@@ -1,7 +1,7 @@
 {
     "name": "uitoux/eyatra",
     "description": "Travel trip management system",
-    "type": "project",
+    "type": "library",
     "authors": [
     {
         "name": "Abdul",
