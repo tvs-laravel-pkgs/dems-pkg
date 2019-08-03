@@ -16,7 +16,8 @@
     {
         "psr-4":
         {
-            "Uitoux\\EYatra\\": "src/"
+            "Uitoux\\EYatra\\": "src/",
+            "Uitoux\\EYatra\\Database\\Seeds": "database/seeds/"
         }
     },
     "extra":
