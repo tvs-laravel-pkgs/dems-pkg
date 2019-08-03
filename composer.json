@@ -9,5 +9,22 @@
     }],
     "minimum-stability": "dev",
     "require":
-    {}
+    {
+
+    },
+    "autoload":
+    {
+        "psr-4":
+        {
+            "Yajra\\DataTables\\": "src/"
+        }
+    },
+    "autoload-dev":
+    {
+        "psr-4":
+        {
+            "Yajra\\DataTables\\Tests\\": "tests/"
+        }
+    },
+
 }
