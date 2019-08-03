@@ -18,5 +18,14 @@
         {
             "Uitoux\\EYatra\\": "src/"
         }
-    }
+    },
+    "extra":
+    {
+        "laravel":
+        {
+            "providers": [
+                "Uitoux\\EYatra\\EYatraServiceProvider"
+            ]
+        }
+    },
 }

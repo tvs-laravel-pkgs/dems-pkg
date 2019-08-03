@@ -13,6 +13,9 @@ class EYatraServiceProvider extends ServiceProvider {
 	public function boot() {
 		include __DIR__ . '/routes.php';
 		$this->loadMigrationsFrom(__DIR__ . '/migrations');
+		$this->publishes([
+			__DIR__ . '/config/eyatra.php' => config_path('eyatra.php'),
+		]);
 	}
 
 	/**
