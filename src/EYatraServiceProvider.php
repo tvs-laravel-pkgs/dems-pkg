@@ -11,11 +11,17 @@ class EYatraServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function boot() {
-		include __DIR__ . '/routes.php';
+		$this->loadRoutesFrom(__DIR__ . '/routes/web.php');
 		$this->loadMigrationsFrom(__DIR__ . '/migrations');
+		$this->loadViewsFrom(__DIR__ . '/views', 'eyatra');
+
 		$this->publishes([
 			__DIR__ . '/config/eyatra.php' => config_path('eyatra.php'),
-		]);
+		], 'config');
+
+		$this->publishes([
+			__DIR__ . '/public' => public_path(''),
+		], 'public');
 	}
 
 	/**
@@ -25,6 +31,5 @@ class EYatraServiceProvider extends ServiceProvider {
 	 */
 	public function register() {
 		$this->app->make('Uitoux\EYatra\EmployeeController');
-		$this->loadViewsFrom(__DIR__ . '/views', 'eyatra');
 	}
 }

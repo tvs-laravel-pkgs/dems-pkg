@@ -16,7 +16,8 @@ class VisitsC extends Migration {
 			$table->unsignedInteger('trip_id');
 			$table->unsignedInteger('from_city_id');
 			$table->unsignedInteger('to_city_id');
-			$table->date('visit_date');
+			$table->date('date');
+			$table->unsignedInteger('travel_mode_id');
 			$table->unsignedInteger('booking_method_id');
 			$table->unsignedInteger('booking_status_id');
 			$table->unsignedInteger('agent_id')->nullable();
@@ -27,7 +28,7 @@ class VisitsC extends Migration {
 			$table->foreign('trip_id')->references('id')->on('trips')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('from_city_id')->references('id')->on('ncities')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('to_city_id')->references('id')->on('ncities')->onDelete('cascade')->onUpdate('cascade');
-
+			$table->foreign('travel_mode_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('booking_method_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('booking_status_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('agent_id')->references('id')->on('agents')->onDelete('cascade')->onUpdate('cascade');
@@ -35,7 +36,7 @@ class VisitsC extends Migration {
 			$table->foreign('status_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('manager_verification_status_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 
-			$table->unique(["trip_id", "from_city_id", "to_city_id", "visit_date"], 'visit_trip_from_to_date');
+			$table->unique(["trip_id", "from_city_id", "to_city_id", "date"], 'visit_trip_from_to_date');
 		});
 	}
 

@@ -15,7 +15,8 @@ class AgentC extends Migration {
 			$table->increments('id');
 			$table->unsignedInteger('company_id');
 			$table->string('code', 191);
-			$table->unsignedInteger('created_by')->nullable();
+			$table->string('name', 255);
+			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();

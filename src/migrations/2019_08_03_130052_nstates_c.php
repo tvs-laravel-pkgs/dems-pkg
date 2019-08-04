@@ -16,7 +16,7 @@ class NstatesC extends Migration {
 			$table->unsignedInteger('country_id')->nullable();
 			$table->string('code', 2);
 			$table->string('name', 191);
-			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();

@@ -19,7 +19,7 @@ class VisitBooking extends Migration {
 			$table->date('date');
 			$table->unsignedDecimal('amount');
 			$table->unsignedInteger('payment_mode_id');
-			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();
@@ -34,7 +34,8 @@ class VisitBooking extends Migration {
 			$table->unique(["payment_of_id", "entity_id", "reference_number"]);
 		});
 
-		Schema::create('visit_booking', function (Blueprint $table) {
+		Schema::create('visit_bookings', function (Blueprint $table) {
+			$table->increments('id');
 			$table->unsignedInteger('visit_id');
 			$table->unsignedInteger('type_id');
 			$table->unsignedInteger('travel_mode_id');
@@ -46,12 +47,20 @@ class VisitBooking extends Migration {
 			$table->unsignedDecimal('claim_amount');
 			$table->unsignedInteger('payment_status_id');
 			$table->unsignedInteger('payment_id')->nullable();
+			$table->unsignedInteger('created_by');
+			$table->unsignedInteger('updated_by')->nullable();
+			$table->unsignedInteger('deleted_by')->nullable();
+			$table->timestamps();
+			$table->softDeletes();
 
 			$table->foreign('visit_id')->references('id')->on('visits')->onDelete('cascade')->onUpdate('cascade');
-			$table->foreign('type_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
-			$table->foreign('travel_mode_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('travel_mode_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('payment_status_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('payment_id')->references('id')->on('payments')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 
 			$table->unique(["visit_id", "type_id", "travel_mode_id"]);
 		});
@@ -63,7 +72,7 @@ class VisitBooking extends Migration {
 	 * @return void
 	 */
 	public function down() {
-		Schema::dropIfExists('visit_booking');
+		Schema::dropIfExists('visit_bookings');
 		Schema::dropIfExists('payments');
 	}
 }

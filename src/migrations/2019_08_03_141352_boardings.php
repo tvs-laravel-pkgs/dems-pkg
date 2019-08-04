@@ -20,7 +20,7 @@ class Boardings extends Migration {
 			$table->unsignedInteger('from_id');
 			$table->unsignedInteger('to_id');
 			$table->unsignedDecimal('amount');
-			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();

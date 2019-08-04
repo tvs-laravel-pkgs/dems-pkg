@@ -26,7 +26,7 @@ class Lodgings extends Migration {
 			$table->string('description', 255)->nullable();
 			$table->string('lodge_name');
 			$table->unsignedDecimal('eligible_amount');
-			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();

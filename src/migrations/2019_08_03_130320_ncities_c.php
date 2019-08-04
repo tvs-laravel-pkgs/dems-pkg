@@ -15,7 +15,7 @@ class NcitiesC extends Migration {
 			$table->increments('id');
 			$table->unsignedInteger('state_id');
 			$table->string('name', 191);
-			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();

@@ -17,7 +17,7 @@ class GrageExpenseTypeC extends Migration {
 			$table->unsignedDecimal('eligible_amount', 10, 2);
 
 			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
-			$table->foreign('expense_type_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('expense_type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 
 			$table->unique(["grade_id", "expense_type_id"]);
 		});

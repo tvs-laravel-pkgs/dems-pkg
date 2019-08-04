@@ -11,14 +11,14 @@ class TravelPurposeGrade extends Migration {
 	 * @return void
 	 */
 	public function up() {
-		Schema::create('travel_purpose_grade', function (Blueprint $table) {
-			$table->unsignedInteger('travel_purpose_id');
+		Schema::create('grade_trip_purpose', function (Blueprint $table) {
+			$table->unsignedInteger('trip_purpose_id');
 			$table->unsignedInteger('grade_id');
 
-			$table->foreign('travel_purpose_id')->references('id')->on('ncities')->onDelete('cascade')->onUpdate('cascade');
-			$table->foreign('grade_id')->references('id')->on('ncities')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('trip_purpose_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 
-			$table->unique(["travel_purpose_id", "grade_id"]);
+			$table->unique(["trip_purpose_id", "grade_id"]);
 		});
 	}
 
@@ -28,6 +28,6 @@ class TravelPurposeGrade extends Migration {
 	 * @return void
 	 */
 	public function down() {
-		Schema::dropIfExists('travel_purpose_grade');
+		Schema::dropIfExists('grade_trip_purpose');
 	}
 }

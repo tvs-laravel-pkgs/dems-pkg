@@ -23,7 +23,7 @@ class Trip extends Migration {
 			$table->datetime('claimed_date')->nullable();
 			$table->unsignedDecimal('paid_amount', 10, 2)->nullable();
 			$table->datetime('payment_date')->nullable();
-			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();

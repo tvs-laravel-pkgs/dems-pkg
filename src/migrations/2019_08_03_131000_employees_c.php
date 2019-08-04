@@ -16,13 +16,14 @@ class EmployeesC extends Migration {
 			$table->unsignedInteger('company_id');
 			$table->string('code', 191);
 			$table->unsignedInteger('outlet_id');
-			$table->unsignedInteger('reporting_to_id');
+			$table->unsignedInteger('reporting_to_id')->nullable();
+			$table->unsignedInteger('grade_id');
 			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
 			$table->timestamps();
 			$table->softDeletes();
-
+			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('outlet_id')->references('id')->on('outlets')->onDelete('cascade')->onUpdate('cascade');
 		});
