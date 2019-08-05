@@ -14,8 +14,8 @@ use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
-class EmployeeController extends Controller {
-	public function listEYatraEmployee(Request $r) {
+class OutletController extends Controller {
+	public function listEYatraOutlet(Request $r) {
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -65,7 +65,7 @@ class EmployeeController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraEmployeeFormData($employee_id = NULL) {
+	public function eyatraOutletFormData($outlet_id = NULL) {
 
 		if (!$trip_id) {
 			$this->data['action'] = 'New';
@@ -92,7 +92,7 @@ class EmployeeController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function saveEYatraEmployee(Request $request) {
+	public function saveEYatraOutlet(Request $request) {
 		//validation
 		try {
 			$validator = Validator::make($request->all(), [
@@ -152,7 +152,7 @@ class EmployeeController extends Controller {
 		}
 	}
 
-	public function viewEYatraEmployee($employee_id) {
+	public function viewEYatraOutlet($outlet_id) {
 
 		$trip = Trip::with([
 			'visits',
@@ -183,7 +183,7 @@ class EmployeeController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function deleteEYatraEmployee($employee_id) {
+	public function deleteEYatraOutlet($outlet_id) {
 		$trip = Trip::where('id', $trip_id)->delete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);

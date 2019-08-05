@@ -30,20 +30,26 @@ class EYatraRoleSeeder extends Seeder {
 					//TRIPS
 					5001, 5002, 5003, 5004, 5005,
 
-					//OUTLETS
-					5020, 5021, 5022, 5023,
-
-					//EMPLOYEES
-					5040, 5041, 5042, 5043,
-
 					//TRIPS VERIFICATION
 					5060, 5061,
 
 					//MASTERS
 					5080,
 
+					//MASTERS > OUTLETS
+					5020, 5021, 5022, 5023,
+
+					//MASTERS > EMPLOYEES
+					5040, 5041, 5042, 5043,
+
 					//MASTERS > AGENTS
 					5100, 5101, 5102, 5103,
+
+					//MASTERS > GRADES
+					5120, 5121, 5122, 5123,
+
+					//MASTERS > GRADES
+					5140, 5141, 5142, 5143,
 				],
 			],
 

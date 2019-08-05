@@ -2,20 +2,6 @@ app.config(['$routeProvider', function($routeProvider) {
 
     $routeProvider.
 
-    //EMPLOYEES
-    when('/eyatra/master/employees', {
-        template: '<eyatra-employee></eyatra-employee>',
-        title: 'Trips',
-    }).
-    when('/eyatra/master/employees/add', {
-        template: '<eyatra-employee-form></eyatra-employee-form>',
-        title: 'Add Trip',
-    }).
-    when('/eyatra/master/employees/edit/:employee_id', {
-        template: '<eyatra-employee-form></eyatra-employee-form>',
-        title: 'Edit Trip',
-    }).
-
     //GRADES
     when('/eyatra/grades', {
         template: '<eyatra-grades></eyatra-grades>',
@@ -50,6 +36,60 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/agent/view/:grade_id', {
         template: '<eyatra-agent-view></eyatra-agent-view>',
         title: 'View Agent',
+    }).
+
+    //STATES
+    when('/eyatra/states', {
+        template: '<eyatra-states></eyatra-states>',
+        title: 'States',
+    }).
+    when('/eyatra/state/add', {
+        template: '<eyatra-state-form></eyatra-state-form>',
+        title: 'Add State',
+    }).
+    when('/eyatra/state/edit/:state_id', {
+        template: '<eyatra-state-form></eyatra-state-form>',
+        title: 'Edit State',
+    }).
+    when('/eyatra/state/view/:state_id', {
+        template: '<eyatra-state-view></eyatra-state-view>',
+        title: 'View State',
+    }).
+
+    //OUTLETS
+    when('/eyatra/outlets', {
+        template: '<eyatra-outlets></eyatra-outlets>',
+        title: 'Outlets',
+    }).
+    when('/eyatra/outlet/add', {
+        template: '<eyatra-outlet-form></eyatra-outlet-form>',
+        title: 'Add Outlet',
+    }).
+    when('/eyatra/outlet/edit/:outlet_id', {
+        template: '<eyatra-outlet-form></eyatra-outlet-form>',
+        title: 'Edit Outlet',
+    }).
+    when('/eyatra/outlet/view/:outlet_id', {
+        template: '<eyatra-outlet-view></eyatra-outlet-view>',
+        title: 'View Outlet',
+    }).
+
+    //EMPLOYEES
+    when('/eyatra/employees', {
+        template: '<eyatra-employees></eyatra-employees>',
+        title: 'Employees',
+    }).
+    when('/eyatra/employee/add', {
+        template: '<eyatra-employee-form></eyatra-employee-form>',
+        title: 'Add Employee',
+    }).
+    when('/eyatra/employee/edit/:outlet_id', {
+        template: '<eyatra-employee-form></eyatra-employee-form>',
+        title: 'Edit Employee',
+    }).
+    when('/eyatra/employee/view/:outlet_id', {
+        template: '<eyatra-employee-view></eyatra-employee-view>',
+        title: 'View Employee',
     }).
 
     //TRIP

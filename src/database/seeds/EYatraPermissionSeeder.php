@@ -126,7 +126,7 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'All',
 			],
 
-			//MASTERS > AGENT
+			//MASTERS > AGENTS
 			5100 => [
 				'display_order' => 1,
 				'parent_id' => 5080,
@@ -152,6 +152,57 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Delete',
 			],
 
+			//MASTERS > GRADES
+			5120 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-grades',
+				'display_name' => 'Grades',
+			],
+			5121 => [
+				'display_order' => 1,
+				'parent_id' => 5120,
+				'name' => 'eyatra-grade-add',
+				'display_name' => 'Add',
+			],
+			5122 => [
+				'display_order' => 2,
+				'parent_id' => 5120,
+				'name' => 'eyatra-grade-edit',
+				'display_name' => 'Edit',
+			],
+			5123 => [
+				'display_order' => 3,
+				'parent_id' => 5120,
+				'name' => 'eyatra-grade-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > STATES
+			5140 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-states',
+				'display_name' => 'States',
+			],
+			5141 => [
+				'display_order' => 1,
+				'parent_id' => 5140,
+				'name' => 'eyatra-state-add',
+				'display_name' => 'Add',
+			],
+			5142 => [
+				'display_order' => 2,
+				'parent_id' => 5140,
+				'name' => 'eyatra-state-edit',
+				'display_name' => 'Edit',
+			],
+			5143 => [
+				'display_order' => 3,
+				'parent_id' => 5140,
+				'name' => 'eyatra-state-delete',
+				'display_name' => 'Delete',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
