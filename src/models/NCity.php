@@ -13,8 +13,13 @@ class NCity extends Model {
 		return $this->belongsTo('Uitoux\EYatra\NState');
 	}
 
-	public static function getList() {
-		return NCity::select('id', 'name')->get();
+	public static function getList($state_id == NULL) {
+		if(!$state_id){
+			return NCity::select('id', 'name')->get();
+		}
+		else{
+			return NCity::select('id', 'name')->where('state_id',$state_id)->get();
+		}
 	}
 
 }

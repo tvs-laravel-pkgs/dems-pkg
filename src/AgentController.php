@@ -5,43 +5,34 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
-use Uitoux\EYatra\Trip;
-use Uitoux\EYatra\Visit;
+use Uitoux\EYatra\NCountry;
+use Uitoux\EYatra\NState;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class AgentController extends Controller {
 	public function listEYatraAgent(Request $r) {
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
-			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
-				'trips.advance_received',
-				'status.name as status'
-			)
-			->where('e.company_id', Auth::user()->company_id)
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+		$agent_list = Agent::withTrashed()->select(
+			'agents.id',
+			'agents.code',
+			'agents.name',
+			'users.mobile_number',
+			DB::raw('IF(agents.deleted_at IS NULL,"Active","In-Active") as status'),
+			DB::raw('GROUP_CONCAT(tm.name) as travel_name'))
+			->join('users', 'users.entity_id', 'agents.id')
+			->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
+			->leftJoin('entities as tm', 'tm.id', 'agent_travel_mode.travel_mode_id')
+			->where('users.user_type_id', 3122)
+			->where('agents.company_id', Auth::user()->company_id)
+			->groupby('agent_travel_mode.agent_id')
+			->orderby('agents.id', 'desc');
 
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
-		return Datatables::of($trips)
-			->addColumn('action', function ($trip) {
+		return Datatables::of($agent_list)
+			->addColumn('action', function ($agent) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -50,44 +41,42 @@ class AgentController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $trip->id . '">
+				<a href="#!/eyatra/trip/edit/' . $agent->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $trip->id . '">
+				<a href="#!/eyatra/trip/view/' . $agent->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
-                </a>';
+				onclick="angular.element(this).scope().deleteAgent(' . $agent->id . ')" dusk = "delete-btn" title="Delete">
+		              <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+		              </a>';
 
 			})
 			->make(true);
 	}
 
-	public function eyatraAgentFormData($trip_id = NULL) {
+	public function eyatraAgentFormData($agent_id = NULL) {
 
-		if (!$trip_id) {
+		if (!$agent_id) {
 			$this->data['action'] = 'New';
-			$trip = new Trip;
-			$visit = new Visit;
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
+			$agent = new Agent;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$trip = Trip::find($trip_id);
-			if (!$trip) {
+			$agent = Agent::find($agent_id);
+			if (!$agent) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
+				$this->data['message'] = 'Agent not found';
 			}
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
 			'travel_mode_list' => Entity::travelModeList(),
-			'city_list' => NCity::getList(),
+			'country_list' => NCountry::getList(),
+			'state_list' => $this->data['action'] = 'New' ? [] : NState::getList($agent->address->country_id),
+			'city_list' => $this->data['action'] = 'New' ? [] : NCity::getList($agent->address->state_id),
 		];
-		$this->data['trip'] = $trip;
+		$this->data['agent'] = $agent;
 
 		return response()->json($this->data);
 	}
