@@ -17,8 +17,6 @@ class Boardings extends Migration {
 			$table->unsignedInteger('city_id');
 			$table->string('expense_name', 255);
 			$table->date('date');
-			$table->unsignedInteger('from_id');
-			$table->unsignedInteger('to_id');
 			$table->unsignedDecimal('amount');
 			$table->unsignedInteger('created_by');
 			$table->unsignedInteger('updated_by')->nullable();
@@ -28,8 +26,6 @@ class Boardings extends Migration {
 
 			$table->foreign('trip_id')->references('id')->on('trips')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('city_id')->references('id')->on('ncities')->onDelete('cascade')->onUpdate('cascade');
-			$table->foreign('from_id')->references('id')->on('ncities')->onDelete('cascade')->onUpdate('cascade');
-			$table->foreign('to_id')->references('id')->on('ncities')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

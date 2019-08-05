@@ -194,18 +194,23 @@ class EYatraTC1Seeder extends Seeder {
 			$user->roles()->sync(503);
 
 			$travel_modes = [];
-			$state_ids = NState::inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
-			foreach ($state_ids as $state_id) {
-				$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
-				foreach ($travel_mode_ids as $travel_mode_id) {
-					$travel_modes[$travel_mode_id] = [
-						'state_id' => $state_id,
-						'service_charge' => $faker->numberBetween(10, 100),
-					];
-				}
+			$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
+			foreach ($travel_mode_ids as $travel_mode_id) {
+				$travel_modes[] = $travel_mode_id;
 			}
 			$agent->travelModes()->sync($travel_modes);
 		}
+
+		// $state_ids = NState::inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
+		// foreach ($state_ids as $state_id) {
+		// 	$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
+		// 	foreach ($travel_mode_ids as $travel_mode_id) {
+		// 		$travel_modes[$travel_mode_id] = [
+		// 			'state_id' => $state_id,
+		// 			'service_charge' => $faker->numberBetween(10, 100),
+		// 		];
+		// 	}
+		// }
 
 		foreach ($company->employeeGrades as $grade) {
 			//GRADE EXPENSE TYPE MAPPING
