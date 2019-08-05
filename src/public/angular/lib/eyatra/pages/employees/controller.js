@@ -28,21 +28,18 @@ app.component('eyatraEmployees', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'status', name: 'status.name', searchable: true },
+                { data: 'code', name: 'e.code', searchable: true },
+                { data: 'outlet_code', name: 'o.code', searchable: true },
+                { data: 'manager_code', name: 'm.code', searchable: true },
+                { data: 'grade', name: 'grd.name', searchable: true },
+                { data: 'status', name: 'c.name', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips');
+        $('.page-header-content .display-inline-block .data-table-title').html('Employees');
         $('.add_new_button').html(
             '<a href="#!/eyatra/employee/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +

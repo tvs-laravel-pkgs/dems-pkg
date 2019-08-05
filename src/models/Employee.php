@@ -24,4 +24,8 @@ class Employee extends Model {
 		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121);
 	}
 
+	public static function getList() {
+		return Employee::select('id', 'name')->get();
+	}
+
 }

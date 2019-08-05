@@ -12,4 +12,8 @@ class Outlet extends Model {
 		return $this->belongsTo('App\Company');
 	}
 
+	public static function getList() {
+		return Outlet::select('id', 'name')->get();
+	}
+
 }

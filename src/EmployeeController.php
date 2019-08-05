@@ -5,43 +5,33 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCity;
-use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class EmployeeController extends Controller {
 	public function listEYatraEmployee(Request $r) {
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
+		$employees = Employee::from('employees as e')
+			->join('entities as grd', 'grd.id', 'e.grade_id')
+			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
+			->join('outlets as o', 'o.id', 'e.outlet_id')
+			->withTrashed()
 			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
-				'trips.advance_received',
-				'status.name as status'
+				'e.id',
+				'e.code',
+				'o.code as outlet_code',
+				'm.code as manager_code',
+				'grd.name as grade',
+				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+			->orderBy('e.code', 'asc');
 
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
-		return Datatables::of($trips)
-			->addColumn('action', function ($trip) {
+		return Datatables::of($employees)
+			->addColumn('action', function ($employee) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -50,14 +40,14 @@ class EmployeeController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $trip->id . '">
+				<a href="#!/eyatra/employee/edit/' . $employee->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $trip->id . '">
+				<a href="#!/eyatra/employee/view/' . $employee->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteTrip(' . $employee->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -67,27 +57,24 @@ class EmployeeController extends Controller {
 
 	public function eyatraEmployeeFormData($employee_id = NULL) {
 
-		if (!$trip_id) {
+		if (!$employee_id) {
 			$this->data['action'] = 'New';
-			$trip = new Trip;
-			$visit = new Visit;
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
+			$employee = new Employee;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$trip = Trip::find($trip_id);
-			if (!$trip) {
+			$employee = Employee::find($employee_id);
+			if (!$employee) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
+				$this->data['message'] = 'Employee not found';
 			}
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
-			'city_list' => NCity::getList(),
+			'manager_list' => Employee::getList(),
+			'outlet_list' => Outlet::getList(),
+			'grade_list' => Entity::getGradeList(),
 		];
-		$this->data['trip'] = $trip;
+		$this->data['employee'] = $employee;
 
 		return response()->json($this->data);
 	}

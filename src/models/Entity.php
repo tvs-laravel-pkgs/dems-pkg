@@ -25,4 +25,8 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 502)->select('id', 'name')->get();
 	}
 
+	public static function getGradeList() {
+		return Entity::where('entity_type_id', 502)->select('id', 'name')->get();
+	}
+
 }
