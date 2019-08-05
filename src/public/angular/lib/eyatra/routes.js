@@ -16,6 +16,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit Trip',
     }).
 
+    //GRADES
+    when('/eyatra/grades', {
+        template: '<eyatra-grades></eyatra-grades>',
+        title: 'Grades',
+    }).
+    when('/eyatra/grade/add', {
+        template: '<eyatra-grade-form></eyatra-grade-form>',
+        title: 'Add Grade',
+    }).
+    when('/eyatra/grade/edit/:grade_id', {
+        template: '<eyatra-grade-form></eyatra-grade-form>',
+        title: 'Edit Grade',
+    }).
+    when('/eyatra/grade/view/:grade_id', {
+        template: '<eyatra-grade-view></eyatra-grade-view>',
+        title: 'View Grade',
+    }).
+
     //TRIP
     when('/eyatra/trips', {
         template: '<eyatra-trips></eyatra-trips>',
@@ -31,6 +49,16 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/trip/view/:trip_id', {
         template: '<eyatra-trip-view></eyatra-trip-view>',
-        title: 'Edit Trip',
+        title: 'View Trip',
+    }).
+
+    //TRIP VERIFICATION
+    when('/eyatra/trip/verifications', {
+        template: '<eyatra-trip-verifications></eyatra-trip-verifications>',
+        title: 'Trips',
+    }).
+    when('/eyatra/trip/verification/form/:trip_id', {
+        template: '<eyatra-trip-verification-form></eyatra-trip-verification-form>',
+        title: 'Add Trip',
     });
 }]);

@@ -104,6 +104,20 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Delete',
 			],
 
+			//TRIPS VERIFICATION
+			5060 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'trips-verification',
+				'display_name' => 'Trips Verification',
+			],
+			5061 => [
+				'display_order' => 1,
+				'parent_id' => 5001,
+				'name' => 'trip-verification-all',
+				'display_name' => 'All',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

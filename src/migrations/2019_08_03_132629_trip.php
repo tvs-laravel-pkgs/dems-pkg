@@ -17,6 +17,7 @@ class Trip extends Migration {
 			$table->unsignedInteger('employee_id');
 			$table->unsignedInteger('purpose_id');
 			$table->string('description', 191)->nullable();
+			$table->unsignedInteger('manager_id');
 			$table->unsignedInteger('status_id');
 			$table->unsignedDecimal('advance_received', 10, 2);
 			$table->unsignedDecimal('claim_amount', 10, 2)->nullable();
@@ -31,6 +32,7 @@ class Trip extends Migration {
 
 			$table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('purpose_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('manager_id')->references('id')->on('employees')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('status_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');

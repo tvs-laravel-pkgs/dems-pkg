@@ -334,6 +334,7 @@ class EYatraTC1Seeder extends Seeder {
 				$trip->number = 'TRP' . $trip_number++;
 				$trip->purpose_id = $employee->grade->tripPurposes()->inRandomOrder()->first()->id;
 				$trip->description = $faker->sentence;
+				$trip->manager_id = $employee->reporting_to_id;
 				$trip->status_id = $trip_status_id; //NEW
 				$trip->advance_received = $faker->randomElement([0, 500, 100, 1500, 2000]);
 				$trip->created_by = $admin->id;

@@ -1,9 +1,9 @@
-app.component('eyatraTrips', {
-    templateUrl: eyatra_trip_list_template_url,
+app.component('eyatraTripVerifications', {
+    templateUrl: eyatra_trip_verification_list_template_url,
     controller: function(HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_trip_table').DataTable({
+        var dataTable = $('#eyatra_trip_verification_table').DataTable({
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -20,7 +20,7 @@ app.component('eyatraTrips', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listTrip'],
+                url: laravel_routes['listTripVerification'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
@@ -35,6 +35,7 @@ app.component('eyatraTrips', {
                 { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+                { data: 'created_at', name: 'trips.created_at', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -42,23 +43,23 @@ app.component('eyatraTrips', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/trip/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
-            'Add New' +
-            '</a>'
-        );
+        $('.page-header-content .display-inline-block .data-table-title').html('Trips Requests');
+        $('.add_new_button').html();
         $rootScope.loading = false;
 
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-
-app.component('eyatraTripForm', {
-    templateUrl: trip_form_template_url,
+app.component('eyatraTripVerificationForm', {
+    templateUrl: trip_verification_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
+        if (typeof($routeParams.trip_id) == 'undefined') {
+            $location.path('/eyatra/trip/verifications')
+            $scope.$apply()
+            return;
+        }
+        $form_data_url = trip_verification_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -82,25 +83,7 @@ app.component('eyatraTripForm', {
 
         });
 
-        self.searchCity = function(query) {
-            if (query) {
-                return new Promise(function(resolve, reject) {
-                    $http
-                        .post(
-                            laravel_routes['searchCity'], {
-                                key: query,
-                            }
-                        )
-                        .then(function(response) {
-                            resolve(response.data);
-                        });
-                });
-            } else {
-                return [];
-            }
-        }
-
-        self.addVisit = function() {
+        self.approveTrip = function() {
             self.trip.visits.push({
                 visit_date: '',
                 booking_method: 'Self',
@@ -168,53 +151,3 @@ app.component('eyatraTripForm', {
         });
     }
 });
-
-app.component('eyatraTripView', {
-    templateUrl: trip_view_template_url,
-
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        $http.get(
-            trip_view_url + '/' + $routeParams.trip_id
-        ).then(function(response) {
-            self.trip = response.data.trip;
-        });
-
-
-        self.verificationRequest = function(trip_id) {
-            $.ajax({
-                    url: trip_verification_request_url + '/' + trip_id,
-                    method: "GET",
-                })
-                .done(function(res) {
-                    console.log(res.success);
-                    if (!res.success) {
-                        $('#submit').button('reset');
-                        var errors = '';
-                        for (var i in res.errors) {
-                            errors += '<li>' + res.errors[i] + '</li>';
-                        }
-                        custom_noty('error', errors);
-                    } else {
-                        new Noty({
-                            type: 'success',
-                            layout: 'topRight',
-                            text: 'Trip successfully sent for verification',
-                        }).show();
-                        $location.path('/eyatra/trips')
-                        $scope.$apply()
-                    }
-                })
-                .fail(function(xhr) {
-                    $('#submit').button('reset');
-                    custom_noty('error', 'Something went wrong at server');
-                });
-        }
-
-    }
-});
-
-
-//------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------

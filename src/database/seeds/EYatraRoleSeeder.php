@@ -16,6 +16,7 @@ class EYatraRoleSeeder extends Seeder {
 
 		$records = [
 
+			//EYATRA ADMIN
 			500 => [
 				//'company_id' => 1,
 				'display_order' => 1,
@@ -34,9 +35,13 @@ class EYatraRoleSeeder extends Seeder {
 
 					//EMPLOYEES
 					5040, 5041, 5042, 5043,
+
+					//TRIPS VERIFICATION
+					5060, 5061,
 				],
 			],
 
+			//EYATRA EMPLOYEE
 			501 => [
 				//'company_id' => 1,
 				'display_order' => 1,
@@ -52,6 +57,7 @@ class EYatraRoleSeeder extends Seeder {
 				],
 			],
 
+			//EYATRA MANAGER
 			502 => [
 				//'company_id' => 1,
 				'display_order' => 1,
@@ -64,9 +70,13 @@ class EYatraRoleSeeder extends Seeder {
 
 					//TRIPS
 					5001, 5002, 5003, 5004,
+
+					//TRIPS VERIFICATION
+					5060,
 				],
 			],
 
+			//EYATRA AGENT
 			503 => [
 				//'company_id' => 1,
 				'display_order' => 1,
