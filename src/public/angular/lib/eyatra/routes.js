@@ -52,6 +52,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Agent',
     }).
 
+    //STATES
+    when('/eyatra/states', {
+        template: '<eyatra-states></eyatra-states>',
+        title: 'States',
+    }).
+    when('/eyatra/state/add', {
+        template: '<eyatra-state-form></eyatra-state-form>',
+        title: 'Add State',
+    }).
+    when('/eyatra/state/edit/:state_id', {
+        template: '<eyatra-state-form></eyatra-state-form>',
+        title: 'Edit State',
+    }).
+    when('/eyatra/state/view/:state_id', {
+        template: '<eyatra-state-view></eyatra-state-view>',
+        title: 'View State',
+    }).
+
     //TRIP
     when('/eyatra/trips', {
         template: '<eyatra-trips></eyatra-trips>',
