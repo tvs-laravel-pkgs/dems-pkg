@@ -44,6 +44,9 @@ class EYatraRoleSeeder extends Seeder {
 
 					//MASTERS > AGENTS
 					5100, 5101, 5102, 5103,
+
+					//MASTERS > GRADES
+					5120, 5121, 5122, 5123,
 				],
 			],
 
