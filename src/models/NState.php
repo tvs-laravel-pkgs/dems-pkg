@@ -12,4 +12,13 @@ class NState extends Model {
 		return $this->belongsTo('App\Country');
 	}
 
+	public static function getList($country_id == NULL) {
+		if(!$state_id){
+			return NState::select('id', 'name')->get();
+		}
+		else{
+			return NState::select('id', 'name')->where('country_id',$country_id)->get();
+		}
+	}
+
 }
