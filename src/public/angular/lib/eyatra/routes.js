@@ -34,6 +34,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Grade',
     }).
 
+    //AGENTS
+    when('/eyatra/agents', {
+        template: '<eyatra-agents></eyatra-agents>',
+        title: 'Agents',
+    }).
+    when('/eyatra/agent/add', {
+        template: '<eyatra-agent-form></eyatra-agent-form>',
+        title: 'Add Agent',
+    }).
+    when('/eyatra/agent/edit/:agent_id', {
+        template: '<eyatra-agent-form></eyatra-agent-form>',
+        title: 'Edit Agent',
+    }).
+    when('/eyatra/agent/view/:grade_id', {
+        template: '<eyatra-agent-view></eyatra-agent-view>',
+        title: 'View Agent',
+    }).
+
     //TRIP
     when('/eyatra/trips', {
         template: '<eyatra-trips></eyatra-trips>',
