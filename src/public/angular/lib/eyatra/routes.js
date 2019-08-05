@@ -70,6 +70,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View State',
     }).
 
+    //OUTLETS
+    when('/eyatra/outlets', {
+        template: '<eyatra-outlets></eyatra-outlets>',
+        title: 'Outlets',
+    }).
+    when('/eyatra/outlet/add', {
+        template: '<eyatra-outlet-form></eyatra-outlet-form>',
+        title: 'Add Outlet',
+    }).
+    when('/eyatra/outlet/edit/:outlet_id', {
+        template: '<eyatra-outlet-form></eyatra-outlet-form>',
+        title: 'Edit Outlet',
+    }).
+    when('/eyatra/outlet/view/:outlet_id', {
+        template: '<eyatra-outlet-view></eyatra-outlet-view>',
+        title: 'View Outlet',
+    }).
+
     //TRIP
     when('/eyatra/trips', {
         template: '<eyatra-trips></eyatra-trips>',

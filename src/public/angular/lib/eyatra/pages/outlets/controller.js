@@ -1,9 +1,9 @@
-app.component('eyatraGrades', {
-    templateUrl: eyatra_grade_list_template_url,
+app.component('eyatraOutlets', {
+    templateUrl: eyatra_outlet_list_template_url,
     controller: function(HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_grade_table').DataTable({
+        var dataTable = $('#eyatra_outlet_table').DataTable({
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -20,7 +20,7 @@ app.component('eyatraGrades', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listEYatraGrade'],
+                url: laravel_routes['listEYatraOutlet'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
@@ -44,7 +44,7 @@ app.component('eyatraGrades', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('Trips');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/eyatra/outlet/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
             '</a>'
         );
@@ -55,10 +55,10 @@ app.component('eyatraGrades', {
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 
-app.component('eyatraGradeForm', {
-    templateUrl: grade_form_template_url,
+app.component('eyatraOutletForm', {
+    templateUrl: outlet_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.grade_id) == 'undefined' ? grade_form_data_url : grade_form_data_url + '/' + $routeParams.grade_id;
+        $form_data_url = typeof($routeParams.outlet_id) == 'undefined' ? outlet_form_data_url : outlet_form_data_url + '/' + $routeParams.outlet_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -71,18 +71,18 @@ app.component('eyatraGradeForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/grades')
+                $location.path('/eyatra/outlets')
                 $scope.$apply()
                 return;
             }
-            self.grade = response.data.grade;
+            self.outlet = response.data.outlet;
             self.extras = response.data.extras;
             self.action = response.data.action;
             $rootScope.loading = false;
 
         });
 
-        var form_id = '#grade-form';
+        var form_id = '#outlet-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
@@ -109,7 +109,7 @@ app.component('eyatraGradeForm', {
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['saveEYatraGrade'],
+                        url: laravel_routes['saveEYatraOutlet'],
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -128,9 +128,9 @@ app.component('eyatraGradeForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Grade saved successfully',
+                                text: 'Outlet saved successfully',
                             }).show();
-                            $location.path('/eyatra/grades')
+                            $location.path('/eyatra/outlets')
                             $scope.$apply()
                         }
                     })
@@ -143,16 +143,16 @@ app.component('eyatraGradeForm', {
     }
 });
 
-app.component('eyatraGradeView', {
-    templateUrl: grade_view_template_url,
+app.component('eyatraOutletView', {
+    templateUrl: outlet_view_template_url,
 
     controller: function($http, $location, $routeParams, HelperService, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            grade_view_url + '/' + $routeParams.grade_id
+            outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
-            self.grade = response.data.grade;
+            self.outlet = response.data.outlet;
         });
     }
 });
