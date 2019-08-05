@@ -20,6 +20,14 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'eYatra',
 			],
 
+			//MASTERS
+			5080 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'eyatra-masters',
+				'display_name' => 'Masters',
+			],
+
 			//TRIPS
 			5001 => [
 				'display_order' => 1,
@@ -55,7 +63,7 @@ class EYatraPermissionSeeder extends Seeder {
 			//OUTLETS
 			5020 => [
 				'display_order' => 1,
-				'parent_id' => 5000,
+				'parent_id' => 5080,
 				'name' => 'eyatra-outlets',
 				'display_name' => 'Outlets',
 			],
@@ -81,7 +89,7 @@ class EYatraPermissionSeeder extends Seeder {
 			//EMPLOYEES
 			5040 => [
 				'display_order' => 1,
-				'parent_id' => 5000,
+				'parent_id' => 5080,
 				'name' => 'eyatra-employees',
 				'display_name' => 'Employees',
 			],
@@ -116,6 +124,32 @@ class EYatraPermissionSeeder extends Seeder {
 				'parent_id' => 5001,
 				'name' => 'trip-verification-all',
 				'display_name' => 'All',
+			],
+
+			//MASTERS > AGENT
+			5100 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-agents',
+				'display_name' => 'Agents',
+			],
+			5101 => [
+				'display_order' => 1,
+				'parent_id' => 5100,
+				'name' => 'eyatra-agent-add',
+				'display_name' => 'Add',
+			],
+			5102 => [
+				'display_order' => 2,
+				'parent_id' => 5100,
+				'name' => 'eyatra-agent-edit',
+				'display_name' => 'Edit',
+			],
+			5103 => [
+				'display_order' => 3,
+				'parent_id' => 5100,
+				'name' => 'eyatra-agent-delete',
+				'display_name' => 'Delete',
 			],
 
 		];
