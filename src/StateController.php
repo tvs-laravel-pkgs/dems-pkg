@@ -5,43 +5,28 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCity;
-use Uitoux\EYatra\Trip;
+use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class StateController extends Controller {
 	public function listEYatraState(Request $r) {
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
+		$states = NState::from('nstates')
+			->join('countries as c', 'c.id', 'nstates.country_id')
 			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
-				'trips.advance_received',
-				'status.name as status'
+				'nstates.id',
+				'nstates.code',
+				'nstates.name',
+				'c.name as country',
+				DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status')
 			)
-			->where('e.company_id', Auth::user()->company_id)
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+			->orderBy('nstates.name', 'asc');
 
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
-		return Datatables::of($trips)
-			->addColumn('action', function ($trip) {
+		return Datatables::of($states)
+			->addColumn('action', function ($state) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -50,14 +35,14 @@ class StateController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $trip->id . '">
+				<a href="#!/eyatra/state/edit/' . $state->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $trip->id . '">
+				<a href="#!/eyatra/state/view/' . $state->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteState(' . $state->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
