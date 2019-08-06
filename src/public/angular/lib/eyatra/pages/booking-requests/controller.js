@@ -1,9 +1,9 @@
-app.component('eyatraTripVerifications', {
-    templateUrl: eyatra_trip_verification_list_template_url,
+app.component('eyatraTripBookingRequests', {
+    templateUrl: eyatra_booking_requests_list_template_url,
     controller: function(HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_trip_verification_table').DataTable({
+        var dataTable = $('#eyatra_trip_booking_requests_table').DataTable({
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -20,22 +20,21 @@ app.component('eyatraTripVerifications', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listTripVerification'],
+                url: laravel_routes['listTripBookingRequests'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
             },
-
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'number', name: 't.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'created_at', name: 'trips.created_at', searchable: true },
+                { data: 'date', name: 'v.date', searchable: true },
+                { data: 'from', name: 'fc.name', searchable: true },
+                { data: 'to', name: 'tc.name', searchable: true },
+                { data: 'travel_mode', name: 'tm.name', searchable: true },
+                { data: 'booking_status', name: 'bs.name', searchable: false },
+                { data: 'agent', name: 'a.name', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -43,7 +42,7 @@ app.component('eyatraTripVerifications', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips Requests');
+        $('.page-header-content .display-inline-block .data-table-title').html('Bookings');
         $('.add_new_button').html();
         $rootScope.loading = false;
 
@@ -51,15 +50,15 @@ app.component('eyatraTripVerifications', {
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraTripVerificationForm', {
-    templateUrl: trip_verification_form_template_url,
+app.component('eyatraTripBookingRequestsView', {
+    templateUrl: eyatra_booking_requests_view_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/trip/verifications')
+            $location.path('/eyatra/trips/booking-requests')
             $scope.$apply()
             return;
         }
-        $form_data_url = trip_verification_form_data_url + '/' + $routeParams.trip_id;
+        $form_data_url = eyatra_booking_requests_view_data_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -72,7 +71,7 @@ app.component('eyatraTripVerificationForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/trips')
+                $location.path('/eyatra/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -90,64 +89,5 @@ app.component('eyatraTripVerificationForm', {
                 preferred_travel_modes: '',
             });
         }
-
-        var form_id = '#trip-form';
-        var v = jQuery(form_id).validate({
-            errorPlacement: function(error, element) {
-                error.insertAfter(element)
-            },
-            ignore: '',
-            rules: {
-                'purpose_id': {
-                    required: true,
-                },
-                'description': {
-                    maxlength: 255,
-                },
-                'advance_received': {
-                    maxlength: 10,
-                },
-            },
-            messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
-                },
-            },
-            submitHandler: function(form) {
-
-                let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
-                $.ajax({
-                        url: laravel_routes['saveTrip'],
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                    })
-                    .done(function(res) {
-                        console.log(res.success);
-                        if (!res.success) {
-                            $('#submit').button('reset');
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Trip saves successfully',
-                            }).show();
-                            $location.path('/eyatra/trips')
-                            $scope.$apply()
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#submit').button('reset');
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-            },
-        });
     }
 });

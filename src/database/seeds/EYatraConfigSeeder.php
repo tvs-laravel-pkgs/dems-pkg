@@ -22,6 +22,10 @@ class EYatraConfigSeeder extends Seeder {
 			505 => 'Visit Booking Type',
 			506 => 'User Type - EYatra',
 			507 => 'Visit Payment Statuses',
+			508 => 'Address of - EYatra',
+			509 => 'Address Type - EYatra',
+			510 => 'Attachment of - EYatra',
+			511 => 'Attachment Type - EYatra',
 
 		];
 
@@ -184,6 +188,28 @@ class EYatraConfigSeeder extends Seeder {
 			3145 => [
 				'name' => 'Paid',
 				'config_type_id' => 507,
+			],
+
+			//ADDRESS OF - EYATRA
+			3160 => [
+				'name' => 'Outlet',
+				'config_type_id' => 508,
+			],
+			3161 => [
+				'name' => 'Agent',
+				'config_type_id' => 508,
+			],
+
+			//ATTACHMENT OF - EYATRA
+			3180 => [
+				'name' => 'Visit',
+				'config_type_id' => 509,
+			],
+
+			//ATTACHMENT TYPE - EYATRA
+			3200 => [
+				'name' => 'Booking Attachments',
+				'config_type_id' => 510,
 			],
 		];
 		foreach ($config_types as $config_type_id => $config_type_name) {

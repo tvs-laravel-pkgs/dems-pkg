@@ -19,4 +19,9 @@ class NState extends Model {
 			return NState::select('id', 'name')->where('country_id', $country_id)->get();
 		}
 	}
+
+	public function cities() {
+		return $this->hasMany('Uitoux\EYatra\NCity', 'state_id');
+	}
+
 }
