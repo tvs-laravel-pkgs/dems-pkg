@@ -191,4 +191,8 @@ class StateController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
+	public function getStateList(Request $request) {
+		return NState::getList($request->country_id);
+	}
+
 }

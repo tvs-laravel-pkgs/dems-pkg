@@ -52,4 +52,7 @@ Route::group(['middleware' => ['web', 'auth']], function () {
 
 	//HELPERS
 	Route::post('eyatra/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
+	Route::post('eyatra/state/get', 'Uitoux\EYatra\StateController@getStateList')->name('getStateList');
+	Route::post('eyatra/city/get', 'Uitoux\EYatra\CityController@getCityList')->name('getCityList');
+
 });
