@@ -234,16 +234,21 @@ class EYatraTC1Seeder extends Seeder {
 			$agent->travelModes()->sync($travel_modes);
 		}
 
-		// $state_ids = NState::inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
-		// foreach ($state_ids as $state_id) {
-		// 	$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
-		// 	foreach ($travel_mode_ids as $travel_mode_id) {
-		// 		$travel_modes[$travel_mode_id] = [
-		// 			'state_id' => $state_id,
-		// 			'service_charge' => $faker->numberBetween(10, 100),
-		// 		];
-		// 	}
-		// }
+		//STATE <> TRAVEL MODE <> AGENT <> SERVICE CHARGE MAPPING
+		foreach (NState::get() as $state) {
+			$state->travelModes()->sync([]);
+			foreach (Entity::travelModeList() as $travel_mode) {
+				$agent = Agent::whereHas('travelModes', function ($query) use ($travel_mode) {
+					$query->where('id', $travel_mode->id);
+				})->inRandomOrder()->first();
+
+				$travel_modes[$travel_mode->id] = [
+					'agent_id' => $agent->id,
+					'service_charge' => $faker->numberBetween(10, 100),
+				];
+			}
+			$state->travelModes()->sync($travel_modes);
+		}
 
 		foreach ($company->employeeGrades as $grade) {
 			//GRADE EXPENSE TYPE MAPPING

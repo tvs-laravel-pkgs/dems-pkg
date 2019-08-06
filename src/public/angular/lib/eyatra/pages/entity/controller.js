@@ -1,5 +1,4 @@
-alert(1)
-app.component('eyatraStates', {
+app.component('eyatraEntities', {
     templateUrl: eyatra_state_list_template_url,
     controller: function(HelperService, $rootScope) {
         alert(2)
