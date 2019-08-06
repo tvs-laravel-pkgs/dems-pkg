@@ -1,13 +1,13 @@
 <?php
 
 namespace Uitoux\EYatra;
-use App\Address;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Address;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
@@ -68,26 +68,34 @@ class AgentController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$agent = Agent::find($agent_id);
-			$address = Address::find($agent_id);
-			$user = User::find($agent_id);
+			$address = Address::where('entity_id', $agent_id)->where('address_of_id', 3161)->first();
+
+			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			if (!$agent) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Agent not found';
+			} else {
+				$this->data['success'] = true;
 			}
 		}
+
+		//dd(NState::getList($agent->address->country_id), $this->data['action'], $agent->address->country_id);
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
 			'country_list' => NCountry::getList(),
-			'state_list' => $this->data['action'] = 'New' ? [] : NState::getList($agent->address->country_id),
-			'city_list' => $this->data['action'] = 'New' ? [] : NCity::getList($agent->address->state_id),
+			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->country_id),
+			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->state_id),
 		];
+		//dd($this->data['extras']['state_list']);
 		$this->data['agent'] = $agent;
+		$this->data['address'] = $address;
+		$this->data['user'] = $user;
 
 		return response()->json($this->data);
 	}
 
 	public function saveEYatraAgent(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			if (empty(count($request->travel_mode))) {
 				return response()->json(['success' => false, 'errors' => ['Travel Mode is Required']]);
@@ -122,6 +130,7 @@ class AgentController extends Controller {
 			}
 
 			DB::beginTransaction();
+			$company_id = Auth::user()->company_id;
 			if (!$request->id) {
 				$agent = new Agent;
 				$user = new User;
@@ -136,13 +145,42 @@ class AgentController extends Controller {
 				$agent->updated_by = Auth::user()->id;
 				$agent->updated_at = Carbon::now();
 			}
+			$agent->company_id = $company_id;
+			$agent->code = $request->agent_code;
+			$agent->name = $request->agent_name;
 			$agent->fill($request->all());
 			$agent->save();
+
+			//ADD ADDRESS
+			$address->address_of_id = 3161;
+			$address->entity_id = $agent->id;
+			$address->name = 'Primary';
+			$address->line_1 = $request->address_line1;
+			$address->line_2 = $request->address_line2;
+			$address->country_id = $request->country;
+			$address->state_id = $request->state;
+			$address->city_id = $request->city;
+			$address->fill($request->all());
+			$address->save();
+
+			//ADD USER
+			$user->mobile_number = $request->mobile_number;
+			$user->entity_type = 0;
+			$user->user_type_id = 3122;
+			$user->company_id = $company_id;
+			$user->entity_id = $agent->id;
+			$user->fill($request->all());
+			$user->save();
 
 			$agent->travelModes()->sync($request->travel_mode);
 
 			DB::commit();
 			$request->session()->flash('success', 'Agent saved successfully!');
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => 'Agent Added successfully']);
+			} else {
+				return response()->json(['success' => true, 'message' => 'Agent Updated Successfully']);
+			}
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
