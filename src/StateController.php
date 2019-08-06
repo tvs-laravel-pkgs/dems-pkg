@@ -6,6 +6,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Visit;
@@ -50,29 +51,32 @@ class StateController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraStateFormData($trip_id = NULL) {
+	public function eyatraStateFormData($state_id = NULL) {
 
-		if (!$trip_id) {
+		if (!$state_id) {
 			$this->data['action'] = 'New';
-			$trip = new Trip;
-			$visit = new Visit;
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
+			$state = new NState;
+			//$visit = new Visit;
+			// $visit->booking_method = 'Self';
+			// $trip->visits = [$visit];
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$trip = Trip::find($trip_id);
-			if (!$trip) {
+			$state = NState::find($state_id);
+			if (!$state) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
+				$this->data['message'] = 'State not found';
 			}
 		}
-		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
-			'city_list' => NCity::getList(),
-		];
-		$this->data['trip'] = $trip;
+		$this->data['travel_modes'] = $travel_modes = Entity::select('name')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get();
+		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
+		// $this->data['extras'] = [
+		// 	'purpose_list' => Entity::purposeList(),
+		// 	'travel_mode_list' => Entity::travelModeList(),
+		// 	'city_list' => NCity::getList(),
+		// ];
+		// DB::table('state_agent_travel_mode')->select();
+		$this->data['state'] = $state;
 
 		return response()->json($this->data);
 	}

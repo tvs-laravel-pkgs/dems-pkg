@@ -215,4 +215,15 @@ class TripController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
+	public function cancelTripVisitBooking($visit_id) {
+		if ($visit_id) {
+			$visit = Visit::where('id', $visit_id)->first();
+			$visit->booking_status_id = 3062; // Booking cancelled
+			$visit->save();
+			return response()->json(['success' => true]);
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
+		}
+	}
+
 }

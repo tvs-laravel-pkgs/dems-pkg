@@ -5,43 +5,36 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
-use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class GradeController extends Controller {
 	public function listEYatraGrade(Request $r) {
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
-			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
-				'trips.advance_received',
-				'status.name as status'
-			)
-			->where('e.company_id', Auth::user()->company_id)
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+		$entity = Entity::withTrashed()->select('entities.id as grade_id', 'entities.name as grade_name', DB::RAW('count(grade_local_travel_mode.local_travel_mode_id) as travel_count'), DB::RAW('count(grade_expense_type.expense_type_id) as expense_count'), DB::RAW('count(grade_trip_purpose.trip_purpose_id) as trip_count'))
+			->leftjoin('grade_local_travel_mode', 'grade_local_travel_mode.grade_id', 'entities.id')
+			->leftjoin('grade_expense_type', 'grade_expense_type.grade_id', 'entities.id')
+			->leftjoin('grade_trip_purpose', 'grade_trip_purpose.grade_id', 'entities.id')
+			->where('entities.entity_type_id', 500)
+			->where('entities.company_id', Auth::user()->company_id)
+			->groupBy('entities.id')
+		// ->get()
+		;
+		// dd($entity);
+		return Datatables::of($entity)
+			->addColumn('expense_count', function ($entity) {
 
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
-		return Datatables::of($trips)
-			->addColumn('action', function ($trip) {
+			})
+			->addColumn('travel_count', function ($entity) {
+
+			})
+			->addColumn('trip_count', function ($entity) {
+
+			})
+			->addColumn('action', function ($entity) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -50,14 +43,14 @@ class GradeController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $trip->id . '">
+				<a href="#!/eyatra/grade/edit/' . $entity->grade_id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $trip->id . '">
+				<a href="#!/eyatra/trip/view/' . $entity->grade_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteTrip(' . $entity->grade_id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -65,98 +58,102 @@ class GradeController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraGradeFormData($trip_id = NULL) {
+	public function eyatraGradeFormData($entity_id = NULL) {
 
-		if (!$trip_id) {
+		if (!$entity_id) {
 			$this->data['action'] = 'New';
-			$trip = new Trip;
-			$visit = new Visit;
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
+			$entity = new entity;
+
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$trip = Trip::find($trip_id);
-			if (!$trip) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
-			}
+			$entity = Entity::find($entity_id);
+			// dd($entity_id);
+			// if (!$trip) {
+			// 	$this->data['success'] = false;
+			// 	$this->data['message'] = 'Trip not found';
+			// }
+			// ->select('expense_type_id','eligible_amount')->get()
+			$this->data['selected_expense_types'] = $entity->expenseTypes()->pluck('expense_type_id')->toArray();
+			$this->data['selected_purposeList'] = $entity->tripPurposes()->pluck('trip_purpose_id')->toArray();
+			$this->data['selected_localTravelModes'] = $entity->localTravelModes()->pluck('local_travel_mode_id')->toArray();
+			// $this->data['selected_expense_types'] = $entity->expenseTypes()->select('eligible_amount', 'expense_type_id')->toArray();
+			// $this->data['selected_expense_types'] = $entity->expenseTypes()->pluck('eligible_amount', 'expense_type_id')->toArray();
+			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
+			'expense_type' => Config::expenseList(),
 			'purpose_list' => Entity::purposeList(),
 			'travel_mode_list' => Entity::travelModeList(),
-			'city_list' => NCity::getList(),
 		];
-		$this->data['trip'] = $trip;
+		$this->data['entity'] = $entity;
 
 		return response()->json($this->data);
 	}
 
 	public function saveEYatraGrade(Request $request) {
 		//validation
+		// dd($request->all());
 		try {
 			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
+				'grade_name' => [
 					'required',
 				],
 			]);
+
+			$validator = Validator::make($request->all(), [
+				"grade_name" => [
+					Rule::unique('entities')->ignore($request->id),
+					'max:191',
+				],
+			]);
+
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 
 			DB::beginTransaction();
+
 			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
+				$grade_details = new Entity;
+				$grade_details->created_by = Auth::user()->id;
+				$grade_details->created_at = Carbon::now();
+				$grade_details->updated_at = NULL;
 
 			} else {
-				$trip = Trip::find($request->id);
-
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
+				$grade_details = Entity::find($request->id);
+				$grade_details->expenseTypes()->sync([]);
+				$grade_details->tripPurposes()->sync([]);
+				$grade_details->localTravelModes()->sync([]);
+				$grade_details->updated_by = Auth::user()->id;
+				$grade_details->updated_at = Carbon::now();
 
 			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
+			if ($request->status == 'Inactive') {
+				$grade_details->deleted_by = Auth::user()->id;
+				$grade_details->deleted_at = Carbon::now();
+			}
+			$grade_details->company_id = Auth::user()->company_id;
+			$grade_details->name = $request->grade_name;
+			$grade_details->entity_type_id = 500;
+			$grade_details->save();
 
-			$trip->number = 'TRP' . $trip->id;
-			$trip->save();
-
-			//SAVING VISITS
-			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					if ($visit_data['booking_method'] == 'Agent') {
-						// $agent = Agent::where('company_id', Auth::user()->company_id)
-						// 	->join('agent_travel_mode as atm', 'atm.agent_id', 'agents.id')
-						// 	->where('atm.state_id', Auth::user()->eyatraEmployee->outlet->address->state_id)
-						// 	->where('atm.travel_mode_id', $visit_data['travel_mode_id'])
-						// 	->first();
-						// if ($agent) {
-						// 	$visit->agent_id = $agent->id;
-						// } else {
-						// 	return response()->json(['success' => false, 'errors' => ['No agent found for visit']]);
-						// }
-					}
-					$visit->save();
+			//Save Expense Mode
+			if (!empty($request->checked_expense_type)) {
+				foreach ($request->checked_expense_type as $key => $value) {
+					$grade_details->expenseTypes()->attach($request->checked_expense_type[$key], ['eligible_amount' => $request->selected_expense_amounts[$key]]);
 				}
+			}
+			if (!empty($request->checked_expense_type)) {
+				$grade_details->tripPurposes()->sync($request->checked_purpose_list);
+			}
+
+			if (!empty($request->checked_expense_type)) {
+				$grade_details->localTravelModes()->sync($request->checked_travel_mode);
 			}
 
 			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
+			$request->session()->flash('success', 'Grade saved successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
