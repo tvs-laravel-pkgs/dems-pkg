@@ -122,7 +122,7 @@ class EYatraPermissionSeeder extends Seeder {
 			5061 => [
 				'display_order' => 1,
 				'parent_id' => 5001,
-				'name' => 'trip-verification-all',
+				'name' => 'view-all-trip-verifications',
 				'display_name' => 'All',
 			],
 
@@ -203,6 +203,21 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-state-delete',
 				'display_name' => 'Delete',
 			],
+
+			//TRIPS BOOKING REQUESTS
+			5160 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'trips-booking-requests',
+				'display_name' => 'Trips Booking Requests',
+			],
+			5161 => [
+				'display_order' => 1,
+				'parent_id' => 5001,
+				'name' => 'view-all-trip-booking-requests',
+				'display_name' => 'All',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

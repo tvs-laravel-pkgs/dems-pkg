@@ -1,11 +1,9 @@
-alert(1)
-app.component('eyatraStates', {
-    templateUrl: eyatra_state_list_template_url,
+app.component('eyatraTripBookingUpdates', {
+    templateUrl: eyatra_booking_updates_list_template_url,
     controller: function(HelperService, $rootScope) {
-        alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_state_table').DataTable({
+        var dataTable = $('#eyatra_trip_booking_updates_table').DataTable({
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -22,40 +20,46 @@ app.component('eyatraStates', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listEYatraState'],
+                url: laravel_routes['listTripBookingUpdates'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
             },
+
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'code', name: 'nstates.code', searchable: true },
-                { data: 'name', name: 'nstates.name', searchable: true },
-                { data: 'country', name: 'c.name', searchable: true },
-                { data: 'status', name: 'status.name', searchable: false },
+                { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'start_date', name: 'v.date', searchable: true },
+                { data: 'end_date', name: 'v.date', searchable: true },
+                { data: 'cities', name: 'c.name', searchable: true },
+                { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+                { data: 'created_at', name: 'trips.created_at', searchable: true },
+                { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('States');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
-            'Add New' +
-            '</a>'
-        );
+        $('.page-header-content .display-inline-block .data-table-title').html('Trips Booking Updates');
+        $('.add_new_button').html();
         $rootScope.loading = false;
 
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-
-app.component('eyatraStateForm', {
-    templateUrl: state_form_template_url,
+app.component('eyatraTripBookingUpdatesForm', {
+    templateUrl: booking_updates_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.state_id) == 'undefined' ? state_form_data_url : state_form_data_url + '/' + $routeParams.state_id;
+        if (typeof($routeParams.visit_id) == 'undefined') {
+            $location.path('/eyatra/trip/booking-updates')
+            $scope.$apply()
+            return;
+        }
+        $form_data_url = booking_updates_form_data_url + '/' + $routeParams.visit_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -68,45 +72,49 @@ app.component('eyatraStateForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/states')
+                $location.path('/eyatra/trips')
                 $scope.$apply()
                 return;
             }
-            self.state = response.data.state;
-            self.extras = response.data.extras;
-            self.action = response.data.action;
+            console.log(response.data);
+            self.visit = response.data.visit;
+            self.travel_mode_list = response.data.travel_mode_list;
             $rootScope.loading = false;
-
         });
 
-        var form_id = '#state-form';
+
+        var form_id = '#trip-booking-updates-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'travel_mode_id': {
                     required: true,
                 },
-                'description': {
-                    maxlength: 255,
+                'reference_number': {
+                    required: true,
+                    maxlength: 191,
                 },
-                'advance_received': {
+                'amount': {
+                    required: true,
                     maxlength: 10,
+                    number: true,
                 },
-            },
-            messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'tax': {
+                    required: true,
+                    maxlength: 10,
+                    number: true,
                 },
             },
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
+                var trip_id = $('#trip_id').val();
                 $.ajax({
-                        url: laravel_routes['saveEYatraState'],
+                        url: laravel_routes['saveTripBookingUpdates'],
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -125,9 +133,9 @@ app.component('eyatraStateForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'State saved successfully',
+                                text: 'Booking details updated successfully',
                             }).show();
-                            $location.path('/eyatra/states')
+                            $location.path('/eyatra/trip/view/' + trip_id)
                             $scope.$apply()
                         }
                     })
@@ -139,21 +147,3 @@ app.component('eyatraStateForm', {
         });
     }
 });
-
-app.component('eyatraStateView', {
-    templateUrl: state_view_template_url,
-
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        $http.get(
-            state_view_url + '/' + $routeParams.state_id
-        ).then(function(response) {
-            self.state = response.data.state;
-        });
-    }
-});
-
-
-//------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------

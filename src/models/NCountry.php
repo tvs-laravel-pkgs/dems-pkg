@@ -16,4 +16,8 @@ class NCountry extends Model {
 	public static function getList() {
 		return NCountry::select('id', 'name')->get();
 	}
+
+	public function states() {
+		return $this->hasMany('Uitoux\EYatra\NState', 'country_id');
+	}
 }

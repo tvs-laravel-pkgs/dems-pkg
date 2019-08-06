@@ -13,11 +13,19 @@ class NState extends Model {
 	}
 
 	public static function getList($country_id = NULL) {
-		if (!$state_id) {
+		if (!$country_id) {
 			return NState::select('id', 'name')->get();
 		} else {
 			return NState::select('id', 'name')->where('country_id', $country_id)->get();
 		}
+	}
+
+	public function cities() {
+		return $this->hasMany('Uitoux\EYatra\NCity', 'state_id');
+	}
+
+	public function travelModes() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'state_agent_travel_mode', 'state_id', 'travel_mode_id');
 	}
 
 }

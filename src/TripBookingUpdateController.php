@@ -1,0 +1,158 @@
+<?php
+
+namespace Uitoux\EYatra;
+use App\Http\Controllers\Controller;
+use Auth;
+use DB;
+use Entrust;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\Attachment;
+use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\Trip;
+use Uitoux\EYatra\Visit;
+use Uitoux\EYatra\VisitBooking;
+use Validator;
+use Yajra\Datatables\Datatables;
+
+class TripBookingUpdateController extends Controller {
+	public function listTripBookingUpdates(Request $r) {
+		$trips = Trip::from('trips')
+			->join('visits as v', 'v.trip_id', 'trips.id')
+			->join('ncities as c', 'c.id', 'v.from_city_id')
+			->join('employees as e', 'e.id', 'trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
+			->join('configs as status', 'status.id', 'trips.status_id')
+			->select(
+				'trips.id',
+				'trips.number',
+				'e.code as ecode',
+				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
+				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				'purpose.name as purpose',
+				'trips.advance_received',
+				'trips.created_at',
+				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
+				'status.name as status'
+
+			)
+			->groupBy('trips.id')
+			->orderBy('trips.created_at', 'desc')
+			->orderBy('trips.status_id', 'desc')
+		;
+
+		if (!Entrust::can('trip-verification-all')) {
+			$trips->where('trips.manager_id', Auth::user()->entity_id);
+		}
+		return Datatables::of($trips)
+			->addColumn('action', function ($trip) {
+
+				$img1 = asset('public/img/content/table/edit-yellow.svg');
+				$img2 = asset('public/img/content/table/eye.svg');
+				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
+				$img2_active = asset('public/img/content/table/eye-active.svg');
+				$img3 = asset('public/img/content/table/delete-default.svg');
+				$img3_active = asset('public/img/content/table/delete-active.svg');
+				return '
+				<a href="#!/eyatra/trip/verification/form/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>
+				';
+
+			})
+			->make(true);
+	}
+
+	public function tripBookingUpdatesFormData($visit_id) {
+
+		$visit = Visit::with([
+			'fromCity',
+			'toCity',
+			'trip',
+		])
+			->find($visit_id);
+
+		if (!$visit) {
+			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
+		}
+
+		// if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
+		// 	return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
+		// }
+
+		$this->data['visit'] = $visit;
+		$this->data['travel_mode_list'] = Entity::travelModeList();
+		$this->data['success'] = true;
+		return response()->json($this->data);
+	}
+
+	public function saveTripBookingUpdates(Request $r) {
+		// dd($r->all());
+		DB::beginTransaction();
+		try {
+			$validator = Validator::make($r->all(), [
+				'travel_mode_id' => [
+					// Rule::unique('suppliers', 'code')->ignore($request->id),
+					'required:true',
+				],
+				'reference_number' => [
+					'required:true',
+				],
+				'amount' => [
+					'required:true',
+				],
+				'tax' => [
+					'required:true',
+				],
+				'attachments.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+			]);
+
+			if ($validator->fails()) {
+				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+
+			//Unique validation
+			$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
+				->where('type_id', $r->type_id)
+				->where('travel_mode_id', $r->travel_mode_id)
+				->first();
+
+			if ($travel_mode_id_unique) {
+				return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
+			}
+
+			//Visit status update
+			$visit = Visit::find($r->visit_id);
+			$visit->booking_status_id = 3061; // Visit status Booked
+			$visit->save();
+
+			$visit_bookings = new VisitBooking;
+			$visit_bookings->fill($r->all());
+			$visit_bookings->created_by = Auth::user()->id;
+			$visit_bookings->save();
+
+			$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
+			Storage::makeDirectory($booking_updates_images, 0777);
+			if ($r->hasfile('attachments')) {
+				foreach ($r->file('attachments') as $image) {
+					$name = $image->getClientOriginalName();
+					$image->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
+					$attachement = new Attachment;
+					$attachement->attachment_of_id = 3180; // Attachment visit
+					$attachement->attachment_type_id = 3200; //Attachment type visit booking
+					$attachement->entity_id = $r->visit_id;
+					$attachement->name = $name;
+					$attachement->save();
+				}
+			}
+			DB::commit();
+		} catch (Exception $e) {
+			DB::rollBack();
+			// dd($e->getMessage());
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		}
+		return response()->json(['success' => true]);
+	}
+
+}

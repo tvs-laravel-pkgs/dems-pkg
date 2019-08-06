@@ -7,12 +7,14 @@ use App\User;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use Uitoux\EYatra\Address;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Company;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
+use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Trip;
@@ -125,6 +127,21 @@ class EYatraTC1Seeder extends Seeder {
 			$outlet->created_by = $admin->id;
 			$outlet->save();
 
+			//OUTLET ADDRESS
+			$address = Address::firstOrNew([
+				'address_of_id' => 3160,
+				'entity_id' => $outlet->id,
+			]);
+			$address->name = 'Primary';
+			$address->line_1 = $faker->streetAddress;
+			$country = NCountry::find(5);
+			$state = $country->states()->inRandomOrder()->first();
+			$city = $state->cities()->inRandomOrder()->first();
+			$address->country_id = $country->id;
+			$address->state_id = $state->id;
+			$address->city_id = $city->id;
+			$address->save();
+
 			//EMPLOYEES - MANAGERS
 			for ($j = 1; $j <= 5; $j++) {
 				$manager = Employee::firstOrNew([
@@ -194,6 +211,21 @@ class EYatraTC1Seeder extends Seeder {
 			$user->save();
 			$user->roles()->sync(503);
 
+			//AGENT ADDRESS
+			$address = Address::firstOrNew([
+				'address_of_id' => 3161,
+				'entity_id' => $agent->id,
+			]);
+			$address->name = 'Primary';
+			$address->line_1 = $faker->streetAddress;
+			$country = NCountry::find(5);
+			$state = $country->states()->inRandomOrder()->first();
+			$city = $state->cities()->inRandomOrder()->first();
+			$address->country_id = $country->id;
+			$address->state_id = $state->id;
+			$address->city_id = $city->id;
+			$address->save();
+
 			$travel_modes = [];
 			$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
 			foreach ($travel_mode_ids as $travel_mode_id) {
@@ -202,16 +234,21 @@ class EYatraTC1Seeder extends Seeder {
 			$agent->travelModes()->sync($travel_modes);
 		}
 
-		// $state_ids = NState::inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
-		// foreach ($state_ids as $state_id) {
-		// 	$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
-		// 	foreach ($travel_mode_ids as $travel_mode_id) {
-		// 		$travel_modes[$travel_mode_id] = [
-		// 			'state_id' => $state_id,
-		// 			'service_charge' => $faker->numberBetween(10, 100),
-		// 		];
-		// 	}
-		// }
+		//STATE <> TRAVEL MODE <> AGENT <> SERVICE CHARGE MAPPING
+		foreach (NState::get() as $state) {
+			$state->travelModes()->sync([]);
+			foreach (Entity::travelModeList() as $travel_mode) {
+				$agent = Agent::whereHas('travelModes', function ($query) use ($travel_mode) {
+					$query->where('id', $travel_mode->id);
+				})->inRandomOrder()->first();
+
+				$travel_modes[$travel_mode->id] = [
+					'agent_id' => $agent->id,
+					'service_charge' => $faker->numberBetween(10, 100),
+				];
+			}
+			$state->travelModes()->sync($travel_modes);
+		}
 
 		foreach ($company->employeeGrades as $grade) {
 			//GRADE EXPENSE TYPE MAPPING

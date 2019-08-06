@@ -14,6 +14,10 @@ class Company extends Model {
 		return $this->hasMany('Uitoux\EYatra\Employee');
 	}
 
+	public function agents() {
+		return $this->hasMany('Uitoux\EYatra\Agent');
+	}
+
 	public function employeeGrades() {
 		return $this->hasMany('Uitoux\EYatra\Entity')->where('entity_type_id', 500);
 	}
