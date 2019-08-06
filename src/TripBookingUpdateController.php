@@ -69,6 +69,7 @@ class TripBookingUpdateController extends Controller {
 		$visit = Visit::with([
 			'fromCity',
 			'toCity',
+			'trip',
 		])
 			->find($visit_id);
 
@@ -120,6 +121,12 @@ class TripBookingUpdateController extends Controller {
 			if ($travel_mode_id_unique) {
 				return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
 			}
+
+			//Visit status update
+			$visit = Visit::find($r->visit_id);
+			$visit->booking_status_id = 3061; // Visit status Booked
+			$visit->save();
+
 			$visit_bookings = new VisitBooking;
 			$visit_bookings->fill($r->all());
 			$visit_bookings->created_by = Auth::user()->id;

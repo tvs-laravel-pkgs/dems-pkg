@@ -112,6 +112,7 @@ app.component('eyatraTripBookingUpdatesForm', {
 
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
+                var trip_id = $('#trip_id').val();
                 $.ajax({
                         url: laravel_routes['saveTripBookingUpdates'],
                         method: "POST",
@@ -134,7 +135,8 @@ app.component('eyatraTripBookingUpdatesForm', {
                                 layout: 'topRight',
                                 text: 'Booking details updated successfully',
                             }).show();
-                            // $location.path('/eyatra/trips/booking_updates')// $scope.$apply()
+                            $location.path('/eyatra/trip/view/' + trip_id)
+                            $scope.$apply()
                         }
                     })
                     .fail(function(xhr) {
