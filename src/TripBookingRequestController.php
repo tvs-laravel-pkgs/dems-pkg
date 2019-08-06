@@ -61,37 +61,46 @@ class TripBookingRequestController extends Controller {
 			->make(true);
 	}
 
-	public function tripBookingRequestsViewData($trip_id) {
+	public function tripBookingRequestsViewData($visit_id) {
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($trip_id);
-
-		if (!$trip) {
+		$visit = Visit::find($visit_id);
+		if (!$visit) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
-		if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
+		$relations = [
+			'type',
+			'fromCity',
+			'toCity',
+			'travelMode',
+			'bookingMethod',
+			'bookingStatus',
+			'agent',
+			'status',
+			'managerVerificationStatus',
+			'trip.employee',
+			'trip.purpose',
+			'trip.status',
+		];
+		if ($visit->booking_status_id == 3061) {
+			$relations[] = 'bookings';
+			$relations[] = 'bookings.type';
+			$relations[] = 'bookings.travelMode';
+			$relations[] = 'bookings.paymentStatus';
+		}
+
+		$visit = Visit::with($relations)
+			->find($visit_id);
+
+		if (!Entrust::can('view-all-trip-booking-requests') && $visit->agent_id != Auth::user()->entity_id) {
 			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		}
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+		$this->data['visit'] = $visit;
+		$this->data['trip'] = $visit->trip;
+		if ($visit->booking_status_id == 3061) {
+			$this->data['bookings'] = $visit->bookings;
+		}
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

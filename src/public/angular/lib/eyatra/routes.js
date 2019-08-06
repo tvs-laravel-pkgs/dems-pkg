@@ -125,6 +125,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Trip',
     }).
 
+    //TRIP CLAIM
+    when('/eyatra/trip/claim/list', {
+        template: '<eyatra-trip-claim-list></eyatra-trip-claim-list>',
+        title: 'Trip Claim List',
+    }).
+    when('/eyatra/trip/claim/add', {
+        template: '<eyatra-trip-claim-form></eyatra-trip-claim-form>',
+        title: 'Trip Claim Form',
+    }).
+    when('/eyatra/trip/claim/edit/:trip_id', {
+        template: '<eyatra-trip-claim-form></eyatra-trip-claim-form>',
+        title: 'Edit Trip Claim',
+    }).
+    when('/eyatra/trip/claim/view/:trip_id', {
+        template: '<eyatra-trip-claim-view></eyatra-trip-claim-view>',
+        title: 'View Trip Claim',
+    }).
+
     //TRIP VERIFICATION
     when('/eyatra/trip/verifications', {
         template: '<eyatra-trip-verifications></eyatra-trip-verifications>',
@@ -143,6 +161,16 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/trips/booking-requests/view/:trip_id', {
         template: '<eyatra-trip-booking-requests-view></eyatra-booking-requests-view>',
         title: 'Trip Booking Request View',
+    }).
+
+    //AGENT CLAIM
+    when('/eyatra/agent/claim/list', {
+        template: '<eyatra-agent-claim-list></eyatra-agent-claim-list>',
+        title: 'Agent Claim List',
+    }).
+    when('/eyatra/agent/claim/form', {
+        template: '<eyatra-agent-claim-form></eyatra-agent-claim-form>',
+        title: 'Agent Claim Form',
     }).
 
     //BOOKING UPDATES

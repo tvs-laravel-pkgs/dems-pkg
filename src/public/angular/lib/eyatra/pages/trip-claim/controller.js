@@ -1,9 +1,9 @@
-app.component('eyatraTripBookingRequests', {
-    templateUrl: eyatra_booking_requests_list_template_url,
+app.component('eyatraTripClaimList', {
+    templateUrl: eyatra_agent_claim_list_template_url,
     controller: function(HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_trip_booking_requests_table').DataTable({
+        var dataTable = $('#eyatra_trip_claim_list_table').DataTable({
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -20,7 +20,7 @@ app.component('eyatraTripBookingRequests', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listTripBookingRequests'],
+                url: laravel_routes['listTripClaim'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
@@ -42,7 +42,7 @@ app.component('eyatraTripBookingRequests', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Bookings');
+        $('.page-header-content .display-inline-block .data-table-title').html('Trip Claims');
         $('.add_new_button').html();
         $rootScope.loading = false;
 
@@ -50,15 +50,10 @@ app.component('eyatraTripBookingRequests', {
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraTripBookingRequestsView', {
-    templateUrl: eyatra_booking_requests_view_template_url,
+app.component('eyatraTripClaimForm', {
+    templateUrl: eyatra_trip_claim_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/trips/booking-requests')
-            $scope.$apply()
-            return;
-        }
-        $form_data_url = eyatra_booking_requests_view_data_url + '/' + $routeParams.trip_id;
+        $form_data_url = eyatra_trip_claim_form_data_url;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -71,25 +66,13 @@ app.component('eyatraTripBookingRequestsView', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/trips/booking-requests')
+                $location.path('/eyatra/trip/claim/list')
                 $scope.$apply()
                 return;
             }
-            self.visit = response.data.visit;
-            self.trip = response.data.trip;
-            self.bookings = response.data.bookings;
             self.extras = response.data.extras;
-            self.action = response.data.action;
             $rootScope.loading = false;
 
         });
-
-        self.approveTrip = function() {
-            self.trip.visits.push({
-                visit_date: '',
-                booking_method: 'Self',
-                preferred_travel_modes: '',
-            });
-        }
     }
 });

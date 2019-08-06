@@ -16,4 +16,8 @@ class Outlet extends Model {
 		return Outlet::select('id', 'name')->get();
 	}
 
+	public function address() {
+		return $this->hasOne('Uitoux\EYatra\Address', 'entity_id')->where('address_of_id', 3160);
+	}
+
 }
