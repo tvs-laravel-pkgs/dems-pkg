@@ -1,24 +1,24 @@
 <?php
 
 namespace Uitoux\EYatra;
+use App\EntityType;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\Trip;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class EntityController extends Controller {
-	public function getEntityListData($entity_type_id) {
-		$entity_type = EntityType::find($entity_type_id);
-		if (!$entity_type) {
-			return response()->json(['success' => false, 'error' => "Entity Type Not found"]);
-		}
-		$this->data['entity_type'] = $entity_type;
-		return response()->json($this->data);
-	}
+	// public function getEntityListData($entity_type_id) {
+	// 	$entity_type = EntityType::find($entity_type_id);
+	// 	if (!$entity_type) {
+	// 		return response()->json(['success' => false, 'error' => "Entity Type Not found"]);
+	// 	}
+	// 	$this->data['entity_type'] = $entity_type;
+	// 	return response()->json($this->data);
+	// }
 
 	public function listEYatraEntity(Request $r) {
 		$entities = Entity::withTrashed()->from('entities')
@@ -49,7 +49,7 @@ class EntityController extends Controller {
 				$img2 = asset('/public/img/content/table/delete-default.svg');
 				$img2_active = asset('/public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/master/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
+				<a href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover="this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
 				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover="this.src="' . $img2_active . '" onmouseout="this.src="' . $img2 . '"></a>';
@@ -139,37 +139,6 @@ class EntityController extends Controller {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => [$e->getMessage()]]);
 		}
-	}
-
-	public function viewEYatraEntity($grade_id) {
-
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($trip_id);
-		if (!$trip) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
-			return response()->json($this->data);
-		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
-		$this->data['success'] = true;
-		return response()->json($this->data);
 	}
 
 	public function deleteEYatraEntity($entity_id) {

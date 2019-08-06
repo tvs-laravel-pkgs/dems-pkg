@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Entity extends Model {
 	use SoftDeletes;
 	protected $table = 'entities';
+	protected $fillable = [
+		'id',
+		'company_id',
+		'entity_type_id',
+		'name',
+		'created_by',
+	];
 
 	public function expenseTypes() {
 		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id');

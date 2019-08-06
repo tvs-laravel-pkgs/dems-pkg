@@ -1,13 +1,13 @@
 app.component('eyatraEntityList', {
     templateUrl: eyatra_entity_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $http, $rootScope, $scope, $routeParams) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable;
         var id = '';
         var title = '';
         $http.get(
-            entity_list_data_url + '/' + $routeParams.entity_type_id
+            eyatra_entity_list_data_url + '/' + $routeParams.entity_type_id
         ).then(function(response) {
 
             self.id = response.data.entity_type.id;
@@ -54,7 +54,7 @@ app.component('eyatraEntityList', {
             });
             $('.dataTables_length select').select2();
             $('.page-header-content .display-inline-block .data-table-title').html(response.data.entity_type.name);
-            var add_url = '#!/master/entity/add/' + self.id;
+            var add_url = '#!/eyatra/entity/add/' + self.id;
             if (self.id) {
                 $('.add_new_button').html(
                     '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
@@ -95,58 +95,70 @@ app.component('eyatraEntityList', {
 app.component('eyatraEntityForm', {
     templateUrl: eyatra_entity_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.state_id) == 'undefined' ? eyatra_entity_form_template_url : eyatra_entity_form_template_url + '/' + $routeParams.entity_id;
+        $form_data_url = typeof($routeParams.entity_id) == 'undefined' ? eyatra_entity_form_data_url + '/' + $routeParams.entity_type_id : eyatra_entity_form_data_url + '/' + $routeParams.entity_type_id + '/' + $routeParams.entity_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         $http.get(
-            $form_data_url
+            $form_data_url,
         ).then(function(response) {
+            //console.log(response.data);
             if (!response.data.success) {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/entity/list')
+                $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
             }
             self.entity = response.data.entity;
-            self.extras = response.data.extras;
+            self.entity_type = response.data.entity_type;
             self.action = response.data.action;
             $rootScope.loading = false;
 
         });
-
-        var form_id = '#entity-form';
-        var v = jQuery(form_id).validate({
+        $('input').on('blur keyup', function() {
+            if ($("#entity_form").valid()) {
+                $('#submit').prop('disabled', false);
+            } else {
+                $('#submit').prop('disabled', 'disabled');
+            }
+        });
+        $('#submit').click(function() {
+            if ($("#entity_form").valid()) {
+                $('#submit').prop('disabled', false);
+            } else {
+                $('#submit').prop('disabled', 'disabled');
+            }
+        });
+        var form_id = form_ids = '#entity_form';
+        var v = jQuery(form_ids).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.hasClass("name")) {
+                    error.appendTo($('.name_error'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'name': {
                     required: true,
+                    minlength: 3,
                 },
-                'description': {
-                    maxlength: 255,
-                },
-                'advance_received': {
-                    maxlength: 10,
-                },
+
             },
             messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'name': {
+                    minlength: 'Please enter minimum of 3 characters',
                 },
             },
             submitHandler: function(form) {
-
                 let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['saveEYatraEntity'],
+                        url: eyatra_save_entity_url + '/' + $routeParams.entity_type_id,
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -155,7 +167,7 @@ app.component('eyatraEntityForm', {
                     .done(function(res) {
                         console.log(res.success);
                         if (!res.success) {
-                            $('#submit').button('reset');
+                            $('#submit').prop('disabled', 'disabled');
                             var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
@@ -165,9 +177,10 @@ app.component('eyatraEntityForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Entity saved successfully',
+                                text: 'Entity Details Added Successfully',
+                                text: res.message,
                             }).show();
-                            $location.path('/eyatra/entity/list')
+                            $location.path('/master/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
                     })
