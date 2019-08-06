@@ -119,4 +119,14 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-verification-form></eyatra-trip-verification-form>',
         title: 'Add Trip',
     });
+
+    //TRIPS - AGENT
+    when('/eyatra/trip/verifications', {
+        template: '<eyatra-trip-verifications></eyatra-trip-verifications>',
+        title: 'Trips',
+    }).
+    when('/eyatra/trip/verification/form/:trip_id', {
+        template: '<eyatra-trip-verification-form></eyatra-trip-verification-form>',
+        title: 'Add Trip',
+    });
 }]);

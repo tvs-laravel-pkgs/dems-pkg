@@ -102,6 +102,7 @@ class EYatraTC1Seeder extends Seeder {
 			500 => 'grd',
 			501 => 'tp',
 			502 => 'tm',
+			503 => 'ltm',
 		];
 		foreach ($dummy_entities as $entity_type_id => $name) {
 			for ($i = 1; $i <= 15; $i++) {
