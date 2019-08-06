@@ -121,12 +121,12 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
     //BOOKING REQUESTS
-    when('/eyatra/trip/booking-requests', {
+    when('/eyatra/trips/booking-requests', {
         template: '<eyatra-trip-booking-requests></eyatra-trip-booking-requests>',
         title: 'Trips Booking Requests',
     }).
-    when('/eyatra/trip/booking-requests/form/:trip_id', {
-        template: '<eyatra-trip-booking-requests-form></eyatra-booking-requests-form>',
+    when('/eyatra/trips/booking-requests/view/:trip_id', {
+        template: '<eyatra-trip-booking-requests-view></eyatra-booking-requests-view>',
         title: 'Trip Booking Request View',
     }).
 

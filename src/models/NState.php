@@ -20,4 +20,8 @@ class NState extends Model {
 		}
 	}
 
+	public function cities() {
+		return $this->hasMany('Uitoux\EYatra\NCities', 'state_id');
+	}
+
 }

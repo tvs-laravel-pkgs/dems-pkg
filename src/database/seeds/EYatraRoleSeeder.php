@@ -33,6 +33,9 @@ class EYatraRoleSeeder extends Seeder {
 					//TRIPS VERIFICATION
 					5060, 5061,
 
+					//TRIPS BOOKING REQUESTS
+					5160, 5161,
+
 					//MASTERS
 					5080,
 
@@ -99,8 +102,8 @@ class EYatraRoleSeeder extends Seeder {
 					//MAIN MENUS
 					5000,
 
-					//TRIPS
-					5001, 5002, 5003, 5004,
+					//TRIPS BOOKING REQUESTS
+					5160,
 				],
 			],
 		];

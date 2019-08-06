@@ -7,12 +7,14 @@ use App\User;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
+use Uitoux\EYatra\Address;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Company;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
+use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Trip;
@@ -125,6 +127,21 @@ class EYatraTC1Seeder extends Seeder {
 			$outlet->created_by = $admin->id;
 			$outlet->save();
 
+			//OUTLET ADDRESS
+			$address = Address::firstOrNew([
+				'address_of_id' => 3160,
+				'entity_id' => $outlet->id,
+			]);
+			$address->name = 'Primary';
+			$address->line1 = $faker->streetAddress;
+			$country = NCountry::find(1);
+			$state = $country->states()->inRandomOrder()->first();
+			$city = $state->cities()->inRandomOrder()->first();
+			$address->country_id = $country->id;
+			$address->state_id = $state->id;
+			$address->city_id = $city->id;
+			$address->save();
+
 			//EMPLOYEES - MANAGERS
 			for ($j = 1; $j <= 5; $j++) {
 				$manager = Employee::firstOrNew([
@@ -193,6 +210,21 @@ class EYatraTC1Seeder extends Seeder {
 			$user->password = '$2y$10$N9pYzAbL2spl7vX3ZE1aBeekppaosAdixk04PTkK5obng7.KsLAQ2';
 			$user->save();
 			$user->roles()->sync(503);
+
+			//AGENT ADDRESS
+			$address = Address::firstOrNew([
+				'address_of_id' => 3161,
+				'entity_id' => $agent->id,
+			]);
+			$address->name = 'Primary';
+			$address->line1 = $faker->streetAddress;
+			$country = NCountry::find(1);
+			$state = $country->states()->inRandomOrder()->first();
+			$city = $state->cities()->inRandomOrder()->first();
+			$address->country_id = $country->id;
+			$address->state_id = $state->id;
+			$address->city_id = $city->id;
+			$address->save();
 
 			$travel_modes = [];
 			$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
