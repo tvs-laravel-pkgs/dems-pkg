@@ -4,21 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class TravelPurposeGrade extends Migration {
+class GradeLocalTravelMode extends Migration {
 	/**
 	 * Run the migrations.
 	 *
 	 * @return void
 	 */
 	public function up() {
-		Schema::create('grade_trip_purpose', function (Blueprint $table) {
+		Schema::create('grade_local_travel_mode', function (Blueprint $table) {
 			$table->unsignedInteger('grade_id');
-			$table->unsignedInteger('trip_purpose_id');
+			$table->unsignedInteger('local_travel_mode_id');
 
-			$table->foreign('trip_purpose_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('local_travel_mode_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 
-			$table->unique(["trip_purpose_id", "grade_id"]);
+			$table->unique(["grade_id", "local_travel_mode_id"]);
 		});
 	}
 
@@ -28,6 +28,6 @@ class TravelPurposeGrade extends Migration {
 	 * @return void
 	 */
 	public function down() {
-		Schema::dropIfExists('grade_trip_purpose');
+		Schema::dropIfExists('grade_local_travel_mode');
 	}
 }
