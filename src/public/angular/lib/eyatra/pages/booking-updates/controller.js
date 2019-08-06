@@ -52,14 +52,14 @@ app.component('eyatraTripBookingUpdates', {
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripBookingUpdatesForm', {
-    templateUrl: trip_booking_updates_form_template_url,
+    templateUrl: booking_updates_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        if (typeof($routeParams.trip_id) == 'undefined') {
+        if (typeof($routeParams.visit_id) == 'undefined') {
             $location.path('/eyatra/trip/booking-updates')
             $scope.$apply()
             return;
         }
-        $form_data_url = trip_booking_updates_form_data_url + '/' + $routeParams.trip_id;
+        $form_data_url = booking_updates_form_data_url + '/' + $routeParams.visit_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -76,20 +76,12 @@ app.component('eyatraTripBookingUpdatesForm', {
                 $scope.$apply()
                 return;
             }
-            self.trip = response.data.trip;
-            self.extras = response.data.extras;
-            self.action = response.data.action;
+            console.log(response.data);
+            self.visit = response.data.visit;
+            self.travel_mode_list = response.data.travel_mode_list;
             $rootScope.loading = false;
-
         });
 
-        self.approveTrip = function() {
-            self.trip.visits.push({
-                visit_date: '',
-                booking_method: 'Self',
-                preferred_travel_modes: '',
-            });
-        }
 
         var form_id = '#trip-booking-updates-form';
         var v = jQuery(form_id).validate({
@@ -98,19 +90,22 @@ app.component('eyatraTripBookingUpdatesForm', {
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'travel_mode_id': {
                     required: true,
                 },
-                'description': {
-                    maxlength: 255,
+                'reference_number': {
+                    required: true,
+                    maxlength: 191,
                 },
-                'advance_received': {
+                'amount': {
+                    required: true,
                     maxlength: 10,
+                    number: true,
                 },
-            },
-            messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'tax': {
+                    required: true,
+                    maxlength: 10,
+                    number: true,
                 },
             },
             submitHandler: function(form) {
@@ -139,8 +134,7 @@ app.component('eyatraTripBookingUpdatesForm', {
                                 layout: 'topRight',
                                 text: 'Booking details updated successfully',
                             }).show();
-                            $location.path('/eyatra/trips/booking_updates')
-                            $scope.$apply()
+                            // $location.path('/eyatra/trips/booking_updates')// $scope.$apply()
                         }
                     })
                     .fail(function(xhr) {

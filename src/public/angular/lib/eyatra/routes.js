@@ -135,7 +135,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-booking-updates></eyatra-trip-booking-updates>',
         title: 'Trips Booking Updates',
     }).
-    when('/eyatra/trips/booking-updates/form/:trip_id', {
+    when('/eyatra/trips/booking-updates/form/:visit_id', {
         template: '<eyatra-trip-booking-updates-form></eyatra-booking-updates-form>',
         title: 'Trip Booking Update View',
     });
