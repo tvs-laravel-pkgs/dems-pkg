@@ -117,16 +117,16 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/trip/verification/form/:trip_id', {
         template: '<eyatra-trip-verification-form></eyatra-trip-verification-form>',
-        title: 'Add Trip',
-    });
+        title: 'Trip Verification Form',
+    }).
 
-    //TRIPS - AGENT
-    when('/eyatra/trip/verifications', {
-        template: '<eyatra-trip-verifications></eyatra-trip-verifications>',
-        title: 'Trips',
+    //BOOKING REQUESTS
+    when('/eyatra/trip/booking-requests', {
+        template: '<eyatra-trip-booking-requests></eyatra-trip-booking-requests>',
+        title: 'Trips Booking Requests',
     }).
     when('/eyatra/trip/verification/form/:trip_id', {
         template: '<eyatra-trip-verification-form></eyatra-trip-verification-form>',
-        title: 'Add Trip',
+        title: 'Trip Booking Request View',
     });
 }]);
