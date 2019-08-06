@@ -1,8 +1,7 @@
-alert(1)
 app.component('eyatraStates', {
     templateUrl: eyatra_state_list_template_url,
     controller: function(HelperService, $rootScope) {
-        alert(2)
+        // alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_state_table').DataTable({
@@ -73,7 +72,8 @@ app.component('eyatraStateForm', {
                 return;
             }
             self.state = response.data.state;
-            self.extras = response.data.extras;
+            self.travel_modes = response.data.travel_modes;
+            self.agents_list = response.data.agents_list;
             self.action = response.data.action;
             $rootScope.loading = false;
 
@@ -86,14 +86,14 @@ app.component('eyatraStateForm', {
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'code': {
                     required: true,
                 },
-                'description': {
+                'name': {
                     maxlength: 255,
                 },
-                'advance_received': {
-                    maxlength: 10,
+                'country_id': {
+                    required: true,
                 },
             },
             messages: {
