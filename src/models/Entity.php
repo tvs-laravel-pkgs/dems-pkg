@@ -17,6 +17,10 @@ class Entity extends Model {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_trip_purpose', 'grade_id', 'trip_purpose_id');
 	}
 
+	public function localTravelModes() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_local_travel_mode', 'grade_id', 'local_travel_mode_id');
+	}
+
 	public static function purposeList() {
 		return Entity::where('entity_type_id', 501)->select('id', 'name')->get();
 	}

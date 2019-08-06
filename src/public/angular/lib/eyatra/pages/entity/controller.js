@@ -1,0 +1,199 @@
+app.component('eyatraEntityList', {
+    templateUrl: eyatra_entity_list_template_url,
+    controller: function(HelperService, $rootScope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        var dataTable;
+        var id = '';
+        var title = '';
+        $http.get(
+            entity_list_data_url + '/' + $routeParams.entity_type_id
+        ).then(function(response) {
+
+            self.id = response.data.entity_type.id;
+            self.title = response.data.entity_type.name;
+            //alert(response.data.entity_type.id);
+
+            var dataTable = $('#entity_table').DataTable({
+                "dom": dom_structure,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search",
+                    "lengthMenu": "Rows Per Page _MENU_",
+                    "paginate": {
+                        "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                        "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                    },
+                },
+                pageLength: 10,
+                processing: true,
+                serverSide: true,
+                paging: true,
+                ordering: false,
+                ajax: {
+                    url: get_entity_list_url + '/' + $routeParams.entity_type_id,
+                    type: "GET",
+                    dataType: "json",
+                    data: function(d) {},
+                },
+                columns: [
+                    { data: 'action', searchable: false, class: 'action' },
+                    { data: 'name', name: 'entities.name' },
+                    { data: 'created_by', name: 'users.username' },
+                    { data: 'updated_by', name: 'updater.username' },
+                    { data: 'deleted_by', name: 'deactivator.username' },
+                    { data: 'created_at', name: 'entities.created_at', searchable: false },
+                    { data: 'updated_at1', name: 'entities.updated_at', searchable: false },
+                    { data: 'deleted_at', name: 'entities.deleted_at', searchable: false },
+                    { data: 'status', searchable: false },
+                ],
+                rowCallback: function(row, data) {
+                    $(row).addClass('highlight-row');
+                }
+
+            });
+            $('.dataTables_length select').select2();
+            $('.page-header-content .display-inline-block .data-table-title').html(response.data.entity_type.name);
+            var add_url = '#!/master/entity/add/' + self.id;
+            if (self.id) {
+                $('.add_new_button').html(
+                    '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                    'Add New' +
+                    '</a>'
+                );
+            }
+            $scope.deleteEntityDetail = function($id) {
+                $('#del').val($id);
+            }
+            $scope.deleteEntity = function() {
+
+                $id = $('#del').val();
+                $http.get(
+                    delete_entity_component_url + '/' + $id,
+                ).then(function(response) {
+                    console.log(response.data);
+                    if (response.data.success) {
+
+                        new Noty({
+                            type: 'success',
+                            layout: 'topRight',
+                            text: 'Entity Details is Deleted Successfully',
+                        }).show();
+                    }
+                    dataTable.ajax.reload(function(json) {});
+
+                });
+            }
+        });
+
+        $rootScope.loading = false;
+    }
+});
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
+
+app.component('eyatraEntityForm', {
+    templateUrl: eyatra_entity_form_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        $form_data_url = typeof($routeParams.state_id) == 'undefined' ? eyatra_entity_form_template_url : eyatra_entity_form_template_url + '/' + $routeParams.entity_id;
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.angular_routes = angular_routes;
+        $http.get(
+            $form_data_url
+        ).then(function(response) {
+            if (!response.data.success) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                }).show();
+                $location.path('/eyatra/entity/list')
+                $scope.$apply()
+                return;
+            }
+            self.entity = response.data.entity;
+            self.extras = response.data.extras;
+            self.action = response.data.action;
+            $rootScope.loading = false;
+
+        });
+
+        var form_id = '#entity-form';
+        var v = jQuery(form_id).validate({
+            errorPlacement: function(error, element) {
+                error.insertAfter(element)
+            },
+            ignore: '',
+            rules: {
+                'purpose_id': {
+                    required: true,
+                },
+                'description': {
+                    maxlength: 255,
+                },
+                'advance_received': {
+                    maxlength: 10,
+                },
+            },
+            messages: {
+                'description': {
+                    maxlength: 'Please enter maximum of 255 letters',
+                },
+            },
+            submitHandler: function(form) {
+
+                let formData = new FormData($(form_id)[0]);
+                $('#submit').button('loading');
+                $.ajax({
+                        url: laravel_routes['saveEYatraEntity'],
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                    .done(function(res) {
+                        console.log(res.success);
+                        if (!res.success) {
+                            $('#submit').button('reset');
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Entity saved successfully',
+                            }).show();
+                            $location.path('/eyatra/entity/list')
+                            $scope.$apply()
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $('#submit').button('reset');
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+            },
+        });
+    }
+});
+
+app.component('eyatraEntityView', {
+    templateUrl: eyatra_entity_view_template_url,
+
+    controller: function($http, $location, $routeParams, HelperService, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            eyatra_entity_view_url + '/' + $routeParams.entity_id
+        ).then(function(response) {
+            self.entity = response.data.entity;
+        });
+    }
+});
+
+
+//------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------

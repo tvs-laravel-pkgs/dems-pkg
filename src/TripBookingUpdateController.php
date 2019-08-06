@@ -6,7 +6,13 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\Attachment;
+use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Trip;
+use Uitoux\EYatra\Visit;
+use Uitoux\EYatra\VisitBooking;
+use Validator;
 use Yajra\Datatables\Datatables;
 
 class TripBookingUpdateController extends Controller {
@@ -58,55 +64,94 @@ class TripBookingUpdateController extends Controller {
 			->make(true);
 	}
 
-	public function tripBookingUpdatesFormData($trip_id) {
+	public function tripBookingUpdatesFormData($visit_id) {
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
+		$visit = Visit::with([
+			'fromCity',
+			'toCity',
+			'trip',
 		])
-			->find($trip_id);
+			->find($visit_id);
 
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		if (!$visit) {
+			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
 		}
 
-		if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
-			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
-		}
+		// if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
+		// 	return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
+		// }
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+		$this->data['visit'] = $visit;
+		$this->data['travel_mode_list'] = Entity::travelModeList();
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		$trip = Trip::find($r->trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		// dd($r->all());
+		DB::beginTransaction();
+		try {
+			$validator = Validator::make($r->all(), [
+				'travel_mode_id' => [
+					// Rule::unique('suppliers', 'code')->ignore($request->id),
+					'required:true',
+				],
+				'reference_number' => [
+					'required:true',
+				],
+				'amount' => [
+					'required:true',
+				],
+				'tax' => [
+					'required:true',
+				],
+				'attachments.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+			]);
+
+			if ($validator->fails()) {
+				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+
+			//Unique validation
+			$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
+				->where('type_id', $r->type_id)
+				->where('travel_mode_id', $r->travel_mode_id)
+				->first();
+
+			if ($travel_mode_id_unique) {
+				return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
+			}
+
+			//Visit status update
+			$visit = Visit::find($r->visit_id);
+			$visit->booking_status_id = 3061; // Visit status Booked
+			$visit->save();
+
+			$visit_bookings = new VisitBooking;
+			$visit_bookings->fill($r->all());
+			$visit_bookings->created_by = Auth::user()->id;
+			$visit_bookings->save();
+
+			$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
+			Storage::makeDirectory($booking_updates_images, 0777);
+			if ($r->hasfile('attachments')) {
+				foreach ($r->file('attachments') as $image) {
+					$name = $image->getClientOriginalName();
+					$image->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
+					$attachement = new Attachment;
+					$attachement->attachment_of_id = 3180; // Attachment visit
+					$attachement->attachment_type_id = 3200; //Attachment type visit booking
+					$attachement->entity_id = $r->visit_id;
+					$attachement->name = $name;
+					$attachement->save();
+				}
+			}
+			DB::commit();
+		} catch (Exception $e) {
+			DB::rollBack();
+			// dd($e->getMessage());
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
-
-		if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
-			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
-		}
-
-		$trip->status_id = 3021;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);
 	}
 

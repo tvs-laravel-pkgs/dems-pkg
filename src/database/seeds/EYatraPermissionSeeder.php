@@ -218,6 +218,84 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'All',
 			],
 
+			//MASTERS > TRAVEL PURPOSES
+			5180 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-travel-purposes',
+				'display_name' => 'Travel Purposes',
+			],
+			5181 => [
+				'display_order' => 1,
+				'parent_id' => 5180,
+				'name' => 'eyatra-travel-purposes-add',
+				'display_name' => 'Add',
+			],
+			5182 => [
+				'display_order' => 2,
+				'parent_id' => 5180,
+				'name' => 'eyatra-travel-purposes-edit',
+				'display_name' => 'Edit',
+			],
+			5183 => [
+				'display_order' => 3,
+				'parent_id' => 5180,
+				'name' => 'eyatra-travel-purposes-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > TRAVEL MODES
+			5200 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-travel-modes',
+				'display_name' => 'Travel Modes',
+			],
+			5201 => [
+				'display_order' => 1,
+				'parent_id' => 5200,
+				'name' => 'eyatra-travel-modes-add',
+				'display_name' => 'Add',
+			],
+			5202 => [
+				'display_order' => 2,
+				'parent_id' => 5200,
+				'name' => 'eyatra-travel-modes-edit',
+				'display_name' => 'Edit',
+			],
+			5203 => [
+				'display_order' => 3,
+				'parent_id' => 5200,
+				'name' => 'eyatra-travel-modes-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > LOCAL TRAVEL MODES
+			5220 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-local-travel-modes',
+				'display_name' => 'Local Travel Modes',
+			],
+			5221 => [
+				'display_order' => 1,
+				'parent_id' => 5220,
+				'name' => 'eyatra-local-travel-modes-add',
+				'display_name' => 'Add',
+			],
+			5222 => [
+				'display_order' => 2,
+				'parent_id' => 5220,
+				'name' => 'eyatra-local-travel-modes-edit',
+				'display_name' => 'Edit',
+			],
+			5223 => [
+				'display_order' => 3,
+				'parent_id' => 5220,
+				'name' => 'eyatra-local-travel-modes-delete',
+				'display_name' => 'Delete',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

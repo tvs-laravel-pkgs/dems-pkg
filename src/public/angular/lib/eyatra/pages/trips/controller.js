@@ -172,7 +172,7 @@ app.component('eyatraTripForm', {
 app.component('eyatraTripView', {
     templateUrl: trip_view_template_url,
 
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -181,6 +181,39 @@ app.component('eyatraTripView', {
             self.trip = response.data.trip;
         });
 
+        $scope.cancelVisitBookingPopup = function(visit_id) {
+            $('#cancel_booking_visit_id').val(visit_id);
+        }
+
+        $scope.cancelVisitBooking = function() {
+            var cancel_booking_visit_id = $('#cancel_booking_visit_id').val();
+            if (cancel_booking_visit_id) {
+                $.ajax({
+                        url: trip_visit_cancel_booking_url + '/' + cancel_booking_visit_id,
+                        method: "GET",
+                    })
+                    .done(function(res) {
+                        console.log(res);
+                        if (!res.success) {
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Booking cancelled successfully',
+                            }).show();
+                            $route.reload();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
 
         self.verificationRequest = function(trip_id) {
             $.ajax({
