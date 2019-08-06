@@ -1,6 +1,8 @@
+alert(1)
 app.component('eyatraStates', {
     templateUrl: eyatra_state_list_template_url,
     controller: function(HelperService, $rootScope) {
+        alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_state_table').DataTable({
@@ -25,24 +27,19 @@ app.component('eyatraStates', {
                 dataType: "json",
                 data: function(d) {}
             },
-
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'status', name: 'status.name', searchable: true },
+                { data: 'code', name: 'nstates.code', searchable: true },
+                { data: 'name', name: 'nstates.name', searchable: true },
+                { data: 'country', name: 'c.name', searchable: true },
+                { data: 'status', name: 'status.name', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips');
+        $('.page-header-content .display-inline-block .data-table-title').html('States');
         $('.add_new_button').html(
             '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +

@@ -56,9 +56,12 @@ Route::group(['middleware' => ['web', 'auth']], function () {
 
 	//TRIPS BOOKING UPDATES
 	Route::get('eyatra/trips/booking-updates/get-list', 'Uitoux\EYatra\TripBookingUpdateController@listTripBookingUpdates')->name('listTripVerification');
-	Route::get('eyatra/trips/booking-updates/get-form-data/{trip_id?}', 'Uitoux\EYatra\TripBookingUpdateController@tripBookingUpdatesFormData')->name('tripBookingUpdatesFormData');
+	Route::get('eyatra/trips/booking-updates/get-form-data/{visit_id?}', 'Uitoux\EYatra\TripBookingUpdateController@tripBookingUpdatesFormData')->name('tripBookingUpdatesFormData');
 	Route::post('eyatra/trips/booking-updates/save', 'Uitoux\EYatra\TripBookingUpdateController@saveTripBookingUpdates')->name('saveTripBookingUpdates');
 
 	//HELPERS
 	Route::post('eyatra/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
+	Route::post('eyatra/state/get', 'Uitoux\EYatra\StateController@getStateList')->name('getStateList');
+	Route::post('eyatra/city/get', 'Uitoux\EYatra\CityController@getCityList')->name('getCityList');
+
 });

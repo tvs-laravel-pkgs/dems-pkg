@@ -13,7 +13,7 @@ class NState extends Model {
 	}
 
 	public static function getList($country_id = NULL) {
-		if (!$state_id) {
+		if (!$country_id) {
 			return NState::select('id', 'name')->get();
 		} else {
 			return NState::select('id', 'name')->where('country_id', $country_id)->get();

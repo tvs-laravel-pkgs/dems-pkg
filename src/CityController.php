@@ -26,4 +26,8 @@ class CityController extends Controller {
 		return response()->json($list);
 	}
 
+	public function getCityList(Request $request) {
+		return NCity::getList($request->state_id);
+	}
+
 }
