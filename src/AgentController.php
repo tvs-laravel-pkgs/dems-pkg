@@ -1,7 +1,9 @@
 <?php
 
 namespace Uitoux\EYatra;
+use App\Address;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -41,10 +43,10 @@ class AgentController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $agent->id . '">
+				<a href="#!/eyatra/agent/edit/' . $agent->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $agent->id . '">
+				<a href="#!/eyatra/agent/view/' . $agent->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
@@ -57,14 +59,17 @@ class AgentController extends Controller {
 	}
 
 	public function eyatraAgentFormData($agent_id = NULL) {
-
 		if (!$agent_id) {
 			$this->data['action'] = 'New';
 			$agent = new Agent;
+			$address = new Address;
+			$user = new User;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
 			$agent = Agent::find($agent_id);
+			$address = Address::find($agent_id);
+			$user = User::find($agent_id);
 			if (!$agent) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Agent not found';
@@ -82,12 +87,35 @@ class AgentController extends Controller {
 	}
 
 	public function saveEYatraAgent(Request $request) {
-		//validation
+		//dd($request->all());
 		try {
+			if (empty(count($request->travel_mode))) {
+				return response()->json(['success' => false, 'errors' => ['Travel Mode is Required']]);
+			}
+			$error_messages = [
+				'agent_code.required' => 'Agent Code is Required',
+				'agent_name.required' => 'Agent Name is Required',
+				'address_line1.required' => 'Address Line1 is Required',
+				'country.required' => 'Country is Required',
+				'state.required' => 'State is Required',
+				'city.required' => 'City is Required',
+				'pincode.required' => 'Pincode is Required',
+				'username.required' => "User Name is Required",
+				'password.required' => "Password is Required",
+				'mobile_number.required' => "Mobile Number is Required",
+			];
+
 			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
-					'required',
-				],
+				'agent_code' => 'required',
+				'agent_name' => 'required',
+				'address_line1' => 'required',
+				'country' => 'required',
+				'state' => 'required',
+				'city' => 'required',
+				'pincode' => 'required',
+				'mobile_number' => 'required',
+				'password' => 'required',
+				'username' => 'required',
 			]);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
@@ -95,57 +123,26 @@ class AgentController extends Controller {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
-
+				$agent = new Agent;
+				$user = new User;
+				$address = new Address;
+				$agent->created_by = Auth::user()->id;
+				$agent->created_at = Carbon::now();
+				$agent->updated_at = NULL;
 			} else {
-				$trip = Trip::find($request->id);
-
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
-
+				$agent = Agent::find($request->id);
+				$user = User::where('entity_id', $request->id)->where('user_type_id', 5122)->first();
+				$address = Address::where('entity_id', $request->id)->first();
+				$agent->updated_by = Auth::user()->id;
+				$agent->updated_at = Carbon::now();
 			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
+			$agent->fill($request->all());
+			$agent->save();
 
-			$trip->number = 'TRP' . $trip->id;
-			$trip->save();
-
-			//SAVING VISITS
-			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					if ($visit_data['booking_method'] == 'Agent') {
-						// $agent = Agent::where('company_id', Auth::user()->company_id)
-						// 	->join('agent_travel_mode as atm', 'atm.agent_id', 'agents.id')
-						// 	->where('atm.state_id', Auth::user()->eyatraEmployee->outlet->address->state_id)
-						// 	->where('atm.travel_mode_id', $visit_data['travel_mode_id'])
-						// 	->first();
-						// if ($agent) {
-						// 	$visit->agent_id = $agent->id;
-						// } else {
-						// 	return response()->json(['success' => false, 'errors' => ['No agent found for visit']]);
-						// }
-					}
-					$visit->save();
-				}
-			}
+			$agent->travelModes()->sync($request->travel_mode);
 
 			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
+			$request->session()->flash('success', 'Agent saved successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -154,9 +151,9 @@ class AgentController extends Controller {
 	}
 
 	public function viewEYatraAgent($agent_id) {
-
-		$trip = Trip::with([
-			'visits',
+		dd($agent_id);
+		$trip = Agent::with([
+			'agents',
 			'visits.fromCity',
 			'visits.toCity',
 			'visits.travelMode',
@@ -169,10 +166,10 @@ class AgentController extends Controller {
 			'purpose',
 			'status',
 		])
-			->find($trip_id);
+			->find($agent_id);
 		if (!$trip) {
 			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
+			$this->data['errors'] = ['Agent not found'];
 			return response()->json($this->data);
 		}
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
@@ -185,9 +182,9 @@ class AgentController extends Controller {
 	}
 
 	public function deleteEYatraAgent($agent_id) {
-		$trip = Trip::where('id', $trip_id)->delete();
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		$agent = Agent::where('id', $agent_id)->delete();
+		if (!$agent) {
+			return response()->json(['success' => false, 'errors' => ['Agent not found']]);
 		}
 		return response()->json(['success' => true]);
 	}
