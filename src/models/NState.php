@@ -24,4 +24,8 @@ class NState extends Model {
 		return $this->hasMany('Uitoux\EYatra\NCity', 'state_id');
 	}
 
+	public function travelModes() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'state_agent_travel_mode', 'state_id', 'travel_mode_id');
+	}
+
 }
