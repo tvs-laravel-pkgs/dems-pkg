@@ -133,8 +133,8 @@ class EYatraTC1Seeder extends Seeder {
 				'entity_id' => $outlet->id,
 			]);
 			$address->name = 'Primary';
-			$address->line1 = $faker->streetAddress;
-			$country = NCountry::find(1);
+			$address->line_1 = $faker->streetAddress;
+			$country = NCountry::find(5);
 			$state = $country->states()->inRandomOrder()->first();
 			$city = $state->cities()->inRandomOrder()->first();
 			$address->country_id = $country->id;
@@ -217,8 +217,8 @@ class EYatraTC1Seeder extends Seeder {
 				'entity_id' => $agent->id,
 			]);
 			$address->name = 'Primary';
-			$address->line1 = $faker->streetAddress;
-			$country = NCountry::find(1);
+			$address->line_1 = $faker->streetAddress;
+			$country = NCountry::find(5);
 			$state = $country->states()->inRandomOrder()->first();
 			$city = $state->cities()->inRandomOrder()->first();
 			$address->country_id = $country->id;
