@@ -46,4 +46,30 @@ class VisitBooking extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Payment');
 	}
 
+	public static function create($visit, $faker, $booking_detail_status_id, $employee) {
+		$booking = new VisitBooking;
+		$booking->visit_id = $visit->id;
+		$booking->type_id = 3100; // FRESH BOOKING
+		$booking->travel_mode_id = $visit->travel_mode_id;
+		$booking->reference_number = $faker->swiftBicNumber;
+		$booking->amount = $faker->numberBetween(500, 2000);
+		$booking->tax = $booking->amount * 10 / 100;
+		$booking->total = $booking->amount + $booking->tax;
+		$booking->status_id = $booking_detail_status_id;
+		if ($visit->booking_method_id == 3042) {
+			//AGENT
+			// $agent = Tra::whereHas('travelModes', function ($query) use ($travel_mode) {
+			// 	$query->where('id', $travel_mode->id);
+			// })->inRandomOrder()->first();
+
+			$booking->service_charge = $faker->randomElement([100, 200, 300, 400, 500]);
+			$booking->created_by = $visit->agent->user->id;
+		} else {
+			$booking->created_by = $employee->user->id;
+		}
+
+		$booking->save();
+		return $booking;
+
+	}
 }

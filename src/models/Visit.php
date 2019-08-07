@@ -91,4 +91,26 @@ class Visit extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3180)->where('attachment_type_id', 3200);
 	}
 
+	public static function create($trip, $src_city, $dest_city, $visit1_date, $company, $booking_method_id, $booking_status_id, $trip_status_id, $manager_verification_status_id, $employee, $faker) {
+		$visit = new Visit();
+		$visit->trip_id = $trip->id;
+		$visit->from_city_id = $src_city->id;
+		$visit->to_city_id = $dest_city->id;
+		$visit->date = $visit1_date;
+		$visit->travel_mode_id = $company->travelModes()->inRandomOrder()->first()->id;
+		$visit->booking_method_id = $booking_method_id;
+		$visit->booking_status_id = $booking_status_id;
+		$visit->status_id = $trip_status_id;
+		$visit->manager_verification_status_id = $manager_verification_status_id;
+		if ($visit->booking_method_id == 3042) {
+			//AGENT
+			$state = $employee->outlet->address->city->state;
+			$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit->travel_mode_id)->first();
+			$visit->agent_id = $agent->id;
+			$visit->notes_to_agent = $faker->sentence;
+		}
+		$visit->save();
+		return $visit;
+	}
+
 }

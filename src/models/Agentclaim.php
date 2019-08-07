@@ -5,7 +5,7 @@ namespace Uitoux\EYatra;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Agentclaim extends Model {
+class AgentClaim extends Model {
 	use SoftDeletes;
 	protected $table = 'ey_agent_claims';
 

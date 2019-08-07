@@ -2,13 +2,13 @@
 
 namespace Uitoux\EYatra\Database\Seeds;
 
-use App\Country;
 use App\User;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Uitoux\EYatra\Address;
 use Uitoux\EYatra\Agent;
+use Uitoux\EYatra\AgentClaim;
 use Uitoux\EYatra\Company;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
@@ -37,6 +37,14 @@ class EYatraTC1Seeder extends Seeder {
 			$company->forceDelete();
 		}
 
+		$number_of_items = $this->command->ask("How many records do you want to create?", '15');
+		$create_dummy_records = $this->command->ask("Do you want to create dummy records", 'y');
+
+		$this->call(EYatraConfigSeeder::class);
+		$this->call(EYatraETSeeder::class);
+		$this->call(EYatraPermissionSeeder::class);
+		$this->call(EYatraRoleSeeder::class);
+
 		$base_telephone_number = '1234567' . $company_id;
 		$company = Company::firstOrNew([
 			'id' => $company_id,
@@ -63,41 +71,54 @@ class EYatraTC1Seeder extends Seeder {
 		$admin->password = '$2y$10$N9pYzAbL2spl7vX3ZE1aBeekppaosAdixk04PTkK5obng7.KsLAQ2';
 		$admin->save();
 		$admin->roles()->sync(500);
-
-		//COUNTRIES
-		for ($i = 5; $i <= 6; $i++) {
-			$country = Country::find($i);
-			if ($country) {
-				$country->delete();
-			}
-			$country = Country::firstOrNew([
-				'id' => $i,
-			]);
-			$country->code = 'C' . $i;
-			$country->name = 'Country ' . $i;
-			$country->save();
-
-			//STATES
-			for ($j = 1; $j <= 9; $j++) {
-				$state = NState::firstOrNew([
-					'country_id' => $country->id,
-					'code' => 'S' . $j,
-				]);
-				$state->name = 'Country ' . $i . ' / State ' . $j;
-				$state->created_by = $admin->id;
-				$state->save();
-
-				//CITIES
-				for ($k = 1; $k <= 15; $k++) {
-					$city = NCity::firstOrNew([
-						'state_id' => $state->id,
-						'name' => 'Country ' . $i . ' / State ' . $j . ' / City ' . $k,
-					]);
-					$city->created_by = $admin->id;
-					$city->save();
-				}
-			}
+		$country = NCountry::find(5);
+		if ($country) {
+			$country->delete();
 		}
+
+		$countries = [
+			5 => [
+				'data' => [
+					'name' => 'Canada',
+					'code' => 'CA',
+				],
+				'states' => [
+					'TN' => [
+						'data' => [
+							'name' => 'Tamilnadu',
+						],
+						'cities' => [
+							'Coimbatore',
+							'Madurai',
+							'Chennai',
+							'Salem',
+						],
+					],
+					'KL' => [
+						'data' => [
+							'name' => 'Kerala',
+						],
+						'cities' => [
+							'Palakkad',
+							'Kollam',
+							'Ernakulam',
+						],
+					],
+					'KA' => [
+						'data' => [
+							'name' => 'Karnataka',
+						],
+						'cities' => [
+							'Bangalore',
+							'Mysore',
+						],
+					],
+
+				],
+			],
+		];
+		NCountry::create($countries, $admin);
+		//NCountry::createDummies($admin);
 
 		//DUMMY ENTITY CREATION
 		$dummy_entities = [
@@ -155,19 +176,10 @@ class EYatraTC1Seeder extends Seeder {
 				'Normal',
 			],
 		];
-		foreach ($sample_entities as $entity_type_id => $entities) {
-			foreach ($entities as $entity_name) {
-				$record = Entity::firstOrCreate([
-					'entity_type_id' => $entity_type_id,
-					'company_id' => $company->id,
-					'name' => $entity_name,
-					'created_by' => $admin->id,
-				]);
-			}
-		}
+		Entity::create($sample_entities, $admin, $company);
 
 		//OUTLETS
-		for ($i = 1; $i <= 15; $i++) {
+		for ($i = 1; $i <= $number_of_items; $i++) {
 			$outlet = Outlet::firstOrNew([
 				'company_id' => $company_id,
 				'code' => 'c' . $company_id . '/o' . $i,
@@ -177,70 +189,30 @@ class EYatraTC1Seeder extends Seeder {
 			$outlet->save();
 
 			//OUTLET ADDRESS
-			$address = Address::firstOrNew([
-				'address_of_id' => 3160,
-				'entity_id' => $outlet->id,
-			]);
-			$address->name = 'Primary';
-			$address->line_1 = $faker->streetAddress;
-			$country = NCountry::find(5);
-			$state = $country->states()->inRandomOrder()->first();
-			$city = $state->cities()->inRandomOrder()->first();
-			$address->country_id = $country->id;
-			$address->state_id = $state->id;
-			$address->city_id = $city->id;
-			$address->save();
+			$address_of_id = 3160;
+			$address = Address::create($address_of_id, $outlet, $faker);
 
-			//EMPLOYEES - MANAGERS
-			for ($j = 1; $j <= 5; $j++) {
-				$manager = Employee::firstOrNew([
-					'company_id' => $company_id,
-					'code' => $outlet->code . '/mngr' . $j,
-				]);
-				$manager->outlet_id = $outlet->id;
-				$manager->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
-				$manager->created_by = $admin->id;
-				$manager->save();
+			//MANAGERS
+			for ($j = 1; $j <= $number_of_items; $j++) {
+				$code = $outlet->code . '/mngr' . $j;
+				$manager = Employee::create($company, $code, $outlet, $admin);
 
 				//USER ACCOUNT
-				$user = new User();
-				$user->company_id = $company->id;
-				$user->user_type_id = 3121;
-				$user->entity_id = $manager->id;
-				$user->username = $manager->code;
-				$user->mobile_number = $faker->unique()->numberBetween(9842000000, 9842099999);
-				$user->password = '$2y$10$N9pYzAbL2spl7vX3ZE1aBeekppaosAdixk04PTkK5obng7.KsLAQ2';
-				$user->save();
-				$user->roles()->sync(502);
-
+				$user_type_id = 3121;
+				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $roles = 502);
 				//EMPLOYEES - REGULAR
-				for ($k = 1; $k <= 5; $k++) {
-					$employee = Employee::firstOrNew([
-						'company_id' => $company_id,
-						'code' => $manager->code . '/e' . $k,
-					]);
-					$employee->outlet_id = $outlet->id;
-					$employee->reporting_to_id = $manager->id;
-					$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
-					$employee->created_by = $admin->id;
-					$employee->save();
+				for ($k = 1; $k <= $number_of_items; $k++) {
+					$code = $manager->code . '/e' . $k;
+					$employee = Employee::create($company, $code, $outlet, $admin, $manager->id);
 
-					//USER ACCOUNT
-					$user = new User();
-					$user->company_id = $company->id;
-					$user->user_type_id = 3121;
-					$user->entity_id = $employee->id;
-					$user->username = $employee->code;
-					$user->mobile_number = $faker->unique()->numberBetween(9842000000, 9842099999);
-					$user->password = '$2y$10$N9pYzAbL2spl7vX3ZE1aBeekppaosAdixk04PTkK5obng7.KsLAQ2';
-					$user->save();
-					$user->roles()->sync(501);
+					$user_type_id = 3121;
+					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $roles = 501);
 				}
 			}
 		}
 
 		//AGENTS
-		for ($i = 1; $i <= 15; $i++) {
+		for ($i = 1; $i <= $number_of_items; $i++) {
 			$agent = Agent::firstOrNew([
 				'company_id' => $company_id,
 				'code' => 'c' . $company_id . '/agt' . $i,
@@ -249,31 +221,12 @@ class EYatraTC1Seeder extends Seeder {
 			$agent->created_by = $admin->id;
 			$agent->save();
 
-			//USER ACCOUNT
-			$user = new User();
-			$user->company_id = $company->id;
-			$user->user_type_id = 3122;
-			$user->entity_id = $agent->id;
-			$user->username = $agent->code;
-			$user->mobile_number = $faker->unique()->numberBetween(9842000000, 9842099999);
-			$user->password = '$2y$10$N9pYzAbL2spl7vX3ZE1aBeekppaosAdixk04PTkK5obng7.KsLAQ2';
-			$user->save();
-			$user->roles()->sync(503);
+			$user_type_id = 3122;
+			$user = Employee::createUser($company, $user_type_id, $agent, $faker, $roles = 503);
 
 			//AGENT ADDRESS
-			$address = Address::firstOrNew([
-				'address_of_id' => 3161,
-				'entity_id' => $agent->id,
-			]);
-			$address->name = 'Primary';
-			$address->line_1 = $faker->streetAddress;
-			$country = NCountry::find(5);
-			$state = $country->states()->inRandomOrder()->first();
-			$city = $state->cities()->inRandomOrder()->first();
-			$address->country_id = $country->id;
-			$address->state_id = $state->id;
-			$address->city_id = $city->id;
-			$address->save();
+			$address_of_id = 3161;
+			$address = Address::create($address_of_id, $agent, $faker);
 
 			$travel_modes = [];
 			if ($i <= 10) {
@@ -323,226 +276,154 @@ class EYatraTC1Seeder extends Seeder {
 			$grade->tripPurposes()->sync($trip_purposes);
 		}
 
-		$trip_number = 1;
 		Trip::join('employees as e', 'e.id', 'trips.employee_id')->where('e.company_id', $company->id)->forceDelete();
-		foreach ($company->employees()->whereNotNull('reporting_to_id')->limit(5)->get() as $employee) {
+		$trip_number = 1;
+		if ($create_dummy_records == 'y') {
+			foreach ($company->employees()->whereNotNull('reporting_to_id')->limit(5)->orderBy('id')->get() as $employee) {
+				for ($i = 1; $i <= 100; $i++) {
 
-			for ($i = 1; $i <= 100; $i++) {
+					if ($i > 0 && $i <= 5) {
+						$trip_status_id = 3020; //NEW
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3084; //NEW
+					} elseif ($i > 5 && $i <= 10) {
+						$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
+					} elseif ($i > 10 && $i <= 15) {
+						$trip_status_id = 3028; //MANAGER APPROVED
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3081; //MANAGER APPROVED
+					} elseif ($i > 15 && $i <= 20) {
+						$trip_status_id = 3022; //MANAGER REJECTED
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3082; //MANAGER REJECTED
+					} elseif ($i > 20 && $i <= 25) {
+						$trip_status_id = 3027; //RESOLVED
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3083; //RESOLVED
+					} elseif ($i > 25 && $i <= 30) {
+						$trip_status_id = 3020; //NEW
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3061; //BOOKED
+						$booking_detail_status_id = 3240; // CLAIM PENDING
+						$manager_verification_status_id = 3084; //NEW
+					} elseif ($i > 30 && $i <= 35) {
+						$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3061; //BOOKED
+						$booking_detail_status_id = 3240; // CLAIM PENDING
+						$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
+					} elseif ($i > 35 && $i <= 40) {
+						$trip_status_id = 3020; //NEW
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3062; //CANCELLED
+						$booking_detail_status_id = 3240; // CLAIM PENDING
+						$manager_verification_status_id = 3084; //NEW
+					} elseif ($i > 40 && $i <= 45) {
+						$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3062; //CANCELLED
+						$booking_detail_status_id = 3240; // CLAIM PENDING
+						$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
+					} elseif ($i > 45 && $i <= 50) {
+						$trip_status_id = 3020; //NEW
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3084; //NEW
+					} elseif ($i > 50 && $i <= 55) {
+						$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
+					} elseif ($i > 55 && $i <= 60) {
+						$trip_status_id = 3028; //MANAGER APPROVED
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3081; //MANAGER APPROVED
+					} elseif ($i > 60 && $i <= 65) {
+						$trip_status_id = 3022; //MANAGER REJECTED
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3082; //MANAGER REJECTED
+					} elseif ($i > 65 && $i <= 70) {
+						$trip_status_id = 3027; //RESOLVED
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3083; //RESOLVED
+					} elseif ($i > 70 && $i <= 75) {
+						$trip_status_id = 3020; //NEW
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3061; //BOOKED
+						$booking_detail_status_id = 3240; // CLAIM PENDING
+						$manager_verification_status_id = 3084; //NEW
+					} elseif ($i > 75 && $i <= 80) {
+						$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3061; //BOOKED
+						$booking_detail_status_id = 3241; // CLAIMED
+						$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
+					} elseif ($i > 80 && $i <= 85) {
+						$trip_status_id = 3020; //NEW
+						$booking_method_id = 3042; //AGENT
+						$booking_status_id = 3062; //CANCELLED
+						$booking_detail_status_id = 3241; // CLAIMED
+						$manager_verification_status_id = 3084; //NEW
+					} elseif ($i > 85 && $i <= 90) {
+						$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
+						$booking_method_id = 3042; //AGENT
+						$booking_detail_status_id = 3240; // CLAIM PENDING
+						$booking_status_id = 3062; //CANCELLED
+						$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
+					} else {
+						$trip_status_id = 3020; //NEW
+						$booking_method_id = 3040; //SELF
+						$booking_status_id = 3060; //PENDING
+						$manager_verification_status_id = 3084; //NEW
+					}
+					$trip_number++;
+					$trip = Trip::create($employee, $trip_number, $faker, $trip_status_id, $admin);
+					//SINGLE CITY
+					$src_city = $employee->outlet->address->city;
+					$dest_city = NCity::where('id', '!=', $src_city->id)->inRandomOrder()->first();
+					$visit1_date = Carbon::today();
+					$visit2_date = Carbon::tomorrow();
 
-				if ($i > 0 && $i <= 5) {
-					$trip_status_id = 3020; //NEW
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3084; //NEW
-				} elseif ($i > 5 && $i <= 10) {
-					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
-				} elseif ($i > 10 && $i <= 15) {
-					$trip_status_id = 3028; //MANAGER APPROVED
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3081; //MANAGER APPROVED
-				} elseif ($i > 15 && $i <= 20) {
-					$trip_status_id = 3022; //MANAGER REJECTED
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3082; //MANAGER REJECTED
-				} elseif ($i > 20 && $i <= 25) {
-					$trip_status_id = 3027; //RESOLVED
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3083; //RESOLVED
-				} elseif ($i > 25 && $i <= 30) {
-					$trip_status_id = 3020; //NEW
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3061; //BOOKED
-					$manager_verification_status_id = 3084; //NEW
-				} elseif ($i > 30 && $i <= 35) {
-					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3061; //BOOKED
-					$booking_detail_status_id = 3240; // CLAIM PENDING
-					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
-				} elseif ($i > 35 && $i <= 40) {
-					$trip_status_id = 3020; //NEW
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3062; //CANCELLED
-					$manager_verification_status_id = 3084; //NEW
-				} elseif ($i > 40 && $i <= 45) {
-					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3062; //CANCELLED
-					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
-				} elseif ($i > 45 && $i <= 50) {
-					$trip_status_id = 3020; //NEW
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3084; //NEW
-				} elseif ($i > 50 && $i <= 55) {
-					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
-				} elseif ($i > 55 && $i <= 60) {
-					$trip_status_id = 3028; //MANAGER APPROVED
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3081; //MANAGER APPROVED
-				} elseif ($i > 60 && $i <= 65) {
-					$trip_status_id = 3022; //MANAGER REJECTED
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3082; //MANAGER REJECTED
-				} elseif ($i > 65 && $i <= 70) {
-					$trip_status_id = 3027; //RESOLVED
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3083; //RESOLVED
-				} elseif ($i > 70 && $i <= 75) {
-					$trip_status_id = 3020; //NEW
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3061; //BOOKED
-					$booking_detail_status_id = 3240; // CLAIM PENDING
-					$manager_verification_status_id = 3084; //NEW
-				} elseif ($i > 75 && $i <= 80) {
-					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3061; //BOOKED
-					$booking_detail_status_id = 3241; // CLAIMED
-					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
-				} elseif ($i > 80 && $i <= 85) {
-					$trip_status_id = 3020; //NEW
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3062; //CANCELLED
-					$manager_verification_status_id = 3084; //NEW
-				} elseif ($i > 85 && $i <= 90) {
-					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
-					$booking_method_id = 3042; //AGENT
-					$booking_status_id = 3062; //CANCELLED
-					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
-				} else {
-					$trip_status_id = 3020; //NEW
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3060; //PENDING
-					$manager_verification_status_id = 3084; //NEW
-				}
-				$trip = new Trip();
-				$trip->employee_id = $employee->id;
-				$trip->number = 'TRP' . $trip_number++;
-				$trip->purpose_id = $employee->grade->tripPurposes()->inRandomOrder()->first()->id;
-				$trip->description = $faker->sentence;
-				$trip->manager_id = $employee->reporting_to_id;
-				$trip->status_id = $trip_status_id; //NEW
-				$trip->advance_received = $faker->randomElement([0, 500, 100, 1500, 2000]);
-				$trip->created_by = $admin->id;
-				$trip->save();
+					$visit = Visit::create($trip, $src_city, $dest_city, $visit1_date, $company, $booking_method_id, $booking_status_id, $trip_status_id, $manager_verification_status_id, $employee, $faker);
 
-				//SINGLE CITY
-				$src_city = $employee->outlet->address->city;
-				//dd($src_city);
-				$dest_city = NCity::where('id', '!=', $src_city->id)->inRandomOrder()->first();
-				$visit1_date = Carbon::today();
-				$visit2_date = Carbon::tomorrow();
-
-				$visit = new Visit();
-				$visit->trip_id = $trip->id;
-				$visit->from_city_id = $src_city->id;
-				$visit->to_city_id = $dest_city->id;
-				$visit->date = $visit1_date;
-				$visit->travel_mode_id = $company->travelModes()->inRandomOrder()->first()->id;
-				$visit->booking_method_id = $booking_method_id;
-				$visit->booking_status_id = $booking_status_id;
-				$visit->status_id = $trip_status_id;
-				$visit->manager_verification_status_id = $manager_verification_status_id;
-				if ($visit->booking_method_id == 3042) {
-					//AGENT
-					$state = $employee->outlet->address->city->state;
-					$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit->travel_mode_id)->first();
-					$visit->agent_id = $agent->id;
-					$visit->notes_to_agent = $faker->sentence;
-				}
-				$visit->save();
-
-				//ADDING BBOKING DETAILS
-				if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
-					//BOOKED OR CANCELLED
-					$booking = new VisitBooking;
-					$booking->visit_id = $visit->id;
-					$booking->type_id = 3100; // FRESH BOOKING
-					$booking->travel_mode_id = $visit->travel_mode_id;
-					$booking->reference_number = $faker->swiftBicNumber;
-					$booking->amount = $faker->numberBetween(500, 2000);
-					$booking->tax = $booking->amount * 10 / 100;
-					$booking->total = $booking->amount + $booking->tax;
-					$booking->status_id = $booking_detail_status_id;
-					$booking->created_by = $employee->user->id;
-					if ($visit->booking_method_id == 3042) {
-						//AGENT
-						// $agent = Tra::whereHas('travelModes', function ($query) use ($travel_mode) {
-						// 	$query->where('id', $travel_mode->id);
-						// })->inRandomOrder()->first();
-
-						$booking->service_charge = $faker->randomElement([100, 200, 300, 400, 500]);
+					//ADDING BBOKING DETAILS
+					if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+						//BOOKED OR CANCELLED
+						$booking = VisitBooking::create($visit, $faker, $booking_detail_status_id, $employee);
 					}
 
-					$booking->save();
+					//RETURN TRAVEL
+					$visit = Visit::create($trip, $dest_city, $src_city, $visit2_date, $company, $booking_method_id, $booking_status_id, $trip_status_id, $manager_verification_status_id, $employee, $faker);
 
-				}
+					//ADDING BBOKING DETAILS
+					if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+						//BOOKED OR CANCELLED
+						$booking = VisitBooking::create($visit, $faker, $booking_detail_status_id, $employee);
 
-				//RETURN TRAVEL
-				$visit = new Visit();
-				$visit->trip_id = $trip->id;
-				$visit->from_city_id = $dest_city->id;
-				$visit->to_city_id = $src_city->id;
-				$visit->date = $visit2_date;
-				$visit->travel_mode_id = $company->travelModes()->inRandomOrder()->first()->id;
-				$visit->booking_method_id = $booking_method_id;
-				$visit->booking_status_id = $booking_status_id;
-				$visit->status_id = $trip_status_id;
-				$visit->manager_verification_status_id = $manager_verification_status_id;
-				if ($visit->booking_method_id == 3042) {
-					//AGENT
-					$state = $employee->outlet->address->city->state;
-					$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit->travel_mode_id)->first();
-					$visit->agent_id = $agent->id;
-					$visit->notes_to_agent = $faker->sentence;
-				}
-				$visit->save();
-
-				//ADDING BBOKING DETAILS
-				if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
-					//BOOKED OR CANCELLED
-					$booking = new VisitBooking;
-					$booking->visit_id = $visit->id;
-					$booking->type_id = 3100; // FRESH BOOKING
-					$booking->travel_mode_id = $visit->travel_mode_id;
-					$booking->reference_number = $faker->swiftBicNumber;
-					$booking->amount = $faker->numberBetween(500, 2000);
-					$booking->tax = $booking->amount * 10 / 100;
-					$booking->total = $booking->amount + $booking->tax;
-					$booking->status_id = $booking_detail_status_id;
-					$booking->created_by = $employee->user->id;
-					if ($visit->booking_method_id == 3042) {
-						//AGENT
-						// $agent = Tra::whereHas('travelModes', function ($query) use ($travel_mode) {
-						// 	$query->where('id', $travel_mode->id);
-						// })->inRandomOrder()->first();
-
-						$booking->service_charge = $faker->randomElement([100, 200, 300, 400, 500]);
+						if ($booking->status_id == 3241) {
+							//CLAIMED
+							$agent_claim = new AgentClaim;
+						}
 					}
-
-					$booking->save();
-
-					if ($booking->status_id == 3241) {
-						//CLAIMED
-					}
-
 				}
-
 			}
-
 		}
+
+		$this->command->info('');
+		$this->command->info('');
+
+		$this->command->info('Seeder Completed');
+		$this->command->info('Seeder Completed');
+		$this->command->info('Seeder Completed');
 	}
 }

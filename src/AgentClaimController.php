@@ -6,7 +6,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Agentclaim;
+use Uitoux\EYatra\AgentClaim;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Visit;
 use Uitoux\EYatra\VisitBooking;
@@ -59,11 +59,11 @@ class AgentClaimController extends Controller {
 	public function eyatraAgentClaimFormData($agent_claim_id = NULL) {
 		if (!$agent_claim_id) {
 			$this->data['action'] = 'New';
-			$agent_claim = new Agentclaim;
+			$agent_claim = new AgentClaim;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent_claim = Agentclaim::find($agent_claim_id);
+			$agent_claim = AgentClaim::find($agent_claim_id);
 			if (!$agent_claim) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Agent Claim not found';
@@ -83,7 +83,7 @@ class AgentClaimController extends Controller {
 			'visit_bookings.reference_number',
 			'from_city.name as from',
 			'to_city.name as to',
-			'travel_mode.name as travel_mode',
+			'travel_mode.name as travel_mode'
 		)
 			->leftJoin('configs as type', 'type.id', 'visit_bookings.type_id')
 			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')

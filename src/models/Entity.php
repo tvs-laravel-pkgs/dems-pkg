@@ -43,4 +43,18 @@ class Entity extends Model {
 	public static function getLodgeStateTypeList() {
 		return Entity::where('entity_type_id', 504)->select('id', 'name')->get();
 	}
+
+	public static function create($sample_entities, $admin, $company) {
+		foreach ($sample_entities as $entity_type_id => $entities) {
+			foreach ($entities as $entity_name) {
+				$record = Entity::firstOrCreate([
+					'entity_type_id' => $entity_type_id,
+					'company_id' => $company->id,
+					'name' => $entity_name,
+					'created_by' => $admin->id,
+				]);
+			}
+		}
+
+	}
 }

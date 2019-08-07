@@ -65,7 +65,7 @@ class TripBookingRequestController extends Controller {
 
 		$visit = Visit::find($visit_id);
 		if (!$visit) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
 		}
 
 		$relations = [

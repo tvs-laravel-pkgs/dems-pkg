@@ -22,8 +22,13 @@ class Agent extends Model {
 	public function travelModes() {
 		return $this->belongsToMany('App\Entity', 'agent_travel_mode', 'agent_id', 'travel_mode_id');
 	}
+
 	public function address() {
 		return $this->hasOne('Uitoux\EYatra\Address', 'entity_id')->where('address_of_id', 3161);
+	}
+
+	public function user() {
+		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3122);
 	}
 
 }
