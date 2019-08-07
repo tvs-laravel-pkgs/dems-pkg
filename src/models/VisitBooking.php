@@ -29,4 +29,20 @@ class VisitBooking extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Visit');
 	}
 
+	public function type() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'type_id');
+	}
+
+	public function travelMode() {
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'travel_mode_id');
+	}
+
+	public function paymentStatus() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'payment_status_id');
+	}
+
+	public function payment() {
+		return $this->belongsTo('Uitoux\EYatra\Payment');
+	}
+
 }

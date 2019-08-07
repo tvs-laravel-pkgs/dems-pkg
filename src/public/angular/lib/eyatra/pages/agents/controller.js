@@ -59,7 +59,6 @@ app.component('eyatraAgentForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-        alert($form_data_url);
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -75,9 +74,14 @@ app.component('eyatraAgentForm', {
             }
             self.agent = response.data.agent;
             self.address = response.data.address;
+            self.user = response.data.user;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            console.log(self.address);
+            console.log(self.extras.state_list);
             if (self.action = 'Edit') {
+                $("#hide_password").hide();
+                self.action = 'Edit';
                 if (self.agent.deleted_at == null) {
                     self.switch_value = 'Active';
                 } else {
@@ -85,6 +89,7 @@ app.component('eyatraAgentForm', {
                 }
             } else {
                 self.switch_value = 'Active';
+                self.action = 'New';
             }
         });
 
@@ -294,7 +299,7 @@ app.component('eyatraAgentForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Agent saved successfully',
+                                text: res.message,
                             }).show();
                             $location.path('/eyatra/agents')
                             $scope.$apply()

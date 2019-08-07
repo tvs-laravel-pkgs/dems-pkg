@@ -1,111 +1,164 @@
-app.component('eyatraEntities', {
-    templateUrl: eyatra_state_list_template_url,
-    controller: function(HelperService, $rootScope) {
-        alert(2)
+app.component('eyatraEntityList', {
+    templateUrl: eyatra_entity_list_template_url,
+    controller: function(HelperService, $http, $rootScope, $scope, $routeParams) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_state_table').DataTable({
-            "dom": dom_structure,
-            "language": {
-                "search": "",
-                "searchPlaceholder": "Search",
-                "lengthMenu": "Rows Per Page _MENU_",
-                "paginate": {
-                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
-                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+        var dataTable;
+        var id = '';
+        var title = '';
+        $http.get(
+            eyatra_entity_list_data_url + '/' + $routeParams.entity_type_id
+        ).then(function(response) {
+
+            self.id = response.data.entity_type.id;
+            self.title = response.data.entity_type.name;
+            //alert(response.data.entity_type.id);
+
+            var dataTable = $('#entity_table').DataTable({
+                "dom": dom_structure,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search",
+                    "lengthMenu": "Rows Per Page _MENU_",
+                    "paginate": {
+                        "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                        "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                    },
                 },
-            },
-            pageLength: 10,
-            processing: true,
-            serverSide: true,
-            paging: true,
-            ordering: false,
-            ajax: {
-                url: laravel_routes['listEYatraState'],
-                type: "GET",
-                dataType: "json",
-                data: function(d) {}
-            },
-            columns: [
-                { data: 'action', searchable: false, class: 'action' },
-                { data: 'code', name: 'nstates.code', searchable: true },
-                { data: 'name', name: 'nstates.name', searchable: true },
-                { data: 'country', name: 'c.name', searchable: true },
-                { data: 'status', name: 'status.name', searchable: false },
-            ],
-            rowCallback: function(row, data) {
-                $(row).addClass('highlight-row');
+                pageLength: 10,
+                processing: true,
+                serverSide: true,
+                paging: true,
+                ordering: false,
+                ajax: {
+                    url: get_entity_list_url + '/' + $routeParams.entity_type_id,
+                    type: "GET",
+                    dataType: "json",
+                    data: function(d) {},
+                },
+                columns: [
+                    { data: 'action', searchable: false, class: 'action' },
+                    { data: 'name', name: 'entities.name' },
+                    { data: 'created_by', name: 'users.username' },
+                    { data: 'updated_by', name: 'updater.username' },
+                    { data: 'deleted_by', name: 'deactivator.username' },
+                    { data: 'created_at', name: 'entities.created_at', searchable: false },
+                    { data: 'updated_at1', name: 'entities.updated_at', searchable: false },
+                    { data: 'deleted_at', name: 'entities.deleted_at', searchable: false },
+                    { data: 'status', searchable: false },
+                ],
+                rowCallback: function(row, data) {
+                    $(row).addClass('highlight-row');
+                }
+
+            });
+            $('.dataTables_length select').select2();
+            $('.page-header-content .display-inline-block .data-table-title').html(response.data.entity_type.name);
+            var add_url = '#!/eyatra/entity/add/' + self.id;
+            if (self.id) {
+                $('.add_new_button').html(
+                    '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                    'Add New' +
+                    '</a>'
+                );
+            }
+            $scope.deleteEntityDetail = function($id) {
+                $('#del').val($id);
+            }
+            $scope.deleteEntity = function() {
+
+                $id = $('#del').val();
+                $http.get(
+                    delete_entity_component_url + '/' + $id,
+                ).then(function(response) {
+                    console.log(response.data);
+                    if (response.data.success) {
+
+                        new Noty({
+                            type: 'success',
+                            layout: 'topRight',
+                            text: 'Entity Details is Deleted Successfully',
+                        }).show();
+                    }
+                    dataTable.ajax.reload(function(json) {});
+
+                });
             }
         });
-        $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('States');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
-            'Add New' +
-            '</a>'
-        );
-        $rootScope.loading = false;
 
+        $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 
-app.component('eyatraStateForm', {
-    templateUrl: state_form_template_url,
+app.component('eyatraEntityForm', {
+    templateUrl: eyatra_entity_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.state_id) == 'undefined' ? state_form_data_url : state_form_data_url + '/' + $routeParams.state_id;
+        $form_data_url = typeof($routeParams.entity_id) == 'undefined' ? eyatra_entity_form_data_url + '/' + $routeParams.entity_type_id : eyatra_entity_form_data_url + '/' + $routeParams.entity_type_id + '/' + $routeParams.entity_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         $http.get(
-            $form_data_url
+            $form_data_url,
         ).then(function(response) {
+            //console.log(response.data);
             if (!response.data.success) {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/states')
+                $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
             }
-            self.state = response.data.state;
-            self.extras = response.data.extras;
+            self.entity = response.data.entity;
+            self.entity_type = response.data.entity_type;
             self.action = response.data.action;
             $rootScope.loading = false;
 
         });
-
-        var form_id = '#state-form';
-        var v = jQuery(form_id).validate({
+        $('input').on('blur keyup', function() {
+            if ($("#entity_form").valid()) {
+                $('#submit').prop('disabled', false);
+            } else {
+                $('#submit').prop('disabled', 'disabled');
+            }
+        });
+        $('#submit').click(function() {
+            if ($("#entity_form").valid()) {
+                $('#submit').prop('disabled', false);
+            } else {
+                $('#submit').prop('disabled', 'disabled');
+            }
+        });
+        var form_id = form_ids = '#entity_form';
+        var v = jQuery(form_ids).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.hasClass("name")) {
+                    error.appendTo($('.name_error'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'name': {
                     required: true,
+                    minlength: 3,
                 },
-                'description': {
-                    maxlength: 255,
-                },
-                'advance_received': {
-                    maxlength: 10,
-                },
+
             },
             messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'name': {
+                    minlength: 'Please enter minimum of 3 characters',
                 },
             },
             submitHandler: function(form) {
-
                 let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['saveEYatraState'],
+                        url: eyatra_save_entity_url + '/' + $routeParams.entity_type_id,
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -114,7 +167,7 @@ app.component('eyatraStateForm', {
                     .done(function(res) {
                         console.log(res.success);
                         if (!res.success) {
-                            $('#submit').button('reset');
+                            $('#submit').prop('disabled', 'disabled');
                             var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
@@ -124,9 +177,10 @@ app.component('eyatraStateForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'State saved successfully',
+                                text: 'Entity Details Added Successfully',
+                                text: res.message,
                             }).show();
-                            $location.path('/eyatra/states')
+                            $location.path('/master/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
                     })
@@ -139,16 +193,16 @@ app.component('eyatraStateForm', {
     }
 });
 
-app.component('eyatraStateView', {
-    templateUrl: state_view_template_url,
+app.component('eyatraEntityView', {
+    templateUrl: eyatra_entity_view_template_url,
 
     controller: function($http, $location, $routeParams, HelperService, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            state_view_url + '/' + $routeParams.state_id
+            eyatra_entity_view_url + '/' + $routeParams.entity_id
         ).then(function(response) {
-            self.state = response.data.state;
+            self.entity = response.data.entity;
         });
     }
 });
