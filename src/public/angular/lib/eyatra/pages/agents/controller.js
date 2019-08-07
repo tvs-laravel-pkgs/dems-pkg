@@ -76,22 +76,46 @@ app.component('eyatraAgentForm', {
             self.address = response.data.address;
             self.user = response.data.user;
             self.extras = response.data.extras;
+            travel_list = response.data.travel_list;
             self.action = response.data.action;
-            console.log(self.address);
-            console.log(self.extras.state_list);
-            if (self.action = 'Edit') {
+
+            if (self.action == 'Edit') {
                 $("#hide_password").hide();
-                self.action = 'Edit';
                 if (self.agent.deleted_at == null) {
                     self.switch_value = 'Active';
                 } else {
                     self.switch_value = 'Inactive';
                 }
+                // if (self.user.force_password_change == 1) {
+                //     self.switch_password = 'No';
+                //     $("#hide_password").hide();
+                // } else {
+                //     self.switch_password = 'Yes';
+                // }
+                // if (self.user.force_password_change == 1) {
+                //     self.switch_password = 'No';
+                //     $("#hide_password").hide();
+                // } else {
+                //     self.switch_password = 'Yes';
+                // }
             } else {
                 self.switch_value = 'Active';
-                self.action = 'New';
+                $("#hide_password").show();
             }
         });
+        $scope.travelChecked = function(id) {
+            var value = travel_list.indexOf(id);
+            return value;
+        }
+
+        $scope.psw_change = function(val) {
+            if (val == 'No') {
+                $("#hide_password").hide();
+                $("#password_change").val('');
+            } else {
+                $("#hide_password").show();
+            }
+        }
 
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");

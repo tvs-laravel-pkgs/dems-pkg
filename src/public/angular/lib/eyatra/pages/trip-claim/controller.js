@@ -53,10 +53,11 @@ app.component('eyatraTripClaimList', {
 app.component('eyatraTripClaimForm', {
     templateUrl: eyatra_trip_claim_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = eyatra_trip_claim_form_data_url;
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -70,9 +71,85 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }
+            console.log(response.data);
             self.extras = response.data.extras;
+            self.trip = response.data.trip;
+            self.action = response.data.action;
+
+            if (self.trip.lodgings.length == 0) {
+                self.addNewLodgings();
+            }
+            if (self.trip.boardings.length == 0) {
+                self.addNewBoardings();
+            }
+            if (self.trip.local_travels.length == 0) {
+                self.addNewLocalTralvels();
+            }
             $rootScope.loading = false;
 
         });
+
+        // $(function() {
+        //     $('.form_datetime').datetimepicker();
+        // });
+
+        // $(".form_datetime").datetimepicker({
+        //     format: "yyyy-m-dd hh:ii",
+        //     autoclose: true,
+        //     todayBtn: true,
+        //     pickerPosition: "bottom-left"
+        // });
+
+        /* Pane Next Button */
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+        // Lodgings
+        self.addNewLodgings = function() {
+            self.trip.lodgings.push({
+                city_id: '',
+                lodge_name: '',
+                stay_type_id: '',
+                amount: '',
+                tax: '',
+                remarks: '',
+            });
+        }
+        self.removeLodging = function(index) {
+            self.trip.lodgings.splice(index, 1);
+        }
+
+        // Boardings
+        self.addNewBoardings = function() {
+            self.trip.boardings.push({
+                city_id: '',
+                expense_name: '',
+                date: '',
+                amount: '',
+                remarks: '',
+            });
+        }
+        self.removeBoarding = function(index) {
+            self.trip.boardings.splice(index, 1);
+        }
+
+        // LocalTralvels
+        self.addNewLocalTralvels = function() {
+            self.trip.local_travels.push({
+                mode_id: '',
+                date: '',
+                from_id: '',
+                to_id: '',
+                amount: '',
+                description: '',
+            });
+        }
+        self.removeLocalTralvel = function(index) {
+            self.trip.local_travels.splice(index, 1);
+        }
     }
 });

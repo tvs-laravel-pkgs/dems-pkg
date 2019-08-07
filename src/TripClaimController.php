@@ -15,7 +15,7 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class TripClaimController extends Controller {
-	public function listTripClaim(Request $r) {
+	public function listEYatraTripClaimList(Request $r) {
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -65,34 +65,51 @@ class TripClaimController extends Controller {
 			->make(true);
 	}
 
-	public function tripClaimFormData($trip_id = NULL) {
+	public function eyatraTripClaimFormData($trip_id = NULL) {
 
 		if (!$trip_id) {
-			$this->data['action'] = 'New';
 			$trip = new Trip;
 			$visit = new Visit;
+			$this->data['action'] = 'New';
 			$visit->booking_method = 'Self';
 			$trip->visits = [$visit];
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$trip = Trip::find($trip_id);
+			$trip = Trip::with(
+				'visits',
+				'purpose',
+				'lodgings',
+				'boardings',
+				'localTravels',
+				'visits.fromCity',
+				'visits.toCity',
+				'visits.travelMode',
+				'visits.bookingMethod',
+				'visits.selfBooking',
+				'visits.agent',
+				'visits.status',
+				'visits.attachments'
+			)->find($trip_id);
+
 			if (!$trip) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Trip not found';
 			}
+			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
 			'purpose_list' => Entity::purposeList(),
 			'travel_mode_list' => Entity::travelModeList(),
 			'city_list' => NCity::getList(),
+			'state_type_list' => Entity::getLodgeStateTypeList(),
 		];
 		$this->data['trip'] = $trip;
 
 		return response()->json($this->data);
 	}
 
-	public function saveTripClaim(Request $request) {
+	public function saveEYatraTripClaim(Request $request) {
 		//validation
 		try {
 			$validator = Validator::make($request->all(), [
@@ -164,7 +181,7 @@ class TripClaimController extends Controller {
 		}
 	}
 
-	public function viewTripClaim($trip_id) {
+	public function viewEYatraTripClaim($trip_id) {
 
 		$trip = Trip::with([
 			'visits',
@@ -195,7 +212,7 @@ class TripClaimController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function deleteTripClaim($trip_id) {
+	public function deleteEYatraTripClaim($trip_id) {
 		$trip = Trip::where('id', $trip_id)->delete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
