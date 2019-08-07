@@ -13,7 +13,7 @@ class Boarding extends Model {
 		'trip_id',
 		'city_id',
 		'expense_name',
-		'date',
+		// 'date',
 		'amount',
 		'created_by',
 		'updated_by',

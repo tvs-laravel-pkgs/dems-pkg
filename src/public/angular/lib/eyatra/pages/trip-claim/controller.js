@@ -55,6 +55,10 @@ app.component('eyatraTripClaimForm', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
+        var lodgings_removal_id = [];
+        var boardings_removal_id = [];
+        var local_travels_removal_id = [];
+
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
@@ -111,6 +115,7 @@ app.component('eyatraTripClaimForm', {
         // Lodgings
         self.addNewLodgings = function() {
             self.trip.lodgings.push({
+                id: '',
                 city_id: '',
                 lodge_name: '',
                 stay_type_id: '',
@@ -119,13 +124,18 @@ app.component('eyatraTripClaimForm', {
                 remarks: '',
             });
         }
-        self.removeLodging = function(index) {
+        self.removeLodging = function(index, lodging_id) {
+            if (lodging_id) {
+                lodgings_removal_id.push(lodging_id);
+                $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
+            }
             self.trip.lodgings.splice(index, 1);
         }
 
         // Boardings
         self.addNewBoardings = function() {
             self.trip.boardings.push({
+                id: '',
                 city_id: '',
                 expense_name: '',
                 date: '',
@@ -133,13 +143,18 @@ app.component('eyatraTripClaimForm', {
                 remarks: '',
             });
         }
-        self.removeBoarding = function(index) {
+        self.removeBoarding = function(index, boarding_id) {
+            if (boarding_id) {
+                boardings_removal_id.push(boarding_id);
+                $('#boardings_removal_id').val(JSON.stringify(boardings_removal_id));
+            }
             self.trip.boardings.splice(index, 1);
         }
 
         // LocalTralvels
         self.addNewLocalTralvels = function() {
             self.trip.local_travels.push({
+                id: '',
                 mode_id: '',
                 date: '',
                 from_id: '',
@@ -148,8 +163,104 @@ app.component('eyatraTripClaimForm', {
                 description: '',
             });
         }
-        self.removeLocalTralvel = function(index) {
+        self.removeLocalTralvel = function(index, local_travel_id) {
+            if (local_travel_id) {
+                local_travels_removal_id.push(local_travel_id);
+                $('#local_travels_removal_id').val(JSON.stringify(local_travels_removal_id));
+            }
             self.trip.local_travels.splice(index, 1);
         }
+
+        //Form submit validation
+        self.claimSubmit = function() {
+            // $('#claim_form').on('submit', function(event) {
+            //Add validation rule for dynamically generated name fields
+            $('.maxlength_name').each(function() {
+                $(this).rules("add", {
+                    required: true,
+                    maxlength: 191,
+                });
+            });
+            $('.num_amount').each(function() {
+                $(this).rules("add", {
+                    maxlength: 12,
+                    number: true,
+                    required: true,
+                });
+            });
+            $('.boarding_expense').each(function() {
+                $(this).rules("add", {
+                    maxlength: 255,
+                    required: true,
+                });
+            });
+        }
+
+        var form_id = '#claim_form';
+        // $.validator.addClassRules({
+        //     maxlength_name: {
+        //         maxlength: 191,
+        //         required: true,
+        //     },
+        //     num_amount: {
+        //         maxlength: 12,
+        //         number: true,
+        //         required: true,
+        //     },
+        //     boarding_expense: {
+        //         maxlength: 255,
+        //         required: true,
+        //     }
+        // });
+
+        var v = jQuery(form_id).validate({
+            invalidHandler: function(event, validator) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Kindly check in each tab to fix errors'
+                }).show();
+            },
+            ignore: "",
+            rules: {},
+            submitHandler: function(form) {
+                //console.log(self.item);
+                let formData = new FormData($(form_id)[0]);
+                $('#submit').button('loading');
+                $.ajax({
+                        url: eyatra_trip_claim_save_url,
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                    .done(function(res) {
+                        //console.log(res.success);
+                        if (!res.success) {
+                            $('#submit').button('reset');
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+
+                            new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Claim saved successfully!!',
+                            }).show();
+
+                            $location.path('/eyatra/trip/claim/list')
+                            $scope.$apply()
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $('#submit').button('reset');
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+
+            },
+        });
     }
 });

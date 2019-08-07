@@ -12,7 +12,7 @@ class LocalTravel extends Model {
 		'id',
 		'trip_id',
 		'mode_id',
-		'date',
+		// 'date',
 		'from_id',
 		'to_id',
 		'amount',
