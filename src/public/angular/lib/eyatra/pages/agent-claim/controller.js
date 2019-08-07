@@ -3,7 +3,7 @@ app.component('eyatraAgentClaimList', {
     controller: function(HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_agent_claim_list_table').DataTable({
+        var dataTable = $('#agent_claim_list').DataTable({
             "dom": dom_structure,
             "language": {
                 "search": "",
