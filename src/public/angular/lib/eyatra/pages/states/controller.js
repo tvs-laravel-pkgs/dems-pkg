@@ -71,35 +71,58 @@ app.component('eyatraStateForm', {
                 $scope.$apply()
                 return;
             }
+
             self.state = response.data.state;
             self.country_list = response.data.country_list;
             self.status = response.data.status;
             self.travel_modes = response.data.travel_modes;
             self.agents_list = response.data.agents_list;
+            self.state.agent = response.data.agent;
             self.action = response.data.action;
 
         });
+        //         $scope.travelChecked = function(id) {
+        //     var value = travel_mode.indexOf(id);
+        //     return value;
+        // }
+        // $('.checkbox').on('click', function() {
+        //     if ($(this).is(": checked")) {
+        //         $('.travel_checkbox').prop('checked', true);
+        //     } else {
+        //         $('.travel_checkbox').prop('checked', false);
 
+        //     }
+        // });
         var form_id = '#state-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.hasClass("code")) {
+                    error.appendTo($('.code_error'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
+
             ignore: '',
             rules: {
                 'code': {
                     required: true,
+                    maxlength: 2,
                 },
                 'name': {
-                    maxlength: 255,
+                    required: true,
+                    maxlength: 191,
                 },
                 'country_id': {
                     required: true,
                 },
             },
             messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'code': {
+                    maxlength: 'Please enter maximum of 2 letters',
+                },
+                'name': {
+                    maxlength: 'Please enter maximum of 191 letters',
                 },
             },
             submitHandler: function(form) {
