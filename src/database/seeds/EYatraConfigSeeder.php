@@ -27,6 +27,7 @@ class EYatraConfigSeeder extends Seeder {
 			510 => 'Attachment of - EYatra',
 			511 => 'Attachment Type - EYatra',
 			512 => 'Visit Statuses - EYatra',
+			513 => 'Visit Booking Statuses - EYatra',
 
 		];
 
@@ -195,24 +196,58 @@ class EYatraConfigSeeder extends Seeder {
 
 			//ATTACHMENT OF - EYATRA
 			3180 => [
-				'name' => 'Visit',
+				'name' => 'Visit Booking',
+				'config_type_id' => 510,
+			],
+			3181 => [
+				'name' => 'Lodging Expense',
+				'config_type_id' => 510,
+			],
+			3182 => [
+				'name' => 'Boarding Expense',
+				'config_type_id' => 510,
+			],
+			3183 => [
+				'name' => 'Local Travel Expense',
 				'config_type_id' => 510,
 			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [
-				'name' => 'Booking Attachments',
+				'name' => 'Multi Attachments',
 				'config_type_id' => 511,
 			],
 
 			//VISIT STATUSES
 			3220 => [
 				'name' => 'New',
-				'config_type_id' => 511,
+				'config_type_id' => 512,
 			],
 			3221 => [
 				'name' => 'Cancellation Requested',
-				'config_type_id' => 511,
+				'config_type_id' => 512,
+			],
+			3222 => [
+				'name' => 'Claim Requested',
+				'config_type_id' => 512,
+			],
+
+			//VISIT BOOKING STATUSES
+			3240 => [
+				'name' => 'Claim Pending',
+				'config_type_id' => 513,
+			],
+			3241 => [
+				'name' => 'Claimed',
+				'config_type_id' => 513,
+			],
+			3242 => [
+				'name' => 'Payment Pending',
+				'config_type_id' => 513,
+			],
+			3243 => [
+				'name' => 'Paid',
+				'config_type_id' => 513,
 			],
 
 		];

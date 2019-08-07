@@ -44,6 +44,20 @@ class EmployeesC extends Migration {
 	 * @return void
 	 */
 	public function down() {
+
+		// Schema::table('employees', function (Blueprint $table) {
+		// 	// $table->dropForeign('employees_company_id_foreign');
+
+		// 	// $table->dropForeign('employees_outlet_id_foreign');
+		// 	// $table->dropForeign('employees_reporting_to_id_foreign');
+		// 	// $table->dropForeign('employees_grade_id_foreign');
+		// 	// $table->dropForeign('employees_created_by_foreign');
+		// 	// $table->dropForeign('employees_updated_by_foreign');
+		// 	// $table->dropForeign('employees_deleted_by_foreign');
+
+		// 	// $table->dropUnique('employees_company_id_code_unique');
+		// });
+
 		Schema::dropIfExists('employees');
 	}
 }

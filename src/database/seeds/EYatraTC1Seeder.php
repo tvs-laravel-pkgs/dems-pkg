@@ -470,8 +470,7 @@ class EYatraTC1Seeder extends Seeder {
 					$booking->amount = $faker->numberBetween(500, 2000);
 					$booking->tax = $booking->amount * 10 / 100;
 					$booking->total = $booking->amount + $booking->tax;
-					$booking->claim_amount = $booking->total;
-					$booking->payment_status_id = 3140; //NOT CLAIMED
+					$booking->status_id = 3240; //CLAIM PENDING
 					$booking->created_by = $employee->user->id;
 					if ($visit->booking_method_id == 3042) {
 						//AGENT
@@ -517,8 +516,7 @@ class EYatraTC1Seeder extends Seeder {
 					$booking->amount = $faker->numberBetween(500, 2000);
 					$booking->tax = $booking->amount * 10 / 100;
 					$booking->total = $booking->amount + $booking->tax;
-					$booking->claim_amount = $booking->total;
-					$booking->payment_status_id = 3140; //NOT CLAIMED
+					$booking->status_id = 3240; //CLAIM PENDING
 					$booking->created_by = $employee->user->id;
 					if ($visit->booking_method_id == 3042) {
 						//AGENT

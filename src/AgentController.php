@@ -65,6 +65,7 @@ class AgentController extends Controller {
 			$address = new Address;
 			$user = new User;
 			$this->data['success'] = true;
+			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
 			$agent = Agent::find($agent_id);
@@ -77,16 +78,15 @@ class AgentController extends Controller {
 			} else {
 				$this->data['success'] = true;
 			}
+			$this->data['travel_list'] = $agent->travelModes()->pluck('travel_mode_id')->toArray();
 		}
 
-		//dd(NState::getList($agent->address->country_id), $this->data['action'], $agent->address->country_id);
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
 			'country_list' => NCountry::getList(),
 			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->country_id),
 			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->state_id),
 		];
-		//dd($this->data['extras']['state_list']);
 		$this->data['agent'] = $agent;
 		$this->data['address'] = $address;
 		$this->data['user'] = $user;
