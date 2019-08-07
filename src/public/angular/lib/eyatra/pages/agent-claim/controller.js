@@ -3,6 +3,7 @@ app.component('eyatraAgentClaimList', {
     controller: function(HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
             "dom": dom_structure,
             "language": {
@@ -33,8 +34,6 @@ app.component('eyatraAgentClaimList', {
                 { data: 'from', name: 'fc.name', searchable: true },
                 { data: 'to', name: 'tc.name', searchable: true },
                 { data: 'travel_mode', name: 'tm.name', searchable: true },
-                { data: 'booking_status', name: 'bs.name', searchable: false },
-                { data: 'agent', name: 'a.name', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -43,7 +42,11 @@ app.component('eyatraAgentClaimList', {
         });
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
-        $('.add_new_button').html();
+        $('.add_new_button').html(
+            '<a href="#!/eyatra/agent/claim/add" type="button" class="btn btn-secondary">' +
+            'Add New' +
+            '</a>'
+        );
         $rootScope.loading = false;
 
     }
@@ -64,15 +67,31 @@ app.component('eyatraAgentClaimForm', {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: response.data.error,
+                    text: response.data.message,
                 }).show();
                 $location.path('/eyatra/agent/claim/list')
                 $scope.$apply()
                 return;
             }
-            self.extras = response.data.extras;
+
+            self.agent_claim = response.data.agent_claim;
+            self.booking_list = response.data.booking_list;
+            self.action = response.data.action;
+            // self.extras = response.data.extras;
+
             $rootScope.loading = false;
 
         });
+
+        $('#head_booking').on('click', function() {
+            if (event.target.checked == true) {
+                $('.booking_list').prop('checked', true);
+            } else {
+                $('.booking_list').prop('checked', false);
+            }
+        });
+
     }
 });
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
