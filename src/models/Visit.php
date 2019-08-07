@@ -83,4 +83,12 @@ class Visit extends Model {
 		return $this->hasMany('Uitoux\EYatra\VisitBooking');
 	}
 
+	public function selfBooking() {
+		return $this->hasOne('Uitoux\EYatra\VisitBooking')->where('type_id', 3100)->latest();
+	}
+
+	public function attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3180)->where('attachment_type_id', 3200);
+	}
+
 }

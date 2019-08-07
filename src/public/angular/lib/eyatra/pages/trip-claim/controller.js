@@ -53,10 +53,11 @@ app.component('eyatraTripClaimList', {
 app.component('eyatraTripClaimForm', {
     templateUrl: eyatra_trip_claim_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = eyatra_trip_claim_form_data_url;
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -70,7 +71,10 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }
+            console.log(response.data);
             self.extras = response.data.extras;
+            self.trip = response.data.trip;
+            self.action = response.data.action;
             $rootScope.loading = false;
 
         });
