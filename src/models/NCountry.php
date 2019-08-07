@@ -14,7 +14,14 @@ class NCountry extends Model {
 	];
 
 	public static function getList() {
-		return NCountry::select('id', 'name')->get();
+		$data = [];
+		$option = new NCountry;
+		$option->name = 'Select Country';
+		$option->id = null;
+		$countries_list = NCountry::select('name', 'id')->get();
+		$data = $countries_list->prepend($option);
+		return $data;
+		// return NCountry::select('id', 'name')->get();
 	}
 
 	public function states() {

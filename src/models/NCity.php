@@ -14,10 +14,19 @@ class NCity extends Model {
 	}
 
 	public static function getList($state_id = NULL) {
+		$data = [];
+		$option = new NCity;
+		$option->name = 'Select City';
+		$option->id = null;
 		if (!$state_id) {
-			return NCity::select('id', 'name')->get();
+			$city_list = NCity::select('id', 'name')->get();
+			$data = $city_list->prepend($option);
+			return $data;
+			// return NCity::select('id', 'name')->get();
 		} else {
-			return NCity::select('id', 'name')->where('state_id', $state_id)->get();
+			$city_list = NCity::select('id', 'name')->where('state_id', $state_id)->get();
+			$data = $city_list->prepend($option);
+			return $data;
 		}
 	}
 

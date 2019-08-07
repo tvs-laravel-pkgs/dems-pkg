@@ -6,8 +6,8 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Visit;
 use Validator;
@@ -54,8 +54,9 @@ class StateController extends Controller {
 	public function eyatraStateFormData($state_id = NULL) {
 
 		if (!$state_id) {
-			$this->data['action'] = 'New';
+			$this->data['action'] = 'Add';
 			$state = new NState;
+			$this->data['status'] = 'Active';
 			//$visit = new Visit;
 			// $visit->booking_method = 'Self';
 			// $trip->visits = [$visit];
@@ -63,18 +64,24 @@ class StateController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$state = NState::find($state_id);
+			if ($state->deleted_at == NULL) {
+				$this->data['status'] = 'Active';
+			} else {
+				$this->data['status'] = 'Inactive';
+			}
+
 			if (!$state) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'State not found';
 			}
 		}
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get();
 		$this->data['travel_modes'] = $travel_modes = Entity::select('name')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get();
+		// foreach ($travel_modes as $travel_mode) {
+		// 		$this->data['role_list'][$user_role->id]->checked = true;
+		// 	}
 		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
-		// $this->data['extras'] = [
-		// 	'purpose_list' => Entity::purposeList(),
-		// 	'travel_mode_list' => Entity::travelModeList(),
-		// 	'city_list' => NCity::getList(),
-		// ];
+
 		// DB::table('state_agent_travel_mode')->select();
 		$this->data['state'] = $state;
 
@@ -85,7 +92,7 @@ class StateController extends Controller {
 		//validation
 		try {
 			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
+				'code' => [
 					'required',
 				],
 			]);

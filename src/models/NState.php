@@ -13,10 +13,20 @@ class NState extends Model {
 	}
 
 	public static function getList($country_id = NULL) {
+		$data = [];
+		$option = new NState;
+		$option->name = 'Select State';
+		$option->id = null;
 		if (!$country_id) {
-			return NState::select('id', 'name')->get();
+			$state_list = NState::select('id', 'name')->get();
+			$data = $state_list->prepend($option);
+			return $data;
+			// return NState::select('id', 'name')->get();
 		} else {
-			return NState::select('id', 'name')->where('country_id', $country_id)->get();
+			$state_list = NState::select('id', 'name')->where('country_id', $country_id)->get();
+			$data = $state_list->prepend($option);
+			return $data;
+			// return NState::select('id', 'name')->where('country_id', $country_id)->get();
 		}
 	}
 
