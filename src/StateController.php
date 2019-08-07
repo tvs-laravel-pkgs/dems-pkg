@@ -6,10 +6,10 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
-use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -52,7 +52,6 @@ class StateController extends Controller {
 	}
 
 	public function eyatraStateFormData($state_id = NULL) {
-
 		if (!$state_id) {
 			$this->data['action'] = 'Add';
 			$state = new NState;
@@ -73,14 +72,16 @@ class StateController extends Controller {
 			if (!$state) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'State not found';
+			} else {
+				$this->data['success'] = true;
+
 			}
 		}
 		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get();
-		$this->data['travel_modes'] = $travel_modes = Entity::select('name')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get();
-		// foreach ($travel_modes as $travel_mode) {
-		// 		$this->data['role_list'][$user_role->id]->checked = true;
-		// 	}
-		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
+		$this->data['travel_modes'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get();
+		foreach ($travel_modes as $travel_mode) {
+			$this->data['agents_list'] = $agents_list[] = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
+		}
 
 		// DB::table('state_agent_travel_mode')->select();
 		$this->data['state'] = $state;
@@ -90,57 +91,81 @@ class StateController extends Controller {
 
 	public function saveEYatraState(Request $request) {
 		//validation
+		//dd($request->all());
 		try {
+			$error_messages = [
+				'code.required' => 'Short Name is required',
+				'code.unique' => 'Short Name has already been taken',
+				'name.required' => 'Name is required',
+				'name.unique' => 'Name has already been taken',
+
+			];
+
 			$validator = Validator::make($request->all(), [
 				'code' => [
 					'required',
+					'unique:nstates,code,' . $request->id . ',id,country_id,' . $request->country_id,
+					'max:2',
 				],
-			]);
+				'name' => [
+					'required',
+					'unique:nstates,name,' . $request->id . ',id,country_id,' . $request->country_id,
+					'max:191',
+				],
+
+			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
+				$state = new NState;
+				$state->created_by = Auth::user()->id;
+				$state->created_at = Carbon::now();
+				$state->updated_at = NULL;
 
 			} else {
-				$trip = Trip::find($request->id);
+				$state = NState::find($request->id);
 
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
+				$state->updated_by = Auth::user()->id;
+				$state->updated_at = Carbon::now();
 
-				$trip->visits()->sync([]);
-
+				//$trip->visits()->sync([]);
+				//dd($request->travel_modes);
 			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
+			if ($request->status == 'Inactive') {
+				$state->deleted_at = date('Y-m-d H:i:s');
+			} else {
+				$state->deleted_at = NULL;
+			}
+			$state->fill($request->all());
+			$state->save();
+			//SAVING state_agent_travel_mode
+			// $travel_modes = [];
+			// $agents = [];
 
-			$trip->number = 'TRP' . $trip->id;
-			$trip->save();
+			foreach (NState::get() as $state) {
+				$state->travelModes()->sync([]);
+				$state->agents()->sync([]);
+				foreach (Entity::travelModeList() as $travel_mode) {
+					$agent = Agent::whereHas('travelModes', function ($query) use ($travel_mode) {
+						$query->where('id', $travel_mode->id);
+					})->inRandomOrder()->get();
+					$travel_modes[$travel_mode->id] = [
+						'state_id' => $request->id,
+						'agent_id' => $request->agent_id,
+						'service_charge' => $request->service_charge,
+					];
 
-			//SAVING VISITS
-			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					$visit->save();
 				}
-			}
+				$state->travelModes()->sync($travel_modes);
+				$state->agents()->sync($agents);
 
+			}
+			//dd($request->travel_mode);
 			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
+			$request->session()->flash('success', 'State saved successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -148,33 +173,20 @@ class StateController extends Controller {
 		}
 	}
 
-	public function viewEYatraState($agent_id) {
+	public function viewEYatraState($state_id) {
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
+		$state = NState::with([
+
+			'country',
 		])
-			->find($trip_id);
-		if (!$trip) {
+			->find($state_id);
+		if (!$state) {
 			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
+			$this->data['errors'] = ['State not found'];
 			return response()->json($this->data);
 		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+
+		$this->data['state'] = $state;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
