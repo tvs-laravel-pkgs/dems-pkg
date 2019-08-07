@@ -6,9 +6,10 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\Agentclaim;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Visit;
+use Uitoux\EYatra\VisitBooking;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -55,26 +56,50 @@ class AgentClaimController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraAgentClaimFormData($employee_id = NULL) {
-
-		if (!$employee_id) {
+	public function eyatraAgentClaimFormData($agent_claim_id = NULL) {
+		if (!$agent_claim_id) {
 			$this->data['action'] = 'New';
-			$employee = new Employee;
+			$agent_claim = new Agentclaim;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::find($employee_id);
-			if (!$employee) {
+			$agent_claim = Agentclaim::find($agent_claim_id);
+			if (!$agent_claim) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'Employee not found';
+				$this->data['message'] = 'Agent Claim not found';
+			} else {
+				$this->data['success'] = true;
 			}
 		}
-		$this->data['extras'] = [
-			'manager_list' => Employee::getList(),
-			'outlet_list' => Outlet::getList(),
-			'grade_list' => Entity::getGradeList(),
-		];
-		$this->data['employee'] = $employee;
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(
+			'visit_bookings.id',
+			'type.name as type_id',
+			'trips.number as trip',
+			'employees.code as employee_code',
+			'visit_bookings.amount',
+			'visit_bookings.tax',
+			'visit_bookings.service_charge',
+			'visit_bookings.total',
+			'visit_bookings.reference_number',
+			'from_city.name as from',
+			'to_city.name as to',
+			'travel_mode.name as travel_mode',
+		)
+			->leftJoin('configs as type', 'type.id', 'visit_bookings.type_id')
+			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
+			->leftJoin('trips', 'trips.id', 'visits.trip_id')
+			->leftJoin('employees', 'employees.id', 'trips.employee_id')
+			->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
+			->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
+			->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
+			->where('visit_bookings.created_by', Auth::user()->id)
+			->get();
+		// $this->data['extras'] = [
+		// 	'manager_list' => Employee::getList(),
+		// 	'outlet_list' => Outlet::getList(),
+		// 	'grade_list' => Entity::getGradeList(),
+		// ];
+		$this->data['agent_claim'] = $agent_claim;
 
 		return response()->json($this->data);
 	}
