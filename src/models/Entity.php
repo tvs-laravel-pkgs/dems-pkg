@@ -37,7 +37,10 @@ class Entity extends Model {
 	}
 
 	public static function getGradeList() {
-		return Entity::where('entity_type_id', 502)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 500)->select('id', 'name')->get();
 	}
 
+	public static function getLodgeStateTypeList() {
+		return Entity::where('entity_type_id', 504)->select('id', 'name')->get();
+	}
 }

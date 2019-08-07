@@ -43,4 +43,16 @@ class Trip extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'status_id');
 	}
 
+	public function lodgings() {
+		return $this->hasMany('Uitoux\EYatra\Lodging');
+	}
+
+	public function boardings() {
+		return $this->hasMany('Uitoux\EYatra\Boarding');
+	}
+
+	public function localTravels() {
+		return $this->hasMany('Uitoux\EYatra\LocalTravel');
+	}
+
 }

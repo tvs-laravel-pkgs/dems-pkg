@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class NState extends Model {
 	use SoftDeletes;
 	protected $table = 'nstates';
+	protected $fillable = [
+		'country_id',
+		'code',
+		'name',
+		'created_by',
+	];
 	public function country() {
 		return $this->belongsTo('App\Country');
 	}

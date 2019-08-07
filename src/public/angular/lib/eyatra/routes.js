@@ -130,7 +130,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-claim-list></eyatra-trip-claim-list>',
         title: 'Trip Claim List',
     }).
-    when('/eyatra/trip/claim/add', {
+    when('/eyatra/trip/claim/add/:trip_id', {
         template: '<eyatra-trip-claim-form></eyatra-trip-claim-form>',
         title: 'Trip Claim Form',
     }).
@@ -168,9 +168,13 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-agent-claim-list></eyatra-agent-claim-list>',
         title: 'Agent Claim List',
     }).
-    when('/eyatra/agent/claim/form', {
+    when('/eyatra/agent/claim/add', {
         template: '<eyatra-agent-claim-form></eyatra-agent-claim-form>',
-        title: 'Agent Claim Form',
+        title: 'New Agent Claim',
+    }).
+    when('/eyatra/agent/claim/edit/:agent_claim_id', {
+        template: '<eyatra-agent-claim-form></eyatra-agent-claim-form>',
+        title: 'Edit Agent Claim',
     }).
 
     //BOOKING UPDATES
