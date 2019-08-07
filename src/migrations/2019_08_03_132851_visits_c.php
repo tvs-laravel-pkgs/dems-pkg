@@ -22,6 +22,8 @@ class VisitsC extends Migration {
 			$table->unsignedInteger('booking_status_id');
 			$table->unsignedInteger('agent_id')->nullable();
 			$table->string('notes_to_agent', 255)->nullable();
+			$table->datetime('departure_date')->nullable();
+			$table->datetime('arrival_date')->nullable();
 			$table->unsignedInteger('status_id');
 			$table->unsignedInteger('manager_verification_status_id');
 

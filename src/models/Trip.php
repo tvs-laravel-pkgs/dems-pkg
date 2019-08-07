@@ -42,5 +42,8 @@ class Trip extends Model {
 	public function status() {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'status_id');
 	}
+	public function lodgings() {
+		return $this->hasMany('Uitoux\EYatra\Lodging');
+	}
 
 }
