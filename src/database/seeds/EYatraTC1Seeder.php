@@ -360,6 +360,7 @@ class EYatraTC1Seeder extends Seeder {
 					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
 					$booking_method_id = 3040; //SELF
 					$booking_status_id = 3061; //BOOKED
+					$booking_detail_status_id = 3240; // CLAIM PENDING
 					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
 				} elseif ($i > 35 && $i <= 40) {
 					$trip_status_id = 3020; //NEW
@@ -400,11 +401,13 @@ class EYatraTC1Seeder extends Seeder {
 					$trip_status_id = 3020; //NEW
 					$booking_method_id = 3042; //AGENT
 					$booking_status_id = 3061; //BOOKED
+					$booking_detail_status_id = 3240; // CLAIM PENDING
 					$manager_verification_status_id = 3084; //NEW
 				} elseif ($i > 75 && $i <= 80) {
 					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
 					$booking_method_id = 3042; //AGENT
 					$booking_status_id = 3061; //BOOKED
+					$booking_detail_status_id = 3241; // CLAIMED
 					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
 				} elseif ($i > 80 && $i <= 85) {
 					$trip_status_id = 3020; //NEW
@@ -470,7 +473,7 @@ class EYatraTC1Seeder extends Seeder {
 					$booking->amount = $faker->numberBetween(500, 2000);
 					$booking->tax = $booking->amount * 10 / 100;
 					$booking->total = $booking->amount + $booking->tax;
-					$booking->status_id = 3240; //CLAIM PENDING
+					$booking->status_id = $booking_detail_status_id;
 					$booking->created_by = $employee->user->id;
 					if ($visit->booking_method_id == 3042) {
 						//AGENT
@@ -516,7 +519,7 @@ class EYatraTC1Seeder extends Seeder {
 					$booking->amount = $faker->numberBetween(500, 2000);
 					$booking->tax = $booking->amount * 10 / 100;
 					$booking->total = $booking->amount + $booking->tax;
-					$booking->status_id = 3240; //CLAIM PENDING
+					$booking->status_id = $booking_detail_status_id;
 					$booking->created_by = $employee->user->id;
 					if ($visit->booking_method_id == 3042) {
 						//AGENT
@@ -528,6 +531,10 @@ class EYatraTC1Seeder extends Seeder {
 					}
 
 					$booking->save();
+
+					if ($booking->status_id == 3241) {
+						//CLAIMED
+					}
 
 				}
 
