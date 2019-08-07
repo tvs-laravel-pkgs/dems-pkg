@@ -5,29 +5,43 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCountry;
-use Uitoux\EYatra\NState;
+use Uitoux\EYatra\NCity;
+use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
-class StateController extends Controller {
-	public function listEYatraState(Request $r) {
-		$states = NState::from('nstates')
-			->join('countries as c', 'c.id', 'nstates.country_id')
+class TripClaimController extends Controller {
+	public function listTripClaim(Request $r) {
+		$trips = Trip::from('trips')
+			->join('visits as v', 'v.trip_id', 'trips.id')
+			->join('ncities as c', 'c.id', 'v.from_city_id')
+			->join('employees as e', 'e.id', 'trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
+			->join('configs as status', 'status.id', 'trips.status_id')
 			->select(
-				'nstates.id',
-				'nstates.code',
-				'nstates.name',
-				'c.name as country',
-				DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status')
+				'trips.id',
+				'trips.number',
+				'e.code as ecode',
+				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
+				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				'purpose.name as purpose',
+				'trips.advance_received',
+				'status.name as status'
 			)
-			->orderBy('nstates.name', 'asc');
+			->where('e.company_id', Auth::user()->company_id)
+			->groupBy('trips.id')
+			->orderBy('trips.created_at', 'desc');
 
-		return Datatables::of($states)
-			->addColumn('action', function ($state) {
+		if (!Entrust::can('view-all-trips')) {
+			$trips->where('trips.employee_id', Auth::user()->entity_id);
+		}
+		return Datatables::of($trips)
+			->addColumn('action', function ($trip) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -36,14 +50,14 @@ class StateController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/state/edit/' . $state->id . '">
+				<a href="#!/eyatra/trip/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/state/view/' . $state->id . '">
+				<a href="#!/eyatra/trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteState(' . $state->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -51,48 +65,38 @@ class StateController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraStateFormData($state_id = NULL) {
+	public function tripClaimFormData($trip_id = NULL) {
 
-		if (!$state_id) {
-			$this->data['action'] = 'Add';
-			$state = new NState;
-			$this->data['status'] = 'Active';
-			//$visit = new Visit;
-			// $visit->booking_method = 'Self';
-			// $trip->visits = [$visit];
+		if (!$trip_id) {
+			$this->data['action'] = 'New';
+			$trip = new Trip;
+			$visit = new Visit;
+			$visit->booking_method = 'Self';
+			$trip->visits = [$visit];
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$state = NState::find($state_id);
-			if ($state->deleted_at == NULL) {
-				$this->data['status'] = 'Active';
-			} else {
-				$this->data['status'] = 'Inactive';
-			}
-
-			if (!$state) {
+			$trip = Trip::find($trip_id);
+			if (!$trip) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'State not found';
+				$this->data['message'] = 'Trip not found';
 			}
 		}
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get();
-		$this->data['travel_modes'] = $travel_modes = Entity::select('name')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get();
-		// foreach ($travel_modes as $travel_mode) {
-		// 		$this->data['role_list'][$user_role->id]->checked = true;
-		// 	}
-		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
-
-		// DB::table('state_agent_travel_mode')->select();
-		$this->data['state'] = $state;
+		$this->data['extras'] = [
+			'purpose_list' => Entity::purposeList(),
+			'travel_mode_list' => Entity::travelModeList(),
+			'city_list' => NCity::getList(),
+		];
+		$this->data['trip'] = $trip;
 
 		return response()->json($this->data);
 	}
 
-	public function saveEYatraState(Request $request) {
+	public function saveTripClaim(Request $request) {
 		//validation
 		try {
 			$validator = Validator::make($request->all(), [
-				'code' => [
+				'purpose_id' => [
 					'required',
 				],
 			]);
@@ -135,6 +139,18 @@ class StateController extends Controller {
 					$visit->booking_status_id = 3060; //PENDING
 					$visit->status_id = 3020; //NEW
 					$visit->manager_verification_status_id = 3080; //NEW
+					if ($visit_data['booking_method'] == 'Agent') {
+						// $agent = Agent::where('company_id', Auth::user()->company_id)
+						// 	->join('agent_travel_mode as atm', 'atm.agent_id', 'agents.id')
+						// 	->where('atm.state_id', Auth::user()->eyatraEmployee->outlet->address->state_id)
+						// 	->where('atm.travel_mode_id', $visit_data['travel_mode_id'])
+						// 	->first();
+						// if ($agent) {
+						// 	$visit->agent_id = $agent->id;
+						// } else {
+						// 	return response()->json(['success' => false, 'errors' => ['No agent found for visit']]);
+						// }
+					}
 					$visit->save();
 				}
 			}
@@ -148,7 +164,7 @@ class StateController extends Controller {
 		}
 	}
 
-	public function viewEYatraState($agent_id) {
+	public function viewTripClaim($trip_id) {
 
 		$trip = Trip::with([
 			'visits',
@@ -179,7 +195,7 @@ class StateController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function deleteEYatraState($agent_id) {
+	public function deleteTripClaim($trip_id) {
 		$trip = Trip::where('id', $trip_id)->delete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -187,8 +203,27 @@ class StateController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
-	public function getStateList(Request $request) {
-		return NState::getList($request->country_id);
+	public function tripVerificationRequest($trip_id) {
+		$trip = Trip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$trip->status_id = 3021;
+		$trip->save();
+
+		$trip->visits()->update(['manager_verification_status_id' => 3080]);
+		return response()->json(['success' => true]);
+	}
+
+	public function cancelTripVisitBooking($visit_id) {
+		if ($visit_id) {
+			$visit = Visit::where('id', $visit_id)->first();
+			$visit->booking_status_id = 3062; // Booking cancelled
+			$visit->save();
+			return response()->json(['success' => true]);
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
+		}
 	}
 
 }

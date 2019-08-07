@@ -27,7 +27,7 @@ app.component('eyatraStates', {
                 data: function(d) {}
             },
             columns: [
-                { data: 'action', searchable: false, class: 'action' },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'nstates.code', searchable: true },
                 { data: 'name', name: 'nstates.name', searchable: true },
                 { data: 'country', name: 'c.name', searchable: true },
@@ -72,10 +72,11 @@ app.component('eyatraStateForm', {
                 return;
             }
             self.state = response.data.state;
+            self.country_list = response.data.country_list;
+            self.status = response.data.status;
             self.travel_modes = response.data.travel_modes;
             self.agents_list = response.data.agents_list;
             self.action = response.data.action;
-            $rootScope.loading = false;
 
         });
 

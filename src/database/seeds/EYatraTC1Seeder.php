@@ -101,10 +101,6 @@ class EYatraTC1Seeder extends Seeder {
 
 		//DUMMY ENTITY CREATION
 		$dummy_entities = [
-			500 => 'grd',
-			501 => 'tp',
-			502 => 'tm',
-			503 => 'ltm',
 		];
 		foreach ($dummy_entities as $entity_type_id => $name) {
 			for ($i = 1; $i <= 15; $i++) {
@@ -112,6 +108,56 @@ class EYatraTC1Seeder extends Seeder {
 					'entity_type_id' => $entity_type_id,
 					'company_id' => $company->id,
 					'name' => $company->code . '/' . $name . $i,
+					'created_by' => $admin->id,
+				]);
+			}
+		}
+
+		$sample_entities = [
+			500 => [
+				'L1',
+				'L2',
+				'L3',
+				'M1',
+				'M2',
+				'M3',
+				'M4',
+				'O1',
+				'O2',
+				'O3',
+				'O4',
+				'S1',
+				'S2',
+				'S3',
+				'SC1',
+				'SC2',
+				'SC3',
+			],
+			501 => [
+				'Client Meeting',
+				'Project Delivery',
+				'Vehicle Service',
+				'Requirement Discussion',
+				'Project Demo',
+			],
+			502 => [
+				'Bus',
+				'Train',
+				'Air',
+			],
+			503 => [
+				'A/C Taxi',
+				'Non A/A Taxi',
+				'Auto Ricksaw',
+				'Bus',
+			],
+		];
+		foreach ($sample_entities as $entity_type_id => $entities) {
+			foreach ($entities as $entity_name) {
+				$record = Entity::firstOrCreate([
+					'entity_type_id' => $entity_type_id,
+					'company_id' => $company->id,
+					'name' => $entity_name,
 					'created_by' => $admin->id,
 				]);
 			}
@@ -227,7 +273,11 @@ class EYatraTC1Seeder extends Seeder {
 			$address->save();
 
 			$travel_modes = [];
-			$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
+			if ($i <= 10) {
+				$travel_mode_ids = $company->travelModes()->pluck('id');
+			} else {
+				$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 5))->pluck('id');
+			}
 			foreach ($travel_mode_ids as $travel_mode_id) {
 				$travel_modes[] = $travel_mode_id;
 			}
@@ -384,7 +434,7 @@ class EYatraTC1Seeder extends Seeder {
 				$trip->save();
 
 				//SINGLE CITY
-				$src_city = NCity::inRandomOrder()->first();
+				$src_city = $employee->outlet->address->city;
 				//dd($src_city);
 				$dest_city = NCity::where('id', '!=', $src_city->id)->inRandomOrder()->first();
 				$visit1_date = Carbon::today();
@@ -392,7 +442,6 @@ class EYatraTC1Seeder extends Seeder {
 
 				$visit = new Visit();
 				$visit->trip_id = $trip->id;
-				// $visit->from_city_id = $employee->outlet->address->city_id;
 				$visit->from_city_id = $src_city->id;
 				$visit->to_city_id = $dest_city->id;
 				$visit->date = $visit1_date;
@@ -401,7 +450,41 @@ class EYatraTC1Seeder extends Seeder {
 				$visit->booking_status_id = $booking_status_id;
 				$visit->status_id = $trip_status_id;
 				$visit->manager_verification_status_id = $manager_verification_status_id;
+				if ($visit->booking_method_id == 3042) {
+					//AGENT
+					$state = $employee->outlet->address->city->state;
+					$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit->travel_mode_id)->first();
+					$visit->agent_id = $agent->id;
+					$visit->notes_to_agent = $faker->sentence;
+				}
 				$visit->save();
+
+				//ADDING BBOKING DETAILS
+				if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+					//BOOKED OR CANCELLED
+					$booking = new VisitBooking;
+					$booking->visit_id = $visit->id;
+					$booking->type_id = 3100; // FRESH BOOKING
+					$booking->travel_mode_id = $visit->travel_mode_id;
+					$booking->reference_number = $faker->swiftBicNumber;
+					$booking->amount = $faker->numberBetween(500, 2000);
+					$booking->tax = $booking->amount * 10 / 100;
+					$booking->total = $booking->amount + $booking->tax;
+					$booking->claim_amount = $booking->total;
+					$booking->payment_status_id = 3140; //NOT CLAIMED
+					$booking->created_by = $employee->user->id;
+					if ($visit->booking_method_id == 3042) {
+						//AGENT
+						// $agent = Tra::whereHas('travelModes', function ($query) use ($travel_mode) {
+						// 	$query->where('id', $travel_mode->id);
+						// })->inRandomOrder()->first();
+
+						$booking->service_charge = $faker->randomElement([100, 200, 300, 400, 500]);
+					}
+
+					$booking->save();
+
+				}
 
 				//RETURN TRAVEL
 				$visit = new Visit();
@@ -414,30 +497,42 @@ class EYatraTC1Seeder extends Seeder {
 				$visit->booking_status_id = $booking_status_id;
 				$visit->status_id = $trip_status_id;
 				$visit->manager_verification_status_id = $manager_verification_status_id;
+				if ($visit->booking_method_id == 3042) {
+					//AGENT
+					$state = $employee->outlet->address->city->state;
+					$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit->travel_mode_id)->first();
+					$visit->agent_id = $agent->id;
+					$visit->notes_to_agent = $faker->sentence;
+				}
 				$visit->save();
 
-				if ($i > 25 && $i <= 30) {
-					//NEW //SELF //BOOKED //MGR STATUS : NEW
-					//BOOKING DETAILS
-					$booking = new VisitBooking();
+				//ADDING BBOKING DETAILS
+				if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+					//BOOKED OR CANCELLED
+					$booking = new VisitBooking;
 					$booking->visit_id = $visit->id;
-					$booking->type_id = 3100; //SELF FIRST BOOKING
-					$booking->travel_mode_id = $company->travelModes()->inRandomOrder()->first()->id;
+					$booking->type_id = 3100; // FRESH BOOKING
+					$booking->travel_mode_id = $visit->travel_mode_id;
 					$booking->reference_number = $faker->swiftBicNumber;
 					$booking->amount = $faker->numberBetween(500, 2000);
 					$booking->tax = $booking->amount * 10 / 100;
-					$booking->service_charge = 0;
 					$booking->total = $booking->amount + $booking->tax;
 					$booking->claim_amount = $booking->total;
 					$booking->payment_status_id = 3140; //NOT CLAIMED
 					$booking->created_by = $employee->user->id;
+					if ($visit->booking_method_id == 3042) {
+						//AGENT
+						// $agent = Tra::whereHas('travelModes', function ($query) use ($travel_mode) {
+						// 	$query->where('id', $travel_mode->id);
+						// })->inRandomOrder()->first();
+
+						$booking->service_charge = $faker->randomElement([100, 200, 300, 400, 500]);
+					}
+
 					$booking->save();
-				} elseif ($i > 30 && $i <= 35) {
-					$trip_status_id = 3021; //MANAGER VERIFICATION PENDING
-					$booking_method_id = 3040; //SELF
-					$booking_status_id = 3061; //BOOKED
-					$manager_verification_status_id = 3080; //MANAGER VERIFICATION PENDING
+
 				}
+
 			}
 
 		}

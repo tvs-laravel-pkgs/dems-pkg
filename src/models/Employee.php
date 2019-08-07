@@ -20,6 +20,10 @@ class Employee extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Entity');
 	}
 
+	public function outlet() {
+		return $this->belongsTo('Uitoux\EYatra\Outlet');
+	}
+
 	public function user() {
 		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121);
 	}

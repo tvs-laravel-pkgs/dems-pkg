@@ -6,28 +6,32 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCountry;
-use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
-class StateController extends Controller {
-	public function listEYatraState(Request $r) {
-		$states = NState::from('nstates')
-			->join('countries as c', 'c.id', 'nstates.country_id')
+class AgentClaimController extends Controller {
+	public function listEYatraAgentClaim(Request $r) {
+		$employees = Employee::from('employees as e')
+			->join('entities as grd', 'grd.id', 'e.grade_id')
+			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
+			->join('outlets as o', 'o.id', 'e.outlet_id')
+			->withTrashed()
 			->select(
-				'nstates.id',
-				'nstates.code',
-				'nstates.name',
-				'c.name as country',
-				DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status')
+				'e.id',
+				'e.code',
+				'o.code as outlet_code',
+				'm.code as manager_code',
+				'grd.name as grade',
+				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
 			)
-			->orderBy('nstates.name', 'asc');
+			->where('e.company_id', Auth::user()->company_id)
+			->orderBy('e.code', 'asc');
 
-		return Datatables::of($states)
-			->addColumn('action', function ($state) {
+		return Datatables::of($employees)
+			->addColumn('action', function ($employee) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -36,14 +40,14 @@ class StateController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/state/edit/' . $state->id . '">
+				<a href="#!/eyatra/employee/edit/' . $employee->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/state/view/' . $state->id . '">
+				<a href="#!/eyatra/employee/view/' . $employee->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteState(' . $state->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteTrip(' . $employee->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -51,48 +55,35 @@ class StateController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraStateFormData($state_id = NULL) {
+	public function eyatraAgentClaimFormData($employee_id = NULL) {
 
-		if (!$state_id) {
-			$this->data['action'] = 'Add';
-			$state = new NState;
-			$this->data['status'] = 'Active';
-			//$visit = new Visit;
-			// $visit->booking_method = 'Self';
-			// $trip->visits = [$visit];
+		if (!$employee_id) {
+			$this->data['action'] = 'New';
+			$employee = new Employee;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$state = NState::find($state_id);
-			if ($state->deleted_at == NULL) {
-				$this->data['status'] = 'Active';
-			} else {
-				$this->data['status'] = 'Inactive';
-			}
-
-			if (!$state) {
+			$employee = Employee::find($employee_id);
+			if (!$employee) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'State not found';
+				$this->data['message'] = 'Employee not found';
 			}
 		}
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get();
-		$this->data['travel_modes'] = $travel_modes = Entity::select('name')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get();
-		// foreach ($travel_modes as $travel_mode) {
-		// 		$this->data['role_list'][$user_role->id]->checked = true;
-		// 	}
-		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
-
-		// DB::table('state_agent_travel_mode')->select();
-		$this->data['state'] = $state;
+		$this->data['extras'] = [
+			'manager_list' => Employee::getList(),
+			'outlet_list' => Outlet::getList(),
+			'grade_list' => Entity::getGradeList(),
+		];
+		$this->data['employee'] = $employee;
 
 		return response()->json($this->data);
 	}
 
-	public function saveEYatraState(Request $request) {
+	public function saveEYatraAgentClaim(Request $request) {
 		//validation
 		try {
 			$validator = Validator::make($request->all(), [
-				'code' => [
+				'purpose_id' => [
 					'required',
 				],
 			]);
@@ -148,7 +139,7 @@ class StateController extends Controller {
 		}
 	}
 
-	public function viewEYatraState($agent_id) {
+	public function viewEYatraAgentClaim($employee_id) {
 
 		$trip = Trip::with([
 			'visits',
@@ -179,16 +170,12 @@ class StateController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function deleteEYatraState($agent_id) {
+	public function deleteEYatraAgentClaim($employee_id) {
 		$trip = Trip::where('id', $trip_id)->delete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		return response()->json(['success' => true]);
-	}
-
-	public function getStateList(Request $request) {
-		return NState::getList($request->country_id);
 	}
 
 }

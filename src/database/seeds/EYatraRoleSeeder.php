@@ -27,6 +27,12 @@ class EYatraRoleSeeder extends Seeder {
 					//MAIN MENUS
 					5000,
 
+					//ADMIN PERMISSION
+					5260,
+
+					//AGENT CLAIM
+					5240,
+
 					//TRIPS
 					5001, 5002, 5003, 5004, 5005,
 
@@ -114,6 +120,10 @@ class EYatraRoleSeeder extends Seeder {
 
 					//TRIPS BOOKING REQUESTS
 					5160,
+
+					//AGENT CLAIM
+					5240,
+
 				],
 			],
 		];

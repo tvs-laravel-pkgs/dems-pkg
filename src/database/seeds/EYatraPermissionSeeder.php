@@ -296,6 +296,21 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Delete',
 			],
 
+			//AGENT CLAIM
+			5240 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'agent-claim',
+				'display_name' => 'Agent Claim',
+			],
+
+			5260 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'admin',
+				'display_name' => 'Admin Permission',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

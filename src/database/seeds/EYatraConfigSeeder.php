@@ -26,6 +26,7 @@ class EYatraConfigSeeder extends Seeder {
 			509 => 'Address Type - EYatra',
 			510 => 'Attachment of - EYatra',
 			511 => 'Attachment Type - EYatra',
+			512 => 'Visit Statuses - EYatra',
 
 		];
 
@@ -134,19 +135,11 @@ class EYatraConfigSeeder extends Seeder {
 
 			//VISIT BOOKING TYPE
 			3100 => [
-				'name' => 'Self First Booking',
+				'name' => 'Fresh Booking',
 				'config_type_id' => 505,
 			],
 			3101 => [
-				'name' => 'Self Booking Cancel',
-				'config_type_id' => 505,
-			],
-			3102 => [
-				'name' => 'Agent First Booking',
-				'config_type_id' => 505,
-			],
-			3103 => [
-				'name' => 'Agent Booking Cancel',
+				'name' => 'Booking Cancellation',
 				'config_type_id' => 505,
 			],
 
@@ -203,14 +196,25 @@ class EYatraConfigSeeder extends Seeder {
 			//ATTACHMENT OF - EYATRA
 			3180 => [
 				'name' => 'Visit',
-				'config_type_id' => 509,
+				'config_type_id' => 510,
 			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [
 				'name' => 'Booking Attachments',
-				'config_type_id' => 510,
+				'config_type_id' => 511,
 			],
+
+			//VISIT STATUSES
+			3220 => [
+				'name' => 'New',
+				'config_type_id' => 511,
+			],
+			3221 => [
+				'name' => 'Cancellation Requested',
+				'config_type_id' => 511,
+			],
+
 		];
 		foreach ($config_types as $config_type_id => $config_type_name) {
 			$config_type = ConfigType::firstOrNew([

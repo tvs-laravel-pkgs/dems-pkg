@@ -19,4 +19,8 @@ class Address extends Model {
 		'pincode',
 	];
 
+	public function city() {
+		return $this->belongsTo('Uitoux\EYatra\NCity');
+	}
+
 }

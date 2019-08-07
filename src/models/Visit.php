@@ -51,6 +51,18 @@ class Visit extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'booking_status_id');
 	}
 
+	public function claimStatus() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'claim_status_id');
+	}
+
+	public function paymentStatus() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'payment_status_id');
+	}
+
+	public function type() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'type_id');
+	}
+
 	public function agent() {
 		return $this->belongsTo('Uitoux\EYatra\Agent', 'agent_id');
 	}
