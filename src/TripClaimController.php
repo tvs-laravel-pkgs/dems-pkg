@@ -77,8 +77,11 @@ class TripClaimController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$trip = Trip::with(
-				'lodgings',
 				'visits',
+				'purpose',
+				'lodgings',
+				'boardings',
+				'localTravels',
 				'visits.fromCity',
 				'visits.toCity',
 				'visits.travelMode',
@@ -99,6 +102,7 @@ class TripClaimController extends Controller {
 			'purpose_list' => Entity::purposeList(),
 			'travel_mode_list' => Entity::travelModeList(),
 			'city_list' => NCity::getList(),
+			'state_type_list' => Entity::getLodgeStateTypeList(),
 		];
 		$this->data['trip'] = $trip;
 

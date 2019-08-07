@@ -17,6 +17,7 @@ class EYatraETSeeder extends Seeder {
 			501 => 'Trip Purposes',
 			502 => 'Travel Modes',
 			503 => 'Local Travel Modes',
+			504 => 'Lodging State',
 		];
 
 		foreach ($entity_types as $entity_type_id => $entity_type_name) {

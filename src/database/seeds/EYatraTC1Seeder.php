@@ -151,6 +151,9 @@ class EYatraTC1Seeder extends Seeder {
 				'Auto Ricksaw',
 				'Bus',
 			],
+			504 => [
+				'Normal',
+			],
 		];
 		foreach ($sample_entities as $entity_type_id => $entities) {
 			foreach ($entities as $entity_name) {
