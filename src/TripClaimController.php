@@ -3,15 +3,14 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
-use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use Validator;
 use Yajra\Datatables\Datatables;
 
 class TripClaimController extends Controller {
@@ -34,6 +33,7 @@ class TripClaimController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
+			->where('trips.status_id', 3023)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -50,10 +50,10 @@ class TripClaimController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $trip->id . '">
+				<a href="#!/eyatra/trip/claim/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $trip->id . '">
+				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
@@ -68,14 +68,9 @@ class TripClaimController extends Controller {
 	public function eyatraTripClaimFormData($trip_id = NULL) {
 
 		if (!$trip_id) {
-			$trip = new Trip;
-			$visit = new Visit;
-			$this->data['action'] = 'New';
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
-			$this->data['success'] = true;
+			$this->data['success'] = false;
+			$this->data['message'] = 'Trip not found';
 		} else {
-			$this->data['action'] = 'Edit';
 			$trip = Trip::with(
 				'visits',
 				'purpose',
@@ -110,65 +105,139 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
+		// dump($request->all());
 		//validation
 		try {
-			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
-					'required',
-				],
-			]);
-			if ($validator->fails()) {
-				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			}
+			// $validator = Validator::make($request->all(), [
+			// 	'purpose_id' => [
+			// 		'required',
+			// 	],
+			// ]);
+			// if ($validator->fails()) {
+			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			// }
 
 			DB::beginTransaction();
-			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
 
-			} else {
-				$trip = Trip::find($request->id);
-
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
-
+			if (empty($request->trip_id)) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
-
-			$trip->number = 'TRP' . $trip->id;
+			//UPDATE TRIP STATUS
+			$trip = Trip::find($request->trip_id);
+			$trip->status_id = 3023; //claimed
 			$trip->save();
 
 			//SAVING VISITS
 			if ($request->visits) {
 				foreach ($request->visits as $visit_data) {
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					if ($visit_data['booking_method'] == 'Agent') {
-						// $agent = Agent::where('company_id', Auth::user()->company_id)
-						// 	->join('agent_travel_mode as atm', 'atm.agent_id', 'agents.id')
-						// 	->where('atm.state_id', Auth::user()->eyatraEmployee->outlet->address->state_id)
-						// 	->where('atm.travel_mode_id', $visit_data['travel_mode_id'])
-						// 	->first();
-						// if ($agent) {
-						// 	$visit->agent_id = $agent->id;
-						// } else {
-						// 	return response()->json(['success' => false, 'errors' => ['No agent found for visit']]);
-						// }
+					if (!empty($visit_data['id'])) {
+						$visit = Visit::find($visit_data['id']);
+						$visit->departure_date = date('Y-m-d H:i:s'); //$visit_data['departure_date'];
+						$visit->arrival_date = date('Y-m-d H:i:s'); //$visit_data['arrival_date'];
+						$visit->save();
 					}
-					$visit->save();
+				}
+			}
+
+			//SAVING LODGINGS
+			if ($request->lodgings) {
+				if (!empty($request->lodgings_removal_id)) {
+					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
+					Lodging::whereIn('id', $lodgings_removal_id)->delete();
+				}
+				foreach ($request->lodgings as $lodging_data) {
+					$lodging = Lodging::firstOrNew([
+						'id' => $lodging_data['id'],
+					]);
+					$lodging->fill($lodging_data);
+					$lodging->trip_id = $request->trip_id;
+					$lodging->check_in_date = date('Y-m-d H:i:s'); //$lodging_data['check_in_date'];
+					$lodging->checkout_date = date('Y-m-d H:i:s'); //$lodging_data['checkout_date'];
+					$lodging->created_by = Auth::user()->id;
+					$lodging->save();
+
+					//STORE ATTACHMENT
+					$item_images = storage_path('app/public/trip/lodgings/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($lodging_data['attachments'])) {
+						foreach ($lodging_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
+							$attachement_lodge = new Attachment;
+							$attachement_lodge->attachment_of_id = 3181;
+							$attachement_lodge->attachment_type_id = 3200;
+							$attachement_lodge->entity_id = $lodging->id;
+							$attachement_lodge->name = $name;
+							$attachement_lodge->save();
+						}
+					}
+				}
+			}
+			//SAVING BOARDINGS
+			if ($request->boardings) {
+				if (!empty($request->boardings_removal_id)) {
+					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
+					Boarding::whereIn('id', $boardings_removal_id)->delete();
+				}
+				foreach ($request->boardings as $boarding_data) {
+					$boarding = Boarding::firstOrNew([
+						'id' => $boarding_data['id'],
+					]);
+					$boarding->fill($boarding_data);
+					$boarding->trip_id = $request->trip_id;
+					$boarding->date = date('Y-m-d', strtotime($boarding_data['date']));
+					$boarding->created_by = Auth::user()->id;
+					$boarding->save();
+
+					//STORE ATTACHMENT
+					$item_images = storage_path('app/public/trip/boarding/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($boarding_data['attachments'])) {
+						foreach ($boarding_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
+							$attachement_board = new Attachment;
+							$attachement_board->attachment_of_id = 3182;
+							$attachement_board->attachment_type_id = 3200;
+							$attachement_board->entity_id = $boarding->id;
+							$attachement_board->name = $name;
+							$attachement_board->save();
+						}
+					}
+				}
+			}
+
+			//SAVING LOCAL TRAVELS
+			if ($request->local_travels) {
+				if (!empty($request->local_travels_removal_id)) {
+					$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
+					LocalTravel::whereIn('id', $local_travels_removal_id)->delete();
+				}
+				foreach ($request->local_travels as $local_travel_data) {
+					$local_travel = LocalTravel::firstOrNew([
+						'id' => $local_travel_data['id'],
+					]);
+					$local_travel->fill($local_travel_data);
+					$local_travel->trip_id = $request->trip_id;
+					$local_travel->date = date('Y-m-d', strtotime($local_travel_data['date']));
+					$local_travel->created_by = Auth::user()->id;
+					$local_travel->save();
+
+					//STORE ATTACHMENT
+					$item_images = storage_path('app/public/trip/local_travels/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($local_travel_data['attachments'])) {
+						foreach ($local_travel_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
+							$attachement_local_travel = new Attachment;
+							$attachement_local_travel->attachment_of_id = 3183;
+							$attachement_local_travel->attachment_type_id = 3200;
+							$attachement_local_travel->entity_id = $local_travel->id;
+							$attachement_local_travel->name = $name;
+							$attachement_local_travel->save();
+						}
+					}
 				}
 			}
 
@@ -183,32 +252,49 @@ class TripClaimController extends Controller {
 
 	public function viewEYatraTripClaim($trip_id) {
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($trip_id);
-		if (!$trip) {
+		if (!$trip_id) {
 			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
-			return response()->json($this->data);
+			$this->data['message'] = 'Trip not found';
+		} else {
+			$trip = Trip::with(
+				'visits',
+				'purpose',
+				'lodgings',
+				'lodgings.city',
+				'lodgings.stateType',
+				'lodgings.attachments',
+				'boardings',
+				'boardings.city',
+				'boardings.attachments',
+				'localTravels',
+				'localTravels.fromCity',
+				'localTravels.toCity',
+				'localTravels.travelMode',
+				'localTravels.attachments',
+				'visits.fromCity',
+				'visits.toCity',
+				'visits.travelMode',
+				'visits.bookingMethod',
+				'visits.selfBooking',
+				'visits.agent',
+				'visits.status',
+				'visits.attachments'
+			)->find($trip_id);
+
+			if (!$trip) {
+				$this->data['success'] = false;
+				$this->data['message'] = 'Trip not found';
+			}
+			$this->data['success'] = true;
 		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
+		$this->data['extras'] = [
+			'purpose_list' => Entity::purposeList(),
+			'travel_mode_list' => Entity::travelModeList(),
+			'city_list' => NCity::getList(),
+			'state_type_list' => Entity::getLodgeStateTypeList(),
+		];
 		$this->data['trip'] = $trip;
-		$this->data['success'] = true;
+
 		return response()->json($this->data);
 	}
 

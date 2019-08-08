@@ -55,4 +55,19 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\LocalTravel');
 	}
 
+	public static function create($employee, $trip_number, $faker, $trip_status_id, $admin) {
+		$trip = new Trip();
+		$trip->employee_id = $employee->id;
+		$trip->number = 'TRP' . $trip_number++;
+		$trip->purpose_id = $employee->grade->tripPurposes()->inRandomOrder()->first()->id;
+		$trip->description = $faker->sentence;
+		$trip->manager_id = $employee->reporting_to_id;
+		$trip->status_id = $trip_status_id; //NEW
+		$trip->advance_received = $faker->randomElement([0, 500, 100, 1500, 2000]);
+		$trip->created_by = $admin->id;
+		$trip->save();
+		return $trip;
+
+	}
+
 }

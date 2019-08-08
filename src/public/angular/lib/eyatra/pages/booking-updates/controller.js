@@ -1,54 +1,54 @@
-app.component('eyatraTripBookingUpdates', {
-    templateUrl: eyatra_booking_updates_list_template_url,
-    controller: function(HelperService, $rootScope) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_trip_booking_updates_table').DataTable({
-            "dom": dom_structure,
-            "language": {
-                "search": "",
-                "searchPlaceholder": "Search",
-                "lengthMenu": "Rows Per Page _MENU_",
-                "paginate": {
-                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
-                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
-                },
-            },
-            pageLength: 10,
-            processing: true,
-            serverSide: true,
-            paging: true,
-            ordering: false,
-            ajax: {
-                url: laravel_routes['listTripBookingUpdates'],
-                type: "GET",
-                dataType: "json",
-                data: function(d) {}
-            },
+// app.component('eyatraTripBookingUpdates', {
+//     templateUrl: eyatra_booking_updates_list_template_url,
+//     controller: function(HelperService, $rootScope) {
+//         var self = this;
+//         self.hasPermission = HelperService.hasPermission;
+//         var dataTable = $('#eyatra_trip_booking_updates_table').DataTable({
+//             "dom": dom_structure,
+//             "language": {
+//                 "search": "",
+//                 "searchPlaceholder": "Search",
+//                 "lengthMenu": "Rows Per Page _MENU_",
+//                 "paginate": {
+//                     "next": '<i class="icon ion-ios-arrow-forward"></i>',
+//                     "previous": '<i class="icon ion-ios-arrow-back"></i>'
+//                 },
+//             },
+//             pageLength: 10,
+//             processing: true,
+//             serverSide: true,
+//             paging: true,
+//             ordering: false,
+//             ajax: {
+//                 url: laravel_routes['listTripBookingUpdates'],
+//                 type: "GET",
+//                 dataType: "json",
+//                 data: function(d) {}
+//             },
 
-            columns: [
-                { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'created_at', name: 'trips.created_at', searchable: true },
-                { data: 'status', name: 'status.name', searchable: true },
-            ],
-            rowCallback: function(row, data) {
-                $(row).addClass('highlight-row');
-            }
-        });
-        $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips Booking Updates');
-        $('.add_new_button').html();
-        $rootScope.loading = false;
+//             columns: [
+//                 { data: 'action', searchable: false, class: 'action' },
+//                 { data: 'number', name: 'trips.number', searchable: true },
+//                 { data: 'ecode', name: 'e.code', searchable: true },
+//                 { data: 'start_date', name: 'v.date', searchable: true },
+//                 { data: 'end_date', name: 'v.date', searchable: true },
+//                 { data: 'cities', name: 'c.name', searchable: true },
+//                 { data: 'purpose', name: 'purpose.name', searchable: true },
+//                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+//                 { data: 'created_at', name: 'trips.created_at', searchable: true },
+//                 { data: 'status', name: 'status.name', searchable: true },
+//             ],
+//             rowCallback: function(row, data) {
+//                 $(row).addClass('highlight-row');
+//             }
+//         });
+//         $('.dataTables_length select').select2();
+//         $('.page-header-content .display-inline-block .data-table-title').html('Trips Booking Updates');
+//         $('.add_new_button').html();
+//         $rootScope.loading = false;
 
-    }
-});
+//     }
+// });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripBookingUpdatesForm', {
@@ -83,7 +83,7 @@ app.component('eyatraTripBookingUpdatesForm', {
         });
 
 
-        var form_id = '#trip-booking-updates-form';
+        var form_id = '#visit-booking-update-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 error.insertAfter(element)

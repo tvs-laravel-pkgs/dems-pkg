@@ -17,7 +17,7 @@ class Entity extends Model {
 	];
 
 	public function expenseTypes() {
-		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id');
+		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id')->withPivot('eligible_amount');
 	}
 
 	public function tripPurposes() {
@@ -29,11 +29,11 @@ class Entity extends Model {
 	}
 
 	public static function purposeList() {
-		return Entity::where('entity_type_id', 501)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 501)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function travelModeList() {
-		return Entity::where('entity_type_id', 502)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 502)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function getGradeList() {
@@ -42,5 +42,19 @@ class Entity extends Model {
 
 	public static function getLodgeStateTypeList() {
 		return Entity::where('entity_type_id', 504)->select('id', 'name')->get();
+	}
+
+	public static function create($sample_entities, $admin, $company) {
+		foreach ($sample_entities as $entity_type_id => $entities) {
+			foreach ($entities as $entity_name) {
+				$record = Entity::firstOrCreate([
+					'entity_type_id' => $entity_type_id,
+					'company_id' => $company->id,
+					'name' => $entity_name,
+					'created_by' => $admin->id,
+				]);
+			}
+		}
+
 	}
 }

@@ -123,6 +123,8 @@ class TripController extends Controller {
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
+			// dd(Auth::user(), );
+			$trip->manager_id = Auth::user()->entity->reporting_to_id;
 			$trip->status_id = 3020; //NEW
 			$trip->save();
 
@@ -137,19 +139,15 @@ class TripController extends Controller {
 					$visit->trip_id = $trip->id;
 					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
 					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
+					$visit->status_id = 3220; //NEW
 					$visit->manager_verification_status_id = 3080; //NEW
 					if ($visit_data['booking_method'] == 'Agent') {
-						// $agent = Agent::where('company_id', Auth::user()->company_id)
-						// 	->join('agent_travel_mode as atm', 'atm.agent_id', 'agents.id')
-						// 	->where('atm.state_id', Auth::user()->eyatraEmployee->outlet->address->state_id)
-						// 	->where('atm.travel_mode_id', $visit_data['travel_mode_id'])
-						// 	->first();
-						// if ($agent) {
-						// 	$visit->agent_id = $agent->id;
-						// } else {
-						// 	return response()->json(['success' => false, 'errors' => ['No agent found for visit']]);
-						// }
+						$state = $trip->employee->outlet->address->city->state;
+						$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit->travel_mode_id)->first();
+						if (!$agent) {
+							return response()->json(['success' => false, 'errors' => ['No agent found for visit']]);
+						}
+						$visit->agent_id = $agent->id;
 					}
 					$visit->save();
 				}

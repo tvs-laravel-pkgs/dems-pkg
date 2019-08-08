@@ -13,7 +13,7 @@ class Boarding extends Model {
 		'trip_id',
 		'city_id',
 		'expense_name',
-		'date',
+		// 'date',
 		'amount',
 		'created_by',
 		'updated_by',
@@ -22,6 +22,14 @@ class Boarding extends Model {
 
 	public function trip() {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
+	}
+
+	public function city() {
+		return $this->belongsTo('Uitoux\EYatra\NCity', 'city_id');
+	}
+
+	public function attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3182)->where('attachment_type_id', 3200);
 	}
 
 }

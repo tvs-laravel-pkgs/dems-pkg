@@ -153,7 +153,7 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Trip Verification Form',
     }).
 
-    //BOOKING REQUESTS
+    //AGENT - BOOKING REQUESTS
     when('/eyatra/trips/booking-requests', {
         template: '<eyatra-trip-booking-requests></eyatra-trip-booking-requests>',
         title: 'Trips Booking Requests',
@@ -161,6 +161,12 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/trips/booking-requests/view/:trip_id', {
         template: '<eyatra-trip-booking-requests-view></eyatra-booking-requests-view>',
         title: 'Trip Booking Request View',
+    }).
+
+    //AGENT - BOOKING UPDATES
+    when('/eyatra/agent/booking-update/form/:visit_id', {
+        template: '<eyatra-agent-booking-update-form></eyatra-agent-booking-update-form>',
+        title: 'Agent Booking Update Form',
     }).
 
     //AGENT CLAIM
@@ -177,13 +183,13 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit Agent Claim',
     }).
 
-    //BOOKING UPDATES
+    //EMPLOYEE - BOOKING UPDATES
     when('/eyatra/trips/booking-updates', {
         template: '<eyatra-trip-booking-updates></eyatra-trip-booking-updates>',
         title: 'Trips Booking Updates',
     }).
     when('/eyatra/trips/booking-updates/form/:visit_id', {
-        template: '<eyatra-trip-booking-updates-form></eyatra-booking-updates-form>',
-        title: 'Trip Booking Update View',
+        template: '<eyatra-trip-booking-updates-form></eyatra-trip-booking-updates-form>',
+        title: 'Employee Booking Update Form',
     });
 }]);
