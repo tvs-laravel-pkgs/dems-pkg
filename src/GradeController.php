@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\Trip;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -50,8 +49,8 @@ class GradeController extends Controller {
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_discount"
-				onclick="angular.element(this).scope().deleteDiscount(' . $entity->id . ')" dusk = "delete-btn" title="Delete">
+				<a href="javascript:;" data-toggle="modal" data-target="#delete_grade"
+				onclick="angular.element(this).scope().deleteGrade(' . $entity->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -194,9 +193,10 @@ class GradeController extends Controller {
 	}
 
 	public function deleteEYatraGrade($grade_id) {
-		$trip = Trip::where('id', $trip_id)->delete();
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		$grade = Entity::where('id', $grade_id)->update(['deleted_by' => Auth::user()->id]);
+		$grade = Entity::where('id', $grade_id)->delete();
+		if (!$grade) {
+			return response()->json(['success' => false, 'errors' => ['Grade Not Found']]);
 		}
 		return response()->json(['success' => true]);
 	}

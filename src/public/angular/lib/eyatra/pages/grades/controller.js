@@ -1,6 +1,6 @@
 app.component('eyatraGrades', {
     templateUrl: eyatra_grade_list_template_url,
-    controller: function(HelperService, $rootScope, $scope) {
+    controller: function($http, HelperService, $rootScope, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_grade_table').DataTable({
@@ -47,14 +47,14 @@ app.component('eyatraGrades', {
         );
         $rootScope.loading = false;
 
-        $scope.deleteDiscount = function($id) {
+        $scope.deleteGrade = function($id) {
             $('#del').val($id);
         }
         $scope.confirmDeleteDiscount = function() {
             //return confirm(‘Are You sure ‘);
             $id = $('#del').val();
             $http.get(
-                delete_discount_url + '/' + $id,
+                grade_delete_url + '/' + $id,
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
@@ -62,16 +62,16 @@ app.component('eyatraGrades', {
                     new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'Discount Deleted Successfully',
+                        text: 'Grade Deleted Successfully',
                     }).show();
                 } else {
                     new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: 'Discount not Deleted',
+                        text: 'Grade not Deleted',
                     }).show();
                 }
-                $('#delete_discount').modal('hide');
+                $('#delete_grade').modal('hide');
                 dataTable.ajax.reload(function(json) {});
             });
         }
