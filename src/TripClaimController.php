@@ -56,7 +56,7 @@ class TripClaimController extends Controller {
 				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
+				<a href="javascript:;" data-toggle="modal" data-target="#delete_claimed_trip"
 				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
@@ -94,8 +94,8 @@ class TripClaimController extends Controller {
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 			'state_type_list' => Entity::getLodgeStateTypeList(),
 		];
@@ -288,8 +288,8 @@ class TripClaimController extends Controller {
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 			'state_type_list' => Entity::getLodgeStateTypeList(),
 		];

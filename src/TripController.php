@@ -83,8 +83,8 @@ class TripController extends Controller {
 			}
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 		];
 		$this->data['trip'] = $trip;
