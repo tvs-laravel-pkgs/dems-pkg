@@ -75,10 +75,8 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response.data);
             self.extras = response.data.extras;
             self.trip = response.data.trip;
-            self.action = response.data.action;
 
             if (self.trip.lodgings.length == 0) {
                 self.addNewLodgings();
@@ -264,5 +262,48 @@ app.component('eyatraTripClaimForm', {
 
             },
         });
+    }
+});
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
+
+app.component('eyatraTripClaimView', {
+    templateUrl: eyatra_trip_claim_view_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.angular_routes = angular_routes;
+        self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
+        self.eyatra_trip_claim_lodging_attachment_url = eyatra_trip_claim_lodging_attachment_url;
+        self.eyatra_trip_claim_boarding_attachment_url = eyatra_trip_claim_boarding_attachment_url;
+        self.eyatra_trip_claim_local_travel_attachment_url = eyatra_trip_claim_local_travel_attachment_url;
+        $http.get(
+            $form_data_url
+        ).then(function(response) {
+            if (!response.data.success) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                }).show();
+                $location.path('/eyatra/trip/claim/list')
+                $scope.$apply()
+                return;
+            }
+            self.extras = response.data.extras;
+            self.trip = response.data.trip;
+            $rootScope.loading = false;
+
+        });
+
+        /* Pane Next Button */
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
     }
 });

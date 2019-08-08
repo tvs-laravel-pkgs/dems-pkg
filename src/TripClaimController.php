@@ -70,13 +70,21 @@ class TripClaimController extends Controller {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
 		} else {
-			$this->data['action'] = 'Edit';
 			$trip = Trip::with(
 				'visits',
 				'purpose',
 				'lodgings',
+				'lodgings.city',
+				'lodgings.stateType',
+				'lodgings.attachments',
 				'boardings',
+				'boardings.city',
+				'boardings.attachments',
 				'localTravels',
+				'localTravels.fromCity',
+				'localTravels.toCity',
+				'localTravels.travelMode',
+				'localTravels.attachments',
 				'visits.fromCity',
 				'visits.toCity',
 				'visits.travelMode',
