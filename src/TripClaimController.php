@@ -6,6 +6,7 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
@@ -66,12 +67,8 @@ class TripClaimController extends Controller {
 	public function eyatraTripClaimFormData($trip_id = NULL) {
 
 		if (!$trip_id) {
-			$trip = new Trip;
-			$visit = new Visit;
-			$this->data['action'] = 'New';
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
-			$this->data['success'] = true;
+			$this->data['success'] = false;
+			$this->data['message'] = 'Trip not found';
 		} else {
 			$this->data['action'] = 'Edit';
 			$trip = Trip::with(
@@ -108,7 +105,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
-		dd($request->all());
+		// dump($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -138,7 +135,7 @@ class TripClaimController extends Controller {
 			if ($request->lodgings) {
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
-					Lodging::whereIn($lodgings_removal_id)->delete();
+					Lodging::whereIn('id', $lodgings_removal_id)->delete();
 				}
 				foreach ($request->lodgings as $lodging_data) {
 					$lodging = Lodging::firstOrNew([
@@ -148,30 +145,31 @@ class TripClaimController extends Controller {
 					$lodging->trip_id = $request->trip_id;
 					$lodging->check_in_date = date('Y-m-d H:i:s'); //$lodging_data['check_in_date'];
 					$lodging->checkout_date = date('Y-m-d H:i:s'); //$lodging_data['checkout_date'];
+					$lodging->created_by = Auth::user()->id;
 					$lodging->save();
 
+					//STORE ATTACHMENT
 					$item_images = storage_path('app/public/trip/lodgings/attachments/');
 					Storage::makeDirectory($item_images, 0777);
-					if ($lodging_data->hasfile('attachments')) {
-						foreach ($lodging_data->file('attachments') as $image) {
-							$name = $image->getClientOriginalName();
-							$image->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
-							$attachement = new Attachment;
-							$attachement->attachment_of_id = 3181;
-							$attachement->attachment_type_id = 3200;
-							$attachement->entity_id = $lodging->id;
-							$attachement->name = $name;
-							$attachement->save();
+					if (!empty($lodging_data['attachments'])) {
+						foreach ($lodging_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
+							$attachement_lodge = new Attachment;
+							$attachement_lodge->attachment_of_id = 3181;
+							$attachement_lodge->attachment_type_id = 3200;
+							$attachement_lodge->entity_id = $lodging->id;
+							$attachement_lodge->name = $name;
+							$attachement_lodge->save();
 						}
 					}
 				}
 			}
-
 			//SAVING BOARDINGS
 			if ($request->boardings) {
 				if (!empty($request->boardings_removal_id)) {
 					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
-					Boarding::whereIn($boardings_removal_id)->delete();
+					Boarding::whereIn('id', $boardings_removal_id)->delete();
 				}
 				foreach ($request->boardings as $boarding_data) {
 					$boarding = Boarding::firstOrNew([
@@ -180,20 +178,22 @@ class TripClaimController extends Controller {
 					$boarding->fill($boarding_data);
 					$boarding->trip_id = $request->trip_id;
 					$boarding->date = date('Y-m-d', strtotime($boarding_data['date']));
+					$boarding->created_by = Auth::user()->id;
 					$boarding->save();
 
+					//STORE ATTACHMENT
 					$item_images = storage_path('app/public/trip/boarding/attachments/');
 					Storage::makeDirectory($item_images, 0777);
-					if ($boarding_data->hasfile('attachments')) {
-						foreach ($boarding_data->file('attachments') as $image) {
-							$name = $image->getClientOriginalName();
-							$image->move(storage_path('app/public/trip/boarding/attachments/'), $name);
-							$attachement = new Attachment;
-							$attachement->attachment_of_id = 3182;
-							$attachement->attachment_type_id = 3200;
-							$attachement->entity_id = $boarding->id;
-							$attachement->name = $name;
-							$attachement->save();
+					if (!empty($boarding_data['attachments'])) {
+						foreach ($boarding_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
+							$attachement_board = new Attachment;
+							$attachement_board->attachment_of_id = 3182;
+							$attachement_board->attachment_type_id = 3200;
+							$attachement_board->entity_id = $boarding->id;
+							$attachement_board->name = $name;
+							$attachement_board->save();
 						}
 					}
 				}
@@ -203,7 +203,7 @@ class TripClaimController extends Controller {
 			if ($request->local_travels) {
 				if (!empty($request->local_travels_removal_id)) {
 					$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
-					LocalTravel::whereIn($local_travels_removal_id)->delete();
+					LocalTravel::whereIn('id', $local_travels_removal_id)->delete();
 				}
 				foreach ($request->local_travels as $local_travel_data) {
 					$local_travel = LocalTravel::firstOrNew([
@@ -212,20 +212,22 @@ class TripClaimController extends Controller {
 					$local_travel->fill($local_travel_data);
 					$local_travel->trip_id = $request->trip_id;
 					$local_travel->date = date('Y-m-d', strtotime($local_travel_data['date']));
+					$local_travel->created_by = Auth::user()->id;
 					$local_travel->save();
 
+					//STORE ATTACHMENT
 					$item_images = storage_path('app/public/trip/local_travels/attachments/');
 					Storage::makeDirectory($item_images, 0777);
-					if ($local_travel_data->hasfile('attachments')) {
-						foreach ($local_travel_data->file('attachments') as $image) {
-							$name = $image->getClientOriginalName();
-							$image->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
-							$attachement = new Attachment;
-							$attachement->attachment_of_id = 3183;
-							$attachement->attachment_type_id = 3200;
-							$attachement->entity_id = $local_travel->id;
-							$attachement->name = $name;
-							$attachement->save();
+					if (!empty($local_travel_data['attachments'])) {
+						foreach ($local_travel_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
+							$attachement_local_travel = new Attachment;
+							$attachement_local_travel->attachment_of_id = 3183;
+							$attachement_local_travel->attachment_type_id = 3200;
+							$attachement_local_travel->entity_id = $local_travel->id;
+							$attachement_local_travel->name = $name;
+							$attachement_local_travel->save();
 						}
 					}
 				}

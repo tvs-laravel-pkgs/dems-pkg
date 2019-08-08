@@ -197,21 +197,24 @@ app.component('eyatraTripClaimForm', {
         }
 
         var form_id = '#claim_form';
-        // $.validator.addClassRules({
-        //     maxlength_name: {
-        //         maxlength: 191,
-        //         required: true,
-        //     },
-        //     num_amount: {
-        //         maxlength: 12,
-        //         number: true,
-        //         required: true,
-        //     },
-        //     boarding_expense: {
-        //         maxlength: 255,
-        //         required: true,
-        //     }
-        // });
+        $.validator.addClassRules({
+            // maxlength_name: {
+            //     maxlength: 191,
+            //     required: true,
+            // },
+            // num_amount: {
+            //     maxlength: 12,
+            //     number: true,
+            //     required: true,
+            // },
+            // boarding_expense: {
+            //     maxlength: 255,
+            //     required: true,
+            // }
+            attachments: {
+                // extension: "xlsx,xls",
+            }
+        });
 
         var v = jQuery(form_id).validate({
             invalidHandler: function(event, validator) {
@@ -244,7 +247,6 @@ app.component('eyatraTripClaimForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
