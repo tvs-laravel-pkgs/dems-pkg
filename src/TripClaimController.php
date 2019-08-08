@@ -74,17 +74,8 @@ class TripClaimController extends Controller {
 				'visits',
 				'purpose',
 				'lodgings',
-				'lodgings.city',
-				'lodgings.stateType',
-				'lodgings.attachments',
 				'boardings',
-				'boardings.city',
-				'boardings.attachments',
 				'localTravels',
-				'localTravels.fromCity',
-				'localTravels.toCity',
-				'localTravels.travelMode',
-				'localTravels.attachments',
 				'visits.fromCity',
 				'visits.toCity',
 				'visits.travelMode',
@@ -126,6 +117,14 @@ class TripClaimController extends Controller {
 			// }
 
 			DB::beginTransaction();
+
+			if (empty($request->trip_id)) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			}
+			//UPDATE TRIP STATUS
+			$trip = Trip::find($request->trip_id);
+			$trip->status_id = 3023; //claimed
+			$trip->save();
 
 			//SAVING VISITS
 			if ($request->visits) {
@@ -252,32 +251,49 @@ class TripClaimController extends Controller {
 
 	public function viewEYatraTripClaim($trip_id) {
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($trip_id);
-		if (!$trip) {
+		if (!$trip_id) {
 			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
-			return response()->json($this->data);
+			$this->data['message'] = 'Trip not found';
+		} else {
+			$trip = Trip::with(
+				'visits',
+				'purpose',
+				'lodgings',
+				'lodgings.city',
+				'lodgings.stateType',
+				'lodgings.attachments',
+				'boardings',
+				'boardings.city',
+				'boardings.attachments',
+				'localTravels',
+				'localTravels.fromCity',
+				'localTravels.toCity',
+				'localTravels.travelMode',
+				'localTravels.attachments',
+				'visits.fromCity',
+				'visits.toCity',
+				'visits.travelMode',
+				'visits.bookingMethod',
+				'visits.selfBooking',
+				'visits.agent',
+				'visits.status',
+				'visits.attachments'
+			)->find($trip_id);
+
+			if (!$trip) {
+				$this->data['success'] = false;
+				$this->data['message'] = 'Trip not found';
+			}
+			$this->data['success'] = true;
 		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
+		$this->data['extras'] = [
+			'purpose_list' => Entity::purposeList(),
+			'travel_mode_list' => Entity::travelModeList(),
+			'city_list' => NCity::getList(),
+			'state_type_list' => Entity::getLodgeStateTypeList(),
+		];
 		$this->data['trip'] = $trip;
-		$this->data['success'] = true;
+
 		return response()->json($this->data);
 	}
 
