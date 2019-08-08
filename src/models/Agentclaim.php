@@ -18,4 +18,8 @@ class AgentClaim extends Model {
 		'status_id',
 		'payment_id',
 	];
+
+	public function bookings() {
+		return $this->belongsToMany('Uitoux\EYatra\VisitBooking', 'ey_agent_claim_booking', 'agent_claim_id', 'booking_id');
+	}
 }

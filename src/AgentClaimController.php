@@ -7,32 +7,30 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\AgentClaim;
-use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\Visit;
 use Uitoux\EYatra\VisitBooking;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class AgentClaimController extends Controller {
-	public function listEYatraAgentClaim(Request $r) {
-		$employees = Employee::from('employees as e')
-			->join('entities as grd', 'grd.id', 'e.grade_id')
-			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
-			->join('outlets as o', 'o.id', 'e.outlet_id')
-			->withTrashed()
-			->select(
-				'e.id',
-				'e.code',
-				'o.code as outlet_code',
-				'm.code as manager_code',
-				'grd.name as grade',
-				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
-			)
-			->where('e.company_id', Auth::user()->company_id)
-			->orderBy('e.code', 'asc');
+	public function listEYatraAgentClaimList(Request $r) {
 
-		return Datatables::of($employees)
-			->addColumn('action', function ($employee) {
+		$agent_claim_list = Agentclaim::select(
+			'ey_agent_claims.id',
+			'ey_agent_claims.number',
+			'ey_agent_claims.invoice_date',
+			'ey_agent_claims.invoice_number',
+			'ey_agent_claims.invoice_amount',
+			'agents.code as agent_code',
+			'configs.name as status',
+			DB::raw('DATE_FORMAT(ey_agent_claims.created_at,"%d/%m/%Y") as date'))
+			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
+			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
+			->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
+			->orderBy('ey_agent_claims.id', 'desc')->get();
+		// dd($agent_claim_list);
+
+		return Datatables::of($agent_claim_list)
+			->addColumn('action', function ($agent_claim_list) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -41,35 +39,41 @@ class AgentClaimController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/employee/edit/' . $employee->id . '">
+				<a href="#!/eyatra/agent/claim/edit/' . $agent_claim_list->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/employee/view/' . $employee->id . '">
+				<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteTrip(' . $employee->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
-                </a>';
+
+				<a href="javascript:;" data-toggle="modal" data-target="#agent_claim"
+				onclick="angular.element(this).scope().deleteAgentClaimconfirm(' . $agent_claim_list->id . ')" dusk = "delete-btn" title="Delete">
+					<img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
+				</a>';
 
 			})
 			->make(true);
 	}
 
 	public function eyatraAgentClaimFormData($agent_claim_id = NULL) {
+		//dd($agent_claim_id);
 		if (!$agent_claim_id) {
 			$this->data['action'] = 'New';
 			$agent_claim = new AgentClaim;
 			$this->data['success'] = true;
+			$this->data['booking_pivot'] = [];
+			$date = '';
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent_claim = AgentClaim::find($agent_claim_id);
+			$agent_claim = Agentclaim::find($agent_claim_id);
+			$date = date("d-m-Y", strtotime($agent_claim->invoice_date));
 			if (!$agent_claim) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Agent Claim not found';
 			} else {
 				$this->data['success'] = true;
 			}
+			$this->data['booking_pivot'] = $agent_claim->bookings()->pluck('booking_id')->toArray();
 		}
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(
 			'visit_bookings.id',
@@ -100,64 +104,72 @@ class AgentClaimController extends Controller {
 		// 	'grade_list' => Entity::getGradeList(),
 		// ];
 		$this->data['agent_claim'] = $agent_claim;
+		$this->data['invoice_date'] = $date;
 
 		return response()->json($this->data);
 	}
 
 	public function saveEYatraAgentClaim(Request $request) {
+		// dd($request->all());
 		//validation
 		try {
+			$error_messages = [
+				'invoice_number.required' => 'Invoice Number is Required',
+				'invoice_number.unique' => 'Invoice Number is already taken',
+				'date.required' => 'Invoice Date is Required',
+				'amount.required' => 'Invoice Amount is Required',
+				'booking_list.*.required' => 'Booking List is Required',
+			];
 			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
-					'required',
+				'invoice_number' => [
+					'required:true',
+					'unique:ey_agent_claims,invoice_number,' . $request->id . ',id,agent_id,' . Auth::user()->id,
 				],
+				'date' => "required",
+				'amount' => "required",
+				'booking_list.*' => "required",
 			]);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
+			if (!array_filter($request->booking_list)) {
+				return response()->json(['success' => false, 'errors' => ['Select Booking List!']]);
+			}
+			$invoice_date = date("Y-m-d", strtotime($request->date));
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
+				$agentClaim = new Agentclaim;
+				$agentClaim->created_by = Auth::user()->id;
+				$agentClaim->created_at = Carbon::now();
+				$agentClaim->updated_at = NULL;
 
 			} else {
-				$trip = Trip::find($request->id);
-
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
-
+				$agentClaim = Agentclaim::find($request->id);
+				$agentClaim->updated_by = Auth::user()->id;
+				$agentClaim->updated_at = Carbon::now();
+				// $agentClaim->visits()->sync([]);
 			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
+			//$agent_id = Auth::user()->entity_id;
+			//dd(Auth::user()->where('user_type_id', 3122)->where('entity_id', $agent_id)->pluck('entity_id'));
+			$agentClaim->number = 'INVOICE_' . rand();
+			$agentClaim->agent_id = Auth::user()->entity_id;
+			$agentClaim->invoice_date = $invoice_date;
+			$agentClaim->invoice_amount = $request->amount;
+			$agentClaim->status_id = 3222;
+			$agentClaim->fill($request->all());
+			$agentClaim->save();
 
-			$trip->number = 'TRP' . $trip->id;
-			$trip->save();
-
-			//SAVING VISITS
-			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					$visit->save();
-				}
-			}
+			$agentClaim->bookings()->sync($request->booking_list);
 
 			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
+			$request->session()->flash('success', 'Agent Claim Requested successfully!');
 			return response()->json(['success' => true]);
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => 'Agent Claim Added successfully']);
+			} else {
+				return response()->json(['success' => true, 'message' => 'Agent Claim Updated Successfully']);
+			}
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
@@ -195,10 +207,10 @@ class AgentClaimController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function deleteEYatraAgentClaim($employee_id) {
-		$trip = Trip::where('id', $trip_id)->delete();
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+	public function deleteEYatraAgentClaim($agent_claim_id) {
+		$agent_claim = Agentclaim::where('id', $agent_claim_id)->delete();
+		if (!$agent_claim) {
+			return response()->json(['success' => false, 'errors' => ['Agent Claim not found']]);
 		}
 		return response()->json(['success' => true]);
 	}
