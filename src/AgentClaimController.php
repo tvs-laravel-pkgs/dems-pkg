@@ -26,8 +26,8 @@ class AgentClaimController extends Controller {
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
 			->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
-			->orderBy('ey_agent_claims.id', 'desc')->get();
-		// dd($agent_claim_list);
+			->orderBy('ey_agent_claims.id', 'desc');
+		// ->get();
 
 		return Datatables::of($agent_claim_list)
 			->addColumn('action', function ($agent_claim_list) {

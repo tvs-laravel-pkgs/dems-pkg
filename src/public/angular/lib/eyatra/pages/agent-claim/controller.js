@@ -116,19 +116,26 @@ app.component('eyatraAgentClaimForm', {
             return value;
         }
 
-        $scope.checkedcount = function(id) {
+        var total_amount = 0;
+        $scope.checkedcount = function(id, amount) {
             if (event.target.checked == true) {
                 var data = $(".booking_list:checked").length;
+                total_amount += parseFloat(amount);
             } else {
                 var data = $(".booking_list:checked").length;
+                total_amount -= parseFloat(amount);
             }
-            return Checked_count;
+            self.selected_amount = total_amount.toFixed(2);
+            self.booking_checked_count = data;
         }
 
 
         $('#head_booking').on('click', function() {
             if (event.target.checked == true) {
                 $('.booking_list').prop('checked', true);
+                $.each($('.booking_list:checked'), function() {
+                    $scope.checkedcount($(this).val(), $(this).attr('data-amount'));
+                });
             } else {
                 $('.booking_list').prop('checked', false);
             }
