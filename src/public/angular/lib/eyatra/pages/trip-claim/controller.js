@@ -1,5 +1,5 @@
 app.component('eyatraTripClaimList', {
-    templateUrl: eyatra_agent_claim_list_template_url,
+    templateUrl: eyatra_trip_claim_list_template_url,
     controller: function(HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -20,21 +20,20 @@ app.component('eyatraTripClaimList', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listTripClaim'],
+                url: laravel_routes['listEYatraTripClaimList'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 't.number', searchable: true },
+                { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'date', name: 'v.date', searchable: true },
-                { data: 'from', name: 'fc.name', searchable: true },
-                { data: 'to', name: 'tc.name', searchable: true },
-                { data: 'travel_mode', name: 'tm.name', searchable: true },
-                { data: 'booking_status', name: 'bs.name', searchable: false },
-                { data: 'agent', name: 'a.name', searchable: true },
+                { data: 'start_date', name: 'v.date', searchable: true },
+                { data: 'end_date', name: 'v.date', searchable: true },
+                { data: 'cities', name: 'c.name', searchable: true },
+                { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -42,7 +41,7 @@ app.component('eyatraTripClaimList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trip Claims');
+        $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
         $('.add_new_button').html();
         $rootScope.loading = false;
 

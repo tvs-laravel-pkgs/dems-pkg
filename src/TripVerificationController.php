@@ -31,6 +31,7 @@ class TripVerificationController extends Controller {
 				'status.name as status'
 
 			)
+			->where('trips.status_id', 3021) //MANAGER APPROVAL PENDING
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
