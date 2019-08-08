@@ -42,8 +42,8 @@ class StateController extends Controller {
 				<a href="#!/eyatra/state/view/' . $state->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteState(' . $state->id . ')" dusk = "delete-btn" title="Delete">
+				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"
+				onclick="angular.element(this).scope().deleteStateConfirm(' . $state->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -62,12 +62,7 @@ class StateController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$state = NState::find($state_id);
-			if ($state->deleted_at == NULL) {
-				$this->data['status'] = 'Active';
-			} else {
-				$this->data['status'] = 'Inactive';
-			}
+			$state = NState::withTrashed()->find($state_id);
 
 			if (!$state) {
 				$this->data['success'] = false;
@@ -76,14 +71,23 @@ class StateController extends Controller {
 				$this->data['success'] = true;
 
 			}
+			if ($state->deleted_at == NULL) {
+				$this->data['status'] = 'Active';
+			} else {
+				$this->data['status'] = 'Inactive';
+			}
 		}
 		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get();
-		$this->data['travel_modes'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get();
-		foreach ($travel_modes as $travel_mode) {
-			$this->data['agents_list'] = $agents_list[] = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
+		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
+		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
+
+		// dd($state->travelModes()->withPivot()->get());
+		foreach ($state->travelModes as $travel_mode) {
+			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
+			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
+			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
 		}
 
-		// DB::table('state_agent_travel_mode')->select();
 		$this->data['state'] = $state;
 
 		return response()->json($this->data);
@@ -126,46 +130,51 @@ class StateController extends Controller {
 				$state->updated_at = NULL;
 
 			} else {
-				$state = NState::find($request->id);
+				$state = NState::withTrashed()->where('id', $request->id)->first();
 
 				$state->updated_by = Auth::user()->id;
 				$state->updated_at = Carbon::now();
 
-				//$trip->visits()->sync([]);
-				//dd($request->travel_modes);
+				$state->travelModes()->sync([]);
 			}
-			if ($request->status == 'Inactive') {
-				$state->deleted_at = date('Y-m-d H:i:s');
-			} else {
+			if ($request->status == 'Active') {
 				$state->deleted_at = NULL;
+				$state->deleted_by = NULL;
+			} else {
+				$state->deleted_at = date('Y-m-d H:i:s');
+				$state->deleted_by = Auth::user()->id;
+
 			}
+
 			$state->fill($request->all());
 			$state->save();
+
 			//SAVING state_agent_travel_mode
-			// $travel_modes = [];
-			// $agents = [];
-
-			foreach (NState::get() as $state) {
-				$state->travelModes()->sync([]);
-				$state->agents()->sync([]);
-				foreach (Entity::travelModeList() as $travel_mode) {
-					$agent = Agent::whereHas('travelModes', function ($query) use ($travel_mode) {
-						$query->where('id', $travel_mode->id);
-					})->inRandomOrder()->get();
-					$travel_modes[$travel_mode->id] = [
-						'state_id' => $request->id,
-						'agent_id' => $request->agent_id,
-						'service_charge' => $request->service_charge,
-					];
-
+			if (count($request->travel_modes) > 0) {
+				foreach ($request->travel_modes as $travel_mode) {
+					if (!isset($travel_mode['id'])) {
+						continue;
+					}
+					if (!isset($travel_mode['agent_id'])) {
+						continue;
+					}
+					if (!isset($travel_mode['service_charge'])) {
+						continue;
+					}
+					$state->travelModes()->attach($travel_mode['id'], [
+						'agent_id' => $travel_mode['agent_id'],
+						'service_charge' => $travel_mode['service_charge'],
+					]);
 				}
-				$state->travelModes()->sync($travel_modes);
-				$state->agents()->sync($agents);
-
 			}
-			//dd($request->travel_mode);
+
 			DB::commit();
 			$request->session()->flash('success', 'State saved successfully!');
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => 'State Added successfully']);
+			} else {
+				return response()->json(['success' => true, 'message' => 'State Updated Successfully']);
+			}
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -178,23 +187,32 @@ class StateController extends Controller {
 		$state = NState::with([
 
 			'country',
-		])
+		])->select('*', DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status'))
+			->withTrashed()
 			->find($state_id);
+		$state_travel = DB::table('state_agent_travel_mode')->select('entities.name as travel_mode_name', 'agents.name', 'service_charge')->where('state_id', $state_id)->where('entities.company_id', Auth::user()->company_id)
+			->leftJoin('entities', 'entities.id', 'state_agent_travel_mode.travel_mode_id')
+			->leftJoin('agents', 'agents.id', 'state_agent_travel_mode.agent_id')
+			->get()->toArray();
+		$this->data['travel_mode_name'] = $travel_mode_name = array_column($state_travel, 'travel_mode_name');
+		$this->data['agents'] = $agents = array_column($state_travel, 'name');
+		$this->data['service_charge'] = $service_charge = array_column($state_travel, 'service_charge');
+		$this->data['action'] = 'View';
 		if (!$state) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['State not found'];
 			return response()->json($this->data);
 		}
-
 		$this->data['state'] = $state;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
-	public function deleteEYatraState($agent_id) {
-		$trip = Trip::where('id', $trip_id)->delete();
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+	public function deleteEYatraState($state_id) {
+		$state = Nstate::withTrashed()->where('id', $state_id)->first();
+		$state->forceDelete();
+		if (!$state) {
+			return response()->json(['success' => false, 'errors' => ['State not found']]);
 		}
 		return response()->json(['success' => true]);
 	}

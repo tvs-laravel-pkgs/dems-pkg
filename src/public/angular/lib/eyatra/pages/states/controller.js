@@ -1,6 +1,6 @@
 app.component('eyatraStates', {
     templateUrl: eyatra_state_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $scope, $http) {
         // alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -31,7 +31,7 @@ app.component('eyatraStates', {
                 { data: 'code', name: 'nstates.code', searchable: true },
                 { data: 'name', name: 'nstates.name', searchable: true },
                 { data: 'country', name: 'c.name', searchable: true },
-                { data: 'status', name: 'status.name', searchable: false },
+                { data: 'status', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -40,10 +40,37 @@ app.component('eyatraStates', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('States');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-state\')">' +
             'Add New' +
             '</a>'
         );
+        $scope.deleteStateConfirm = function($id) {
+            $("#delete_state_id").val($id);
+        }
+
+        $scope.deleteState = function() {
+            $id = $('#delete_state_id').val();
+            $http.get(
+                state_delete_url + '/' + $id,
+            ).then(function(response) {
+                console.log(response.data);
+                if (response.data.success) {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'State Deleted Successfully',
+                    }).show();
+                    dataTable.ajax.reload(function(json) {});
+
+                } else {
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: 'State not Deleted',
+                    }).show();
+                }
+            });
+        }
         $rootScope.loading = false;
 
     }
@@ -75,29 +102,94 @@ app.component('eyatraStateForm', {
             self.state = response.data.state;
             self.country_list = response.data.country_list;
             self.status = response.data.status;
-            self.travel_modes = response.data.travel_modes;
+            self.travel_mode_list = response.data.travel_mode_list;
             self.agents_list = response.data.agents_list;
             self.state.agent = response.data.agent;
             self.action = response.data.action;
 
         });
-        //         $scope.travelChecked = function(id) {
-        //     var value = travel_mode.indexOf(id);
-        //     return value;
-        // }
-        // $('.checkbox').on('click', function() {
-        //     if ($(this).is(": checked")) {
-        //         $('.travel_checkbox').prop('checked', true);
-        //     } else {
-        //         $('.travel_checkbox').prop('checked', false);
 
+        $('#travel_mode').on('click', function() {
+            if (event.target.checked == true) {
+                $('.travelmodecheckbox').prop('checked', true);
+
+                $.each($('.travelmodecheckbox:checked'), function() {
+                    $scope.getTravelMode($(this).val());
+                });
+
+            } else {
+                $('.travelmodecheckbox').prop('checked', false);
+                $.each($('.travelmodecheckbox'), function() {
+                    $scope.getTravelMode($(this).val());
+                });
+            }
+        });
+
+        $scope.getTravelMode = function(id) {
+            if (event.target.checked == true) {
+                $("#sc_" + id).removeClass("ng-hide");
+                $("#sc_" + id).prop('required', true);
+                $("#agent_" + id).removeClass("ng-hide");
+                $("#agent_" + id).prop('required', true);
+                $("#agent_" + id).removeClass("ng-hide");
+            } else {
+                $("#sc_" + id).addClass("ng-hide");
+                $("#sc_" + id).prop('required', false);
+                $("#agent_" + id).addClass("ng-hide");
+                $("#agent_" + id).prop('required', false);
+            }
+        }
+        // $('#travel_mode').on('click', function() {
+        //     if (event.target.checked == true) {
+        //         $('.travelmodecheckbox').prop('checked', true);
+        //         $.each($('.travelmodecheckbox:checked'), function() {
+        //             $scope.getTravelMode($(this).val());
+        //             //$('.state_agent_travel_mode_table').find('ui-select').attr('disabled', false);
+        //             // $('.state_agent_travel_mode_table tbody ui-select option' + $(this).find('ui-select')).removeClass('ng-hide');
+        //             // $('.state_agent_travel_mode_table tbody tr #agent_' + $(this).val()).removeClass('ng-hide');
+        //             $('.state_agent_travel_mode_table tbody tr #sc_' + $(this).val()).removeClass('ng-hide');
+        //         });
+        //     } else {
+        //         $('.travelmodecheckbox').prop('checked', false);
+        //         $.each($('.travelmodecheckbox'), function() {
+        //             // $('.state_agent_travel_mode_table tbody ui-select option' + $(this).find('ui-select')).addClass('ng-hide');
+        //             //$('.state_agent_travel_mode_table tbody tr #agent_' + $(this).val()).addClass('ng-hide');
+        //             $('.state_agent_travel_mode_table tbody tr #sc_' + $(this).val()).addClass('ng-hide');
+        //         });
         //     }
         // });
+
+
+        // $(document).ready(function() {
+        //     $('#travel_mode').on('click', function() {
+        //         // $(':checkbox').change(function() {
+
+        //         if ($(this).is(':checked')) {
+        //             $(this).parents().parents().find('ui-select').attr('disabled', false);
+        //         } else {
+        //             $(this).parents().parents().find('ui-select').attr('disabled', true);
+        //         }
+
+        //     });
+
+
+        // });
+        // $scope.getTravelMode = function(id) {
+        //     if (event.target.checked == true) {
+        //         $("#sc_" + id).prop('readonly', false);
+        //         // $(this).prop('readonly', false);
+        //     } else {
+        //         $("#sc_" + id).prop('readonly', true);
+        //         // $("agent_" + id).prop('readonly', true);
+        //     }
+        // }
         var form_id = '#state-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 if (element.hasClass("code")) {
                     error.appendTo($('.code_error'));
+                } else if (element.hasClass("name")) {
+                    error.appendTo($('.name_error'));
                 } else {
                     error.insertAfter(element)
                 }
@@ -150,6 +242,7 @@ app.component('eyatraStateForm', {
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'State saved successfully',
+                                text: res.message,
                             }).show();
                             $location.path('/eyatra/states')
                             $scope.$apply()
@@ -174,6 +267,10 @@ app.component('eyatraStateView', {
             state_view_url + '/' + $routeParams.state_id
         ).then(function(response) {
             self.state = response.data.state;
+            self.travel_mode_name = response.data.travel_mode_name;
+            self.agents = response.data.agents;
+            self.service_charge = response.data.service_charge;
+            self.action = response.data.action;
         });
     }
 });
