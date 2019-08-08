@@ -111,4 +111,28 @@ class TripVerificationController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
+	public function approveTripVerification($trip_id) {
+		$trip = Trip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$trip->status_id = 3028;
+		$trip->save();
+
+		$trip->visits()->update(['manager_verification_status_id' => 3081]);
+		return response()->json(['success' => true]);
+	}
+
+	public function rejectTripVerification($trip_id) {
+		$trip = Trip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$trip->status_id = 3022;
+		$trip->save();
+
+		$trip->visits()->update(['manager_verification_status_id' => 3082]);
+		return response()->json(['success' => true]);
+	}
+
 }

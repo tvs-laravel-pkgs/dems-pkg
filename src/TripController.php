@@ -152,7 +152,6 @@ class TripController extends Controller {
 					$visit->save();
 				}
 			}
-
 			DB::commit();
 			$request->session()->flash('success', 'Trip saved successfully!');
 			return response()->json(['success' => true]);
