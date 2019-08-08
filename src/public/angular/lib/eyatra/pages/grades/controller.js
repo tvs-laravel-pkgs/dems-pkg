@@ -1,6 +1,6 @@
 app.component('eyatraGrades', {
     templateUrl: eyatra_grade_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_grade_table').DataTable({
@@ -32,6 +32,7 @@ app.component('eyatraGrades', {
                 { data: 'expense_count', searchable: false },
                 { data: 'travel_count', searchable: true },
                 { data: 'trip_count', searchable: true },
+                { data: 'status', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -46,6 +47,36 @@ app.component('eyatraGrades', {
         );
         $rootScope.loading = false;
 
+        $scope.deleteDiscount = function($id) {
+            $('#del').val($id);
+        }
+        $scope.confirmDeleteDiscount = function() {
+            //return confirm(‘Are You sure ‘);
+            $id = $('#del').val();
+            $http.get(
+                delete_discount_url + '/' + $id,
+            ).then(function(response) {
+                console.log(response.data);
+                if (response.data.success) {
+
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Discount Deleted Successfully',
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: 'Discount not Deleted',
+                    }).show();
+                }
+                $('#delete_discount').modal('hide');
+                dataTable.ajax.reload(function(json) {});
+            });
+        }
+
+
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +84,7 @@ app.component('eyatraGrades', {
 
 app.component('eyatraGradeForm', {
     templateUrl: grade_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
         $form_data_url = typeof($routeParams.grade_id) == 'undefined' ? grade_form_data_url : grade_form_data_url + '/' + $routeParams.grade_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -73,21 +104,17 @@ app.component('eyatraGradeForm', {
             }
             self.entity = response.data.entity;
             self.extras = response.data.extras;
-            self.expense_type = response.data.extras.expense_type;
-            self.selected_expense_types = response.data.selected_expense_types;
-            self.selected_travel_types = response.data.selected_purposeList;
-            self.selected_travel_modes = response.data.selected_localTravelModes;
-            self.purpose_list = response.data.extras.purpose_list;
-            self.travel_mode_list = response.data.extras.travel_mode_list;
             self.action = response.data.action;
             $rootScope.loading = false;
-            selected_expense_types = response.data.selected_expense_types;
-            selected_travel_types = response.data.selected_purposeList;
-            selected_travel_modes = response.data.selected_localTravelModes;
-            self.title = "New Grade";
+
             if (self.action == 'Edit') {
-                self.title = "Edit Grade";
-                load_checked_values(selected_expense_types, selected_travel_types, selected_travel_modes);
+                if (self.entity.deleted_at == null) {
+                    self.switch_value = 'Active';
+                } else {
+                    self.switch_value = 'Inactive';
+                }
+            } else {
+                self.switch_value = 'Active';
             }
         });
 
@@ -98,88 +125,47 @@ app.component('eyatraGradeForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
-        function load_checked_values(selected_expense_types, selected_travel_types, selected_travel_modes) {
-            $scope.valueChecked = function(id) {
-                var value = selected_expense_types.indexOf(id);
-                return value;
-            }
 
-            $scope.travel_purpose_checked = function(id) {
-                var value = selected_travel_types.indexOf(id);
-                return value;
-            }
 
-            $scope.local_travel = function(id) {
-                var value = selected_travel_modes.indexOf(id);
-                return value;
-            }
-        }
+        $('.toggle_cb').on('click', function() {
+            var class_name = $(this).data('class');
+            if (event.target.checked == true) {
+                $('.' + class_name).prop('checked', true);
+                if (class_name == 'expense_cb') {
+                    $.each($('.' + class_name + ':checked'), function() {
+                        $scope.getexpense_type($(this).val());
+                    });
+                }
 
+            } else {
+                $('.' + class_name).prop('checked', false);
+                if (class_name == 'expense_cb') {
+                    $.each($('.' + class_name), function() {
+                        $scope.getexpense_type($(this).val());
+                    });
+                }
+            }
+        });
 
         $scope.getexpense_type = function(id) {
             if (event.target.checked == true) {
-                // $(".outlet_code_" + id).prop('disabled', false);
-                $("#outlet_code_" + id).removeAttr("disabled");
-                // $("#outlet_code_" + id).attr('disabled', false);
-                $("#outlet_code_" + id).prop('readonly', false);
-                $("#outlet_code_" + id).prop('required', true);
+                $(".sub_class_" + id).removeClass("ng-hide");
+                $(".sub_class_" + id).prop('required', true);
             } else {
-
-                $("#outlet_code_" + id).attr("disabled", "disabled");
-                // $("#outlet_code_" + id).prop('disabled', true);
-                // $("#outlet_code_" + id).attr('disabled', true);
-                // $(".outlet_code_" + id).prop('disabled', true);
-                $("#outlet_code_" + id).prop('readonly', true);
-                $("#outlet_code_" + id).prop('required', false);
+                $(".sub_class_" + id).addClass("ng-hide");
+                $(".sub_class_" + id).prop('required', false);
             }
         }
 
-
-        $('#select_all_expense').on('click', function() {
-            if (event.target.checked == true) {
-                $('.expense_sub_check').prop('checked', true);
-                $('.expense_sub_check').prop('required', true);
-                $.each($('.expense_sub_check:checked'), function() {
-                    $scope.getexpense_type($(this).val());
-                });
+        $(document).on('click', '.expense_cb', function() {
+            var id = $(this).val();
+            if ($(this).prop("checked") == true) {
+                $(".sub_class_" + id).prop('required', true);
             } else {
-                $('.expense_sub_check').prop('checked', false);
-                $('.expense_sub_check').prop('required', false);
-                $.each($('.expense_sub_check'), function() {
-                    $scope.getexpense_type($(this).val());
-                });
+                $(".sub_class_" + id).prop('required', false);
             }
+
         });
-
-        $('#travel_purpose').on('click', function() {
-            if (event.target.checked == true) {
-                $('.travel_purpose_sub_check').prop('checked', true);
-                $.each($('.travel_purpose_sub_check:checked'), function() {
-                    $scope.getexpense_type($(this).val());
-                });
-            } else {
-                $('.travel_purpose_sub_check').prop('checked', false);
-                $.each($('.travel_purpose_sub_check'), function() {
-                    $scope.getexpense_type($(this).val());
-                });
-            }
-        });
-
-
-        $('#local_travel').on('click', function() {
-            if (event.target.checked == true) {
-                $('.local_travel_sub_check').prop('checked', true);
-                $.each($('.local_travel_sub_check:checked'), function() {
-                    $scope.getexpense_type($(this).val());
-                });
-            } else {
-                $('.local_travel_sub_check').prop('checked', false);
-                $.each($('.local_travel_sub_check'), function() {
-                    $scope.getexpense_type($(this).val());
-                });
-            }
-        });
-
 
         var form_id = '#grade-form';
         var v = jQuery(form_id).validate({
@@ -191,18 +177,10 @@ app.component('eyatraGradeForm', {
                 'grade_name': {
                     required: true,
                 },
-                'selected_expense_amounts[]': {
-                    required: true,
-                    number: true,
-                },
-
             },
             messages: {
                 'grade_name': {
                     required: 'Please enter Grade Name',
-                },
-                'selected_expense_amounts': {
-                    required: 'Please enter Valid Amount',
                 },
             },
             submitHandler: function(form) {
@@ -254,6 +232,21 @@ app.component('eyatraGradeView', {
             grade_view_url + '/' + $routeParams.grade_id
         ).then(function(response) {
             self.grade = response.data.grade;
+            self.expense_type_list = response.data.expense_type_list;
+            self.localtravel_list = response.data.localtravel_list;
+            self.travel_purpose_list = response.data.travel_purpose_list;
+            self.action = response.data.action;
+            if (self.grade.deleted_at == null) {
+                self.status = 'Active';
+            } else {
+                self.status = 'Inactive';
+            }
+        });
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
     }
 });

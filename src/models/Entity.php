@@ -17,7 +17,7 @@ class Entity extends Model {
 	];
 
 	public function expenseTypes() {
-		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id');
+		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id')->withPivot('eligible_amount');
 	}
 
 	public function tripPurposes() {
@@ -29,11 +29,11 @@ class Entity extends Model {
 	}
 
 	public static function purposeList() {
-		return Entity::where('entity_type_id', 501)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 501)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function travelModeList() {
-		return Entity::where('entity_type_id', 502)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 502)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function getGradeList() {
