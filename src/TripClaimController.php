@@ -299,34 +299,16 @@ class TripClaimController extends Controller {
 	}
 
 	public function deleteEYatraTripClaim($trip_id) {
+		//CHECK IF AGENT BOOKED TRIP VISITS
+		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+		if ($agent_visits_booked) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
+		}
 		$trip = Trip::where('id', $trip_id)->delete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		return response()->json(['success' => true]);
-	}
-
-	public function tripVerificationRequest($trip_id) {
-		$trip = Trip::find($trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->status_id = 3021;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3080]);
-		return response()->json(['success' => true]);
-	}
-
-	public function cancelTripVisitBooking($visit_id) {
-		if ($visit_id) {
-			$visit = Visit::where('id', $visit_id)->first();
-			$visit->booking_status_id = 3062; // Booking cancelled
-			$visit->save();
-			return response()->json(['success' => true]);
-		} else {
-			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
-		}
 	}
 
 }
