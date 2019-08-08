@@ -24,4 +24,12 @@ class Boarding extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
 	}
 
+	public function city() {
+		return $this->belongsTo('Uitoux\EYatra\NCity', 'city_id');
+	}
+
+	public function attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3182)->where('attachment_type_id', 3200);
+	}
+
 }
