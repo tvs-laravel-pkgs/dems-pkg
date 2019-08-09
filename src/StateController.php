@@ -78,7 +78,7 @@ class StateController extends Controller {
 		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
 
 		// dd($state->travelModes()->withPivot()->get());
-		foreach ($state->travelModes as $travel_mode) {
+		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
 			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
 			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
 			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
