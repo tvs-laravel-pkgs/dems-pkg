@@ -56,7 +56,7 @@ class TripClaimController extends Controller {
 				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
+				<a href="javascript:;" data-toggle="modal" data-target="#delete_claimed_trip"
 				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
@@ -94,8 +94,8 @@ class TripClaimController extends Controller {
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 			'state_type_list' => Entity::getLodgeStateTypeList(),
 		];
@@ -288,8 +288,8 @@ class TripClaimController extends Controller {
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 			'state_type_list' => Entity::getLodgeStateTypeList(),
 		];
@@ -299,34 +299,16 @@ class TripClaimController extends Controller {
 	}
 
 	public function deleteEYatraTripClaim($trip_id) {
+		//CHECK IF AGENT BOOKED TRIP VISITS
+		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+		if ($agent_visits_booked) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
+		}
 		$trip = Trip::where('id', $trip_id)->delete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		return response()->json(['success' => true]);
-	}
-
-	public function tripVerificationRequest($trip_id) {
-		$trip = Trip::find($trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->status_id = 3021;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3080]);
-		return response()->json(['success' => true]);
-	}
-
-	public function cancelTripVisitBooking($visit_id) {
-		if ($visit_id) {
-			$visit = Visit::where('id', $visit_id)->first();
-			$visit->booking_status_id = 3062; // Booking cancelled
-			$visit->save();
-			return response()->json(['success' => true]);
-		} else {
-			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
-		}
 	}
 
 }

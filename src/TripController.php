@@ -83,8 +83,8 @@ class TripController extends Controller {
 			}
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 		];
 		$this->data['trip'] = $trip;
@@ -152,7 +152,6 @@ class TripController extends Controller {
 					$visit->save();
 				}
 			}
-
 			DB::commit();
 			$request->session()->flash('success', 'Trip saved successfully!');
 			return response()->json(['success' => true]);
@@ -194,6 +193,11 @@ class TripController extends Controller {
 	}
 
 	public function deleteTrip($trip_id) {
+		//CHECK IF AGENT BOOKED TRIP VISITS
+		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+		if ($agent_visits_booked) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
+		}
 		$trip = Trip::where('id', $trip_id)->delete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -215,6 +219,11 @@ class TripController extends Controller {
 
 	public function cancelTripVisitBooking($visit_id) {
 		if ($visit_id) {
+			//CHECK IF AGENT BOOKED VISIT
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			if ($agent_visits_booked) {
+				return response()->json(['success' => false, 'errors' => ['Visit cannot be deleted']]);
+			}
 			$visit = Visit::where('id', $visit_id)->first();
 			$visit->booking_status_id = 3062; // Booking cancelled
 			$visit->save();

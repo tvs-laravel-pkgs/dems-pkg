@@ -1,6 +1,6 @@
 app.component('eyatraTrips', {
     templateUrl: eyatra_trip_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_table').DataTable({
@@ -48,6 +48,38 @@ app.component('eyatraTrips', {
             'Add New' +
             '</a>'
         );
+
+        $scope.deleteTrip = function(id) {
+            $('#del').val(id);
+        }
+        $scope.confirmDeleteTrip = function() {
+            $id = $('#del').val();
+            $http.get(
+                eyatra_trip_claim_delete_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trips Deleted Successfully',
+                    }).show();
+                    $('#delete_emp').modal('hide');
+                    dataTable.ajax.reload(function(json) {});
+                }
+
+            });
+        }
+
         $rootScope.loading = false;
 
     }
@@ -181,6 +213,7 @@ app.component('eyatraTripView', {
             self.trip = response.data.trip;
         });
 
+        //CANCEL VISIT BOOKING
         $scope.cancelVisitBookingPopup = function(visit_id) {
             $('#cancel_booking_visit_id').val(visit_id);
         }
@@ -213,6 +246,38 @@ app.component('eyatraTripView', {
                         console.log(xhr);
                     });
             }
+        }
+
+        //DELETE TRIP
+        $scope.deleteTrip = function(id) {
+            $('#del').val(id);
+        }
+        $scope.confirmDeleteTrip = function() {
+            $id = $('#del').val();
+            $http.get(
+                trip_delete_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trips Deleted Successfully',
+                    }).show();
+                    $location.path('/eyatra/trips')
+                    $scope.$apply()
+                }
+
+            });
         }
 
         self.verificationRequest = function(trip_id) {

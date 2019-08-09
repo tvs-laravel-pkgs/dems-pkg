@@ -41,7 +41,7 @@ class NState extends Model {
 	}
 
 	public function travelModes() {
-		return $this->belongsToMany('Uitoux\EYatra\Entity', 'state_agent_travel_mode', 'state_id', 'travel_mode_id');
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'state_agent_travel_mode', 'state_id', 'travel_mode_id')->withPivot('agent_id', 'service_charge');
 	}
 
 	public function agents() {

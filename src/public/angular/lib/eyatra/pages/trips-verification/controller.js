@@ -53,7 +53,7 @@ app.component('eyatraTripVerifications', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripVerificationForm', {
     templateUrl: trip_verification_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/trip/verifications')
             $scope.$apply()
@@ -90,6 +90,79 @@ app.component('eyatraTripVerificationForm', {
                 preferred_travel_modes: '',
             });
         }
+
+        //APPROVE TRIP
+        self.approveTrip = function(id) {
+            $('#trip_id').val(id);
+        }
+
+        self.confirmApproveTrip = function() {
+            $id = $('#trip_id').val();
+            $http.get(
+                trip_verification_approve_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trip Approved Successfully',
+                    }).show();
+                    $('#approval_modal').modal('hide');
+                    $timeout(function() {
+                        $location.path('/eyatra/trip/verifications')
+                        $scope.$apply()
+                    }, 500);
+                }
+
+            });
+        }
+
+        //REJECT TRIP
+        self.rejectTrip = function(id, type) {
+            $('#trip_id').val(id);
+        }
+
+        self.confirmRejectTrip = function() {
+            $id = $('#trip_id').val();
+            $http.get(
+                trip_verification_reject_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trip Rejected Successfully',
+                    }).show();
+                    $('#reject_modal').modal('hide');
+                    $timeout(function() {
+                        $location.path('/eyatra/trip/verifications')
+                        $scope.$apply()
+                    }, 500);
+                }
+
+            });
+        }
+
 
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({

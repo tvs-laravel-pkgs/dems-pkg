@@ -1,6 +1,6 @@
 app.component('eyatraTripClaimList', {
     templateUrl: eyatra_trip_claim_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_claim_list_table').DataTable({
@@ -43,6 +43,36 @@ app.component('eyatraTripClaimList', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
         $('.add_new_button').html();
+
+        $scope.deleteTrip = function(id) {
+            $('#del').val(id);
+        }
+        $scope.confirmDeleteTrip = function() {
+            $id = $('#del').val();
+            $http.get(
+                trip_delete_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trips Deleted Successfully',
+                    }).show();
+                    $('#delete_emp').modal('hide');
+                    dataTable.ajax.reload(function(json) {});
+                }
+            });
+        }
         $rootScope.loading = false;
 
     }
