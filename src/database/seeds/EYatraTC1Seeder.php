@@ -168,7 +168,7 @@ class EYatraTC1Seeder extends Seeder {
 			],
 			503 => [
 				'A/C Taxi',
-				'Non A/A Taxi',
+				'Non A/C Taxi',
 				'Auto Ricksaw',
 				'Bus',
 			],
@@ -191,6 +191,7 @@ class EYatraTC1Seeder extends Seeder {
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
 			$address = Address::create($address_of_id, $outlet, $faker);
+			dd($address);
 
 			//MANAGERS
 			for ($j = 1; $j <= $number_of_items; $j++) {
