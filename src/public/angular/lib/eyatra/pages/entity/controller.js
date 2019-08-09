@@ -12,8 +12,6 @@ app.component('eyatraEntityList', {
 
             self.id = response.data.entity_type.id;
             self.title = response.data.entity_type.name;
-            //alert(response.data.entity_type.id);
-
             var dataTable = $('#entity_table').DataTable({
                 "dom": dom_structure,
                 "language": {
@@ -31,10 +29,12 @@ app.component('eyatraEntityList', {
                 paging: true,
                 ordering: false,
                 ajax: {
-                    url: get_entity_list_url + '/' + $routeParams.entity_type_id,
+                    url: eyatra_entity_get_list_url,
                     type: "GET",
                     dataType: "json",
-                    data: function(d) {},
+                    data: function(d) {
+                        d.entity_type_id = $routeParams.entity_type_id;
+                    },
                 },
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
