@@ -157,8 +157,8 @@ class AgentController extends Controller {
 			$address->name = 'Primary';
 			$address->line_1 = $request->address_line1;
 			$address->line_2 = $request->address_line2;
-			$address->country_id = $request->country;
-			$address->state_id = $request->state;
+			// $address->country_id = $request->country;
+			// $address->state_id = $request->state;
 			$address->city_id = $request->city;
 			$address->fill($request->all());
 			$address->save();
@@ -189,32 +189,19 @@ class AgentController extends Controller {
 	}
 
 	public function viewEYatraAgent($agent_id) {
-		dd($agent_id);
-		$trip = Agent::with([
-			'agents',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($agent_id);
-		if (!$trip) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['Agent not found'];
-			return response()->json($this->data);
-		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+
+		$this->data['agent'] = $agent = Agent::find($agent_id);
+		$this->data['address'] = $address = Address::join('ncities', 'ncities.id', 'ey_addresses.city_id')
+			->join('nstates', 'nstates.id', 'ncities.state_id')
+			->join('countries', 'countries.id', 'nstates.country_id')
+			->where('entity_id', $agent_id)->where('address_of_id', 3161)
+			->select('ey_addresses.*', 'ncities.name as city_name', 'nstates.name as state_name', 'countries.name as country_name')
+			->first();
+
+		$this->data['user_details'] = $user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
+
+		$this->data['travel_list'] = $agent->travelModes;
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
