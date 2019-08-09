@@ -73,7 +73,10 @@ class StateController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get();
+		$option = new NCountry;
+		$option->name = 'Select Country';
+		$option->id = null;
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
 		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
 		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
 
@@ -95,10 +98,10 @@ class StateController extends Controller {
 		//dd($request->all());
 		try {
 			$error_messages = [
-				'code.required' => 'Short Name is required',
-				'code.unique' => 'Short Name has already been taken',
-				'name.required' => 'Name is required',
-				'name.unique' => 'Name has already been taken',
+				'code.required' => 'State Code is required',
+				'code.unique' => 'State Code has already been taken',
+				'name.required' => 'State Name is required',
+				'name.unique' => 'State Name has already been taken',
 
 			];
 
