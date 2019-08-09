@@ -4,6 +4,7 @@ app.component('eyatraAgents', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#agent_list').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -78,26 +79,26 @@ app.component('eyatraAgentForm', {
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-
+            console.log(travel_list);
             if (self.action == 'Edit') {
-                $("#hide_password").hide();
+                //$("#hide_password").hide();
                 if (self.agent.deleted_at == null) {
                     self.switch_value = 'Active';
                 } else {
                     self.switch_value = 'Inactive';
                 }
-                // if (self.user.force_password_change == 1) {
-                //     self.switch_password = 'No';
-                //     $("#hide_password").hide();
-                // } else {
-                //     self.switch_password = 'Yes';
-                // }
-                // if (self.user.force_password_change == 1) {
-                //     self.switch_password = 'No';
-                //     $("#hide_password").hide();
-                // } else {
-                //     self.switch_password = 'Yes';
-                // }
+                if (self.user.force_password_change == 1) {
+                    self.switch_password = 'No';
+                    $("#hide_password").hide();
+                } else {
+                    self.switch_password = 'Yes';
+                }
+                if (self.user.force_password_change == 1) {
+                    self.switch_password = 'No';
+                    $("#hide_password").hide();
+                } else {
+                    self.switch_password = 'Yes';
+                }
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
@@ -119,14 +120,14 @@ app.component('eyatraAgentForm', {
 
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $('.btn-pills').on("click", function() {
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
@@ -232,7 +233,13 @@ app.component('eyatraAgentForm', {
                     maxlength: 191,
                 },
                 'password': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#password_change").val() == 'Yes') {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     minlength: 5,
                     maxlength: 16,
                 },
@@ -299,6 +306,13 @@ app.component('eyatraAgentForm', {
                     required: 'Travel mode is Required',
                 }
             },
+            invalidHandler: function(event, validator) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Please check in each tab and fix errors!'
+                }).show();
+            },
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
@@ -344,14 +358,29 @@ app.component('eyatraAgentView', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        alert(agent_view_url + '/' + $routeParams.agent_id);
         $http.get(
             agent_view_url + '/' + $routeParams.agent_id
         ).then(function(response) {
             self.agent = response.data.agent;
-            console.log(self.agent);
+            self.agent_address = response.data.address;
+            self.user_details = response.data.user_details;
+            self.travel_modes = response.data.travel_list;
+            if (self.agent.deleted_at == null) {
+                self.status = 'Active';
+            } else {
+                self.status = 'Inactive';
+            }
+            self.action = "View ";
 
         });
+
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
         $rootScope.loading = false;
     }
 });

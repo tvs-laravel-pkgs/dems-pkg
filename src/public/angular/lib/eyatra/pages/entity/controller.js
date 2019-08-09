@@ -13,6 +13,7 @@ app.component('eyatraEntityList', {
             self.id = response.data.entity_type.id;
             self.title = response.data.entity_type.name;
             var dataTable = $('#entity_table').DataTable({
+                stateSave: true,
                 "dom": dom_structure,
                 "language": {
                     "search": "",

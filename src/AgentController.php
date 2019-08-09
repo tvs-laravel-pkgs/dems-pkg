@@ -68,8 +68,7 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent = Agent::find($agent_id);
-			$address = Address::where('entity_id', $agent_id)->where('address_of_id', 3161)->first();
+			$agent = Agent::with('address', 'address.city', 'address.city.state')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			if (!$agent) {
@@ -84,11 +83,11 @@ class AgentController extends Controller {
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
 			'country_list' => NCountry::getList(),
-			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->country_id),
-			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->state_id),
+			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->city->state->country_id),
+			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->city->state_id),
 		];
 		$this->data['agent'] = $agent;
-		$this->data['address'] = $address;
+		$this->data['address'] = $agent->address;
 		$this->data['user'] = $user;
 
 		return response()->json($this->data);
@@ -102,6 +101,7 @@ class AgentController extends Controller {
 			}
 			$error_messages = [
 				'agent_code.required' => 'Agent Code is Required',
+				'agent_code.unique' => 'Agent Code is already taken',
 				'agent_name.required' => 'Agent Name is Required',
 				'address_line1.required' => 'Address Line1 is Required',
 				'country.required' => 'Country is Required',
@@ -109,24 +109,30 @@ class AgentController extends Controller {
 				'city.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
 				'username.required' => "User Name is Required",
-				'password.required' => "Password is Required",
 				'mobile_number.required' => "Mobile Number is Required",
+				'mobile_number.unique' => "Mobile Number is already taken",
 			];
-
+			// dd(1);
 			$validator = Validator::make($request->all(), [
-				'agent_code' => 'required',
+				'agent_code' => [
+					'required:true',
+					'unique:agents,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				],
+				'mobile_number' => 'required|unique:users,mobile_number,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				'agent_name' => 'required',
 				'address_line1' => 'required',
 				'country' => 'required',
 				'state' => 'required',
 				'city' => 'required',
 				'pincode' => 'required',
-				'mobile_number' => 'required',
-				'password' => 'required',
 				'username' => 'required',
-			]);
+			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+
+			if ($request->password_change == 'Yes') {
+				return response()->json(['success' => false, 'errors' => ['Password is Required']]);
 			}
 
 			DB::beginTransaction();
@@ -140,7 +146,7 @@ class AgentController extends Controller {
 				$agent->updated_at = NULL;
 			} else {
 				$agent = Agent::find($request->id);
-				$user = User::where('entity_id', $request->id)->where('user_type_id', 5122)->first();
+				$user = User::where('entity_id', Auth::user()->entity_id)->first();
 				$address = Address::where('entity_id', $request->id)->first();
 				$agent->updated_by = Auth::user()->id;
 				$agent->updated_at = Carbon::now();
@@ -157,8 +163,9 @@ class AgentController extends Controller {
 			$address->name = 'Primary';
 			$address->line_1 = $request->address_line1;
 			$address->line_2 = $request->address_line2;
-			$address->country_id = $request->country;
-			$address->state_id = $request->state;
+
+			// $address->country_id = $request->country;
+			// $address->state_id = $request->state;
 			$address->city_id = $request->city;
 			$address->fill($request->all());
 			$address->save();
@@ -169,6 +176,11 @@ class AgentController extends Controller {
 			$user->user_type_id = 3122;
 			$user->company_id = $company_id;
 			$user->entity_id = $agent->id;
+			if ($request->password_change == 'No') {
+				$user->force_password_change = 0;
+			} else if ($request->password_change == 'Yes') {
+				$user->force_password_change = 1;
+			}
 			$user->fill($request->all());
 			$user->save();
 
@@ -189,32 +201,19 @@ class AgentController extends Controller {
 	}
 
 	public function viewEYatraAgent($agent_id) {
-		dd($agent_id);
-		$trip = Agent::with([
-			'agents',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($agent_id);
-		if (!$trip) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['Agent not found'];
-			return response()->json($this->data);
-		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+
+		$this->data['agent'] = $agent = Agent::find($agent_id);
+		$this->data['address'] = $address = Address::join('ncities', 'ncities.id', 'ey_addresses.city_id')
+			->join('nstates', 'nstates.id', 'ncities.state_id')
+			->join('countries', 'countries.id', 'nstates.country_id')
+			->where('entity_id', $agent_id)->where('address_of_id', 3161)
+			->select('ey_addresses.*', 'ncities.name as city_name', 'nstates.name as state_name', 'countries.name as country_name')
+			->first();
+
+		$this->data['user_details'] = $user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
+
+		$this->data['travel_list'] = $agent->travelModes;
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

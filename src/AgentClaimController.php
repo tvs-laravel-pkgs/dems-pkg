@@ -177,8 +177,8 @@ class AgentClaimController extends Controller {
 			$agentClaim->bookings()->sync($request->booking_list);
 
 			DB::commit();
-			$request->session()->flash('success', 'Agent Claim Requested successfully!');
-			return response()->json(['success' => true]);
+			// $request->session()->flash('success', 'Agent Claim Requested successfully!');
+			// return response()->json(['success' => true]);
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Agent Claim Added successfully']);
 			} else {

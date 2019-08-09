@@ -4,6 +4,7 @@ app.component('eyatraGrades', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_grade_table').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -28,10 +29,10 @@ app.component('eyatraGrades', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'grade_name', name: 'entities.name', searchable: false },
+                { data: 'grade_name', name: 'entities.name', searchable: true },
                 { data: 'expense_count', searchable: false },
-                { data: 'travel_count', searchable: true },
-                { data: 'trip_count', searchable: true },
+                { data: 'travel_count', searchable: false },
+                { data: 'trip_count', searchable: false },
                 { data: 'status', searchable: false },
             ],
             rowCallback: function(row, data) {
@@ -39,7 +40,7 @@ app.component('eyatraGrades', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Grades List');
+        $('.page-header-content .display-inline-block .data-table-title').html('Grades');
         $('.add_new_button').html(
             '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
@@ -172,17 +173,22 @@ app.component('eyatraGradeForm', {
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
             },
+            invalidHandler: function(event, validator) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'You have errors,Please check all tabs'
+                }).show();
+            },
             ignore: '',
             rules: {
                 'grade_name': {
                     required: true,
+                    minlength: 2,
+                    maxlength: 191,
                 },
             },
-            messages: {
-                'grade_name': {
-                    required: 'Please enter Grade Name',
-                },
-            },
+
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
@@ -207,7 +213,7 @@ app.component('eyatraGradeForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Grade saved successfully',
+                                text: 'Grade Updated successfully',
                             }).show();
                             $location.path('/eyatra/grades')
                             $scope.$apply()

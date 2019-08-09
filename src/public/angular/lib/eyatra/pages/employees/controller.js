@@ -4,6 +4,7 @@ app.component('eyatraEmployees', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_employee_table').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",

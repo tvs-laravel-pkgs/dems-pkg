@@ -6,7 +6,6 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
 use Validator;
@@ -65,7 +64,7 @@ class GradeController extends Controller {
 		$travel_purpose_list = Entity::purposeList();
 		$travel_types_list = Entity::travelModeList();
 		if (!$entity_id) {
-			$this->data['action'] = 'New';
+			$this->data['action'] = 'Add';
 			$entity = new Entity;
 			$this->data['success'] = true;
 		} else {
@@ -113,10 +112,7 @@ class GradeController extends Controller {
 			]);
 
 			$validator = Validator::make($request->all(), [
-				"name" => [
-					Rule::unique('entities')->ignore($request->id),
-					'max:191',
-				],
+				'grade_name' => 'required|unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,500',
 			]);
 
 			if ($validator->fails()) {
@@ -172,7 +168,7 @@ class GradeController extends Controller {
 			}
 
 			DB::commit();
-			$request->session()->flash('success', 'Grade saved successfully!');
+			$request->session()->flash('success', 'Grade Updated successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -193,8 +189,7 @@ class GradeController extends Controller {
 	}
 
 	public function deleteEYatraGrade($grade_id) {
-		$grade = Entity::where('id', $grade_id)->update(['deleted_by' => Auth::user()->id]);
-		$grade = Entity::where('id', $grade_id)->delete();
+		$grade = Entity::where('id', $grade_id)->forceDelete();
 		if (!$grade) {
 			return response()->json(['success' => false, 'errors' => ['Grade Not Found']]);
 		}

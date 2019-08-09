@@ -48,7 +48,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-agent-form></eyatra-agent-form>',
         title: 'Edit Agent',
     }).
-    when('/eyatra/agent/view/:grade_id', {
+    when('/eyatra/agent/view/:agent_id', {
         template: '<eyatra-agent-view></eyatra-agent-view>',
         title: 'View Agent',
     }).

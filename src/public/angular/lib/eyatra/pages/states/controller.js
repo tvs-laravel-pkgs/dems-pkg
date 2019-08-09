@@ -5,6 +5,7 @@ app.component('eyatraStates', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_state_table').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -201,10 +202,12 @@ app.component('eyatraStateForm', {
             rules: {
                 'code': {
                     required: true,
+                    minlength: 2,
                     maxlength: 2,
                 },
                 'name': {
                     required: true,
+                    minlength: 3,
                     maxlength: 191,
                 },
                 'country_id': {
@@ -213,9 +216,11 @@ app.component('eyatraStateForm', {
             },
             messages: {
                 'code': {
+                    minlength: 'Please enter minimum of 2 letters',
                     maxlength: 'Please enter maximum of 2 letters',
                 },
                 'name': {
+                    minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
             },

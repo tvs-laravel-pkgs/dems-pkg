@@ -211,6 +211,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Local Travel Expense',
 				'config_type_id' => 510,
 			],
+			3184 => [
+				'name' => 'Agent Invoice Attachment',
+				'config_type_id' => 510,
+			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [
