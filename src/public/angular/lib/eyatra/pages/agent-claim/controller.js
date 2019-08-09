@@ -151,17 +151,23 @@ app.component('eyatraAgentClaimForm', {
 
         $('#head_booking').on('click', function() {
             var total_amount = 0;
+            var count = 0;
+            var amount = 0;
             if (event.target.checked == true) {
                 $('.booking_list').prop('checked', true);
                 $.each($('.booking_list:checked'), function() {
-                    $scope.checkedallcount($(this).val(), $(this).attr('data-amount'));
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
                 });
             } else {
                 $('.booking_list').prop('checked', false);
                 $.each($('.booking_list:checked'), function() {
-                    $scope.checkedallcount($(this).val(), $(this).attr('data-amount'));
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
                 });
             }
+            $("#amount").html(amount.toFixed(2));
+            $("#count").html(count);
         });
 
         var form_id = '#agent-claim-form';
