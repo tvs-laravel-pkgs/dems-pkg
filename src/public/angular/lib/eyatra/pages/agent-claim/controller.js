@@ -5,6 +5,7 @@ app.component('eyatraAgentClaimList', {
         self.hasPermission = HelperService.hasPermission;
         // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",

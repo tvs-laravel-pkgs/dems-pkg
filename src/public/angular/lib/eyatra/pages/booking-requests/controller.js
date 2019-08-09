@@ -4,6 +4,7 @@ app.component('eyatraTripBookingRequests', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_booking_requests_table').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",

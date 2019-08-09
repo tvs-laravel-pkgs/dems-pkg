@@ -82,10 +82,12 @@ class TripController extends Controller {
 				$this->data['message'] = 'Trip not found';
 			}
 		}
+		dd(Auth::user()->entity);
 		$this->data['extras'] = [
 			'purpose_list' => Entity::uiPurposeList(),
 			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
+			'employee_city' => Auth::user()->entity->outlet->address->city,
 		];
 		$this->data['trip'] = $trip;
 
