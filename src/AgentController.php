@@ -77,7 +77,7 @@ class AgentController extends Controller {
 			} else {
 				$this->data['success'] = true;
 			}
-			$this->data['travel_list'] = $agent->travelModes()->where('company_id', Auth::user()->company_id)->pluck('travel_mode_id')->toArray();
+			$this->data['travel_list'] = $agent->travelModes()->pluck('travel_mode_id')->toArray();
 		}
 
 		$this->data['extras'] = [
@@ -101,6 +101,7 @@ class AgentController extends Controller {
 			}
 			$error_messages = [
 				'agent_code.required' => 'Agent Code is Required',
+				'agent_code.unique' => 'Agent Code is already taken',
 				'agent_name.required' => 'Agent Name is Required',
 				'address_line1.required' => 'Address Line1 is Required',
 				'country.required' => 'Country is Required',
@@ -108,24 +109,30 @@ class AgentController extends Controller {
 				'city.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
 				'username.required' => "User Name is Required",
-				'password.required' => "Password is Required",
 				'mobile_number.required' => "Mobile Number is Required",
+				'mobile_number.unique' => "Mobile Number is already taken",
 			];
-
+			// dd(1);
 			$validator = Validator::make($request->all(), [
-				'agent_code' => 'required',
+				'agent_code' => [
+					'required:true',
+					'unique:agents,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				],
+				'mobile_number' => 'required|unique:users,mobile_number,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				'agent_name' => 'required',
 				'address_line1' => 'required',
 				'country' => 'required',
 				'state' => 'required',
 				'city' => 'required',
 				'pincode' => 'required',
-				'mobile_number' => 'required',
-				'password' => 'required',
 				'username' => 'required',
-			]);
+			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+
+			if ($request->password_change == 'Yes') {
+				return response()->json(['success' => false, 'errors' => ['Password is Required']]);
 			}
 
 			DB::beginTransaction();
@@ -139,7 +146,7 @@ class AgentController extends Controller {
 				$agent->updated_at = NULL;
 			} else {
 				$agent = Agent::find($request->id);
-				$user = User::where('entity_id', $request->id)->where('user_type_id', 5122)->first();
+				$user = User::where('entity_id', Auth::user()->entity_id)->first();
 				$address = Address::where('entity_id', $request->id)->first();
 				$agent->updated_by = Auth::user()->id;
 				$agent->updated_at = Carbon::now();
@@ -169,6 +176,11 @@ class AgentController extends Controller {
 			$user->user_type_id = 3122;
 			$user->company_id = $company_id;
 			$user->entity_id = $agent->id;
+			if ($request->password_change == 'No') {
+				$user->force_password_change = 0;
+			} else if ($request->password_change == 'Yes') {
+				$user->force_password_change = 1;
+			}
 			$user->fill($request->all());
 			$user->save();
 
