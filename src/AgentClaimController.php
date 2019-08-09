@@ -62,6 +62,7 @@ class AgentClaimController extends Controller {
 			$agent_claim = new AgentClaim;
 			$this->data['success'] = true;
 			$this->data['booking_pivot'] = [];
+			$this->data['booking_pivot_amt'] = [];
 			$date = '';
 		} else {
 			$this->data['action'] = 'Edit';
@@ -73,7 +74,20 @@ class AgentClaimController extends Controller {
 			} else {
 				$this->data['success'] = true;
 			}
+			// $this->data['booking_pivot'] = VisitBooking::select(
+			// 	'amount',
+			// 	'id'
+			// )
+			// 	->where('created_by', Auth::user()->entity_id)
+			// 	->get()
+			// 	->keyBy('id')
+			// ;
 			$this->data['booking_pivot'] = $agent_claim->bookings()->pluck('booking_id')->toArray();
+			// foreach ($agent_claim->bookings as $agent_booking) {
+			// 	$this->data['booking_pivot'][$agent_booking->id]->checked = ture;
+			// }
+			// dd($this->data['booking_pivot']);
+			$this->data['booking_pivot_amt'] = $agent_claim->bookings()->pluck('amount')->toArray();
 		}
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(
 			'visit_bookings.id',

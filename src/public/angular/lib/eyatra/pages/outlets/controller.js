@@ -1,6 +1,6 @@
 app.component('eyatraOutlets', {
     templateUrl: eyatra_outlet_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_outlet_table').DataTable({
@@ -28,27 +28,52 @@ app.component('eyatraOutlets', {
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'status', name: 'status.name', searchable: true },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'code', name: 'outlets.code', searchable: true },
+                { data: 'name', name: 'outlets.name', searchable: true },
+                { data: 'city_name', name: 'city.name', searchable: true },
+                { data: 'state_name', name: 's.name', searchable: true },
+                { data: 'country_name', name: 'c.name', searchable: true },
+                { data: 'status', name: 'outlets.deleted_at', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips');
+        $('.page-header-content .display-inline-block .data-table-title').html('Outlets');
         $('.add_new_button').html(
             '<a href="#!/eyatra/outlet/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
             '</a>'
         );
+        $scope.deleteOutletConfirm = function($outlet_id) {
+            $("#delete_outlet_id").val($outlet_id);
+        }
+
+        $scope.deleteOutlet = function() {
+            $outlet_id = $('#delete_outlet_id').val();
+            $http.get(
+                outlet_delete_url + '/' + $outlet_id,
+            ).then(function(response) {
+                console.log(response.data);
+                if (response.data.success) {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Outlet Deleted Successfully',
+                    }).show();
+                    dataTable.ajax.reload(function(json) {});
+
+                } else {
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: 'Outlet not Deleted',
+                    }).show();
+                }
+            });
+        }
         $rootScope.loading = false;
 
     }

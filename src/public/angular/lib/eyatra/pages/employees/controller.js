@@ -1,6 +1,6 @@
 app.component('eyatraEmployees', {
     templateUrl: eyatra_employee_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_employee_table').DataTable({
@@ -30,6 +30,7 @@ app.component('eyatraEmployees', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'code', name: 'e.code', searchable: true },
+                { data: 'name', name: 'e.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
                 { data: 'manager_code', name: 'm.code', searchable: true },
                 { data: 'grade', name: 'grd.name', searchable: true },
@@ -46,6 +47,38 @@ app.component('eyatraEmployees', {
             'Add New' +
             '</a>'
         );
+
+        $scope.deleteEmployee = function(id) {
+            $('#del').val(id);
+        }
+        $scope.confirmDeleteEmployee = function() {
+            $id = $('#del').val();
+            $http.get(
+                employee_delete_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Employee Deleted Successfully',
+                    }).show();
+                    $('#delete_emp').modal('hide');
+                    dataTable.ajax.reload(function(json) {});
+                }
+
+            });
+        }
+
         $rootScope.loading = false;
 
     }
@@ -80,26 +113,37 @@ app.component('eyatraEmployeeForm', {
 
         });
 
-        var form_id = '#employee-form';
+        var form_id = '#employee_form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'code': {
+                    required: true,
+                    maxlength: 191,
+                },
+                'name': {
+                    required: true,
+                    maxlength: 80,
+                },
+                'outlet_id': {
                     required: true,
                 },
-                'description': {
-                    maxlength: 255,
+                'reporting_to_id': {
+                    required: true,
                 },
-                'advance_received': {
-                    maxlength: 10,
+                'grade_id': {
+                    required: true,
                 },
             },
             messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'code': {
+                    maxlength: 'Please enter maximum of 191 letters',
+                },
+                'name': {
+                    maxlength: 'Please enter maximum of 80 letters',
                 },
             },
             submitHandler: function(form) {
@@ -143,7 +187,6 @@ app.component('eyatraEmployeeForm', {
 
 app.component('eyatraEmployeeView', {
     templateUrl: employee_view_template_url,
-
     controller: function($http, $location, $routeParams, HelperService, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
