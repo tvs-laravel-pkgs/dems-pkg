@@ -53,7 +53,7 @@ class StateController extends Controller {
 
 	public function eyatraStateFormData($state_id = NULL) {
 		if (!$state_id) {
-			$this->data['action'] = 'Add';
+			$this->data['action'] = 'New';
 			$state = new NState;
 			$this->data['status'] = 'Active';
 
