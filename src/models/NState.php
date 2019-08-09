@@ -22,7 +22,7 @@ class NState extends Model {
 		$data = [];
 		$option = new NState;
 		$option->name = 'Select State';
-		$option->id = null;
+		$option->id = -1;
 		if (!$country_id) {
 			$state_list = NState::select('id', 'name')->get();
 			$data = $state_list->prepend($option);

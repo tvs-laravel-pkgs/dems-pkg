@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Outlet extends Model {
 	use SoftDeletes;
+	protected $table = 'outlets';
+	protected $fillable = [
+		'company_id',
+		'code',
+		'name',
+		'created_by',
 
+	];
 	public function company() {
 		return $this->belongsTo('App\Company');
 	}
