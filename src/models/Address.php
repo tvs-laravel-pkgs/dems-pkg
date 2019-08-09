@@ -13,6 +13,9 @@ class Address extends Model {
 		'entity_id',
 		'name',
 		'line_1',
+		'line_2',
+		// 'country_id',
+		// 'state_id',
 		'city_id',
 		'pincode',
 	];

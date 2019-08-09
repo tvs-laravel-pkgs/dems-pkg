@@ -17,7 +17,7 @@ class NCity extends Model {
 		$data = [];
 		$option = new NCity;
 		$option->name = 'Select City';
-		$option->id = null;
+		$option->id = NULL;
 		if (!$state_id) {
 			$city_list = NCity::select('id', 'name')->get();
 			$data = $city_list->prepend($option);

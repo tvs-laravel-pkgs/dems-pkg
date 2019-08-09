@@ -6,10 +6,9 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\Address;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Outlet;
-use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -46,10 +45,10 @@ class OutletController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $outlet->id . '">
+				<a href="#!/eyatra/outlet/edit/' . $outlet->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $outlet->id . '">
+				<a href="#!/eyatra/outlet/view/' . $outlet->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_outlet"
@@ -63,27 +62,37 @@ class OutletController extends Controller {
 
 	public function eyatraOutletFormData($outlet_id = NULL) {
 
-		if (!$trip_id) {
+		if (!$outlet_id) {
 			$this->data['action'] = 'New';
-			$trip = new Trip;
-			$visit = new Visit;
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
-			$this->data['success'] = true;
+			$outlet = new Outlet;
+			$address = new Address;
+			$this->data['status'] = 'Active';
 		} else {
 			$this->data['action'] = 'Edit';
-			$trip = Trip::find($trip_id);
-			if (!$trip) {
+			$outlet = Outlet::with('address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
+			// $outlet->address;
+			// dd($outlet->address);
+
+			if (!$outlet) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
+				$this->data['message'] = 'Outlet not found';
+			}
+			if ($outlet->deleted_at == NULL) {
+				$this->data['status'] = 'Active';
+			} else {
+				$this->data['status'] = 'Inactive';
 			}
 		}
 		$this->data['extras'] = [
-			'purpose_list' => Entity::purposeList(),
-			'travel_mode_list' => Entity::travelModeList(),
-			'city_list' => NCity::getList(),
+			'country_list' => NCountry::getList(),
+			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($outlet->address->city->state->country_id),
+			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($outlet->address->state_id),
+			// 'city_list' => NCity::getList(),
 		];
-		$this->data['trip'] = $trip;
+
+		$this->data['outlet'] = $outlet;
+		$this->data['address'] = $outlet->address;
+		$this->data['success'] = true;
 
 		return response()->json($this->data);
 	}
@@ -91,10 +100,24 @@ class OutletController extends Controller {
 	public function saveEYatraOutlet(Request $request) {
 		//validation
 		try {
+			$error_messages = [
+				'code.required' => 'Outlet Code is Required',
+				'outlet_name.required' => 'Outlet Name is Required',
+				'line_1.required' => 'Address Line1 is Required',
+				// 'country_id.required' => 'Country is Required',
+				// 'state_id.required' => 'State is Required',
+				'city_id.required' => 'City is Required',
+				'pincode.required' => 'Pincode is Required',
+			];
+
 			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
-					'required',
-				],
+				'code' => 'required',
+				'outlet_name' => 'required',
+				'line_1' => 'required',
+				// 'country_id' => 'required',
+				// 'state_id' => 'required',
+				'city_id' => 'required',
+				'pincode' => 'required',
 			]);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
@@ -102,45 +125,47 @@ class OutletController extends Controller {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
+				$outlet = new Outlet;
+				$address = new Address;
+				$outlet->created_by = Auth::user()->id;
+				$outlet->created_at = Carbon::now();
+				$outlet->updated_at = NULL;
 
 			} else {
-				$trip = Trip::find($request->id);
+				$outlet = Outlet::withTrashed()->find($request->id);
+				$address = Address::where('entity_id', $request->id)->first();
 
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
+				$outlet->updated_by = Auth::user()->id;
+				$outlet->updated_at = Carbon::now();
 
 			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
+			if ($request->status == 'Active') {
+				$outlet->deleted_at = NULL;
+				$outlet->deleted_by = NULL;
+			} else {
+				$outlet->deleted_at = date('Y-m-d H:i:s');
+				$outlet->deleted_by = Auth::user()->id;
 
-			$trip->number = 'TRP' . $trip->id;
-			$trip->save();
-
-			//SAVING VISITS
-			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					$visit->save();
-				}
 			}
+			$outlet->name = $request->outlet_name;
+			$outlet->company_id = Auth::user()->company_id;
+			$outlet->fill($request->all());
+			$outlet->save();
 
+			//SAVING ADDRESS
+			$address->address_of_id = 3160;
+			$address->entity_id = $outlet->id;
+			$address->name = 'Primary';
+			$address->fill($request->all());
+			$address->save();
+			// dd($address);
 			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
+			$request->session()->flash('success', 'outlet saved successfully!');
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => 'Outlet Added successfully']);
+			} else {
+				return response()->json(['success' => true, 'message' => 'Outlet Updated Successfully']);
+			}
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -150,31 +175,20 @@ class OutletController extends Controller {
 
 	public function viewEYatraOutlet($outlet_id) {
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($trip_id);
-		if (!$trip) {
+		$outlet = Outlet::with([
+			'address',
+			'address.city',
+		])->select('*', DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
+			->withTrashed()
+			->find($outlet_id);
+		if (!$outlet) {
 			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
+			$this->data['errors'] = ['Outlet not found'];
 			return response()->json($this->data);
 		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+
+		$this->data['action'] = 'View';
+		$this->data['outlet'] = $outlet;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
