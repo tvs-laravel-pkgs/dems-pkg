@@ -168,7 +168,7 @@ class EYatraTC1Seeder extends Seeder {
 			],
 			503 => [
 				'A/C Taxi',
-				'Non A/A Taxi',
+				'Non A/C Taxi',
 				'Auto Ricksaw',
 				'Bus',
 			],
@@ -191,11 +191,12 @@ class EYatraTC1Seeder extends Seeder {
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
 			$address = Address::create($address_of_id, $outlet, $faker);
+			dd($address);
 
 			//MANAGERS
 			for ($j = 1; $j <= $number_of_items; $j++) {
 				$code = $outlet->code . '/mngr' . $j;
-				$manager = Employee::create($company, $code, $outlet, $admin);
+				$manager = Employee::create($company, $code, $outlet, $admin, $faker);
 
 				//USER ACCOUNT
 				$user_type_id = 3121;
@@ -203,7 +204,7 @@ class EYatraTC1Seeder extends Seeder {
 				//EMPLOYEES - REGULAR
 				for ($k = 1; $k <= $number_of_items; $k++) {
 					$code = $manager->code . '/e' . $k;
-					$employee = Employee::create($company, $code, $outlet, $admin, $manager->id);
+					$employee = Employee::create($company, $code, $outlet, $admin, $faker, $manager->id);
 
 					$user_type_id = 3121;
 					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $roles = 501);
@@ -243,10 +244,13 @@ class EYatraTC1Seeder extends Seeder {
 		//STATE <> TRAVEL MODE <> AGENT <> SERVICE CHARGE MAPPING
 		foreach (NState::get() as $state) {
 			$state->travelModes()->sync([]);
-			foreach (Entity::travelModeList() as $travel_mode) {
+			foreach ($company->travelModes as $travel_mode) {
 				$agent = Agent::whereHas('travelModes', function ($query) use ($travel_mode) {
 					$query->where('id', $travel_mode->id);
 				})->inRandomOrder()->first();
+
+				$agent = Agent::inRandomOrder()->first();
+				// dd($agent, $travel_mode, $agent->travelModes);
 
 				$travel_modes[$travel_mode->id] = [
 					'agent_id' => $agent->id,

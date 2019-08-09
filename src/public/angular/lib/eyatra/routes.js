@@ -98,11 +98,11 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-employee-form></eyatra-employee-form>',
         title: 'Add Employee',
     }).
-    when('/eyatra/employee/edit/:outlet_id', {
+    when('/eyatra/employee/edit/:employee_id', {
         template: '<eyatra-employee-form></eyatra-employee-form>',
         title: 'Edit Employee',
     }).
-    when('/eyatra/employee/view/:outlet_id', {
+    when('/eyatra/employee/view/:employee_id', {
         template: '<eyatra-employee-view></eyatra-employee-view>',
         title: 'View Employee',
     }).

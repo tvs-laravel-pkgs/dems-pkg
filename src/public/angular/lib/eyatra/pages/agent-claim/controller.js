@@ -5,6 +5,7 @@ app.component('eyatraAgentClaimList', {
         self.hasPermission = HelperService.hasPermission;
         // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -86,7 +87,6 @@ app.component('eyatraAgentClaimForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-        // $rootScope.loading = false;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -105,41 +105,65 @@ app.component('eyatraAgentClaimForm', {
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
             booking_pivot = response.data.booking_pivot;
+            booking_pivot_amt = response.data.booking_pivot_amt;
             self.invoice_date = response.data.invoice_date;
-            // self.extras = response.data.extras;
+
+            if (self.action == 'Edit') {
+                var total = 0;
+                var i = 0;
+                $.each(booking_pivot, function(key, value) {
+                    total += parseFloat(booking_pivot_amt[key]);
+                    i++;
+                });
+                self.total_amount = total;
+                self.selected_amount = total.toFixed(2);
+                self.booking_checked_count = i;
+            } else {
+                self.total_amount = 0;
+                self.selected_amount = 0;
+                self.booking_checked_count = 0;
+            } // self.extras = response.data.extras;
             $rootScope.loading = false;
+
         });
 
         $scope.bookingChecked = function(id) {
-            // console.log(id);
             var value = booking_pivot.indexOf(id);
             return value;
         }
 
-        var total_amount = 0;
+
         $scope.checkedcount = function(id, amount) {
             if (event.target.checked == true) {
                 var data = $(".booking_list:checked").length;
-                total_amount += parseFloat(amount);
+                self.total_amount += parseFloat(amount);
             } else {
                 var data = $(".booking_list:checked").length;
-                total_amount -= parseFloat(amount);
+                self.total_amount -= parseFloat(amount);
             }
-            self.selected_amount = total_amount.toFixed(2);
+            self.selected_amount = self.total_amount.toFixed(2);
             self.booking_checked_count = data;
         }
 
+        $scope.checkedallcount = function(id, amount) {
+            console.log(id, amount);
+        }
 
         $('#head_booking').on('click', function() {
+            var total_amount = 0;
             if (event.target.checked == true) {
                 $('.booking_list').prop('checked', true);
                 $.each($('.booking_list:checked'), function() {
-                    $scope.checkedcount($(this).val(), $(this).attr('data-amount'));
+                    $scope.checkedallcount($(this).val(), $(this).attr('data-amount'));
                 });
             } else {
                 $('.booking_list').prop('checked', false);
+                $.each($('.booking_list:checked'), function() {
+                    $scope.checkedallcount($(this).val(), $(this).attr('data-amount'));
+                });
             }
         });
+
         var form_id = '#agent-claim-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -209,7 +233,6 @@ app.component('eyatraAgentClaimForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';

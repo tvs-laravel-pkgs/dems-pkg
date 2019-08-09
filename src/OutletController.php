@@ -5,43 +5,39 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
-use Uitoux\EYatra\Trip;
+use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class OutletController extends Controller {
 	public function listEYatraOutlet(Request $r) {
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
+		$outlets = Outlet::withTrashed()->from('outlets')
+			->join('ey_addresses as a', 'a.entity_id', 'outlets.id')
+			->join('ncities as city', 'city.id', 'a.city_id')
+			->join('nstates as s', 's.id', 'city.state_id')
+			->join('countries as c', 'c.id', 's.country_id')
 			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
-				'trips.advance_received',
-				'status.name as status'
+				'outlets.id',
+				'outlets.code',
+				'outlets.name',
+				'city.name as city_name',
+				's.name as state_name',
+				'c.name as country_name',
+				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status')
 			)
-			->where('e.company_id', Auth::user()->company_id)
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+			->where('outlets.company_id', Auth::user()->company_id)
+			->where('a.address_of_id', 3160)
+			->groupBy('outlets.id');
 
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
-		return Datatables::of($trips)
-			->addColumn('action', function ($trip) {
+		// if (!Entrust::can('view-all-trips')) {
+		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
+		// }
+		return Datatables::of($outlets)
+			->addColumn('action', function ($outlet) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -50,14 +46,14 @@ class OutletController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/edit/' . $trip->id . '">
+				<a href="#!/eyatra/trip/edit/' . $outlet->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/view/' . $trip->id . '">
+				<a href="#!/eyatra/trip/view/' . $outlet->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
+				<a href="javascript:;" data-toggle="modal" data-target="#delete_outlet"
+				onclick="angular.element(this).scope().deleteOutletConfirm(' . $outlet->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -184,9 +180,9 @@ class OutletController extends Controller {
 	}
 
 	public function deleteEYatraOutlet($outlet_id) {
-		$trip = Trip::where('id', $trip_id)->delete();
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		$outlet = Outlet::where('id', $outlet_id)->forceDelete();
+		if (!$outlet) {
+			return response()->json(['success' => false, 'errors' => ['Outlet not found']]);
 		}
 		return response()->json(['success' => true]);
 	}
