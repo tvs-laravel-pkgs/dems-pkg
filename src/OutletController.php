@@ -69,10 +69,9 @@ class OutletController extends Controller {
 			$this->data['status'] = 'Active';
 		} else {
 			$this->data['action'] = 'Edit';
-			$outlet = Outlet::withTrashed()->find($outlet_id);
+			$outlet = Outlet::with('address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
 			// $outlet->address;
 			// dd($outlet->address);
-			$address = Address::where('entity_id', $outlet_id)->where('address_of_id', 3160)->first();
 
 			if (!$outlet) {
 				$this->data['success'] = false;
@@ -86,13 +85,13 @@ class OutletController extends Controller {
 		}
 		$this->data['extras'] = [
 			'country_list' => NCountry::getList(),
-			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($outlet->address->country_id),
+			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($outlet->address->city->state->country_id),
 			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($outlet->address->state_id),
 			// 'city_list' => NCity::getList(),
 		];
 
 		$this->data['outlet'] = $outlet;
-		$this->data['address'] = $address;
+		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
 
 		return response()->json($this->data);
