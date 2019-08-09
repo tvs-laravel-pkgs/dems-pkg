@@ -68,8 +68,7 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent = Agent::find($agent_id);
-			$address = Address::where('entity_id', $agent_id)->where('address_of_id', 3161)->first();
+			$agent = Agent::with('address', 'address.city', 'address.city.state')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			if (!$agent) {
@@ -78,17 +77,17 @@ class AgentController extends Controller {
 			} else {
 				$this->data['success'] = true;
 			}
-			$this->data['travel_list'] = $agent->travelModes()->pluck('travel_mode_id')->toArray();
+			$this->data['travel_list'] = $agent->travelModes()->where('company_id', Auth::user()->company_id)->pluck('travel_mode_id')->toArray();
 		}
 
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
 			'country_list' => NCountry::getList(),
-			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->country_id),
-			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->state_id),
+			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->city->state->country_id),
+			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->city->state_id),
 		];
 		$this->data['agent'] = $agent;
-		$this->data['address'] = $address;
+		$this->data['address'] = $agent->address;
 		$this->data['user'] = $user;
 
 		return response()->json($this->data);
@@ -157,8 +156,9 @@ class AgentController extends Controller {
 			$address->name = 'Primary';
 			$address->line_1 = $request->address_line1;
 			$address->line_2 = $request->address_line2;
-			$address->country_id = $request->country;
-			$address->state_id = $request->state;
+
+			// $address->country_id = $request->country;
+			// $address->state_id = $request->state;
 			$address->city_id = $request->city;
 			$address->fill($request->all());
 			$address->save();
@@ -189,32 +189,19 @@ class AgentController extends Controller {
 	}
 
 	public function viewEYatraAgent($agent_id) {
-		dd($agent_id);
-		$trip = Agent::with([
-			'agents',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($agent_id);
-		if (!$trip) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['Agent not found'];
-			return response()->json($this->data);
-		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+
+		$this->data['agent'] = $agent = Agent::find($agent_id);
+		$this->data['address'] = $address = Address::join('ncities', 'ncities.id', 'ey_addresses.city_id')
+			->join('nstates', 'nstates.id', 'ncities.state_id')
+			->join('countries', 'countries.id', 'nstates.country_id')
+			->where('entity_id', $agent_id)->where('address_of_id', 3161)
+			->select('ey_addresses.*', 'ncities.name as city_name', 'nstates.name as state_name', 'countries.name as country_name')
+			->first();
+
+		$this->data['user_details'] = $user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
+
+		$this->data['travel_list'] = $agent->travelModes;
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

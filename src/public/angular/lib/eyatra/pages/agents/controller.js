@@ -4,6 +4,7 @@ app.component('eyatraAgents', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#agent_list').DataTable({
+            stateSave: true,
             "dom": dom_structure,
             "language": {
                 "search": "",
@@ -119,14 +120,14 @@ app.component('eyatraAgentForm', {
 
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $('.btn-pills').on("click", function() {
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
@@ -344,14 +345,29 @@ app.component('eyatraAgentView', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        alert(agent_view_url + '/' + $routeParams.agent_id);
         $http.get(
             agent_view_url + '/' + $routeParams.agent_id
         ).then(function(response) {
             self.agent = response.data.agent;
-            console.log(self.agent);
+            self.agent_address = response.data.address;
+            self.user_details = response.data.user_details;
+            self.travel_modes = response.data.travel_list;
+            if (self.agent.deleted_at == null) {
+                self.status = 'Active';
+            } else {
+                self.status = 'Inactive';
+            }
+            self.action = "View ";
 
         });
+
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
         $rootScope.loading = false;
     }
 });

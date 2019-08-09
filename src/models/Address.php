@@ -34,8 +34,6 @@ class Address extends Model {
 		$country = NCountry::find(5);
 		$state = $country->states()->inRandomOrder()->first();
 		$city = $state->cities()->inRandomOrder()->first();
-		// $address->country_id = $country->id;
-		// $address->state_id = $state->id;
 		$address->city_id = $city->id;
 		$address->save();
 
