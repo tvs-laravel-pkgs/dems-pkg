@@ -79,26 +79,26 @@ app.component('eyatraAgentForm', {
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-
+            console.log(travel_list);
             if (self.action == 'Edit') {
-                $("#hide_password").hide();
+                //$("#hide_password").hide();
                 if (self.agent.deleted_at == null) {
                     self.switch_value = 'Active';
                 } else {
                     self.switch_value = 'Inactive';
                 }
-                // if (self.user.force_password_change == 1) {
-                //     self.switch_password = 'No';
-                //     $("#hide_password").hide();
-                // } else {
-                //     self.switch_password = 'Yes';
-                // }
-                // if (self.user.force_password_change == 1) {
-                //     self.switch_password = 'No';
-                //     $("#hide_password").hide();
-                // } else {
-                //     self.switch_password = 'Yes';
-                // }
+                if (self.user.force_password_change == 1) {
+                    self.switch_password = 'No';
+                    $("#hide_password").hide();
+                } else {
+                    self.switch_password = 'Yes';
+                }
+                if (self.user.force_password_change == 1) {
+                    self.switch_password = 'No';
+                    $("#hide_password").hide();
+                } else {
+                    self.switch_password = 'Yes';
+                }
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
@@ -233,7 +233,13 @@ app.component('eyatraAgentForm', {
                     maxlength: 191,
                 },
                 'password': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#password_change").val() == 'Yes') {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     minlength: 5,
                     maxlength: 16,
                 },
@@ -299,6 +305,13 @@ app.component('eyatraAgentForm', {
                 'travel_mode[]': {
                     required: 'Travel mode is Required',
                 }
+            },
+            invalidHandler: function(event, validator) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Please check in each tab and fix errors!'
+                }).show();
             },
             submitHandler: function(form) {
 
