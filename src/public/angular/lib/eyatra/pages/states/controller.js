@@ -31,7 +31,7 @@ app.component('eyatraStates', {
                 { data: 'code', name: 'nstates.code', searchable: true },
                 { data: 'name', name: 'nstates.name', searchable: true },
                 { data: 'country', name: 'c.name', searchable: true },
-                { data: 'status', searchable: false },
+                { data: 'status', name: 'nstates.deleted_at', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -44,14 +44,14 @@ app.component('eyatraStates', {
             'Add New' +
             '</a>'
         );
-        $scope.deleteStateConfirm = function($id) {
-            $("#delete_state_id").val($id);
+        $scope.deleteStateConfirm = function($state_id) {
+            $("#delete_state_id").val($state_id);
         }
 
         $scope.deleteState = function() {
-            $id = $('#delete_state_id').val();
+            $state_id = $('#delete_state_id').val();
             $http.get(
-                state_delete_url + '/' + $id,
+                state_delete_url + '/' + $state_id,
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
@@ -129,14 +129,14 @@ app.component('eyatraStateForm', {
             if (event.target.checked == true) {
                 $("#sc_" + id).removeClass("ng-hide");
                 $("#sc_" + id).prop('required', true);
-                $("#agent_" + id).removeClass("ng-hide");
-                $("#agent_" + id).prop('required', true);
-                $("#agent_" + id).removeClass("ng-hide");
+                $(".agent_select").removeClass("ng-hide");
+                $(".agent_select").prop('required', true);
+                //alert('fsdghgf');
             } else {
                 $("#sc_" + id).addClass("ng-hide");
                 $("#sc_" + id).prop('required', false);
-                $("#agent_" + id).addClass("ng-hide");
-                $("#agent_" + id).prop('required', false);
+                $(".agent_select").addClass("ng-hide");
+                $(".agent_select").prop('required', false);
             }
         }
         // $('#travel_mode').on('click', function() {
@@ -146,16 +146,16 @@ app.component('eyatraStateForm', {
         //             $scope.getTravelMode($(this).val());
         //             //$('.state_agent_travel_mode_table').find('ui-select').attr('disabled', false);
         //             // $('.state_agent_travel_mode_table tbody ui-select option' + $(this).find('ui-select')).removeClass('ng-hide');
-        //             // $('.state_agent_travel_mode_table tbody tr #agent_' + $(this).val()).removeClass('ng-hide');
+        //             $('.state_agent_travel_mode_table tbody tr .agent_select' + $(this).val()).removeClass('ng-hide');
         //             $('.state_agent_travel_mode_table tbody tr #sc_' + $(this).val()).removeClass('ng-hide');
         //         });
         //     } else {
         //         $('.travelmodecheckbox').prop('checked', false);
-        //         $.each($('.travelmodecheckbox'), function() {
-        //             // $('.state_agent_travel_mode_table tbody ui-select option' + $(this).find('ui-select')).addClass('ng-hide');
-        //             //$('.state_agent_travel_mode_table tbody tr #agent_' + $(this).val()).addClass('ng-hide');
-        //             $('.state_agent_travel_mode_table tbody tr #sc_' + $(this).val()).addClass('ng-hide');
-        //         });
+        //         // $.each($('.travelmodecheckbox'), function() {
+        //         // $('.state_agent_travel_mode_table tbody ui-select option' + $(this).find('ui-select')).addClass('ng-hide');
+        //         $('.state_agent_travel_mode_table tbody tr .agent_select').addClass('ng-hide');
+        //         $('.state_agent_travel_mode_table tbody tr #sc_' + $(this).val()).addClass('ng-hide');
+        //         // });
         //     }
         // });
 
@@ -177,9 +177,11 @@ app.component('eyatraStateForm', {
         // $scope.getTravelMode = function(id) {
         //     if (event.target.checked == true) {
         //         $("#sc_" + id).prop('readonly', false);
+        //         $(".agent_select").prop('readonly', false);
         //         // $(this).prop('readonly', false);
         //     } else {
         //         $("#sc_" + id).prop('readonly', true);
+        //         $(".agent_select").prop('readonly', true);
         //         // $("agent_" + id).prop('readonly', true);
         //     }
         // }

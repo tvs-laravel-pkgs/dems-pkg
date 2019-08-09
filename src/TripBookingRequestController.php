@@ -82,7 +82,12 @@ class TripBookingRequestController extends Controller {
 			'trip.purpose',
 			'trip.status',
 		];
-		if ($visit->booking_status_id == 3061) {
+
+		//Booking Status
+		//3061 => Booking
+		//3062 => Cancel
+
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$relations[] = 'bookings';
 			$relations[] = 'bookings.type';
 			$relations[] = 'bookings.travelMode';
@@ -96,9 +101,11 @@ class TripBookingRequestController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		}
 
+		$agent = Agent::find(Auth::user()->entity_id);
+		$this->data['travel_mode'] = $agent_travel_mode = $agent->travelModes;
 		$this->data['visit'] = $visit;
 		$this->data['trip'] = $visit->trip;
-		if ($visit->booking_status_id == 3061) {
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$this->data['bookings'] = $visit->bookings;
 		}
 		$this->data['success'] = true;

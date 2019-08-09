@@ -11,14 +11,14 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class EntityController extends Controller {
-	// public function getEntityListData($entity_type_id) {
-	// 	$entity_type = EntityType::find($entity_type_id);
-	// 	if (!$entity_type) {
-	// 		return response()->json(['success' => false, 'error' => "Entity Type Not found"]);
-	// 	}
-	// 	$this->data['entity_type'] = $entity_type;
-	// 	return response()->json($this->data);
-	// }
+	public function getEntityListData($entity_type_id) {
+		$entity_type = EntityType::find($entity_type_id);
+		if (!$entity_type) {
+			return response()->json(['success' => false, 'error' => "Entity Type Not found"]);
+		}
+		$this->data['entity_type'] = $entity_type;
+		return response()->json($this->data);
+	}
 
 	public function listEYatraEntity(Request $r) {
 		$entities = Entity::withTrashed()->from('entities')
@@ -40,7 +40,7 @@ class EntityController extends Controller {
 			->leftjoin('users as updater', 'updater.id', '=', 'entities.updated_by')
 			->leftjoin('users as deactivator', 'deactivator.id', '=', 'entities.deleted_by')
 			->where('entities.company_id', Auth::user()->company_id)
-			->where('entities.entity_type_id', $entity_type_id)
+			->where('entities.entity_type_id', $r->entity_type_id)
 			->orderBy('entities.id', 'desc');
 		return Datatables::of($entities)
 			->addColumn('action', function ($entity) {

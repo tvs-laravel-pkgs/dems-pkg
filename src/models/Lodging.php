@@ -23,6 +23,7 @@ class Lodging extends Model {
 		'description',
 		'lodge_name',
 		'eligible_amount',
+		'remarks',
 		'created_by',
 		'updated_by',
 		'deleted_by',

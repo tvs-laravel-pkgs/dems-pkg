@@ -15,7 +15,7 @@ use Yajra\Datatables\Datatables;
 
 class StateController extends Controller {
 	public function listEYatraState(Request $r) {
-		$states = NState::from('nstates')
+		$states = NState::withTrashed()->from('nstates')
 			->join('countries as c', 'c.id', 'nstates.country_id')
 			->select(
 				'nstates.id',
@@ -53,12 +53,10 @@ class StateController extends Controller {
 
 	public function eyatraStateFormData($state_id = NULL) {
 		if (!$state_id) {
-			$this->data['action'] = 'Add';
+			$this->data['action'] = 'New';
 			$state = new NState;
 			$this->data['status'] = 'Active';
-			//$visit = new Visit;
-			// $visit->booking_method = 'Self';
-			// $trip->visits = [$visit];
+
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -67,10 +65,8 @@ class StateController extends Controller {
 			if (!$state) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'State not found';
-			} else {
-				$this->data['success'] = true;
-
 			}
+
 			if ($state->deleted_at == NULL) {
 				$this->data['status'] = 'Active';
 			} else {
@@ -82,13 +78,14 @@ class StateController extends Controller {
 		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
 
 		// dd($state->travelModes()->withPivot()->get());
-		foreach ($state->travelModes as $travel_mode) {
+		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
 			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
 			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
 			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
 		}
 
 		$this->data['state'] = $state;
+		$this->data['success'] = true;
 
 		return response()->json($this->data);
 	}
@@ -216,7 +213,6 @@ class StateController extends Controller {
 		}
 		return response()->json(['success' => true]);
 	}
-
 	public function getStateList(Request $request) {
 		return NState::getList($request->country_id);
 	}

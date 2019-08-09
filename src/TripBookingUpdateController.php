@@ -92,10 +92,9 @@ class TripBookingUpdateController extends Controller {
 		DB::beginTransaction();
 		try {
 			$validator = Validator::make($r->all(), [
-				'travel_mode_id' => [
-					// Rule::unique('suppliers', 'code')->ignore($request->id),
-					'required:true',
-				],
+				// 'travel_mode_id' => [
+				// 	'required:true',
+				// ],
 				'reference_number' => [
 					'required:true',
 				],
@@ -112,23 +111,46 @@ class TripBookingUpdateController extends Controller {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 
-			//Unique validation
-			$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
-				->where('type_id', $r->type_id)
-				->where('travel_mode_id', $r->travel_mode_id)
-				->first();
-
-			if ($travel_mode_id_unique) {
-				return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
+			//If Booking Type Fresh Booking
+			if ($r->booking_type == 'fresh_booking') {
+				//Unique validation
+				$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
+					->where('type_id', $r->type_id)
+					->where('travel_mode_id', $r->travel_mode_id)
+					->first();
+				if ($travel_mode_id_unique) {
+					return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
+				}
+				$booking_status_id = 3061; //Visit Status Booked
+			} else {
+				//Find Visit Details
+				$visit_status = VisitBooking::where('visit_id', $r->visit_id)
+					->where('type_id', 3100)
+					->first();
+				if (!$visit_status) {
+					return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
+				}
+				$booking_status_id = 3062; //Visit Status Cancelled
 			}
-
 			//Visit status update
 			$visit = Visit::find($r->visit_id);
-			$visit->booking_status_id = 3061; // Visit status Booked
+			$visit->booking_status_id = $booking_status_id;
 			$visit->save();
+
+			//Get Service Charge
+			$service_charge = NCity::join('state_agent_travel_mode', 'state_agent_travel_mode.state_id', 'ncities.state_id')->where('state_agent_travel_mode.agent_id', Auth::user()->entity_id)
+				->where('state_agent_travel_mode.travel_mode_id', $r->travel_mode_id)
+				->where('ncities.id', $visit->from_city_id)
+				->pluck('state_agent_travel_mode.service_charge')->first();
+			$service_charge = $service_charge ? $service_charge : 0;
+
+			//Total Amount of Booking Deails (include tax)
+			$total_amount = $r->amount + $r->tax + $service_charge;
 
 			$visit_bookings = new VisitBooking;
 			$visit_bookings->fill($r->all());
+			$visit_bookings->service_charge = $service_charge;
+			$visit_bookings->total = $total_amount;
 			$visit_bookings->created_by = Auth::user()->id;
 			$visit_bookings->save();
 
@@ -139,8 +161,8 @@ class TripBookingUpdateController extends Controller {
 					$name = $image->getClientOriginalName();
 					$image->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
 					$attachement = new Attachment;
-					$attachement->attachment_of_id = 3180; // Attachment visit
-					$attachement->attachment_type_id = 3200; //Attachment type visit booking
+					$attachement->attachment_of_id = 3180; // Visit Booking Attachment
+					$attachement->attachment_type_id = 3200; //Multi Attachment
 					$attachement->entity_id = $r->visit_id;
 					$attachement->name = $name;
 					$attachement->save();

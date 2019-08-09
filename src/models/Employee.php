@@ -32,11 +32,12 @@ class Employee extends Model {
 		return Employee::select('id', 'name')->get();
 	}
 
-	public static function create($company, $code, $outlet, $admin, $manager_id = null) {
+	public static function create($company, $code, $outlet, $admin, $faker, $manager_id = null) {
 		$employee = Employee::firstOrNew([
 			'company_id' => $company->id,
 			'code' => $code,
 		]);
+		$employee->name = $faker->name;
 		$employee->outlet_id = $outlet->id;
 		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
 		$employee->reporting_to_id = $manager_id;
