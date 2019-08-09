@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Employee extends Model {
 	use SoftDeletes;
 
+	protected $fillable = [
+		'id',
+		'code',
+		'name',
+		'outlet_id',
+		'reporting_to_id',
+		'grade_id',
+		'created_by',
+		'updated_by',
+		'deleted_by',
+	];
+
 	public function company() {
 		return $this->belongsTo('App\Company');
 	}
@@ -29,7 +41,7 @@ class Employee extends Model {
 	}
 
 	public static function getList() {
-		return Employee::select('id', 'name')->get();
+		return Employee::select('name', 'id')->get();
 	}
 
 	public static function create($company, $code, $outlet, $admin, $manager_id = null) {

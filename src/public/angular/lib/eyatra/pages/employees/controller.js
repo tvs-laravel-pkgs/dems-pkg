@@ -29,6 +29,7 @@ app.component('eyatraEmployees', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'code', name: 'e.code', searchable: true },
+                { data: 'name', name: 'e.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
                 { data: 'manager_code', name: 'm.code', searchable: true },
                 { data: 'grade', name: 'grd.name', searchable: true },
@@ -79,26 +80,37 @@ app.component('eyatraEmployeeForm', {
 
         });
 
-        var form_id = '#employee-form';
+        var form_id = '#employee_form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'code': {
+                    required: true,
+                    maxlength: 191,
+                },
+                'name': {
+                    required: true,
+                    maxlength: 80,
+                },
+                'outlet_id': {
                     required: true,
                 },
-                'description': {
-                    maxlength: 255,
+                'reporting_to_id': {
+                    required: true,
                 },
-                'advance_received': {
-                    maxlength: 10,
+                'grade_id': {
+                    required: true,
                 },
             },
             messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'code': {
+                    maxlength: 'Please enter maximum of 191 letters',
+                },
+                'name': {
+                    maxlength: 'Please enter maximum of 80 letters',
                 },
             },
             submitHandler: function(form) {

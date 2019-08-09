@@ -8,7 +8,6 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -22,6 +21,7 @@ class EmployeeController extends Controller {
 			->select(
 				'e.id',
 				'e.code',
+				'e.name',
 				'o.code as outlet_code',
 				'm.code as manager_code',
 				'grd.name as grade',
@@ -58,7 +58,7 @@ class EmployeeController extends Controller {
 	public function eyatraEmployeeFormData($employee_id = NULL) {
 
 		if (!$employee_id) {
-			$this->data['action'] = 'New';
+			$this->data['action'] = 'Add';
 			$employee = new Employee;
 			$this->data['success'] = true;
 		} else {
@@ -68,6 +68,7 @@ class EmployeeController extends Controller {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
 			}
+			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
@@ -83,8 +84,12 @@ class EmployeeController extends Controller {
 		//validation
 		try {
 			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
-					'required',
+				'code' => [
+					'unique:employees,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+					'required:true',
+				],
+				'name' => [
+					'required:true',
 				],
 			]);
 			if ($validator->fails()) {
@@ -93,45 +98,27 @@ class EmployeeController extends Controller {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
-
+				$employee = new Employee;
+				$employee->created_by = Auth::user()->id;
+				$employee->created_at = Carbon::now();
+				$employee->updated_at = NULL;
 			} else {
-				$trip = Trip::find($request->id);
-
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
-
+				$employee = Employee::find($request->id);
+				$employee->updated_by = Auth::user()->id;
+				$employee->updated_at = Carbon::now();
 			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
-
-			$trip->number = 'TRP' . $trip->id;
-			$trip->save();
-
-			//SAVING VISITS
-			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3020; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					$visit->save();
-				}
+			$employee->fill($request->all());
+			$employee->company_id = Auth::user()->company_id;
+			if ($request->status == 0) {
+				$employee->deleted_at = date('Y-m-d H:i:s');
+				$employee->deleted_by = Auth::user()->id;
+			} else {
+				$employee->deleted_by = NULL;
+				$employee->deleted_at = NULL;
 			}
-
+			$employee->save();
 			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
+			$request->session()->flash('success', 'Employee saved successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
