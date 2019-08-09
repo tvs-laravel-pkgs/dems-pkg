@@ -31,7 +31,7 @@ app.component('eyatraStates', {
                 { data: 'code', name: 'nstates.code', searchable: true },
                 { data: 'name', name: 'nstates.name', searchable: true },
                 { data: 'country', name: 'c.name', searchable: true },
-                { data: 'status', searchable: false },
+                { data: 'status', name: 'nstates.deleted_at', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -44,14 +44,14 @@ app.component('eyatraStates', {
             'Add New' +
             '</a>'
         );
-        $scope.deleteStateConfirm = function($id) {
-            $("#delete_state_id").val($id);
+        $scope.deleteStateConfirm = function($state_id) {
+            $("#delete_state_id").val($state_id);
         }
 
         $scope.deleteState = function() {
-            $id = $('#delete_state_id').val();
+            $state_id = $('#delete_state_id').val();
             $http.get(
-                state_delete_url + '/' + $id,
+                state_delete_url + '/' + $state_id,
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {

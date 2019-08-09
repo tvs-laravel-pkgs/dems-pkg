@@ -15,7 +15,7 @@ use Yajra\Datatables\Datatables;
 
 class StateController extends Controller {
 	public function listEYatraState(Request $r) {
-		$states = NState::from('nstates')
+		$states = NState::withTrashed()->from('nstates')
 			->join('countries as c', 'c.id', 'nstates.country_id')
 			->select(
 				'nstates.id',
@@ -56,9 +56,7 @@ class StateController extends Controller {
 			$this->data['action'] = 'Add';
 			$state = new NState;
 			$this->data['status'] = 'Active';
-			//$visit = new Visit;
-			// $visit->booking_method = 'Self';
-			// $trip->visits = [$visit];
+
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -67,10 +65,8 @@ class StateController extends Controller {
 			if (!$state) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'State not found';
-			} else {
-				$this->data['success'] = true;
-
 			}
+
 			if ($state->deleted_at == NULL) {
 				$this->data['status'] = 'Active';
 			} else {
@@ -89,6 +85,7 @@ class StateController extends Controller {
 		}
 
 		$this->data['state'] = $state;
+		$this->data['success'] = true;
 
 		return response()->json($this->data);
 	}
@@ -216,7 +213,6 @@ class StateController extends Controller {
 		}
 		return response()->json(['success' => true]);
 	}
-
 	public function getStateList(Request $request) {
 		return NState::getList($request->country_id);
 	}
