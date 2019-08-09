@@ -36,6 +36,10 @@ class Employee extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Outlet');
 	}
 
+	public function bankDetail() {
+		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
+	}
+
 	public function reportingTo() {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
 	}

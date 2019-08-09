@@ -6,6 +6,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\BankDetail;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Validator;
@@ -60,10 +61,12 @@ class EmployeeController extends Controller {
 		if (!$employee_id) {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
+			$bank_detail = new BankDetail;
+			$employee->$bank_detail;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::find($employee_id);
+			$employee = Employee::with('bankDetail', 'reportingTo')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
@@ -117,6 +120,15 @@ class EmployeeController extends Controller {
 				$employee->deleted_at = NULL;
 			}
 			$employee->save();
+
+			//BANK DETAIL SAVE
+			$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
+			$bank_detail->fill($request->all());
+			$bank_detail->detail_of_id = 3243;
+			$bank_detail->entity_id = $employee->id;
+			$bank_detail->account_type_id = 3243;
+			$bank_detail->save();
+
 			DB::commit();
 			$request->session()->flash('success', 'Employee Saved Successfully!');
 			return response()->json(['success' => true]);
@@ -132,6 +144,7 @@ class EmployeeController extends Controller {
 			'reportingTo',
 			'outlet',
 			'grade',
+			'bankDetail',
 		])
 			->find($employee_id);
 		if (!$employee) {
@@ -150,6 +163,22 @@ class EmployeeController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Employee not found']]);
 		}
 		return response()->json(['success' => true]);
+	}
+
+	public function searchManager(Request $r) {
+		$key = $r->key;
+		$manager_list = Employee::select(
+			'name',
+			'code',
+			'id'
+		)
+			->where(function ($q) use ($key) {
+				$q->where('name', 'like', '%' . $key . '%')
+					->orWhere('code', 'like', '%' . $key . '%')
+				;
+			})
+			->get();
+		return response()->json($manager_list);
 	}
 
 }

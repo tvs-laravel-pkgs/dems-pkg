@@ -136,6 +136,22 @@ app.component('eyatraEmployeeForm', {
                 'grade_id': {
                     required: true,
                 },
+                'bank_name': {
+                    required: true,
+                    maxlength: 100,
+                },
+                'branch_name': {
+                    required: true,
+                    maxlength: 50,
+                },
+                'account_number': {
+                    required: true,
+                    maxlength: 20,
+                },
+                'ifsc_code': {
+                    required: true,
+                    maxlength: 10,
+                },
             },
             messages: {
                 'code': {
@@ -181,6 +197,27 @@ app.component('eyatraEmployeeForm', {
                     });
             },
         });
+
+        //SEARCH MANAGER
+        self.searchManager = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            search_manager_url, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            console.log(response.data);
+                            resolve(response.data);
+                        });
+                    //reject(response);
+                });
+            } else {
+                return [];
+            }
+        }
     }
 });
 
