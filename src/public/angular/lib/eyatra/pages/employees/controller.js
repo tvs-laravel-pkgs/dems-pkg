@@ -1,6 +1,6 @@
 app.component('eyatraEmployees', {
     templateUrl: eyatra_employee_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_employee_table').DataTable({
@@ -46,6 +46,38 @@ app.component('eyatraEmployees', {
             'Add New' +
             '</a>'
         );
+
+        $scope.deleteEmployee = function(id) {
+            $('#del').val(id);
+        }
+        $scope.confirmDeleteEmployee = function() {
+            $id = $('#del').val();
+            $http.get(
+                employee_delete_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Employee Deleted Successfully',
+                    }).show();
+                    $('#delete_emp').modal('hide');
+                    dataTable.ajax.reload(function(json) {});
+                }
+
+            });
+        }
+
         $rootScope.loading = false;
 
     }
@@ -154,7 +186,6 @@ app.component('eyatraEmployeeForm', {
 
 app.component('eyatraEmployeeView', {
     templateUrl: employee_view_template_url,
-
     controller: function($http, $location, $routeParams, HelperService, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;

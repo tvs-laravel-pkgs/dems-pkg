@@ -47,7 +47,7 @@ class EmployeeController extends Controller {
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteTrip(' . $employee->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteEmployee(' . $employee->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
@@ -118,7 +118,7 @@ class EmployeeController extends Controller {
 			}
 			$employee->save();
 			DB::commit();
-			$request->session()->flash('success', 'Employee saved successfully!');
+			$request->session()->flash('success', 'Employee Saved Successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -128,39 +128,26 @@ class EmployeeController extends Controller {
 
 	public function viewEYatraEmployee($employee_id) {
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
+		$employee = Employee::withTrashed()->with([
+			'reportingTo',
+			'outlet',
+			'grade',
 		])
-			->find($trip_id);
-		if (!$trip) {
+			->find($employee_id);
+		if (!$employee) {
 			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
+			$this->data['errors'] = ['Employee not found'];
 			return response()->json($this->data);
 		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
+		$this->data['employee'] = $employee;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
 	public function deleteEYatraEmployee($employee_id) {
-		$trip = Trip::where('id', $trip_id)->delete();
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		$employee = Employee::withTrashed()->where('id', $employee_id)->forcedelete();
+		if (!$employee) {
+			return response()->json(['success' => false, 'errors' => ['Employee not found']]);
 		}
 		return response()->json(['success' => true]);
 	}

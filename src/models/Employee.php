@@ -36,6 +36,10 @@ class Employee extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Outlet');
 	}
 
+	public function reportingTo() {
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
+	}
+
 	public function user() {
 		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121);
 	}
