@@ -219,9 +219,8 @@ class TripController extends Controller {
 
 	public function cancelTripVisitBooking($visit_id) {
 		if ($visit_id) {
-
 			//CHECK IF AGENT BOOKED VISIT
-			$agent_visits_booked = Visit::where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
 			if ($agent_visits_booked) {
 				return response()->json(['success' => false, 'errors' => ['Visit cannot be deleted']]);
 			}
