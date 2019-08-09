@@ -42,7 +42,7 @@ app.component('eyatraOutlets', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('Outlets');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/outlet/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/eyatra/outlet/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-outlet\')">' +
             'Add New' +
             '</a>'
         );
@@ -82,7 +82,7 @@ app.component('eyatraOutlets', {
 
 app.component('eyatraOutletForm', {
     templateUrl: outlet_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+    controller: function($http, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.outlet_id) == 'undefined' ? outlet_form_data_url : outlet_form_data_url + '/' + $routeParams.outlet_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -101,33 +101,180 @@ app.component('eyatraOutletForm', {
                 return;
             }
             self.outlet = response.data.outlet;
+            self.status = response.data.status;
+            self.address = response.data.address;
             self.extras = response.data.extras;
             self.action = response.data.action;
             $rootScope.loading = false;
 
         });
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+            tabPaneFooter();
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+            tabPaneFooter();
+        });
+        $('.btn-pills').on("click", function() {
+            tabPaneFooter();
+        });
+        $scope.btnNxt = function() {}
+        $scope.prev = function() {}
+        // $scope.loadCity = function(state_id) {
+        //     $.ajax({
+        //             url: get_city_url,
+        //             method: "POST",
+        //             data: { state_id: state_id },
+        //         })
+        //         .done(function(res) {
+        //             self.city_list = [];
+        //             $(res['city_list']).each(function(i, v) {
+        //                 self.city_list.push({
+        //                     id: v['id'],
+        //                     name: v['name'],
+        //                 });
+        //             });
+        //         })
+        //         .fail(function(xhr) {
+        //             console.log(xhr);
+        //         });
+        // }
 
+        $scope.loadState = function(country_id) {
+            $.ajax({
+                    url: get_state_by_country,
+                    method: "POST",
+                    data: { country_id: country_id },
+                })
+                .done(function(res) {
+                    self.extras.state_list = [];
+                    $(res).each(function(i, v) {
+                        self.extras.state_list.push({
+                            id: v['id'],
+                            name: v['name'],
+                        });
+                    });
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+        }
+        $scope.loadCity = function(state_id) {
+            $.ajax({
+                    url: get_city_by_state,
+                    method: "POST",
+                    data: { state_id: state_id },
+                })
+                .done(function(res) {
+                    self.extras.city_list = [];
+                    $(res).each(function(i, v) {
+                        self.extras.city_list.push({
+                            id: v['id'],
+                            name: v['name'],
+                        });
+                    });
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+        }
         var form_id = '#outlet-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.hasClass("code")) {
+                    error.appendTo($('.code_error'));
+                } else if (element.hasClass("outlet_name")) {
+                    error.appendTo($('.name_error'));
+                } else if (element.hasClass("line_1")) {
+                    error.appendTo($('.line1_error'));
+                } else if (element.hasClass("line_2")) {
+                    error.appendTo($('.line2_error'));
+                }
+                // else if (element.hasClass("country_id")) {
+                // error.appendTo($('.country_error'));
+                // } 
+                // else if (element.hasClass("state_id")) {
+                // error.appendTo($('.state_error'));
+                // } 
+                else if (element.hasClass("city_id")) {
+                    error.appendTo($('.city_error'));
+                } else if (element.hasClass("pincode")) {
+                    error.appendTo($('.pincode_error'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             rules: {
-                'purpose_id': {
+                'code': {
                     required: true,
+                    maxlength: 191,
                 },
-                'description': {
+                'outlet_name': {
+                    required: true,
+                    maxlength: 191,
+                },
+                'line_1': {
+                    required: true,
+                    minlength: 3,
                     maxlength: 255,
                 },
-                'advance_received': {
-                    maxlength: 10,
+                'line_2': {
+                    minlength: 3,
+                    maxlength: 255,
                 },
+                'country_id': {
+                    required: true,
+                },
+                'state_id': {
+                    required: true,
+                },
+                'city_id': {
+                    required: true,
+                },
+                'pincode': {
+                    required: true,
+                    minlength: 6,
+                    maxlength: 6,
+                    number: true,
+                }
+
             },
             messages: {
-                'description': {
+                'code': {
+                    required: 'Outlet code is required',
+                    maxlength: 'Please enter maximum of 191 letters',
+                },
+                'outlet_name': {
+                    required: 'Outlet name is required',
+                    maxlength: 'Please enter maximum of 191 letters',
+                },
+                'line_1': {
+                    required: 'Address Line1 is required',
+                    minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 255 letters',
                 },
+                'line_2': {
+                    minlength: 'Please enter minimum of 3 letters',
+                    maxlength: 'Please enter maximum of 255 letters',
+                },
+                'country_id': {
+                    required: 'Country is Required',
+                },
+                'state_id': {
+                    required: 'State is Required',
+                },
+                'city_id': {
+                    required: 'City is Required',
+                },
+                'pincode': {
+                    required: 'PinCode is Required',
+                    minlength: 'Please enter minimum of 6 numbers',
+                    maxlength: 'Please enter maximum of 6 letters',
+                    numbers: 'Enter numbers only',
+                }
+
             },
             submitHandler: function(form) {
 
@@ -154,6 +301,7 @@ app.component('eyatraOutletForm', {
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Outlet saved successfully',
+                                text: res.message,
                             }).show();
                             $location.path('/eyatra/outlets')
                             $scope.$apply()
@@ -178,6 +326,7 @@ app.component('eyatraOutletView', {
             outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
             self.outlet = response.data.outlet;
+            self.action = response.data.action;
         });
     }
 });
