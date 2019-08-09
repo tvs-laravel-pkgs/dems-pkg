@@ -105,24 +105,37 @@ app.component('eyatraAgentClaimForm', {
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
             booking_pivot = response.data.booking_pivot;
+            booking_pivot_amt = response.data.booking_pivot_amt;
             self.invoice_date = response.data.invoice_date;
+            // console.log(booking_pivot);
+            if (self.action == 'Edit') {
+                console.log(booking_pivot);
+                // console.log(booking_pivot_amt);
+                $.each(booking_pivot, function(key, value) {
+                    // console.log(key, value);
+                    // console.log(booking_pivot_amt[key], value);
+                    $scope.checkedcount(value, booking_pivot_amt[key]);
+                });
+            }
+
+
             // self.extras = response.data.extras;
             $rootScope.loading = false;
+
         });
 
         $scope.bookingChecked = function(id) {
-            // console.log(id);
             var value = booking_pivot.indexOf(id);
             return value;
         }
 
         var total_amount = 0;
         $scope.checkedcount = function(id, amount) {
-            if (event.target.checked == true) {
-                var data = $(".booking_list:checked").length;
+            if ($("#role_" + id + ":checked") == true) {
+                var data = $("#role_" + id + ":checked").length;
                 total_amount += parseFloat(amount);
             } else {
-                var data = $(".booking_list:checked").length;
+                var data = $("#role_" + id + ":checked").length;
                 total_amount -= parseFloat(amount);
             }
             self.selected_amount = total_amount.toFixed(2);
