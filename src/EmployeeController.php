@@ -73,10 +73,16 @@ class EmployeeController extends Controller {
 			}
 			$this->data['success'] = true;
 		}
+		// $outlet_list = [];
+		// $outlet_list['name'] = 'Select Outlet';
+		// $outlet_list['id'] = '';
+		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
+		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
+		// dd($outlet_list);
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
-			'outlet_list' => Outlet::getList(),
-			'grade_list' => Entity::getGradeList(),
+			'outlet_list' => $outlet_list,
+			'grade_list' => $grade_list,
 		];
 		$this->data['employee'] = $employee;
 
@@ -130,7 +136,6 @@ class EmployeeController extends Controller {
 			$bank_detail->save();
 
 			DB::commit();
-			$request->session()->flash('success', 'Employee Saved Successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
