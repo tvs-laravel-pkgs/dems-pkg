@@ -6,6 +6,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Storage;
 use Uitoux\EYatra\AgentClaim;
 use Uitoux\EYatra\VisitBooking;
 use Validator;
@@ -74,19 +75,8 @@ class AgentClaimController extends Controller {
 			} else {
 				$this->data['success'] = true;
 			}
-			// $this->data['booking_pivot'] = VisitBooking::select(
-			// 	'amount',
-			// 	'id'
-			// )
-			// 	->where('created_by', Auth::user()->entity_id)
-			// 	->get()
-			// 	->keyBy('id')
-			// ;
+			$this->data['attachment'] = Attachment::where('entity_id', $agent_claim_id)->first();
 			$this->data['booking_pivot'] = $agent_claim->bookings()->pluck('booking_id')->toArray();
-			// foreach ($agent_claim->bookings as $agent_booking) {
-			// 	$this->data['booking_pivot'][$agent_booking->id]->checked = ture;
-			// }
-			// dd($this->data['booking_pivot']);
 			$this->data['booking_pivot_amt'] = $agent_claim->bookings()->pluck('amount')->toArray();
 		}
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(
@@ -146,9 +136,9 @@ class AgentClaimController extends Controller {
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
-			if (!array_filter($request->booking_list)) {
-				return response()->json(['success' => false, 'errors' => ['Select Booking List!']]);
-			}
+			// if (!array_filter($request->booking_list)) {
+			// 	return response()->json(['success' => false, 'errors' => ['Select Booking List!']]);
+			// }
 			$invoice_date = date("Y-m-d", strtotime($request->date));
 
 			DB::beginTransaction();
@@ -162,10 +152,7 @@ class AgentClaimController extends Controller {
 				$agentClaim = Agentclaim::find($request->id);
 				$agentClaim->updated_by = Auth::user()->id;
 				$agentClaim->updated_at = Carbon::now();
-				// $agentClaim->visits()->sync([]);
 			}
-			//$agent_id = Auth::user()->entity_id;
-			//dd(Auth::user()->where('user_type_id', 3122)->where('entity_id', $agent_id)->pluck('entity_id'));
 			$agentClaim->number = 'INVOICE_' . rand();
 			$agentClaim->agent_id = Auth::user()->entity_id;
 			$agentClaim->invoice_date = $invoice_date;
@@ -174,11 +161,36 @@ class AgentClaimController extends Controller {
 			$agentClaim->fill($request->all());
 			$agentClaim->save();
 
+			//STORE ATTACHMENT
+			$item_images = 'agent_claim/attachments/';
+			Storage::makeDirectory($item_images, 0777);
+			if (!empty($request->invoice_attachmet)) {
+				$attachement = $request->invoice_attachmet;
+				$name = $attachement->getClientOriginalName();
+				$attachement->move(storage_path('app/public/agent_claim/attachments/'), $name);
+				$attachement_vendor_claim = new Attachment;
+				$attachement_vendor_claim->attachment_of_id = 3161; //agent id from configs
+				$attachement_vendor_claim->attachment_type_id = 3200;
+				$attachement_vendor_claim->entity_id = $agentClaim->id;
+				$attachement_vendor_claim->name = $name;
+				$attachement_vendor_claim->save();
+				// if (!empty($local_travel_data['invoice_attachmet'])) {
+
+				// foreach ($local_travel_data['attachments'] as $key => $attachement) {
+				// 	$name = $attachement->getClientOriginalName();
+				// 	$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
+				// 	$attachement_local_travel = new Attachment;
+				// 	$attachement_local_travel->attachment_of_id = 3183;
+				// 	$attachement_local_travel->attachment_type_id = 3200;
+				// 	$attachement_local_travel->entity_id = $local_travel->id;
+				// 	$attachement_local_travel->name = $name;
+				// 	$attachement_local_travel->save();
+				// }
+			}
+
 			$agentClaim->bookings()->sync($request->booking_list);
 
 			DB::commit();
-			// $request->session()->flash('success', 'Agent Claim Requested successfully!');
-			// return response()->json(['success' => true]);
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Agent Claim Added successfully']);
 			} else {

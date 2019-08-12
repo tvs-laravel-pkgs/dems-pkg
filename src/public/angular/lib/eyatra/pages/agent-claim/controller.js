@@ -107,7 +107,8 @@ app.component('eyatraAgentClaimForm', {
             booking_pivot = response.data.booking_pivot;
             booking_pivot_amt = response.data.booking_pivot_amt;
             self.invoice_date = response.data.invoice_date;
-
+            self.attachment = response.data.attachment;
+            console.log(self.attachment.name);
             if (self.action == 'Edit') {
                 var total = 0;
                 var i = 0;
@@ -116,12 +117,16 @@ app.component('eyatraAgentClaimForm', {
                     i++;
                 });
                 self.total_amount = total;
-                self.selected_amount = total.toFixed(2);
-                self.booking_checked_count = i;
+                $("#amount").html(total.toFixed(2));
+                $("#count").html(i);
+                // self.selected_amount = total.toFixed(2);
+                // self.booking_checked_count = i;
             } else {
                 self.total_amount = 0;
-                self.selected_amount = 0;
-                self.booking_checked_count = 0;
+                $("#amount").html(0);
+                $("#count").html(0);
+                // self.selected_amount = 0;
+                // self.booking_checked_count = 0;
             } // self.extras = response.data.extras;
             $rootScope.loading = false;
 
@@ -132,7 +137,6 @@ app.component('eyatraAgentClaimForm', {
             return value;
         }
 
-
         $scope.checkedcount = function(id, amount) {
             if (event.target.checked == true) {
                 var data = $(".booking_list:checked").length;
@@ -141,8 +145,10 @@ app.component('eyatraAgentClaimForm', {
                 var data = $(".booking_list:checked").length;
                 self.total_amount -= parseFloat(amount);
             }
-            self.selected_amount = self.total_amount.toFixed(2);
-            self.booking_checked_count = data;
+            $("#amount").html(self.total_amount.toFixed(2));
+            $("#count").html(data);
+            // self.selected_amount =
+            // self.booking_checked_count = data;
         }
 
         $scope.checkedallcount = function(id, amount) {
@@ -165,12 +171,18 @@ app.component('eyatraAgentClaimForm', {
                     count++;
                     amount += parseFloat($(this).attr('data-amount'));
                 });
+                self.total_amount = 0;
             }
             $("#amount").html(amount.toFixed(2));
             $("#count").html(count);
         });
 
         var form_id = '#agent-claim-form';
+
+        $.validator.addMethod('decimal', function(value, element) {
+            return this.optional(element) || /^((\d+(\\.\d{0,2})?)|((\d*(\.\d{1,2}))))$/.test(value);
+        }, "Please enter a correct number, format 0.00");
+
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'booking_list[]') {
@@ -194,12 +206,13 @@ app.component('eyatraAgentClaimForm', {
                 'amount': {
                     required: true,
                     number: true,
-                    range: [0, 10000000],
-                    maxlength: 10,
+                    decimal: true,
+                    //range: [0, 10000000],
+                    maxlength: 11,
                 },
-                'invoice_attachmet': {
-                    extension: "docx|rtf|doc|pdf",
-                },
+                // 'invoice_attachmet': {
+                //     extension: "docx|rtf|doc|pdf",
+                // },
                 'booking_list[]': {
                     required: true,
                 },
@@ -216,13 +229,14 @@ app.component('eyatraAgentClaimForm', {
                 'amount': {
                     required: 'Amount is Required',
                     number: 'Enter Numbers Only',
-                    range: 'Enter Maximum 10000000 amount',
+                    decimal: 'Please enter a correct number, format 0.00',
+                    // range: 'Enter Maximum 10000000 amount',
                     maxlength: 'Enter Maximum 10 Digit Number',
 
                 },
-                'invoice_attachmet': {
-                    extension: 'Select valied input file format LIKE: docx|rtf|doc|pdf',
-                },
+                // 'invoice_attachmet': {
+                //     extension: 'Select valied input file format LIKE: docx|rtf|doc|pdf',
+                // },
                 'booking_list[]': {
                     required: 'Booking list is Required',
                 },
