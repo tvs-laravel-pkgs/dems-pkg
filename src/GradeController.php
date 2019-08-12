@@ -105,15 +105,14 @@ class GradeController extends Controller {
 		//validation
 		// dd($request->all());
 		try {
-			$validator = Validator::make($request->all(), [
-				'grade_name' => [
-					'required',
-				],
-			]);
+
+			$error_messages = [
+				'grade_name.unique' => "Grade Name is already taken",
+			];
 
 			$validator = Validator::make($request->all(), [
 				'grade_name' => 'required|unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,500',
-			]);
+			], $error_messages);
 
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
