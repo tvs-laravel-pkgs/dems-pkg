@@ -123,10 +123,12 @@ app.component('eyatraEmployeeForm', {
                 'code': {
                     required: true,
                     maxlength: 191,
+                    minlength: 3,
                 },
                 'name': {
                     required: true,
                     maxlength: 80,
+                    minlength: 3,
                 },
                 'outlet_id': {
                     required: true,
@@ -140,18 +142,22 @@ app.component('eyatraEmployeeForm', {
                 'bank_name': {
                     required: true,
                     maxlength: 100,
+                    minlength: 3,
                 },
                 'branch_name': {
                     required: true,
                     maxlength: 50,
+                    minlength: 3,
                 },
                 'account_number': {
                     required: true,
                     maxlength: 20,
+                    minlength: 3,
                 },
                 'ifsc_code': {
                     required: true,
                     maxlength: 10,
+                    minlength: 3,
                 },
             },
             messages: {
@@ -186,7 +192,7 @@ app.component('eyatraEmployeeForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Employee saved successfully',
+                                text: 'Employee updated successfully',
                             }).show();
                             $location.path('/eyatra/employees')
                             $scope.$apply()
