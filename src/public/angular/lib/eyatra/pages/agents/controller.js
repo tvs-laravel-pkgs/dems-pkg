@@ -1,6 +1,6 @@
 app.component('eyatraAgents', {
     templateUrl: eyatra_agent_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#agent_list').DataTable({
@@ -32,7 +32,7 @@ app.component('eyatraAgents', {
                 { data: 'code', name: 'agents.code', searchable: true },
                 { data: 'name', name: 'agents.name', searchable: true },
                 { data: 'mobile_number', name: 'users.mobile_number', searchable: true },
-                { data: 'travel_name', name: 'entity_types.name', searchable: true },
+                { data: 'travel_name', name: 'tm.name', searchable: true },
                 { data: 'status', name: 'status', searchable: false },
             ],
             rowCallback: function(row, data) {
@@ -46,7 +46,32 @@ app.component('eyatraAgents', {
             'Add New' +
             '</a>'
         );
-        $rootScope.loading = false;
+        $scope.deleteAgentConfirm = function($id) {
+            $("#deleteAgent_id").val($id);
+        }
+        $scope.deleteAgent = function() {
+            var id = $("#deleteAgent_id").val();
+            $http.get(
+                agent_delete_url + '/' + id,
+            ).then(function(response) {
+                if (response.data.success) {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Agent Deleted Successfully',
+                    }).show();
+                    $('#agent_list').DataTable().ajax.reload(function(json) {});
+                    $location.path('/eyatra/agents');
+                    $scope.$apply();
+                } else {
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: 'Agent not Deleted',
+                    }).show();
+                }
+            });
+        }
 
     }
 });
@@ -79,7 +104,7 @@ app.component('eyatraAgentForm', {
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-            console.log(travel_list);
+            console.log(self.user.id);
             if (self.action == 'Edit') {
                 //$("#hide_password").hide();
                 if (self.agent.deleted_at == null) {
@@ -93,21 +118,24 @@ app.component('eyatraAgentForm', {
                 } else {
                     self.switch_password = 'Yes';
                 }
-                if (self.user.force_password_change == 1) {
-                    self.switch_password = 'No';
-                    $("#hide_password").hide();
-                } else {
-                    self.switch_password = 'Yes';
-                }
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
+                self.switch_password = 'Yes';
             }
         });
         $scope.travelChecked = function(id) {
             var value = travel_list.indexOf(id);
             return value;
         }
+
+        $("#travel_mode").on('click', function() {
+            if (event.target.checked == true) {
+                $('.travelcheckbox').prop('checked', true);
+            } else {
+                $('.travelcheckbox').prop('checked', false);
+            }
+        });
 
         $scope.psw_change = function(val) {
             if (val == 'No') {

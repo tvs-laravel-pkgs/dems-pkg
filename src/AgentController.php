@@ -49,11 +49,18 @@ class AgentController extends Controller {
 				<a href="#!/eyatra/agent/view/' . $agent->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
-				onclick="angular.element(this).scope().deleteAgent(' . $agent->id . ')" dusk = "delete-btn" title="Delete">
-		              <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+				<a href="javascript:;" data-toggle="modal" data-target="#agent_confirm_box"
+				onclick="angular.element(this).scope().deleteAgentConfirm(' . $agent->id . ')" dusk = "delete-btn" title="Delete">
+		              <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
 		              </a>';
 
+			})
+			->addColumn('status', function ($agent) {
+				if ($agent->status == 'In-Active') {
+					return '<span style="color:#ea4335;">In Active</span>';
+				} else {
+					return '<span style="color:#63ce63;">Active</span>';
+				}
 			})
 			->make(true);
 	}
@@ -68,7 +75,7 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent = Agent::with('address', 'address.city', 'address.city.state')->find($agent_id);
+			$agent = Agent::withTrashed()->with('address', 'address.city', 'address.city.state')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			if (!$agent) {
@@ -112,13 +119,16 @@ class AgentController extends Controller {
 				'mobile_number.required' => "Mobile Number is Required",
 				'mobile_number.unique' => "Mobile Number is already taken",
 			];
-			// dd(1);
+
 			$validator = Validator::make($request->all(), [
 				'agent_code' => [
 					'required:true',
 					'unique:agents,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				],
-				'mobile_number' => 'required|unique:users,mobile_number,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				'mobile_number' => [
+					'required:true',
+					'unique:users,mobile_number,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+				],
 				'agent_name' => 'required',
 				'address_line1' => 'required',
 				'country' => 'required',
@@ -131,7 +141,7 @@ class AgentController extends Controller {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 
-			if ($request->password_change == 'Yes') {
+			if ($request->password_change == 'Yes' && $request->password == '') {
 				return response()->json(['success' => false, 'errors' => ['Password is Required']]);
 			}
 
@@ -145,8 +155,8 @@ class AgentController extends Controller {
 				$agent->created_at = Carbon::now();
 				$agent->updated_at = NULL;
 			} else {
-				$agent = Agent::find($request->id);
-				$user = User::where('entity_id', Auth::user()->entity_id)->first();
+				$agent = Agent::withTrashed()->find($request->id);
+				$user = User::where('id', $request->user_id)->first();
 				$address = Address::where('entity_id', $request->id)->first();
 				$agent->updated_by = Auth::user()->id;
 				$agent->updated_at = Carbon::now();
@@ -155,6 +165,13 @@ class AgentController extends Controller {
 			$agent->code = $request->agent_code;
 			$agent->name = $request->agent_name;
 			$agent->fill($request->all());
+			if ($request->status == 'Active') {
+				$agent->deleted_by = NULL;
+				$agent->deleted_at = NULL;
+			} else if ($request->status == 'Inactive') {
+				$agent->deleted_by = Auth()->user()->id;
+				$agent->deleted_at = Carbon::now();
+			}
 			$agent->save();
 
 			//ADD ADDRESS
@@ -176,18 +193,20 @@ class AgentController extends Controller {
 			$user->user_type_id = 3122;
 			$user->company_id = $company_id;
 			$user->entity_id = $agent->id;
-			if ($request->password_change == 'No') {
-				$user->force_password_change = 0;
-			} else if ($request->password_change == 'Yes') {
+			$user->fill($request->all());
+
+			if ($request->password_change == 'Yes') {
+				if (!empty($request->user['password'])) {
+					$user->password = $request->user['password'];
+				}
 				$user->force_password_change = 1;
 			}
-			$user->fill($request->all());
+			// $user->fill($request->all());
 			$user->save();
 
 			$agent->travelModes()->sync($request->travel_mode);
 
 			DB::commit();
-			$request->session()->flash('success', 'Agent saved successfully!');
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Agent Added successfully']);
 			} else {
@@ -219,7 +238,7 @@ class AgentController extends Controller {
 	}
 
 	public function deleteEYatraAgent($agent_id) {
-		$agent = Agent::where('id', $agent_id)->delete();
+		$agent = Agent::where('id', $agent_id)->forceDelete();
 		if (!$agent) {
 			return response()->json(['success' => false, 'errors' => ['Agent not found']]);
 		}
