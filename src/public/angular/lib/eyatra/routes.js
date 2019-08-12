@@ -182,6 +182,10 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-agent-claim-form></eyatra-agent-claim-form>',
         title: 'Edit Agent Claim',
     }).
+    when('/eyatra/agent/claim/view/:agent_claim_id', {
+        template: '<eyatra-agent-claim-view></eyatra-agent-claim-view>',
+        title: 'View Agent Claim',
+    }).
 
     //EMPLOYEE - BOOKING UPDATES
     when('/eyatra/trips/booking-updates', {
