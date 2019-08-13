@@ -107,7 +107,6 @@ app.component('eyatraAgentClaimForm', {
             booking_pivot_amt = response.data.booking_pivot_amt;
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
-
             if (self.action == 'Edit') {
                 var total = 0;
                 var i = 0;
@@ -116,6 +115,7 @@ app.component('eyatraAgentClaimForm', {
                     i++;
                 });
                 self.total_amount = total;
+                console.log(total);
                 $("#amount").html(total.toFixed(2));
                 $("#count").html(i);
                 // self.selected_amount = total.toFixed(2);
@@ -136,23 +136,43 @@ app.component('eyatraAgentClaimForm', {
             return value;
         }
 
-        $scope.checkedcount = function(id, amount) {
-            if (event.target.checked == true) {
-                var data = $(".booking_list:checked").length;
-                self.total_amount += parseFloat(amount);
-            } else {
-                var data = $(".booking_list:checked").length;
-                self.total_amount -= parseFloat(amount);
-            }
-            $("#amount").html(self.total_amount.toFixed(2));
-            $("#count").html(data);
-            // self.selected_amount =
-            // self.booking_checked_count = data;
-        }
+        // $scope.checkedcount = function(id, amount) {
+        //     if (event.target.checked == true) {
+        //         var data = $(".booking_list:checked").length;
+        //         self.total_amount += parseFloat(amount);
+        //     } else {
+        //         var data = $(".booking_list:checked").length;
+        //         self.total_amount -= parseFloat(amount);
+        //     }
+        //     $("#amount").html(self.total_amount.toFixed(2));
+        //     $("#count").html(data);
+        //     // self.selected_amount =
+        //     // self.booking_checked_count = data;
+        // }
 
-        $scope.checkedallcount = function(id, amount) {
-            console.log(id, amount);
-        }
+        // $scope.checkedallcount = function(id, amount) {
+        //     console.log(id, amount);
+        // }
+        $(document).on('click', '.booking_list', function() {
+            var total_amount = 0;
+            var count = 0;
+            var amount = 0;
+            if (event.target.checked == true) {
+                $.each($('.booking_list:checked'), function() {
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
+                });
+            } else {
+                $.each($('.booking_list:checked'), function() {
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
+                });
+                self.total_amount = 0;
+            }
+            $("#amount").html(amount.toFixed(2));
+            $("#count").html(count);
+
+        });
 
         $('#head_booking').on('click', function() {
             var total_amount = 0;
