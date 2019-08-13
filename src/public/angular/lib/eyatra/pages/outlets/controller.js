@@ -111,14 +111,14 @@ app.component('eyatraOutletForm', {
         });
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $('.btn-pills').on("click", function() {
-            tabPaneFooter();
+            // tabPaneFooter();
         });
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
@@ -245,9 +245,9 @@ app.component('eyatraOutletForm', {
                 },
                 'pincode': {
                     required: true,
+                    number: true,
                     minlength: 6,
                     maxlength: 6,
-                    number: true,
                     min: 1,
                 }
 
@@ -255,20 +255,22 @@ app.component('eyatraOutletForm', {
             messages: {
                 'code': {
                     required: 'Outlet code is required',
-                    maxlength: 'Please enter maximum of 191 letters',
+                    minlength: 'Please enter minimum of 3 characters',
+                    maxlength: 'Please enter maximum of 191 characters',
                 },
                 'outlet_name': {
                     required: 'Outlet name is required',
-                    maxlength: 'Please enter maximum of 191 letters',
+                    minlength: 'Please enter minimum of 3 characters',
+                    maxlength: 'Please enter maximum of 191 characters',
                 },
                 'line_1': {
                     required: 'Address Line1 is required',
-                    minlength: 'Please enter minimum of 3 letters',
-                    maxlength: 'Please enter maximum of 255 letters',
+                    minlength: 'Please enter minimum of 3 characters',
+                    maxlength: 'Please enter maximum of 255 characters',
                 },
                 'line_2': {
-                    minlength: 'Please enter minimum of 3 letters',
-                    maxlength: 'Please enter maximum of 255 letters',
+                    minlength: 'Please enter minimum of 3 characters',
+                    maxlength: 'Please enter maximum of 255 characters',
                 },
                 'country_id': {
                     required: 'Country is Required',
@@ -281,9 +283,9 @@ app.component('eyatraOutletForm', {
                 },
                 'pincode': {
                     required: 'PinCode is Required',
+                    number: 'Enter numbers only',
                     minlength: 'Please enter minimum of 6 numbers',
-                    maxlength: 'Please enter maximum of 6 letters',
-                    numbers: 'Enter numbers only',
+                    maxlength: 'Please enter maximum of 6 numbers',
                 }
 
             },
