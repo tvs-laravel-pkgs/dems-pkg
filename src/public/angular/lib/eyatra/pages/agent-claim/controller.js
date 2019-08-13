@@ -96,7 +96,7 @@ app.component('eyatraAgentClaimForm', {
                     text: response.data.message,
                 }).show();
                 $location.path('/eyatra/agent/claim/list')
-                $scope.$apply()
+                // $scope.$apply()
                 return;
             }
 
@@ -107,6 +107,8 @@ app.component('eyatraAgentClaimForm', {
             booking_pivot_amt = response.data.booking_pivot_amt;
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
+            console.log(self.booking_list);
+            console.log(booking_pivot);
             if (self.action == 'Edit') {
                 var total = 0;
                 var i = 0;
@@ -115,15 +117,23 @@ app.component('eyatraAgentClaimForm', {
                     i++;
                 });
                 self.total_amount = total;
-                $("#amount").html(total.toFixed(2));
+                $(".amount").html(total.toFixed(2));
+                $(".net_amount").val(total.toFixed(2));
                 $("#count").html(i);
             } else {
                 self.total_amount = 0;
-                $("#amount").html(0);
+                $(".amount").html(0);
+                $(".net_amount").val(0);
                 $("#count").html(0);
             } // self.extras = response.data.extras;
             $rootScope.loading = false;
-
+        });
+        var total = 0;
+        $('#tax').on('change', function() {
+            var net_amt = parseFloat($(".net_amount").val());
+            var tax = parseFloat($("#tax").val());
+            total = (net_amt + tax);
+            $("#invoice_amount").val(total.toFixed(2));
         });
 
         $scope.bookingChecked = function(id) {
@@ -147,7 +157,8 @@ app.component('eyatraAgentClaimForm', {
                 });
                 self.total_amount = 0;
             }
-            $("#amount").html(amount.toFixed(2));
+            $(".amount").html(amount.toFixed(2));
+            $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
 
         });
@@ -170,7 +181,8 @@ app.component('eyatraAgentClaimForm', {
                 });
                 self.total_amount = 0;
             }
-            $("#amount").html(amount.toFixed(2));
+            $(".amount").html(amount.toFixed(2));
+            $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
         });
 

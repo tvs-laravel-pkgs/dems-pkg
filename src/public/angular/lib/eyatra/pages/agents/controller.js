@@ -116,12 +116,14 @@ app.component('eyatraAgentForm', {
                 if (self.user.force_password_change == 1) {
                     self.switch_password = 'No';
                     $("#hide_password").hide();
+                    $("#password").prop('disabled', true);
                 } else {
                     self.switch_password = 'Yes';
                 }
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
+                $("#password").prop('disabled', false);
                 self.switch_password = 'Yes';
             }
         });
@@ -141,9 +143,10 @@ app.component('eyatraAgentForm', {
         $scope.psw_change = function(val) {
             if (val == 'No') {
                 $("#hide_password").hide();
-                $("#password_change").val('');
+                $("#password").prop('disabled', true);
             } else {
                 $("#hide_password").show();
+                $("#password").prop('disabled', false);
             }
         }
 
