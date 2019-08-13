@@ -78,7 +78,10 @@ class StateController extends Controller {
 		$option->id = null;
 		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
 		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
-		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
+		$option = new Agent;
+		$option->name = 'Select Agent';
+		$option->id = null;
+		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
 
 		// dd($state->travelModes()->withPivot()->get());
 		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
