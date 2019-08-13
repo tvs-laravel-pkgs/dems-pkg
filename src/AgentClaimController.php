@@ -64,6 +64,7 @@ class AgentClaimController extends Controller {
 			$this->data['success'] = true;
 			$this->data['booking_pivot'] = [];
 			$this->data['booking_pivot_amt'] = [];
+			$this->data['attachment'] = [];
 			$date = '';
 		} else {
 			$this->data['action'] = 'Edit';

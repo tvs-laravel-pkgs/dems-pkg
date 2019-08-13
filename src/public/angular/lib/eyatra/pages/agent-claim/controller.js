@@ -115,17 +115,12 @@ app.component('eyatraAgentClaimForm', {
                     i++;
                 });
                 self.total_amount = total;
-                console.log(total);
                 $("#amount").html(total.toFixed(2));
                 $("#count").html(i);
-                // self.selected_amount = total.toFixed(2);
-                // self.booking_checked_count = i;
             } else {
                 self.total_amount = 0;
                 $("#amount").html(0);
                 $("#count").html(0);
-                // self.selected_amount = 0;
-                // self.booking_checked_count = 0;
             } // self.extras = response.data.extras;
             $rootScope.loading = false;
 
@@ -136,23 +131,6 @@ app.component('eyatraAgentClaimForm', {
             return value;
         }
 
-        // $scope.checkedcount = function(id, amount) {
-        //     if (event.target.checked == true) {
-        //         var data = $(".booking_list:checked").length;
-        //         self.total_amount += parseFloat(amount);
-        //     } else {
-        //         var data = $(".booking_list:checked").length;
-        //         self.total_amount -= parseFloat(amount);
-        //     }
-        //     $("#amount").html(self.total_amount.toFixed(2));
-        //     $("#count").html(data);
-        //     // self.selected_amount =
-        //     // self.booking_checked_count = data;
-        // }
-
-        // $scope.checkedallcount = function(id, amount) {
-        //     console.log(id, amount);
-        // }
         $(document).on('click', '.booking_list', function() {
             var total_amount = 0;
             var count = 0;
@@ -226,7 +204,6 @@ app.component('eyatraAgentClaimForm', {
                     required: true,
                     number: true,
                     decimal: true,
-                    //range: [0, 10000000],
                     maxlength: 11,
                 },
                 // 'invoice_attachmet': {
@@ -249,7 +226,6 @@ app.component('eyatraAgentClaimForm', {
                     required: 'Agent Invoice Amount is Required',
                     number: 'Enter Numbers Only',
                     decimal: 'Please enter a correct number, format 0.00',
-                    // range: 'Enter Maximum 10000000 amount',
                     maxlength: 'Enter Maximum 10 Digit Number',
 
                 },
