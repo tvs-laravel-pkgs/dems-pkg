@@ -206,14 +206,23 @@ app.component('eyatraOutletForm', {
                     error.insertAfter(element)
                 }
             },
+            invalidHandler: function(event, validator) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'You have errors,Please check all tabs'
+                }).show();
+            },
             ignore: '',
             rules: {
                 'code': {
                     required: true,
+                    minlength: 3,
                     maxlength: 191,
                 },
                 'outlet_name': {
                     required: true,
+                    minlength: 3,
                     maxlength: 191,
                 },
                 'line_1': {
@@ -239,6 +248,7 @@ app.component('eyatraOutletForm', {
                     minlength: 6,
                     maxlength: 6,
                     number: true,
+                    min: 1,
                 }
 
             },

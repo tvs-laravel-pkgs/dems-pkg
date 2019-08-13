@@ -63,7 +63,7 @@ class OutletController extends Controller {
 	public function eyatraOutletFormData($outlet_id = NULL) {
 
 		if (!$outlet_id) {
-			$this->data['action'] = 'New';
+			$this->data['action'] = 'Add';
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
@@ -100,6 +100,7 @@ class OutletController extends Controller {
 	public function saveEYatraOutlet(Request $request) {
 		//validation
 		try {
+
 			$error_messages = [
 				'code.required' => 'Outlet Code is Required',
 				'outlet_name.required' => 'Outlet Name is Required',
@@ -108,6 +109,8 @@ class OutletController extends Controller {
 				// 'state_id.required' => 'State is Required',
 				'city_id.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
+				'code.unique' => "Outlet Code is already taken",
+				'outlet_name.unique' => "Outlet Name is already taken",
 			];
 
 			$validator = Validator::make($request->all(), [
@@ -118,7 +121,10 @@ class OutletController extends Controller {
 				// 'state_id' => 'required',
 				'city_id' => 'required',
 				'pincode' => 'required',
-			]);
+				'code' => 'required|unique:outlets,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				'outlet_name' => 'required|unique:outlets,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+			], $error_messages);
+
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}

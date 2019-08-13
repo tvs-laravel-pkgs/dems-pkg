@@ -77,7 +77,7 @@ class AgentClaimController extends Controller {
 			}
 			$this->data['attachment'] = Attachment::where('entity_id', $agent_claim_id)->first();
 			$this->data['booking_pivot'] = $agent_claim->bookings()->pluck('booking_id')->toArray();
-			$this->data['booking_pivot_amt'] = $agent_claim->bookings()->pluck('amount')->toArray();
+			$this->data['booking_pivot_amt'] = $agent_claim->bookings()->pluck('total')->toArray();
 		}
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(
 			'visit_bookings.id',

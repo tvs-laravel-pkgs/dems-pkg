@@ -121,6 +121,7 @@ class TripBookingUpdateController extends Controller {
 				if ($travel_mode_id_unique) {
 					return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
 				}
+				$travel_mode_id = $r->travel_mode_id;
 				$booking_status_id = 3061; //Visit Status Booked
 			} else {
 				//Find Visit Details
@@ -130,18 +131,21 @@ class TripBookingUpdateController extends Controller {
 				if (!$visit_status) {
 					return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
 				}
+				$travel_mode_id = $visit_status->travel_mode_id;
 				$booking_status_id = 3062; //Visit Status Cancelled
 			}
+
 			//Visit status update
 			$visit = Visit::find($r->visit_id);
 			$visit->booking_status_id = $booking_status_id;
 			$visit->save();
 
 			//Get Service Charge
-			$service_charge = NCity::join('state_agent_travel_mode', 'state_agent_travel_mode.state_id', 'ncities.state_id')->where('state_agent_travel_mode.agent_id', Auth::user()->entity_id)
-				->where('state_agent_travel_mode.travel_mode_id', $r->travel_mode_id)
-				->where('ncities.id', $visit->from_city_id)
+			$service_charge = Agent::join('state_agent_travel_mode', 'state_agent_travel_mode.agent_id', 'agents.id')
+				->where('state_agent_travel_mode.agent_id', $visit->agent_id)
+				->where('state_agent_travel_mode.travel_mode_id', $travel_mode_id)
 				->pluck('state_agent_travel_mode.service_charge')->first();
+
 			$service_charge = $service_charge ? $service_charge : 0;
 
 			//Total Amount of Booking Deails (include tax)

@@ -82,7 +82,6 @@ class TripController extends Controller {
 				$this->data['message'] = 'Trip not found';
 			}
 		}
-		dd(Auth::user()->entity);
 		$this->data['extras'] = [
 			'purpose_list' => Entity::uiPurposeList(),
 			'travel_mode_list' => Entity::uiTravelModeList(),
@@ -135,9 +134,19 @@ class TripController extends Controller {
 
 			//SAVING VISITS
 			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
+				$visit_count = count($request->visits);
+				$i = 0;
+				foreach ($request->visits as $key => $visit_data) {
+					if ($i == 0) {
+						$from_city_id = Auth::user()->entity->outlet->address->city->id;
+					} else {
+						$previous_value = $request->visits[$key - 1];
+						$from_city_id = $previous_value['to_city_id'];
+					}
+
 					$visit = new Visit;
 					$visit->fill($visit_data);
+					$visit->from_city_id = $from_city_id;
 					$visit->trip_id = $trip->id;
 					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
 					$visit->booking_status_id = 3060; //PENDING
@@ -152,6 +161,7 @@ class TripController extends Controller {
 						$visit->agent_id = $agent->id;
 					}
 					$visit->save();
+					$i++;
 				}
 			}
 			DB::commit();
