@@ -63,7 +63,7 @@ app.component('eyatraAgents', {
                     }).show();
                     $('#agent_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agents');
-                    $scope.$apply();
+                    // $scope.$apply();
                 } else {
                     new Noty({
                         type: 'error',
@@ -73,6 +73,7 @@ app.component('eyatraAgents', {
                 }
             });
         }
+        $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
