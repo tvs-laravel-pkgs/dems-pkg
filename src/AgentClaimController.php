@@ -64,6 +64,7 @@ class AgentClaimController extends Controller {
 			$this->data['success'] = true;
 			$this->data['booking_pivot'] = [];
 			$this->data['booking_pivot_amt'] = [];
+			$this->data['attachment'] = [];
 			$date = '';
 		} else {
 			$this->data['action'] = 'Edit';
@@ -142,6 +143,8 @@ class AgentClaimController extends Controller {
 				} elseif ($request->booking_list == '') {
 					return response()->json(['success' => false, 'errors' => ['Booking List is Empty!']]);
 				}
+			} else {
+				return response()->json(['success' => false, 'errors' => ['Booking List is Empty!']]);
 			}
 			$invoice_date = date("Y-m-d", strtotime($request->date));
 

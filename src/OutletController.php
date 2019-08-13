@@ -8,6 +8,7 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Address;
 use Uitoux\EYatra\NCity;
+use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -83,10 +84,11 @@ class OutletController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
+
 		$this->data['extras'] = [
 			'country_list' => NCountry::getList(),
-			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($outlet->address->city->state->country_id),
-			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($outlet->address->state_id),
+			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($outlet->address->city->state->country_id),
+			'city_list' => $this->data['action'] == 'Add' ? [] : NCity::getList($outlet->address->state_id),
 			// 'city_list' => NCity::getList(),
 		];
 

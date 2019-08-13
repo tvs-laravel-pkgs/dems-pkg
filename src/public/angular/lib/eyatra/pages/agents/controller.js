@@ -222,6 +222,10 @@ app.component('eyatraAgentForm', {
                     minlength: 3,
                     maxlength: 191,
                 },
+                'gstin': {
+                    minlength: 3,
+                    maxlength: 20,
+                },
                 'address_line1': {
                     required: true,
                     minlength: 3,
@@ -286,6 +290,10 @@ app.component('eyatraAgentForm', {
                     required: 'Agent name is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
+                },
+                'gstin': {
+                    minlength: 'Enter Minimum 3 Characters!',
+                    maxlength: 'Enter Maximum 20 Characters!',
                 },
                 'address_line1': {
                     required: 'Address Line1 is required',
