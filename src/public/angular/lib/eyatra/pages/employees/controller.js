@@ -113,6 +113,11 @@ app.component('eyatraEmployeeForm', {
 
         });
 
+        $.validator.addMethod('positiveNumber',
+            function(value) {
+                return Number(value) > 0;
+            }, 'Enter a positive number.');
+
         var form_id = '#employee_form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -153,6 +158,7 @@ app.component('eyatraEmployeeForm', {
                     required: true,
                     maxlength: 20,
                     minlength: 3,
+                    positiveNumber: true,
                 },
                 'ifsc_code': {
                     required: true,

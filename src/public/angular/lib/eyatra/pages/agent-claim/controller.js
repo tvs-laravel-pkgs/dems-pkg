@@ -75,7 +75,6 @@ app.component('eyatraAgentClaimList', {
                 }
             });
         }
-        $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -299,5 +298,33 @@ app.component('eyatraAgentClaimForm', {
 
     }
 });
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
+app.component('eyatraAgentClaimView', {
+    templateUrl: eyatra_agent_claim_view_template_url,
+    controller: function($http, $location, $routeParams, HelperService, $rootScope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            eyatra_agent_claim_view_data_url + '/' + $routeParams.agent_claim_id
+        ).then(function(response) {
+            self.agent_claim_view = response.data.agent_claim_view;
+            self.booking_list = response.data.booking_list;
+            self.booking_pivot = response.data.booking_pivot;
+            self.booking_pivot_amt = response.data.booking_pivot_amt;
+            self.action = "View ";
+
+            self.count = self.booking_pivot.length;
+            var total = 0;
+            for (var i = 0; i < self.booking_pivot_amt.length; i++) {
+                total += self.booking_pivot_amt[i] << 0;
+            }
+            self.total = total;
+        });
+        $rootScope.loading = false;
+    }
+});
+
+
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------

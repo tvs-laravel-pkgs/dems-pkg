@@ -136,9 +136,13 @@ class AgentClaimController extends Controller {
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
-			// if (!array_filter($request->booking_list)) {
-			// 	return response()->json(['success' => false, 'errors' => ['Select Booking List!']]);
-			// }
+			if (!empty($request->booking_list)) {
+				if (!array_filter($request->booking_list)) {
+					return response()->json(['success' => false, 'errors' => ['Select Booking List!']]);
+				} elseif ($request->booking_list == '') {
+					return response()->json(['success' => false, 'errors' => ['Booking List is Empty!']]);
+				}
+			}
 			$invoice_date = date("Y-m-d", strtotime($request->date));
 
 			DB::beginTransaction();
@@ -174,18 +178,6 @@ class AgentClaimController extends Controller {
 				$attachement_vendor_claim->entity_id = $agentClaim->id;
 				$attachement_vendor_claim->name = $name;
 				$attachement_vendor_claim->save();
-				// if (!empty($local_travel_data['invoice_attachmet'])) {
-
-				// foreach ($local_travel_data['attachments'] as $key => $attachement) {
-				// 	$name = $attachement->getClientOriginalName();
-				// 	$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
-				// 	$attachement_local_travel = new Attachment;
-				// 	$attachement_local_travel->attachment_of_id = 3183;
-				// 	$attachement_local_travel->attachment_type_id = 3200;
-				// 	$attachement_local_travel->entity_id = $local_travel->id;
-				// 	$attachement_local_travel->name = $name;
-				// 	$attachement_local_travel->save();
-				// }
 			}
 
 			$agentClaim->bookings()->sync($request->booking_list);
@@ -202,34 +194,40 @@ class AgentClaimController extends Controller {
 		}
 	}
 
-	public function viewEYatraAgentClaim($employee_id) {
+	public function viewEYatraAgentClaim($agent_claim_id) {
+		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::select(
+			'ey_agent_claims.id',
+			'ey_agent_claims.invoice_number',
+			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
+			'ey_agent_claims.invoice_amount')
+			->where('ey_agent_claims.id', $agent_claim_id)->first();
 
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($trip_id);
-		if (!$trip) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
-			return response()->json($this->data);
-		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
-		$this->data['success'] = true;
+		$this->data['booking_pivot'] = $agent_visit_booking_id = $agent_claim_view->bookings()->pluck('booking_id')->toArray();
+
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(
+			'visit_bookings.id',
+			'type.name as type_id',
+			'trips.number as trip',
+			'employees.code as employee_code',
+			'visit_bookings.amount',
+			'visit_bookings.tax',
+			'visit_bookings.service_charge',
+			'visit_bookings.total',
+			'visit_bookings.reference_number',
+			'from_city.name as from',
+			'to_city.name as to',
+			'travel_mode.name as travel_mode')
+			->leftJoin('configs as type', 'type.id', 'visit_bookings.type_id')
+			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
+			->leftJoin('trips', 'trips.id', 'visits.trip_id')
+			->leftJoin('employees', 'employees.id', 'trips.employee_id')
+			->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
+			->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
+			->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
+			->whereIn('visit_bookings.created_by', $agent_visit_booking_id)
+			->get();
+		$this->data['booking_pivot_amt'] = $agent_claim_view->bookings()->pluck('amount')->toArray();
+
 		return response()->json($this->data);
 	}
 
