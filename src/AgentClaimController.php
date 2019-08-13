@@ -142,6 +142,8 @@ class AgentClaimController extends Controller {
 				} elseif ($request->booking_list == '') {
 					return response()->json(['success' => false, 'errors' => ['Booking List is Empty!']]);
 				}
+			} else {
+				return response()->json(['success' => false, 'errors' => ['Booking List is Empty!']]);
 			}
 			$invoice_date = date("Y-m-d", strtotime($request->date));
 

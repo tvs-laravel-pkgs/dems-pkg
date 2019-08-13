@@ -194,7 +194,7 @@ app.component('eyatraAgentClaimForm', {
             },
             ignore: '',
             rules: {
-                'number': {
+                'invoice_number': {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
@@ -217,16 +217,16 @@ app.component('eyatraAgentClaimForm', {
                 },
             },
             messages: {
-                'number': {
-                    required: 'Agent Claim Number is Required',
+                'invoice_number': {
+                    required: 'Agent Invoice Number is Required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'date': {
-                    required: 'Date is Required',
+                    required: 'Agent Invoice Date is Required',
                 },
                 'amount': {
-                    required: 'Amount is Required',
+                    required: 'Agent Invoice Amount is Required',
                     number: 'Enter Numbers Only',
                     decimal: 'Please enter a correct number, format 0.00',
                     // range: 'Enter Maximum 10000000 amount',
