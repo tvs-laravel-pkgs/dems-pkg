@@ -1,6 +1,6 @@
 app.component('eyatraAgents', {
     templateUrl: eyatra_agent_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http) {
+    controller: function(HelperService, $rootScope, $scope, $http, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#agent_list').DataTable({
@@ -49,6 +49,7 @@ app.component('eyatraAgents', {
         $scope.deleteAgentConfirm = function($id) {
             $("#deleteAgent_id").val($id);
         }
+
         $scope.deleteAgent = function() {
             var id = $("#deleteAgent_id").val();
             $http.get(
@@ -72,7 +73,6 @@ app.component('eyatraAgents', {
                 }
             });
         }
-
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ app.component('eyatraAgentForm', {
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-            console.log(self.user.id);
+            // console.log(self.user.id);
             if (self.action == 'Edit') {
                 //$("#hide_password").hide();
                 if (self.agent.deleted_at == null) {
