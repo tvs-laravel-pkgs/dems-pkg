@@ -80,9 +80,8 @@ class TripBookingUpdateController extends Controller {
 		// if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
 		// 	return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		// }
-
 		$this->data['visit'] = $visit;
-		$this->data['travel_mode_list'] = Entity::travelModeList();
+		$this->data['travel_mode_list'] = Entity::uiTravelModeList();
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
@@ -111,8 +110,8 @@ class TripBookingUpdateController extends Controller {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 
-			//If Booking Type Fresh Booking
-			if ($r->booking_type == 'fresh_booking') {
+			//Check Booking Method Agent of Self
+			if ($r->booking_method == 'self') {
 				//Unique validation
 				$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
 					->where('type_id', $r->type_id)
@@ -123,16 +122,31 @@ class TripBookingUpdateController extends Controller {
 				}
 				$travel_mode_id = $r->travel_mode_id;
 				$booking_status_id = 3061; //Visit Status Booked
+
 			} else {
-				//Find Visit Details
-				$visit_status = VisitBooking::where('visit_id', $r->visit_id)
-					->where('type_id', 3100)
-					->first();
-				if (!$visit_status) {
-					return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
+				//check Booking Type Fresh Booking or Cancel Booking
+				if ($r->booking_type == 'fresh_booking') {
+					//Unique validation
+					$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
+						->where('type_id', $r->type_id)
+						->where('travel_mode_id', $r->travel_mode_id)
+						->first();
+					if ($travel_mode_id_unique) {
+						return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
+					}
+					$travel_mode_id = $r->travel_mode_id;
+					$booking_status_id = 3061; //Visit Status Booked
+				} else {
+					//Find Visit Details
+					$visit_status = VisitBooking::where('visit_id', $r->visit_id)
+						->where('type_id', 3100)
+						->first();
+					if (!$visit_status) {
+						return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
+					}
+					$travel_mode_id = $visit_status->travel_mode_id;
+					$booking_status_id = 3062; //Visit Status Cancelled
 				}
-				$travel_mode_id = $visit_status->travel_mode_id;
-				$booking_status_id = 3062; //Visit Status Cancelled
 			}
 
 			//Visit status update
@@ -140,13 +154,18 @@ class TripBookingUpdateController extends Controller {
 			$visit->booking_status_id = $booking_status_id;
 			$visit->save();
 
-			//Get Service Charge
-			$service_charge = Agent::join('state_agent_travel_mode', 'state_agent_travel_mode.agent_id', 'agents.id')
-				->where('state_agent_travel_mode.agent_id', $visit->agent_id)
-				->where('state_agent_travel_mode.travel_mode_id', $travel_mode_id)
-				->pluck('state_agent_travel_mode.service_charge')->first();
+			if ($r->booking_method == 'self') {
+				$service_charge = 0;
+			} else {
+				//Get Service Charge
+				$service_charge = Agent::join('state_agent_travel_mode', 'state_agent_travel_mode.agent_id', 'agents.id')
+					->where('state_agent_travel_mode.agent_id', $visit->agent_id)
+					->where('state_agent_travel_mode.travel_mode_id', $travel_mode_id)
+					->pluck('state_agent_travel_mode.service_charge')->first();
 
-			$service_charge = $service_charge ? $service_charge : 0;
+				$service_charge = $service_charge ? $service_charge : 0;
+
+			}
 
 			//Total Amount of Booking Deails (include tax)
 			$total_amount = $r->amount + $r->tax + $service_charge;

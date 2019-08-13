@@ -137,13 +137,14 @@ class TripController extends Controller {
 				$visit_count = count($request->visits);
 				$i = 0;
 				foreach ($request->visits as $key => $visit_data) {
+					//if no agent found display visit count
+					$visit_count = $i + 1;
 					if ($i == 0) {
 						$from_city_id = Auth::user()->entity->outlet->address->city->id;
 					} else {
 						$previous_value = $request->visits[$key - 1];
 						$from_city_id = $previous_value['to_city_id'];
 					}
-
 					$visit = new Visit;
 					$visit->fill($visit_data);
 					$visit->from_city_id = $from_city_id;
@@ -154,9 +155,11 @@ class TripController extends Controller {
 					$visit->manager_verification_status_id = 3080; //NEW
 					if ($visit_data['booking_method'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
-						$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit->travel_mode_id)->first();
+
+						$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
+
 						if (!$agent) {
-							return response()->json(['success' => false, 'errors' => ['No agent found for visit']]);
+							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count]]);
 						}
 						$visit->agent_id = $agent->id;
 					}
@@ -217,6 +220,17 @@ class TripController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
+	public function cancelTrip($trip_id) {
+
+		$trip = Trip::where('id', $trip_id)->update(['status_id' => 3062]);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$visit = Visit::where('trip_id', $trip_id)->update(['status_id' => 3221]);
+
+		return response()->json(['success' => true]);
+	}
+
 	public function tripVerificationRequest($trip_id) {
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
@@ -243,6 +257,62 @@ class TripController extends Controller {
 		} else {
 			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
 		}
+	}
+
+	public function visitFormData($visit_id) {
+
+		$visit = Visit::find($visit_id);
+		if (!$visit) {
+			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
+		}
+
+		$relations = [
+			'type',
+			'fromCity',
+			'toCity',
+			'travelMode',
+			'bookingMethod',
+			'bookingStatus',
+			'agent',
+			'status',
+			'managerVerificationStatus',
+			'trip.employee',
+			'trip.purpose',
+			'trip.status',
+		];
+
+		//Booking Status
+		//3061 => Booking
+		//3062 => Cancel
+
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+			$relations[] = 'bookings';
+			$relations[] = 'bookings.type';
+			$relations[] = 'bookings.travelMode';
+			$relations[] = 'bookings.paymentStatus';
+		}
+
+		$visit = Visit::with($relations)
+			->find($visit_id);
+
+		$this->data['visit'] = $visit;
+		$this->data['trip'] = $visit->trip;
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+			$this->data['bookings'] = $visit->bookings;
+		}
+		$this->data['success'] = true;
+		return response()->json($this->data);
+	}
+
+	public function requestCancelVisitBooking($visit_id) {
+
+		$visit = Visit::where('id', $visit_id)->update(['status_id' => 3221]);
+
+		if (!$visit) {
+			return response()->json(['success' => false, 'errors' => ['Booking Details not Found']]);
+		}
+
+		return response()->json(['success' => true]);
 	}
 
 }
