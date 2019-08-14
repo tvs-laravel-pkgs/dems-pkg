@@ -51,6 +51,9 @@ class Entity extends Model {
 	public static function getLodgeStateTypeList() {
 		return Entity::where('entity_type_id', 504)->select('id', 'name')->get();
 	}
+	public static function walletModeList() {
+		return Entity::where('entity_type_id', 505)->select('id', 'name')->get();
+	}
 
 	public static function create($sample_entities, $admin, $company) {
 		foreach ($sample_entities as $entity_type_id => $entities) {
