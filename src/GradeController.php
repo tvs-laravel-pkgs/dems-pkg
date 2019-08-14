@@ -63,6 +63,7 @@ class GradeController extends Controller {
 		$expense_type_list = Config::expenseList();
 		$travel_purpose_list = Entity::purposeList();
 		$travel_types_list = Entity::travelModeList();
+		$eligibility_type_list = Entity::eligibilityType();
 		if (!$entity_id) {
 			$this->data['action'] = 'Add';
 			$entity = new Entity;
@@ -95,6 +96,7 @@ class GradeController extends Controller {
 			'expense_type_list' => $expense_type_list,
 			'travel_purpose_list' => $travel_purpose_list,
 			'travel_types_list' => $travel_types_list,
+			'eligibility_type_list' => $eligibility_type_list,
 		];
 		$this->data['entity'] = $entity;
 
