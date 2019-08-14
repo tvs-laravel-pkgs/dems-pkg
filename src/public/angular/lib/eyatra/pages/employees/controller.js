@@ -242,6 +242,9 @@ app.component('eyatraEmployeeForm', {
                     minlength: 6,
                     maxlength: 191,
                 },
+                'roles': {
+                    required: true,
+                },
                 'username': {
                     required: true,
                     minlength: 4,

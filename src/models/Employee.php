@@ -50,7 +50,7 @@ class Employee extends Model {
 	}
 
 	public function user() {
-		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121);
+		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121)->withTrashed();
 	}
 
 	public static function getList() {
