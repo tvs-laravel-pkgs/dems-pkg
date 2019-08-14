@@ -141,6 +141,15 @@ app.component('eyatraTripForm', {
             });
         }
 
+        self.removeLodging = function(index, lodging_id) {
+
+            if (lodging_id) {
+                lodgings_removal_id.push(lodging_id);
+                $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
+            }
+            self.trip.visits.splice(index, 1);
+        }
+
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -275,6 +284,7 @@ app.component('eyatraTripView', {
                                 layout: 'topRight',
                                 text: 'Booking cancelled successfully',
                             }).show();
+                            $('#request_cancel_trip').modal('hide');
                             $route.reload();
                         }
                     })

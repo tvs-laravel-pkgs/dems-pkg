@@ -311,6 +311,58 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Admin Permission',
 			],
 
+			//MASTERS > CATEGORIES
+			5280 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-category',
+				'display_name' => 'Category',
+			],
+			5281 => [
+				'display_order' => 1,
+				'parent_id' => 5280,
+				'name' => 'eyatra-category-add',
+				'display_name' => 'Add',
+			],
+			5282 => [
+				'display_order' => 2,
+				'parent_id' => 5280,
+				'name' => 'eyatra-category-edit',
+				'display_name' => 'Edit',
+			],
+			5283 => [
+				'display_order' => 3,
+				'parent_id' => 5280,
+				'name' => 'eyatra-category-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > CITIES
+			5300 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-cities',
+				'display_name' => 'Cities',
+			],
+			5301 => [
+				'display_order' => 1,
+				'parent_id' => 5300,
+				'name' => 'eyatra-city-add',
+				'display_name' => 'Add',
+			],
+			5302 => [
+				'display_order' => 2,
+				'parent_id' => 5300,
+				'name' => 'eyatra-city-edit',
+				'display_name' => 'Edit',
+			],
+			5303 => [
+				'display_order' => 3,
+				'parent_id' => 5300,
+				'name' => 'eyatra-city-delete',
+				'display_name' => 'Delete',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

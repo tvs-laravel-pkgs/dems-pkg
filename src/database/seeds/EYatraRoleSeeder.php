@@ -57,7 +57,7 @@ class EYatraRoleSeeder extends Seeder {
 					//MASTERS > GRADES
 					5120, 5121, 5122, 5123,
 
-					//MASTERS > GRADES
+					//MASTERS > STATES
 					5140, 5141, 5142, 5143,
 
 					//MASTERS > TRAVEL PURPOSES
@@ -68,6 +68,12 @@ class EYatraRoleSeeder extends Seeder {
 
 					//MASTERS > LOCAL TRAVEL MODES
 					5220, 5221, 5222, 5223,
+
+					//MASTERS > CATEGORY
+					5280, 5281, 5282, 5283,
+
+					//MASTERS > CITIES
+					5300, 5301, 5302, 5303,
 
 				],
 			],
