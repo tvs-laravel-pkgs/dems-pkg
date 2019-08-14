@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\Role;
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -67,23 +68,26 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::with('bankDetail', 'reportingTo', 'WalletDetail', 'user')->find($employee_id);
+			$employee = Employee::withTrashed()->with('bankDetail', 'reportingTo', 'walletDetail', 'user')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
 			}
+			$employee->roles = $employee->user->roles()->pluck('role_id')->toArray();
 			$this->data['success'] = true;
 		}
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
 			'grade_list' => $grade_list,
 			'payment_mode_list' => $payment_mode_list,
 			'wallet_mode_list' => $wallet_mode_list,
+			'role_list' => $role_list,
 		];
 		$this->data['employee'] = $employee;
 
@@ -119,6 +123,12 @@ class EmployeeController extends Controller {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 
+			//ROLE VALIDATION
+			$roles_valid = json_decode($request->roles);
+			if (empty($roles_valid)) {
+				return response()->json(['success' => false, 'errors' => ['Role is required']]);
+			}
+
 			DB::beginTransaction();
 			if (!$request->id) {
 				$employee = new Employee;
@@ -126,7 +136,7 @@ class EmployeeController extends Controller {
 				$employee->created_at = Carbon::now();
 				$employee->updated_at = NULL;
 			} else {
-				$employee = Employee::find($request->id);
+				$employee = Employee::withTrashed()->find($request->id);
 				$employee->updated_by = Auth::user()->id;
 				$employee->updated_at = Carbon::now();
 			}
@@ -142,8 +152,8 @@ class EmployeeController extends Controller {
 			$employee->save();
 
 			//USER ACCOUNT
-			$user = User::firstOrNew([
-				'entity_id' => $employee->id,
+			$user = User::withTrashed()->firstOrNew([
+				'id' => $request->user_id,
 			]);
 			$user->mobile_number = $request->mobile_number;
 			$user->entity_type = 0;
@@ -157,11 +167,19 @@ class EmployeeController extends Controller {
 				}
 				$user->force_password_change = 1;
 			}
+			if ($request->status == 0) {
+				$user->deleted_at = date('Y-m-d H:i:s');
+				$user->deleted_by = Auth::user()->id;
+			} else {
+				$user->deleted_by = NULL;
+				$user->deleted_at = NULL;
+			}
 			$user->save();
-			$user->roles()->sync([501]);
+
+			//USER ROLE SYNC
+			$user->roles()->sync(json_decode($request->roles));
 
 			//BANK DETAIL SAVE
-			BankDetail::where('entity_id', $employee->id)->forceDelete();
 			if ($request->bank_name) {
 				$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
 				$bank_detail->fill($request->all());
@@ -172,7 +190,6 @@ class EmployeeController extends Controller {
 			}
 
 			//WALLET SAVE
-			WalletDetail::where('entity_id', $employee->id)->forceDelete();
 			if ($request->type_id) {
 				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $employee->id]);
 				$wallet_detail->fill($request->all());
@@ -195,6 +212,10 @@ class EmployeeController extends Controller {
 			'outlet',
 			'grade',
 			'bankDetail',
+			'walletDetail',
+			'walletDetail.type',
+			'user',
+			'paymentMode',
 		])
 			->find($employee_id);
 		if (!$employee) {
@@ -202,12 +223,17 @@ class EmployeeController extends Controller {
 			$this->data['errors'] = ['Employee not found'];
 			return response()->json($this->data);
 		}
+		$employee->roles = $employee->user->roles()->pluck('name')->toArray();
 		$this->data['employee'] = $employee;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
 	public function deleteEYatraEmployee($employee_id) {
+		$user = User::withTrashed()->where('entity_id', $employee_id)->forcedelete();
+		if (!$user) {
+			return response()->json(['success' => false, 'errors' => ['User not found']]);
+		}
 		$employee = Employee::withTrashed()->where('id', $employee_id)->forcedelete();
 		if (!$employee) {
 			return response()->json(['success' => false, 'errors' => ['Employee not found']]);

@@ -41,7 +41,7 @@ class Employee extends Model {
 		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
 	}
 
-	public function WalletDetail() {
+	public function walletDetail() {
 		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id');
 	}
 
@@ -49,8 +49,12 @@ class Employee extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
 	}
 
+	public function paymentMode() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'payment_mode_id');
+	}
+
 	public function user() {
-		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121);
+		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121)->withTrashed();
 	}
 
 	public static function getList() {

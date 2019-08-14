@@ -15,4 +15,8 @@ class WalletDetail extends Model {
 		'type_id',
 		'value',
 	];
+
+	public function type() {
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'type_id');
+	}
 }
