@@ -122,13 +122,13 @@ app.component('eyatraEmployeeForm', {
                 } else {
                     self.switch_password = 'Yes';
                 }
+                $scope.selectPaymentMode(self.employee.payment_mode_id);
             } else {
                 $("#hide_password").show();
                 $("#password").prop('disabled', false);
                 self.switch_password = 'Yes';
             }
 
-            $scope.selectPaymentMode(self.employee.payment_mode_id);
 
             $rootScope.loading = false;
 
@@ -156,6 +156,10 @@ app.component('eyatraEmployeeForm', {
                 $scope.showBank = false;
                 $scope.showCheque = false;
                 $scope.showWallet = true;
+            } else {
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
             }
         }
 

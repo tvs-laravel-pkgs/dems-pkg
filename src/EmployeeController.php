@@ -161,6 +161,7 @@ class EmployeeController extends Controller {
 			$user->roles()->sync([501]);
 
 			//BANK DETAIL SAVE
+			BankDetail::where('entity_id', $employee->id)->forceDelete();
 			if ($request->bank_name) {
 				$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
 				$bank_detail->fill($request->all());
@@ -171,6 +172,7 @@ class EmployeeController extends Controller {
 			}
 
 			//WALLET SAVE
+			WalletDetail::where('entity_id', $employee->id)->forceDelete();
 			if ($request->type_id) {
 				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $employee->id]);
 				$wallet_detail->fill($request->all());
