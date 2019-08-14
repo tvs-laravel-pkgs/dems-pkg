@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Storage;
+use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\AgentClaim;
 use Uitoux\EYatra\VisitBooking;
 use Validator;
@@ -62,14 +63,13 @@ class AgentClaimController extends Controller {
 			$this->data['action'] = 'New';
 			$agent_claim = new AgentClaim;
 			$this->data['success'] = true;
-			$this->data['booking_pivot'] = [];
-			$this->data['booking_pivot_amt'] = [];
 			$this->data['attachment'] = [];
 			$this->data['booking_list'] = $booking_list = VisitBooking::select(
 				'visit_bookings.id',
 				'type.name as type_id',
 				'trips.number as trip',
 				'employees.code as employee_code',
+				'employees.name as employee_name',
 				'visit_bookings.amount',
 				'visit_bookings.tax',
 				'visit_bookings.service_charge',
@@ -103,6 +103,7 @@ class AgentClaimController extends Controller {
 				'type.name as type_id',
 				'trips.number as trip',
 				'employees.code as employee_code',
+				'employees.name as employee_name',
 				'visit_bookings.amount',
 				'visit_bookings.tax',
 				'visit_bookings.service_charge',
@@ -125,12 +126,8 @@ class AgentClaimController extends Controller {
 				->get();
 			$this->data['success'] = true;
 			$this->data['attachment'] = Attachment::where('entity_id', $agent_claim_id)->first();
-			// $this->data['booking_pivot'] = VisitBooking::select('id')->where('status_id', 3222)->get();
-			// dd($this->data['booking_pivot']);
-			// $this->data['booking_pivot'] = $agent_claim->bookings()->pluck('booking_id')->toArray();
-			// $this->data['booking_pivot_amt'] = $booking_list->where('status_id', 3222)->pluck('total')->toArray();
-			// $this->data['booking_pivot_amt'] = $agent_claim->bookings()->pluck('total')->toArray();
 		}
+		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
 		// $this->data['extras'] = [
 		// 	'manager_list' => Employee::getList(),
 		// 	'outlet_list' => Outlet::getList(),
@@ -151,8 +148,8 @@ class AgentClaimController extends Controller {
 				'invoice_number.unique' => 'Invoice Number is already taken',
 				'date.required' => 'Invoice Date is Required',
 				'net_amount.required' => 'Net Amount is Required',
-				'tax.required' => 'Tax is Required',
-				'invoice_amount.required' => 'Invoice Amount is Required',
+				// 'tax.required' => 'Tax is Required',
+				// 'invoice_amount.required' => 'Invoice Amount is Required',
 				'booking_list.*.required' => 'Booking List is Required',
 			];
 			$validator = Validator::make($request->all(), [
@@ -162,13 +159,17 @@ class AgentClaimController extends Controller {
 				],
 				'date' => "required",
 				'net_amount' => "required",
-				'tax' => "required",
-				'invoice_amount' => "required",
+				// 'tax' => "required",
+				// 'invoice_amount' => "required",
 				'booking_list.*' => "required",
 			]);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
+			if ($request->tax == '') {
+				$request->tax = 0;
+			}
+
 			if (!empty($request->booking_list)) {
 				if (!array_filter($request->booking_list)) {
 					return response()->json(['success' => false, 'errors' => ['Select Booking List!']]);
@@ -179,6 +180,7 @@ class AgentClaimController extends Controller {
 				return response()->json(['success' => false, 'errors' => ['Booking List is Empty!']]);
 			}
 			$invoice_date = date("Y-m-d", strtotime($request->date));
+			// dd($request->all());
 
 			DB::beginTransaction();
 			if (!$request->id) {
@@ -192,14 +194,21 @@ class AgentClaimController extends Controller {
 				$agentClaim->updated_by = Auth::user()->id;
 				$agentClaim->updated_at = Carbon::now();
 			}
-			$agentClaim->number = 'INVOICE_' . rand();
+			// $agentClaim->number = 'INVOICE_' . rand();
 			$agentClaim->agent_id = Auth::user()->entity_id;
 			$agentClaim->invoice_date = $invoice_date;
 			$agentClaim->net_amount = $request->net_amount;
 			$agentClaim->tax = $request->tax;
+			// dd($invoice_amount);
 			$agentClaim->invoice_amount = $request->invoice_amount;
 			$agentClaim->status_id = 3222;
 			$agentClaim->fill($request->all());
+			if ($request->invoice_amount == '' || $request->invoice_amount == null) {
+				$agentClaim->invoice_amount = $request->net_amount;
+			}
+
+			$agentClaim->save();
+			$agentClaim->number = 'INVOICE_' . $agentClaim->id;
 			$agentClaim->save();
 
 			// dd($request->booking_list);
@@ -222,7 +231,7 @@ class AgentClaimController extends Controller {
 				$attachement_vendor_claim->save();
 			}
 
-			$agentClaim->bookings()->sync($request->booking_list);
+			// $agentClaim->bookings()->sync($request->booking_list);
 
 			DB::commit();
 			if (empty($request->id)) {
@@ -240,17 +249,20 @@ class AgentClaimController extends Controller {
 		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',
+			'ey_agent_claims.net_amount',
+			'ey_agent_claims.tax',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
 			->where('ey_agent_claims.id', $agent_claim_id)->first();
 
-		$this->data['booking_pivot'] = $agent_visit_booking_id = $agent_claim_view->bookings()->pluck('booking_id')->toArray();
+		// $this->data['booking_pivot'] = $agent_visit_booking_id = $agent_claim_view->bookings()->pluck('booking_id')->toArray();
 
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(
 			'visit_bookings.id',
 			'type.name as type_id',
 			'trips.number as trip',
 			'employees.code as employee_code',
+			'employees.name as employee_name',
 			'visit_bookings.amount',
 			'visit_bookings.tax',
 			'visit_bookings.service_charge',
@@ -266,10 +278,13 @@ class AgentClaimController extends Controller {
 			->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
 			->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
 			->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
-			->whereIn('visit_bookings.created_by', $agent_visit_booking_id)
-			->whereIn('visit_bookings.status_id', 3222)
+			->where('visit_bookings.created_by', Auth::user()->id)
+			->where('visit_bookings.status_id', 3222)
+			->where('visit_bookings.agent_claim_id', $agent_claim_id)
 			->get();
-		$this->data['booking_pivot_amt'] = $agent_claim_view->bookings()->pluck('amount')->toArray();
+		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
+
+		// $this->data['booking_pivot_amt'] = $agent_claim_view->bookings()->pluck('amount')->toArray();
 
 		return response()->json($this->data);
 	}

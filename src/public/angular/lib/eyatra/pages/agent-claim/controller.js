@@ -104,29 +104,25 @@ app.component('eyatraAgentClaimForm', {
             self.agent_claim = response.data.agent_claim;
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
-            booking_pivot = response.data.booking_pivot;
-            booking_pivot_amt = response.data.booking_pivot_amt;
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
-            console.log(self.booking_list);
-            // console.log(booking_pivot);
+            self.gstin_tax = response.data.gstin_tax;
+            // console.log(self.booking_list);
             if (self.action == 'Edit') {
                 var total = 0;
-                var i = 0;
-                $.each(booking_pivot, function(key, value) {
-                    total += parseFloat(booking_pivot_amt[key]);
-                    i++;
+                $.each(self.booking_list, function(key, value) {
+                    total += parseFloat(value.total);
                 });
-                self.total_amount = total;
                 $(".amount").html(total.toFixed(2));
-                $(".net_amount").val(total.toFixed(2));
-                $("#count").html(i);
+                $("#count").html(self.booking_list.length);
             } else {
-                self.total_amount = 0;
                 $(".amount").html(0);
-                $(".net_amount").val(0);
                 $("#count").html(0);
             } // self.extras = response.data.extras;
+            if (self.gstin_tax[0].gstin == null || self.gstin_tax[0].gstin == '') {
+                $("#total_amt").hide().prop('disabled', true);
+                $("#tax_amt").hide().prop('disabled', true);
+            }
             $rootScope.loading = false;
         });
         var total = 0;
@@ -136,11 +132,6 @@ app.component('eyatraAgentClaimForm', {
             total = (net_amt + tax);
             $("#invoice_amount").val(total.toFixed(2));
         });
-
-        $scope.bookingChecked = function(id) {
-            var value = booking_pivot.indexOf(id);
-            return value;
-        }
 
         $(document).on('click', '.booking_list', function() {
             var total_amount = 0;
@@ -299,16 +290,14 @@ app.component('eyatraAgentClaimView', {
         ).then(function(response) {
             self.agent_claim_view = response.data.agent_claim_view;
             self.booking_list = response.data.booking_list;
-            self.booking_pivot = response.data.booking_pivot;
-            self.booking_pivot_amt = response.data.booking_pivot_amt;
+            self.gstin_tax = response.data.gstin_tax;
             self.action = "View ";
-
-            self.count = self.booking_pivot.length;
-            var total = 0;
-            for (var i = 0; i < self.booking_pivot_amt.length; i++) {
-                total += self.booking_pivot_amt[i] << 0;
+            if (self.gstin_tax[0].gstin == null || self.gstin_tax[0].gstin == '') {
+                $("#total_amt").hide().prop('disabled', true);
+                $("#tax_amt").hide().prop('disabled', true);
             }
-            self.total = total;
+            // console.log(self.booking_list);
+            self.count = self.booking_list.length;
         });
         $rootScope.loading = false;
     }
