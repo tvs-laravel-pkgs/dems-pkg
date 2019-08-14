@@ -123,13 +123,19 @@ app.component('eyatraStateForm', {
                 $.each($('.travelmodecheckbox'), function() {
                     $scope.getTravelMode($(this).val());
                 });
+                //     if ($('.travelmodecheckbox').is(":checked")) {
+                //         $('#sc_' + id).show();
+                //         $('.agent_select').show();
+                //     } else {
+                //         $('#sc_' + id).hide();
+                //         $('.agent_select').hide();
+                //     }
             }
         });
 
         $scope.getTravelMode = function(id) {
             if (event.target.checked == true) {
                 $("#sc_" + id).removeClass("ng-hide");
-                $("#sc_" + id).addClass("error");
                 $("#sc_" + id).prop('required', true);
                 $("#sc_" + id).prop('min', 1);
                 $(".agent_select").removeClass("ng-hide");
@@ -137,10 +143,11 @@ app.component('eyatraStateForm', {
                 //alert('fsdghgf');
             } else {
                 $("#sc_" + id).addClass("ng-hide");
-                $("#sc_" + id).prop('required', false).removeClass('error');
+                $("#sc_" + id).prop('required', false);
                 $(".agent_select").addClass("ng-hide");
                 $(".agent_select").prop('required', false);
             }
+
         }
 
         $(document).on('click', '.travelmodecheckbox', function() {
@@ -152,8 +159,8 @@ app.component('eyatraStateForm', {
                 $(".agent_select_" + id).prop('required', true);
             } else {
                 // $(".error").css("display", "none");
-                $(".sc_" + id).prop('required', false).removeClass("error");
-                $(".agent_select_" + id).prop('required', false).removeClass("error");
+                $(".sc_" + id).prop('required', false);
+                $(".agent_select_" + id).prop('required', false);
                 // $(".sc_" + id).prop('min', false);
             }
 
