@@ -175,6 +175,12 @@ class EYatraTC1Seeder extends Seeder {
 			504 => [
 				'Normal',
 			],
+			505 => [
+				'Paytm',
+				'Phone Pay',
+				'Google Pay',
+				'BHIM UPI',
+			],
 		];
 		Entity::create($sample_entities, $admin, $company);
 

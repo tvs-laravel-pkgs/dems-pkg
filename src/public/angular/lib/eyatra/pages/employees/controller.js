@@ -93,6 +93,10 @@ app.component('eyatraEmployeeForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $scope.showBank = false;
+        $scope.showCheque = false;
+        $scope.showWallet = false;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -112,6 +116,24 @@ app.component('eyatraEmployeeForm', {
             $rootScope.loading = false;
 
         });
+
+
+        //SELECT PAYMENT MODE
+        $scope.selectPaymentMode = function(payment_id) {
+            if (payment_id == 3244) { //BANK
+                $scope.showBank = true;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            } else if (payment_id == 3245) { //CHEQUE
+                $scope.showBank = false;
+                $scope.showCheque = true;
+                $scope.showWallet = false;
+            } else if (payment_id == 3246) { //WALLET
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = true;
+            }
+        }
 
         $.validator.addMethod('positiveNumber',
             function(value) {

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\BankDetail;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Validator;
@@ -73,16 +74,16 @@ class EmployeeController extends Controller {
 			}
 			$this->data['success'] = true;
 		}
-		// $outlet_list = [];
-		// $outlet_list['name'] = 'Select Outlet';
-		// $outlet_list['id'] = '';
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
-		// dd($outlet_list);
+		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
+		$wallet_mode_list = collect(Config::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
 			'grade_list' => $grade_list,
+			'payment_mode_list' => $payment_mode_list,
+			'wallet_mode_list' => $wallet_mode_list,
 		];
 		$this->data['employee'] = $employee;
 
