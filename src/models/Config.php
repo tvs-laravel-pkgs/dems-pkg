@@ -20,4 +20,8 @@ class Config extends Model {
 		return Config::where('config_type_id', 500)->select('id', 'name')->get()->keyBy('id');
 	}
 
+	public static function paymentModeList() {
+		return Config::where('config_type_id', 514)->select('id', 'name')->get();
+	}
+
 }

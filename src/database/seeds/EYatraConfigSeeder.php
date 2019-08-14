@@ -28,6 +28,7 @@ class EYatraConfigSeeder extends Seeder {
 			511 => 'Attachment Type - EYatra',
 			512 => 'Visit Statuses - EYatra',
 			513 => 'Visit Booking Statuses - EYatra',
+			514 => 'Employee Payment Mode - EYatra',
 
 		];
 
@@ -252,6 +253,20 @@ class EYatraConfigSeeder extends Seeder {
 			3243 => [
 				'name' => 'Paid',
 				'config_type_id' => 513,
+			],
+
+			//EMPLOYEE PAYMENT MODES
+			3244 => [
+				'name' => 'Bank',
+				'config_type_id' => 514,
+			],
+			3245 => [
+				'name' => 'Cheque',
+				'config_type_id' => 514,
+			],
+			3246 => [
+				'name' => 'Wallet',
+				'config_type_id' => 514,
 			],
 
 		];

@@ -2,13 +2,16 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\BankDetail;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\WalletDetail;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -61,28 +64,26 @@ class EmployeeController extends Controller {
 		if (!$employee_id) {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
-			$bank_detail = new BankDetail;
-			$employee->$bank_detail;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::with('bankDetail', 'reportingTo')->find($employee_id);
+			$employee = Employee::with('bankDetail', 'reportingTo', 'WalletDetail', 'user')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
 			}
 			$this->data['success'] = true;
 		}
-		// $outlet_list = [];
-		// $outlet_list['name'] = 'Select Outlet';
-		// $outlet_list['id'] = '';
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
-		// dd($outlet_list);
+		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
 			'grade_list' => $grade_list,
+			'payment_mode_list' => $payment_mode_list,
+			'wallet_mode_list' => $wallet_mode_list,
 		];
 		$this->data['employee'] = $employee;
 
@@ -92,15 +93,28 @@ class EmployeeController extends Controller {
 	public function saveEYatraEmployee(Request $request) {
 		//validation
 		try {
+			$error_messages = [
+				'mobile_number.required' => "Mobile Number is Required",
+				'username.required' => "Username is Required",
+				'mobile_number.unique' => "Mobile Number is already taken",
+			];
+
 			$validator = Validator::make($request->all(), [
 				'code' => [
 					'unique:employees,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 					'required:true',
 				],
+				'mobile_number' => [
+					'required:true',
+					'unique:users,mobile_number,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+				],
 				'name' => [
 					'required:true',
 				],
-			]);
+				'username' => [
+					'required:true',
+				],
+			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
@@ -127,14 +141,45 @@ class EmployeeController extends Controller {
 			}
 			$employee->save();
 
-			//BANK DETAIL SAVE
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
-			$bank_detail->fill($request->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $employee->id;
-			$bank_detail->account_type_id = 3243;
-			$bank_detail->save();
+			//USER ACCOUNT
+			$user = User::firstOrNew([
+				'entity_id' => $employee->id,
+			]);
+			$user->mobile_number = $request->mobile_number;
+			$user->entity_type = 0;
+			$user->user_type_id = 3121;
+			$user->company_id = Auth::user()->company_id;
+			$user->entity_id = $employee->id;
+			$user->fill($request->all());
+			if ($request->password_change == 'Yes') {
+				if (!empty($request->user['password'])) {
+					$user->password = $request->user['password'];
+				}
+				$user->force_password_change = 1;
+			}
+			$user->save();
+			$user->roles()->sync([501]);
 
+			//BANK DETAIL SAVE
+			BankDetail::where('entity_id', $employee->id)->forceDelete();
+			if ($request->bank_name) {
+				$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
+				$bank_detail->fill($request->all());
+				$bank_detail->detail_of_id = 3243;
+				$bank_detail->entity_id = $employee->id;
+				$bank_detail->account_type_id = 3243;
+				$bank_detail->save();
+			}
+
+			//WALLET SAVE
+			WalletDetail::where('entity_id', $employee->id)->forceDelete();
+			if ($request->type_id) {
+				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $employee->id]);
+				$wallet_detail->fill($request->all());
+				$wallet_detail->wallet_of_id = 3243;
+				$wallet_detail->entity_id = $employee->id;
+				$wallet_detail->save();
+			}
 			DB::commit();
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {

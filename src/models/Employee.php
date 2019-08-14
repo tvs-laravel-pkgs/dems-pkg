@@ -15,6 +15,7 @@ class Employee extends Model {
 		'outlet_id',
 		'reporting_to_id',
 		'grade_id',
+		'payment_mode_id',
 		'created_by',
 		'updated_by',
 		'deleted_by',
@@ -38,6 +39,10 @@ class Employee extends Model {
 
 	public function bankDetail() {
 		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
+	}
+
+	public function WalletDetail() {
+		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id');
 	}
 
 	public function reportingTo() {
@@ -73,7 +78,7 @@ class Employee extends Model {
 		$user->entity_id = $entity->id;
 		$user->username = $entity->code;
 		$user->mobile_number = $faker->unique()->numberBetween(9842000000, 9842099999);
-		$user->password = '$2y$10$N9pYzAbL2spl7vX3ZE1aBeekppaosAdixk04PTkK5obng7.KsLAQ2';
+		$user->password = 'Test@123';
 		$user->save();
 		$user->roles()->sync($roles);
 		return $user;
