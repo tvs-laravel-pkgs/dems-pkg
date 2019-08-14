@@ -121,14 +121,15 @@ class AgentClaimController extends Controller {
 				->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
 				->where('visit_bookings.created_by', Auth::user()->id)
 				->where('visit_bookings.status_id', 3222)
+				->where('visit_bookings.agent_claim_id', $agent_claim_id)
 				->get();
 			$this->data['success'] = true;
 			$this->data['attachment'] = Attachment::where('entity_id', $agent_claim_id)->first();
 			// $this->data['booking_pivot'] = VisitBooking::select('id')->where('status_id', 3222)->get();
 			// dd($this->data['booking_pivot']);
-			$this->data['booking_pivot'] = $agent_claim->bookings()->pluck('booking_id')->toArray();
+			// $this->data['booking_pivot'] = $agent_claim->bookings()->pluck('booking_id')->toArray();
 			// $this->data['booking_pivot_amt'] = $booking_list->where('status_id', 3222)->pluck('total')->toArray();
-			$this->data['booking_pivot_amt'] = $agent_claim->bookings()->pluck('total')->toArray();
+			// $this->data['booking_pivot_amt'] = $agent_claim->bookings()->pluck('total')->toArray();
 		}
 		// $this->data['extras'] = [
 		// 	'manager_list' => Employee::getList(),
@@ -204,7 +205,7 @@ class AgentClaimController extends Controller {
 			// dd($request->booking_list);
 			//UPDATE VISIT BOOKING BY AGENT
 			$booking_list_array = implode(',', $request->booking_list);
-			$visit_book = VisitBooking::whereIn('id', $request->booking_list)->update(['status_id' => 3222]);
+			$visit_book = VisitBooking::whereIn('id', $request->booking_list)->update(['status_id' => 3222, 'agent_claim_id' => $agentClaim->id]);
 
 			//STORE ATTACHMENT
 			$item_images = 'agent_claim/attachments/';
@@ -274,7 +275,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function deleteEYatraAgentClaim($agent_claim_id) {
-		$agent_claim = Agentclaim::where('id', $agent_claim_id)->delete();
+		$agent_claim = Agentclaim::where('id', $agent_claim_id)->forceDelete();
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim not found']]);
 		}

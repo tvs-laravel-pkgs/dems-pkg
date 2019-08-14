@@ -65,7 +65,7 @@ app.component('eyatraAgentClaimList', {
                     }).show();
                     $('#agent_claim_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agent/claim/list');
-                    $scope.$apply();
+                    // $scope.$apply();
                 } else {
                     new Noty({
                         type: 'error',
@@ -75,6 +75,7 @@ app.component('eyatraAgentClaimList', {
                 }
             });
         }
+        $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ app.component('eyatraAgentClaimForm', {
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             console.log(self.booking_list);
-            console.log(booking_pivot);
+            // console.log(booking_pivot);
             if (self.action == 'Edit') {
                 var total = 0;
                 var i = 0;
