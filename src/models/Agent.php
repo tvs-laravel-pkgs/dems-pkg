@@ -12,6 +12,7 @@ class Agent extends Model {
 		'company_id',
 		'code',
 		'name',
+		'gstin',
 		'created_by',
 	];
 

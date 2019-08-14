@@ -124,6 +124,10 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-view></eyatra-trip-view>',
         title: 'View Trip',
     }).
+    when('/eyatra/trip/visit/view/:visit_id', {
+        template: '<eyatra-trip-visit-view></eyatra-trip-visit-view>',
+        title: 'View Trip',
+    }).
 
     //TRIP CLAIM
     when('/eyatra/trip/claim/list', {

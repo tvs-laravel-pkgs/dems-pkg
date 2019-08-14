@@ -1,6 +1,6 @@
 app.component('eyatraAgents', {
     templateUrl: eyatra_agent_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http) {
+    controller: function(HelperService, $rootScope, $scope, $http, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#agent_list').DataTable({
@@ -49,6 +49,7 @@ app.component('eyatraAgents', {
         $scope.deleteAgentConfirm = function($id) {
             $("#deleteAgent_id").val($id);
         }
+
         $scope.deleteAgent = function() {
             var id = $("#deleteAgent_id").val();
             $http.get(
@@ -62,7 +63,7 @@ app.component('eyatraAgents', {
                     }).show();
                     $('#agent_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agents');
-                    $scope.$apply();
+                    // $scope.$apply();
                 } else {
                     new Noty({
                         type: 'error',
@@ -72,7 +73,7 @@ app.component('eyatraAgents', {
                 }
             });
         }
-
+        $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ app.component('eyatraAgentForm', {
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-            console.log(self.user.id);
+            // console.log(self.user.id);
             if (self.action == 'Edit') {
                 //$("#hide_password").hide();
                 if (self.agent.deleted_at == null) {
@@ -115,12 +116,14 @@ app.component('eyatraAgentForm', {
                 if (self.user.force_password_change == 1) {
                     self.switch_password = 'No';
                     $("#hide_password").hide();
+                    $("#password").prop('disabled', true);
                 } else {
                     self.switch_password = 'Yes';
                 }
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
+                $("#password").prop('disabled', false);
                 self.switch_password = 'Yes';
             }
         });
@@ -140,9 +143,10 @@ app.component('eyatraAgentForm', {
         $scope.psw_change = function(val) {
             if (val == 'No') {
                 $("#hide_password").hide();
-                $("#password_change").val('');
+                $("#password").prop('disabled', true);
             } else {
                 $("#hide_password").show();
+                $("#password").prop('disabled', false);
             }
         }
 
@@ -221,6 +225,10 @@ app.component('eyatraAgentForm', {
                     minlength: 3,
                     maxlength: 191,
                 },
+                'gstin': {
+                    minlength: 3,
+                    maxlength: 20,
+                },
                 'address_line1': {
                     required: true,
                     minlength: 3,
@@ -285,6 +293,10 @@ app.component('eyatraAgentForm', {
                     required: 'Agent name is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
+                },
+                'gstin': {
+                    minlength: 'Enter Minimum 3 Characters!',
+                    maxlength: 'Enter Maximum 20 Characters!',
                 },
                 'address_line1': {
                     required: 'Address Line1 is required',

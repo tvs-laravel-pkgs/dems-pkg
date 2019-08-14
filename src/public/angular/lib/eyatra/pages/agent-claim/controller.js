@@ -65,7 +65,7 @@ app.component('eyatraAgentClaimList', {
                     }).show();
                     $('#agent_claim_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agent/claim/list');
-                    $scope.$apply();
+                    // $scope.$apply();
                 } else {
                     new Noty({
                         type: 'error',
@@ -75,6 +75,7 @@ app.component('eyatraAgentClaimList', {
                 }
             });
         }
+        $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -96,7 +97,7 @@ app.component('eyatraAgentClaimForm', {
                     text: response.data.message,
                 }).show();
                 $location.path('/eyatra/agent/claim/list')
-                $scope.$apply()
+                // $scope.$apply()
                 return;
             }
 
@@ -107,7 +108,8 @@ app.component('eyatraAgentClaimForm', {
             booking_pivot_amt = response.data.booking_pivot_amt;
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
-
+            console.log(self.booking_list);
+            // console.log(booking_pivot);
             if (self.action == 'Edit') {
                 var total = 0;
                 var i = 0;
@@ -116,19 +118,23 @@ app.component('eyatraAgentClaimForm', {
                     i++;
                 });
                 self.total_amount = total;
-                $("#amount").html(total.toFixed(2));
+                $(".amount").html(total.toFixed(2));
+                $(".net_amount").val(total.toFixed(2));
                 $("#count").html(i);
-                // self.selected_amount = total.toFixed(2);
-                // self.booking_checked_count = i;
             } else {
                 self.total_amount = 0;
-                $("#amount").html(0);
+                $(".amount").html(0);
+                $(".net_amount").val(0);
                 $("#count").html(0);
-                // self.selected_amount = 0;
-                // self.booking_checked_count = 0;
             } // self.extras = response.data.extras;
             $rootScope.loading = false;
-
+        });
+        var total = 0;
+        $('#tax').on('change', function() {
+            var net_amt = parseFloat($(".net_amount").val());
+            var tax = parseFloat($("#tax").val());
+            total = (net_amt + tax);
+            $("#invoice_amount").val(total.toFixed(2));
         });
 
         $scope.bookingChecked = function(id) {
@@ -136,23 +142,27 @@ app.component('eyatraAgentClaimForm', {
             return value;
         }
 
-        $scope.checkedcount = function(id, amount) {
+        $(document).on('click', '.booking_list', function() {
+            var total_amount = 0;
+            var count = 0;
+            var amount = 0;
             if (event.target.checked == true) {
-                var data = $(".booking_list:checked").length;
-                self.total_amount += parseFloat(amount);
+                $.each($('.booking_list:checked'), function() {
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
+                });
             } else {
-                var data = $(".booking_list:checked").length;
-                self.total_amount -= parseFloat(amount);
+                $.each($('.booking_list:checked'), function() {
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
+                });
+                self.total_amount = 0;
             }
-            $("#amount").html(self.total_amount.toFixed(2));
-            $("#count").html(data);
-            // self.selected_amount =
-            // self.booking_checked_count = data;
-        }
+            $(".amount").html(amount.toFixed(2));
+            $(".net_amount").val(amount.toFixed(2));
+            $("#count").html(count);
 
-        $scope.checkedallcount = function(id, amount) {
-            console.log(id, amount);
-        }
+        });
 
         $('#head_booking').on('click', function() {
             var total_amount = 0;
@@ -172,7 +182,8 @@ app.component('eyatraAgentClaimForm', {
                 });
                 self.total_amount = 0;
             }
-            $("#amount").html(amount.toFixed(2));
+            $(".amount").html(amount.toFixed(2));
+            $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
         });
 
@@ -194,7 +205,7 @@ app.component('eyatraAgentClaimForm', {
             },
             ignore: '',
             rules: {
-                'number': {
+                'invoice_number': {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
@@ -206,7 +217,6 @@ app.component('eyatraAgentClaimForm', {
                     required: true,
                     number: true,
                     decimal: true,
-                    //range: [0, 10000000],
                     maxlength: 11,
                 },
                 // 'invoice_attachmet': {
@@ -217,19 +227,18 @@ app.component('eyatraAgentClaimForm', {
                 },
             },
             messages: {
-                'number': {
-                    required: 'Agent Claim Number is Required',
+                'invoice_number': {
+                    required: 'Agent Invoice Number is Required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'date': {
-                    required: 'Date is Required',
+                    required: 'Agent Invoice Date is Required',
                 },
                 'amount': {
-                    required: 'Amount is Required',
+                    required: 'Agent Invoice Amount is Required',
                     number: 'Enter Numbers Only',
                     decimal: 'Please enter a correct number, format 0.00',
-                    // range: 'Enter Maximum 10000000 amount',
                     maxlength: 'Enter Maximum 10 Digit Number',
 
                 },

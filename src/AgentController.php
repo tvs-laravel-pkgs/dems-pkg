@@ -194,7 +194,6 @@ class AgentController extends Controller {
 			$user->company_id = $company_id;
 			$user->entity_id = $agent->id;
 			$user->fill($request->all());
-
 			if ($request->password_change == 'Yes') {
 				if (!empty($request->user['password'])) {
 					$user->password = $request->user['password'];
@@ -203,6 +202,8 @@ class AgentController extends Controller {
 			}
 			// $user->fill($request->all());
 			$user->save();
+
+			$user->roles()->sync([503]);
 
 			$agent->travelModes()->sync($request->travel_mode);
 
