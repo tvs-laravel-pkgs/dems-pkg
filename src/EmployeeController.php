@@ -68,12 +68,12 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::withTrashed()->with('bankDetail', 'reportingTo', 'WalletDetail', 'user')->find($employee_id);
+			$employee = Employee::withTrashed()->with('bankDetail', 'reportingTo', 'walletDetail', 'user')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
 			}
-			$employee->roles = $employee->user->roles()->pluck('id')->toArray();
+			$employee->roles = $employee->user->roles()->pluck('role_id')->toArray();
 			$this->data['success'] = true;
 		}
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
@@ -95,7 +95,6 @@ class EmployeeController extends Controller {
 	}
 
 	public function saveEYatraEmployee(Request $request) {
-		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -213,6 +212,10 @@ class EmployeeController extends Controller {
 			'outlet',
 			'grade',
 			'bankDetail',
+			'walletDetail',
+			'walletDetail.type',
+			'user',
+			'paymentMode',
 		])
 			->find($employee_id);
 		if (!$employee) {
@@ -220,12 +223,17 @@ class EmployeeController extends Controller {
 			$this->data['errors'] = ['Employee not found'];
 			return response()->json($this->data);
 		}
+		$employee->roles = $employee->user->roles()->pluck('name')->toArray();
 		$this->data['employee'] = $employee;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
 	public function deleteEYatraEmployee($employee_id) {
+		$user = User::withTrashed()->where('entity_id', $employee_id)->forcedelete();
+		if (!$user) {
+			return response()->json(['success' => false, 'errors' => ['User not found']]);
+		}
 		$employee = Employee::withTrashed()->where('id', $employee_id)->forcedelete();
 		if (!$employee) {
 			return response()->json(['success' => false, 'errors' => ['Employee not found']]);

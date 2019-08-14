@@ -339,7 +339,30 @@ app.component('eyatraEmployeeView', {
             employee_view_url + '/' + $routeParams.employee_id
         ).then(function(response) {
             self.employee = response.data.employee;
+            self.roles = self.employee.roles ? self.employee.roles.join() : '';
+            $scope.selectPaymentMode(self.employee.payment_mode_id);
+
         });
+        //SELECT PAYMENT MODE
+        $scope.selectPaymentMode = function(payment_id) {
+            if (payment_id == 3244) { //BANK
+                $scope.showBank = true;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            } else if (payment_id == 3245) { //CHEQUE
+                $scope.showBank = false;
+                $scope.showCheque = true;
+                $scope.showWallet = false;
+            } else if (payment_id == 3246) { //WALLET
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = true;
+            } else {
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            }
+        }
     }
 });
 

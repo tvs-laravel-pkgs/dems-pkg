@@ -41,12 +41,16 @@ class Employee extends Model {
 		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
 	}
 
-	public function WalletDetail() {
+	public function walletDetail() {
 		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id');
 	}
 
 	public function reportingTo() {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
+	}
+
+	public function paymentMode() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'payment_mode_id');
 	}
 
 	public function user() {
