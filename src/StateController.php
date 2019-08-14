@@ -48,12 +48,20 @@ class StateController extends Controller {
                 </a>';
 
 			})
+			->addColumn('status', function ($state) {
+				if ($state->deleted_at) {
+					return '<span style="color:red">Inactive</span>';
+				} else {
+					return '<span style="color:green">Active</span>';
+				}
+
+			})
 			->make(true);
 	}
 
 	public function eyatraStateFormData($state_id = NULL) {
 		if (!$state_id) {
-			$this->data['action'] = 'New';
+			$this->data['action'] = 'Add';
 			$state = new NState;
 			$this->data['status'] = 'Active';
 
