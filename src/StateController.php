@@ -162,20 +162,14 @@ class StateController extends Controller {
 
 			//SAVING state_agent_travel_mode
 			if (count($request->travel_modes) > 0) {
-				foreach ($request->travel_modes as $travel_mode) {
-					if (!isset($travel_mode['id'])) {
+				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
+					if (!isset($pivot_data['agent_id'])) {
 						continue;
 					}
-					if (!isset($travel_mode['agent_id'])) {
+					if (!isset($pivot_data['service_charge'])) {
 						continue;
 					}
-					if (!isset($travel_mode['service_charge'])) {
-						continue;
-					}
-					$state->travelModes()->attach($travel_mode['id'], [
-						'agent_id' => $travel_mode['agent_id'],
-						'service_charge' => $travel_mode['service_charge'],
-					]);
+					$state->travelModes()->attach($travel_mode, $pivot_data);
 				}
 			}
 
