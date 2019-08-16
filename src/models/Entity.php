@@ -57,7 +57,7 @@ class Entity extends Model {
 	public static function walletModeList() {
 		return Entity::where('entity_type_id', 505)->select('id', 'name')->get();
 	}
-	public static function eligibilityType() {
+	public static function cityCategoryList() {
 		return Entity::where('entity_type_id', 506)->select('id', 'name')->get();
 	}
 

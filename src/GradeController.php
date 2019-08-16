@@ -13,7 +13,7 @@ use Yajra\Datatables\Datatables;
 
 class GradeController extends Controller {
 	public function listEYatraGrade(Request $r) {
-		$entity = Entity::withTrashed()->select('entities.id', 'entities.deleted_at', 'entities.name as grade_name', DB::RAW('count(DISTINCT(grade_local_travel_mode.local_travel_mode_id)) as travel_count'), DB::RAW('count(DISTINCT(grade_expense_type.expense_type_id)) as expense_count'), DB::RAW('count(DISTINCT(grade_trip_purpose.trip_purpose_id)) as trip_count'))
+		$grade_list = Entity::withTrashed()->select('entities.id', 'entities.deleted_at', 'entities.name as grade_name', DB::RAW('count(DISTINCT(grade_local_travel_mode.local_travel_mode_id)) as travel_count'), DB::RAW('count(DISTINCT(grade_expense_type.expense_type_id)) as expense_count'), DB::RAW('count(DISTINCT(grade_trip_purpose.trip_purpose_id)) as trip_count'))
 			->leftjoin('grade_local_travel_mode', 'grade_local_travel_mode.grade_id', 'entities.id')
 			->leftjoin('grade_expense_type', 'grade_expense_type.grade_id', 'entities.id')
 			->leftjoin('grade_trip_purpose', 'grade_trip_purpose.grade_id', 'entities.id')
@@ -23,17 +23,17 @@ class GradeController extends Controller {
 			->orderby('entities.id', 'desc')
 		// ->get()
 		;
-		// dd($entity);
-		return Datatables::of($entity)
-			->addColumn('status', function ($entity) {
-				if ($entity->deleted_at) {
-					return '<span style="color:red">Inactive</span>';
+		// dd($grade_list);
+		return Datatables::of($grade_list)
+			->addColumn('status', function ($grade_list) {
+				if ($grade_list->deleted_at) {
+					return '<span style="color:#ea4335">In Active</span>';
 				} else {
-					return '<span style="color:green">Active</span>';
+					return '<span style="color:#63ce63">Active</span>';
 				}
 
 			})
-			->addColumn('action', function ($entity) {
+			->addColumn('action', function ($grade_list) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -42,16 +42,16 @@ class GradeController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/grade/edit/' . $entity->id . '">
+				<a href="#!/eyatra/grade/edit/' . $grade_list->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/grade/view/' . $entity->id . '">
+				<a href="#!/eyatra/grade/view/' . $grade_list->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_grade"
-				onclick="angular.element(this).scope().deleteGrade(' . $entity->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+				onclick="angular.element(this).scope().deleteGrade(' . $grade_list->id . ')" dusk = "delete-btn" title="Delete">
+                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
 			})
@@ -59,48 +59,47 @@ class GradeController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraGradeFormData($entity_id = NULL) {
+	public function eyatraGradeFormData($grade_id = NULL) {
 
 		$expense_type_list = Config::expenseList();
 		$travel_purpose_list = Entity::purposeList();
 		$travel_types_list = Entity::travelModeList();
-		$eligibility_type_list = Entity::eligibilityType();
-		if (!$entity_id) {
+		$city_category_list = Entity::cityCategoryList();
+		if (!$grade_id) {
 			$this->data['action'] = 'Add';
-			$entity = new Entity;
+			$grade = new Entity;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$entity = Entity::withTrashed()->find($entity_id);
-			if (count($entity->expenseTypes) > 0) {
-				foreach ($entity->expenseTypes as $expense_type) {
+			$grade = Entity::withTrashed()->find($grade_id);
+			if (count($grade->expenseTypes) > 0) {
+				foreach ($grade->expenseTypes as $expense_type) {
 					$expense_type_list[$expense_type->id]->checked = true;
-					$expense_type_list[$expense_type->id]->city_category_id = $expense_type->pivot->city_category_id;
-					$expense_type_list[$expense_type->id]->eligible_amount = $expense_type->pivot->eligible_amount;
-					// }
+					$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = $expense_type->pivot->eligible_amount;
 				}
 			}
-			if (count($entity->tripPurposes) > 0) {
-				foreach ($entity->tripPurposes as $trip_purpose) {
+			// dd($expense_type_list);
+			if (count($grade->tripPurposes) > 0) {
+				foreach ($grade->tripPurposes as $trip_purpose) {
 					$travel_purpose_list[$trip_purpose->id]->checked = true;
 				}
 			}
-			if (count($entity->localTravelModes) > 0) {
-				foreach ($entity->localTravelModes as $travel_type) {
+			if (count($grade->localTravelModes) > 0) {
+				foreach ($grade->localTravelModes as $travel_type) {
 					$travel_types_list[$travel_type->id]->checked = true;
 				}
 			}
 
-			$this->data['grade_advanced'] = $entity->gradeEligibility()->where('grade_id', $entity_id)->pluck('advanced_eligibility');
+			$this->data['grade_advanced'] = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
 			'expense_type_list' => $expense_type_list,
 			'travel_purpose_list' => $travel_purpose_list,
 			'travel_types_list' => $travel_types_list,
-			'eligibility_type_list' => $eligibility_type_list,
+			'city_category_list' => $city_category_list,
 		];
-		$this->data['entity'] = $entity;
+		$this->data['grade'] = $grade;
 
 		return response()->json($this->data);
 	}
@@ -171,13 +170,6 @@ class GradeController extends Controller {
 							$grade->expenseTypes()->attach($data);
 						}
 					}
-					/*dd($data);
-					dd($eligible_amount, $city_id, $expense_type_id, $grade->id);*/
-					// if (!isset($pivot_data['id'])) {
-					// 	continue;
-					// }
-					// unset($pivot_data['id']);
-					//$grade->expenseTypes()->attach($expense_type_id, $pivot_data);
 				}
 			}
 			if (!empty($request->checked_purpose_list)) {
@@ -200,11 +192,11 @@ class GradeController extends Controller {
 
 	public function viewEYatraGrade($grade_id) {
 
-		$this->data['grade'] = $entity = Entity::withTrashed()->find($grade_id);
-		$this->data['expense_type_list'] = $expense_type_list = $entity->expenseTypes;
-		// dd($expense_type_list);
-		$this->data['travel_purpose_list'] = $travel_purpose_list = $entity->tripPurposes;
-		$this->data['localtravel_list'] = $localtravel_list = $entity->localTravelModes;
+		$this->data['grade'] = $grade = Entity::withTrashed()->find($grade_id);
+		$this->data['expense_type_list'] = $expense_type_list = $grade->expenseTypes;
+		$this->data['grade_advanced'] = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
+		$this->data['travel_purpose_list'] = $travel_purpose_list = $grade->tripPurposes;
+		$this->data['localtravel_list'] = $localtravel_list = $grade->localTravelModes;
 		$this->data['action'] = 'View';
 		$this->data['success'] = true;
 		return response()->json($this->data);
