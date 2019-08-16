@@ -178,6 +178,9 @@ class EYatraTC1Seeder extends Seeder {
 		];
 		Entity::create($sample_entities, $admin, $company);
 
+		$this->command->info('');
+		$this->command->info('Creating Outlets > Managers > Employees');
+
 		//OUTLETS
 		for ($i = 1; $i <= $number_of_items; $i++) {
 			$outlet = Outlet::firstOrNew([
@@ -191,7 +194,7 @@ class EYatraTC1Seeder extends Seeder {
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
 			$address = Address::create($address_of_id, $outlet, $faker);
-			dd($address);
+			// dd($address);
 
 			//MANAGERS
 			for ($j = 1; $j <= $number_of_items; $j++) {
@@ -211,6 +214,9 @@ class EYatraTC1Seeder extends Seeder {
 				}
 			}
 		}
+
+		$this->command->info('');
+		$this->command->info('Creating Agents');
 
 		//AGENTS
 		for ($i = 1; $i <= $number_of_items; $i++) {
@@ -242,6 +248,8 @@ class EYatraTC1Seeder extends Seeder {
 		}
 
 		//STATE <> TRAVEL MODE <> AGENT <> SERVICE CHARGE MAPPING
+		$this->command->info('');
+		$this->command->info('MAPPING STATE <> TRAVEL MODE <> AGENT <> SERVICE CHARGE');
 		foreach (NState::get() as $state) {
 			$state->travelModes()->sync([]);
 			foreach ($company->travelModes as $travel_mode) {
@@ -280,6 +288,8 @@ class EYatraTC1Seeder extends Seeder {
 			$grade->tripPurposes()->sync($trip_purposes);
 		}
 
+		$this->command->info('');
+		$this->command->info('CREATING TRIPS');
 		Trip::join('employees as e', 'e.id', 'trips.employee_id')->where('e.company_id', $company->id)->forceDelete();
 		$trip_number = 1;
 		if ($create_dummy_records == 'y') {
