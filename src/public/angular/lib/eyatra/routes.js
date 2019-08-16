@@ -74,19 +74,19 @@ app.config(['$routeProvider', function($routeProvider) {
     //CITIES
     when('/eyatra/cities', {
         template: '<eyatra-city></eyatra-city>',
-        title: 'States',
+        title: 'Cities',
     }).
     when('/eyatra/city/add', {
         template: '<eyatra-city-form></eyatra-city-form>',
-        title: 'Add State',
+        title: 'Add City',
     }).
     when('/eyatra/city/edit/:city_id', {
         template: '<eyatra-city-form></eyatra-city-form>',
-        title: 'Edit State',
+        title: 'Edit City',
     }).
     when('/eyatra/city/view/:city_id', {
         template: '<eyatra-city-view></eyatra-city-view>',
-        title: 'View State',
+        title: 'View City',
     }).
 
     //OUTLETS

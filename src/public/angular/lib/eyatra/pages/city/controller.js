@@ -40,7 +40,7 @@ app.component('eyatraCity', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('City');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-state\')">' +
+            '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-city\')">' +
             'Add New' +
             '</a>'
         );
@@ -81,7 +81,7 @@ app.component('eyatraCity', {
 app.component('eyatraCityForm', {
     templateUrl: city_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.state_id) == 'undefined' ? city_form_data_url : city_form_data_url + '/' + $routeParams.state_id;
+        $form_data_url = typeof($routeParams.city_id) == 'undefined' ? city_form_data_url : city_form_data_url + '/' + $routeParams.city_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -99,12 +99,10 @@ app.component('eyatraCityForm', {
                 return;
             }
 
-            self.state = response.data.state;
-            self.country_list = response.data.country_list;
+            self.city = response.data.city;
+            self.state_list = response.data.state_list;
             self.status = response.data.status;
-            self.travel_mode_list = response.data.travel_mode_list;
-            self.agents_list = response.data.agents_list;
-            self.state.agent = response.data.agent;
+            self.extras = response.data.extras;
             self.action = response.data.action;
 
         });
