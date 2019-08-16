@@ -6,8 +6,6 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Agent;
-use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
@@ -85,46 +83,41 @@ class CityController extends Controller {
 		return NCity::getList($request->state_id);
 	}
 
-	public function eyatraStateFormData($state_id = NULL) {
-		if (!$state_id) {
+	public function eyatraCityFormData($city_id = NULL) {
+		if (!$city_id) {
 			$this->data['action'] = 'Add';
-			$state = new NState;
+			$city = new NCity;
 			$this->data['status'] = 'Active';
 
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$state = NState::withTrashed()->find($state_id);
+			$city = NCity::withTrashed()->find($city_id);
 
-			if (!$state) {
+			if (!$city) {
 				$this->data['success'] = false;
-				$this->data['message'] = 'State not found';
+				$this->data['message'] = 'City not found';
 			}
 
-			if ($state->deleted_at == NULL) {
+			if ($city->deleted_at == NULL) {
 				$this->data['status'] = 'Active';
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-		$option = new NCountry;
-		$option->name = 'Select Country';
+		$option = new NState;
+		$option->name = 'Select State';
 		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
-		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
-		$option = new Agent;
-		$option->name = 'Select Agent';
-		$option->id = null;
-		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
+		$this->data['state_list'] = $state_list = NState::select('name', 'id')->get()->prepend($option);
 
-		// dd($state->travelModes()->withPivot()->get());
-		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
-			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
-			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
-			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
-		}
+		$this->data['extras'] = [
+			'country_list' => NCountry::getList(),
+			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($city->state->country_id),
+			// 'city_list' => NCity::getList(),
+		];
 
-		$this->data['state'] = $state;
+		// dd($this->data['extras']);
+		$this->data['city'] = $city;
 		$this->data['success'] = true;
 
 		return response()->json($this->data);
