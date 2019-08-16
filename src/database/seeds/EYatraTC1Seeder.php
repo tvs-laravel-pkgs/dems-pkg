@@ -68,7 +68,7 @@ class EYatraTC1Seeder extends Seeder {
 		]);
 		$admin->user_type_id = 3120;
 		$admin->mobile_number = $base_telephone_number . '01';
-		$admin->password = '$2y$10$N9pYzAbL2spl7vX3ZE1aBeekppaosAdixk04PTkK5obng7.KsLAQ2';
+		$admin->password = 'Test@123';
 		$admin->save();
 		$admin->roles()->sync(500);
 		$country = NCountry::find(5);
@@ -174,6 +174,12 @@ class EYatraTC1Seeder extends Seeder {
 			],
 			504 => [
 				'Normal',
+			],
+			505 => [
+				'Paytm',
+				'Phone Pay',
+				'Google Pay',
+				'BHIM UPI',
 			],
 		];
 		Entity::create($sample_entities, $admin, $company);

@@ -93,6 +93,10 @@ app.component('eyatraEmployeeForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $scope.showBank = false;
+        $scope.showCheque = false;
+        $scope.showWallet = false;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -109,9 +113,86 @@ app.component('eyatraEmployeeForm', {
             self.employee = response.data.employee;
             self.extras = response.data.extras;
             self.action = response.data.action;
+
+            if (self.action == 'Edit') {
+                if (self.employee.user.force_password_change == 1) {
+                    self.switch_password = 'No';
+                    $("#hide_password").hide();
+                    $("#password").prop('disabled', true);
+                } else {
+                    self.switch_password = 'Yes';
+                }
+                $scope.selectPaymentMode(self.employee.payment_mode_id);
+                $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
+            } else {
+                $("#hide_password").show();
+                $("#password").prop('disabled', false);
+                self.switch_password = 'Yes';
+            }
+
+
             $rootScope.loading = false;
 
         });
+
+        /* Pane Next Button */
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+
+        $scope.getSbuBasedonLob = function(lob_id) {
+            if (lob_id) {
+                $.ajax({
+                        url: get_sbu_by_lob,
+                        method: "POST",
+                        data: { lob_id: lob_id },
+                    })
+                    .done(function(res) {
+                        self.extras.sbu_list = [];
+                        self.extras.sbu_list = res.sbu_list;
+                        $scope.$apply()
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
+
+
+        //SELECT PAYMENT MODE
+        $scope.selectPaymentMode = function(payment_id) {
+            if (payment_id == 3244) { //BANK
+                $scope.showBank = true;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            } else if (payment_id == 3245) { //CHEQUE
+                $scope.showBank = false;
+                $scope.showCheque = true;
+                $scope.showWallet = false;
+            } else if (payment_id == 3246) { //WALLET
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = true;
+            } else {
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            }
+        }
+
+        $scope.psw_change = function(val) {
+            if (val == 'No') {
+                $("#hide_password").hide();
+                $("#password").prop('disabled', true);
+            } else {
+                $("#hide_password").show();
+                $("#password").prop('disabled', false);
+            }
+        }
 
         $.validator.addMethod('positiveNumber',
             function(value) {
@@ -120,6 +201,13 @@ app.component('eyatraEmployeeForm', {
 
         var form_id = '#employee_form';
         var v = jQuery(form_id).validate({
+            invalidHandler: function(event, validator) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Kindly check in each tab to fix errors'
+                }).show();
+            },
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
             },
@@ -164,6 +252,35 @@ app.component('eyatraEmployeeForm', {
                     required: true,
                     maxlength: 10,
                     minlength: 3,
+                },
+                'mobile_number': {
+                    required: true,
+                    minlength: 8,
+                    maxlength: 10,
+                },
+                'email': {
+                    email: true,
+                    minlength: 6,
+                    maxlength: 191,
+                },
+                'roles': {
+                    required: true,
+                },
+                'username': {
+                    required: true,
+                    minlength: 4,
+                    maxlength: 191,
+                },
+                'password': {
+                    required: function(element) {
+                        if ($("#password_change").val() == 'Yes') {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    minlength: 5,
+                    maxlength: 16,
                 },
             },
             messages: {
@@ -243,7 +360,30 @@ app.component('eyatraEmployeeView', {
             employee_view_url + '/' + $routeParams.employee_id
         ).then(function(response) {
             self.employee = response.data.employee;
+            self.roles = self.employee.roles ? self.employee.roles.join() : '';
+            $scope.selectPaymentMode(self.employee.payment_mode_id);
+
         });
+        //SELECT PAYMENT MODE
+        $scope.selectPaymentMode = function(payment_id) {
+            if (payment_id == 3244) { //BANK
+                $scope.showBank = true;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            } else if (payment_id == 3245) { //CHEQUE
+                $scope.showBank = false;
+                $scope.showCheque = true;
+                $scope.showWallet = false;
+            } else if (payment_id == 3246) { //WALLET
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = true;
+            } else {
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            }
+        }
     }
 });
 

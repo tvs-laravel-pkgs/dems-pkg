@@ -71,6 +71,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View State',
     }).
 
+    //CITIES
+    when('/eyatra/cities', {
+        template: '<eyatra-city></eyatra-city>',
+        title: 'Cities',
+    }).
+    when('/eyatra/city/add', {
+        template: '<eyatra-city-form></eyatra-city-form>',
+        title: 'Add City',
+    }).
+    when('/eyatra/city/edit/:city_id', {
+        template: '<eyatra-city-form></eyatra-city-form>',
+        title: 'Edit City',
+    }).
+    when('/eyatra/city/view/:city_id', {
+        template: '<eyatra-city-view></eyatra-city-view>',
+        title: 'View City',
+    }).
+
     //OUTLETS
     when('/eyatra/outlets', {
         template: '<eyatra-outlets></eyatra-outlets>',
@@ -122,6 +140,10 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/trip/view/:trip_id', {
         template: '<eyatra-trip-view></eyatra-trip-view>',
+        title: 'View Trip',
+    }).
+    when('/eyatra/trip/visit/view/:visit_id', {
+        template: '<eyatra-trip-visit-view></eyatra-trip-visit-view>',
         title: 'View Trip',
     }).
 

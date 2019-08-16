@@ -76,7 +76,6 @@ app.component('eyatraTripBookingUpdatesForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response.data);
             self.visit = response.data.visit;
             self.travel_mode_list = response.data.travel_mode_list;
             $rootScope.loading = false;

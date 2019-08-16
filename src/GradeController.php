@@ -20,6 +20,7 @@ class GradeController extends Controller {
 			->where('entities.entity_type_id', 500)
 			->where('entities.company_id', Auth::user()->company_id)
 			->groupBy('entities.id')
+			->orderby('entities.id', 'desc')
 		// ->get()
 		;
 		// dd($entity);
@@ -63,6 +64,7 @@ class GradeController extends Controller {
 		$expense_type_list = Config::expenseList();
 		$travel_purpose_list = Entity::purposeList();
 		$travel_types_list = Entity::travelModeList();
+		$eligibility_type_list = Entity::eligibilityType();
 		if (!$entity_id) {
 			$this->data['action'] = 'Add';
 			$entity = new Entity;
@@ -70,14 +72,14 @@ class GradeController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$entity = Entity::withTrashed()->find($entity_id);
-
 			if (count($entity->expenseTypes) > 0) {
 				foreach ($entity->expenseTypes as $expense_type) {
 					$expense_type_list[$expense_type->id]->checked = true;
+					$expense_type_list[$expense_type->id]->city_category_id = $expense_type->pivot->city_category_id;
 					$expense_type_list[$expense_type->id]->eligible_amount = $expense_type->pivot->eligible_amount;
+					// }
 				}
 			}
-
 			if (count($entity->tripPurposes) > 0) {
 				foreach ($entity->tripPurposes as $trip_purpose) {
 					$travel_purpose_list[$trip_purpose->id]->checked = true;
@@ -89,12 +91,14 @@ class GradeController extends Controller {
 				}
 			}
 
+			$this->data['grade_advanced'] = $entity->gradeEligibility()->where('grade_id', $entity_id)->pluck('advanced_eligibility');
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
 			'expense_type_list' => $expense_type_list,
 			'travel_purpose_list' => $travel_purpose_list,
 			'travel_types_list' => $travel_types_list,
+			'eligibility_type_list' => $eligibility_type_list,
 		];
 		$this->data['entity'] = $entity;
 
@@ -131,6 +135,7 @@ class GradeController extends Controller {
 				$grade->expenseTypes()->sync([]);
 				$grade->tripPurposes()->sync([]);
 				$grade->localTravelModes()->sync([]);
+				$grade->gradeEligibility()->sync([]);
 				$grade->updated_by = Auth::user()->id;
 				$grade->updated_at = Carbon::now();
 
@@ -147,14 +152,32 @@ class GradeController extends Controller {
 			$grade->entity_type_id = 500;
 			$grade->save();
 
+			if ($request->grade_advanced == 'on') {
+				$request->grade_advanced = 1;
+			} else {
+				$request->grade_advanced = 0;
+			}
+
+			$grade->gradeEligibility()->sync($request->grade_advanced);
+
 			//Save Expense Mode
 			if (count($request->expense_types) > 0) {
 				foreach ($request->expense_types as $expense_type_id => $pivot_data) {
-					if (!isset($pivot_data['id'])) {
-						continue;
-					}
 					unset($pivot_data['id']);
-					$grade->expenseTypes()->attach($expense_type_id, $pivot_data);
+
+					foreach ($pivot_data as $city_id => $eligible_amount) {
+						if (!empty($eligible_amount['eligible_amount'])) {
+							$data = [$expense_type_id => ['eligible_amount' => $eligible_amount['eligible_amount'], 'city_category_id' => $city_id]];
+							$grade->expenseTypes()->attach($data);
+						}
+					}
+					/*dd($data);
+					dd($eligible_amount, $city_id, $expense_type_id, $grade->id);*/
+					// if (!isset($pivot_data['id'])) {
+					// 	continue;
+					// }
+					// unset($pivot_data['id']);
+					//$grade->expenseTypes()->attach($expense_type_id, $pivot_data);
 				}
 			}
 			if (!empty($request->checked_purpose_list)) {

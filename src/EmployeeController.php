@@ -2,13 +2,19 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\Role;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\BankDetail;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\Lob;
+use Uitoux\EYatra\Sbu;
+use Uitoux\EYatra\WalletDetail;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -61,28 +67,33 @@ class EmployeeController extends Controller {
 		if (!$employee_id) {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
-			$bank_detail = new BankDetail;
-			$employee->$bank_detail;
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::with('bankDetail', 'reportingTo')->find($employee_id);
+			$employee = Employee::withTrashed()->with('sbu', 'bankDetail', 'reportingTo', 'walletDetail', 'user')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
 			}
+			$employee->roles = $employee->user->roles()->pluck('role_id')->toArray();
 			$this->data['success'] = true;
 		}
-		// $outlet_list = [];
-		// $outlet_list['name'] = 'Select Outlet';
-		// $outlet_list['id'] = '';
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
-		// dd($outlet_list);
+		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
+		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		$sbu_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
 			'grade_list' => $grade_list,
+			'payment_mode_list' => $payment_mode_list,
+			'wallet_mode_list' => $wallet_mode_list,
+			'role_list' => $role_list,
+			'lob_list' => $lob_list,
+			'sbu_list' => $sbu_list,
 		];
 		$this->data['employee'] = $employee;
 
@@ -92,17 +103,36 @@ class EmployeeController extends Controller {
 	public function saveEYatraEmployee(Request $request) {
 		//validation
 		try {
+			$error_messages = [
+				'mobile_number.required' => "Mobile Number is Required",
+				'username.required' => "Username is Required",
+				'mobile_number.unique' => "Mobile Number is already taken",
+			];
+
 			$validator = Validator::make($request->all(), [
 				'code' => [
 					'unique:employees,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 					'required:true',
 				],
+				'mobile_number' => [
+					'required:true',
+					'unique:users,mobile_number,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+				],
 				'name' => [
 					'required:true',
 				],
-			]);
+				'username' => [
+					'required:true',
+				],
+			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+
+			//ROLE VALIDATION
+			$roles_valid = json_decode($request->roles);
+			if (empty($roles_valid)) {
+				return response()->json(['success' => false, 'errors' => ['Role is required']]);
 			}
 
 			DB::beginTransaction();
@@ -112,7 +142,7 @@ class EmployeeController extends Controller {
 				$employee->created_at = Carbon::now();
 				$employee->updated_at = NULL;
 			} else {
-				$employee = Employee::find($request->id);
+				$employee = Employee::withTrashed()->find($request->id);
 				$employee->updated_by = Auth::user()->id;
 				$employee->updated_at = Carbon::now();
 			}
@@ -127,14 +157,52 @@ class EmployeeController extends Controller {
 			}
 			$employee->save();
 
-			//BANK DETAIL SAVE
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
-			$bank_detail->fill($request->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $employee->id;
-			$bank_detail->account_type_id = 3243;
-			$bank_detail->save();
+			//USER ACCOUNT
+			$user = User::withTrashed()->firstOrNew([
+				'id' => $request->user_id,
+			]);
+			$user->mobile_number = $request->mobile_number;
+			$user->entity_type = 0;
+			$user->user_type_id = 3121;
+			$user->company_id = Auth::user()->company_id;
+			$user->entity_id = $employee->id;
+			$user->fill($request->all());
+			if ($request->password_change == 'Yes') {
+				if (!empty($request->user['password'])) {
+					$user->password = $request->user['password'];
+				}
+				$user->force_password_change = 1;
+			}
+			if ($request->status == 0) {
+				$user->deleted_at = date('Y-m-d H:i:s');
+				$user->deleted_by = Auth::user()->id;
+			} else {
+				$user->deleted_by = NULL;
+				$user->deleted_at = NULL;
+			}
+			$user->save();
 
+			//USER ROLE SYNC
+			$user->roles()->sync(json_decode($request->roles));
+
+			//BANK DETAIL SAVE
+			if ($request->bank_name) {
+				$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
+				$bank_detail->fill($request->all());
+				$bank_detail->detail_of_id = 3243;
+				$bank_detail->entity_id = $employee->id;
+				$bank_detail->account_type_id = 3243;
+				$bank_detail->save();
+			}
+
+			//WALLET SAVE
+			if ($request->type_id) {
+				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $employee->id]);
+				$wallet_detail->fill($request->all());
+				$wallet_detail->wallet_of_id = 3243;
+				$wallet_detail->entity_id = $employee->id;
+				$wallet_detail->save();
+			}
 			DB::commit();
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
@@ -150,6 +218,10 @@ class EmployeeController extends Controller {
 			'outlet',
 			'grade',
 			'bankDetail',
+			'walletDetail',
+			'walletDetail.type',
+			'user',
+			'paymentMode',
 		])
 			->find($employee_id);
 		if (!$employee) {
@@ -157,12 +229,17 @@ class EmployeeController extends Controller {
 			$this->data['errors'] = ['Employee not found'];
 			return response()->json($this->data);
 		}
+		$employee->roles = $employee->user->roles()->pluck('name')->toArray();
 		$this->data['employee'] = $employee;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
 	public function deleteEYatraEmployee($employee_id) {
+		$user = User::withTrashed()->where('entity_id', $employee_id)->forcedelete();
+		if (!$user) {
+			return response()->json(['success' => false, 'errors' => ['User not found']]);
+		}
 		$employee = Employee::withTrashed()->where('id', $employee_id)->forcedelete();
 		if (!$employee) {
 			return response()->json(['success' => false, 'errors' => ['Employee not found']]);
@@ -184,6 +261,15 @@ class EmployeeController extends Controller {
 			})
 			->get();
 		return response()->json($manager_list);
+	}
+
+	public function getSbuByLob(Request $request) {
+		if (!empty($request->lob_id)) {
+			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);
+		} else {
+			$sbu_list = [];
+		}
+		return response()->json(['sbu_list' => $sbu_list]);
 	}
 
 }

@@ -100,15 +100,23 @@ app.component('eyatraGradeForm', {
                     text: response.data.error,
                 }).show();
                 $location.path('/eyatra/grades')
-                $scope.$apply()
+                // $scope.$apply()
                 return;
             }
             self.entity = response.data.entity;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            self.grade_advanced = response.data.grade_advanced;
+            console.log(self.extras);
+            console.log(self.extras.expense_type_lists);
             $rootScope.loading = false;
 
             if (self.action == 'Edit') {
+                if (self.grade_advanced[0] == 1) {
+                    $(".grade_advanced").prop('checked', true);
+                } else {
+                    $(".grade_advanced").prop('checked', false);
+                }
                 if (self.entity.deleted_at == null) {
                     self.switch_value = 'Active';
                 } else {
@@ -242,6 +250,7 @@ app.component('eyatraGradeView', {
             self.localtravel_list = response.data.localtravel_list;
             self.travel_purpose_list = response.data.travel_purpose_list;
             self.action = response.data.action;
+            console.log(self.expense_type_list);
             if (self.grade.deleted_at == null) {
                 self.status = 'Active';
             } else {

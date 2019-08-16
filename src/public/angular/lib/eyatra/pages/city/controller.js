@@ -1,10 +1,9 @@
-app.component('eyatraStates', {
-    templateUrl: eyatra_state_list_template_url,
+app.component('eyatraCity', {
+    templateUrl: eyatra_city_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
-        // alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_state_table').DataTable({
+        var dataTable = $('#eyatra_city_table').DataTable({
             stateSave: true,
             "dom": dom_structure,
             "language": {
@@ -22,44 +21,44 @@ app.component('eyatraStates', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listEYatraState'],
+                url: laravel_routes['listEYatraCity'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
-                { data: 'code', name: 'nstates.code', searchable: true },
-                { data: 'name', name: 'nstates.name', searchable: true },
-                { data: 'country', name: 'c.name', searchable: true },
-                { data: 'status', name: 'nstates.deleted_at', searchable: false },
+                { data: 'city_name', name: 'ncities.name', searchable: true },
+                { data: 'name', name: 'entities.name', searchable: true },
+                { data: 'state_name', name: 'nstates.name', searchable: true },
+                { data: 'status', name: 'ncities.deleted_at', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('States');
+        $('.page-header-content .display-inline-block .data-table-title').html('City');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-state\')">' +
+            '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-city\')">' +
             'Add New' +
             '</a>'
         );
-        $scope.deleteStateConfirm = function($state_id) {
-            $("#delete_state_id").val($state_id);
+        $scope.deleteCityConfirm = function($city_id) {
+            $("#delete_city_id").val($city_id);
         }
 
-        $scope.deleteState = function() {
-            $state_id = $('#delete_state_id').val();
+        $scope.deleteCity = function() {
+            $city_id = $('#delete_city_id').val();
             $http.get(
-                state_delete_url + '/' + $state_id,
+                city_delete_url + '/' + $city_id,
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
                     new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'State Deleted Successfully',
+                        text: 'City Deleted Successfully',
                     }).show();
                     dataTable.ajax.reload(function(json) {});
 
@@ -67,7 +66,7 @@ app.component('eyatraStates', {
                     new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: 'State not Deleted',
+                        text: 'City not Deleted',
                     }).show();
                 }
             });
@@ -79,10 +78,10 @@ app.component('eyatraStates', {
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 
-app.component('eyatraStateForm', {
-    templateUrl: state_form_template_url,
+app.component('eyatraCityForm', {
+    templateUrl: city_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.state_id) == 'undefined' ? state_form_data_url : state_form_data_url + '/' + $routeParams.state_id;
+        $form_data_url = typeof($routeParams.city_id) == 'undefined' ? city_form_data_url : city_form_data_url + '/' + $routeParams.city_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -95,17 +94,15 @@ app.component('eyatraStateForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/states')
+                $location.path('/eyatra/cities')
                 $scope.$apply()
                 return;
             }
 
-            self.state = response.data.state;
-            self.country_list = response.data.country_list;
+            self.city = response.data.city;
+            self.state_list = response.data.state_list;
             self.status = response.data.status;
-            self.travel_mode_list = response.data.travel_mode_list;
-            self.agents_list = response.data.agents_list;
-            self.state.agent = response.data.agent;
+            self.extras = response.data.extras;
             self.action = response.data.action;
 
         });
@@ -312,19 +309,16 @@ app.component('eyatraStateForm', {
     }
 });
 
-app.component('eyatraStateView', {
-    templateUrl: state_view_template_url,
+app.component('eyatraCityView', {
+    templateUrl: city_view_template_url,
 
     controller: function($http, $location, $routeParams, HelperService, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            state_view_url + '/' + $routeParams.state_id
+            city_view_url + '/' + $routeParams.city_id
         ).then(function(response) {
-            self.state = response.data.state;
-            self.travel_mode_name = response.data.travel_mode_name;
-            self.agents = response.data.agents;
-            self.service_charge = response.data.service_charge;
+            self.city = response.data.city;
             self.action = response.data.action;
         });
     }
