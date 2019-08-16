@@ -16,6 +16,7 @@ class Employee extends Model {
 		'reporting_to_id',
 		'grade_id',
 		'payment_mode_id',
+		'sbu_id',
 		'created_by',
 		'updated_by',
 		'deleted_by',
@@ -23,6 +24,10 @@ class Employee extends Model {
 
 	public function company() {
 		return $this->belongsTo('App\Company');
+	}
+
+	public function Sbu() {
+		return $this->belongsTo('Uitoux\EYatra\Sbu');
 	}
 
 	public function trips() {

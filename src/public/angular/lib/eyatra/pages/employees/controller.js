@@ -123,6 +123,7 @@ app.component('eyatraEmployeeForm', {
                     self.switch_password = 'Yes';
                 }
                 $scope.selectPaymentMode(self.employee.payment_mode_id);
+                $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
             } else {
                 $("#hide_password").show();
                 $("#password").prop('disabled', false);
@@ -141,6 +142,26 @@ app.component('eyatraEmployeeForm', {
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
+
+
+        $scope.getSbuBasedonLob = function(lob_id) {
+            if (lob_id) {
+                $.ajax({
+                        url: get_sbu_by_lob,
+                        method: "POST",
+                        data: { lob_id: lob_id },
+                    })
+                    .done(function(res) {
+                        self.extras.sbu_list = [];
+                        self.extras.sbu_list = res.sbu_list;
+                        $scope.$apply()
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
+
 
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
