@@ -122,6 +122,25 @@ app.component('eyatraOutletForm', {
         });
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
+
+        $scope.getSbuBasedonLob = function(lob_id) {
+            if (lob_id) {
+                $.ajax({
+                        url: get_sbu_by_lob_outlet,
+                        method: "POST",
+                        data: { lob_id: lob_id },
+                    })
+                    .done(function(res) {
+                        self.extras.sbu_list = [];
+                        self.extras.sbu_list = res.sbu_list;
+                        $scope.$apply()
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
+
         // $scope.loadCity = function(state_id) {
         //     $.ajax({
         //             url: get_city_url,

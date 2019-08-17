@@ -19,6 +19,10 @@ class Outlet extends Model {
 		return $this->belongsTo('App\Company');
 	}
 
+	public function Sbu() {
+		return $this->belongsTo('Uitoux\EYatra\Sbu');
+	}
+
 	public static function getList() {
 		return Outlet::select('id', 'name')->get();
 	}
