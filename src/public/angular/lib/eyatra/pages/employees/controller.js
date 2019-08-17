@@ -113,7 +113,7 @@ app.component('eyatraEmployeeForm', {
             self.employee = response.data.employee;
             self.extras = response.data.extras;
             self.action = response.data.action;
-
+            console.log(response.data.extras);
             if (self.action == 'Edit') {
                 if (self.employee.user.force_password_change == 1) {
                     self.switch_password = 'No';

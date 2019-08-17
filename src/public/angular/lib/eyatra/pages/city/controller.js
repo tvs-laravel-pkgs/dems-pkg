@@ -130,64 +130,26 @@ app.component('eyatraCityForm', {
             }
         });
 
-        $scope.getTravelMode = function(id) {
-            if (event.target.checked == true) {
-                $("#sc_" + id).removeClass("ng-hide");
-                $("#sc_" + id).prop('required', true);
-                $("#sc_" + id).prop('min', 1);
-                $(".agent_select").removeClass("ng-hide");
-                $(".agent_select").prop('required', true);
-                //alert('fsdghgf');
-            } else {
-                $("#sc_" + id).addClass("ng-hide");
-                $("#sc_" + id).prop('required', false);
-                $(".agent_select").addClass("ng-hide");
-                $(".agent_select").prop('required', false);
-            }
-
+        $scope.loadState = function(country_id) {
+            $.ajax({
+                    url: get_state_by_country,
+                    method: "POST",
+                    data: { country_id: country_id },
+                })
+                .done(function(res) {
+                    self.extras.state_list = [];
+                    $(res).each(function(i, v) {
+                        self.extras.state_list.push({
+                            id: v['id'],
+                            name: v['name'],
+                        });
+                    });
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
         }
 
-        $(document).on('click', '.travelmodecheckbox', function() {
-            var id = $(this).val();
-            if ($(this).prop("checked") == true) {
-                $(".sc_" + id).prop('required', true);
-                $(".sc_" + id).prop('number', true);
-                $(".sc_" + id).prop('min', 1);
-                $(".agent_select_" + id).prop('required', true);
-            } else {
-                // $(".error").css("display", "none");
-                $(".sc_" + id).prop('required', false);
-                $(".agent_select_" + id).prop('required', false);
-                // $(".sc_" + id).prop('min', false);
-            }
-
-        });
-
-        // $('#travel_mode').on('click', function() {
-        //     if (event.target.checked == true) {
-        //         $('.travelmodecheckbox').prop('checked', true);
-        //         $.each($('.travelmodecheckbox:checked'), function() {
-        //             $scope.getTravelMode($(this).val());
-        //             $('.state_agent_travel_mode_table tbody tr #sc_' + $(this).val()).removeClass('ng-hide');
-        //             $('.agent_select').removeClass('ng-hide');
-        //         });
-        //     } else {
-        //         $('.travelmodecheckbox').prop('checked', false);
-        //         $.each($('.travelmodecheckbox'), function() {
-        //             $('.state_agent_travel_mode_table tbody tr #sc_' + $(this).val()).addClass('ng-hide');
-        //             $('.agent_select').addClass('ng-hide');
-        //         });
-        //     }
-        // });
-        // $scope.getTravelMode = function(id) {
-        //     if (event.target.checked == true) {
-        //         $('#sc_' + id).removeClass("ng-hide");
-        //         $('#agent_select_' + id).removeClass("ng-hide");
-        //     } else {
-        //         $('#sc_' + id).addClass("ng-hide");
-        //         $('#agent_select_' + id).addClass("ng-hide");
-        //     }
-        // }
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
         });
