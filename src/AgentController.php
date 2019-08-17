@@ -75,7 +75,7 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent = Agent::withTrashed()->with('address', 'address.city', 'address.city.state')->find($agent_id);
+			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			if (!$agent) {
@@ -87,11 +87,16 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = $agent->travelModes()->pluck('travel_mode_id')->toArray();
 		}
 
+		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
 			'country_list' => NCountry::getList(),
 			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->city->state->country_id),
 			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->city->state_id),
+			'payment_mode_list' => $payment_mode_list,
+			'wallet_mode_list' => $wallet_mode_list,
 		];
 		$this->data['agent'] = $agent;
 		$this->data['address'] = $agent->address;
@@ -206,6 +211,25 @@ class AgentController extends Controller {
 			$user->roles()->sync([503]);
 
 			$agent->travelModes()->sync($request->travel_mode);
+
+			//BANK DETAIL SAVE
+			if ($request->bank_name) {
+				$bank_detail = BankDetail::firstOrNew(['entity_id' => $agent->id]);
+				$bank_detail->fill($request->all());
+				$bank_detail->detail_of_id = 3243;
+				$bank_detail->entity_id = $agent->id;
+				$bank_detail->account_type_id = 3243;
+				$bank_detail->save();
+			}
+
+			//WALLET SAVE
+			if ($request->type_id) {
+				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent->id]);
+				$wallet_detail->fill($request->all());
+				$wallet_detail->wallet_of_id = 3243;
+				$wallet_detail->entity_id = $agent->id;
+				$wallet_detail->save();
+			}
 
 			DB::commit();
 			if (empty($request->id)) {

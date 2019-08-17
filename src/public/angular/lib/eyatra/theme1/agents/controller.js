@@ -120,6 +120,7 @@ app.component('eyatraAgentForm', {
                 } else {
                     self.switch_password = 'Yes';
                 }
+                $scope.selectPaymentMode(self.employee.payment_mode_id);
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
@@ -139,6 +140,27 @@ app.component('eyatraAgentForm', {
                 $('.travelcheckbox').prop('checked', false);
             }
         });
+
+        //SELECT PAYMENT MODE
+        $scope.selectPaymentMode = function(payment_id) {
+            if (payment_id == 3244) { //BANK
+                $scope.showBank = true;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            } else if (payment_id == 3245) { //CHEQUE
+                $scope.showBank = false;
+                $scope.showCheque = true;
+                $scope.showWallet = false;
+            } else if (payment_id == 3246) { //WALLET
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = true;
+            } else {
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            }
+        }
 
         $scope.psw_change = function(val) {
             if (val == 'No') {
@@ -281,7 +303,28 @@ app.component('eyatraAgentForm', {
                 },
                 'travel_mode[]': {
                     required: true,
-                }
+                },
+                'bank_name': {
+                    required: true,
+                    maxlength: 100,
+                    minlength: 3,
+                },
+                'branch_name': {
+                    required: true,
+                    maxlength: 50,
+                    minlength: 3,
+                },
+                'account_number': {
+                    required: true,
+                    maxlength: 20,
+                    minlength: 3,
+                    positiveNumber: true,
+                },
+                'ifsc_code': {
+                    required: true,
+                    maxlength: 10,
+                    minlength: 3,
+                },
             },
             messages: {
                 'agent_code': {

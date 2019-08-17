@@ -32,4 +32,12 @@ class Agent extends Model {
 		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3122);
 	}
 
+	public function bankDetail() {
+		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
+	}
+
+	public function walletDetail() {
+		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id');
+	}
+
 }

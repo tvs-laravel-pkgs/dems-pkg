@@ -7,9 +7,11 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Address;
+use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
+use Uitoux\EYatra\Sbu;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -93,10 +95,14 @@ class OutletController extends Controller {
 			}
 		}
 
+		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		$sbu_list = [];
 		$this->data['extras'] = [
 			'country_list' => NCountry::getList(),
 			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($outlet->address->city->state->country_id),
 			'city_list' => $this->data['action'] == 'Add' ? [] : NCity::getList($outlet->address->state_id),
+			'lob_list' => $lob_list,
+			'sbu_list' => $sbu_list,
 			// 'city_list' => NCity::getList(),
 		];
 
@@ -215,6 +221,15 @@ class OutletController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Outlet not found']]);
 		}
 		return response()->json(['success' => true]);
+	}
+
+	public function getSbuByLob(Request $request) {
+		if (!empty($request->lob_id)) {
+			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);
+		} else {
+			$sbu_list = [];
+		}
+		return response()->json(['sbu_list' => $sbu_list]);
 	}
 
 }
