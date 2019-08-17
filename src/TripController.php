@@ -3,7 +3,6 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
-use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
@@ -11,7 +10,6 @@ use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use Validator;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
@@ -94,86 +92,7 @@ class TripController extends Controller {
 	}
 
 	public function saveTrip(Request $request) {
-		//validation
-		try {
-			$validator = Validator::make($request->all(), [
-				'purpose_id' => [
-					'required',
-				],
-			]);
-			if ($validator->fails()) {
-				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			}
-
-			DB::beginTransaction();
-			if (!$request->id) {
-				$trip = new Trip;
-				$trip->created_by = Auth::user()->id;
-				$trip->created_at = Carbon::now();
-				$trip->updated_at = NULL;
-
-			} else {
-				$trip = Trip::find($request->id);
-
-				$trip->updated_by = Auth::user()->id;
-				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
-
-			}
-			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
-			$trip->employee_id = Auth::user()->entity->id;
-			// dd(Auth::user(), );
-			$trip->manager_id = Auth::user()->entity->reporting_to_id;
-			$trip->status_id = 3020; //NEW
-			$trip->save();
-
-			$trip->number = 'TRP' . $trip->id;
-			$trip->save();
-
-			//SAVING VISITS
-			if ($request->visits) {
-				$visit_count = count($request->visits);
-				$i = 0;
-				foreach ($request->visits as $key => $visit_data) {
-					//if no agent found display visit count
-					$visit_count = $i + 1;
-					if ($i == 0) {
-						$from_city_id = Auth::user()->entity->outlet->address->city->id;
-					} else {
-						$previous_value = $request->visits[$key - 1];
-						$from_city_id = $previous_value['to_city_id'];
-					}
-					$visit = new Visit;
-					$visit->fill($visit_data);
-					$visit->from_city_id = $from_city_id;
-					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3220; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
-					if ($visit_data['booking_method'] == 'Agent') {
-						$state = $trip->employee->outlet->address->city->state;
-
-						$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
-
-						if (!$agent) {
-							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count]]);
-						}
-						$visit->agent_id = $agent->id;
-					}
-					$visit->save();
-					$i++;
-				}
-			}
-			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
-			return response()->json(['success' => true]);
-		} catch (Exception $e) {
-			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
-		}
+		return Trip::saveTrip($request);
 	}
 
 	public function viewTrip($trip_id) {
