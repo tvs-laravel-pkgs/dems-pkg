@@ -91,6 +91,11 @@ class EYatraRoleSeeder extends Seeder {
 
 					//TRIPS
 					5001, 5002, 5003, 5004,
+
+					//MOBILE PERMISSIONS
+					//TRIPS
+					9000, 9001, 9002, 9003, 9004, 9005,
+
 				],
 			],
 
