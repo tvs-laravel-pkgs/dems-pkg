@@ -214,6 +214,8 @@ class EmployeeController extends Controller {
 	public function viewEYatraEmployee($employee_id) {
 
 		$employee = Employee::withTrashed()->with([
+			'Sbu',
+			'Sbu.lob',
 			'reportingTo',
 			'outlet',
 			'grade',
