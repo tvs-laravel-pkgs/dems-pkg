@@ -12,6 +12,8 @@ use Uitoux\EYatra\BankDetail;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\Lob;
+use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\WalletDetail;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -68,7 +70,7 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::withTrashed()->with('bankDetail', 'reportingTo', 'walletDetail', 'user')->find($employee_id);
+			$employee = Employee::withTrashed()->with('sbu', 'bankDetail', 'reportingTo', 'walletDetail', 'user')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
@@ -81,6 +83,8 @@ class EmployeeController extends Controller {
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
+		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		$sbu_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
@@ -88,6 +92,8 @@ class EmployeeController extends Controller {
 			'payment_mode_list' => $payment_mode_list,
 			'wallet_mode_list' => $wallet_mode_list,
 			'role_list' => $role_list,
+			'lob_list' => $lob_list,
+			'sbu_list' => $sbu_list,
 		];
 		$this->data['employee'] = $employee;
 
@@ -255,6 +261,15 @@ class EmployeeController extends Controller {
 			})
 			->get();
 		return response()->json($manager_list);
+	}
+
+	public function getSbuByLob(Request $request) {
+		if (!empty($request->lob_id)) {
+			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);
+		} else {
+			$sbu_list = [];
+		}
+		return response()->json(['sbu_list' => $sbu_list]);
 	}
 
 }

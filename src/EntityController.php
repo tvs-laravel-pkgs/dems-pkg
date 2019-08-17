@@ -59,7 +59,6 @@ class EntityController extends Controller {
 	}
 
 	public function eyatraEntityFormData($entity_type_id, $entity_id = NULL) {
-
 		$entity_type = EntityType::find($entity_type_id);
 		if (!$entity_id) {
 			$entity = new Entity;

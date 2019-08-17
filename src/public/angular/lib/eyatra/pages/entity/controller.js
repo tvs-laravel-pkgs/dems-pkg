@@ -181,7 +181,7 @@ app.component('eyatraEntityForm', {
                                 text: 'Entity Details Added Successfully',
                                 text: res.message,
                             }).show();
-                            $location.path('/master/entity/list' + '/' + $routeParams.entity_type_id)
+                            $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
                     })
