@@ -12,6 +12,10 @@ class Outlet extends Model {
 		'company_id',
 		'code',
 		'name',
+		'sbu_id',
+		'cashier_name',
+		'amount_eligible',
+		'amount_limit',
 		'created_by',
 
 	];

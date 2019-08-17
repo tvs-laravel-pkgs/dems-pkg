@@ -80,7 +80,7 @@ class OutletController extends Controller {
 			$this->data['status'] = 'Active';
 		} else {
 			$this->data['action'] = 'Edit';
-			$outlet = Outlet::with('address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
+			$outlet = Outlet::with('Sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
 			// $outlet->address;
 			// dd($outlet->address);
 

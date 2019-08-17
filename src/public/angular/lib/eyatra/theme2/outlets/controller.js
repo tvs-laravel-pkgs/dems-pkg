@@ -102,10 +102,14 @@ app.component('eyatraOutletForm', {
                 return;
             }
             self.outlet = response.data.outlet;
+            self.outlet.amount_eligible_val = response.data.outlet.amount_eligible;
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            if (self.action == 'Edit') {
+                $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
+            }
             $rootScope.loading = false;
 
         });
@@ -243,6 +247,14 @@ app.component('eyatraOutletForm', {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
+                },
+                'cashier_name': {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 191,
+                },
+                'amount_limit': {
+                    required: true,
                 },
                 'line_1': {
                     required: true,
