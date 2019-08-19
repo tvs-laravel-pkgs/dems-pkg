@@ -50,14 +50,15 @@ class CityController extends Controller {
                 </a>';
 
 			})
-		// ->addColumn('status', function ($city) {
-		// 	if ($city->deleted_at) {
-		// 		return '<span style="color:red">Inactive</span>';
-		// 	} else {
-		// 		return '<span style="color:green">Active</span>';
-		// 	}
+			->addColumn('status', function ($city) {
+				if ($city->status == 'Inactive') {
+					return '<span style="color:#ea4335;"">In Active</span>';
+				} else {
+					return '<span style="color:#63ce63;">Active</span>';
+				}
 
-		// })
+			})
+
 			->make(true);
 	}
 
