@@ -14,6 +14,7 @@ class EYatraSeeder extends Seeder {
 		$this->call(EYatraConfigSeeder::class);
 		$this->call(EYatraETSeeder::class);
 		$this->call(EYatraPermissionSeeder::class);
+		$this->call(EYatraMPermissionSeeder::class);
 		$this->call(EYatraRoleSeeder::class);
 	}
 }
