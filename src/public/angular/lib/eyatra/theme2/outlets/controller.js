@@ -88,6 +88,9 @@ app.component('eyatraOutletForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $scope.showAmountLimit = false;
+        $scope.checkedAmountEligible = false;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -102,17 +105,19 @@ app.component('eyatraOutletForm', {
                 return;
             }
             self.outlet = response.data.outlet;
-            self.outlet.amount_eligible_val = response.data.outlet.amount_eligible;
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
             self.action = response.data.action;
             if (self.action == 'Edit') {
                 $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
+                $scope.AmountEligible(self.outlet.amount_eligible);
             }
             $rootScope.loading = false;
 
         });
+
+
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
             // tabPaneFooter();
@@ -126,6 +131,18 @@ app.component('eyatraOutletForm', {
         });
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
+
+        $scope.AmountEligible = function(val) {
+            console.log(' == AmountEligible ===' + val);
+            if (val == 1) {
+                $scope.showAmountLimit = true;
+                $scope.checkedAmountEligible = true;
+            } else {
+                $scope.showAmountLimit = false;
+                $scope.checkedAmountEligible = false;
+            }
+            console.log(' == checkedAmountEligible ==' + $scope.checkedAmountEligible);
+        }
 
         $scope.getSbuBasedonLob = function(lob_id) {
             if (lob_id) {
