@@ -31,7 +31,7 @@ app.component('eyatraCity', {
                 { data: 'city_name', name: 'ncities.name', searchable: true },
                 { data: 'name', name: 'entities.name', searchable: true },
                 { data: 'state_name', name: 'nstates.name', searchable: true },
-                { data: 'status', name: 'ncities.deleted_at', searchable: false },
+                { data: 'status', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -219,10 +219,10 @@ app.component('eyatraCityForm', {
 
             },
             messages: {
-                'code': {
-                    minlength: 'Please enter minimum of 2 letters',
-                    maxlength: 'Please enter maximum of 2 letters',
-                },
+                // 'code': {
+                //     minlength: 'Please enter minimum of 2 letters',
+                //     maxlength: 'Please enter maximum of 2 letters',
+                // },
                 'name': {
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
@@ -236,7 +236,7 @@ app.component('eyatraCityForm', {
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['saveEYatraState'],
+                        url: laravel_routes['saveEYatraCity'],
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -255,10 +255,10 @@ app.component('eyatraCityForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'State saved successfully',
+                                text: 'City saved successfully',
                                 text: res.message,
                             }).show();
-                            $location.path('/eyatra/states')
+                            $location.path('/eyatra/cities')
                             $scope.$apply()
                         }
                     })

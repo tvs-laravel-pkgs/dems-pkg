@@ -25,10 +25,11 @@ class CityController extends Controller {
 				'entities.name',
 				DB::raw('IF(ncities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
-			->orderBy('ncities.name', 'asc')
+			->orderBy('ncities.id', 'asc')
 		;
+		// dd($cities);
 		return Datatables::of($cities)
-			->addColumn('action', function ($cities) {
+			->addColumn('action', function ($city) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -37,26 +38,26 @@ class CityController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/city/edit/' . $cities->id . '">
+				<a href="#!/eyatra/city/edit/' . $city->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/city/view/' . $cities->id . '">
+				<a href="#!/eyatra/city/view/' . $city->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_city"
-				onclick="angular.element(this).scope().deleteCityConfirm(' . $cities->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteCityConfirm(' . $city->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
 			})
-			->addColumn('status', function ($cities) {
-				if ($cities->deleted_at) {
-					return '<span style="color:red">Inactive</span>';
-				} else {
-					return '<span style="color:green">Active</span>';
-				}
+		// ->addColumn('status', function ($city) {
+		// 	if ($city->deleted_at) {
+		// 		return '<span style="color:red">Inactive</span>';
+		// 	} else {
+		// 		return '<span style="color:green">Active</span>';
+		// 	}
 
-			})
+		// })
 			->make(true);
 	}
 
@@ -105,13 +106,14 @@ class CityController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-		$option = new NState;
-		$option->name = 'Select State';
-		$option->id = null;
-		$this->data['state_list'] = $state_list = NState::select('name', 'id')->get()->prepend($option);
+		// $option = new NState;
+		// $option->name = 'Select State';
+		// $option->id = null;
+		// $this->data['state_list'] = $state_list = NState::select('name', 'id')->get()->prepend($option);
 
 		$this->data['extras'] = [
 			'country_list' => NCountry::getList(),
+			'category_list' => Entity::cityCategoryList(),
 			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($city->state->country_id),
 			// 'city_list' => NCity::getList(),
 		];
@@ -123,27 +125,27 @@ class CityController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function saveEYatraState(Request $request) {
+	public function saveEYatraCity(Request $request) {
 		//validation
 		//dd($request->all());
 		try {
 			$error_messages = [
-				'code.required' => 'State Code is required',
-				'code.unique' => 'State Code has already been taken',
-				'name.required' => 'State Name is required',
-				'name.unique' => 'State Name has already been taken',
+				// 'code.required' => 'State Code is required',
+				// 'code.unique' => 'State Code has already been taken',
+				'name.required' => 'City Name is required',
+				'name.unique' => 'City Name has already been taken',
 
 			];
 
 			$validator = Validator::make($request->all(), [
-				'code' => [
-					'required',
-					'unique:nstates,code,' . $request->id . ',id,country_id,' . $request->country_id,
-					'max:2',
-				],
+				// 'code' => [
+				// 	'required',
+				// 	'unique:nstates,code,' . $request->id . ',id,country_id,' . $request->country_id,
+				// 	'max:2',
+				// ],
 				'name' => [
 					'required',
-					'unique:nstates,name,' . $request->id . ',id,country_id,' . $request->country_id,
+					'unique:ncities,name,' . $request->id . ',id,state_id,' . $request->state_id,
 					'max:191',
 				],
 
@@ -154,50 +156,50 @@ class CityController extends Controller {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$state = new NState;
-				$state->created_by = Auth::user()->id;
-				$state->created_at = Carbon::now();
-				$state->updated_at = NULL;
+				$city = new NCity;
+				$city->created_by = Auth::user()->id;
+				$city->created_at = Carbon::now();
+				$city->updated_at = NULL;
 
 			} else {
-				$state = NState::withTrashed()->where('id', $request->id)->first();
+				$city = NCity::withTrashed()->where('id', $request->id)->first();
 
-				$state->updated_by = Auth::user()->id;
-				$state->updated_at = Carbon::now();
+				$city->updated_by = Auth::user()->id;
+				$city->updated_at = Carbon::now();
 
-				$state->travelModes()->sync([]);
+				// $city->travelModes()->sync([]);
 			}
 			if ($request->status == 'Active') {
-				$state->deleted_at = NULL;
-				$state->deleted_by = NULL;
+				$city->deleted_at = NULL;
+				$city->deleted_by = NULL;
 			} else {
-				$state->deleted_at = date('Y-m-d H:i:s');
-				$state->deleted_by = Auth::user()->id;
+				$city->deleted_at = date('Y-m-d H:i:s');
+				$city->deleted_by = Auth::user()->id;
 
 			}
 
-			$state->fill($request->all());
-			$state->save();
+			$city->fill($request->all());
+			$city->save();
 
 			//SAVING state_agent_travel_mode
-			if (count($request->travel_modes) > 0) {
-				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
-					if (!isset($pivot_data['agent_id'])) {
-						continue;
-					}
-					if (!isset($pivot_data['service_charge'])) {
-						continue;
-					}
-					$state->travelModes()->attach($travel_mode, $pivot_data);
-				}
-			}
+			// if (count($request->travel_modes) > 0) {
+			// 	foreach ($request->travel_modes as $travel_mode => $pivot_data) {
+			// 		if (!isset($pivot_data['agent_id'])) {
+			// 			continue;
+			// 		}
+			// 		if (!isset($pivot_data['service_charge'])) {
+			// 			continue;
+			// 		}
+			// 		$state->travelModes()->attach($travel_mode, $pivot_data);
+			// 	}
+			// }
 
 			DB::commit();
 			$request->session()->flash('success', 'State saved successfully!');
 			if (empty($request->id)) {
-				return response()->json(['success' => true, 'message' => 'State Added successfully']);
+				return response()->json(['success' => true, 'message' => 'City Added successfully']);
 			} else {
-				return response()->json(['success' => true, 'message' => 'State Updated Successfully']);
+				return response()->json(['success' => true, 'message' => 'City Updated Successfully']);
 			}
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
