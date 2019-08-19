@@ -35,7 +35,8 @@ class TripController extends Controller {
 			)
 			->where('e.company_id', Auth::user()->company_id)
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+		// ->orderBy('trips.created_at', 'desc');
+			->orderBy('trips.id', 'desc');
 
 		if (!Entrust::can('view-all-trips')) {
 			$trips->where('trips.employee_id', Auth::user()->entity_id);
@@ -94,6 +95,7 @@ class TripController extends Controller {
 	}
 
 	public function saveTrip(Request $request) {
+		// dd($request->all());
 		//validation
 		try {
 			$validator = Validator::make($request->all(), [
@@ -114,12 +116,9 @@ class TripController extends Controller {
 
 			} else {
 				$trip = Trip::find($request->id);
-
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
-
 				$trip->visits()->sync([]);
-
 			}
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();

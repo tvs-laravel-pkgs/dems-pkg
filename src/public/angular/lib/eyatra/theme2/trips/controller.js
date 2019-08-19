@@ -112,7 +112,16 @@ app.component('eyatraTripForm', {
             self.extras = response.data.extras;
             self.action = response.data.action;
             $rootScope.loading = false;
+            $scope.showBank = false;
+            $scope.showCheque = false;
+            $scope.showWallet = false;
 
+        });
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
         self.searchCity = function(query) {
@@ -141,8 +150,31 @@ app.component('eyatraTripForm', {
             });
         }
 
-        self.removeLodging = function(index, lodging_id) {
+        // $(".visits-wrp-delete").hide();
+        // $(".add_btn").hide();
+        // $(".single_trip").hide();
+        // $(".round_trip").hide();
+        // $(".multi_trip").hide();
+        $scope.trip_mode = function(id) {
+            if (id == 1) {
+                $scope.single_trip = true;
+                $scope.round_trip = false;
+                $scope.multi_trip = false;
+                self.booking_method = 'Self';
+            } else if (id == 2) {
+                $scope.single_trip = false;
+                $scope.round_trip = true;
+                $scope.multi_trip = false;
+                self.booking_method = 'Self';
+                self.booking_methods = 'Self';
+            } else if (id == 3) {
+                $scope.round_trip = false;
+                $scope.single_trip = false;
+                $scope.multi_trip = true;
+            }
+        }
 
+        self.removeLodging = function(index, lodging_id) {
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
