@@ -120,7 +120,7 @@ app.component('eyatraAgentForm', {
                 } else {
                     self.switch_password = 'Yes';
                 }
-                $scope.selectPaymentMode(self.employee.payment_mode_id);
+                $scope.selectPaymentMode(self.agent.payment_mode_id);
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
@@ -132,6 +132,13 @@ app.component('eyatraAgentForm', {
             var value = travel_list.indexOf(id);
             return value;
         }
+
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
 
         $("#travel_mode").on('click', function() {
             if (event.target.checked == true) {
@@ -224,6 +231,12 @@ app.component('eyatraAgentForm', {
                     console.log(xhr);
                 });
         }
+
+        $.validator.addMethod('positiveNumber',
+            function(value) {
+                return Number(value) > 0;
+            }, 'Enter a positive number.');
+
 
 
         var form_id = '#agent-form';
