@@ -27,6 +27,10 @@ class Trip extends Model {
 		'created_by',
 	];
 
+	public function getCreatedAtAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
 	public function company() {
 		return $this->belongsTo('App\Company');
 	}
@@ -156,4 +160,64 @@ class Trip extends Model {
 		}
 	}
 
+	public static function getViewData($trip_id) {
+		$data = [];
+		$trip = Trip::with([
+			'visits',
+			'visits.fromCity',
+			'visits.toCity',
+			'visits.travelMode',
+			'visits.bookingMethod',
+			'visits.bookingStatus',
+			'visits.agent',
+			'visits.status',
+			'visits.managerVerificationStatus',
+			'employee',
+			'purpose',
+			'status',
+		])
+			->find($trip_id);
+		if (!$trip) {
+			$data['success'] = false;
+			$data['errors'] = ['Trip not found'];
+			return response()->json($data);
+		}
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
+		$trip->start_date = $start_date->start_date;
+		$trip->end_date = $start_date->end_date;
+		$this->data['trip'] = $trip;
+		$this->data['success'] = true;
+		return response()->json($this->data);
+
+	}
+
+	public static function getTripFormData($trip_id) {
+		$data = [];
+		if (!$trip_id) {
+			$data['action'] = 'New';
+			$trip = new Trip;
+			$visit = new Visit;
+			$visit->booking_method = 'Self';
+			$trip->visits = [$visit];
+			$data['success'] = true;
+		} else {
+			$data['action'] = 'Edit';
+			$trip = Trip::find($trip_id);
+			if (!$trip) {
+				$data['success'] = false;
+				$data['message'] = 'Trip not found';
+			}
+		}
+		$data['extras'] = [
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
+			'city_list' => NCity::getList(),
+			'employee_city' => Auth::user()->entity->outlet->address->city,
+		];
+		$data['trip'] = $trip;
+
+		return response()->json($data);
+
+	}
 }
