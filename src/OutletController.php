@@ -61,7 +61,7 @@ class OutletController extends Controller {
 
 			})
 			->addColumn('status', function ($outlet) {
-				if ($outlet->deleted_at) {
+				if ($outlet->status == 'Inactive') {
 					return '<span style="color:red">Inactive</span>';
 				} else {
 					return '<span style="color:green">Active</span>';
@@ -80,7 +80,7 @@ class OutletController extends Controller {
 			$this->data['status'] = 'Active';
 		} else {
 			$this->data['action'] = 'Edit';
-			$outlet = Outlet::with('address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
+			$outlet = Outlet::with('Sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
 			// $outlet->address;
 			// dd($outlet->address);
 
@@ -127,12 +127,16 @@ class OutletController extends Controller {
 				'pincode.required' => 'Pincode is Required',
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
+				'cashier_name.required' => "Cashier Name is Required",
+				'amount_eligible.required' => "Amount Eligible is Required",
 			];
 
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'outlet_name' => 'required',
 				'line_1' => 'required',
+				'cashier_name' => 'required',
+				'amount_eligible' => 'required',
 				// 'country_id' => 'required',
 				// 'state_id' => 'required',
 				'city_id' => 'required',
@@ -200,7 +204,9 @@ class OutletController extends Controller {
 		$outlet = Outlet::with([
 			'address',
 			'address.city',
-		])->select('*', DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
+			'Sbu',
+			'Sbu.lob',
+		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
 		if (!$outlet) {

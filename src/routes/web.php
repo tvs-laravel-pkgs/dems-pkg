@@ -1,6 +1,6 @@
 <?php
 //AUTH
-Route::get('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
+Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
 
 Route::group(['middleware' => ['api']], function () {
 	Route::group(['middleware' => ['auth:api']], function () {
@@ -11,7 +11,10 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('eyatra/city/get', 'Uitoux\EYatra\Api\CityController@getCityList');
 
 		//TRIPS
+		Route::post('eyatra/api/trip/list', 'Uitoux\EYatra\Api\TripController@listTrip');
+		Route::post('eyatra/api/trip/get-form-data', 'Uitoux\EYatra\Api\TripController@getTripFormData');
 		Route::post('eyatra/api/trip/add', 'Uitoux\EYatra\Api\TripController@addTrip');
+		Route::post('eyatra/api/trip/view/{trip_id}', 'Uitoux\EYatra\Api\TripController@viewTrip');
 
 	});
 });
@@ -70,6 +73,14 @@ Route::group(['middleware' => ['web', 'auth']], function () {
 	Route::get('eyatra/employee/delete/{employee_id}', 'Uitoux\EYatra\EmployeeController@deleteEYatraEmployee')->name('deleteEYatraEmployee');
 	Route::post('eyatra/employee/manager/search', 'Uitoux\EYatra\EmployeeController@searchManager')->name('searchManager');
 	Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
+
+	//REGIONS
+	Route::get('eyatra/region/get-list', 'Uitoux\EYatra\RegionController@listEYatraRegion')->name('listEYatraRegion');
+	Route::get('eyatra/region/get-form-data/{region_id?}', 'Uitoux\EYatra\RegionController@eyatraRegionFormData')->name('eyatraRegionFormData');
+	Route::post('eyatra/region/save', 'Uitoux\EYatra\RegionController@saveEYatraRegion')->name('saveEYatraRegion');
+	Route::get('eyatra/region/view/{region_id}', 'Uitoux\EYatra\RegionController@viewEYatraRegion')->name('viewEYatraRegion');
+	Route::get('eyatra/region/delete/{region_id}', 'Uitoux\EYatra\RegionController@deleteEYatraRegion')->name('deleteEYatraRegion');
+	Route::post('eyatra/region/get/state', 'Uitoux\EYatra\RegionController@getStateByCountry')->name('getStateByCountry');
 
 	//TRIPS
 	Route::get('eyatra/trip/get-list', 'Uitoux\EYatra\TripController@listTrip')->name('listTrip');

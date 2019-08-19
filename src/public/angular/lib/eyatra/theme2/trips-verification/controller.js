@@ -5,7 +5,7 @@ app.component('eyatraTripVerifications', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_verification_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -44,7 +44,7 @@ app.component('eyatraTripVerifications', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips Requests');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Travel Request</p><h3 class="title">Travel Request</h3>');
         $('.add_new_button').html();
         $rootScope.loading = false;
 

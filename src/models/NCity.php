@@ -8,7 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class NCity extends Model {
 	use SoftDeletes;
 	protected $table = 'ncities';
-
+	protected $fillable = [
+		'state_id',
+		'name',
+		'category_id',
+		'created_by',
+		'updated_by',
+		'deleted_by',
+	];
 	public function state() {
 		return $this->belongsTo('Uitoux\EYatra\NState');
 	}

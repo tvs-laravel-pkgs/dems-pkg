@@ -3,15 +3,11 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
-use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use Validator;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
@@ -67,31 +63,7 @@ class TripController extends Controller {
 	}
 
 	public function tripFormData($trip_id = NULL) {
-
-		if (!$trip_id) {
-			$this->data['action'] = 'New';
-			$trip = new Trip;
-			$visit = new Visit;
-			$visit->booking_method = 'Self';
-			$trip->visits = [$visit];
-			$this->data['success'] = true;
-		} else {
-			$this->data['action'] = 'Edit';
-			$trip = Trip::find($trip_id);
-			if (!$trip) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
-			}
-		}
-		$this->data['extras'] = [
-			'purpose_list' => Entity::uiPurposeList(),
-			'travel_mode_list' => Entity::uiTravelModeList(),
-			'city_list' => NCity::getList(),
-			'employee_city' => Auth::user()->entity->outlet->address->city,
-		];
-		$this->data['trip'] = $trip;
-
-		return response()->json($this->data);
+		return Trip::getTripFormData($trip_id);
 	}
 
 	public function saveTrip(Request $request) {
@@ -176,34 +148,7 @@ class TripController extends Controller {
 	}
 
 	public function viewTrip($trip_id) {
-
-		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
-		])
-			->find($trip_id);
-		if (!$trip) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['Trip not found'];
-			return response()->json($this->data);
-		}
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
-		$this->data['trip'] = $trip;
-		$this->data['success'] = true;
-		return response()->json($this->data);
+		return Trip::getViewData($trip_id);
 	}
 
 	public function deleteTrip($trip_id) {
