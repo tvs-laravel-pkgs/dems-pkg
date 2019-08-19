@@ -127,12 +127,16 @@ class OutletController extends Controller {
 				'pincode.required' => 'Pincode is Required',
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
+				'cashier_name.required' => "Cashier Name is Required",
+				'amount_eligible.required' => "Amount Eligible is Required",
 			];
 
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'outlet_name' => 'required',
 				'line_1' => 'required',
+				'cashier_name' => 'required',
+				'amount_eligible' => 'required',
 				// 'country_id' => 'required',
 				// 'state_id' => 'required',
 				'city_id' => 'required',
@@ -200,7 +204,9 @@ class OutletController extends Controller {
 		$outlet = Outlet::with([
 			'address',
 			'address.city',
-		])->select('*', DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
+			'Sbu',
+			'Sbu.lob',
+		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
 		if (!$outlet) {

@@ -132,8 +132,8 @@ app.component('eyatraOutletForm', {
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
 
+        //AMOUNT ELIGIBLE SHOW AMOUNT LIMIT AND CHECKED FUNCTION
         $scope.AmountEligible = function(val) {
-            console.log(' == AmountEligible ===' + val);
             if (val == 1) {
                 $scope.showAmountLimit = true;
                 $scope.checkedAmountEligible = true;
@@ -141,7 +141,6 @@ app.component('eyatraOutletForm', {
                 $scope.showAmountLimit = false;
                 $scope.checkedAmountEligible = false;
             }
-            console.log(' == checkedAmountEligible ==' + $scope.checkedAmountEligible);
         }
 
         $scope.getSbuBasedonLob = function(lob_id) {
