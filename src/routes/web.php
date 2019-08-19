@@ -1,4 +1,23 @@
 <?php
+//AUTH
+Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
+
+Route::group(['middleware' => ['api']], function () {
+	Route::group(['middleware' => ['auth:api']], function () {
+
+		//HELPERS
+		Route::get('eyatra/api/city/search', 'Uitoux\EYatra\Api\CityController@searchCity');
+		Route::post('eyatra/state/get', 'Uitoux\EYatra\Api\StateController@getStateList');
+		Route::post('eyatra/city/get', 'Uitoux\EYatra\Api\CityController@getCityList');
+
+		//TRIPS
+		Route::post('eyatra/api/trip/list', 'Uitoux\EYatra\Api\TripController@listTrip');
+		Route::post('eyatra/api/trip/get-form-data', 'Uitoux\EYatra\Api\TripController@getTripFormData');
+		Route::post('eyatra/api/trip/add', 'Uitoux\EYatra\Api\TripController@addTrip');
+		Route::post('eyatra/api/trip/view/{trip_id}', 'Uitoux\EYatra\Api\TripController@viewTrip');
+
+	});
+});
 
 Route::group(['middleware' => ['web', 'auth']], function () {
 

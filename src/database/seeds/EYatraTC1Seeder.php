@@ -40,10 +40,7 @@ class EYatraTC1Seeder extends Seeder {
 		$number_of_items = $this->command->ask("How many records do you want to create?", '15');
 		$create_dummy_records = $this->command->ask("Do you want to create dummy records", 'y');
 
-		$this->call(EYatraConfigSeeder::class);
-		$this->call(EYatraETSeeder::class);
-		$this->call(EYatraPermissionSeeder::class);
-		$this->call(EYatraRoleSeeder::class);
+		$this->call(EYatraSeeder::class);
 
 		$base_telephone_number = '1234567' . $company_id;
 		$company = Company::firstOrNew([
