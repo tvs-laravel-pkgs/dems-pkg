@@ -88,6 +88,9 @@ app.component('eyatraOutletForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $scope.showAmountLimit = false;
+        $scope.checkedAmountEligible = false;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -106,9 +109,15 @@ app.component('eyatraOutletForm', {
             self.address = response.data.address;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            if (self.action == 'Edit') {
+                $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
+                $scope.AmountEligible(self.outlet.amount_eligible);
+            }
             $rootScope.loading = false;
 
         });
+
+
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
             // tabPaneFooter();
@@ -122,6 +131,17 @@ app.component('eyatraOutletForm', {
         });
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
+
+        //AMOUNT ELIGIBLE SHOW AMOUNT LIMIT AND CHECKED FUNCTION
+        $scope.AmountEligible = function(val) {
+            if (val == 1) {
+                $scope.showAmountLimit = true;
+                $scope.checkedAmountEligible = true;
+            } else {
+                $scope.showAmountLimit = false;
+                $scope.checkedAmountEligible = false;
+            }
+        }
 
         $scope.getSbuBasedonLob = function(lob_id) {
             if (lob_id) {
@@ -243,6 +263,14 @@ app.component('eyatraOutletForm', {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
+                },
+                'cashier_name': {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 191,
+                },
+                'amount_limit': {
+                    required: true,
                 },
                 'line_1': {
                     required: true,
