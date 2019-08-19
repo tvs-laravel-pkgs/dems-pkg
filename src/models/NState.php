@@ -15,7 +15,7 @@ class NState extends Model {
 		'created_by',
 	];
 	public function country() {
-		return $this->belongsTo('App\Country');
+		return $this->belongsTo('Uitoux\EYatra\NCountry');
 	}
 
 	public static function getList($country_id = NULL) {

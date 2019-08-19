@@ -61,7 +61,7 @@ class OutletController extends Controller {
 
 			})
 			->addColumn('status', function ($outlet) {
-				if ($outlet->deleted_at) {
+				if ($outlet->status == 'Inactive') {
 					return '<span style="color:red">Inactive</span>';
 				} else {
 					return '<span style="color:green">Active</span>';

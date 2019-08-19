@@ -125,6 +125,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Outlet',
     }).
 
+    //REGIONS
+    when('/eyatra/regions', {
+        template: '<eyatra-regions></eyatra-regions>',
+        title: 'Regions',
+    }).
+    when('/eyatra/region/add', {
+        template: '<eyatra-region-form></eyatra-region-form>',
+        title: 'Add Region',
+    }).
+    when('/eyatra/region/edit/:region_id', {
+        template: '<eyatra-region-form></eyatra-region-form>',
+        title: 'Edit Region',
+    }).
+    when('/eyatra/region/view/:region_id', {
+        template: '<eyatra-region-view></eyatra-region-view>',
+        title: 'View Region',
+    }).
+
     //EMPLOYEES
     when('/eyatra/employees', {
         template: '<eyatra-employees></eyatra-employees>',
