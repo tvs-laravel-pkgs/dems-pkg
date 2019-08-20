@@ -44,15 +44,15 @@ class EntityController extends Controller {
 			->orderBy('entities.id', 'desc');
 		return Datatables::of($entities)
 			->addColumn('action', function ($entity) {
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2 = asset('/public/img/content/table/delete-default.svg');
-				$img2_active = asset('/public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2 = asset('public/img/content/yatra/table/delete.svg');
+				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
 				<a href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover="this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover="this.src="' . $img2_active . '" onmouseout="this.src="' . $img2 . '"></a>';
+				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
 
 			})
 			->make(true);

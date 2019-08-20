@@ -28,6 +28,10 @@ class Trip extends Model {
 		'created_by',
 	];
 
+	public function getCreatedAtAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
 	public function company() {
 		return $this->belongsTo('App\Company');
 	}

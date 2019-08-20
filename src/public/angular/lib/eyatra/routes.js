@@ -89,6 +89,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View City',
     }).
 
+    //DEASIGNATIONS
+    when('/eyatra/designations', {
+        template: '<eyatra-designation></eyatra-designation>',
+        title: 'Designations',
+    }).
+    when('/eyatra/designation/add', {
+        template: '<eyatra-designation-form></eyatra-designation-form>',
+        title: 'Add Designation',
+    }).
+    when('/eyatra/designation/edit/:designation_id', {
+        template: '<eyatra-designation-form></eyatra-designation-form>',
+        title: 'Edit Designation',
+    }).
+    when('/eyatra/designation/view/:designation_id', {
+        template: '<eyatra-designation-view></eyatra-designation-view>',
+        title: 'View Designation',
+    }).
+
     //OUTLETS
     when('/eyatra/outlets', {
         template: '<eyatra-outlets></eyatra-outlets>',
@@ -105,6 +123,24 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/outlet/view/:outlet_id', {
         template: '<eyatra-outlet-view></eyatra-outlet-view>',
         title: 'View Outlet',
+    }).
+
+    //REGIONS
+    when('/eyatra/regions', {
+        template: '<eyatra-regions></eyatra-regions>',
+        title: 'Regions',
+    }).
+    when('/eyatra/region/add', {
+        template: '<eyatra-region-form></eyatra-region-form>',
+        title: 'Add Region',
+    }).
+    when('/eyatra/region/edit/:region_id', {
+        template: '<eyatra-region-form></eyatra-region-form>',
+        title: 'Edit Region',
+    }).
+    when('/eyatra/region/view/:region_id', {
+        template: '<eyatra-region-view></eyatra-region-view>',
+        title: 'View Region',
     }).
 
     //EMPLOYEES

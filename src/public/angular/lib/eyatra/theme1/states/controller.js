@@ -110,61 +110,56 @@ app.component('eyatraStateForm', {
 
         });
 
-        $('#travel_mode').on('click', function() {
-            if (event.target.checked == true) {
-                $('.travelmodecheckbox').prop('checked', true);
+        // $('#travel_mode').on('click', function() {
+        //     if (event.target.checked == true) {
+        //         $('.travelmodecheckbox').prop('checked', true);
 
-                $.each($('.travelmodecheckbox:checked'), function() {
-                    $scope.getTravelMode($(this).val());
-                });
+        //         $.each($('.travelmodecheckbox:checked'), function() {
+        //             $scope.getTravelMode($(this).val());
+        //         });
 
-            } else {
-                $('.travelmodecheckbox').prop('checked', false);
-                $.each($('.travelmodecheckbox'), function() {
-                    $scope.getTravelMode($(this).val());
-                });
-                //     if ($('.travelmodecheckbox').is(":checked")) {
-                //         $('#sc_' + id).show();
-                //         $('.agent_select').show();
-                //     } else {
-                //         $('#sc_' + id).hide();
-                //         $('.agent_select').hide();
-                //     }
-            }
-        });
+        //     } else {
+        //         $('.travelmodecheckbox').prop('checked', false);
+        //         $.each($('.travelmodecheckbox'), function() {
+        //             $scope.getTravelMode($(this).val());
+        //         });
+        //         //     if ($('.travelmodecheckbox').is(":checked")) {
+        //         //         $('#sc_' + id).show();
+        //         //         $('.agent_select').show();
+        //         //     } else {
+        //         //         $('#sc_' + id).hide();
+        //         //         $('.agent_select').hide();
+        //         //     }
+        //     }
+        // });
 
-        $scope.getTravelMode = function(id) {
-            if (event.target.checked == true) {
-                $("#sc_" + id).removeClass("ng-hide");
-                $("#sc_" + id).prop('required', true);
-                $("#sc_" + id).prop('min', 1);
-                $(".agent_select").removeClass("ng-hide");
-                $(".agent_select").prop('required', true);
-                //alert('fsdghgf');
-            } else {
-                $("#sc_" + id).addClass("ng-hide");
-                $("#sc_" + id).prop('required', false);
-                $(".agent_select").addClass("ng-hide");
-                $(".agent_select").prop('required', false);
-            }
+        // $scope.getTravelMode = function(id) {
+        //     if (event.target.checked == true) {
+        //         $("#sc_" + id).removeClass("ng-hide");
+        //         $("#sc_" + id).prop('required', true);
+        //         $("#sc_" + id).prop('min', 1);
+        //         $(".agent_select").removeClass("ng-hide");
+        //         $(".agent_select").prop('required', true);
+        //         //alert('fsdghgf');
+        //     } else {
+        //         $("#sc_" + id).addClass("ng-hide");
+        //         $("#sc_" + id).prop('required', false);
+        //         $(".agent_select").addClass("ng-hide");
+        //         $(".agent_select").prop('required', false);
+        //     }
 
-        }
+        // }
 
-        $(document).on('click', '.travelmodecheckbox', function() {
-            var id = $(this).val();
-            if ($(this).prop("checked") == true) {
-                $(".sc_" + id).prop('required', true);
-                $(".sc_" + id).prop('number', true);
-                $(".sc_" + id).prop('min', 1);
-                $(".agent_select_" + id).prop('required', true);
-            } else {
-                // $(".error").css("display", "none");
-                $(".sc_" + id).prop('required', false);
-                $(".agent_select_" + id).prop('required', false);
-                // $(".sc_" + id).prop('min', false);
-            }
+        // $(document).on('click', '#submit', function() {
+            //     //     var id = $(this).val();
+            //     //     if ($(this).prop("checked") == true) {
+            //     $(".sc_").prop('required', true);
+            //     $(".sc_").prop('number', true);
+            //     $(".sc_").prop('min', 1);
+            //     //         $(".agent_select_" + id).prop('required', true);
+            //     // }
 
-        });
+            // });
 
         // $('#travel_mode').on('click', function() {
         //     if (event.target.checked == true) {
@@ -197,7 +192,9 @@ app.component('eyatraStateForm', {
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
-        $('.btn-pills').on("click", function() {});
+        $('.btn-pills').on("click", function() {
+
+        });
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
 
@@ -244,11 +241,11 @@ app.component('eyatraStateForm', {
                 'country_id': {
                     required: true,
                 },
-                // 'travel_modes[]': {
-                //     required: true,
-                //     // number: true,
-                //     // min: 1,
-                // },
+                // 'service_charge[]': {
+    //     required: true,
+    //     number: true,
+    //     min: 1,
+    // },
                 // 'travel_modes[{{travel_mode.id}}][agent_id]': {
                 //     required: true,
                 // },
@@ -268,9 +265,9 @@ app.component('eyatraStateForm', {
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
-                'travel_modes[]': {
-                    required: 'Travel mode required',
-                }
+                // 'travel_modes[]': {
+    //     required: 'Travel mode required',
+    // }
             },
             submitHandler: function(form) {
 
