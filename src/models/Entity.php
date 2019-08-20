@@ -27,6 +27,11 @@ class Entity extends Model {
 	public function localTravelModes() {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_local_travel_mode', 'grade_id', 'local_travel_mode_id');
 	}
+
+	public function travelModes() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_travel_mode', 'grade_id', 'travel_mode_id');
+	}
+
 	public function gradeEligibility() {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_advanced_eligibility', 'grade_id', 'advanced_eligibility');
 	}
@@ -37,6 +42,10 @@ class Entity extends Model {
 
 	public static function travelModeList() {
 		return Entity::where('entity_type_id', 502)->select('id', 'name')->get()->keyBy('id');
+	}
+
+	public static function localTravelModeList() {
+		return Entity::where('entity_type_id', 503)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function uiPurposeList() {

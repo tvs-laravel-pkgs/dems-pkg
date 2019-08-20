@@ -13,8 +13,9 @@ use Yajra\Datatables\Datatables;
 
 class GradeController extends Controller {
 	public function listEYatraGrade(Request $r) {
-		$grade_list = Entity::withTrashed()->select('entities.id', 'entities.deleted_at', 'entities.name as grade_name', DB::RAW('count(DISTINCT(grade_local_travel_mode.local_travel_mode_id)) as travel_count'), DB::RAW('count(DISTINCT(grade_expense_type.expense_type_id)) as expense_count'), DB::RAW('count(DISTINCT(grade_trip_purpose.trip_purpose_id)) as trip_count'))
+		$grade_list = Entity::withTrashed()->select('entities.id', 'entities.deleted_at', 'entities.name as grade_name', DB::RAW('count(DISTINCT(grade_local_travel_mode.local_travel_mode_id)) as local_travel_count'), DB::RAW('count(DISTINCT(grade_travel_mode.travel_mode_id)) as travel_count'), DB::RAW('count(DISTINCT(grade_expense_type.expense_type_id)) as expense_count'), DB::RAW('count(DISTINCT(grade_trip_purpose.trip_purpose_id)) as trip_count'))
 			->leftjoin('grade_local_travel_mode', 'grade_local_travel_mode.grade_id', 'entities.id')
+			->leftjoin('grade_travel_mode', 'grade_travel_mode.grade_id', 'entities.id')
 			->leftjoin('grade_expense_type', 'grade_expense_type.grade_id', 'entities.id')
 			->leftjoin('grade_trip_purpose', 'grade_trip_purpose.grade_id', 'entities.id')
 			->where('entities.entity_type_id', 500)
@@ -35,12 +36,12 @@ class GradeController extends Controller {
 			})
 			->addColumn('action', function ($grade_list) {
 
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img2 = asset('public/img/content/table/eye.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2_active = asset('public/img/content/table/eye-active.svg');
-				$img3 = asset('public/img/content/table/delete-default.svg');
-				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
 				<a href="#!/eyatra/grade/edit/' . $grade_list->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
@@ -64,6 +65,7 @@ class GradeController extends Controller {
 		$expense_type_list = Config::expenseList();
 		$travel_purpose_list = Entity::purposeList();
 		$travel_types_list = Entity::travelModeList();
+		$local_travel_types_list = Entity::localTravelModeList();
 		$city_category_list = Entity::cityCategoryList();
 		if (!$grade_id) {
 			$this->data['action'] = 'Add';
@@ -84,9 +86,15 @@ class GradeController extends Controller {
 					$travel_purpose_list[$trip_purpose->id]->checked = true;
 				}
 			}
-			if (count($grade->localTravelModes) > 0) {
-				foreach ($grade->localTravelModes as $travel_type) {
+			if (count($grade->travelModes) > 0) {
+				foreach ($grade->travelModes as $travel_type) {
 					$travel_types_list[$travel_type->id]->checked = true;
+				}
+			}
+
+			if (count($grade->localTravelModes) > 0) {
+				foreach ($grade->localTravelModes as $local_travel_type) {
+					$local_travel_types_list[$local_travel_type->id]->checked = true;
 				}
 			}
 
@@ -98,9 +106,9 @@ class GradeController extends Controller {
 			'travel_purpose_list' => $travel_purpose_list,
 			'travel_types_list' => $travel_types_list,
 			'city_category_list' => $city_category_list,
+			'local_travel_types_list' => $local_travel_types_list,
 		];
 		$this->data['grade'] = $grade;
-
 		return response()->json($this->data);
 	}
 
@@ -133,6 +141,7 @@ class GradeController extends Controller {
 				$grade = Entity::withTrashed()->find($request->id);
 				$grade->expenseTypes()->sync([]);
 				$grade->tripPurposes()->sync([]);
+				$grade->travelModes()->sync([]);
 				$grade->localTravelModes()->sync([]);
 				$grade->gradeEligibility()->sync([]);
 				$grade->updated_by = Auth::user()->id;
@@ -151,7 +160,7 @@ class GradeController extends Controller {
 			$grade->entity_type_id = 500;
 			$grade->save();
 
-			if ($request->grade_advanced == 'on') {
+			if ($request->grade_advanced == 'Yes') {
 				$request->grade_advanced = 1;
 			} else {
 				$request->grade_advanced = 0;
@@ -173,12 +182,15 @@ class GradeController extends Controller {
 				}
 			}
 			if (!empty($request->checked_purpose_list)) {
-				// dd($request->checked_purpose_list);
 				$grade->tripPurposes()->sync($request->checked_purpose_list);
 			}
 
 			if (!empty($request->checked_travel_mode)) {
-				$grade->localTravelModes()->sync($request->checked_travel_mode);
+				$grade->travelModes()->sync($request->checked_travel_mode);
+			}
+
+			if (!empty($request->checked_local_travel_mode)) {
+				$grade->localTravelModes()->sync($request->checked_local_travel_mode);
 			}
 
 			DB::commit();
