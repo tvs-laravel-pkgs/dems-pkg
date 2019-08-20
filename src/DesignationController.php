@@ -12,19 +12,21 @@ use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\Designation;
 use Validator;
 use Yajra\Datatables\Datatables;
+use Illuminate\Validation\Rule;
 
 class DesignationController extends Controller {
 	public function listEYatraDesignation(Request $r) {
-		$designations = Designation::select(
+		$designations = Designation::withTrashed()->select(
 				'designations.id',
 				'designations.code',
 				'designations.name',
+				'designations.deleted_at',
 				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 			->orderBy('designations.name', 'asc');
 
 		return Datatables::of($designations)
-			->addColumn('action', function ($state) {
+			->addColumn('action', function ($designations) {
 
 				$img1 = asset('public/img/content/table/edit-yellow.svg');
 				$img2 = asset('public/img/content/table/eye.svg');
@@ -40,13 +42,13 @@ class DesignationController extends Controller {
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"
-				onclick="angular.element(this).scope().deleteStateConfirm(' . $designations->id . ')" dusk = "delete-btn" title="Delete">
+				onclick="angular.element(this).scope().deleteDesignationConfirm(' . $designations->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
                 </a>';
 
 			})
-			->addColumn('status', function ($state) {
-				if ($state->deleted_at) {
+			->addColumn('status', function ($designations) {
+				if ($designations->deleted_at) {
 					return '<span style="color:red">Inactive</span>';
 				} else {
 					return '<span style="color:green">Active</span>';
@@ -98,13 +100,13 @@ class DesignationController extends Controller {
 			];
 			$validator = Validator::make($request->all(), [
 				'code' => [
-					'unique:designations,code',
 					'required:true',
+					Rule::unique('designations')->ignore($request->id)
 				],
 				
 				'name' => [
 					'required:true',
-					'unique:designations,name'
+					Rule::unique('designations')->ignore($request->id)
 				],
 			], $error_messages);
 			if ($validator->fails()) {
@@ -128,7 +130,7 @@ class DesignationController extends Controller {
 				$designation->deleted_at = NULL;
 				$designation->deleted_by = NULL;
 			} else {
-				$designation->deleted_at = date('Y-m-d H:i:s');
+				$designation->deleted_at = Carbon::now();
 				$designation->deleted_by = Auth::user()->id;
 
 			}
@@ -150,42 +152,29 @@ class DesignationController extends Controller {
 		}
 	}
 
-	public function viewEYatraState($state_id) {
-
-		$state = NState::with([
-
-			'country',
-		])->select('*', DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status'))
+	public function viewEYatraDesignation($designation_id) {
+		$designation = Designation::select('*', DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
-			->find($state_id);
-		$state_travel = DB::table('state_agent_travel_mode')->select('entities.name as travel_mode_name', 'agents.name', 'service_charge')->where('state_id', $state_id)->where('entities.company_id', Auth::user()->company_id)
-			->leftJoin('entities', 'entities.id', 'state_agent_travel_mode.travel_mode_id')
-			->leftJoin('agents', 'agents.id', 'state_agent_travel_mode.agent_id')
-			->get()->toArray();
-		$this->data['travel_mode_name'] = $travel_mode_name = array_column($state_travel, 'travel_mode_name');
-		$this->data['agents'] = $agents = array_column($state_travel, 'name');
-		$this->data['service_charge'] = $service_charge = array_column($state_travel, 'service_charge');
+			->find($designation_id);
 		$this->data['action'] = 'View';
-		if (!$state) {
+		if (!$designation) {
 			$this->data['success'] = false;
-			$this->data['errors'] = ['State not found'];
+			$this->data['errors'] = ['Designation not found'];
 			return response()->json($this->data);
 		}
-		$this->data['state'] = $state;
+		//dd($designation);
+		$this->data['designation'] = $designation;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
-	public function deleteEYatraState($state_id) {
-		$state = Nstate::withTrashed()->where('id', $state_id)->first();
-		$state->forceDelete();
-		if (!$state) {
-			return response()->json(['success' => false, 'errors' => ['State not found']]);
+	public function deleteEYatraDesignation($designation_id) {
+		$designation = Designation::withTrashed()->where('id', $designation_id)->first();
+		$designation->forceDelete();
+		if (!$designation) {
+			return response()->json(['success' => false, 'errors' => ['Designation not found']]);
 		}
 		return response()->json(['success' => true]);
-	}
-	public function getStateList(Request $request) {
-		return NState::getList($request->country_id);
 	}
 
 }
