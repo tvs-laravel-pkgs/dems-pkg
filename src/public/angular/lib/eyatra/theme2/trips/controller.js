@@ -5,7 +5,7 @@ app.component('eyatraTrips', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -30,10 +30,10 @@ app.component('eyatraTrips', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'created_date', name: 'trips.created_date', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
+                { data: 'ename', name: 'e.name', searchable: true },
+                { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
@@ -43,13 +43,12 @@ app.component('eyatraTrips', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trips');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Trips</p><h3 class="title">Trips</h3>');
         $('.add_new_button').html(
             '<a href="#!/eyatra/trip/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
             '</a>'
         );
-
         $scope.deleteTrip = function(id) {
             $('#del').val(id);
         }
