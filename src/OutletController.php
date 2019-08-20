@@ -61,7 +61,7 @@ class OutletController extends Controller {
 
 			})
 			->addColumn('status', function ($outlet) {
-				if ($outlet->deleted_at) {
+				if ($outlet->status == 'Inactive') {
 					return '<span style="color:red">Inactive</span>';
 				} else {
 					return '<span style="color:green">Active</span>';
@@ -128,7 +128,7 @@ class OutletController extends Controller {
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
 				'cashier_name.required' => "Cashier Name is Required",
-				'amount_eligible.required' => "Amount Eligible is Required",
+				// 'amount_eligible.required' => "Amount Eligible is Required",
 			];
 
 			$validator = Validator::make($request->all(), [
@@ -136,7 +136,7 @@ class OutletController extends Controller {
 				'outlet_name' => 'required',
 				'line_1' => 'required',
 				'cashier_name' => 'required',
-				'amount_eligible' => 'required',
+				// 'amount_eligible' => 'required',
 				// 'country_id' => 'required',
 				// 'state_id' => 'required',
 				'city_id' => 'required',

@@ -49,10 +49,10 @@ class StateController extends Controller {
 
 			})
 			->addColumn('status', function ($state) {
-				if ($state->deleted_at) {
-					return '<span style="color:red">Inactive</span>';
+				if ($state->status == 'Inactive') {
+					return '<span style="color:#ea4335;">Inactive</span>';
 				} else {
-					return '<span style="color:green">Active</span>';
+					return '<span style="color:#63ce63;">Active</span>';
 				}
 
 			})

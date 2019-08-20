@@ -57,7 +57,7 @@ class EYatraTC1Seeder extends Seeder {
 		$company->fill($com_data['data']);
 		$company->save();
 
-		$company->users()->forceDelete();
+		// $company->users()->forceDelete();
 		//ADMIN USERS
 		$admin = User::firstOrNew([
 			'company_id' => $company->id,
@@ -178,10 +178,21 @@ class EYatraTC1Seeder extends Seeder {
 				'Google Pay',
 				'BHIM UPI',
 			],
+			506 => [
+				'A',
+				'B',
+				'C',
+				'D',
+			],
 		];
 		Entity::create($sample_entities, $admin, $company);
 
-		$this->command->info('');
+		foreach (NCity::get() as $city) {
+			$city->category_id = $company->cityCategories()->inRandomOrder()->first()->id;
+			$city->save();
+		}
+
+		$this->command->info('------------------');
 		$this->command->info('Creating Outlets > Managers > Employees');
 
 		//OUTLETS
@@ -197,12 +208,19 @@ class EYatraTC1Seeder extends Seeder {
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
 			$address = Address::create($address_of_id, $outlet, $faker);
+			dump($address);
+
+			$this->command->info('------------------');
+			$this->command->info('Outlet Created : ' . $outlet->name);
 			// dd($address);
 
 			//MANAGERS
 			for ($j = 1; $j <= $number_of_items; $j++) {
+				dump($j, $number_of_items);
 				$code = $outlet->code . '/mngr' . $j;
 				$manager = Employee::create($company, $code, $outlet, $admin, $faker);
+				$this->command->info('------------------');
+				$this->command->info('Manager Created : ' . $manager->code);
 
 				//USER ACCOUNT
 				$user_type_id = 3121;
@@ -211,6 +229,8 @@ class EYatraTC1Seeder extends Seeder {
 				for ($k = 1; $k <= $number_of_items; $k++) {
 					$code = $manager->code . '/e' . $k;
 					$employee = Employee::create($company, $code, $outlet, $admin, $faker, $manager->id);
+					$this->command->info('------------------');
+					$this->command->info('Employee Created : ' . $employee->code);
 
 					$user_type_id = 3121;
 					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $roles = 501);

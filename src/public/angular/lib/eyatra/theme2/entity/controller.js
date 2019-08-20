@@ -14,7 +14,7 @@ app.component('eyatraEntityList', {
             self.title = response.data.entity_type.name;
             var dataTable = $('#entity_table').DataTable({
                 stateSave: true,
-                "dom": dom_structure,
+                "dom": dom_structure_separate,
                 "language": {
                     "search": "",
                     "searchPlaceholder": "Search",
@@ -54,7 +54,7 @@ app.component('eyatraEntityList', {
 
             });
             $('.dataTables_length select').select2();
-            $('.page-header-content .display-inline-block .data-table-title').html(response.data.entity_type.name);
+            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + response.data.entity_type.name + '</p><h3 class="title">' + response.data.entity_type.name + '</h3>');
             var add_url = '#!/eyatra/entity/add/' + self.id;
             if (self.id) {
                 $('.add_new_button').html(

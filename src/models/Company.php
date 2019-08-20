@@ -26,6 +26,10 @@ class Company extends Model {
 		return $this->hasMany('Uitoux\EYatra\Entity')->where('entity_type_id', 501);
 	}
 
+	public function cityCategories() {
+		return $this->hasMany('Uitoux\EYatra\Entity')->where('entity_type_id', 506);
+	}
+
 	public function travelModes() {
 		return $this->hasMany('Uitoux\EYatra\Entity')->where('entity_type_id', 502);
 	}
