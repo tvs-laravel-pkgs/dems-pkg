@@ -186,11 +186,9 @@ class Trip extends Model {
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $start_date->end_date;
-		// $this->data['trip'] = $trip;
+
 		$data['trip'] = $trip;
 		$data['success'] = true;
-		// $this->data['success'] = true;
-		// return response()->json($this->data);
 		return response()->json($data);
 
 	}

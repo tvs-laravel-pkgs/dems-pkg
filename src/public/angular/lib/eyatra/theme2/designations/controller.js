@@ -38,27 +38,29 @@ app.component('eyatraDesignation', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('States');
+        $('.page-header-content .display-inline-block .data-table-title').html('Designations');
         $('.add_new_button').html(
             '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-designation\')">' +
             'Add New' +
             '</a>'
         );
-        $scope.deleteStateConfirm = function($state_id) {
-            $("#delete_state_id").val($state_id);
+        $scope.deleteDesignationConfirm = function(designation_id) {
+            $("#delete_designation_id").val(designation_id);
         }
 
-        $scope.deleteState = function() {
-            $state_id = $('#delete_state_id').val();
+        $scope.deleteDesignation = function() {
+            var designation_id = $('#delete_designation_id').val();
+            console.log(designation_id)
+            console.log(designation_delete_url + '/' + designation_id);
             $http.get(
-                state_delete_url + '/' + $state_id,
+                designation_delete_url + '/' + designation_id,
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
                     new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'State Deleted Successfully',
+                        text: 'Designation Deleted Successfully',
                     }).show();
                     dataTable.ajax.reload(function(json) {});
 
@@ -66,7 +68,7 @@ app.component('eyatraDesignation', {
                     new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: 'State not Deleted',
+                        text: 'Designation not Deleted',
                     }).show();
                 }
             });
@@ -99,72 +101,44 @@ app.component('eyatraDesignationForm', {
                 return;
             }
             console.log(response);
-            self.designation = response.data;
+            self.designation = response.data.designation;
             self.designation.status = response.data.status;
             //self.status = response.data.status;
             self.action = response.data.action;
 
         });
 
-        $('#travel_mode').on('click', function() {
-            if (event.target.checked == true) {
-                $('.travelmodecheckbox').prop('checked', true);
-
-                $.each($('.travelmodecheckbox:checked'), function() {
-                    $scope.getTravelMode($(this).val());
-                });
-
-            } else {
-                $('.travelmodecheckbox').prop('checked', false);
-                $.each($('.travelmodecheckbox'), function() {
-                    $scope.getTravelMode($(this).val());
-                });
-
-            }
-        });
 
 
-
-
-
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-        });
-        $('.btn-pills').on("click", function() {});
-        $scope.btnNxt = function() {}
-        $scope.prev = function() {}
-
-        var form_id = '#designation-form';
+        var form_id = '#designation';
         var v = jQuery(form_id).validate({
             ignore: '',
             rules: {
                 'code': {
                     required: true,
-                    minlength: 2,
-                    maxlength: 2,
+                    minlength: 3,
+                    maxlength: 191,
                 },
                 'name': {
                     required: true,
                     minlength: 3,
-                    maxlength: 191,
+                    maxlength: 80,
                 },
             },
             messages: {
                 'code': {
-                    minlength: 'Please enter minimum of 2 letters',
-                    maxlength: 'Please enter maximum of 2 letters',
-                },
-                'name': {
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
+                'name': {
+                    minlength: 'Please enter minimum of 3 letters',
+                    maxlength: 'Please enter maximum of 80 letters',
+                },
             },
             submitHandler: function(form) {
-
+                //alert();
                 let formData = new FormData($(form_id)[0]);
+                //console.log(formData);
                 $('#submit').button('loading');
                 $.ajax({
                         url: laravel_routes['saveEYatraDesignation'],
@@ -186,10 +160,10 @@ app.component('eyatraDesignationForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'State saved successfully',
+                                text: 'Designation saved successfully',
                                 text: res.message,
                             }).show();
-                            $location.path('/eyatra/states')
+                            $location.path('/eyatra/designations')
                             $scope.$apply()
                         }
                     })
@@ -202,19 +176,17 @@ app.component('eyatraDesignationForm', {
     }
 });
 
-app.component('eyatraStateView', {
-    templateUrl: state_view_template_url,
+app.component('eyatraDesignationView', {
+    templateUrl: eyatra_designations_view_template_url,
 
     controller: function($http, $location, $routeParams, HelperService, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            state_view_url + '/' + $routeParams.state_id
+            eyatra_designation_view_data_url + '/' + $routeParams.designation_id
         ).then(function(response) {
-            self.state = response.data.state;
-            self.travel_mode_name = response.data.travel_mode_name;
-            self.agents = response.data.agents;
-            self.service_charge = response.data.service_charge;
+            console.log(response.data.designation);
+            self.designation = response.data.designation;
             self.action = response.data.action;
         });
     }
