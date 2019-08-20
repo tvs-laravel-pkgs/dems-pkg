@@ -75,10 +75,11 @@ class GradeController extends Controller {
 			if (count($grade->expenseTypes) > 0) {
 				foreach ($grade->expenseTypes as $expense_type) {
 					$expense_type_list[$expense_type->id]->checked = true;
-					$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = $expense_type->pivot->eligible_amount;
+					if ($expense_type->pivot->city_category_id) {
+						$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = $expense_type->pivot->eligible_amount;
+					}
 				}
 			}
-			// dd($expense_type_list);
 			if (count($grade->tripPurposes) > 0) {
 				foreach ($grade->tripPurposes as $trip_purpose) {
 					$travel_purpose_list[$trip_purpose->id]->checked = true;

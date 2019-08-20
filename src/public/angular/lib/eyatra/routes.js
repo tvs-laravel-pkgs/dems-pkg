@@ -99,12 +99,12 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Add Designation',
     }).
     when('/eyatra/designation/edit/:designation_id', {
-        template: '<eyatra-city-form></eyatra-city-form>',
-        title: 'Edit City',
+        template: '<eyatra-designation-form></eyatra-designation-form>',
+        title: 'Edit Designation',
     }).
-    when('/eyatra/city/view/:city_id', {
-        template: '<eyatra-city-view></eyatra-city-view>',
-        title: 'View City',
+    when('/eyatra/designation/view/:designation_id', {
+        template: '<eyatra-designation-view></eyatra-designation-view>',
+        title: 'View Designation',
     }).
 
     //OUTLETS

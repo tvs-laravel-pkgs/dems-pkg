@@ -3,11 +3,13 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
+use Validator;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
