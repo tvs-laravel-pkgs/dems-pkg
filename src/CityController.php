@@ -52,7 +52,7 @@ class CityController extends Controller {
 			})
 			->addColumn('status', function ($city) {
 				if ($city->status == 'Inactive') {
-					return '<span style="color:#ea4335;"">In Active</span>';
+					return '<span style="color:#ea4335;">In Active</span>';
 				} else {
 					return '<span style="color:#63ce63;">Active</span>';
 				}
