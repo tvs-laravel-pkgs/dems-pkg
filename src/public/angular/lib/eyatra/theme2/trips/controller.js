@@ -150,23 +150,15 @@ app.component('eyatraTripForm', {
             });
         }
 
-        // $(".visits-wrp-delete").hide();
-        // $(".add_btn").hide();
-        // $(".single_trip").hide();
-        // $(".round_trip").hide();
-        // $(".multi_trip").hide();
         $scope.trip_mode = function(id) {
             if (id == 1) {
                 $scope.single_trip = true;
                 $scope.round_trip = false;
                 $scope.multi_trip = false;
-                self.booking_method = 'Self';
             } else if (id == 2) {
                 $scope.single_trip = false;
                 $scope.round_trip = true;
                 $scope.multi_trip = false;
-                self.booking_method = 'Self';
-                self.booking_methods = 'Self';
             } else if (id == 3) {
                 $scope.round_trip = false;
                 $scope.single_trip = false;
@@ -185,7 +177,11 @@ app.component('eyatraTripForm', {
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.attr('name') == 'trip_mode[]') {
+                    error.appendTo($('.trip_mode'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             rules: {
@@ -198,11 +194,27 @@ app.component('eyatraTripForm', {
                 'advance_received': {
                     maxlength: 10,
                 },
+                'trip_mode[]': {
+                    required: true,
+                },
             },
             messages: {
                 'description': {
                     maxlength: 'Please enter maximum of 255 letters',
                 },
+                'advance_received': {
+                    maxlength: 'Please enter maximum of 10 Numbers',
+                },
+                'trip_mode[]': {
+                    required: 'Select Visit Mode',
+                },
+            },
+            invalidHandler: function(event, validator) {
+                new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Check all tabs for errors'
+                }).show();
             },
             submitHandler: function(form) {
 
