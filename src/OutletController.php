@@ -21,6 +21,7 @@ class OutletController extends Controller {
 			->join('ey_addresses as a', 'a.entity_id', 'outlets.id')
 			->join('ncities as city', 'city.id', 'a.city_id')
 			->join('nstates as s', 's.id', 'city.state_id')
+			->join('regions as r', 'r.state_id', 's.id')
 			->join('countries as c', 'c.id', 's.country_id')
 			->select(
 				'outlets.id',
@@ -28,6 +29,7 @@ class OutletController extends Controller {
 				'outlets.name',
 				'city.name as city_name',
 				's.name as state_name',
+				'r.name as region_name',
 				'c.name as country_name',
 				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status')
 			)
@@ -78,6 +80,7 @@ class OutletController extends Controller {
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
+			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
 			$outlet = Outlet::with('Sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
@@ -103,6 +106,7 @@ class OutletController extends Controller {
 			'city_list' => $this->data['action'] == 'Add' ? [] : NCity::getList($outlet->address->state_id),
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
+			// 'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
 
@@ -111,6 +115,22 @@ class OutletController extends Controller {
 		$this->data['success'] = true;
 
 		return response()->json($this->data);
+	}
+//SEARCH CASHIER
+	public function searchCashier(Request $r) {
+		$key = $r->key;
+		$cashier_list = Employee::select(
+			'name',
+			'code',
+			'id'
+		)
+			->where(function ($q) use ($key) {
+				$q->where('name', 'like', '%' . $key . '%')
+					->orWhere('code', 'like', '%' . $key . '%')
+				;
+			})
+			->get();
+		return response()->json($cashier_list);
 	}
 
 	public function saveEYatraOutlet(Request $request) {
@@ -148,7 +168,7 @@ class OutletController extends Controller {
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
-
+			// dd($request->all());
 			DB::beginTransaction();
 			if (!$request->id) {
 				$outlet = new Outlet;
@@ -165,6 +185,7 @@ class OutletController extends Controller {
 				$outlet->updated_at = Carbon::now();
 
 			}
+
 			if ($request->status == 'Active') {
 				$outlet->deleted_at = NULL;
 				$outlet->deleted_by = NULL;
@@ -173,6 +194,15 @@ class OutletController extends Controller {
 				$outlet->deleted_by = Auth::user()->id;
 
 			}
+			if ($request->eligible_amount == 1) {
+				$outlet->amount_eligible = 1;
+				$outlet->amount_limit = $request->amount_limit;
+			} else {
+				$outlet->amount_eligible = 0;
+				$outlet->amount_limit = NULL;
+
+			}
+
 			$outlet->name = $request->outlet_name;
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());

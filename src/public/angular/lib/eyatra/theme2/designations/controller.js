@@ -4,9 +4,9 @@ app.component('eyatraDesignation', {
         //alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_state_table').DataTable({
+        var dataTable = $('#eyatra_designation_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -28,7 +28,7 @@ app.component('eyatraDesignation', {
                 data: function(d) {}
             },
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'designations.code', searchable: true },
                 { data: 'name', name: 'designations.name', searchable: true },
                 { data: 'status', name: 'designations.deleted_at', searchable: false },
@@ -38,7 +38,8 @@ app.component('eyatraDesignation', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Designations');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Designations</p><h3 class="title">Designations</h3>');
+        //$('.page-header-content .display-inline-block .data-table-title').html('Designations');
         $('.add_new_button').html(
             '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-designation\')">' +
             'Add New' +

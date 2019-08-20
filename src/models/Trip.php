@@ -5,6 +5,7 @@ namespace Uitoux\EYatra;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Validator;
@@ -179,14 +180,22 @@ class Trip extends Model {
 			->find($trip_id);
 		if (!$trip) {
 			$data['success'] = false;
+			$data['message'] = 'Trip not found';
 			$data['errors'] = ['Trip not found'];
 			return response()->json($data);
 		}
+
+		if (!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) {
+			$data['success'] = false;
+			$data['message'] = 'Trip belongs to you';
+			$data['errors'] = ['Trip belongs to you'];
+			return response()->json($data);
+		}
+
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $start_date->end_date;
-
 		$data['trip'] = $trip;
 		$data['success'] = true;
 		return response()->json($data);
@@ -210,6 +219,8 @@ class Trip extends Model {
 				$data['message'] = 'Trip not found';
 			}
 		}
+
+		// dd(Auth::user()->entity->outlet->address->city);
 		$data['extras'] = [
 			'purpose_list' => Entity::uiPurposeList(),
 			'travel_mode_list' => Entity::uiTravelModeList(),

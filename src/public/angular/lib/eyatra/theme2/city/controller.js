@@ -163,21 +163,9 @@ app.component('eyatraCityForm', {
         var form_id = '#state-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                if (element.hasClass("code")) {
-                    error.appendTo($('.code_error'));
-                } else if (element.hasClass("name")) {
+                if (element.hasClass("name")) {
                     error.appendTo($('.name_error'));
-                }
-                // else if (element.attr('name') == 'travel_modes[]') {
-                //     error.appendTo($('.travel_mode_error'));
-                // }
-                // else if (element.attr('name') == 'travel_modes[{{travel_mode.id}}][agent_id]') {
-                //     error.appendTo($('.agent_error'));
-                // }
-                // else if (element.hasClass('travel_modes[{{travel_mode.id}}][agent_id]')) {
-                //     error.appendTo($('.agent_error'));
-                // } 
-                else {
+                } else {
                     error.insertAfter(element)
                 }
             },
@@ -190,11 +178,7 @@ app.component('eyatraCityForm', {
             },
             ignore: '',
             rules: {
-                'code': {
-                    required: true,
-                    minlength: 2,
-                    maxlength: 2,
-                },
+
                 'name': {
                     required: true,
                     minlength: 3,
@@ -203,11 +187,12 @@ app.component('eyatraCityForm', {
                 'country_id': {
                     required: true,
                 },
-                // 'travel_modes[]': {
-                //     required: true,
-                //     // number: true,
-                //     // min: 1,
-                // },
+                'state_id': {
+                    required: true,
+                },
+                'category_id': {
+                    required: true,
+                },
                 // 'travel_modes[{{travel_mode.id}}][agent_id]': {
                 //     required: true,
                 // },
@@ -219,24 +204,24 @@ app.component('eyatraCityForm', {
 
             },
             messages: {
-                'code': {
-                    minlength: 'Please enter minimum of 2 letters',
-                    maxlength: 'Please enter maximum of 2 letters',
-                },
+                // 'code': {
+                //     minlength: 'Please enter minimum of 2 letters',
+                //     maxlength: 'Please enter maximum of 2 letters',
+                // },
                 'name': {
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
-                'travel_modes[]': {
-                    required: 'Travel mode required',
-                }
+                // 'travel_modes[]': {
+                //     required: 'Travel mode required',
+                // }
             },
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['saveEYatraState'],
+                        url: laravel_routes['saveEYatraCity'],
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -255,10 +240,10 @@ app.component('eyatraCityForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'State saved successfully',
+                                text: 'City saved successfully',
                                 text: res.message,
                             }).show();
-                            $location.path('/eyatra/states')
+                            $location.path('/eyatra/cities')
                             $scope.$apply()
                         }
                     })
