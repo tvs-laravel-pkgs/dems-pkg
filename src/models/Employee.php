@@ -81,11 +81,12 @@ class Employee extends Model {
 		return $employee;
 	}
 	public static function createUser($company, $user_type_id, $entity, $faker, $roles) {
-		$user = new User();
-		$user->company_id = $company->id;
-		$user->user_type_id = $user_type_id;
+		$user = User::firstOrNew([
+			'company_id' => $company->id,
+			'user_type_id' => $user_type_id,
+			'username' => $entity->code,
+		]);
 		$user->entity_id = $entity->id;
-		$user->username = $entity->code;
 		$user->mobile_number = $faker->unique()->numberBetween(9842000000, 9842099999);
 		$user->password = 'Test@123';
 		$user->save();

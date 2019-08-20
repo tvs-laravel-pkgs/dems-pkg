@@ -57,7 +57,7 @@ class EYatraTC1Seeder extends Seeder {
 		$company->fill($com_data['data']);
 		$company->save();
 
-		$company->users()->forceDelete();
+		// $company->users()->forceDelete();
 		//ADMIN USERS
 		$admin = User::firstOrNew([
 			'company_id' => $company->id,
@@ -178,8 +178,19 @@ class EYatraTC1Seeder extends Seeder {
 				'Google Pay',
 				'BHIM UPI',
 			],
+			506 => [
+				'A',
+				'B',
+				'C',
+				'D',
+			],
 		];
 		Entity::create($sample_entities, $admin, $company);
+
+		foreach (NCity::get() as $city) {
+			$city->category_id = $company->cityCategories()->inRandomOrder()->first()->id;
+			$city->save();
+		}
 
 		$this->command->info('------------------');
 		$this->command->info('Creating Outlets > Managers > Employees');
