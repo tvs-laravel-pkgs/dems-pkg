@@ -31,6 +31,7 @@ app.component('eyatraOutlets', {
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'outlets.code', searchable: true },
                 { data: 'name', name: 'outlets.name', searchable: true },
+                { data: 'region_name', name: 'r.name', searchable: true },
                 { data: 'city_name', name: 'city.name', searchable: true },
                 { data: 'state_name', name: 's.name', searchable: true },
                 { data: 'country_name', name: 'c.name', searchable: true },
@@ -219,6 +220,27 @@ app.component('eyatraOutletForm', {
                     console.log(xhr);
                 });
         }
+
+        self.searchCashier = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            search_cashier_url, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            console.log(response.data);
+                            resolve(response.data);
+                        });
+                    //reject(response);
+                });
+            } else {
+                return [];
+            }
+        }
+
         var form_id = '#outlet-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {

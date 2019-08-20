@@ -451,7 +451,7 @@ app.component('eyatraAgentForm', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraAgentView', {
     templateUrl: agent_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -461,6 +461,7 @@ app.component('eyatraAgentView', {
             self.agent_address = response.data.address;
             self.user_details = response.data.user_details;
             self.travel_modes = response.data.travel_list;
+            $scope.selectPaymentMode(self.agent.payment_mode_id);
             if (self.agent.deleted_at == null) {
                 self.status = 'Active';
             } else {
@@ -469,6 +470,27 @@ app.component('eyatraAgentView', {
             self.action = "View ";
 
         });
+
+        //SELECT PAYMENT MODE
+        $scope.selectPaymentMode = function(payment_id) {
+            if (payment_id == 3244) { //BANK
+                $scope.showBank = true;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            } else if (payment_id == 3245) { //CHEQUE
+                $scope.showBank = false;
+                $scope.showCheque = true;
+                $scope.showWallet = false;
+            } else if (payment_id == 3246) { //WALLET
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = true;
+            } else {
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            }
+        }
 
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");

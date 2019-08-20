@@ -190,11 +190,7 @@ app.component('eyatraCityForm', {
             },
             ignore: '',
             rules: {
-                'code': {
-                    required: true,
-                    minlength: 2,
-                    maxlength: 2,
-                },
+
                 'name': {
                     required: true,
                     minlength: 3,
@@ -203,11 +199,12 @@ app.component('eyatraCityForm', {
                 'country_id': {
                     required: true,
                 },
-                // 'travel_modes[]': {
-                //     required: true,
-                //     // number: true,
-                //     // min: 1,
-                // },
+                'state_id': {
+                    required: true,
+                },
+                'category_id': {
+                    required: true,
+                },
                 // 'travel_modes[{{travel_mode.id}}][agent_id]': {
                 //     required: true,
                 // },
@@ -227,9 +224,9 @@ app.component('eyatraCityForm', {
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
-                'travel_modes[]': {
-                    required: 'Travel mode required',
-                }
+                // 'travel_modes[]': {
+                //     required: 'Travel mode required',
+                // }
             },
             submitHandler: function(form) {
 
