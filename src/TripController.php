@@ -24,9 +24,12 @@ class TripController extends Controller {
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'e.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				// DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				DB::raw('CONCAT(DATE_FORMAT(MIN(v.date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.date),"%d/%m/%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'status.name as status'
@@ -57,7 +60,7 @@ class TripController extends Controller {
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
 				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
 			})
