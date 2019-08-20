@@ -5,7 +5,7 @@ app.component('eyatraGrades', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_grade_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -32,6 +32,7 @@ app.component('eyatraGrades', {
                 { data: 'grade_name', name: 'entities.name', searchable: true },
                 { data: 'expense_count', searchable: false },
                 { data: 'travel_count', searchable: false },
+                { data: 'local_travel_count', searchable: false },
                 { data: 'trip_count', searchable: false },
                 { data: 'status', searchable: false },
             ],
@@ -40,9 +41,9 @@ app.component('eyatraGrades', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Grades');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Grades</p><h3 class="title">Grades</h3>');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-grade\')">' +
             'Add New' +
             '</a>'
         );
@@ -111,9 +112,11 @@ app.component('eyatraGradeForm', {
 
             if (self.action == 'Edit') {
                 if (self.grade_advanced[0] == 1) {
-                    $(".grade_advanced").prop('checked', true);
+                    self.grade_advanced_value = 'Yes';
+                    // $(".grade_advanced").prop('checked', true);
                 } else {
-                    $(".grade_advanced").prop('checked', false);
+                    self.grade_advanced_value = 'No';
+                    // $(".grade_advanced").prop('checked', false);
                 }
                 if (self.entity.deleted_at == null) {
                     self.switch_value = 'Active';
@@ -122,6 +125,7 @@ app.component('eyatraGradeForm', {
                 }
             } else {
                 self.switch_value = 'Active';
+                self.grade_advanced_value = 'Yes';
             }
         });
 

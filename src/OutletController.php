@@ -168,7 +168,7 @@ class OutletController extends Controller {
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
-
+			// dd($request->all());
 			DB::beginTransaction();
 			if (!$request->id) {
 				$outlet = new Outlet;
@@ -185,6 +185,7 @@ class OutletController extends Controller {
 				$outlet->updated_at = Carbon::now();
 
 			}
+
 			if ($request->status == 'Active') {
 				$outlet->deleted_at = NULL;
 				$outlet->deleted_by = NULL;
@@ -194,13 +195,14 @@ class OutletController extends Controller {
 
 			}
 			if ($request->eligible_amount == 1) {
-				$outlet->amount_eligible = $request->eligible_amount;
+				$outlet->amount_eligible = 1;
 				$outlet->amount_limit = $request->amount_limit;
 			} else {
-				$outlet->amount_eligible = $request->eligible_amount;
+				$outlet->amount_eligible = 0;
 				$outlet->amount_limit = NULL;
 
 			}
+
 			$outlet->name = $request->outlet_name;
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());

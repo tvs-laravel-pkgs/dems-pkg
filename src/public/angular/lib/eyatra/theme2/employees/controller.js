@@ -5,7 +5,7 @@ app.component('eyatraEmployees', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_employee_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -41,7 +41,8 @@ app.component('eyatraEmployees', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Employees');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Employees</p><h3 class="title">Employees</h3>');
+        //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
         $('.add_new_button').html(
             '<a href="#!/eyatra/employee/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
