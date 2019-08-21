@@ -104,11 +104,12 @@ app.component('eyatraTripForm', {
                     text: response.data.error,
                 }).show();
                 $location.path('/eyatra/trips')
-                $scope.$apply()
+                //$scope.$apply()
                 return;
             }
+            console.log(response.data);
             self.employee_eligible_grade = response.data.employee_eligible_grade;
-            if (self.employee_eligible_grade == 1) {
+            if (self.employee_eligible_grade.advanced_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }
             self.trip = response.data.trip;
