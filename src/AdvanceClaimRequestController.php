@@ -61,6 +61,7 @@ class AdvanceClaimRequestController extends Controller {
 	public function advanceClaimRequestFormData($trip_id) {
 
 		$trip = Trip::with([
+			'advanceRequestPayment',
 			'visits',
 			'visits.fromCity',
 			'visits.toCity',
