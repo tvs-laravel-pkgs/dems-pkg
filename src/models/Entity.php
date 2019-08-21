@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -37,15 +38,15 @@ class Entity extends Model {
 	}
 
 	public static function purposeList() {
-		return Entity::where('entity_type_id', 501)->select('id', 'name')->get()->keyBy('id');
+		return Entity::where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function travelModeList() {
-		return Entity::where('entity_type_id', 502)->select('id', 'name')->get()->keyBy('id');
+		return Entity::where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function localTravelModeList() {
-		return Entity::where('entity_type_id', 503)->select('id', 'name')->get()->keyBy('id');
+		return Entity::where('entity_type_id', 503)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function uiPurposeList() {
@@ -67,7 +68,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 505)->select('id', 'name')->get();
 	}
 	public static function cityCategoryList() {
-		return Entity::where('entity_type_id', 506)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 
 	public static function create($sample_entities, $admin, $company) {

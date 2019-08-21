@@ -28,9 +28,10 @@ app.component('eyatraAgents', {
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action' },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'agents.code', searchable: true },
                 { data: 'name', name: 'agents.name', searchable: true },
+                { data: 'gstin', name: 'agents.gstin', searchable: true },
                 { data: 'mobile_number', name: 'users.mobile_number', searchable: true },
                 { data: 'travel_name', name: 'tm.name', searchable: true },
                 { data: 'status', name: 'status', searchable: false },
@@ -128,17 +129,19 @@ app.component('eyatraAgentForm', {
                 self.switch_password = 'Yes';
             }
         });
-        $scope.travelChecked = function(id) {
-            var value = travel_list.indexOf(id);
-            return value;
-        }
-
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
         });
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
+
+        $scope.travelChecked = function(id) {
+            var value = travel_list.indexOf(id);
+            return value;
+        }
+
+
 
         $("#travel_mode").on('click', function() {
             if (event.target.checked == true) {
@@ -178,20 +181,6 @@ app.component('eyatraAgentForm', {
                 $("#password").prop('disabled', false);
             }
         }
-
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-            // tabPaneFooter();
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-            // tabPaneFooter();
-        });
-        $('.btn-pills').on("click", function() {
-            // tabPaneFooter();
-        });
-        $scope.btnNxt = function() {}
-        $scope.prev = function() {}
 
         $scope.getDataBasedonCountry = function(country_id) {
             $.ajax({
