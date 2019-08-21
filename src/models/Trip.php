@@ -228,7 +228,12 @@ class Trip extends Model {
 			}
 		}
 		$grade = Auth::user()->entity;
-		$data['employee_eligible_grade'] = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
+		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
+		if ($grade_eligibility) {
+			$data['employee_eligible_grade'] = $grade_eligibility;
+		} else {
+			$data['employee_eligible_grade'] = '';
+		}
 
 		$data['extras'] = [
 			// 'purpose_list' => Entity::uiPurposeList(),
