@@ -22,6 +22,7 @@ class AgentController extends Controller {
 			'agents.id',
 			'agents.code',
 			'agents.name',
+			DB::raw('IF(agents.gstin IS NULL,"---",agents.gstin) as gstin'),
 			'users.mobile_number',
 			DB::raw('IF(agents.deleted_at IS NULL,"Active","In-Active") as status'),
 			DB::raw('GROUP_CONCAT(tm.name) as travel_name'))
