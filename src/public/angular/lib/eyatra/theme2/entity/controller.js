@@ -39,7 +39,7 @@ app.component('eyatraEntityList', {
                     },
                 },
                 columns: [
-                    { data: 'action', searchable: false, class: 'action' },
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                     { data: 'name', name: 'entities.name' },
                     { data: 'created_by', name: 'users.username' },
                     { data: 'updated_by', name: 'updater.username' },
