@@ -31,6 +31,7 @@ class EYatraConfigSeeder extends Seeder {
 			514 => 'Employee Payment Mode - EYatra',
 			515 => 'Payment of - EYatra',
 			516 => 'Advance Request Approval Statuses - EYatra',
+			517 => 'Reimbursement status - EYatra',
 		];
 
 		$configs = [
@@ -296,6 +297,16 @@ class EYatraConfigSeeder extends Seeder {
 			3262 => [
 				'name' => 'Rejected',
 				'config_type_id' => 516,
+			],
+
+			//REIMBURSEMENT HISTORY STATUS
+			3264 => [
+				'name' => 'Claim',
+				'config_type_id' => 517,
+			],
+			3265 => [
+				'name' => 'Cash Topup',
+				'config_type_id' => 517,
 			],
 
 		];

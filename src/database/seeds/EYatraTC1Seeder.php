@@ -30,19 +30,19 @@ class EYatraTC1Seeder extends Seeder {
 	public function run() {
 		$faker = Faker::create();
 
-		$company_id = $this->command->ask("Enter company id", '7');
+		$company_id = $this->command->ask("Enter company id", '4');
 		$delete_company = $this->command->ask("Do you want to delete company", 'n');
 		if ($delete_company == 'y') {
 			$company = Company::find($company_id);
 			$company->forceDelete();
 		}
 
-		$number_of_items = $this->command->ask("How many records do you want to create?", '15');
-		$create_dummy_records = $this->command->ask("Do you want to create dummy records", 'y');
+		$number_of_items = $this->command->ask("How many records do you want to create?", '1');
+		$create_dummy_records = $this->command->ask("Do you want to create dummy records", 'n');
 
 		$this->call(EYatraSeeder::class);
 
-		$base_telephone_number = '00000' . $company_id;
+		$base_telephone_number = $company_id;
 		$company = Company::firstOrNew([
 			'id' => $company_id,
 		]);
@@ -52,7 +52,7 @@ class EYatraTC1Seeder extends Seeder {
 		$com_data['data']['cin_number'] = 'CIN' . $company_id;
 		$com_data['data']['gst_number'] = 'GST' . $company_id;
 		$com_data['data']['customer_care_email'] = 'customercare@com' . $company_id . '.in';
-		$com_data['data']['customer_care_phone'] = $base_telephone_number . '0000';
+		$com_data['data']['customer_care_phone'] = $base_telephone_number . '000000000';
 		$com_data['data']['reference_code'] = 'com' . $company_id;
 		$company->fill($com_data['data']);
 		$company->save();
@@ -64,7 +64,7 @@ class EYatraTC1Seeder extends Seeder {
 			'username' => 'c' . $company->id . '/a1',
 		]);
 		$admin->user_type_id = 3120;
-		$admin->mobile_number = $base_telephone_number . '1000';
+		$admin->mobile_number = $base_telephone_number . '100000000';
 		$admin->password = 'Test@123';
 		$admin->save();
 		$admin->roles()->sync(500);
@@ -247,7 +247,7 @@ class EYatraTC1Seeder extends Seeder {
 
 				//USER ACCOUNT
 				$user_type_id = 3121;
-				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $base_telephone_number . $i . $j . '0', $roles = 502);
+				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $base_telephone_number . $i . $j . '0000000', $roles = 502);
 				//EMPLOYEES - REGULAR
 				for ($k = 1; $k <= $number_of_items; $k++) {
 					$code = $manager->code . '/e' . $k;
@@ -256,9 +256,19 @@ class EYatraTC1Seeder extends Seeder {
 					$this->command->info('Employee Created : ' . $employee->code);
 
 					$user_type_id = 3121;
-					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $base_telephone_number . $i . $j . $k . '0', $roles = 501);
+					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $base_telephone_number . $i . $j . $k . '000000', $roles = 501);
 				}
 			}
+		}
+
+		$this->command->info('');
+		$this->command->info('Outlet Cashier Mapping');
+		foreach ($company->outlets as $outlet) {
+			$cashier = $company->employees()->inRandomOrder()->first();
+			$user = $cashier->user;
+			$user->roles()->attach(504);
+			$outlet->cashier_id = $cashier->id;
+			$outlet->save();
 		}
 
 		$this->command->info('');
