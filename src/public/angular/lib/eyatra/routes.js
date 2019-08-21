@@ -274,5 +274,23 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/trips/booking-updates/form/:visit_id', {
         template: '<eyatra-trip-booking-updates-form></eyatra-trip-booking-updates-form>',
         title: 'Employee Booking Update Form',
+    }).
+
+    //OUTLET - OUTLET REIMBURSEMENT
+    when('/eyatra/outlet-reimbursement', {
+        template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
+        title: 'Regions',
+    }).
+    when('/eyatra/outlet-reimbursement/add', {
+        template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
+        title: 'Add Region',
+    }).
+    when('/eyatra/outlet-reimbursement/edit/:outlet_id', {
+        template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
+        title: 'Edit Region',
+    }).
+    when('/eyatra/outlet-reimbursement/view/:outlet_id', {
+        template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
+        title: 'View Region',
     });
 }]);

@@ -99,6 +99,9 @@ class TripController extends Controller {
 			$trip->employee_id = Auth::user()->entity->id;
 			// dd(Auth::user(), );
 			$trip->manager_id = Auth::user()->entity->reporting_to_id;
+			if ($request->advance_received != '') {
+				$trip->advance_request_approval_status_id = 3260;
+			}
 			$trip->status_id = 3020; //NEW
 			$trip->save();
 
