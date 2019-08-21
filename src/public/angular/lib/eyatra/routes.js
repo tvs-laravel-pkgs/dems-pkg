@@ -211,6 +211,17 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Trip Verification Form',
     }).
 
+    //ADVANCE CLAIM REQUEST
+    when('/eyatra/advance-claim/requests', {
+        template: '<eyatra-advance-claim-requests></eyatra-advance-claim-requests>',
+        title: 'Advance Claim Requests',
+    }).
+    when('/eyatra/advance-claim/request/form/:trip_id', {
+        template: '<eyatra-advance-claim-request-form></eyatra-advance-claim-request-form>',
+        title: 'Advance Claim Request Form',
+    }).
+
+
     //AGENT - BOOKING REQUESTS
     when('/eyatra/trips/booking-requests', {
         template: '<eyatra-trip-booking-requests></eyatra-trip-booking-requests>',
