@@ -11,35 +11,7 @@ use Yajra\Datatables\Datatables;
 
 class TripVerificationController extends Controller {
 	public function listTripVerification(Request $r) {
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
-			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
-				'trips.advance_received',
-				'trips.created_at',
-				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
-				'status.name as status'
-
-			)
-			->where('trips.status_id', 3021) //MANAGER APPROVAL PENDING
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc')
-			->orderBy('trips.status_id', 'desc')
-		;
-
-		if (!Entrust::can('trip-verification-all')) {
-			$trips->where('trips.manager_id', Auth::user()->entity_id);
-		}
+		$trips = Trip::getVerficationPendingList();
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
@@ -95,20 +67,7 @@ class TripVerificationController extends Controller {
 	}
 
 	public function saveTripVerification(Request $r) {
-		$trip = Trip::find($r->trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-
-		if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
-			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
-		}
-
-		$trip->status_id = 3021;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3080]);
-		return response()->json(['success' => true]);
+		return Trip::saveTripVerification($r)
 	}
 
 	public function approveTripVerification($trip_id) {

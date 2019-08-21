@@ -4,8 +4,8 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
 
@@ -33,6 +33,7 @@ class AdvanceClaimRequestController extends Controller {
 			)
 			->whereNotNull('trips.advance_received')
 			->where('trips.status_id', 3028) //MANAGER APPROVED
+			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
@@ -60,6 +61,7 @@ class AdvanceClaimRequestController extends Controller {
 	public function advanceClaimRequestFormData($trip_id) {
 
 		$trip = Trip::with([
+			'advanceRequestPayment',
 			'visits',
 			'visits.fromCity',
 			'visits.toCity',
@@ -75,6 +77,9 @@ class AdvanceClaimRequestController extends Controller {
 			'purpose',
 			'status',
 		])
+			->whereNotNull('trips.advance_received')
+			->where('trips.status_id', 3028) //MANAGER APPROVED
+			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->find($trip_id);
 
 		if (!$trip) {
@@ -97,15 +102,37 @@ class AdvanceClaimRequestController extends Controller {
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-
-		if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
-			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
-		}
-
-		$trip->status_id = 3021;
+		$trip->advance_request_approval_status_id = 3261;
 		$trip->save();
 
-		$trip->visits()->update(['manager_verification_status_id' => 3080]);
+		//PAYMENT SAVE
+		$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
+		$payment->fill($r->all());
+		$payment->payment_of_id = 3250;
+		$payment->entity_id = $trip->id;
+		$payment->created_by = Auth::user()->id;
+		$payment->save();
+
+		//BANK DETAIL SAVE
+		if ($r->bank_name) {
+			$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
+			$bank_detail->fill($r->all());
+			$bank_detail->detail_of_id = 3243;
+			$bank_detail->entity_id = $trip->id;
+			$bank_detail->account_type_id = 3243;
+			$bank_detail->save();
+		}
+
+		//WALLET SAVE
+		if ($r->type_id) {
+			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
+			$wallet_detail->fill($r->all());
+			$wallet_detail->wallet_of_id = 3243;
+			$wallet_detail->entity_id = $trip->id;
+			$wallet_detail->save();
+		}
+
+		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);
 	}
 

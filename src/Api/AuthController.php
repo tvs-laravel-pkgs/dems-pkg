@@ -44,6 +44,10 @@ class AuthController extends Controller {
 
 			// }
 			$user->permissions = $user->permissions($only_mobile = true);
+			$user->entity->designation;
+			$user->entity->grade;
+			$user->entity->outlet->address;
+			$user->employee = $user->entity;
 			$user['token'] = $user->createToken('eYatra')->accessToken;
 			return response()->json(['success' => true, 'user' => $user], $this->successStatus);
 		} else {
