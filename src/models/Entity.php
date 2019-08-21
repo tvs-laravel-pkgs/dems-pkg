@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -53,7 +54,7 @@ class Entity extends Model {
 	}
 
 	public static function uiTravelModeList() {
-		return Entity::where('entity_type_id', 502)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 502)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function getGradeList() {

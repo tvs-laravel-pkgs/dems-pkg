@@ -193,9 +193,11 @@ class Trip extends Model {
 		}
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
+		$trip->end_date = $end_date->end_date;
+		$trip->days = $days->days;
 		$data['trip'] = $trip;
 		$data['success'] = true;
 		return response()->json($data);
@@ -219,11 +221,14 @@ class Trip extends Model {
 				$data['message'] = 'Trip not found';
 			}
 		}
+		$grade = Auth::user()->entity;
+		$data['employee_eligible_grade'] = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
 
-		// dd(Auth::user()->entity->outlet->address->city);
 		$data['extras'] = [
-			'purpose_list' => Entity::uiPurposeList(),
-			'travel_mode_list' => Entity::uiTravelModeList(),
+			// 'purpose_list' => Entity::uiPurposeList(),
+			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get(),
+			// 'travel_mode_list' => Entity::uiTravelModeList(),
+			'travel_mode_list' => DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get(),
 			'city_list' => NCity::getList(),
 			'employee_city' => Auth::user()->entity->outlet->address->city,
 		];
