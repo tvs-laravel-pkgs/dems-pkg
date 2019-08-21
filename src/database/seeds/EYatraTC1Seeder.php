@@ -262,6 +262,16 @@ class EYatraTC1Seeder extends Seeder {
 		}
 
 		$this->command->info('');
+		$this->command->info('Outlet Cashier Mapping');
+		foreach ($company->outlets as $outlet) {
+			$cashier = $company->employees()->inRandomOrder()->first();
+			$cashier = $cashier->user;
+			$cashier->roles()->attach(504);
+			$outlet->cashier_id = $cashier->id;
+			$outlet->save();
+		}
+
+		$this->command->info('');
 		$this->command->info('Creating Agents');
 
 		//AGENTS
