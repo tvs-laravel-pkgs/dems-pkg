@@ -204,12 +204,29 @@ class GradeController extends Controller {
 	}
 
 	public function viewEYatraGrade($grade_id) {
-
 		$this->data['grade'] = $grade = Entity::withTrashed()->find($grade_id);
-		$this->data['expense_type_list'] = $expense_type_list = $grade->expenseTypes;
+		$expense_type_list = Config::expenseList();
+		$city_category_list = Entity::cityCategoryList();
+		$travel_purpose_list = $grade->tripPurposes;
+		$travel_types_list = $grade->travelModes;
+		$local_travel_types_list = $grade->localTravelModes;
+		if (count($grade->expenseTypes) > 0) {
+			foreach ($grade->expenseTypes as $expense_type) {
+				$expense_type_list[$expense_type->id]->checked = true;
+				if ($expense_type->pivot->city_category_id) {
+					$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = $expense_type->pivot->eligible_amount;
+				}
+			}
+		}
+
+		$this->data['extras'] = [
+			'expense_type_list' => $expense_type_list,
+			'travel_purpose_list' => $travel_purpose_list,
+			'travel_types_list' => $travel_types_list,
+			'city_category_list' => $city_category_list,
+			'local_travel_types_list' => $local_travel_types_list,
+		];
 		$this->data['grade_advanced'] = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
-		$this->data['travel_purpose_list'] = $travel_purpose_list = $grade->tripPurposes;
-		$this->data['localtravel_list'] = $localtravel_list = $grade->localTravelModes;
 		$this->data['action'] = 'View';
 		$this->data['success'] = true;
 		return response()->json($this->data);
