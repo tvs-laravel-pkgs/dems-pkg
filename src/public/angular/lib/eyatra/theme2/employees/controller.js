@@ -147,6 +147,7 @@ app.component('eyatraEmployeeForm', {
 
         $scope.getSbuBasedonLob = function(lob_id) {
             if (lob_id) {
+                //alert(lob_id);
                 $.ajax({
                         url: get_sbu_by_lob,
                         method: "POST",
@@ -232,6 +233,19 @@ app.component('eyatraEmployeeForm', {
                 },
                 'grade_id': {
                     required: true,
+                },
+                'date_of_joining': {
+                    required: true,
+                },
+                'aadhar_no': {
+                    required: true,
+                    maxlength: 16,
+                    minlength: 16,
+                },
+                'pan_no': {
+                    required: true,
+                    maxlength: 10,
+                    minlength: 8,
                 },
                 'bank_name': {
                     required: true,
