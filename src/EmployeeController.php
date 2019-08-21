@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\BankDetail;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\Sbu;
@@ -84,6 +85,7 @@ class EmployeeController extends Controller {
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
 		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		$designation_list = collect(Designation::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Designation']);
 		$sbu_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
@@ -94,6 +96,7 @@ class EmployeeController extends Controller {
 			'role_list' => $role_list,
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
+			'designation_list' => $designation_list,
 		];
 		$this->data['employee'] = $employee;
 
@@ -266,6 +269,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function getSbuByLob(Request $request) {
+		//dd($request);
 		if (!empty($request->lob_id)) {
 			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);
 		} else {
