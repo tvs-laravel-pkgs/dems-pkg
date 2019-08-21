@@ -160,5 +160,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/state/get', 'Uitoux\EYatra\StateController@getStateList')->name('getStateList');
 		Route::post('eyatra/city/get', 'Uitoux\EYatra\CityController@getCityList')->name('getCityList');
 
+		//PETTY CASH
+		Route::get('eyatra/petty-cash/request/get-list', 'Uitoux\EYatra\PettyCashController@listPettyCashRequest')->name('listPettyCashRequest');
+		Route::get('eyatra/petty-cash/request/get-form-data/{pettycash_id?}', 'Uitoux\EYatra\PettyCashController@pettycashFormData')->name('pettycashFormData');
 	});
 });

@@ -276,6 +276,20 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Employee Booking Update Form',
     }).
 
+
+    //PETTY CASH
+    when('/eyatra/petty-cash/list', {
+        template: '<eyatra-petty-cash-list></eyatra-petty-cash-list>',
+        title: 'Petty Cash',
+    }).
+    when('/eyatra/petty-cash/add', {
+        template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
+        title: 'Add Petty Cash',
+    }).
+    when('/eyatra/petty-cash/edit/:pettycash_id', {
+        template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
+        title: 'Edit Petty Cash',
+    }).
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
         template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
@@ -293,4 +307,5 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
         title: 'View Region',
     });
+
 }]);
