@@ -103,7 +103,7 @@ app.component('eyatraAgentForm', {
             self.agent = response.data.agent;
             self.address = response.data.address;
             self.user = response.data.user;
-            alert(response.data.user);
+            // alert(response.data.user);
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
