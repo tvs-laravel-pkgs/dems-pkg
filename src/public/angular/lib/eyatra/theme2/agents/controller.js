@@ -5,7 +5,7 @@ app.component('eyatraAgents', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#agent_list').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -41,7 +41,8 @@ app.component('eyatraAgents', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Agents');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Agents</p><h3 class="title">Agents</h3>');
+        // $('.page-header-content .display-inline-block .data-table-title').html('Agents');
         $('.add_new_button').html(
             '<a href="#!/eyatra/agent/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-agent\')">' +
             'Add New' +
@@ -103,7 +104,6 @@ app.component('eyatraAgentForm', {
             self.agent = response.data.agent;
             self.address = response.data.address;
             self.user = response.data.user;
-            // alert(response.data.user);
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
@@ -122,6 +122,7 @@ app.component('eyatraAgentForm', {
                 } else {
                     self.switch_password = 'No';
                 }
+
                 $scope.selectPaymentMode(self.agent.payment_mode_id);
             } else {
                 self.switch_value = 'Active';
@@ -228,6 +229,18 @@ app.component('eyatraAgentForm', {
             }, 'Enter a positive number.');
 
 
+        $.validator.addMethod("pwcheck", function(value) {
+            if (value == '') return true;
+            return /^[A-Za-z0-9\d=!\-@._*]*$/.test(value) // consists of only these
+                &&
+                /[a-z]/.test(value) // has a lowercase letter
+                &&
+                /[A-Z]/.test(value) // has a uppercase letter
+                &&
+                /[=!\-@._*]/.test(value) // has a uppercase letter
+                &&
+                /\d/.test(value) // has a digit
+        }, 'Use strong password with atleast one uppercase and digit and special symbol');
 
         var form_id = '#agent-form';
         var v = jQuery(form_id).validate({
@@ -301,6 +314,8 @@ app.component('eyatraAgentForm', {
                             return false;
                         }
                     },
+                    'pwcheck': true,
+
                     minlength: 5,
                     maxlength: 16,
                 },
