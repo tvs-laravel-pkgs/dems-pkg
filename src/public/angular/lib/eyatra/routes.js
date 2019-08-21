@@ -264,5 +264,20 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/trips/booking-updates/form/:visit_id', {
         template: '<eyatra-trip-booking-updates-form></eyatra-trip-booking-updates-form>',
         title: 'Employee Booking Update Form',
+    }).
+
+    //PETTY CASH
+    when('/eyatra/petty-cash/list', {
+        template: '<eyatra-petty-cash-list></eyatra-petty-cash-list>',
+        title: 'Petty Cash',
+    }).
+    when('/eyatra/petty-cash/add', {
+        template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
+        title: 'Add Petty Cash',
+    }).
+    when('/eyatra/petty-cash/edit/:pettycash_id', {
+        template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
+        title: 'Edit Petty Cash',
     });
+
 }]);
