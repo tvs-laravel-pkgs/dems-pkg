@@ -184,6 +184,29 @@ class EYatraTC1Seeder extends Seeder {
 				'C',
 				'D',
 			],
+			507 => [
+				'Trip Postponed',
+				'Date Irrelevant',
+				'Trip Details Mismatch',
+				'Not Eligible',
+			],
+			508 => [
+				'Amount Limit Exceed',
+				'Not Eligible',
+				'Budget not allocated',
+			],
+			509 => [
+				'Amount Limit Exceed',
+			],
+			510 => [
+				'Amount Limit Exceed',
+				'Budget not allocated',
+			],
+			511 => [
+				'Amount Limit Exceed',
+				'Budget not allocated',
+			],
+
 		];
 		Entity::create($sample_entities, $admin, $company);
 

@@ -15,7 +15,7 @@ class DesignationMasterTable extends Migration
     {
             Schema::create('designations', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('name');
+            $table->string('name',191);
             $table->string('code', 191);
             $table->unsignedInteger('created_by');
             $table->unsignedInteger('updated_by')->nullable();

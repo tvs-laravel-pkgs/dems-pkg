@@ -81,7 +81,9 @@ class TripBookingUpdateController extends Controller {
 		// 	return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		// }
 		$this->data['visit'] = $visit;
-		$this->data['travel_mode_list'] = Entity::uiTravelModeList();
+		// $this->data['travel_mode_list'] = Entity::uiTravelModeList();
+		$grade = Auth::user()->entity;
+		$this->data['travel_mode_list'] = DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get();
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

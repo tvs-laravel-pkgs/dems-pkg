@@ -123,6 +123,16 @@ app.component('eyatraGradeForm', {
                 } else {
                     self.switch_value = 'Inactive';
                 }
+
+                $timeout(function() {
+                    $.each($('.expense_cb:checked'), function() {
+                        var id = $(this).val();
+                        $(".sub_class_" + id).removeClass("ng-hide");
+                        $(".sub_class_" + id).addClass("required");
+                        $(".sub_class_" + id).prop('required', true);
+                    });
+                }, 500);
+
             } else {
                 self.switch_value = 'Active';
                 self.grade_advanced_value = 'Yes';
@@ -161,21 +171,20 @@ app.component('eyatraGradeForm', {
         $scope.getexpense_type = function(id) {
             if (event.target.checked == true) {
                 $(".sub_class_" + id).removeClass("ng-hide");
+                $(".sub_class_" + id).addClass("required");
                 $(".sub_class_" + id).prop('required', true);
+                $(".sub_class_" + id).prop("disabled", false);
             } else {
                 $(".sub_class_" + id).addClass("ng-hide");
+                $(".sub_class_" + id).removeClass("required");
                 $(".sub_class_" + id).prop('required', false);
+                $(".sub_class_" + id).prop("disabled", true);
             }
         }
 
         $(document).on('click', '.expense_cb', function() {
             var id = $(this).val();
-            if ($(this).prop("checked") == true) {
-                $(".sub_class_" + id).prop('required', true);
-            } else {
-                $(".sub_class_" + id).prop('required', false);
-            }
-
+            $scope.getexpense_type(id);
         });
 
         var form_id = '#grade-form';
@@ -247,21 +256,19 @@ app.component('eyatraGradeView', {
         $http.get(
             grade_view_url + '/' + $routeParams.grade_id
         ).then(function(response) {
-            self.grade = response.data.grade;
-            self.expense_type_list = response.data.expense_type_list;
-            self.localtravel_list = response.data.localtravel_list;
-            self.travel_purpose_list = response.data.travel_purpose_list;
-            self.grade_advanced = response.data.grade_advanced;
+            self.entity = response.data.grade;
+            self.extras = response.data.extras;
             self.action = response.data.action;
+            self.grade_advanced = response.data.grade_advanced;
             if (self.grade.deleted_at == null) {
                 self.status = 'Active';
             } else {
                 self.status = 'Inactive';
             }
             if (self.grade_advanced[0] == 1) {
-                self.grade_advanced_eligibility = "YES";
+                self.grade_advanced_value = "YES";
             } else {
-                self.grade_advanced_eligibility = "NO";
+                self.grade_advanced_value = "NO";
             }
         });
         $('.btn-nxt').on("click", function() {

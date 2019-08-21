@@ -363,6 +363,195 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Delete',
 			],
 
+			//MASTERS > DESIGNATIONS
+			5320 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-designation',
+				'display_name' => 'Designation',
+			],
+			5321 => [
+				'display_order' => 1,
+				'parent_id' => 5320,
+				'name' => 'eyatra-designation-add',
+				'display_name' => 'Add',
+			],
+			5322 => [
+				'display_order' => 2,
+				'parent_id' => 5320,
+				'name' => 'eyatra-designation-edit',
+				'display_name' => 'Edit',
+			],
+			5323 => [
+				'display_order' => 3,
+				'parent_id' => 5320,
+				'name' => 'eyatra-designation-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > REGIONS
+			5340 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-region',
+				'display_name' => 'Region',
+			],
+			5341 => [
+				'display_order' => 1,
+				'parent_id' => 5340,
+				'name' => 'eyatra-region-add',
+				'display_name' => 'Add',
+			],
+			5342 => [
+				'display_order' => 2,
+				'parent_id' => 5340,
+				'name' => 'eyatra-region-edit',
+				'display_name' => 'Edit',
+			],
+			5343 => [
+				'display_order' => 3,
+				'parent_id' => 5340,
+				'name' => 'eyatra-region-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > REJECTION REASONS
+			5360 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-rejection',
+				'display_name' => 'Rejection',
+			],
+
+			//MASTERS > REJECTION REASONS > TRIP REQUEST REJECTION REASONS
+			5380 => [
+				'display_order' => 1,
+				'parent_id' => 5360,
+				'name' => 'eyatra-trip-request-reject',
+				'display_name' => 'Trip Request Reject',
+			],
+			5381 => [
+				'display_order' => 1,
+				'parent_id' => 5380,
+				'name' => 'eyatra-trip-request-reject-add',
+				'display_name' => 'Add',
+			],
+			5382 => [
+				'display_order' => 2,
+				'parent_id' => 5380,
+				'name' => 'eyatra-trip-request-reject-edit',
+				'display_name' => 'Edit',
+			],
+			5383 => [
+				'display_order' => 3,
+				'parent_id' => 5380,
+				'name' => 'eyatra-trip-request-reject-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > REJECTION REASONS > TRIP ADVANCE REJECTION REASONS
+			5400 => [
+				'display_order' => 1,
+				'parent_id' => 5360,
+				'name' => 'eyatra-trip-advance-reject',
+				'display_name' => 'Trip Advance Reject',
+			],
+			5401 => [
+				'display_order' => 1,
+				'parent_id' => 5400,
+				'name' => 'eyatra-trip-advance-reject-add',
+				'display_name' => 'Add',
+			],
+			5402 => [
+				'display_order' => 2,
+				'parent_id' => 5400,
+				'name' => 'eyatra-trip-advance-reject-edit',
+				'display_name' => 'Edit',
+			],
+			5403 => [
+				'display_order' => 3,
+				'parent_id' => 5400,
+				'name' => 'eyatra-trip-advance-reject-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > REJECTION REASONS > TRIP CLAIM REJECTION REASONS
+			5420 => [
+				'display_order' => 1,
+				'parent_id' => 5360,
+				'name' => 'eyatra-trip-claim-reject',
+				'display_name' => 'Trip Claim Reject',
+			],
+			5421 => [
+				'display_order' => 1,
+				'parent_id' => 5420,
+				'name' => 'eyatra-trip-claim-reject-add',
+				'display_name' => 'Add',
+			],
+			5422 => [
+				'display_order' => 2,
+				'parent_id' => 5420,
+				'name' => 'eyatra-trip-claim-reject-edit',
+				'display_name' => 'Edit',
+			],
+			5423 => [
+				'display_order' => 3,
+				'parent_id' => 5420,
+				'name' => 'eyatra-trip-claim-reject-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > REJECTION REASONS > AGENT CLAIM REJECTION REASONS
+			5440 => [
+				'display_order' => 1,
+				'parent_id' => 5360,
+				'name' => 'eyatra-agent-claim-reject',
+				'display_name' => 'Trip Claim Reject',
+			],
+			5441 => [
+				'display_order' => 1,
+				'parent_id' => 5440,
+				'name' => 'eyatra-agent-claim-reject-add',
+				'display_name' => 'Add',
+			],
+			5442 => [
+				'display_order' => 2,
+				'parent_id' => 5440,
+				'name' => 'eyatra-agent-claim-reject-edit',
+				'display_name' => 'Edit',
+			],
+			5443 => [
+				'display_order' => 3,
+				'parent_id' => 5440,
+				'name' => 'eyatra-agent-claim-reject-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > REJECTION REASONS > VOUCHER CLAIM REJECTION REASONS
+			5460 => [
+				'display_order' => 1,
+				'parent_id' => 5360,
+				'name' => 'eyatra-voucher-claim-reject',
+				'display_name' => 'Voucher Claim Reject',
+			],
+			5461 => [
+				'display_order' => 1,
+				'parent_id' => 5460,
+				'name' => 'eyatra-voucher-claim-reject-add',
+				'display_name' => 'Add',
+			],
+			5462 => [
+				'display_order' => 2,
+				'parent_id' => 5460,
+				'name' => 'eyatra-voucher-claim-reject-edit',
+				'display_name' => 'Edit',
+			],
+			5463 => [
+				'display_order' => 3,
+				'parent_id' => 5460,
+				'name' => 'eyatra-voucher-claim-reject-delete',
+				'display_name' => 'Delete',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

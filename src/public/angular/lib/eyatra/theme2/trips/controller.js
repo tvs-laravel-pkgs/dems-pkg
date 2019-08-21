@@ -30,7 +30,7 @@ app.component('eyatraTrips', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'created_date', name: 'trips.created_date', searchable: true },
+                { data: 'created_date', name: 'trips.created_date', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'e.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },
@@ -45,7 +45,7 @@ app.component('eyatraTrips', {
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Trips</p><h3 class="title">Trips</h3>');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/trip/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/eyatra/trip/add" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
             '</a>'
         );
@@ -107,6 +107,10 @@ app.component('eyatraTripForm', {
                 $scope.$apply()
                 return;
             }
+            self.employee_eligible_grade = response.data.employee_eligible_grade;
+            if (self.employee_eligible_grade == 1) {
+                $("#advance").show().prop('disabled', false);
+            }
             self.trip = response.data.trip;
             self.extras = response.data.extras;
             self.action = response.data.action;
@@ -116,6 +120,7 @@ app.component('eyatraTripForm', {
             $scope.showWallet = false;
 
         });
+        $("#advance").hide().prop('disabled', true);
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
         });
@@ -464,8 +469,9 @@ app.component('eyatraTripVisitView', {
             self.visit = response.data.visit;
             self.trip = response.data.trip;
             self.bookings = response.data.bookings;
-            console.log(response.data.trip);
+            // console.log(response.data.trip);
             $rootScope.loading = false;
+
         });
 
         //Tab Navigation

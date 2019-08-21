@@ -10,6 +10,7 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\BankDetail;
 use Uitoux\EYatra\Config;
+use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Lob;
@@ -40,12 +41,13 @@ class EmployeeController extends Controller {
 		return Datatables::of($employees)
 			->addColumn('action', function ($employee) {
 
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img2 = asset('public/img/content/table/eye.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2_active = asset('public/img/content/table/eye-active.svg');
-				$img3 = asset('public/img/content/table/delete-default.svg');
-				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
+
 				return '
 				<a href="#!/eyatra/employee/edit/' . $employee->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
@@ -83,6 +85,8 @@ class EmployeeController extends Controller {
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
+		$designation_list = collect(Designation::designationList())->prepend(['id' => '', 'name' => 'Select Designation']);
+		// dd($designation_list);
 		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
 		$sbu_list = [];
 		$this->data['extras'] = [
@@ -94,7 +98,9 @@ class EmployeeController extends Controller {
 			'role_list' => $role_list,
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
+			'designation_list' => $designation_list,
 		];
+		// dd($this->data['extras']);
 		$this->data['employee'] = $employee;
 
 		return response()->json($this->data);
@@ -266,6 +272,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function getSbuByLob(Request $request) {
+		//dd($request);
 		if (!empty($request->lob_id)) {
 			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);
 		} else {
