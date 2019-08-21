@@ -20,6 +20,11 @@ class EYatraETSeeder extends Seeder {
 			504 => 'Lodging State',
 			505 => 'Employee Wallet Mode',
 			506 => 'City Category',
+			507 => 'Trip Request Rejection Reasons',
+			508 => 'Trip Advance Rejection Reasons',
+			509 => 'Trip Claim Rejection Reasons',
+			510 => 'Agent Claim Rejection Reasons',
+			511 => 'Voucher Claim Rejection Reasons',
 		];
 
 		foreach ($entity_types as $entity_type_id => $entity_type_name) {
