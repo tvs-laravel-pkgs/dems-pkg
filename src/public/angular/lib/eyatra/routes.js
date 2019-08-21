@@ -221,6 +221,16 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Advance Claim Request Form',
     }).
 
+    //AGENT - REQUEST VIEW
+    when('/eyatra/agent/requests', {
+        template: '<eyatra-agent-requests></eyatra-agent-requests>',
+        title: 'Agent Requests',
+    }).
+    when('/eyatra/agent/request/view/:trip_id', {
+        template: '<eyatra-agent-request-form></eyatra-agent-request-form>',
+        title: 'Agent Request Form',
+    }).
+
 
     //AGENT - BOOKING REQUESTS
     when('/eyatra/trips/booking-requests', {
