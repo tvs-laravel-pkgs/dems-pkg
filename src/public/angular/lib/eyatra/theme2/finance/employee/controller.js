@@ -1,4 +1,4 @@
-app.component('eyatraTripClaimList', {
+app.component('eyatraFinanceEmpList', {
     templateUrl: eyatra_trip_claim_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
@@ -80,9 +80,10 @@ app.component('eyatraTripClaimList', {
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraTripClaimForm', {
-    templateUrl: eyatra_trip_claim_form_template_url,
+app.component('eyatraFinanceEmpForm', {
+    templateUrl: eyatra_finance_employee_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        alert();
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var lodgings_removal_id = [];
