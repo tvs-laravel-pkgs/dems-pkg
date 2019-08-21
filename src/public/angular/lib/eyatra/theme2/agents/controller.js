@@ -115,11 +115,11 @@ app.component('eyatraAgentForm', {
                     self.switch_value = 'Inactive';
                 }
                 if (self.user.force_password_change == 1) {
-                    self.switch_password = 'No';
-                    $("#hide_password").hide();
-                    $("#password").prop('disabled', true);
-                } else {
                     self.switch_password = 'Yes';
+                    $("#hide_password").show();
+                    $("#password").prop('disabled', false);
+                } else {
+                    self.switch_password = 'No';
                 }
                 $scope.selectPaymentMode(self.agent.payment_mode_id);
             } else {
@@ -279,7 +279,7 @@ app.component('eyatraAgentForm', {
                 },
                 'mobile_number': {
                     required: true,
-                    minlength: 8,
+                    number: true,
                     maxlength: 10,
                 },
                 'email': {

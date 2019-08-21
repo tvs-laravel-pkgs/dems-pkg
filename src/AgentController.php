@@ -72,6 +72,7 @@ class AgentController extends Controller {
 			$agent = new Agent;
 			$address = new Address;
 			$user = new User;
+			$user->password_change = 'yes';
 			$this->data['success'] = true;
 			$this->data['travel_list'] = [];
 		} else {
@@ -79,6 +80,7 @@ class AgentController extends Controller {
 			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
+			// dd($user);
 			if (!$agent) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Agent not found';
@@ -94,6 +96,7 @@ class AgentController extends Controller {
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
 			'country_list' => NCountry::getList(),
+
 			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->city->state->country_id),
 			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->city->state_id),
 			'payment_mode_list' => $payment_mode_list,
@@ -119,7 +122,7 @@ class AgentController extends Controller {
 				'address_line1.required' => 'Address Line1 is Required',
 				'country.required' => 'Country is Required',
 				'state.required' => 'State is Required',
-				'city.required' => 'City is Required',
+				'city_id.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
 				'username.required' => "User Name is Required",
 				'mobile_number.required' => "Mobile Number is Required",
@@ -139,7 +142,7 @@ class AgentController extends Controller {
 				'address_line1' => 'required',
 				'country' => 'required',
 				'state' => 'required',
-				'city' => 'required',
+				'city_id' => 'required',
 				'pincode' => 'required',
 				'username' => 'required',
 			], $error_messages);
@@ -188,8 +191,7 @@ class AgentController extends Controller {
 			$address->line_2 = $request->address_line2;
 
 			// $address->country_id = $request->country;
-			// $address->state_id = $request->state;
-			$address->city_id = $request->city;
+			// $address->city_id = $request->city;
 			$address->fill($request->all());
 			$address->save();
 
@@ -206,6 +208,7 @@ class AgentController extends Controller {
 				}
 				$user->force_password_change = 1;
 			}
+
 			// $user->fill($request->all());
 			$user->save();
 
