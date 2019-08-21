@@ -28,7 +28,7 @@ class NCountry extends Model {
 		return $this->hasMany('Uitoux\EYatra\NState', 'country_id');
 	}
 
-	static public function create($countries, $admin) {
+	static public function create($countries, $admin, $company) {
 
 		foreach ($countries as $country_id => $country_data) {
 			$country = NCountry::firstOrNew([
@@ -44,6 +44,16 @@ class NCountry extends Model {
 				$state->fill($state_data['data']);
 				$state->created_by = $admin->id;
 				$state->save();
+				foreach ($state_data['regions'] as $region_code => $region_name) {
+					$region = Region::firstOrNew([
+						'company_id' => $company->id,
+						'state_id' => $state->id,
+						'code' => $region_code,
+					]);
+					$region->name = $region_name;
+					$region->created_by = $admin->id;
+					$region->save();
+				}
 				foreach ($state_data['cities'] as $city_name) {
 					$city = NCity::firstOrNew([
 						'state_id' => $state->id,

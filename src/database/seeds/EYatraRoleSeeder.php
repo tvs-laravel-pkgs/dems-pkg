@@ -25,7 +25,7 @@ class EYatraRoleSeeder extends Seeder {
 				'created_by' => 1,
 				'permissions' => [
 					//MAIN MENUS
-					5000,
+					//5000,
 
 					//ADMIN PERMISSION
 					5260,
@@ -34,10 +34,10 @@ class EYatraRoleSeeder extends Seeder {
 					5240,
 
 					//TRIPS
-					5001, 5002, 5003, 5004, 5005,
+					5001, 5002, 5003, 5004, 5005, 5480,
 
 					//TRIPS VERIFICATION
-					5060, 5061,
+					5060, 5061, 5482,
 
 					//TRIPS BOOKING REQUESTS
 					5160, 5161,
