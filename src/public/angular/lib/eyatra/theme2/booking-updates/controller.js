@@ -77,6 +77,7 @@ app.component('eyatraTripBookingUpdatesForm', {
                 return;
             }
             self.visit = response.data.visit;
+            console.log(self.visit);
             self.travel_mode_list = response.data.travel_mode_list;
             $rootScope.loading = false;
         });
