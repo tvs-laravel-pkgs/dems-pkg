@@ -42,7 +42,7 @@ class EYatraTC1Seeder extends Seeder {
 
 		$this->call(EYatraSeeder::class);
 
-		$base_telephone_number = '1234567' . $company_id;
+		$base_telephone_number = '00000' . $company_id;
 		$company = Company::firstOrNew([
 			'id' => $company_id,
 		]);
@@ -52,7 +52,7 @@ class EYatraTC1Seeder extends Seeder {
 		$com_data['data']['cin_number'] = 'CIN' . $company_id;
 		$com_data['data']['gst_number'] = 'GST' . $company_id;
 		$com_data['data']['customer_care_email'] = 'customercare@com' . $company_id . '.in';
-		$com_data['data']['customer_care_phone'] = $base_telephone_number . '00';
+		$com_data['data']['customer_care_phone'] = $base_telephone_number . '0000';
 		$com_data['data']['reference_code'] = 'com' . $company_id;
 		$company->fill($com_data['data']);
 		$company->save();
@@ -64,13 +64,13 @@ class EYatraTC1Seeder extends Seeder {
 			'username' => 'c' . $company->id . '/a1',
 		]);
 		$admin->user_type_id = 3120;
-		$admin->mobile_number = $base_telephone_number . '01';
+		$admin->mobile_number = $base_telephone_number . '1000';
 		$admin->password = 'Test@123';
 		$admin->save();
 		$admin->roles()->sync(500);
 		$country = NCountry::find(5);
 		if ($country) {
-			$country->delete();
+			// $country->delete();
 		}
 
 		$countries = [
@@ -208,7 +208,7 @@ class EYatraTC1Seeder extends Seeder {
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
 			$address = Address::create($address_of_id, $outlet, $faker);
-			dump($address);
+			dump($outlet, $address);
 
 			$this->command->info('------------------');
 			$this->command->info('Outlet Created : ' . $outlet->name);
@@ -224,7 +224,7 @@ class EYatraTC1Seeder extends Seeder {
 
 				//USER ACCOUNT
 				$user_type_id = 3121;
-				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $roles = 502);
+				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $base_telephone_number . $i . $j . '0', $roles = 502);
 				//EMPLOYEES - REGULAR
 				for ($k = 1; $k <= $number_of_items; $k++) {
 					$code = $manager->code . '/e' . $k;
@@ -233,7 +233,7 @@ class EYatraTC1Seeder extends Seeder {
 					$this->command->info('Employee Created : ' . $employee->code);
 
 					$user_type_id = 3121;
-					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $roles = 501);
+					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $base_telephone_number . $i . $j . $k . '0', $roles = 501);
 				}
 			}
 		}
@@ -252,7 +252,7 @@ class EYatraTC1Seeder extends Seeder {
 			$agent->save();
 
 			$user_type_id = 3122;
-			$user = Employee::createUser($company, $user_type_id, $agent, $faker, $roles = 503);
+			$user = Employee::createUser($company, $user_type_id, $agent, $faker, $base_telephone_number . '300' . $i, $roles = 503);
 
 			//AGENT ADDRESS
 			$address_of_id = 3161;
