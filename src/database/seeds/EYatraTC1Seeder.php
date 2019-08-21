@@ -362,6 +362,18 @@ class EYatraTC1Seeder extends Seeder {
 				$trip_purposes[] = $trip_purpose_id;
 			}
 			$grade->tripPurposes()->sync($trip_purposes);
+
+			//GRADE TRAVEL MODE MAPPING
+			$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 4))->pluck('id');
+			$travel_modes = [];
+			foreach ($travel_mode_ids as $travel_mode_id) {
+				$travel_modes[] = $travel_mode_id;
+			}
+			$grade->travelModes()->sync($travel_modes);
+
+			//GRADE ADVANCE ELIGIBILITY
+			$advance_eligibility = $faker->randomElement([0, 1]);
+			$grade->gradeEligibility()->sync($advance_eligibility);
 		}
 
 		$this->command->info('');

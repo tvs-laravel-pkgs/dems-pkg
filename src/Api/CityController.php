@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\NCity;
 
-class TripController extends Controller {
+class CityController extends Controller {
 
 	public function addTrip(Request $request) {
 

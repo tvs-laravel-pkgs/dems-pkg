@@ -1,4 +1,4 @@
-app.component('eyatraTrips', {
+app.component('eyatraTrips1', {
     templateUrl: eyatra_trip_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;

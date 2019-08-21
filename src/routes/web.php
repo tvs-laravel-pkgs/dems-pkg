@@ -4,7 +4,6 @@ Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
 
 Route::group(['middleware' => ['api']], function () {
 	Route::group(['middleware' => ['auth:api'], 'prefix' => 'eyatra/api'], function () {
-// Route::prefix('admin')->group(function () {
 		//HELPERS
 		Route::get('city/search', 'Uitoux\EYatra\Api\CityController@searchCity');
 		Route::post('state/get', 'Uitoux\EYatra\Api\StateController@getStateList');

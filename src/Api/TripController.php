@@ -12,8 +12,8 @@ use Uitoux\EYatra\Trip;
 class TripController extends Controller {
 	public $successStatus = 200;
 
-	public function getTripFormData($trip_id = NULL) {
-		return Trip::getTripFormData($trip_id);
+	public function getTripFormData(Request $r) {
+		return Trip::getTripFormData($r->trip_id);
 	}
 
 	public function listTrip(Request $request) {
