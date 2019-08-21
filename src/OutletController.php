@@ -79,6 +79,7 @@ class OutletController extends Controller {
 			$this->data['action'] = 'Add';
 			$outlet = new Outlet;
 			$address = new Address;
+			$outlet->amount_eligible = 0;
 			$this->data['status'] = 'Active';
 			$this->data['success'] = true;
 		} else {
@@ -96,6 +97,7 @@ class OutletController extends Controller {
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
+			$outlet->amount_eligible == 1 ? $outlet->amount_eligible : '';
 		}
 
 		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);

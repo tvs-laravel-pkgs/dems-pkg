@@ -89,7 +89,7 @@ class EntityController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'name' => [
 					'required',
-					'unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+					'unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,' . $request->entity_type_id,
 					'max:191',
 				],
 

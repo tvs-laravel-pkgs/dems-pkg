@@ -28,7 +28,7 @@ app.component('eyatraEmployees', {
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action' },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'e.code', searchable: true },
                 { data: 'name', name: 'e.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
@@ -44,7 +44,7 @@ app.component('eyatraEmployees', {
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Employees</p><h3 class="title">Employees</h3>');
         //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/employee/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/eyatra/employee/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-employees\')">' +
             'Add New' +
             '</a>'
         );
@@ -114,7 +114,7 @@ app.component('eyatraEmployeeForm', {
             self.employee = response.data.employee;
             self.extras = response.data.extras;
             self.action = response.data.action;
-            console.log(response.data.extras);
+            // console.log(response.data.extras);
             if (self.action == 'Edit') {
                 if (self.employee.user.force_password_change == 1) {
                     self.switch_password = 'No';
@@ -147,6 +147,7 @@ app.component('eyatraEmployeeForm', {
 
         $scope.getSbuBasedonLob = function(lob_id) {
             if (lob_id) {
+                //alert(lob_id);
                 $.ajax({
                         url: get_sbu_by_lob,
                         method: "POST",
@@ -232,6 +233,19 @@ app.component('eyatraEmployeeForm', {
                 },
                 'grade_id': {
                     required: true,
+                },
+                'date_of_joining': {
+                    required: true,
+                },
+                'aadhar_no': {
+                    required: true,
+                    maxlength: 16,
+                    minlength: 16,
+                },
+                'pan_no': {
+                    required: true,
+                    maxlength: 10,
+                    minlength: 8,
                 },
                 'bank_name': {
                     required: true,

@@ -17,6 +17,10 @@ class Employee extends Model {
 		'grade_id',
 		'payment_mode_id',
 		'sbu_id',
+		'designation_id',
+		'date_of_joining',
+		'aadhar_no',
+		'pan_no',
 		'created_by',
 		'updated_by',
 		'deleted_by',
@@ -93,6 +97,13 @@ class Employee extends Model {
 		$user->roles()->sync($roles);
 		return $user;
 
+	}
+		public function setDateOfJoiningAttribute($value) {
+		return $this->attributes['date_of_joining'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
+	}
+
+	public function getDateOfJoiningAttribute($value) {
+		return date('d-m-Y', strtotime($value));
 	}
 
 }

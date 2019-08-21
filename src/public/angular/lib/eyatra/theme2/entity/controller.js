@@ -29,6 +29,7 @@ app.component('eyatraEntityList', {
                 serverSide: true,
                 paging: true,
                 ordering: false,
+
                 ajax: {
                     url: eyatra_entity_get_list_url,
                     type: "GET",
@@ -38,7 +39,7 @@ app.component('eyatraEntityList', {
                     },
                 },
                 columns: [
-                    { data: 'action', searchable: false, class: 'action' },
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                     { data: 'name', name: 'entities.name' },
                     { data: 'created_by', name: 'users.username' },
                     { data: 'updated_by', name: 'updater.username' },
@@ -78,7 +79,7 @@ app.component('eyatraEntityList', {
                         new Noty({
                             type: 'success',
                             layout: 'topRight',
-                            text: 'Entity Details is Deleted Successfully',
+                            text: 'Entity Detail Deleted Successfully',
                         }).show();
                     }
                     dataTable.ajax.reload(function(json) {});
@@ -148,12 +149,14 @@ app.component('eyatraEntityForm', {
                 'name': {
                     required: true,
                     minlength: 1,
+                    maxlength: 191,
                 },
 
             },
             messages: {
                 'name': {
                     minlength: 'Please enter minimum of 1 characters',
+                    minlength: 'Please enter maximum of 191 characters',
                 },
             },
             submitHandler: function(form) {
