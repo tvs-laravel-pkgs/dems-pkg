@@ -221,6 +221,16 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Advance Claim Request Form',
     }).
 
+    //AGENT - REQUEST VIEW
+    when('/eyatra/agent/requests', {
+        template: '<eyatra-agent-requests></eyatra-agent-requests>',
+        title: 'Agent Requests',
+    }).
+    when('/eyatra/agent/request/view/:trip_id', {
+        template: '<eyatra-agent-request-form></eyatra-agent-request-form>',
+        title: 'Agent Request Form',
+    }).
+
 
     //AGENT - BOOKING REQUESTS
     when('/eyatra/trips/booking-requests', {
@@ -266,6 +276,7 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Employee Booking Update Form',
     }).
 
+
     //EMPLOYEE - FINANCE TEAM
     when('/eyatra/finance-emp-claim', {
         template: '<eyatra-finance-emp-list></eyatra-finance-emp-list>',
@@ -274,5 +285,22 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/finance-emp-claim/add', {
         template: '<eyatra-finance-emp-form></eyatra-finance-emp-form>',
         title: 'Finance Employee Claims Add',
+    }).
+    //OUTLET - OUTLET REIMBURSEMENT
+    when('/eyatra/outlet-reimbursement', {
+        template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
+        title: 'Regions',
+    }).
+    when('/eyatra/outlet-reimbursement/add', {
+        template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
+        title: 'Add Region',
+    }).
+    when('/eyatra/outlet-reimbursement/edit/:outlet_id', {
+        template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
+        title: 'Edit Region',
+    }).
+    when('/eyatra/outlet-reimbursement/view/:outlet_id', {
+        template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
+        title: 'View Region',
     });
 }]);
