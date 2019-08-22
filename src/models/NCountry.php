@@ -5,7 +5,7 @@ namespace Uitoux\EYatra;
 use Illuminate\Database\Eloquent\Model;
 
 class NCountry extends Model {
-	protected $table = 'countries';
+	protected $table = 'country';
 
 	protected $fillable = [
 		'id',

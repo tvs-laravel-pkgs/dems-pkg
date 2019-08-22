@@ -218,6 +218,10 @@ class EYatraTC1Seeder extends Seeder {
 				'Amount Limit Exceed',
 				'Budget not allocated',
 			],
+			512 => [
+				'Local Conveyance',
+				'Others',
+			],
 
 		];
 		Entity::create($sample_entities, $admin, $company);
