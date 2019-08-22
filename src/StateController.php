@@ -16,7 +16,7 @@ use Yajra\Datatables\Datatables;
 class StateController extends Controller {
 	public function listEYatraState(Request $r) {
 		$states = NState::withTrashed()->from('nstates')
-			->join('countries as c', 'c.id', 'nstates.country_id')
+			->join('country as c', 'c.id', 'nstates.country_id')
 			->select(
 				'nstates.id',
 				'nstates.code',

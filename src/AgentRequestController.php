@@ -59,7 +59,6 @@ class AgentRequestController extends Controller {
 	}
 
 	public function agentRequestFormData($trip_id) {
-
 		$trip = Trip::with([
 			'visits',
 			'visits.fromCity',
@@ -68,6 +67,7 @@ class AgentRequestController extends Controller {
 			'visits.bookingMethod',
 			'visits.bookingStatus',
 			'visits.agent',
+			'visits.bookings',
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',

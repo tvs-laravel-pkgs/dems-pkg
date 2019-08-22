@@ -6,42 +6,65 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 
 class TripBookingRequestController extends Controller {
 	public function listTripBookingRequests(Request $r) {
 
-		$visits = Visit::from('visits as v')
-			->join('trips as t', 'v.trip_id', 't.id')
-			->join('employees as e', 'e.id', 't.employee_id')
-			->join('ncities as fc', 'fc.id', 'v.from_city_id')
-			->join('ncities as tc', 'tc.id', 'v.to_city_id')
-			->join('entities as tm', 'tm.id', 'v.travel_mode_id')
+		$visits = Trip::join('employees as e', 'e.id', 'trips.employee_id')
+			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('configs as bs', 'bs.id', 'v.booking_status_id')
-			->join('agents as a', 'a.id', 'v.agent_id')
 			->join('configs as status', 'status.id', 'v.status_id')
-			->select(
-				'v.id',
-				't.number',
-				'e.code as ecode',
-				DB::raw('DATE_FORMAT(v.date,"%d/%m/%Y") as date'),
-				'fc.name as from',
-				'tc.name as to',
-				'tm.name as travel_mode',
-				'bs.name as booking_status',
+			->leftjoin('agents as a', 'a.id', 'v.agent_id')
+			->select('trips.id as trip_id',
+				'e.code as ecode', 'e.name as ename',
+				'status.name as status',
 				'a.name as agent',
-				'status.name as status'
-
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as date')
 			)
-			->orderBy('t.id', 'desc')
-			->orderBy('t.created_at', 'desc')
-			->orderBy('v.status_id', 'desc')
+			->groupBy('v.trip_id')
+			->orderBy('trips.created_at', 'desc')
+		// ->get()
 		;
 
+		// dd($visits);
+		// $visits = Visit::from('visits as v')
+		// 	->join('trips as t', 'v.trip_id', 't.id')
+		// 	->join('employees as e', 'e.id', 't.employee_id')
+		// 	->join('ncities as fc', 'fc.id', 'v.from_city_id')
+		// 	->join('ncities as tc', 'tc.id', 'v.to_city_id')
+		// 	->join('entities as tm', 'tm.id', 'v.travel_mode_id')
+		// 	->join('configs as bs', 'bs.id', 'v.booking_status_id')
+		// 	->join('agents as a', 'a.id', 'v.agent_id')
+		// 	->join('configs as status', 'status.id', 'v.status_id')
+		// 	->select(
+		// 		'v.id',
+		// 		't.number',
+		// 		'e.code as ecode',
+		// 		DB::raw('DATE_FORMAT(v.date,"%d/%m/%Y") as date'),
+		// 		'fc.name as from',
+		// 		'tc.name as to',
+		// 		'tm.name as travel_mode',
+		// 		'bs.name as booking_status',
+		// 		'a.name as agent',
+		// 		'status.name as status'
+
+		// 	)
+		// 	->orderBy('t.id', 'desc')
+		// 	->orderBy('t.created_at', 'desc')
+		// 	->orderBy('v.status_id', 'desc')
+		// 	->groupBy('v.trip_id')
+		// // ->get()
+		// ;
+
+		// dd($visits);
 		if (!Entrust::can('view-all-trip-booking-requests')) {
 			$visits->where('v.agent_id', Auth::user()->entity_id);
 		}
+
+		// dd($visits);
 		return Datatables::of($visits)
 			->addColumn('action', function ($visit) {
 
@@ -52,7 +75,7 @@ class TripBookingRequestController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trips/booking-requests/view/' . $visit->id . '">
+				<a href="#!/eyatra/trips/booking-requests/view/' . $visit->trip_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				';

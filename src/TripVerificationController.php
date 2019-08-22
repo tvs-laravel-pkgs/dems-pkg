@@ -67,7 +67,7 @@ class TripVerificationController extends Controller {
 	}
 
 	public function saveTripVerification(Request $r) {
-		return Trip::saveTripVerification($r)
+		return Trip::saveTripVerification($r);
 	}
 
 	public function approveTripVerification($trip_id) {
