@@ -66,7 +66,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function eyatraTripClaimFormData($trip_id = NULL) {
-
+//dd($trip_id);
 		if (!$trip_id) {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
@@ -86,7 +86,7 @@ class TripClaimController extends Controller {
 				'visits.status',
 				'visits.attachments'
 			)->find($trip_id);
-
+//dd($trip);
 			if (!$trip) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Trip not found';
@@ -98,6 +98,7 @@ class TripClaimController extends Controller {
 			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 			'state_type_list' => Entity::getLodgeStateTypeList(),
+			'booking_type_list' => Config::getBookingTypeTypeList(),
 		];
 		$this->data['trip'] = $trip;
 

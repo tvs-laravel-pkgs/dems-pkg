@@ -275,8 +275,15 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-booking-updates-form></eyatra-trip-booking-updates-form>',
         title: 'Employee Booking Update Form',
     }).
-
-
+    //EMPLOYEE - FINANCE TEAM
+    when('/eyatra/finance-emp-claim', {
+        template: '<eyatra-finance-emp-list></eyatra-finance-emp-list>',
+        title: 'Finance Employee Claims',
+    }).
+    when('/eyatra/finance-emp-claim/add', {
+        template: '<eyatra-finance-emp-form></eyatra-finance-emp-form>',
+        title: 'Finance Employee Claims Add',
+    }).
     //PETTY CASH
     when('/eyatra/petty-cash/list', {
         template: '<eyatra-petty-cash-list></eyatra-petty-cash-list>',
