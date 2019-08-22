@@ -50,7 +50,10 @@ class Entity extends Model {
 	}
 
 	public static function uiPurposeList() {
-		return Entity::where('entity_type_id', 501)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 501)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
+	}
+	public static function uiExpenceTypeList() {
+		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function uiTravelModeList() {

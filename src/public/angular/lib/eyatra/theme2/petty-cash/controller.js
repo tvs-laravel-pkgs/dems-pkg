@@ -1,9 +1,9 @@
-app.component('eyatraTrips1', {
-    templateUrl: eyatra_trip_list_template_url,
+app.component('eyatraPettyCashList', {
+    templateUrl: eyatra_pettycash_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_trip_table').DataTable({
+        var dataTable = $('#petty_cash_list').DataTable({
             stateSave: true,
             "dom": dom_structure_separate,
             "language": {
@@ -21,7 +21,7 @@ app.component('eyatraTrips1', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listTrip'],
+                url: laravel_routes['listPettyCashRequest'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
@@ -29,13 +29,12 @@ app.component('eyatraTrips1', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'created_date', name: 'trips.created_date', searchable: false },
-                { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'ename', name: 'e.name', searchable: true },
-                { data: 'travel_period', name: 'travel_period', searchable: false },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+                { data: 'ename', name: 'ename', searchable: true },
+                { data: 'ecode', name: 'ecode', searchable: false },
+                { data: 'oname', name: 'oname', searchable: true },
+                { data: 'ocode', name: 'ocode', searchable: true },
+                { data: 'date', name: 'date', searchable: false },
+                { data: 'total', name: 'total', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -43,7 +42,7 @@ app.component('eyatraTrips1', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Trips</p><h3 class="title">Trips</h3>');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Expense Voucher Claim</h3>');
         $('.add_new_button').html(
             '<a href="#!/eyatra/trip/add" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
@@ -108,21 +107,18 @@ app.component('eyatraPettyCashForm', {
                 //$scope.$apply()
                 // return;
             }
-            console.log(response.data);
-            self.employee_eligible_grade = response.data.employee_eligible_grade;
-            if (self.employee_eligible_grade.advanced_eligibility == 1) {
-                $("#advance").show().prop('disabled', false);
-            }
-            self.trip = response.data.trip;
+            console.log(response);
             self.extras = response.data.extras;
             self.action = response.data.action;
-            $rootScope.loading = false;
-            $scope.showBank = false;
-            $scope.showCheque = false;
-            $scope.showWallet = false;
+            self.petty_cash = response.data.petty_cash;
+            self.petty_cash_other = response.data.petty_cash_other;
+
+            if (self.petty_cash.length == 0) {
+                self.addlocalconveyance();
+                self.addotherexpence();
+            }
 
         });
-        $("#advance").hide().prop('disabled', true);
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
         });
@@ -130,91 +126,63 @@ app.component('eyatraPettyCashForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
-        self.searchCity = function(query) {
-            if (query) {
-                return new Promise(function(resolve, reject) {
-                    $http
-                        .post(
-                            laravel_routes['searchCity'], {
-                                key: query,
-                            }
-                        )
-                        .then(function(response) {
-                            resolve(response.data);
-                        });
-                });
-            } else {
-                return [];
-            }
-        }
+        // self.searchCity = function(query) {
+        //     if (query) {
+        //         return new Promise(function(resolve, reject) {
+        //             $http
+        //                 .post(
+        //                     laravel_routes['searchCity'], {
+        //                         key: query,
+        //                     }
+        //                 )
+        //                 .then(function(response) {
+        //                     resolve(response.data);
+        //                 });
+        //         });
+        //     } else {
+        //         return [];
+        //     }
+        // }
 
-        self.addVisit = function() {
-            self.trip.visits.push({
-                visit_date: '',
+        self.addlocalconveyance = function() {
+            self.petty_cash.push({
+                booking_method: 'Self',
+                from_place: '',
+                to_place: '',
+                from_km: '',
+                to_km: '',
+            });
+        }
+        self.addotherexpence = function() {
+            self.petty_cash_other.push({
+                expence_type: '',
                 booking_method: 'Self',
                 preferred_travel_modes: '',
             });
         }
 
-        $scope.trip_mode = function(id) {
-            if (id == 1) {
-                $scope.single_trip = true;
-                $scope.round_trip = false;
-                $scope.multi_trip = false;
-            } else if (id == 2) {
-                $scope.single_trip = false;
-                $scope.round_trip = true;
-                $scope.multi_trip = false;
-            } else if (id == 3) {
-                $scope.round_trip = false;
-                $scope.single_trip = false;
-                $scope.multi_trip = true;
-            }
-        }
-
-        self.removeLodging = function(index, lodging_id) {
+        self.removepettyCash = function(index, lodging_id) {
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
             }
-            self.trip.visits.splice(index, 1);
+            self.petty_cash.splice(index, 1);
         }
 
-        var form_id = '#trip-form';
+        self.removeotherexpence = function(index, lodging_id) {
+            if (lodging_id) {
+                lodgings_removal_id.push(lodging_id);
+                $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
+            }
+            self.petty_cash_other.splice(index, 1);
+        }
+
+        var form_id = '#petty-cash';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                if (element.attr('name') == 'trip_mode[]') {
-                    error.appendTo($('.trip_mode'));
-                } else {
-                    error.insertAfter(element)
-                }
+                error.insertAfter(element)
             },
             ignore: '',
-            rules: {
-                'purpose_id': {
-                    required: true,
-                },
-                'description': {
-                    maxlength: 255,
-                },
-                'advance_received': {
-                    maxlength: 10,
-                },
-                'trip_mode[]': {
-                    required: true,
-                },
-            },
-            messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
-                },
-                'advance_received': {
-                    maxlength: 'Please enter maximum of 10 Numbers',
-                },
-                'trip_mode[]': {
-                    required: 'Select Visit Mode',
-                },
-            },
             invalidHandler: function(event, validator) {
                 new Noty({
                     type: 'error',
@@ -227,7 +195,7 @@ app.component('eyatraPettyCashForm', {
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['saveTrip'],
+                        url: laravel_routes['pettycashSave'],
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -246,9 +214,9 @@ app.component('eyatraPettyCashForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Trip saves successfully',
+                                text: 'Petty Cash saves successfully',
                             }).show();
-                            $location.path('/eyatra/trips')
+                            $location.path('/eyatra/pettycash')
                             $scope.$apply()
                         }
                     })
