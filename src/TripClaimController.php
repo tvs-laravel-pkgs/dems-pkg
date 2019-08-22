@@ -70,6 +70,7 @@ class TripClaimController extends Controller {
 		if (!$trip_id) {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
+			$this->data['employee']= [];
 		} else {
 			$trip = Trip::with(
 				'visits',
@@ -92,6 +93,9 @@ class TripClaimController extends Controller {
 				$this->data['message'] = 'Trip not found';
 			}
 			$this->data['success'] = true;
+
+			$this->data['employee']= $employee=Employee::where('id',$trip->employee_id)->first();
+			//dd($employee);
 		}
 		$this->data['extras'] = [
 			'purpose_list' => Entity::uiPurposeList(),

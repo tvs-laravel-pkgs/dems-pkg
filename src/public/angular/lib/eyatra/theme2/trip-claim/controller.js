@@ -95,7 +95,7 @@ app.component('eyatraTripClaimForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
+            /*if (!response.data.success) {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
@@ -104,9 +104,10 @@ app.component('eyatraTripClaimForm', {
                 $location.path('/eyatra/trip/claim/list')
                 $scope.$apply()
                 return;
-            }
+            }*/
             console.log(response.data.trip);
             //console.log(response.data.extras);
+            self.employee = response.data.employee;
             self.extras = response.data.extras;
             self.trip = response.data.trip;
             console.log(self.trip.lodgings.length);
