@@ -4,7 +4,6 @@ Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
 
 Route::group(['middleware' => ['api']], function () {
 	Route::group(['middleware' => ['auth:api'], 'prefix' => 'eyatra/api'], function () {
-// Route::prefix('admin')->group(function () {
 		//HELPERS
 		Route::get('city/search', 'Uitoux\EYatra\Api\CityController@searchCity');
 		Route::post('state/get', 'Uitoux\EYatra\Api\StateController@getStateList');
@@ -73,6 +72,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/outlet/delete/{outlet_id}', 'Uitoux\EYatra\OutletController@deleteEYatraOutlet')->name('deleteEYatraOutlet');
 		Route::post('eyatra/outlet/get/sbu', 'Uitoux\EYatra\OutletController@getSbuByLob')->name('getSbuByLobOutlet');
 		Route::post('eyatra/outlet/cashier-search', 'Uitoux\EYatra\OutletController@searchCashier')->name('searchCashier');
+		Route::get('eyatra/outlet/get/lob-sbu/{id}', 'Angular\Master\OutletController@getOutletSbuByLob')->name('getOutletSbu');
 
 		//EMPLOYEES
 		Route::get('eyatra/employee/get-list', 'Uitoux\EYatra\EmployeeController@listEYatraEmployee')->name('listEYatraEmployee');
@@ -164,5 +164,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/state/get', 'Uitoux\EYatra\StateController@getStateList')->name('getStateList');
 		Route::post('eyatra/city/get', 'Uitoux\EYatra\CityController@getCityList')->name('getCityList');
 
+		//PETTY CASH
+		Route::get('eyatra/petty-cash/request/get-list', 'Uitoux\EYatra\PettyCashController@listPettyCashRequest')->name('listPettyCashRequest');
+		Route::get('eyatra/petty-cash/request/get-form-data/{pettycash_id?}', 'Uitoux\EYatra\PettyCashController@pettycashFormData')->name('pettycashFormData');
 	});
 });

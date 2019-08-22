@@ -79,7 +79,6 @@ class OutletController extends Controller {
 			$this->data['action'] = 'Add';
 			$outlet = new Outlet;
 			$address = new Address;
-			$outlet->amount_eligible = 0;
 			$this->data['status'] = 'Active';
 			$this->data['success'] = true;
 		} else {
@@ -111,7 +110,21 @@ class OutletController extends Controller {
 			// 'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
+		$this->data['lob_outlet'] = $lob = Lob::select('name', 'id')->get();
+		// $this->data['sbu_outlet'] = Sbu::select(
+		// 	'name',
+		// 	'id',
+		// )
+		// 	->whereIn('lob_id', )
+		// 	->get()
+		// ;
+		// foreach ($outlet->outletBudgets as $outlet_budget) {
+		// 	$this->data['lob_outlet'][$outlet_budget->id]->checked = true;
 
+		// }
+		foreach ($lob->Sbu as $outlet_sbu) {
+			$this->data['sbu_outlet'][$outlet_sbu->id]->checked = true;
+		}
 		$this->data['outlet'] = $outlet;
 		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
@@ -269,5 +282,12 @@ class OutletController extends Controller {
 		}
 		return response()->json(['sbu_list' => $sbu_list]);
 	}
-
+	public function getOutletSbuByLob($id) {
+		if (!empty($id)) {
+			$sbu_outlet = Sbu::select('name', 'id', 'lob_id')->where('lob_id', $id)->get();
+		} else {
+			$sbu_outlet = NULL;
+		}
+		return response()->json(['sbu_outlet' => $sbu_outlet]);
+	}
 }

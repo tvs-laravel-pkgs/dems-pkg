@@ -275,8 +275,6 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-booking-updates-form></eyatra-trip-booking-updates-form>',
         title: 'Employee Booking Update Form',
     }).
-
-
     //EMPLOYEE - FINANCE TEAM
     when('/eyatra/finance-emp-claim', {
         template: '<eyatra-finance-emp-list></eyatra-finance-emp-list>',
@@ -285,6 +283,19 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/finance-emp-claim/add', {
         template: '<eyatra-finance-emp-form></eyatra-finance-emp-form>',
         title: 'Finance Employee Claims Add',
+    }).
+    //PETTY CASH
+    when('/eyatra/petty-cash/list', {
+        template: '<eyatra-petty-cash-list></eyatra-petty-cash-list>',
+        title: 'Petty Cash',
+    }).
+    when('/eyatra/petty-cash/add', {
+        template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
+        title: 'Add Petty Cash',
+    }).
+    when('/eyatra/petty-cash/edit/:pettycash_id', {
+        template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
+        title: 'Edit Petty Cash',
     }).
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
@@ -303,4 +314,5 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
         title: 'View Region',
     });
+
 }]);
