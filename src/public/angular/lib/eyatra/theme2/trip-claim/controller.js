@@ -106,8 +106,10 @@ app.component('eyatraTripClaimForm', {
                 return;
             }
             console.log(response.data.trip);
+            //console.log(response.data.extras);
             self.extras = response.data.extras;
             self.trip = response.data.trip;
+            console.log(self.trip.lodgings.length);
 
             if (self.trip.lodgings.length == 0) {
                 self.addNewLodgings();
@@ -122,13 +124,14 @@ app.component('eyatraTripClaimForm', {
 
         });
 
-        self.addVisit = function() {
-            self.trip.visits.push({
+
+        /*self.addLodgingExpenses = function() {
+            self.lodging.push({
                 visit_date: '',
                 booking_method: 'Self',
                 preferred_travel_modes: '',
             });
-        }
+        }*/
         // $(function() {
         //     $('.form_datetime').datetimepicker();
         // });
@@ -209,6 +212,7 @@ app.component('eyatraTripClaimForm', {
 
         //Form submit validation
         self.claimSubmit = function() {
+            alert();
             // $('#claim_form').on('submit', function(event) {
             //Add validation rule for dynamically generated name fields
             $('.maxlength_name').each(function() {

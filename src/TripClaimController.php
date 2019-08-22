@@ -98,6 +98,7 @@ class TripClaimController extends Controller {
 			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
 			'state_type_list' => Entity::getLodgeStateTypeList(),
+			'booking_type_list' => Config::getBookingTypeTypeList(),
 		];
 		$this->data['trip'] = $trip;
 

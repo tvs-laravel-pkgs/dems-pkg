@@ -83,8 +83,8 @@ app.component('eyatraFinanceEmpList', {
 app.component('eyatraFinanceEmpForm', {
     templateUrl: eyatra_finance_employee_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        alert();
-        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
+        //alert();
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? finance_employee_form_data_url + '/' : finance_employee_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var lodgings_removal_id = [];
         var boardings_removal_id = [];
@@ -96,16 +96,16 @@ app.component('eyatraFinanceEmpForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
-                new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                }).show();
-                $location.path('/eyatra/trip/claim/list')
-                $scope.$apply()
-                return;
-            }
+            /* if (!response.data.success) {
+                 new Noty({
+                     type: 'error',
+                     layout: 'topRight',
+                     text: response.data.error,
+                 }).show();
+                 $location.path('/eyatra/trip/claim/list')
+                 //$scope.$apply()
+                 return;
+             }*/
             console.log(response.data.trip);
             self.extras = response.data.extras;
             self.trip = response.data.trip;

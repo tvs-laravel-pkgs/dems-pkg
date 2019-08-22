@@ -62,9 +62,11 @@ class FinanceEmployeeClaimController extends Controller {
 	}
 
 	public function eyatraFinanceEmployeeClaimFormData($trip_id = NULL) {
-		if (!$trip_id) {
+		//dd($trip_id);
+		/*if (!$trip_id) {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
+			$trip='';
 		} else {
 			$trip = Trip::with(
 			'visits',
@@ -82,19 +84,21 @@ class FinanceEmployeeClaimController extends Controller {
 			'visits.attachments'
 			)->find($trip_id);
 			//dd($trip);
+
 			if (!$trip) {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
 			}
 			$this->data['success'] = true;
-		}
+		}*/
+
 		$this->data['extras'] = [
 		'purpose_list' => Entity::uiPurposeList(),
 		'travel_mode_list' => Entity::uiTravelModeList(),
 		'city_list' => NCity::getList(),
 		'state_type_list' => Entity::getLodgeStateTypeList(),
 		];
-		$this->data['trip'] = $trip;
+		$this->data['trip'] = '';
 
 		return response()->json($this->data);
 	}

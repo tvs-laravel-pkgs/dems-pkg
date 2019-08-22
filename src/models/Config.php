@@ -24,4 +24,7 @@ class Config extends Model {
 		return Config::where('config_type_id', 514)->select('id', 'name')->get();
 	}
 
+	public static function getBookingTypeTypeList() {
+		return Config::where('config_type_id', 502)->select('id', 'name')->get();
+	}
 }
