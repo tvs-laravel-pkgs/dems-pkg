@@ -117,6 +117,10 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/verification/approve/{trip_id}', 'Uitoux\EYatra\TripVerificationController@approveTripVerification')->name('approveTripVerification');
 		Route::get('eyatra/trip/verification/reject/{trip_id}', 'Uitoux\EYatra\TripVerificationController@rejectTripVerification')->name('rejectTripVerification');
 
+		// FINANCE EMPLOYEE CLAIMS
+		Route::get('eyatra/finance-emp/claims/get-list', 'Uitoux\EYatra\FinanceEmployeeClaimController@listEYatraFinanceEmployeeClaim')->name('listEYatraFinanceEmployeeClaim');
+		Route::get('eyatra/finance-emp/claims/get-form-data/{trip_id?}', 'Uitoux\EYatra\FinanceEmployeeClaimController@eyatraFinanceEmployeeClaimFormData')->name('eyatraFinanceEmployeeClaimFormData');
+
 		//ADVANCE CLAIM REQUESTS
 		Route::get('eyatra/advance-claim/request/get-list', 'Uitoux\EYatra\AdvanceClaimRequestController@listAdvanceClaimRequest')->name('listAdvanceClaimRequest');
 		Route::get('eyatra/advance-claim/request/get-form-data/{trip_id?}', 'Uitoux\EYatra\AdvanceClaimRequestController@advanceClaimRequestFormData')->name('advanceClaimRequestFormData');

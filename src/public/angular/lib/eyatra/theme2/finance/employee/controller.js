@@ -1,4 +1,4 @@
-app.component('eyatraTripClaimList', {
+app.component('eyatraFinanceEmpList', {
     templateUrl: eyatra_trip_claim_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
@@ -80,10 +80,11 @@ app.component('eyatraTripClaimList', {
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraTripClaimForm', {
-    templateUrl: eyatra_trip_claim_form_template_url,
+app.component('eyatraFinanceEmpForm', {
+    templateUrl: eyatra_finance_employee_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
+        //alert();
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? finance_employee_form_data_url + '/' : finance_employee_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var lodgings_removal_id = [];
         var boardings_removal_id = [];
@@ -95,21 +96,19 @@ app.component('eyatraTripClaimForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
-                new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                }).show();
-                $location.path('/eyatra/trip/claim/list')
-                $scope.$apply()
-                return;
-            }
+            /* if (!response.data.success) {
+                 new Noty({
+                     type: 'error',
+                     layout: 'topRight',
+                     text: response.data.error,
+                 }).show();
+                 $location.path('/eyatra/trip/claim/list')
+                 //$scope.$apply()
+                 return;
+             }*/
             console.log(response.data.trip);
-            //console.log(response.data.extras);
             self.extras = response.data.extras;
             self.trip = response.data.trip;
-            console.log(self.trip.lodgings.length);
 
             if (self.trip.lodgings.length == 0) {
                 self.addNewLodgings();
@@ -124,14 +123,13 @@ app.component('eyatraTripClaimForm', {
 
         });
 
-
-        /*self.addLodgingExpenses = function() {
-            self.lodging.push({
+        self.addVisit = function() {
+            self.trip.visits.push({
                 visit_date: '',
                 booking_method: 'Self',
                 preferred_travel_modes: '',
             });
-        }*/
+        }
         // $(function() {
         //     $('.form_datetime').datetimepicker();
         // });
@@ -212,7 +210,6 @@ app.component('eyatraTripClaimForm', {
 
         //Form submit validation
         self.claimSubmit = function() {
-            alert();
             // $('#claim_form').on('submit', function(event) {
             //Add validation rule for dynamically generated name fields
             $('.maxlength_name').each(function() {

@@ -25,6 +25,8 @@ class EYatraETSeeder extends Seeder {
 			509 => 'Trip Claim Rejection Reasons',
 			510 => 'Agent Claim Rejection Reasons',
 			511 => 'Voucher Claim Rejection Reasons',
+			512 => 'Petty Cash Expense type',
+
 		];
 
 		foreach ($entity_types as $entity_type_id => $entity_type_name) {
