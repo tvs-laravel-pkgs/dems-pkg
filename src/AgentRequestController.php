@@ -81,12 +81,28 @@ class AgentRequestController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
+		$visits = $trip->visits;
+		$trip_status = 'not_booked';
+		foreach ($visits as $key => $value) {
+			if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062) {
+
+				$trip_status = 'booked';
+				// $relations = 'bookings.travelMode';
+				// $visit = Visit::with($relations)
+				// 	->find($value->id);
+				// $travelMode = $visit->travelMode->name;
+				// $value->travelMode = $travelMode;
+			}
+		}
+		// dd($trip);
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $start_date->end_date;
 		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::travelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
 		$this->data['trip'] = $trip;
+		$this->data['visits'] = $visits;
+		$this->data['trip_status'] = $trip_status;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

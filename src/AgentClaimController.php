@@ -74,6 +74,7 @@ class AgentClaimController extends Controller {
 				'visit_bookings.tax',
 				'visit_bookings.service_charge',
 				'visit_bookings.total',
+				'visit_bookings.paid_amount',
 				'visit_bookings.reference_number',
 				'from_city.name as from',
 				'to_city.name as to',

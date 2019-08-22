@@ -88,7 +88,7 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		dd($r->all());
+		// dd($r->all());
 		DB::beginTransaction();
 		try {
 			// $validator = Validator::make($r->all(), [
@@ -130,13 +130,13 @@ class TripBookingUpdateController extends Controller {
 					$booking_status_id = 3061; //Visit Status Booked
 				} else {
 					//Find Visit Details
-					$visit_status = VisitBooking::where('visit_id', $r->visit_id)
-						->where('type_id', 3100)
-						->first();
-					if (!$visit_status) {
-						return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
-					}
-					$travel_mode_id = $visit_status->travel_mode_id;
+					// $visit_status = VisitBooking::where('visit_id', $r->visit_id)
+					// 	->where('type_id', 3100)
+					// 	->first();
+					// if (!$visit_status) {
+					// 	return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
+					// }
+					// $travel_mode_id = $visit_status->travel_mode_id;
 					$booking_status_id = 3062; //Visit Status Cancelled
 				}
 
@@ -193,15 +193,32 @@ class TripBookingUpdateController extends Controller {
 
 					$total_amount = $amount + $tax + $service_charge;
 
+					//Agent Claimed Amount
+					if ($r->booking_type == 'fresh_booking') {
+						$claim_amount = $total_amount;
+					} else {
+						//Get Same Visit Booking Details
+						$previous_visit_booking = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->select('amount', 'tax', 'service_charge')->first();
+
+						//Update Same Visit Booking details paid/claim amount
+						$visit_booking_update = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->update(['paid_amount' => $previous_visit_booking->service_charge]);
+
+						$previous_booking_amount = $previous_visit_booking->amount + $previous_visit_booking->tax;
+						$cancel_booking_amount = $amount + $tax;
+						$claim_amount = ($previous_booking_amount - $cancel_booking_amount) + $service_charge;
+
+					}
+
 					$visit_bookings = new VisitBooking;
 					$visit_bookings->visit_id = $value['visit_id'];
 					$visit_bookings->type_id = $r->type_id;
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
-					$visit_bookings->reference_number = $value['visit_id'];
+					$visit_bookings->reference_number = $value['reference_number'];
 					$visit_bookings->amount = $amount;
 					$visit_bookings->tax = $tax;
 					$visit_bookings->service_charge = $service_charge;
 					$visit_bookings->total = $total_amount;
+					$visit_bookings->paid_amount = $claim_amount;
 					$visit_bookings->status_id = $r->status_id;
 					$visit_bookings->created_by = Auth::user()->id;
 					$visit_bookings->save();
@@ -220,6 +237,7 @@ class TripBookingUpdateController extends Controller {
 							$attachement->save();
 						}
 					}
+
 				}
 			}
 			DB::commit();
