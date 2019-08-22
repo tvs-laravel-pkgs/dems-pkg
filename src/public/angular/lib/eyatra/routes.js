@@ -285,7 +285,7 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Finance Employee Claims Add',
     }).
     //PETTY CASH
-    when('/eyatra/petty-cash/list', {
+    when('/eyatra/petty-cash', {
         template: '<eyatra-petty-cash-list></eyatra-petty-cash-list>',
         title: 'Petty Cash',
     }).
