@@ -109,6 +109,8 @@ app.component('eyatraOutletForm', {
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
+            self.lob_outlet = response.data.lob_outlet;
+            self.sbu_outlet = response.data.sbu_outlet;
             self.action = response.data.action;
             if (self.action == 'Edit') {
                 $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
@@ -240,6 +242,97 @@ app.component('eyatraOutletForm', {
                 return [];
             }
         }
+
+        $scope.getDataBasedonLob = function(id) {
+            if (event.target.checked == true) {
+                $http.get(
+                    lob_sbu_url + '/' + id
+                ).then(function(response) {
+                    response.data.sbu_outlet.forEach(function(sbus) {
+                        self.sbu_outlet.push({
+                            "name": sbus.name,
+                            "id": sbus.id,
+                            "code": sbus.code
+                        });
+                    });
+                });
+            } else {
+                if ($('.regioncheckbox:checked').length > 0) {
+                    self.sbu_outlet = [];
+                    $.each($(".regioncheckbox:checked"), function() {
+                        $scope.test($(this).val())
+                    });
+
+                } else {
+                    $('#region').prop('checked', false);
+                    $('#outlet tbody tr').html('');
+                }
+            }
+        }
+        $scope.test = function(id) {
+            $http.get(
+                vendor_get_outlet_by_region + '/' + id
+            ).then(function(response) {
+                response.data.outlet_list.forEach(function(sbus) {
+                    if (id == sbus.region_id) {
+                        self.outlet_list.push({
+                            "name": sbus.name,
+                            "code": sbus.code,
+                            "id": sbus.id
+                        });
+                    }
+                });
+            });
+        }
+
+        $('#outletmain').prop('disabled', 'disabled');
+        $('#region').on('click', function() {
+            if (event.target.checked == true) {
+                $('#outlet tbody tr').html('');
+                $('.regioncheckbox').prop('checked', true);
+                $('#outletmain').prop('disabled', false);
+                $.each($(".regioncheckbox:checked"), function() {
+                    $scope.getDataBasedonRegion($(this).val())
+                });
+            } else {
+                $('.regioncheckbox').prop('checked', false);
+                $('#outletmain').prop('disabled', 'disabled');
+                $('#outletmain').prop('checked', false);
+                $('#outlet tbody tr').html('');
+            }
+        });
+
+        $('#outletmain').on('click', function() {
+            if (event.target.checked == true) {
+                $('.outletcheckbox').prop('checked', true);
+            } else {
+                $('.outletcheckbox').prop('checked', false);
+            }
+        });
+
+        $('#business').on('click', function() {
+            if (event.target.checked == true) {
+                $('.businesscheckbox').prop('checked', true);
+                $.each($('.businesscheckbox:checked'), function() {
+                    $scope.getcodeonBusiness($(this).val());
+                    $('.business_table tbody tr #dms_' + $(this).val()).removeClass('ng-hide');
+                });
+            } else {
+                $('.businesscheckbox').prop('checked', false);
+                $.each($('.businesscheckbox'), function() {
+                    $('.business_table tbody tr #dms_' + $(this).val()).addClass('ng-hide');
+                });
+            }
+        });
+        $scope.getcodeonBusiness = function(id) {
+            if (event.target.checked == true) {
+                $("#dms_" + id).prop('readonly', false);
+            } else {
+                $("#dms_" + id).prop('readonly', true);
+                // $("#dms_" + id).val('');
+            }
+        }
+
 
         var form_id = '#outlet-form';
         var v = jQuery(form_id).validate({

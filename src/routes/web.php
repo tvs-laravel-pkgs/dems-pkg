@@ -65,7 +65,7 @@ Route::group(['middleware' => ['web', 'auth']], function () {
 	Route::get('eyatra/outlet/delete/{outlet_id}', 'Uitoux\EYatra\OutletController@deleteEYatraOutlet')->name('deleteEYatraOutlet');
 	Route::post('eyatra/outlet/get/sbu', 'Uitoux\EYatra\OutletController@getSbuByLob')->name('getSbuByLobOutlet');
 	Route::post('eyatra/outlet/cashier-search', 'Uitoux\EYatra\OutletController@searchCashier')->name('searchCashier');
-
+	Route::get('eyatra/outlet/get/lob-sbu/{id}', 'Angular\Master\OutletController@getOutletSbuByLob')->name('getOutletSbu');
 	//EMPLOYEES
 	Route::get('eyatra/employee/get-list', 'Uitoux\EYatra\EmployeeController@listEYatraEmployee')->name('listEYatraEmployee');
 	Route::get('eyatra/employee/get-form-data/{employee_id?}', 'Uitoux\EYatra\EmployeeController@eyatraEmployeeFormData')->name('eyatraEmployeeFormData');
