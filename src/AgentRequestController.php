@@ -9,8 +9,8 @@ use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
 
-class AdvanceClaimRequestController extends Controller {
-	public function listAdvanceClaimRequest(Request $r) {
+class AgentRequestController extends Controller {
+	public function listAgentRequest(Request $r) {
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -58,10 +58,9 @@ class AdvanceClaimRequestController extends Controller {
 			->make(true);
 	}
 
-	public function advanceClaimRequestFormData($trip_id) {
+	public function agentRequestFormData($trip_id) {
 
 		$trip = Trip::with([
-			'advanceRequestPayment',
 			'visits',
 			'visits.fromCity',
 			'visits.toCity',
@@ -72,14 +71,10 @@ class AdvanceClaimRequestController extends Controller {
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
-			'employee.bankDetail',
-			'employee.walletDetail',
+			'employee.user',
 			'purpose',
 			'status',
 		])
-			->whereNotNull('trips.advance_received')
-			->where('trips.status_id', 3028) //MANAGER APPROVED
-			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->find($trip_id);
 
 		if (!$trip) {
@@ -90,14 +85,13 @@ class AdvanceClaimRequestController extends Controller {
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $start_date->end_date;
-		$this->data['payment_mode_list'] = $payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
-		$this->data['wallet_mode_list'] = $wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::travelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
-	public function saveAdvanceClaimRequest(Request $r) {
+	public function saveAgentRequest(Request $r) {
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);

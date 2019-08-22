@@ -19,6 +19,44 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra',
 				'display_name' => 'eYatra',
 			],
+			5001 => [
+				'display_order' => 101,
+				'parent_id' => NULL,
+				'name' => 'eyatra-top-level-menus',
+				'display_name' => 'eYatra Top Level Menus',
+			],
+
+			//ROLES
+			5010 => [
+				'display_order' => 101,
+				'parent_id' => NULL,
+				'name' => 'eyatra-roles',
+				'display_name' => 'eYatra Roles',
+			],
+			5011 => [
+				'display_order' => 101,
+				'parent_id' => 5010,
+				'name' => 'eyatra-employee',
+				'display_name' => 'Employee',
+			],
+			5012 => [
+				'display_order' => 101,
+				'parent_id' => 5010,
+				'name' => 'eyatra-manager',
+				'display_name' => 'Manager',
+			],
+			5013 => [
+				'display_order' => 101,
+				'parent_id' => 5010,
+				'name' => 'eyatra-agent',
+				'display_name' => 'Agent',
+			],
+			5014 => [
+				'display_order' => 101,
+				'parent_id' => 5010,
+				'name' => 'eyatra-cashier',
+				'display_name' => 'Cashier',
+			],
 
 			//MASTERS
 			5080 => [
@@ -552,6 +590,60 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-voucher-claim-reject-delete',
 				'display_name' => 'Delete',
 			],
+
+			//INDIVIDUAL MENUS
+			5480 => [
+				'display_order' => 1,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-trips',
+				'display_name' => 'Trips',
+			],
+			5481 => [
+				'display_order' => 2,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-claimed-trips',
+				'display_name' => 'Claimed Trips',
+			],
+			5482 => [
+				'display_order' => 3,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-trip-verifications',
+				'display_name' => 'Trip Verifications',
+			],
+			5483 => [
+				'display_order' => 4,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-trip-booking-requests',
+				'display_name' => 'Booking Requests',
+			],
+			5484 => [
+				'display_order' => 5,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-agent-claims',
+				'display_name' => 'Agent Claims',
+			],
+
+			5500 => [
+				'display_order' => 6,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-employee-claims-verification1',
+				'display_name' => 'Employee Claims Verification 1',
+			],
+
+			5520 => [
+				'display_order' => 6,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-employee-claims-verification2',
+				'display_name' => 'Employee Claim Verification 2',
+			],
+
+			5540 => [
+				'display_order' => 6,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-agent-claims-verfication1',
+				'display_name' => 'Agent Claims Verification 1',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

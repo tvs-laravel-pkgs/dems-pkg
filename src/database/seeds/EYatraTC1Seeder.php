@@ -30,19 +30,19 @@ class EYatraTC1Seeder extends Seeder {
 	public function run() {
 		$faker = Faker::create();
 
-		$company_id = $this->command->ask("Enter company id", '7');
+		$company_id = $this->command->ask("Enter company id", '4');
 		$delete_company = $this->command->ask("Do you want to delete company", 'n');
 		if ($delete_company == 'y') {
 			$company = Company::find($company_id);
 			$company->forceDelete();
 		}
 
-		$number_of_items = $this->command->ask("How many records do you want to create?", '15');
-		$create_dummy_records = $this->command->ask("Do you want to create dummy records", 'y');
+		$number_of_items = $this->command->ask("How many records do you want to create?", '1');
+		$create_dummy_records = $this->command->ask("Do you want to create dummy records", 'n');
 
 		$this->call(EYatraSeeder::class);
 
-		$base_telephone_number = '1234567' . $company_id;
+		$base_telephone_number = $company_id;
 		$company = Company::firstOrNew([
 			'id' => $company_id,
 		]);
@@ -52,7 +52,7 @@ class EYatraTC1Seeder extends Seeder {
 		$com_data['data']['cin_number'] = 'CIN' . $company_id;
 		$com_data['data']['gst_number'] = 'GST' . $company_id;
 		$com_data['data']['customer_care_email'] = 'customercare@com' . $company_id . '.in';
-		$com_data['data']['customer_care_phone'] = $base_telephone_number . '00';
+		$com_data['data']['customer_care_phone'] = $base_telephone_number . '000000000';
 		$com_data['data']['reference_code'] = 'com' . $company_id;
 		$company->fill($com_data['data']);
 		$company->save();
@@ -64,13 +64,13 @@ class EYatraTC1Seeder extends Seeder {
 			'username' => 'c' . $company->id . '/a1',
 		]);
 		$admin->user_type_id = 3120;
-		$admin->mobile_number = $base_telephone_number . '01';
+		$admin->mobile_number = $base_telephone_number . '100000000';
 		$admin->password = 'Test@123';
 		$admin->save();
 		$admin->roles()->sync(500);
 		$country = NCountry::find(5);
 		if ($country) {
-			$country->delete();
+			// $country->delete();
 		}
 
 		$countries = [
@@ -84,6 +84,10 @@ class EYatraTC1Seeder extends Seeder {
 						'data' => [
 							'name' => 'Tamilnadu',
 						],
+						'regions' => [
+							'TN1' => 'Tamilnadu 1',
+							'TN2' => 'Tamilnadu 2',
+						],
 						'cities' => [
 							'Coimbatore',
 							'Madurai',
@@ -95,6 +99,10 @@ class EYatraTC1Seeder extends Seeder {
 						'data' => [
 							'name' => 'Kerala',
 						],
+						'regions' => [
+							'KL1' => 'Kerala 1',
+							'KL2' => 'Kerala 2',
+						],
 						'cities' => [
 							'Palakkad',
 							'Kollam',
@@ -105,6 +113,10 @@ class EYatraTC1Seeder extends Seeder {
 						'data' => [
 							'name' => 'Karnataka',
 						],
+						'regions' => [
+							'KA1' => 'Karnataka 1',
+							'KA2' => 'Karnataka 2',
+						],
 						'cities' => [
 							'Bangalore',
 							'Mysore',
@@ -114,7 +126,7 @@ class EYatraTC1Seeder extends Seeder {
 				],
 			],
 		];
-		NCountry::create($countries, $admin);
+		NCountry::create($countries, $admin, $company);
 		//NCountry::createDummies($admin);
 
 		//DUMMY ENTITY CREATION
@@ -225,13 +237,18 @@ class EYatraTC1Seeder extends Seeder {
 				'code' => 'c' . $company_id . '/o' . $i,
 			]);
 			$outlet->name = 'Company ' . $company->id . ' / Outlet ' . $i;
+
+			//$outlet->sbu_id = Sbu::inRandomOrder()->first()->id;
+			$outlet->amount_eligible = $faker->randomElement([0, 1]);
+			$outlet->reimbursement_amount = $outlet->amount_eligible == 1 ? $faker->randomElement([10000, 20000, 30000]) : 0;
+			$outlet->amount_limit = $outlet->reimbursement_amount / 5;
 			$outlet->created_by = $admin->id;
 			$outlet->save();
 
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
 			$address = Address::create($address_of_id, $outlet, $faker);
-			dump($address);
+			dump($outlet, $address);
 
 			$this->command->info('------------------');
 			$this->command->info('Outlet Created : ' . $outlet->name);
@@ -247,7 +264,7 @@ class EYatraTC1Seeder extends Seeder {
 
 				//USER ACCOUNT
 				$user_type_id = 3121;
-				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $roles = 502);
+				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $base_telephone_number . $i . $j . '0000000', $roles = 502);
 				//EMPLOYEES - REGULAR
 				for ($k = 1; $k <= $number_of_items; $k++) {
 					$code = $manager->code . '/e' . $k;
@@ -256,9 +273,19 @@ class EYatraTC1Seeder extends Seeder {
 					$this->command->info('Employee Created : ' . $employee->code);
 
 					$user_type_id = 3121;
-					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $roles = 501);
+					$user = Employee::createUser($company, $user_type_id, $employee, $faker, $base_telephone_number . $i . $j . $k . '000000', $roles = 501);
 				}
 			}
+		}
+
+		$this->command->info('');
+		$this->command->info('Outlet Cashier Mapping');
+		foreach ($company->outlets as $outlet) {
+			$cashier = $company->employees()->inRandomOrder()->first();
+			$user = $cashier->user;
+			$user->roles()->attach(504);
+			$outlet->cashier_id = $cashier->id;
+			$outlet->save();
 		}
 
 		$this->command->info('');
@@ -275,7 +302,7 @@ class EYatraTC1Seeder extends Seeder {
 			$agent->save();
 
 			$user_type_id = 3122;
-			$user = Employee::createUser($company, $user_type_id, $agent, $faker, $roles = 503);
+			$user = Employee::createUser($company, $user_type_id, $agent, $faker, $base_telephone_number . '300' . $i, $roles = 503);
 
 			//AGENT ADDRESS
 			$address_of_id = 3161;
@@ -319,9 +346,12 @@ class EYatraTC1Seeder extends Seeder {
 			$expense_type_ids = Config::where('config_type_id', 500)->inRandomOrder()->limit($faker->numberBetween(1, 4))->pluck('id');
 			$expense_types = [];
 			foreach ($expense_type_ids as $expense_type_id) {
-				$expense_types[$expense_type_id] = [
-					'eligible_amount' => $faker->randomElement([1000, 1500, 2000, 2500]),
-				];
+				foreach ($company->cityCategories as $city_category) {
+					$expense_types[$expense_type_id] = [
+						'eligible_amount' => $faker->randomElement([1000, 1500, 2000, 2500]),
+						'city_category_id' => $city_category->id,
+					];
+				}
 			}
 			$grade->expenseTypes()->sync($expense_types);
 
@@ -332,6 +362,18 @@ class EYatraTC1Seeder extends Seeder {
 				$trip_purposes[] = $trip_purpose_id;
 			}
 			$grade->tripPurposes()->sync($trip_purposes);
+
+			//GRADE TRAVEL MODE MAPPING
+			$travel_mode_ids = $company->travelModes()->inRandomOrder()->limit($faker->numberBetween(1, 4))->pluck('id');
+			$travel_modes = [];
+			foreach ($travel_mode_ids as $travel_mode_id) {
+				$travel_modes[] = $travel_mode_id;
+			}
+			$grade->travelModes()->sync($travel_modes);
+
+			//GRADE ADVANCE ELIGIBILITY
+			$advance_eligibility = $faker->randomElement([0, 1]);
+			$grade->gradeEligibility()->sync($advance_eligibility);
 		}
 
 		$this->command->info('');

@@ -39,7 +39,11 @@ class Employee extends Model {
 	}
 
 	public function grade() {
-		return $this->belongsTo('Uitoux\EYatra\Entity');
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'grade_id');
+	}
+
+	public function designation() {
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'designation_id');
 	}
 
 	public function outlet() {
@@ -84,14 +88,16 @@ class Employee extends Model {
 
 		return $employee;
 	}
-	public static function createUser($company, $user_type_id, $entity, $faker, $roles) {
+	public static function createUser($company, $user_type_id, $entity, $faker, $mobile_number, $roles) {
 		$user = User::firstOrNew([
 			'company_id' => $company->id,
 			'user_type_id' => $user_type_id,
 			'username' => $entity->code,
 		]);
 		$user->entity_id = $entity->id;
-		$user->mobile_number = $faker->unique()->numberBetween(9842000000, 9842099999);
+		// $user->mobile_number = $faker->unique()->numberBetween(1234500000, 1234599999);
+		$user->mobile_number = $mobile_number;
+
 		$user->password = 'Test@123';
 		$user->save();
 		$user->roles()->sync($roles);

@@ -35,6 +35,10 @@ class Visit extends Model {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
 	}
 
+	public function getDepartureDateAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
 	public function fromCity() {
 		return $this->belongsTo('Uitoux\EYatra\NCity', 'from_city_id');
 	}

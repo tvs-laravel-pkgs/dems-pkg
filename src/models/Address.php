@@ -25,7 +25,7 @@ class Address extends Model {
 	}
 
 	public static function create($address_of_id, $entity, $faker) {
-		$address = Address::firstOrNew([
+		$address = Self::firstOrNew([
 			'address_of_id' => $address_of_id,
 			'entity_id' => $entity->id,
 		]);

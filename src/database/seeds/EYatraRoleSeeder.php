@@ -25,7 +25,7 @@ class EYatraRoleSeeder extends Seeder {
 				'created_by' => 1,
 				'permissions' => [
 					//MAIN MENUS
-					5000,
+					//5000,
 
 					//ADMIN PERMISSION
 					5260,
@@ -34,10 +34,10 @@ class EYatraRoleSeeder extends Seeder {
 					5240,
 
 					//TRIPS
-					5001, 5002, 5003, 5004, 5005,
+					5001, 5002, 5003, 5004, 5005, 5480,
 
 					//TRIPS VERIFICATION
-					5060, 5061,
+					5060, 5061, 5482,
 
 					//TRIPS BOOKING REQUESTS
 					5160, 5161,
@@ -99,6 +99,15 @@ class EYatraRoleSeeder extends Seeder {
 					//MASTERS > REJECTION REASONS > VOUCHER CLAIM REJECT
 					5460, 5461, 5462, 5463,
 
+					//EMPLOYEE CLAIM VERIFICATION 1
+					5500,
+
+					//EMPLOYEE CLAIM VERIFICATION 2
+					5520,
+
+					//AGENT CLAIM VERIFICATION 1
+					5540,
+
 				],
 			],
 
@@ -110,11 +119,8 @@ class EYatraRoleSeeder extends Seeder {
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
-					//MAIN MENUS
-					5000,
-
 					//TRIPS
-					5001, 5002, 5003, 5004,
+					5001, 5002, 5003, 5004, 5480, 5481,
 
 					//MOBILE PERMISSIONS
 					//TRIPS
@@ -131,14 +137,15 @@ class EYatraRoleSeeder extends Seeder {
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
-					//MAIN MENUS
-					5000,
 
 					//TRIPS
-					5001, 5002, 5003, 5004,
+					5001, 5002, 5003, 5004, 5482,
 
 					//TRIPS VERIFICATION
 					5060,
+
+					//CLAIM VERIFICATION 1
+					5500,
 				],
 			],
 
@@ -150,18 +157,39 @@ class EYatraRoleSeeder extends Seeder {
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
-					//MAIN MENUS
-					5000,
 
 					//TRIPS BOOKING REQUESTS
-					5160,
+					5483,
 
 					//AGENT CLAIM
 					5240,
 
 				],
 			],
+
+			//EYATRA CAHIER
+			504 => [
+				//'company_id' => 1,
+				'display_order' => 1,
+				'display_name' => 'eYatra Cashier',
+				'fixed_roles' => 0,
+				'created_by' => 1,
+				'permissions' => [
+
+					//AGENT ROLE
+					5014,
+
+					//EMPLOYEE CLAIM VERIFICATION 2
+					5520,
+
+					//AGENT CLAIM VERIFICATION 1
+					5540,
+
+				],
+			],
 		];
+
+		// $sync_type = $this->command->ask("Sync roles completely?", 'y');
 
 		foreach ($records as $id => $record_data) {
 			$permissions = $record_data['permissions'];

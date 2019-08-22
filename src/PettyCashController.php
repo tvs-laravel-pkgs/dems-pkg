@@ -2,15 +2,13 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
-use Auth;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
 
-class AdvanceClaimRequestController extends Controller {
-	public function listAdvanceClaimRequest(Request $r) {
+class PettyCashController extends Controller {
+	public function listPettyCashRequest(Request $r) {
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -58,8 +56,8 @@ class AdvanceClaimRequestController extends Controller {
 			->make(true);
 	}
 
-	public function advanceClaimRequestFormData($trip_id) {
-
+	public function pettycashFormData($pettycash_id = NULL) {
+		dd($pettycash_id);
 		$trip = Trip::with([
 			'advanceRequestPayment',
 			'visits',
@@ -95,69 +93,6 @@ class AdvanceClaimRequestController extends Controller {
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
 		return response()->json($this->data);
-	}
-
-	public function saveAdvanceClaimRequest(Request $r) {
-		$trip = Trip::find($r->trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->advance_request_approval_status_id = 3261;
-		$trip->save();
-
-		//PAYMENT SAVE
-		$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
-		$payment->fill($r->all());
-		$payment->payment_of_id = 3250;
-		$payment->entity_id = $trip->id;
-		$payment->created_by = Auth::user()->id;
-		$payment->save();
-
-		//BANK DETAIL SAVE
-		if ($r->bank_name) {
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
-			$bank_detail->fill($r->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $trip->id;
-			$bank_detail->account_type_id = 3243;
-			$bank_detail->save();
-		}
-
-		//WALLET SAVE
-		if ($r->type_id) {
-			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
-			$wallet_detail->fill($r->all());
-			$wallet_detail->wallet_of_id = 3243;
-			$wallet_detail->entity_id = $trip->id;
-			$wallet_detail->save();
-		}
-
-		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
-		return response()->json(['success' => true]);
-	}
-
-	public function approveAdvanceClaimRequest($trip_id) {
-		$trip = Trip::find($trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->status_id = 3028;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3081]);
-		return response()->json(['success' => true]);
-	}
-
-	public function rejectAdvanceClaimRequest($trip_id) {
-		$trip = Trip::find($trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->status_id = 3022;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3082]);
-		return response()->json(['success' => true]);
 	}
 
 }

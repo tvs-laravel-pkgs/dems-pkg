@@ -1,4 +1,4 @@
-app.component('eyatraTrips', {
+app.component('eyatraTrips1', {
     templateUrl: eyatra_trip_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
@@ -87,13 +87,14 @@ app.component('eyatraTrips', {
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 
-app.component('eyatraTripForm', {
-    templateUrl: trip_form_template_url,
+app.component('eyatraPettyCashForm', {
+    templateUrl: pettycash_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? pettycash_form_data_url : pettycash_form_data_url + '/' + $routeParams.pettycash_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        // alert($form_data_url);
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -103,9 +104,9 @@ app.component('eyatraTripForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/trips')
+                //$location.path('/eyatra/trips')
                 //$scope.$apply()
-                return;
+                // return;
             }
             console.log(response.data);
             self.employee_eligible_grade = response.data.employee_eligible_grade;
@@ -259,232 +260,5 @@ app.component('eyatraTripForm', {
         });
     }
 });
-
-app.component('eyatraTripView', {
-    templateUrl: trip_view_template_url,
-
-    controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        $http.get(
-            trip_view_url + '/' + $routeParams.trip_id
-        ).then(function(response) {
-            self.trip = response.data.trip;
-        });
-
-        //REQUEST AGENT FOR CANCEL VISIT BOOKING
-        $scope.requestVisitBookingPopup = function(visit_id) {
-            $('#booking_visit_id').val(visit_id);
-        }
-
-        $scope.requestCancelBooking = function() {
-            var cancel_booking_visit_id = $('#booking_visit_id').val();
-            if (cancel_booking_visit_id) {
-                $.ajax({
-                        url: trip_visit_request_cancel_booking_url + '/' + cancel_booking_visit_id,
-                        method: "GET",
-                    })
-                    .done(function(res) {
-                        console.log(res);
-                        if (!res.success) {
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Booking cancelled successfully',
-                            }).show();
-                            $route.reload();
-                        }
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
-        }
-
-        //CANCEL VISIT BOOKING
-        $scope.cancelVisitBookingPopup = function(visit_id) {
-            $('#cancel_booking_visit_id').val(visit_id);
-        }
-
-        $scope.cancelVisitBooking = function() {
-            var cancel_booking_visit_id = $('#cancel_booking_visit_id').val();
-            if (cancel_booking_visit_id) {
-                $.ajax({
-                        url: trip_visit_cancel_booking_url + '/' + cancel_booking_visit_id,
-                        method: "GET",
-                    })
-                    .done(function(res) {
-                        console.log(res);
-                        if (!res.success) {
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Booking cancelled successfully',
-                            }).show();
-                            $('#request_cancel_trip').modal('hide');
-                            $route.reload();
-                        }
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
-        }
-
-        //DELETE TRIP
-        $scope.deleteTrip = function(id) {
-            $('#del').val(id);
-        }
-        $scope.confirmDeleteTrip = function() {
-            $id = $('#del').val();
-            $http.get(
-                trip_delete_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors
-                    }).show();
-                } else {
-                    new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trips Deleted Successfully',
-                    }).show();
-                    $location.path('/eyatra/trips')
-                    $scope.$apply()
-                }
-
-            });
-        }
-
-        self.verificationRequest = function(trip_id) {
-            $.ajax({
-                    url: trip_verification_request_url + '/' + trip_id,
-                    method: "GET",
-                })
-                .done(function(res) {
-                    console.log(res.success);
-                    if (!res.success) {
-                        $('#submit').button('reset');
-                        var errors = '';
-                        for (var i in res.errors) {
-                            errors += '<li>' + res.errors[i] + '</li>';
-                        }
-                        custom_noty('error', errors);
-                    } else {
-                        new Noty({
-                            type: 'success',
-                            layout: 'topRight',
-                            text: 'Trip successfully sent for verification',
-                        }).show();
-                        $location.path('/eyatra/trips')
-                        $scope.$apply()
-                    }
-                })
-                .fail(function(xhr) {
-                    $('#submit').button('reset');
-                    custom_noty('error', 'Something went wrong at server');
-                });
-        }
-
-        //CANCEL TRIP
-        $scope.confirmCancelTrip = function() {
-            $id = $('#trip_id').val();
-
-            $http.get(
-                trip_cancel_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors
-                    }).show();
-                } else {
-                    $('#cancel_trip').modal('hide');
-                    new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trip Cancelled Successfully',
-                    }).show();
-                    setTimeout(function() {
-                        $location.path('/eyatra/trips')
-                        $scope.$apply()
-                    }, 500);
-
-                }
-
-            });
-        }
-
-    }
-});
-
-app.component('eyatraTripVisitView', {
-    templateUrl: trip_visit_view_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        if (typeof($routeParams.visit_id) == 'undefined') {
-            $location.path('/eyatra/trips')
-            $scope.$apply()
-            return;
-        }
-        $form_data_url = trip_visit_view_form_data_url + '/' + $routeParams.visit_id;
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        self.angular_routes = angular_routes;
-        $http.get(
-            $form_data_url
-        ).then(function(response) {
-            if (!response.data.success) {
-                new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                }).show();
-                $location.path('/eyatra/trips')
-                $scope.$apply()
-                return;
-            }
-            self.visit = response.data.visit;
-            self.trip = response.data.trip;
-            self.bookings = response.data.bookings;
-            // console.log(response.data.trip);
-            $rootScope.loading = false;
-
-        });
-
-        //Tab Navigation
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-        });
-    }
-});
-
-
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------

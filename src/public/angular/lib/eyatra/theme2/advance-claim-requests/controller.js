@@ -195,28 +195,46 @@ app.component('eyatraAdvanceClaimRequestForm', {
             });
         }
 
+        $.validator.addMethod('positiveNumber',
+            function(value) {
+                return Number(value) > 0;
+            }, 'Enter a positive number.');
 
-        var form_id = '#trip-form';
+        var form_id = '#advance-request-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
             },
             ignore: '',
             rules: {
-                'payment_mode_id': {
+                'amount': {
+                    min: 1,
+                    number: true,
                     required: true,
                 },
-                'payment_amount': {
-                    maxlength: 255,
+                'date': {
                     required: true,
                 },
-                'payment_date': {
+                'bank_name': {
                     required: true,
+                    maxlength: 100,
+                    minlength: 3,
                 },
-            },
-            messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
+                'branch_name': {
+                    required: true,
+                    maxlength: 50,
+                    minlength: 3,
+                },
+                'account_number': {
+                    required: true,
+                    maxlength: 20,
+                    minlength: 3,
+                    positiveNumber: true,
+                },
+                'ifsc_code': {
+                    required: true,
+                    maxlength: 10,
+                    minlength: 3,
                 },
             },
             submitHandler: function(form) {
@@ -243,7 +261,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Trip saves successfully',
+                                text: 'Advance Claim Request Approved successfully',
                             }).show();
                             $location.path('/eyatra/advance-claim/requests')
                             $scope.$apply()

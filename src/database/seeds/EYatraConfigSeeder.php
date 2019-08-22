@@ -29,7 +29,9 @@ class EYatraConfigSeeder extends Seeder {
 			512 => 'Visit Statuses - EYatra',
 			513 => 'Visit Booking Statuses - EYatra',
 			514 => 'Employee Payment Mode - EYatra',
-
+			515 => 'Payment of - EYatra',
+			516 => 'Advance Request Approval Statuses - EYatra',
+			517 => 'Reimbursement status - EYatra',
 		];
 
 		$configs = [
@@ -267,6 +269,44 @@ class EYatraConfigSeeder extends Seeder {
 			3246 => [
 				'name' => 'Wallet',
 				'config_type_id' => 514,
+			],
+
+			//PAYMENT OF
+			3250 => [
+				'name' => 'Employee Advance Claim',
+				'config_type_id' => 515,
+			],
+			3251 => [
+				'name' => 'Employee Expense Claim',
+				'config_type_id' => 515,
+			],
+			3252 => [
+				'name' => 'Agent Booking Claim',
+				'config_type_id' => 515,
+			],
+
+			//ADVANCE REQUEST APPROVAL STATUSES
+			3260 => [
+				'name' => 'New',
+				'config_type_id' => 516,
+			],
+			3261 => [
+				'name' => 'Approved',
+				'config_type_id' => 516,
+			],
+			3262 => [
+				'name' => 'Rejected',
+				'config_type_id' => 516,
+			],
+
+			//REIMBURSEMENT HISTORY STATUS
+			3264 => [
+				'name' => 'Claim',
+				'config_type_id' => 517,
+			],
+			3265 => [
+				'name' => 'Cash Topup',
+				'config_type_id' => 517,
 			],
 
 		];
