@@ -306,7 +306,7 @@ app.component('eyatraFinanceEmpForm', {
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 
-app.component('eyatraTripClaimView', {
+app.component('eyatraEmpView', {
     templateUrl: eyatra_trip_claim_view_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_view_url + '/' : eyatra_trip_claim_view_url + '/' + $routeParams.trip_id;

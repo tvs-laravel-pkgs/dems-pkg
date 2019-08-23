@@ -16,6 +16,7 @@ class LocalTravel extends Model {
 		'from_id',
 		'to_id',
 		'amount',
+		'tax',
 		'description',
 		'created_by',
 		'updated_by',
