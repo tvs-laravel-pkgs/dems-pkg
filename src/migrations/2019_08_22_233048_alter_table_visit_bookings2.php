@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AlterTableVisitBookings extends Migration {
+class AlterTableVisitBookings2 extends Migration {
 	/**
 	 * Run the migrations.
 	 *

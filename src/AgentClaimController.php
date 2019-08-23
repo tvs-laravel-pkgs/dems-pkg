@@ -41,16 +41,8 @@ class AgentClaimController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/agent/claim/edit/' . $agent_claim_list->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
 				<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-
-				<a href="javascript:;" data-toggle="modal" data-target="#agent_claim"
-				onclick="angular.element(this).scope().deleteAgentClaimconfirm(' . $agent_claim_list->id . ')" dusk = "delete-btn" title="Delete">
-					<img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
 				</a>';
 
 			})
@@ -59,75 +51,51 @@ class AgentClaimController extends Controller {
 
 	public function eyatraAgentClaimFormData($agent_claim_id = NULL) {
 		//dd($agent_claim_id);
-		if (!$agent_claim_id) {
-			$this->data['action'] = 'New';
-			$agent_claim = new AgentClaim;
-			$this->data['success'] = true;
-			$this->data['attachment'] = [];
-			$this->data['booking_list'] = $booking_list = VisitBooking::select(
-				'visit_bookings.id',
-				'type.name as type_id',
-				'trips.number as trip',
-				'employees.code as employee_code',
-				'employees.name as employee_name',
-				'visit_bookings.amount',
-				'visit_bookings.tax',
-				'visit_bookings.service_charge',
-				'visit_bookings.total',
-				'visit_bookings.paid_amount',
-				'visit_bookings.reference_number',
-				'from_city.name as from',
-				'to_city.name as to',
-				'travel_mode.name as travel_mode'
-			)
-				->leftJoin('configs as type', 'type.id', 'visit_bookings.type_id')
-				->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
-				->leftJoin('trips', 'trips.id', 'visits.trip_id')
-				->leftJoin('employees', 'employees.id', 'trips.employee_id')
-				->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
-				->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
-				->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
-				->where('visit_bookings.created_by', Auth::user()->id)
-				->where('visit_bookings.status_id', 3240)
-				->get();
-			$date = '';
-		} else {
-			$this->data['action'] = 'Edit';
-			$agent_claim = Agentclaim::find($agent_claim_id);
-			$date = date("d-m-Y", strtotime($agent_claim->invoice_date));
-			if (!$agent_claim) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'Agent Claim not found';
-			}
-			$this->data['booking_list'] = $booking_list = VisitBooking::select(
-				'visit_bookings.id',
-				'type.name as type_id',
-				'trips.number as trip',
-				'employees.code as employee_code',
-				'employees.name as employee_name',
-				'visit_bookings.amount',
-				'visit_bookings.tax',
-				'visit_bookings.service_charge',
-				'visit_bookings.total',
-				'visit_bookings.reference_number',
-				'from_city.name as from',
-				'to_city.name as to',
-				'travel_mode.name as travel_mode'
-			)
-				->leftJoin('configs as type', 'type.id', 'visit_bookings.type_id')
-				->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
-				->leftJoin('trips', 'trips.id', 'visits.trip_id')
-				->leftJoin('employees', 'employees.id', 'trips.employee_id')
-				->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
-				->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
-				->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
-				->where('visit_bookings.created_by', Auth::user()->id)
-				->where('visit_bookings.status_id', 3222)
-				->where('visit_bookings.agent_claim_id', $agent_claim_id)
-				->get();
-			$this->data['success'] = true;
-			$this->data['attachment'] = Attachment::where('entity_id', $agent_claim_id)->first();
-		}
+
+		$this->data['action'] = 'New';
+		$agent_claim = new AgentClaim;
+		$this->data['success'] = true;
+		$this->data['attachment'] = [];
+
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
+			'employees.name as employee_name', 'configs.name as status')
+			->join('visits', 'visits.id', 'visit_bookings.visit_id')
+			->join('trips', 'trips.id', 'visits.trip_id')
+			->join('employees', 'employees.id', 'trips.employee_id')
+			->join('configs', 'configs.id', 'trips.status_id')
+			->where('visit_bookings.created_by', Auth::user()->id)
+			->where('visit_bookings.status_id', 3240)
+			->groupBy('trips.id')
+			->get();
+
+		// $this->data['booking_list'] = $booking_list = VisitBooking::select(
+		// 	'visit_bookings.id',
+		// 	'type.name as type_id',
+		// 	'trips.number as trip',
+		// 	'employees.code as employee_code',
+		// 	'employees.name as employee_name',
+		// 	'visit_bookings.amount',
+		// 	'visit_bookings.tax',
+		// 	'visit_bookings.service_charge',
+		// 	'visit_bookings.total',
+		// 	'visit_bookings.paid_amount',
+		// 	'visit_bookings.reference_number',
+		// 	'from_city.name as from',
+		// 	'to_city.name as to',
+		// 	'travel_mode.name as travel_mode'
+		// )
+		// 	->leftJoin('configs as type', 'type.id', 'visit_bookings.type_id')
+		// 	->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
+		// 	->leftJoin('trips', 'trips.id', 'visits.trip_id')
+		// 	->leftJoin('employees', 'employees.id', 'trips.employee_id')
+		// 	->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
+		// 	->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
+		// 	->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
+		// 	->where('visit_bookings.created_by', Auth::user()->id)
+		// 	->where('visit_bookings.status_id', 3240)
+		// 	->get();
+		$date = '';
+
 		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
 		// $this->data['extras'] = [
 		// 	'manager_list' => Employee::getList(),
@@ -141,7 +109,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function saveEYatraAgentClaim(Request $request) {
-		// dd($request->all());
+		// dd($request->booking_list);
 		//validation
 		try {
 			$error_messages = [
@@ -214,8 +182,11 @@ class AgentClaimController extends Controller {
 
 			// dd($request->booking_list);
 			//UPDATE VISIT BOOKING BY AGENT
-			$booking_list_array = implode(',', $request->booking_list);
-			$visit_book = VisitBooking::whereIn('id', $request->booking_list)->update(['status_id' => 3222, 'agent_claim_id' => $agentClaim->id]);
+			$visit_book = VisitBooking::join('visits', 'visits.id', 'visit_bookings.visit_id')
+				->whereIn('visits.trip_id', $request->booking_list)
+				->update(['visit_bookings.status_id' => 3222, 'visit_bookings.agent_claim_id' => $agentClaim->id]);
+			// $booking_list_array = implode(',', $request->booking_list);
+			// $visit_book = VisitBooking::whereIn('id', $request->booking_list)->update(['status_id' => 3222, 'agent_claim_id' => $agentClaim->id]);
 
 			//STORE ATTACHMENT
 			$item_images = 'agent_claim/attachments/';
@@ -258,10 +229,13 @@ class AgentClaimController extends Controller {
 
 		// $this->data['booking_pivot'] = $agent_visit_booking_id = $agent_claim_view->bookings()->pluck('booking_id')->toArray();
 
-		$this->data['booking_list'] = $booking_list = VisitBooking::select(
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
 			'visit_bookings.id',
+			'visit_bookings.paid_amount',
+			'configs.name as status',
 			'type.name as type_id',
 			'trips.number as trip',
+			'trips.id as trips_id',
 			'employees.code as employee_code',
 			'employees.name as employee_name',
 			'visit_bookings.amount',
@@ -278,11 +252,23 @@ class AgentClaimController extends Controller {
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
 			->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
 			->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
+			->join('configs', 'configs.id', 'trips.status_id')
 			->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
 			->where('visit_bookings.created_by', Auth::user()->id)
 			->where('visit_bookings.status_id', 3222)
 			->where('visit_bookings.agent_claim_id', $agent_claim_id)
 			->get();
+
+		// $this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
+		// 	'employees.name as employee_name', 'configs.name as status')
+		// 	->join('visits', 'visits.id', 'visit_bookings.visit_id')
+		// 	->join('trips', 'trips.id', 'visits.trip_id')
+		// 	->join('employees', 'employees.id', 'trips.employee_id')
+		// 	->join('configs', 'configs.id', 'trips.status_id')
+		// 	->where('visit_bookings.created_by', Auth::user()->id)
+		// 	->where('visit_bookings.status_id', 3240)
+		// 	->groupBy('trips.id')
+		// 	->get();
 		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
 
 		// $this->data['booking_pivot_amt'] = $agent_claim_view->bookings()->pluck('amount')->toArray();

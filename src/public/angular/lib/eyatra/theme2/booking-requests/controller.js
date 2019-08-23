@@ -118,7 +118,7 @@ app.component('eyatraTripBookingRequestsView', {
                 submitHandler: function(form) {
 
                     let formData = new FormData($(form_id)[0]);
-                    $('#submit').button('loading');
+                    $('#cancel').button('loading');
                     $.ajax({
                             url: laravel_routes['saveTripBookingUpdates'],
                             method: "POST",
@@ -129,7 +129,7 @@ app.component('eyatraTripBookingRequestsView', {
                         .done(function(res) {
                             console.log(res.success);
                             if (!res.success) {
-                                $('#submit').button('reset');
+                                $('#cancel').button('reset');
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
