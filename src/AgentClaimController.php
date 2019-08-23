@@ -43,11 +43,6 @@ class AgentClaimController extends Controller {
 				return '
 				<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-
-				<a href="javascript:;" data-toggle="modal" data-target="#agent_claim"
-				onclick="angular.element(this).scope().deleteAgentClaimconfirm(' . $agent_claim_list->id . ')" dusk = "delete-btn" title="Delete">
-					<img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
 				</a>';
 
 			})
