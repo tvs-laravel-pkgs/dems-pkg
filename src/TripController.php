@@ -68,6 +68,23 @@ class TripController extends Controller {
 		return Trip::getTripFormData($trip_id);
 	}
 
+	// public function searchCity(Request $c) {
+	// 	$key = $c->key;
+	// $city_list = NCity::from('ncities')
+	// 	->join('nstates as s', 's.id', 'ncities.state_id')
+	// 	->select(
+	// 		'ncities.id',
+	// 		'ncities.name',
+	// 		's.name as state_name'
+	// 	)
+	// 	->where(function ($q) use ($key) {
+	// 		$q->where('ncities.name', 'like', '%' . $key . '%')
+	// 		;
+	// 	})
+	// 		->get();
+	// 	return response()->json($city_list);
+	// }
+
 	public function saveTrip(Request $request) {
 		// dd($request->all());
 		//validation

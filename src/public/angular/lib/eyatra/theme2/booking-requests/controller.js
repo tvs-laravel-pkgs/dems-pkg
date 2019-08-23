@@ -49,7 +49,7 @@ app.component('eyatraTripBookingRequests', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripBookingRequestsView', {
     templateUrl: agent_request_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/agent/requests')
             $scope.$apply()
@@ -59,6 +59,9 @@ app.component('eyatraTripBookingRequestsView', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+
+        $scope.showBookingForm = true;
+        $scope.showCancelForm = false;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -83,25 +86,24 @@ app.component('eyatraTripBookingRequestsView', {
                 return;
             }
             self.trip = response.data.trip;
+            self.visits = response.data.visits;
+            self.trip_status = response.data.trip_status;
             self.travel_mode_list = response.data.travel_mode_list;
             self.action = response.data.action;
             $rootScope.loading = false;
 
         });
-        // $('.close_icon').hide();
-        $(document).on('click', '.cancel_form', function() {
-            var id = $(this).attr('data-visit_id');
-            $(".cancel_form_" + id).removeClass("ng-hide");
-            $(".sub_class_" + id).prop("disabled", false);
+
+        $scope.userDetailId = 0;
+        $scope.showUserDetail = function(id) {
             $("#open_cancel_form_" + id).hide();
             $("#close_" + id).show();
-            // $scope.getform(id);
-        });
+            $scope.userDetailId = id;
+        }
 
         $(document).on('click', '.close_icon', function() {
             var id = $(this).attr('data-visit_id');
-            $(".cancel_form_" + id).addClass("ng-hide");
-            $(".sub_class_" + id).prop("disabled", true);
+            $scope.userDetailId = 0;
             $("#open_cancel_form_" + id).show();
             $("#close_" + id).hide();
         });
@@ -113,24 +115,10 @@ app.component('eyatraTripBookingRequestsView', {
                     error.insertAfter(element)
                 },
                 ignore: '',
-                // rules: {
-                //     'cancellation_number': {
-                //         required: true,
-                //     },
-                //     'cancel_amount': {
-                //         required: true,
-                //     },
-
-                // },
-                // messages: {
-                //     'cancellation_number': {
-                //         maxlength: 'Please enter maximum of 255 letters',
-                //     },
-                // },
                 submitHandler: function(form) {
 
                     let formData = new FormData($(form_id)[0]);
-                    $('#submit').button('loading');
+                    $('#cancel').button('loading');
                     $.ajax({
                             url: laravel_routes['saveTripBookingUpdates'],
                             method: "POST",
@@ -141,7 +129,7 @@ app.component('eyatraTripBookingRequestsView', {
                         .done(function(res) {
                             console.log(res.success);
                             if (!res.success) {
-                                $('#submit').button('reset');
+                                $('#cancel').button('reset');
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
@@ -151,9 +139,9 @@ app.component('eyatraTripBookingRequestsView', {
                                 new Noty({
                                     type: 'success',
                                     layout: 'topRight',
-                                    text: 'Trip saves successfully',
+                                    text: 'Booking details updated successfully!',
                                 }).show();
-                                $location.path('/eyatra/trips/booking-requests/view')
+                                $route.reload();
                                 $scope.$apply()
                             }
                         })
@@ -211,9 +199,9 @@ app.component('eyatraTripBookingRequestsView', {
                                 new Noty({
                                     type: 'success',
                                     layout: 'topRight',
-                                    text: 'Ticket Booked successfully',
+                                    text: 'Booking details updated successfully',
                                 }).show();
-                                $location.path('/eyatra/trips/booking-requests/view/')
+                                $route.reload();
                                 $scope.$apply()
                             }
                         })

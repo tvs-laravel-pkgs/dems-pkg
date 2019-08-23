@@ -179,6 +179,27 @@ app.component('eyatraTripForm', {
             self.trip.visits.splice(index, 1);
         }
 
+        //SEARCH CITY
+        // self.searchCity = function(query) {
+        //     if (query) {
+        //         return new Promise(function(resolve, reject) {
+        //             $http
+        //                 .post(
+        //                     trip_search_city_url, {
+        //                         key: query,
+        //                     }
+        //                 )
+        //                 .then(function(response) {
+        //                     console.log(response.data);
+        //                     resolve(response.data);
+        //                 });
+        //             //reject(response);
+        //         });
+        //     } else {
+        //         return [];
+        //     }
+        // }
+
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {

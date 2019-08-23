@@ -162,7 +162,7 @@ class EYatraRoleSeeder extends Seeder {
 					5483,
 
 					//AGENT CLAIM
-					5240,
+					5240, 5484,
 
 				],
 			],

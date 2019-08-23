@@ -70,6 +70,7 @@ class TripClaimController extends Controller {
 		if (!$trip_id) {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
+			$this->data['employee']= [];
 		} else {
 			$trip = Trip::with(
 				'visits',
@@ -92,6 +93,19 @@ class TripClaimController extends Controller {
 				$this->data['message'] = 'Trip not found';
 			}
 			$this->data['success'] = true;
+
+			$this->data['employee']= $employee=Employee::select('employees.name as name','employees.code as code','designations.name as designation','entities.name as grade')
+			->leftjoin('designations','designations.id','employees.designation_id')
+			->leftjoin('entities','entities.id','employees.grade_id')
+			->where('employees.id',$trip->employee_id)->first();
+
+			$this->data['travel_cities']= $travel_cities=Visit::select('cities.name as to_cities')
+			->leftjoin('ncities as cities','visits.to_city_id','cities.id')
+			->where('visits.trip_id',$trip->id)->get();
+			
+			$this->data['travel_dates']= $travel_dates=Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'),  DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id',$trip->id)->first();
+			
+			//dd($employee);
 		}
 		$this->data['extras'] = [
 			'purpose_list' => Entity::uiPurposeList(),
@@ -106,7 +120,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
-		// dump($request->all());
+		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -126,6 +140,7 @@ class TripClaimController extends Controller {
 			//UPDATE TRIP STATUS
 			$trip = Trip::find($request->trip_id);
 			$trip->status_id = 3023; //claimed
+			$trip->claim_amount = $request->claim_total_amount; //claimed
 			$trip->save();
 
 			//SAVING VISITS
