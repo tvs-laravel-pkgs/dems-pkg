@@ -123,6 +123,7 @@ app.component('eyatraAgentClaimForm', {
                 $("#total_amt").hide().prop('disabled', true);
                 $("#tax_amt").hide().prop('disabled', true);
             }
+            $(".payment-btn").prop('disabled', true);
             $rootScope.loading = false;
         });
         var total = 0;
@@ -152,6 +153,14 @@ app.component('eyatraAgentClaimForm', {
             $(".amount").html(amount.toFixed(2));
             $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
+            if (count > 0) {
+                $(".payment-btn").prop('disabled', false);
+            } else {
+                $(".payment-btn").prop('disabled', true);
+                $(".separate-bottom-layer").removeClass("in");
+                $("button.payment-btn").css({ 'display': 'inline-block' });
+                $(".btn-close").css({ 'display': 'none' });
+            }
 
         });
 
@@ -176,6 +185,47 @@ app.component('eyatraAgentClaimForm', {
             $(".amount").html(amount.toFixed(2));
             $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
+            $(".payment-btn").prop('disabled', true);
+            if (count > 0) {
+                $(".payment-btn").prop('disabled', false);
+            } else {
+                $(".separate-bottom-layer").removeClass("in");
+                $("button.payment-btn").css({ 'display': 'inline-block' });
+                $(".btn-close").css({ 'display': 'none' });
+            }
+        });
+
+        $(".payment-btn").on('click', function() {
+
+            if ($(".separate-bottom-layer").hasClass("in")) {
+                $(".separate-bottom-layer").removeClass("in");
+            } else {
+                $(".separate-bottom-layer").addClass("in");
+                $("button.payment-btn").css({ 'display': 'none' });
+                $("button.advance-btn").css({ 'display': 'none' });
+                $(".btn-close").css({ 'display': 'inline-block' });
+            }
+        });
+
+
+
+        $(".btn-close").on('click', function() {
+            /* Bottom Layer Close */
+            if ($(".separate-bottom-layer").hasClass("in")) {
+                $(".separate-bottom-layer").removeClass("in");
+                $("button.payment-btn").css({ 'display': 'inline-block' });
+                $("button.advance-btn").css({ 'display': 'inline-block' });
+                $(".btn-close").css({ 'display': 'none' });
+                $(".bottom-item").css({ 'display': 'inline-block' });
+                $(".bottom-title").css({ 'display': 'none' });
+            }
+
+            /* Page Side Wrapper Close */
+            if ($(".page-side-wrapper").hasClass("in")) {
+                $(".page-side-wrapper").removeClass("in");
+                $(".page-side-wrapper-drop").removeClass("in");
+                $("body").removeClass("modal-open");
+            }
         });
 
         var form_id = '#agent-claim-form';
