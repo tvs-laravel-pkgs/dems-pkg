@@ -26,6 +26,7 @@ class EYatraETSeeder extends Seeder {
 			510 => 'Agent Claim Rejection Reasons',
 			511 => 'Voucher Claim Rejection Reasons',
 			512 => 'Petty Cash Expense type',
+			513 => 'COA Categories',
 
 		];
 

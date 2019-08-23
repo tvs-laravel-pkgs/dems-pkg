@@ -222,6 +222,11 @@ class EYatraTC1Seeder extends Seeder {
 				'Local Conveyance',
 				'Others',
 			],
+			513 => [
+				'Assets',
+				'Liabilites',
+				'Equities',
+			],
 
 		];
 		Entity::create($sample_entities, $admin, $company);

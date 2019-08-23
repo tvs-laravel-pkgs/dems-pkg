@@ -315,4 +315,14 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Region',
     });
 
+    //FINANCIER - AGENT CLAIM
+    when('/eyatra/agent/claim/verification1/list', {
+        template: '<eyatra-agent-claim-verification-list></eyatra-agent-claim-verification-list>',
+        title: 'Agent Claim Verification',
+    }).
+    when('/eyatra/agent/claim/verification1/view/:claim_id', {
+        template: '<eyatra-agent-claim-verification-view></agent-claim-verification-view>',
+        title: 'Agent Claim Verification View',
+    }).
+
 }]);
