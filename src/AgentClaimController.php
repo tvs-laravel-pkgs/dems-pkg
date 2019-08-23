@@ -229,10 +229,13 @@ class AgentClaimController extends Controller {
 
 		// $this->data['booking_pivot'] = $agent_visit_booking_id = $agent_claim_view->bookings()->pluck('booking_id')->toArray();
 
-		$this->data['booking_list'] = $booking_list = VisitBooking::select(
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
 			'visit_bookings.id',
+			'visit_bookings.paid_amount',
+			'configs.name as status',
 			'type.name as type_id',
 			'trips.number as trip',
+			'trips.id as trips_id',
 			'employees.code as employee_code',
 			'employees.name as employee_name',
 			'visit_bookings.amount',
@@ -249,11 +252,23 @@ class AgentClaimController extends Controller {
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
 			->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
 			->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
+			->join('configs', 'configs.id', 'trips.status_id')
 			->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
 			->where('visit_bookings.created_by', Auth::user()->id)
 			->where('visit_bookings.status_id', 3222)
 			->where('visit_bookings.agent_claim_id', $agent_claim_id)
 			->get();
+
+		// $this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
+		// 	'employees.name as employee_name', 'configs.name as status')
+		// 	->join('visits', 'visits.id', 'visit_bookings.visit_id')
+		// 	->join('trips', 'trips.id', 'visits.trip_id')
+		// 	->join('employees', 'employees.id', 'trips.employee_id')
+		// 	->join('configs', 'configs.id', 'trips.status_id')
+		// 	->where('visit_bookings.created_by', Auth::user()->id)
+		// 	->where('visit_bookings.status_id', 3240)
+		// 	->groupBy('trips.id')
+		// 	->get();
 		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
 
 		// $this->data['booking_pivot_amt'] = $agent_claim_view->bookings()->pluck('amount')->toArray();
