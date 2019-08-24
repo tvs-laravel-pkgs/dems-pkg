@@ -161,7 +161,7 @@ app.component('eyatraCityForm', {
         $scope.btnNxt = function() {}
         $scope.prev = function() {}
 
-        var form_id = '#state-form';
+        var form_id = '#city-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 if (element.hasClass("name")) {

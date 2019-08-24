@@ -28,7 +28,7 @@ app.component('eyatraRegions', {
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action' },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'name', name: 'regions.name', searchable: true },
                 { data: 'code', name: 'regions.code', searchable: true },
                 { data: 'state_name', name: 'nstates.name', searchable: true },
@@ -211,15 +211,22 @@ app.component('eyatraRegionForm', {
 
 app.component('eyatraRegionView', {
     templateUrl: region_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $scope, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
             region_view_url + '/' + $routeParams.region_id
         ).then(function(response) {
             self.region = response.data.region;
-            $rootScope.loading = false;
         });
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+        $rootScope.loading = false;
     }
 });
 

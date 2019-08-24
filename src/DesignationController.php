@@ -6,41 +6,34 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Agent;
-use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCountry;
+use Illuminate\Validation\Rule;
 use Uitoux\EYatra\Designation;
 use Validator;
 use Yajra\Datatables\Datatables;
-use Illuminate\Validation\Rule;
 
 class DesignationController extends Controller {
 	public function listEYatraDesignation(Request $r) {
 		$designations = Designation::withTrashed()->select(
-				'designations.id',
-				'designations.code',
-				'designations.name',
-				'designations.deleted_at',
-				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
-			)
+			'designations.id',
+			'designations.name',
+			'designations.deleted_at',
+			DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
+		)
 			->orderBy('designations.name', 'asc');
 
 		return Datatables::of($designations)
 			->addColumn('action', function ($designations) {
 
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img2 = asset('public/img/content/table/eye.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2_active = asset('public/img/content/table/eye-active.svg');
-				$img3 = asset('public/img/content/table/delete-default.svg');
-				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
 				<a href="#!/eyatra/designation/edit/' . $designations->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/designation/view/' . $designations->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
+
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"
 				onclick="angular.element(this).scope().deleteDesignationConfirm(' . $designations->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
@@ -80,7 +73,7 @@ class DesignationController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-		
+
 		$this->data['success'] = true;
 		$this->data['designation'] = $designation;
 
@@ -92,21 +85,16 @@ class DesignationController extends Controller {
 		//dd($request->all());
 		try {
 			$error_messages = [
-				'code.required' => 'Designation Code is required',
-				'code.unique' => 'Designation Code has already been taken',
+
 				'name.required' => 'Designation Name is required',
 				'name.unique' => 'Designation Name has already been taken',
 
 			];
 			$validator = Validator::make($request->all(), [
-				'code' => [
-					'required:true',
-					Rule::unique('designations')->ignore($request->id)
-				],
-				
+
 				'name' => [
 					'required:true',
-					Rule::unique('designations')->ignore($request->id)
+					Rule::unique('designations')->ignore($request->id),
 				],
 			], $error_messages);
 			if ($validator->fails()) {
@@ -134,7 +122,7 @@ class DesignationController extends Controller {
 				$designation->deleted_by = Auth::user()->id;
 
 			}
-
+			$designation->company_id = Auth::user()->company_id;
 			$designation->fill($request->all());
 			$designation->save();
 
@@ -150,22 +138,6 @@ class DesignationController extends Controller {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
-	}
-
-	public function viewEYatraDesignation($designation_id) {
-		$designation = Designation::select('*', DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status'))
-			->withTrashed()
-			->find($designation_id);
-		$this->data['action'] = 'View';
-		if (!$designation) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['Designation not found'];
-			return response()->json($this->data);
-		}
-		//dd($designation);
-		$this->data['designation'] = $designation;
-		$this->data['success'] = true;
-		return response()->json($this->data);
 	}
 
 	public function deleteEYatraDesignation($designation_id) {
