@@ -28,8 +28,7 @@ app.component('eyatraDesignation', {
                 data: function(d) {}
             },
             columns: [
-                { data: 'action', searchable: false, class: 'action text-left' },
-                { data: 'code', name: 'designations.code', searchable: true },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'name', name: 'designations.name', searchable: true },
                 { data: 'status', name: 'designations.deleted_at', searchable: false },
             ],
@@ -111,7 +110,7 @@ app.component('eyatraDesignationForm', {
 
 
 
-        var form_id = '#designation';
+        var form_id = '#designation-form';
         var v = jQuery(form_id).validate({
             ignore: '',
             rules: {
@@ -177,21 +176,7 @@ app.component('eyatraDesignationForm', {
     }
 });
 
-app.component('eyatraDesignationView', {
-    templateUrl: eyatra_designations_view_template_url,
 
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        $http.get(
-            eyatra_designation_view_data_url + '/' + $routeParams.designation_id
-        ).then(function(response) {
-            console.log(response.data.designation);
-            self.designation = response.data.designation;
-            self.action = response.data.action;
-        });
-    }
-});
 
 
 //------------------------------------------------------------------------------------------------------------------

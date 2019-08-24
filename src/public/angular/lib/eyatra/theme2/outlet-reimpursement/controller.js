@@ -77,6 +77,7 @@ app.component('eyatraOutletReimbursement', {
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 
+
 app.component('eyatraEntityForm1', {
     templateUrl: eyatra_entity_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
