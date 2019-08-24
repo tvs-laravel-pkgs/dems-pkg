@@ -6,7 +6,7 @@ app.component('eyatraStates', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_state_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -39,7 +39,8 @@ app.component('eyatraStates', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('States');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / States</p><h3 class="title">States</h3>');
+        // $('.page-header-content .display-inline-block .data-table-title').html('States');
         $('.add_new_button').html(
             '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-state\')">' +
             'Add New' +
@@ -315,7 +316,7 @@ app.component('eyatraStateForm', {
 app.component('eyatraStateView', {
     templateUrl: state_view_template_url,
 
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $scope, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -327,6 +328,15 @@ app.component('eyatraStateView', {
             self.service_charge = response.data.service_charge;
             self.action = response.data.action;
         });
+
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+        $rootScope.loading = false;
     }
 });
 

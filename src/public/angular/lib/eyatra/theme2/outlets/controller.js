@@ -532,7 +532,7 @@ app.component('eyatraOutletForm', {
 app.component('eyatraOutletView', {
     templateUrl: outlet_view_template_url,
 
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $scope, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -541,5 +541,14 @@ app.component('eyatraOutletView', {
             self.outlet = response.data.outlet;
             self.action = response.data.action;
         });
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+        $rootScope.loading = false;
+
     }
 });

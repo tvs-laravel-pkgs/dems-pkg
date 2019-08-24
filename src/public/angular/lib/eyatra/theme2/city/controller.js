@@ -5,7 +5,7 @@ app.component('eyatraCity', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_city_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -38,7 +38,8 @@ app.component('eyatraCity', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('City');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Cities</p><h3 class="title">Cities</h3>');
+        // $('.page-header-content .display-inline-block .data-table-title').html('City');
         $('.add_new_button').html(
             '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-city\')">' +
             'Add New' +
