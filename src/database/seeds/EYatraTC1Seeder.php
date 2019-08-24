@@ -266,7 +266,6 @@ class EYatraTC1Seeder extends Seeder {
 			]);
 			$outlet->name = 'Company ' . $company->id . ' / Outlet ' . $i;
 
-			//$outlet->sbu_id = Sbu::inRandomOrder()->first()->id;
 			$outlet->amount_eligible = $faker->randomElement([0, 1]);
 			$outlet->reimbursement_amount = $outlet->amount_eligible == 1 ? $faker->randomElement([10000, 20000, 30000]) : 0;
 			$outlet->amount_limit = $outlet->reimbursement_amount / 5;
@@ -281,6 +280,17 @@ class EYatraTC1Seeder extends Seeder {
 			$this->command->info('------------------');
 			$this->command->info('Outlet Created : ' . $outlet->name);
 			// dd($address);
+
+			//OUTLET CASHIER CREATION
+			$code = $outlet->code . '/cash' . $i;
+			$cashier = Employee::create($company, $code, $outlet, $admin, $faker, $manager->id);
+			$this->command->info('------------------');
+			$this->command->info('Cashier Created : ' . $cashier->code);
+
+			$user_type_id = 3121;
+			$cashier_user = Employee::createUser($company, $user_type_id, $employee, $faker, $base_telephone_number . $i . $j . $k . '000000', $roles = 504);
+			$outlet->cashier_id = $cashier->id;
+			$outlet->save();
 
 			//MANAGERS
 			for ($j = 1; $j <= $number_of_items; $j++) {
@@ -306,15 +316,15 @@ class EYatraTC1Seeder extends Seeder {
 			}
 		}
 
-		$this->command->info('');
-		$this->command->info('Outlet Cashier Mapping');
-		foreach ($company->outlets as $outlet) {
-			$cashier = $company->employees()->inRandomOrder()->first();
-			$user = $cashier->user;
-			$user->roles()->attach(504);
-			$outlet->cashier_id = $cashier->id;
-			$outlet->save();
-		}
+		// $this->command->info('');
+		// $this->command->info('Outlet Cashier Mapping');
+		// foreach ($company->outlets as $outlet) {
+		// 	$cashier = $company->employees()->inRandomOrder()->first();
+		// 	$user = $cashier->user;
+		// 	$user->roles()->attach(504);
+		// 	$outlet->cashier_id = $cashier->id;
+		// 	$outlet->save();
+		// }
 
 		$this->command->info('');
 		$this->command->info('Creating Agents');

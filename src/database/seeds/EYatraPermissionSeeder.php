@@ -644,6 +644,13 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Agent Claims Verification 1',
 			],
 
+			5560 => [
+				'display_order' => 7,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-trip-advance-requests',
+				'display_name' => 'Trip Advance Requests',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
