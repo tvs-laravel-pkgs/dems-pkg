@@ -313,16 +313,16 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/outlet-reimbursement/view/:outlet_id', {
         template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
         title: 'View Region',
-    });
+    }).
 
     //FINANCIER - AGENT CLAIM
     when('/eyatra/agent/claim/verification1/list', {
         template: '<eyatra-agent-claim-verification-list></eyatra-agent-claim-verification-list>',
         title: 'Agent Claim Verification',
     }).
-    when('/eyatra/agent/claim/verification1/view/:claim_id', {
-        template: '<eyatra-agent-claim-verification-view></agent-claim-verification-view>',
-        title: 'Agent Claim Verification View',
-    }).
+    when('/eyatra/finance/agent/claim/view/:agent_claim_id', {
+        template: '<eyatra-agent-claim-verification-view></eyatra-agent-claim-verification-view>',
+        title: 'View Agent Claim',
+    });
 
 }]);

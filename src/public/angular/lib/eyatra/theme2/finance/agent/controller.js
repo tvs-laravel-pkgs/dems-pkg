@@ -1,10 +1,9 @@
 app.component('eyatraAgentClaimVerificationList', {
-    templateUrl: eyatra_trip_claim_list_template_url,
+    templateUrl: eyatra_finance_agent_claim_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
-        alert('qqqq');
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_trip_claim_list_table').DataTable({
+        var dataTable = $('#eyatra_finance_agent_claim_list_table').DataTable({
             stateSave: true,
             "dom": dom_structure,
             "language": {
@@ -22,21 +21,21 @@ app.component('eyatraAgentClaimVerificationList', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listEYatraTripClaimList'],
+                url: laravel_routes['listFinanceEYatraAgentClaimList'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'status', name: 'status.name', searchable: true },
+                { data: 'date', name: 'ey_agent_claims.invoice_date', searchable: false },
+                { data: 'number', name: 'ey_agent_claims.number', searchable: true },
+                { data: 'agent_code', name: 'agents.code', searchable: true },
+                { data: 'agent_name', name: 'agents.name', searchable: true },
+                { data: 'invoice_number', name: 'ey_agent_claims.invoice_number', searchable: true },
+                { data: 'invoice_date', name: 'ey_agent_claims.invoice_date', searchable: true },
+                { data: 'invoice_amount', name: 'ey_agent_claims.invoice_amount', searchable: true },
+                { data: 'status', name: 'configs.name', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -81,243 +80,13 @@ app.component('eyatraAgentClaimVerificationList', {
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraFinanceEmpForm', {
-    templateUrl: eyatra_finance_employee_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        //alert();
-        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? finance_employee_form_data_url + '/' : finance_employee_form_data_url + '/' + $routeParams.trip_id;
-        var self = this;
-        var lodgings_removal_id = [];
-        var boardings_removal_id = [];
-        var local_travels_removal_id = [];
-
-        self.hasPermission = HelperService.hasPermission;
-        self.angular_routes = angular_routes;
-        self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
-        $http.get(
-            $form_data_url
-        ).then(function(response) {
-            /* if (!response.data.success) {
-                 new Noty({
-                     type: 'error',
-                     layout: 'topRight',
-                     text: response.data.error,
-                 }).show();
-                 $location.path('/eyatra/trip/claim/list')
-                 //$scope.$apply()
-                 return;
-             }*/
-            console.log(response.data.trip);
-            self.extras = response.data.extras;
-            self.trip = response.data.trip;
-
-            if (self.trip.lodgings.length == 0) {
-                self.addNewLodgings();
-            }
-            if (self.trip.boardings.length == 0) {
-                self.addNewBoardings();
-            }
-            if (self.trip.local_travels.length == 0) {
-                self.addNewLocalTralvels();
-            }
-            $rootScope.loading = false;
-
-        });
-
-        self.addVisit = function() {
-            self.trip.visits.push({
-                visit_date: '',
-                booking_method: 'Self',
-                preferred_travel_modes: '',
-            });
-        }
-        // $(function() {
-        //     $('.form_datetime').datetimepicker();
-        // });
-
-        // $(".form_datetime").datetimepicker({
-        //     format: "yyyy-m-dd hh:ii",
-        //     autoclose: true,
-        //     todayBtn: true,
-        //     pickerPosition: "bottom-left"
-        // });
-
-        /* Pane Next Button */
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-        });
-
-        // Lodgings
-        self.addNewLodgings = function() {
-            self.trip.lodgings.push({
-                id: '',
-                city_id: '',
-                lodge_name: '',
-                stay_type_id: '',
-                amount: '',
-                tax: '',
-                remarks: '',
-            });
-        }
-        self.removeLodging = function(index, lodging_id) {
-            if (lodging_id) {
-                lodgings_removal_id.push(lodging_id);
-                $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
-            }
-            self.trip.lodgings.splice(index, 1);
-        }
-
-        // Boardings
-        self.addNewBoardings = function() {
-            self.trip.boardings.push({
-                id: '',
-                city_id: '',
-                expense_name: '',
-                date: '',
-                amount: '',
-                remarks: '',
-            });
-        }
-        self.removeBoarding = function(index, boarding_id) {
-            if (boarding_id) {
-                boardings_removal_id.push(boarding_id);
-                $('#boardings_removal_id').val(JSON.stringify(boardings_removal_id));
-            }
-            self.trip.boardings.splice(index, 1);
-        }
-
-        // LocalTralvels
-        self.addNewLocalTralvels = function() {
-            self.trip.local_travels.push({
-                id: '',
-                mode_id: '',
-                date: '',
-                from_id: '',
-                to_id: '',
-                amount: '',
-                description: '',
-            });
-        }
-        self.removeLocalTralvel = function(index, local_travel_id) {
-            if (local_travel_id) {
-                local_travels_removal_id.push(local_travel_id);
-                $('#local_travels_removal_id').val(JSON.stringify(local_travels_removal_id));
-            }
-            self.trip.local_travels.splice(index, 1);
-        }
-
-        //Form submit validation
-        self.claimSubmit = function() {
-            // $('#claim_form').on('submit', function(event) {
-            //Add validation rule for dynamically generated name fields
-            $('.maxlength_name').each(function() {
-                $(this).rules("add", {
-                    required: true,
-                    maxlength: 191,
-                });
-            });
-            $('.num_amount').each(function() {
-                $(this).rules("add", {
-                    maxlength: 12,
-                    number: true,
-                    required: true,
-                });
-            });
-            $('.boarding_expense').each(function() {
-                $(this).rules("add", {
-                    maxlength: 255,
-                    required: true,
-                });
-            });
-        }
-
-        var form_id = '#claim_form';
-        $.validator.addClassRules({
-            // maxlength_name: {
-            //     maxlength: 191,
-            //     required: true,
-            // },
-            // num_amount: {
-            //     maxlength: 12,
-            //     number: true,
-            //     required: true,
-            // },
-            // boarding_expense: {
-            //     maxlength: 255,
-            //     required: true,
-            // }
-            attachments: {
-                // extension: "xlsx,xls",
-            }
-        });
-
-        var v = jQuery(form_id).validate({
-            invalidHandler: function(event, validator) {
-                new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: 'Kindly check in each tab to fix errors'
-                }).show();
-            },
-            ignore: "",
-            rules: {},
-            submitHandler: function(form) {
-                //console.log(self.item);
-                let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
-                $.ajax({
-                        url: eyatra_trip_claim_save_url,
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                    })
-                    .done(function(res) {
-                        //console.log(res.success);
-                        if (!res.success) {
-                            $('#submit').button('reset');
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Claim saved successfully!!',
-                            }).show();
-
-                            $location.path('/eyatra/trip/claim/list')
-                            $scope.$apply()
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#submit').button('reset');
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-
-            },
-        });
-    }
-});
-//------------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------
-
-app.component('eyatraTripClaimView', {
-    templateUrl: eyatra_trip_claim_view_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_view_url + '/' : eyatra_trip_claim_view_url + '/' + $routeParams.trip_id;
+app.component('eyatraAgentClaimVerificationView', {
+    templateUrl: eyatra_finance_agent_claim_form_template_url,
+    controller: function($http, $location, HelperService, $routeParams, $rootScope, $scope) {
+        $form_data_url = typeof($routeParams.agent_claim_id) == 'undefined' ? eyatra_finance_agent_claim_view_data_url : eyatra_finance_agent_claim_view_data_url + '/' + $routeParams.agent_claim_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-        self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
-        self.eyatra_trip_claim_lodging_attachment_url = eyatra_trip_claim_lodging_attachment_url;
-        self.eyatra_trip_claim_boarding_attachment_url = eyatra_trip_claim_boarding_attachment_url;
-        self.eyatra_trip_claim_local_travel_attachment_url = eyatra_trip_claim_local_travel_attachment_url;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -325,24 +94,58 @@ app.component('eyatraTripClaimView', {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: response.data.error,
+                    text: response.data.message,
                 }).show();
-                $location.path('/eyatra/trip/claim/list')
-                $scope.$apply()
+                $location.path('/eyatra/agent/claim/verification1/list')
+                // $scope.$apply()
                 return;
             }
-            self.extras = response.data.extras;
-            self.trip = response.data.trip;
+
+            self.agent_claim_view = response.data.agent_claim_view;
+            self.total_trips = response.data.total_trips;
+            self.booking_list = response.data.booking_list;
+            self.action = response.data.action;
+
+
             $rootScope.loading = false;
-
         });
 
-        /* Pane Next Button */
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        //SELECT PAYMENT MODE
+        $scope.selectPaymentMode = function(payment_id) {
+            if (payment_id == 3244) { //BANK
+                $scope.showBank = true;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            } else if (payment_id == 3245) { //CHEQUE
+                $scope.showBank = false;
+                $scope.showCheque = true;
+                $scope.showWallet = false;
+            } else if (payment_id == 3246) { //WALLET
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = true;
+            } else {
+                $scope.showBank = false;
+                $scope.showCheque = false;
+                $scope.showWallet = false;
+            }
+        }
+
+        $(".bottom-expand-btn").on('click', function() {
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                $(".separate-bottom-fixed-layer").removeClass("in");
+            } else {
+                $(".separate-bottom-fixed-layer").addClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'none' });
+            }
         });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        $(".btn-close").on('click', function() {
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                $(".separate-bottom-fixed-layer").removeClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'inline-block' });
+            } else {
+                $(".separate-bottom-fixed-layer").addClass("in");
+            }
         });
 
     }

@@ -23,6 +23,7 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.invoice_amount',
 			'agents.code as agent_code',
+			'agents.name as agent_name',
 			'configs.name as status',
 			DB::raw('DATE_FORMAT(ey_agent_claims.created_at,"%d/%m/%Y") as date'))
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
@@ -282,6 +283,74 @@ class AgentClaimController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim not found']]);
 		}
 		return response()->json(['success' => true]);
+	}
+
+	public function listFinanceEYatraAgentClaimList(Request $r) {
+
+		$agent_claim_list = Agentclaim::select(
+			'ey_agent_claims.id',
+			'ey_agent_claims.number',
+			'ey_agent_claims.invoice_date',
+			'ey_agent_claims.invoice_number',
+			'ey_agent_claims.invoice_amount',
+			'agents.code as agent_code',
+			'agents.name as agent_name',
+			'configs.name as status',
+			DB::raw('DATE_FORMAT(ey_agent_claims.created_at,"%d/%m/%Y") as date'))
+			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
+			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
+		// ->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
+			->orderBy('ey_agent_claims.id', 'desc');
+		// ->get();
+
+		return Datatables::of($agent_claim_list)
+			->addColumn('action', function ($agent_claim_list) {
+
+				$img1 = asset('public/img/content/table/edit-yellow.svg');
+				$img2 = asset('public/img/content/table/eye.svg');
+				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
+				$img2_active = asset('public/img/content/table/eye-active.svg');
+				$img3 = asset('public/img/content/table/delete-default.svg');
+				$img3_active = asset('public/img/content/table/delete-active.svg');
+				return '
+				<a href="#!/eyatra/finance/agent/claim/view/' . $agent_claim_list->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
+
+			})
+			->make(true);
+	}
+
+	public function viewEYatraFinanceAgentClaim($agent_claim_id) {
+		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
+			'ey_agent_claims.id',
+			'ey_agent_claims.invoice_number',
+			'ey_agent_claims.net_amount',
+			'ey_agent_claims.tax',
+			'agents.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
+			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
+			'ey_agent_claims.invoice_amount')
+			->where('ey_agent_claims.id', $agent_claim_id)->first();
+
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
+			'visit_bookings.id',
+			'visit_bookings.paid_amount',
+			'configs.name as status',
+			'trips.number as trip',
+			'trips.id as trip_id',
+			'employees.code as employee_code',
+			'employees.name as employee_name')
+			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
+			->leftJoin('trips', 'trips.id', 'visits.trip_id')
+			->leftJoin('employees', 'employees.id', 'trips.employee_id')
+			->join('configs', 'configs.id', 'trips.status_id')
+			->where('visit_bookings.agent_claim_id', $agent_claim_id)
+			->groupBy('trips.id')
+			->get();
+		$this->data['total_trips'] = count($booking_list);
+		$this->data['success'] = true;
+		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
+		return response()->json($this->data);
 	}
 
 }
