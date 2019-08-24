@@ -68,6 +68,7 @@ class OutletController extends Controller {
 			})
 			->make(true);
 	}
+
 	public function eyatraOutletFormData($outlet_id = NULL) {
 		if (!$outlet_id) {
 			$this->data['action'] = 'Add';
@@ -77,7 +78,7 @@ class OutletController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$outlet = Outlet::with('Sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
+			$outlet = Outlet::with('sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
 			$outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
 			// $this->data['cashier'] = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
 			// dd($outlet->employee->id);
@@ -90,8 +91,12 @@ class OutletController extends Controller {
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
-			$outlet->amount_eligible = 1 ? $outlet->amount_eligible : '';
-// dd($outlet->outletBudgets);
+			if ($outlet->amount_eligible == 1) {
+				$outlet->eligible_amount = 'Yes';
+			} else {
+				$outlet->eligible_amount = 'No';
+			}
+			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
 			// 'name',
 			// 'id',
@@ -108,7 +113,8 @@ class OutletController extends Controller {
 			// $this->data['sbu_outlet'][$outlet_sbu->id]->amount = $outlet_sbu->pivot->amount;
 			// }
 		}
-		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		// dd(Auth::user()->company_id);
+		$lob_list = collect(Lob::select('name', 'id')->where('company_id', Auth::user()->company_id)->get());
 		// $cashier_list = Employee::select('name', 'code', 'id')->get();
 		$sbu_list = [];
 		$this->data['extras'] = [
@@ -120,8 +126,7 @@ class OutletController extends Controller {
 			'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
-		$this->data['lob_outlet'] = $lob_outlet = Lob::select('name', 'id')->get();
-		// dd($lob_outlet);
+		// $this->data['lob_outlet'] = $lob_outlet = Lob::select('name', 'id')->get();
 		$this->data['sbu_outlet'] = [];
 		// foreach ($lob_outlet->sbus as $lob_sbu) {
 		// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;

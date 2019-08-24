@@ -150,43 +150,29 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getSbuBasedonLob = function(lob_id) {
-            if (lob_id) {
-                $.ajax({
-                        url: get_sbu_by_lob_outlet,
-                        method: "POST",
-                        data: { lob_id: lob_id },
-                    })
-                    .done(function(res) {
-                        self.extras.sbu_list = [];
-                        self.extras.sbu_list = res.sbu_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
+        $scope.getSbus = function() {
+            var lob_ids = [];
+            $.each($(".lobcheckbox:checked"), function() {
+                lob_ids.push($(this).val())
+            });
+            $.ajax({
+                    url: get_sbu_by_lob_outlet,
+                    method: "GET",
+                    data: { lob_ids: lob_ids },
+                })
+                .done(function(res) {
+                    self.extras.sbu_list = [];
+                    self.extras.sbu_list = res.sbus;
+
+                    console.log(self.extras.sbu_list);
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
         }
 
-        // $scope.loadCity = function(state_id) {
-        //     $.ajax({
-        //             url: get_city_url,
-        //             method: "POST",
-        //             data: { state_id: state_id },
-        //         })
-        //         .done(function(res) {
-        //             self.city_list = [];
-        //             $(res['city_list']).each(function(i, v) {
-        //                 self.city_list.push({
-        //                     id: v['id'],
-        //                     name: v['name'],
-        //                 });
-        //             });
-        //         })
-        //         .fail(function(xhr) {
-        //             console.log(xhr);
-        //         });
-        // }
+
 
         $scope.loadState = function(country_id) {
             $.ajax({
@@ -247,7 +233,7 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getDataBasedonLob = function(id) {
+        $scope.getDataBasedonLob = function() {
             if (event.target.checked == true) {
                 $http.get(
                     lob_sbu_url + '/' + id
@@ -532,7 +518,7 @@ app.component('eyatraOutletForm', {
 app.component('eyatraOutletView', {
     templateUrl: outlet_view_template_url,
 
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $scope, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -541,5 +527,14 @@ app.component('eyatraOutletView', {
             self.outlet = response.data.outlet;
             self.action = response.data.action;
         });
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+        $rootScope.loading = false;
+
     }
 });

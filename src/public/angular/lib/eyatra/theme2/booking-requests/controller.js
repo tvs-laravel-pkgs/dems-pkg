@@ -214,22 +214,36 @@ app.component('eyatraTripBookingRequestsView', {
                 },
             });
         });
-
+        
         // Select and loop the container element of the elements you want to equalise
-        $('.container').each(function() {
+        setTimeout(function () {
             // Cache the highest
-            var highestBox = 0;
-            // Select and loop the elements you want to equalise
-            $('.match-height', this).each(function() {
-                // If this box is higher than the cached highest then store it
-                if ($(this).height() > highestBox) {
-                    highestBox = $(this).height();
-                }
+            var highestBox = new Array();
+            // Loop to get all element Widths
+            $('.match-height').each(function() { 
+                // Need to let sizes be whatever they want so no overflow on resize   
+                // Then add size (no units) to array
+                highestBox.push($(this).height());
             });
+            // Find max Width of all elements
+            var max = Math.max.apply( Math, highestBox );
             // Set the height of all those children to whichever was highest 
-            $('.match-height', this).height(highestBox);
+            $('.match-height').height(max);                
 
-        });
+            // Cache the highest
+            var highestBox_1 = new Array();
+            // Loop to get all element Widths
+            $('.match-height-1').each(function() {    
+                // Need to let sizes be whatever they want so no overflow on resize
+                // Then add size (no units) to array
+                highestBox_1.push($(this).height());
+            });
+            // Find max Width of all elements
+            var max_1 = Math.max.apply( Math, highestBox_1 );
+            // Set the height of all those children to whichever was highest 
+            $('.match-height-1').height(max_1);
+
+        }, 500);
 
         self.approveTrip = function() {
             self.trip.visits.push({

@@ -23,7 +23,7 @@ class Outlet extends Model {
 		return $this->belongsTo('App\Company');
 	}
 
-	public function Sbu() {
+	public function sbu() {
 		return $this->belongsTo('Uitoux\EYatra\Sbu');
 	}
 	public function employee() {
