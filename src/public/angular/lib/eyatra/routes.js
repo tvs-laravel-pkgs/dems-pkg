@@ -35,6 +35,25 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Grade',
     }).
 
+    //Coa Codes
+    when('/eyatra/coa-codes', {
+        template: '<eyatra-coa-code></eyatra-coa-code>',
+        title: 'Coa Codes',
+    }).
+    when('/eyatra/coa-code/add', {
+        template: '<eyatra-coa-code-form></eyatra-coa-code-form>',
+        title: 'Add Coa Codes',
+    }).
+    when('/eyatra/coa-code/edit/:coa_code_id', {
+        template: '<eyatra-coa-code-form></eyatra-coa-code-form>',
+        title: 'Edit Coa Codes',
+    }).
+    when('/eyatra/coa-code/view/:coa_code_id', {
+        template: '<eyatra-coa-code-view></eyatra-coa-code-view>',
+        title: 'View Coa Codes',
+    }).
+
+
     //AGENTS
     when('/eyatra/agents', {
         template: '<eyatra-agents></eyatra-agents>',

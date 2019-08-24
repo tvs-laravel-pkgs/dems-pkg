@@ -4,7 +4,7 @@ namespace Uitoux\EYatra;
 use Illuminate\Database\Eloquent\Model;
 
 class Lob extends Model {
-	protected $table = 'lobss';
+	protected $table = 'lobs';
 	protected $fillable = [
 		'id',
 		'name',

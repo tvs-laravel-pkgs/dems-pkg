@@ -539,6 +539,9 @@ app.component('eyatraOutletView', {
             outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
             self.outlet = response.data.outlet;
+            self.lob_name = response.data.lob_name;
+            self.sbu_name = response.data.sbu_name;
+            self.amount = response.data.amount;
             self.action = response.data.action;
         });
         $('.btn-nxt').on("click", function() {
