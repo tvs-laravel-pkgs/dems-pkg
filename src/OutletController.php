@@ -1,5 +1,4 @@
 <?php
-
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -7,6 +6,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Address;
+use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\NState;
@@ -17,11 +17,11 @@ use Yajra\Datatables\Datatables;
 
 class OutletController extends Controller {
 	public function listEYatraOutlet(Request $r) {
-		$outlets = Outlet::withTrashed()->from('outlets')
+		$outlets = Outlet::withTrashed()
 			->join('ey_addresses as a', 'a.entity_id', 'outlets.id')
 			->join('ncities as city', 'city.id', 'a.city_id')
 			->join('nstates as s', 's.id', 'city.state_id')
-			->join('regions as r', 'r.state_id', 's.id')
+			->leftjoin('regions as r', 'r.state_id', 's.id')
 			->join('country as c', 'c.id', 's.country_id')
 			->select(
 				'outlets.id',
@@ -29,38 +29,35 @@ class OutletController extends Controller {
 				'outlets.name',
 				'city.name as city_name',
 				's.name as state_name',
-				'r.name as region_name',
+				DB::raw('IF(r.name IS NULL,"---","r.name") as region_name'),
 				'c.name as country_name',
 				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 			->where('outlets.company_id', Auth::user()->company_id)
 			->where('a.address_of_id', 3160)
 			->groupBy('outlets.id');
-
 		// if (!Entrust::can('view-all-trips')) {
-		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
+		// $trips->where('trips.employee_id', Auth::user()->entity_id);
 		// }
 		return Datatables::of($outlets)
 			->addColumn('action', function ($outlet) {
-
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img2 = asset('public/img/content/table/eye.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2_active = asset('public/img/content/table/eye-active.svg');
-				$img3 = asset('public/img/content/table/delete-default.svg');
-				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/outlet/edit/' . $outlet->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/outlet/view/' . $outlet->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_outlet"
-				onclick="angular.element(this).scope().deleteOutletConfirm(' . $outlet->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
-                </a>';
-
+        <a href="#!/eyatra/outlet/edit/' . $outlet->id . '">
+          <img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
+        </a>
+        <a href="#!/eyatra/outlet/view/' . $outlet->id . '">
+          <img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+        </a>
+        <a href="javascript:;" data-toggle="modal" data-target="#delete_outlet"
+        onclick="angular.element(this).scope().deleteOutletConfirm(' . $outlet->id . ')" dusk = "delete-btn" title="Delete">
+        <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+        </a>';
 			})
 			->addColumn('status', function ($outlet) {
 				if ($outlet->status == 'Inactive') {
@@ -68,13 +65,10 @@ class OutletController extends Controller {
 				} else {
 					return '<span style="color:green">Active</span>';
 				}
-
 			})
 			->make(true);
 	}
-
 	public function eyatraOutletFormData($outlet_id = NULL) {
-
 		if (!$outlet_id) {
 			$this->data['action'] = 'Add';
 			$outlet = new Outlet;
@@ -84,9 +78,9 @@ class OutletController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$outlet = Outlet::with('Sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
-			// $outlet->address;
-			// dd($outlet->address);
-
+			$outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
+			// $this->data['cashier'] = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
+			// dd($outlet->employee->id);
 			if (!$outlet) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Outlet not found';
@@ -96,10 +90,26 @@ class OutletController extends Controller {
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
-			$outlet->amount_eligible == 1 ? $outlet->amount_eligible : '';
+			$outlet->amount_eligible = 1 ? $outlet->amount_eligible : '';
+// dd($outlet->outletBudgets);
+			// $this->data['sbu_outlet'] = Sbu::select(
+			// 'name',
+			// 'id',
+			// )
+			// // ->whereIn('lob_id', $outlet->Sbu)
+			// ->get()
+			// ;
+			// foreach ($lob_outlet->sbus as $lob_sbu) {
+			// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;
+			// }
+			// foreach ($outlet->outletBudgets as $outlet_sbu) {
+			// $this->data['sbu_outlet'][$outlet_sbu->id]->checked = true;
+			// $this->data['sbu_outlet'][$outlet_sbu->id]->sbu_id = $outlet_sbu->pivot->sbu_id;
+			// $this->data['sbu_outlet'][$outlet_sbu->id]->amount = $outlet_sbu->pivot->amount;
+			// }
 		}
-
 		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		// $cashier_list = Employee::select('name', 'code', 'id')->get();
 		$sbu_list = [];
 		$this->data['extras'] = [
 			'country_list' => NCountry::getList(),
@@ -107,28 +117,18 @@ class OutletController extends Controller {
 			'city_list' => $this->data['action'] == 'Add' ? [] : NCity::getList($outlet->address->state_id),
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
-			// 'cashier_list' => Employee::getList(),
+			'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
-		$this->data['lob_outlet'] = $lob = Lob::select('name', 'id')->get();
-		// $this->data['sbu_outlet'] = Sbu::select(
-		// 	'name',
-		// 	'id',
-		// )
-		// 	->whereIn('lob_id', )
-		// 	->get()
-		// ;
-		// foreach ($outlet->outletBudgets as $outlet_budget) {
-		// 	$this->data['lob_outlet'][$outlet_budget->id]->checked = true;
-
+		$this->data['lob_outlet'] = $lob_outlet = Lob::select('name', 'id')->get();
+		// dd($lob_outlet);
+		$this->data['sbu_outlet'] = [];
+		// foreach ($lob_outlet->sbus as $lob_sbu) {
+		// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;
 		// }
-		foreach ($lob->Sbu as $outlet_sbu) {
-			$this->data['sbu_outlet'][$outlet_sbu->id]->checked = true;
-		}
 		$this->data['outlet'] = $outlet;
 		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
-
 		return response()->json($this->data);
 	}
 //SEARCH CASHIER
@@ -147,11 +147,9 @@ class OutletController extends Controller {
 			->get();
 		return response()->json($cashier_list);
 	}
-
 	public function saveEYatraOutlet(Request $request) {
 		//validation
 		try {
-
 			$error_messages = [
 				'code.required' => 'Outlet Code is Required',
 				'outlet_name.required' => 'Outlet Name is Required',
@@ -162,15 +160,14 @@ class OutletController extends Controller {
 				'pincode.required' => 'Pincode is Required',
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
-				'cashier_name.required' => "Cashier Name is Required",
+				'cashier_id.required' => "Cashier Name is Required",
 				// 'amount_eligible.required' => "Amount Eligible is Required",
 			];
-
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'outlet_name' => 'required',
 				'line_1' => 'required',
-				'cashier_name' => 'required',
+				'cashier_id' => 'required',
 				// 'amount_eligible' => 'required',
 				// 'country_id' => 'required',
 				// 'state_id' => 'required',
@@ -179,7 +176,6 @@ class OutletController extends Controller {
 				'code' => 'required|unique:outlets,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				'outlet_name' => 'required|unique:outlets,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 			], $error_messages);
-
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
@@ -191,23 +187,19 @@ class OutletController extends Controller {
 				$outlet->created_by = Auth::user()->id;
 				$outlet->created_at = Carbon::now();
 				$outlet->updated_at = NULL;
-
 			} else {
 				$outlet = Outlet::withTrashed()->find($request->id);
 				$address = Address::where('entity_id', $request->id)->first();
-
 				$outlet->updated_by = Auth::user()->id;
 				$outlet->updated_at = Carbon::now();
-
+				$outlet->outletBudgets()->sync([]);
 			}
-
 			if ($request->status == 'Active') {
 				$outlet->deleted_at = NULL;
 				$outlet->deleted_by = NULL;
 			} else {
 				$outlet->deleted_at = date('Y-m-d H:i:s');
 				$outlet->deleted_by = Auth::user()->id;
-
 			}
 			if ($request->eligible_amount == 1) {
 				$outlet->amount_eligible = 1;
@@ -215,14 +207,11 @@ class OutletController extends Controller {
 			} else {
 				$outlet->amount_eligible = 0;
 				$outlet->amount_limit = NULL;
-
 			}
-
 			$outlet->name = $request->outlet_name;
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());
 			$outlet->save();
-
 			//SAVING ADDRESS
 			$address->address_of_id = 3160;
 			$address->entity_id = $outlet->id;
@@ -230,6 +219,19 @@ class OutletController extends Controller {
 			$address->fill($request->all());
 			$address->save();
 			// dd($address);
+			//SAVING OUTLET BUDGET
+			$sbu_ids = array_column($request->sbus, 'sbu_id');
+			// dd($sbu_ids);
+			if (count($request->sbus) > 0) {
+				foreach ($request->sbus as $sbu) {
+					if (!isset($sbu['sbu_id'])) {
+						continue;
+					}
+					$outlet->outletBudgets()->attach($sbu['sbu_id'], [
+						'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
+					]);
+				}
+			}
 			DB::commit();
 			$request->session()->flash('success', 'outlet saved successfully!');
 			if (empty($request->id)) {
@@ -243,14 +245,15 @@ class OutletController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
-
 	public function viewEYatraOutlet($outlet_id) {
-
 		$outlet = Outlet::with([
 			'address',
 			'address.city',
+			'address.city.state',
+			'address.city.state.country',
 			'Sbu',
 			'Sbu.lob',
+			'employee',
 		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
@@ -259,13 +262,12 @@ class OutletController extends Controller {
 			$this->data['errors'] = ['Outlet not found'];
 			return response()->json($this->data);
 		}
-
+		// dd($outlet);
 		$this->data['action'] = 'View';
 		$this->data['outlet'] = $outlet;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
-
 	public function deleteEYatraOutlet($outlet_id) {
 		$outlet = Outlet::where('id', $outlet_id)->forceDelete();
 		if (!$outlet) {
@@ -273,7 +275,6 @@ class OutletController extends Controller {
 		}
 		return response()->json(['success' => true]);
 	}
-
 	public function getSbuByLob(Request $request) {
 		if (!empty($request->lob_id)) {
 			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);

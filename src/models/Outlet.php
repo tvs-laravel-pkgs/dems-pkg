@@ -26,7 +26,9 @@ class Outlet extends Model {
 	public function Sbu() {
 		return $this->belongsTo('Uitoux\EYatra\Sbu');
 	}
-
+	public function employee() {
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'cashier_id');
+	}
 	public static function getList() {
 		return Outlet::select('id', 'name')->get();
 	}
