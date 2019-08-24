@@ -64,7 +64,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 500)->select('id', 'name')->get();
 	}
 
-	public static function getLodgeStateTypeList() {
+	public static function getLodgeStayTypeList() {
 		return Entity::where('entity_type_id', 504)->select('id', 'name')->get();
 	}
 	public static function walletModeList() {

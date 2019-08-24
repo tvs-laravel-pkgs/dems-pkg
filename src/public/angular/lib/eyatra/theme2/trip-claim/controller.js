@@ -85,7 +85,7 @@ app.component('eyatraTripClaimList', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripClaimForm', {
     templateUrl: eyatra_trip_claim_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $element, $scope) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var lodgings_removal_id = [];
@@ -108,9 +108,8 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }*/
-            console.log(response.data.trip);
-            console.log(response.data.travel_cities);
-            console.log(response.data.travel_dates);
+            // console.log(response.data.trip);
+            // console.log(response.data.travel_dates);
             //console.log(response.data.extras);
             self.employee = response.data.employee;
             self.travel_cities = response.data.travel_cities;
@@ -120,7 +119,6 @@ app.component('eyatraTripClaimForm', {
             self.lodgings_removal_id = [];
             self.boardings_removal_id = [];
             self.local_travels_removal_id = [];
-            console.log(self.trip.lodgings.length);
 
             if (self.trip.lodgings.length == 0) {
                 self.addNewLodgings();
@@ -142,6 +140,78 @@ app.component('eyatraTripClaimForm', {
 
         });
 
+        $element.find('input').on('keydown', function(ev) {
+            ev.stopPropagation();
+        });
+
+        $scope.searchBookedBy;
+        $scope.clearSearchBookedBy = function() {
+            $scope.searchBookedBy = '';
+        };
+
+        $scope.searchTravelMode;
+        $scope.clearSearchTravelMode = function() {
+            $scope.searchTravelMode = '';
+        };
+
+        $scope.searchLodgingCity;
+        $scope.clearSearchLodgingCity = function() {
+            $scope.searchLodgingCity = '';
+        };
+
+        $scope.searchStayType;
+        $scope.clearSearchStayType = function() {
+            $scope.searchStayType = '';
+        };
+
+        $scope.searchBoardingCity;
+        $scope.clearSearchBoardingCity = function() {
+            $scope.searchBoardingCity = '';
+        };
+
+        $scope.searchLocalTravelMode;
+        $scope.clearSearchLocalTravelMode = function() {
+            $scope.searchLocalTravelMode = '';
+        };
+
+        $scope.searchLocalTravelFrom;
+        $scope.clearSearchLocalTravelFrom = function() {
+            $scope.searchLocalTravelFrom = '';
+        };
+
+        $scope.searchLocalTravelTo;
+        $scope.clearSearchLocalTravelTo = function() {
+            $scope.searchLocalTravelTo = '';
+        };
+
+
+        $scope.getEligibleAmtBasedonCitycategoryGrade = function(grade_id, city_id, expense_type_id, key) {
+            if (city_id && grade_id && expense_type_id) {
+                console.log(grade_id, city_id, expense_type_id, key);
+                $.ajax({
+                        url: get_eligible_amount_by_city_category_grade,
+                        method: "GET",
+                        data: { city_id: city_id, grade_id: grade_id, expense_type_id: expense_type_id },
+                    })
+                    .done(function(res) {
+                        var eligible_amount = res.grade_expense_type ? res.grade_expense_type.eligible_amount : '0.00';
+                        console.log(' == eligible_amount ==' + eligible_amount);
+                        if (expense_type_id == 3000) { //TRANSPORT EXPENSES
+                            self.trip.self_visits[key].eligible_amount = eligible_amount;
+                        } else if (expense_type_id == 3001) { // LODGING EXPENSE
+                            self.trip.lodgings[key].eligible_amount = eligible_amount;
+                        } else if (expense_type_id == 3002) { // BOARDING EXPENSE
+                            self.trip.boardings[key].eligible_amount = eligible_amount;
+                        } else if (expense_type_id == 3003) { // LOCAL TRAVEL EXPENSE
+                            self.trip.local_travels[key].eligible_amount = eligible_amount;
+                        }
+                        $scope.$apply()
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
 
         /*self.addLodgingExpenses = function() {
             self.lodging.push({
@@ -176,6 +246,7 @@ app.component('eyatraTripClaimForm', {
                 city_id: '',
                 lodge_name: '',
                 stay_type_id: '',
+                eligible_amount: '0.00',
                 amount: '',
                 tax: '',
                 remarks: '',
@@ -187,6 +258,9 @@ app.component('eyatraTripClaimForm', {
                 $('#lodgings_removal_id').val(JSON.stringify(self.lodgings_removal_id));
             }
             self.trip.lodgings.splice(index, 1);
+            setTimeout(function() {
+                self.lodgingCal();
+            }, 500);
         }
 
         // Boardings
@@ -198,6 +272,7 @@ app.component('eyatraTripClaimForm', {
                 date: '',
                 amount: '',
                 remarks: '',
+                eligible_amount: '0.00',
             });
         }
         self.removeBoarding = function(index, boarding_id) {
@@ -206,6 +281,9 @@ app.component('eyatraTripClaimForm', {
                 $('#boardings_removal_id').val(JSON.stringify(self.boardings_removal_id));
             }
             self.trip.boardings.splice(index, 1);
+            setTimeout(function() {
+                self.boardingCal();
+            }, 500);
         }
 
         // LocalTralvels
@@ -218,6 +296,7 @@ app.component('eyatraTripClaimForm', {
                 to_id: '',
                 amount: '',
                 description: '',
+                eligible_amount: '0.00',
             });
         }
         self.removeLocalTralvel = function(index, local_travel_id) {
@@ -226,6 +305,9 @@ app.component('eyatraTripClaimForm', {
                 $('#local_travels_removal_id').val(JSON.stringify(self.local_travels_removal_id));
             }
             self.trip.local_travels.splice(index, 1);
+            setTimeout(function() {
+                self.localTravelCal();
+            }, 500);
         }
         self.travelCal = function() {
             var total_travel_amount = 0;
@@ -242,13 +324,12 @@ app.component('eyatraTripClaimForm', {
                 travel_current_total = travel_amount + travel_tax;
                 total_travel_amount += travel_current_total;
             });
-            console.log(total_travel_amount);
+            // console.log(total_travel_amount);
             $('.transport_expenses').text('₹ ' + total_travel_amount.toFixed(2));
             $('.total_travel_amount').val(total_travel_amount.toFixed(2));
             caimTotalAmount();
         }
         self.lodgingCal = function() {
-            //alert();
             var total_lodging_amount = 0;
             $('.lodging_amount').each(function() {
                 var lodging_amount = parseInt($(this).closest('tr').find('#lodging_amount').val() || 0);
@@ -263,7 +344,7 @@ app.component('eyatraTripClaimForm', {
                 current_total = lodging_amount + lodging_tax;
                 total_lodging_amount += current_total;
             });
-            console.log(total_lodging_amount);
+            // console.log(total_lodging_amount);
             $('.lodging_expenses').text('₹ ' + total_lodging_amount.toFixed(2));
             $('.total_lodging_amount').val(total_lodging_amount.toFixed(2));
             caimTotalAmount();
@@ -285,7 +366,7 @@ app.component('eyatraTripClaimForm', {
                 current_boarding_total = boarding_amount + boarding_tax;
                 total_boarding_amount += current_boarding_total;
             });
-            console.log(total_boarding_amount);
+            // console.log(total_boarding_amount);
             $('.boarding_expenses').text('₹ ' + total_boarding_amount.toFixed(2));
             $('.total_boarding_amount').val(total_boarding_amount.toFixed(2));
             caimTotalAmount();
@@ -306,7 +387,7 @@ app.component('eyatraTripClaimForm', {
                 current_boarding_total = boarding_amount + boarding_tax;
                 total_boarding_amount += current_boarding_total;
             });
-            console.log(total_boarding_amount);
+            // console.log(total_boarding_amount);
             $('.boarding_expenses').text('₹ ' + total_boarding_amount.toFixed(2));
             $('.total_boarding_amount').val(total_boarding_amount.toFixed(2));
             caimTotalAmount();
@@ -319,7 +400,7 @@ app.component('eyatraTripClaimForm', {
             $('.local_travel_amount').each(function() {
                 var local_travel_amount = parseFloat($(this).closest('tr').find('#local_travel_amount').val() || 0);
                 var local_travel_tax = parseFloat($(this).closest('tr').find('#local_travel_tax').val() || 0);
-                console.log(local_travel_amount, local_travel_tax);
+                // console.log(local_travel_amount, local_travel_tax);
                 if (!$.isNumeric(local_travel_amount)) {
                     local_travel_amount = 0;
                 }
@@ -329,7 +410,7 @@ app.component('eyatraTripClaimForm', {
                 current_boarding_total = local_travel_amount + local_travel_tax;
                 total_local_travel_amount += current_boarding_total;
             });
-            console.log(total_local_travel_amount);
+            // console.log(total_local_travel_amount);
             $('.local_expenses').text('₹ ' + total_local_travel_amount.toFixed(2));
             $('.total_local_travel_amount').val(total_local_travel_amount.toFixed(2));
             caimTotalAmount();
@@ -345,7 +426,7 @@ app.component('eyatraTripClaimForm', {
             $('.claim_total_amount').val(total_claim_amount.toFixed(2));
             $('.claim_total_amount').text('₹ ' + total_claim_amount.toFixed(2));
 
-            console.log('total claim' + total_claim_amount);
+            // console.log('total claim' + total_claim_amount);
         }
 
         //Form submit validation
