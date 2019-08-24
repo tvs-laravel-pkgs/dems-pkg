@@ -34,8 +34,16 @@ class Company extends Model {
 		return $this->hasMany('Uitoux\EYatra\Entity')->where('entity_type_id', 502);
 	}
 
+	public function localTravelModes() {
+		return $this->hasMany('Uitoux\EYatra\Entity')->where('entity_type_id', 503);
+	}
+
 	public function expenseTypes() {
 		return $this->hasMany('Uitoux\EYatra\Config')->where('config_type_id', 500);
+	}
+
+	public function employeePaymentModes() {
+		return $this->hasMany('Uitoux\EYatra\Config')->where('config_type_id', 514);
 	}
 
 	public function trips() {

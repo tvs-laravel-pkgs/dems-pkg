@@ -5,7 +5,7 @@ app.component('eyatraOutlets', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_outlet_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -42,7 +42,8 @@ app.component('eyatraOutlets', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Outlets');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Outlets</p><h3 class="title">Outlets</h3>');
+        // $('.page-header-content .display-inline-block .data-table-title').html('Outlets');
         $('.add_new_button').html(
             '<a href="#!/eyatra/outlet/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-outlet\')">' +
             'Add New' +
@@ -112,9 +113,12 @@ app.component('eyatraOutletForm', {
             self.lob_outlet = response.data.lob_outlet;
             self.sbu_outlet = response.data.sbu_outlet;
             self.action = response.data.action;
+
             if (self.action == 'Edit') {
                 $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
                 $scope.AmountEligible(self.outlet.amount_eligible);
+                // self.outlet.cashier = response.data.cashier_name;
+                // alert(response.data.cashier_name);
             }
             $rootScope.loading = false;
 
@@ -146,43 +150,29 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getSbuBasedonLob = function(lob_id) {
-            if (lob_id) {
-                $.ajax({
-                        url: get_sbu_by_lob_outlet,
-                        method: "POST",
-                        data: { lob_id: lob_id },
-                    })
-                    .done(function(res) {
-                        self.extras.sbu_list = [];
-                        self.extras.sbu_list = res.sbu_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
+        $scope.getSbus = function() {
+            var lob_ids = [];
+            $.each($(".lobcheckbox:checked"), function() {
+                lob_ids.push($(this).val())
+            });
+            $.ajax({
+                    url: get_sbu_by_lob_outlet,
+                    method: "GET",
+                    data: { lob_ids: lob_ids },
+                })
+                .done(function(res) {
+                    self.extras.sbu_list = [];
+                    self.extras.sbu_list = res.sbus;
+
+                    console.log(self.extras.sbu_list);
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
         }
 
-        // $scope.loadCity = function(state_id) {
-        //     $.ajax({
-        //             url: get_city_url,
-        //             method: "POST",
-        //             data: { state_id: state_id },
-        //         })
-        //         .done(function(res) {
-        //             self.city_list = [];
-        //             $(res['city_list']).each(function(i, v) {
-        //                 self.city_list.push({
-        //                     id: v['id'],
-        //                     name: v['name'],
-        //                 });
-        //             });
-        //         })
-        //         .fail(function(xhr) {
-        //             console.log(xhr);
-        //         });
-        // }
+
 
         $scope.loadState = function(country_id) {
             $.ajax({
@@ -243,95 +233,102 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getDataBasedonLob = function(id) {
+        $scope.getDataBasedonLob = function() {
             if (event.target.checked == true) {
                 $http.get(
                     lob_sbu_url + '/' + id
                 ).then(function(response) {
-                    response.data.sbu_outlet.forEach(function(sbus) {
+                    // alert(response.data.sbu_outlet)
+                    response.data.sbu_outlet.forEach(function(v) {
+
                         self.sbu_outlet.push({
-                            "name": sbus.name,
-                            "id": sbus.id,
-                            "code": sbus.code
+                            "name": v.name,
+                            "id": v.id
                         });
                     });
                 });
             } else {
-                if ($('.regioncheckbox:checked').length > 0) {
+                if ($('.lobcheckbox:checked').length > 0) {
                     self.sbu_outlet = [];
-                    $.each($(".regioncheckbox:checked"), function() {
+                    $.each($(".lobcheckbox:checked"), function() {
                         $scope.test($(this).val())
                     });
 
                 } else {
-                    $('#region').prop('checked', false);
-                    $('#outlet tbody tr').html('');
+                    $('#lob').prop('checked', false);
+                    $('#sbu tbody tr').html('');
                 }
             }
         }
         $scope.test = function(id) {
             $http.get(
-                vendor_get_outlet_by_region + '/' + id
+                lob_sbu_url + '/' + id
             ).then(function(response) {
-                response.data.outlet_list.forEach(function(sbus) {
-                    if (id == sbus.region_id) {
-                        self.outlet_list.push({
-                            "name": sbus.name,
-                            "code": sbus.code,
-                            "id": sbus.id
+                response.data.sbu_outlet.forEach(function(v) {
+                    // alert(v.lob_id)
+                    if (id) {
+                        self.sbu_outlet.push({
+                            "name": v.name,
+                            "id": v.id
                         });
                     }
                 });
             });
         }
 
-        $('#outletmain').prop('disabled', 'disabled');
-        $('#region').on('click', function() {
+        $('.select_all_sbu').on('click', function() {
             if (event.target.checked == true) {
-                $('#outlet tbody tr').html('');
-                $('.regioncheckbox').prop('checked', true);
-                $('#outletmain').prop('disabled', false);
-                $.each($(".regioncheckbox:checked"), function() {
-                    $scope.getDataBasedonRegion($(this).val())
+                $('.sbucheckbox').prop('checked', true);
+                // $('#budget_table').css('display', 'block');
+                $.each($('.sbucheckbox:checked'), function() {
+                    $scope.getamountonSbu($(this).val());
+                    $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
                 });
             } else {
-                $('.regioncheckbox').prop('checked', false);
-                $('#outletmain').prop('disabled', 'disabled');
-                $('#outletmain').prop('checked', false);
-                $('#outlet tbody tr').html('');
-            }
-        });
-
-        $('#outletmain').on('click', function() {
-            if (event.target.checked == true) {
-                $('.outletcheckbox').prop('checked', true);
-            } else {
-                $('.outletcheckbox').prop('checked', false);
-            }
-        });
-
-        $('#business').on('click', function() {
-            if (event.target.checked == true) {
-                $('.businesscheckbox').prop('checked', true);
-                $.each($('.businesscheckbox:checked'), function() {
-                    $scope.getcodeonBusiness($(this).val());
-                    $('.business_table tbody tr #dms_' + $(this).val()).removeClass('ng-hide');
-                });
-            } else {
-                $('.businesscheckbox').prop('checked', false);
-                $.each($('.businesscheckbox'), function() {
-                    $('.business_table tbody tr #dms_' + $(this).val()).addClass('ng-hide');
+                $('.sbucheckbox').prop('checked', false);
+                $.each($('.sbucheckbox'), function() {
+                    $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide');
                 });
             }
         });
-        $scope.getcodeonBusiness = function(id) {
+        $scope.getamountonSbu = function(id) {
             if (event.target.checked == true) {
-                $("#dms_" + id).prop('readonly', false);
+                $("#amount" + id).removeClass('ng-hide');
             } else {
-                $("#dms_" + id).prop('readonly', true);
+                $("#amount" + id).addClass('ng-hide');
                 // $("#dms_" + id).val('');
             }
         }
+
+
+        // $('#select_all_sbu').prop('disabled', 'disabled');
+        $('#select_all_lob').on('click', function() {
+            if (event.target.checked == true) {
+                $('#sbu tbody tr').html('');
+                $('.lobcheckbox').prop('checked', true);
+                $('#select_all_sbu').prop('checked', true);
+                $('.sbucheckbox').prop('checked', true);
+                $.each($(".lobcheckbox:checked"), function() {
+                    // $('.sbucheckbox').prop('checked', true);
+                    $scope.getDataBasedonLob($(this).val())
+                });
+            } else {
+                $('.lobcheckbox').prop('checked', false);
+                $('.sbucheckbox').prop('checked', false);
+                $('#select_all_sbu').prop('checked', false);
+                $('#sbu tbody tr').html('');
+            }
+        });
+
+        // $('#select_all_sbu').on('click', function() {
+        //     if (event.target.checked == true) {
+        //         $('.sbucheckbox').prop('checked', true);
+        //     } else {
+        //         $('.sbucheckbox').prop('checked', false);
+        //     }
+        // });
+
+
 
 
         var form_id = '#outlet-form';
@@ -379,13 +376,21 @@ app.component('eyatraOutletForm', {
                     minlength: 3,
                     maxlength: 191,
                 },
-                'cashier_name': {
+                'lob_id': {
+                    required: true,
+                },
+                'sbu_id': {
+                    required: true,
+                },
+                'cashier_id': {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
                 },
                 'amount_limit': {
                     required: true,
+                    number: true,
+                    min: 1,
                 },
                 'line_1': {
                     required: true,
@@ -411,8 +416,10 @@ app.component('eyatraOutletForm', {
                     minlength: 6,
                     maxlength: 6,
                     min: 1,
+                },
+                'sbus[]': {
+                    required: true,
                 }
-
             },
             messages: {
                 'code': {
@@ -424,6 +431,21 @@ app.component('eyatraOutletForm', {
                     required: 'Outlet name is required',
                     minlength: 'Please enter minimum of 3 characters',
                     maxlength: 'Please enter maximum of 191 characters',
+                },
+                'lob_id': {
+                    required: 'Lob is required',
+                },
+                'sbu_id': {
+                    required: 'Sbu is required',
+                },
+                'cashier_id': {
+                    required: 'Cashier name is required',
+                    minlength: 'Please enter minimum of 3 characters',
+                    maxlength: 'Please enter maximum of 191 characters',
+                },
+                'amount_limit': {
+                    required: 'Petty cash threshold is required',
+                    number: 'Enter number only',
                 },
                 'line_1': {
                     required: 'Address Line1 is required',
@@ -448,8 +470,10 @@ app.component('eyatraOutletForm', {
                     number: 'Enter numbers only',
                     minlength: 'Please enter minimum of 6 numbers',
                     maxlength: 'Please enter maximum of 6 numbers',
+                },
+                'sbus[]': {
+                    required: 'Sbu is Required',
                 }
-
             },
             submitHandler: function(form) {
 
@@ -494,7 +518,7 @@ app.component('eyatraOutletForm', {
 app.component('eyatraOutletView', {
     templateUrl: outlet_view_template_url,
 
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $scope, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -503,9 +527,14 @@ app.component('eyatraOutletView', {
             self.outlet = response.data.outlet;
             self.action = response.data.action;
         });
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+        $rootScope.loading = false;
+
     }
 });
-
-
-//------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------

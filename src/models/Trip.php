@@ -43,6 +43,9 @@ class Trip extends Model {
 	public function selfVisits() {
 		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
 	}
+	public function agentVisits() {
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+	}
 
 	public function advanceRequestPayment() {
 		return $this->hasOne('Uitoux\EYatra\Payment', 'entity_id')->where('payment_of_id', 3250); //Employee Advance Claim
@@ -152,7 +155,7 @@ class Trip extends Model {
 					if ($visit_data['booking_method'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
 
-						$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
+						$agent = $state->agents()->where('company_id', Auth::user()->company_id)->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
 
 						if (!$agent) {
 							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count]]);

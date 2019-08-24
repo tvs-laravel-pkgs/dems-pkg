@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra\Database\Seeds;
 
+use App\Lob;
 use App\User;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
@@ -72,6 +73,19 @@ class EYatraTC1Seeder extends Seeder {
 		if ($country) {
 			// $country->delete();
 		}
+
+		// $los = [
+		// 	'lob1' => [
+		// 		'sbus' => [
+		// 			'sbu1'
+		// 		],
+		// 	],
+		// 	'lob2',
+		// 	'lob1',
+		// 	'lob1',
+		// ]
+
+		Lob::create($company, $admin);
 
 		$countries = [
 			5 => [
@@ -147,21 +161,10 @@ class EYatraTC1Seeder extends Seeder {
 			500 => [
 				'L1',
 				'L2',
-				'L3',
 				'M1',
 				'M2',
-				'M3',
-				'M4',
 				'O1',
 				'O2',
-				'O3',
-				'O4',
-				'S1',
-				'S2',
-				'S3',
-				'SC1',
-				'SC2',
-				'SC3',
 			],
 			501 => [
 				'Client Meeting',
@@ -219,13 +222,29 @@ class EYatraTC1Seeder extends Seeder {
 				'Budget not allocated',
 			],
 			512 => [
+				'Pooja',
+				'Entertainment',
 				'Local Conveyance',
-				'Others',
 			],
 			513 => [
 				'Assets',
 				'Liabilites',
 				'Equities',
+			],
+			514 => [
+				'Debit',
+				'Credit',
+			],
+			515 => [
+				'Balance Sheet',
+			],
+			516 => [
+				'Test Group',
+				'Current Assets',
+			],
+			517 => [
+				'Inventory',
+				'Test Sub Group',
 			],
 
 		];
@@ -339,7 +358,7 @@ class EYatraTC1Seeder extends Seeder {
 					$query->where('id', $travel_mode->id);
 				})->inRandomOrder()->first();
 
-				$agent = Agent::inRandomOrder()->first();
+				$agent = $company->agents()->inRandomOrder()->first();
 				// dd($agent, $travel_mode, $agent->travelModes);
 
 				$travel_modes[$travel_mode->id] = [
@@ -354,15 +373,17 @@ class EYatraTC1Seeder extends Seeder {
 			//GRADE EXPENSE TYPE MAPPING
 			$expense_type_ids = Config::where('config_type_id', 500)->inRandomOrder()->limit($faker->numberBetween(1, 4))->pluck('id');
 			$expense_types = [];
+			$grade->expenseTypes()->sync([]);
 			foreach ($expense_type_ids as $expense_type_id) {
+				// dd($company->cityCategories);
 				foreach ($company->cityCategories as $city_category) {
 					$expense_types[$expense_type_id] = [
 						'eligible_amount' => $faker->randomElement([1000, 1500, 2000, 2500]),
 						'city_category_id' => $city_category->id,
 					];
+					$grade->expenseTypes()->attach($expense_type_id, $expense_types[$expense_type_id]);
 				}
 			}
-			$grade->expenseTypes()->sync($expense_types);
 
 			//GRADE TRAVEL PURPOSE MAPPING
 			$trip_purpose_ids = $company->tripPurposes()->inRandomOrder()->limit($faker->numberBetween(1, 4))->pluck('id');
@@ -379,6 +400,14 @@ class EYatraTC1Seeder extends Seeder {
 				$travel_modes[] = $travel_mode_id;
 			}
 			$grade->travelModes()->sync($travel_modes);
+
+			//GRADE LOCAL TRAVEL MODE MAPPING
+			$local_travel_mode_ids = $company->localTravelModes()->inRandomOrder()->limit($faker->numberBetween(1, 4))->pluck('id');
+			$local_travel_modes = [];
+			foreach ($local_travel_mode_ids as $local_travel_mode_id) {
+				$local_travel_modes[] = $local_travel_mode_id;
+			}
+			$grade->localTravelModes()->sync($local_travel_modes);
 
 			//GRADE ADVANCE ELIGIBILITY
 			$advance_eligibility = $faker->randomElement([0, 1]);

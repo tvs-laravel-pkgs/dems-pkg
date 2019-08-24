@@ -83,6 +83,7 @@ class Employee extends Model {
 		$employee->outlet_id = $outlet->id;
 		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
 		$employee->reporting_to_id = $manager_id;
+		$employee->payment_mode_id = $company->employeePaymentModes()->inRandomOrder()->first()->id;
 		$employee->created_by = $admin->id;
 		$employee->save();
 
@@ -104,7 +105,7 @@ class Employee extends Model {
 		return $user;
 
 	}
-		public function setDateOfJoiningAttribute($value) {
+	public function setDateOfJoiningAttribute($value) {
 		return $this->attributes['date_of_joining'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
 	}
 
