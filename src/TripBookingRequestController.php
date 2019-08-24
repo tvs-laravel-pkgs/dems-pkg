@@ -17,6 +17,7 @@ class TripBookingRequestController extends Controller {
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('configs as bs', 'bs.id', 'v.booking_status_id')
 			->join('configs as status', 'status.id', 'v.status_id')
+			->join('users as cb', 'cb.id', 'trips.created_by')
 			->leftjoin('agents as a', 'a.id', 'v.agent_id')
 			->select('trips.id as trip_id',
 				'e.code as ecode', 'e.name as ename',
@@ -26,8 +27,10 @@ class TripBookingRequestController extends Controller {
 			)
 			->groupBy('v.trip_id')
 			->orderBy('trips.created_at', 'desc')
+			->where('cb.company_id', Auth::user()->company_id)
 		// ->get()
 		;
+		// dd(Auth::user()->company_id);
 
 		// dd($visits);
 		// $visits = Visit::from('visits as v')
@@ -61,6 +64,7 @@ class TripBookingRequestController extends Controller {
 
 		// dd($visits);
 		if (!Entrust::can('view-all-trip-booking-requests')) {
+			// dd(Auth::user()->entity_id);
 			$visits->where('v.agent_id', Auth::user()->entity_id);
 		}
 

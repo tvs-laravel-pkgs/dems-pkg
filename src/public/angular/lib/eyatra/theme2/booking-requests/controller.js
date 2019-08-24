@@ -71,7 +71,7 @@ app.component('eyatraTripBookingRequestsView', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/agent/requests')
+                $location.path('/eyatra/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -81,12 +81,14 @@ app.component('eyatraTripBookingRequestsView', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/agent/requests')
+                $location.path('/eyatra/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
             self.trip = response.data.trip;
-            self.visits = response.data.visits;
+            self.total_amount = response.data.total_amount;
+            self.ticket_amount = response.data.ticket_amount;
+            self.service_charge = response.data.service_charge;
             self.trip_status = response.data.trip_status;
             self.travel_mode_list = response.data.travel_mode_list;
             self.action = response.data.action;
@@ -212,22 +214,36 @@ app.component('eyatraTripBookingRequestsView', {
                 },
             });
         });
-
+        
         // Select and loop the container element of the elements you want to equalise
-        $('.container').each(function() {
+        setTimeout(function () {
             // Cache the highest
-            var highestBox = 0;
-            // Select and loop the elements you want to equalise
-            $('.match-height', this).each(function() {
-                // If this box is higher than the cached highest then store it
-                if ($(this).height() > highestBox) {
-                    highestBox = $(this).height();
-                }
+            var highestBox = new Array();
+            // Loop to get all element Widths
+            $('.match-height').each(function() { 
+                // Need to let sizes be whatever they want so no overflow on resize   
+                // Then add size (no units) to array
+                highestBox.push($(this).height());
             });
+            // Find max Width of all elements
+            var max = Math.max.apply( Math, highestBox );
             // Set the height of all those children to whichever was highest 
-            $('.match-height', this).height(highestBox);
+            $('.match-height').height(max);                
 
-        });
+            // Cache the highest
+            var highestBox_1 = new Array();
+            // Loop to get all element Widths
+            $('.match-height-1').each(function() {    
+                // Need to let sizes be whatever they want so no overflow on resize
+                // Then add size (no units) to array
+                highestBox_1.push($(this).height());
+            });
+            // Find max Width of all elements
+            var max_1 = Math.max.apply( Math, highestBox_1 );
+            // Set the height of all those children to whichever was highest 
+            $('.match-height-1').height(max_1);
+
+        }, 1200);
 
         self.approveTrip = function() {
             self.trip.visits.push({

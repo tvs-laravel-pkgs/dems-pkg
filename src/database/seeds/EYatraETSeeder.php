@@ -17,7 +17,7 @@ class EYatraETSeeder extends Seeder {
 			501 => 'Trip Purposes',
 			502 => 'Travel Modes',
 			503 => 'Local Travel Modes',
-			504 => 'Lodging State',
+			504 => 'Lodging Stay',
 			505 => 'Employee Wallet Mode',
 			506 => 'City Category',
 			507 => 'Trip Request Rejection Reasons',
@@ -25,8 +25,12 @@ class EYatraETSeeder extends Seeder {
 			509 => 'Trip Claim Rejection Reasons',
 			510 => 'Agent Claim Rejection Reasons',
 			511 => 'Voucher Claim Rejection Reasons',
-			512 => 'Petty Cash Expense type',
-			513 => 'COA Categories',
+			512 => 'Petty Cash Expense types',
+			513 => 'COA Account Types',
+			514 => 'COA Balance Types',
+			515 => 'COA Final Statement',
+			516 => 'COA Groups',
+			517 => 'COA Sub Groups',
 
 		];
 

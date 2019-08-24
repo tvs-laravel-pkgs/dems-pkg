@@ -316,6 +316,10 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
         title: 'Edit Petty Cash',
     }).
+    when('/eyatra/petty-cash/view/:pettycash_id', {
+        template: '<eyatra-petty-cash-view></eyatra-petty-cash-view>',
+        title: 'View Petty Cash',
+    }).
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
         template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
