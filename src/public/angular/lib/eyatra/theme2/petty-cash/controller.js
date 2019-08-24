@@ -128,6 +128,8 @@ app.component('eyatraPettyCashForm', {
                 self.otherConveyanceCal();
             }, 500);
             $rootScope.loading = false;
+            /* Datepicker With Current Date */
+
         });
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
@@ -135,6 +137,11 @@ app.component('eyatraPettyCashForm', {
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
+        setTimeout(function() {
+            $('div[data-provide="datepicker"]').datepicker({
+                todayHighlight: true,
+            });
+        }, 1500);
 
         self.localConveyanceCal = function() {
             var total_petty_cash_local_amount = 0;
