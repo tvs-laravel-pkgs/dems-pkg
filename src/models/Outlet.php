@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -30,7 +31,7 @@ class Outlet extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'cashier_id');
 	}
 	public static function getList() {
-		return Outlet::select('id', 'name')->get();
+		return Outlet::select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public function address() {

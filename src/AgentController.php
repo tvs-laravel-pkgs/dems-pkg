@@ -254,9 +254,9 @@ class AgentController extends Controller {
 		$this->data['agent'] = $agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
 		$this->data['address'] = $address = Address::join('ncities', 'ncities.id', 'ey_addresses.city_id')
 			->join('nstates', 'nstates.id', 'ncities.state_id')
-			->join('countries', 'countries.id', 'nstates.country_id')
+			->join('country as c', 'c.id', 'nstates.country_id')
 			->where('entity_id', $agent_id)->where('address_of_id', 3161)
-			->select('ey_addresses.*', 'ncities.name as city_name', 'nstates.name as state_name', 'countries.name as country_name')
+			->select('ey_addresses.*', 'ncities.name as city_name', 'nstates.name as state_name', 'c.name as country_name')
 			->first();
 
 		$this->data['user_details'] = $user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
