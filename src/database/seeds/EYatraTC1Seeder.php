@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra\Database\Seeds;
 
+use App\Lob;
 use App\User;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
@@ -72,6 +73,20 @@ class EYatraTC1Seeder extends Seeder {
 		if ($country) {
 			// $country->delete();
 		}
+
+		// $los = [
+		// 	'lob1' => [
+		// 		'sbus' => [
+		// 			'sbu1'
+		// 		],
+		// 	],
+		// 	'lob2',
+		// 	'lob1',
+		// 	'lob1',
+		// ]
+
+		Lob::create($company, $admin);
+		dd(1);
 
 		$countries = [
 			5 => [
