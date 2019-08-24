@@ -175,5 +175,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/petty-cash/request/get-form-data/{pettycash_id?}', 'Uitoux\EYatra\PettyCashController@pettycashFormData')->name('pettycashFormData');
 		Route::post('eyatra/petty-cash/request/save', 'Uitoux\EYatra\PettyCashController@pettycashSave')->name('pettycashSave');
 		Route::get('/eyatra/petty-cash/employee/{searchText}', 'Uitoux\EYatra\PettyCashController@getemployee')->name('getemployee');
+		Route::get('/eyatra/petty-cash/request/delete/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashDelete')->name('pettycashDelete');
+		Route::get('/eyatra/petty-cash/request/view/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashView')->name('pettycashView');
 	});
 });

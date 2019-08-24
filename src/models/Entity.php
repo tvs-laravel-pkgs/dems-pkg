@@ -55,6 +55,9 @@ class Entity extends Model {
 	public static function uiExpenceTypeList() {
 		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
+	public static function uiExpenceTypeListBasedPettyCash() {
+		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->where('name', 'NOT LIKE', '%Local Conveyance%')->get();
+	}
 
 	public static function uiTravelModeList() {
 		return Entity::where('entity_type_id', 502)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
