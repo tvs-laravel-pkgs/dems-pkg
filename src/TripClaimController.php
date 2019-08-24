@@ -7,6 +7,7 @@ use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
@@ -92,7 +93,7 @@ class TripClaimController extends Controller {
 			}
 			$this->data['success'] = true;
 
-			$this->data['employee'] = $employee = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id')
+			$this->data['employee'] = $employee = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
 				->leftjoin('designations', 'designations.id', 'employees.designation_id')
 				->leftjoin('entities', 'entities.id', 'employees.grade_id')
 				->where('employees.id', $trip->employee_id)->first();
@@ -143,6 +144,14 @@ class TripClaimController extends Controller {
 			$trip->claim_amount = $request->claim_total_amount; //claimed
 			$trip->save();
 
+			//SAVE EMPLOYEE CLAIMS
+			$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+			$employee_claim->fill($request->all());
+			$employee_claim->trip_id = $trip->id;
+			$employee_claim->total_amount = $request->claim_total_amount;
+			$employee_claim->status_id = 3222;
+			$employee_claim->created_by = Auth::user()->id;
+			$employee_claim->save();
 			//SAVING VISITS
 			if ($request->visits) {
 				foreach ($request->visits as $visit_data) {

@@ -77,6 +77,25 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 
+	public static function accountTypeList() {
+		return Entity::where('entity_type_id', 513)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function normalBalanceList() {
+		return Entity::where('entity_type_id', 514)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function finalStatementList() {
+		return Entity::where('entity_type_id', 515)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function accGroupList() {
+		return Entity::where('entity_type_id', 516)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function subGroupList() {
+		return Entity::where('entity_type_id', 517)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
 	public static function create($sample_entities, $admin, $company) {
 		foreach ($sample_entities as $entity_type_id => $entities) {
 			foreach ($entities as $entity_name) {
