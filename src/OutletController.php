@@ -90,8 +90,12 @@ class OutletController extends Controller {
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
-			$outlet->amount_eligible = 1 ? $outlet->amount_eligible : '';
-// dd($outlet->outletBudgets);
+			if ($outlet->amount_eligible == 1) {
+				$outlet->eligible_amount = 'Yes';
+			} else {
+				$outlet->eligible_amount = 'No';
+			}
+			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
 			// 'name',
 			// 'id',
