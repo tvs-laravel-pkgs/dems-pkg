@@ -6,26 +6,22 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Agent;
-use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\NCountry;
+use Illuminate\Validation\Rule;
 use Uitoux\EYatra\Designation;
+use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
-use Uitoux\EYatra\Trip;
-use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
-use Illuminate\Validation\Rule;
 
 class FinanceEmployeeClaimController extends Controller {
 	public function listEYatraFinanceEmployeeClaim(Request $r) {
 		$designations = Designation::withTrashed()->select(
-				'designations.id',
-				'designations.code',
-				'designations.name',
-				'designations.deleted_at',
-				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
-			)
+			'designations.id',
+			'designations.code',
+			'designations.name',
+			'designations.deleted_at',
+			DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
+		)
 			->orderBy('designations.name', 'asc');
 
 		return Datatables::of($designations)
@@ -93,10 +89,10 @@ class FinanceEmployeeClaimController extends Controller {
 		}*/
 
 		$this->data['extras'] = [
-		'purpose_list' => Entity::uiPurposeList(),
-		'travel_mode_list' => Entity::uiTravelModeList(),
-		'city_list' => NCity::getList(),
-		'state_type_list' => Entity::getLodgeStateTypeList(),
+			'purpose_list' => Entity::uiPurposeList(),
+			'travel_mode_list' => Entity::uiTravelModeList(),
+			'city_list' => NCity::getList(),
+			'state_type_list' => Entity::getLodgeStayTypeList(),
 		];
 		$this->data['trip'] = '';
 
@@ -117,12 +113,12 @@ class FinanceEmployeeClaimController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'code' => [
 					'required:true',
-					Rule::unique('designations')->ignore($request->id)
+					Rule::unique('designations')->ignore($request->id),
 				],
-				
+
 				'name' => [
 					'required:true',
-					Rule::unique('designations')->ignore($request->id)
+					Rule::unique('designations')->ignore($request->id),
 				],
 			], $error_messages);
 			if ($validator->fails()) {

@@ -40,6 +40,9 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Visit');
 	}
 
+	public function selfVisits() {
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
+	}
 	public function agentVisits() {
 		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
 	}
