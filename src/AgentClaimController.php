@@ -219,61 +219,35 @@ class AgentClaimController extends Controller {
 	}
 
 	public function viewEYatraAgentClaim($agent_claim_id) {
-		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::select(
+
+		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
 			'ey_agent_claims.tax',
+			'agents.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
 			->where('ey_agent_claims.id', $agent_claim_id)->first();
-
-		// $this->data['booking_pivot'] = $agent_visit_booking_id = $agent_claim_view->bookings()->pluck('booking_id')->toArray();
 
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
 			'visit_bookings.id',
 			'visit_bookings.paid_amount',
 			'configs.name as status',
-			'type.name as type_id',
 			'trips.number as trip',
-			'trips.id as trips_id',
+			'trips.id as trip_id',
 			'employees.code as employee_code',
-			'employees.name as employee_name',
-			'visit_bookings.amount',
-			'visit_bookings.tax',
-			'visit_bookings.service_charge',
-			'visit_bookings.total',
-			'visit_bookings.reference_number',
-			'from_city.name as from',
-			'to_city.name as to',
-			'travel_mode.name as travel_mode')
-			->leftJoin('configs as type', 'type.id', 'visit_bookings.type_id')
+			'employees.name as employee_name')
 			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
 			->leftJoin('trips', 'trips.id', 'visits.trip_id')
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
-			->leftJoin('ncities as from_city', 'from_city.id', 'visits.from_city_id')
-			->leftJoin('ncities as to_city', 'to_city.id', 'visits.to_city_id')
 			->join('configs', 'configs.id', 'trips.status_id')
-			->leftJoin('entities as travel_mode', 'travel_mode.id', 'visit_bookings.travel_mode_id')
-			->where('visit_bookings.created_by', Auth::user()->id)
-			->where('visit_bookings.status_id', 3222)
 			->where('visit_bookings.agent_claim_id', $agent_claim_id)
+			->groupBy('trips.id')
 			->get();
-
-		// $this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
-		// 	'employees.name as employee_name', 'configs.name as status')
-		// 	->join('visits', 'visits.id', 'visit_bookings.visit_id')
-		// 	->join('trips', 'trips.id', 'visits.trip_id')
-		// 	->join('employees', 'employees.id', 'trips.employee_id')
-		// 	->join('configs', 'configs.id', 'trips.status_id')
-		// 	->where('visit_bookings.created_by', Auth::user()->id)
-		// 	->where('visit_bookings.status_id', 3240)
-		// 	->groupBy('trips.id')
-		// 	->get();
+		$this->data['total_trips'] = count($booking_list);
+		$this->data['success'] = true;
 		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
-
-		// $this->data['booking_pivot_amt'] = $agent_claim_view->bookings()->pluck('amount')->toArray();
-
 		return response()->json($this->data);
 	}
 
