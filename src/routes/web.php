@@ -20,6 +20,11 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/verification/view/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@viewTrip');
 		Route::post('trip/verification/save', 'Uitoux\EYatra\Api\TripVerificationController@viewTrip');
 
+		//COMPLETED TRIP & CLAIM
+		Route::post('trip/claim/list', 'Uitoux\EYatra\Api\TripClaimController@listCompletedTrips');
+		Route::post('trip/claim/form/data', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
+		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
+
 	});
 });
 

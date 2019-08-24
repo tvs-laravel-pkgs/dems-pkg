@@ -103,6 +103,8 @@ class AgentRequestController extends Controller {
 			$ticket_amount = $visits->amount + $visits->tax;
 			$service_charge = $visits->service_charge;
 			$total_amount = $visits->paid_amount;
+		} else {
+			$total_amount = 0;
 		}
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
