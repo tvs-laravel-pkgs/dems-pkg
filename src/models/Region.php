@@ -11,6 +11,7 @@ class Region extends Model {
 
 	protected $fillable = [
 		'id',
+		'company_id',
 		'name',
 		'code',
 		'state_id',
