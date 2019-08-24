@@ -40,6 +40,10 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Visit');
 	}
 
+	public function agentVisits() {
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+	}
+
 	public function advanceRequestPayment() {
 		return $this->hasOne('Uitoux\EYatra\Payment', 'entity_id')->where('payment_of_id', 3250); //Employee Advance Claim
 	}

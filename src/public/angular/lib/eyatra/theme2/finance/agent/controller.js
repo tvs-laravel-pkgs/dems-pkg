@@ -106,7 +106,6 @@ app.component('eyatraAgentClaimVerificationView', {
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
 
-
             $rootScope.loading = false;
         });
 
