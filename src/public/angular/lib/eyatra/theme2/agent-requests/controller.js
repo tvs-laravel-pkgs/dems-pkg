@@ -21,7 +21,7 @@ app.component('eyatraAgentRequestForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/agent/requests')
+                $location.path('/eyatra / agent / requests')
                 $scope.$apply()
                 return;
             }

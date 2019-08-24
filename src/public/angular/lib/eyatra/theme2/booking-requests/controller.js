@@ -71,7 +71,7 @@ app.component('eyatraTripBookingRequestsView', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/agent/requests')
+                $location.path('/eyatra/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -81,12 +81,14 @@ app.component('eyatraTripBookingRequestsView', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra/agent/requests')
+                $location.path('/eyatra/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
             self.trip = response.data.trip;
-            self.visits = response.data.visits;
+            self.total_amount = response.data.total_amount;
+            self.ticket_amount = response.data.ticket_amount;
+            self.service_charge = response.data.service_charge;
             self.trip_status = response.data.trip_status;
             self.travel_mode_list = response.data.travel_mode_list;
             self.action = response.data.action;

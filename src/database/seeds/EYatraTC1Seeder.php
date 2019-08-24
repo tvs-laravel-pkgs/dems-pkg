@@ -219,13 +219,29 @@ class EYatraTC1Seeder extends Seeder {
 				'Budget not allocated',
 			],
 			512 => [
+				'Pooja',
+				'Entertainment',
 				'Local Conveyance',
-				'Others',
 			],
 			513 => [
 				'Assets',
 				'Liabilites',
 				'Equities',
+			],
+			514 => [
+				'Debit',
+				'Credit',
+			],
+			515 => [
+				'Balance Sheet',
+			],
+			516 => [
+				'Test Group',
+				'Current Assets',
+			],
+			517 => [
+				'Inventory',
+				'Test Sub Group',
 			],
 
 		];
