@@ -60,16 +60,17 @@ class AgentRequestController extends Controller {
 
 	public function agentRequestFormData($trip_id) {
 		$trip = Trip::with([
-			'visits',
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.bookings',
-			'visits.status',
-			'visits.managerVerificationStatus',
+			'agentVisits',
+			'agentVisits.fromCity',
+			'agentVisits.toCity',
+			'agentVisits.travelMode',
+			'agentVisits.bookingMethod',
+			'agentVisits.bookingStatus',
+			'agentVisits.bookings',
+			'agentVisits.bookings.travelMode',
+			'agentVisits.agent',
+			'agentVisits.status',
+			'agentVisits.managerVerificationStatus',
 			'employee',
 			'employee.user',
 			'purpose',
@@ -83,26 +84,38 @@ class AgentRequestController extends Controller {
 
 		$visits = $trip->visits;
 		$trip_status = 'not_booked';
+		$ticket_amount = 0;
+		$service_charge = 0;
 		foreach ($visits as $key => $value) {
 			if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062) {
-
 				$trip_status = 'booked';
-				// $relations = 'bookings.travelMode';
-				// $visit = Visit::with($relations)
-				// 	->find($value->id);
-				// $travelMode = $visit->travelMode->name;
-				// $value->travelMode = $travelMode;
 			}
 		}
-		// dd($trip);
+		if ($trip_status == 'booked') {
+			$visits = Trip::select(DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.service_charge) as service_charge'))
+				->join('visits', 'trips.id', 'visits.trip_id')
+				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+				->where('visits.booking_method_id', 3042)
+				->where('visit_bookings.created_by', Auth::user()->id)
+				->where('visits.trip_id', $trip_id)
+				->groupBy('visits.trip_id')
+				->first();
+			$ticket_amount = $visits->amount + $visits->tax;
+			$service_charge = $visits->service_charge;
+			$total_amount = $visits->paid_amount;
+		} else {
+			$total_amount = 0;
+		}
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $start_date->end_date;
 		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::travelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
 		$this->data['trip'] = $trip;
-		$this->data['visits'] = $visits;
 		$this->data['trip_status'] = $trip_status;
+		$this->data['total_amount'] = $total_amount;
+		$this->data['ticket_amount'] = $ticket_amount;
+		$this->data['service_charge'] = $service_charge;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

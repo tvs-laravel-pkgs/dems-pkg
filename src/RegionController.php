@@ -24,6 +24,7 @@ class RegionController extends Controller {
 				DB::raw('COALESCE(nstates.name, "--") as state_name'),
 				DB::raw('IF(regions.deleted_at IS NULL, "Active","Inactive") as status')
 			)
+			->where('company_id', Auth::user()->company_id)
 			->orderBy('regions.id', 'desc');
 
 		return Datatables::of($regions)
@@ -47,6 +48,13 @@ class RegionController extends Controller {
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
+			})
+			->addColumn('status', function ($region) {
+				if ($region->status == 'Inactive') {
+					return '<span style="color:red">Inactive</span>';
+				} else {
+					return '<span style="color:green">Active</span>';
+				}
 			})
 			->make(true);
 	}
@@ -119,7 +127,6 @@ class RegionController extends Controller {
 				$region->updated_by = Auth::user()->id;
 				$region->updated_at = Carbon::now();
 			}
-			$region->fill($request->all());
 			if ($request->status == 'Inactive') {
 				$region->deleted_at = date('Y-m-d H:i:s');
 				$region->deleted_by = Auth::user()->id;
@@ -127,6 +134,8 @@ class RegionController extends Controller {
 				$region->deleted_by = NULL;
 				$region->deleted_at = NULL;
 			}
+			$region->company_id = Auth::user()->company_id;
+			$region->fill($request->all());
 			$region->save();
 
 			DB::commit();

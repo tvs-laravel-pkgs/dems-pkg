@@ -15,4 +15,8 @@ class Sbu extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Lob');
 	}
 
+	public static function getList($r) {
+		return Sbu::select('name', 'id')->whereIn('lob_id', $r->lob_ids)->get()->keyBy('id');
+	}
+
 }

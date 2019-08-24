@@ -19,7 +19,7 @@ class GrageExpenseTypeC extends Migration {
 			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('expense_type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 
-			$table->unique(["grade_id", "expense_type_id"]);
+			$table->unique(["grade_id", "expense_type_id", "city_category_id"], 'grd_exp_type');
 		});
 	}
 

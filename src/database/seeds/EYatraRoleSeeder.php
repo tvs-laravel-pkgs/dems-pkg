@@ -185,6 +185,9 @@ class EYatraRoleSeeder extends Seeder {
 					//AGENT CLAIM VERIFICATION 1
 					5540,
 
+					//ADVANCE REQUESTS
+					5560,
+
 				],
 			],
 		];

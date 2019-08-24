@@ -40,6 +40,13 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Visit');
 	}
 
+	public function selfVisits() {
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
+	}
+	public function agentVisits() {
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+	}
+
 	public function advanceRequestPayment() {
 		return $this->hasOne('Uitoux\EYatra\Payment', 'entity_id')->where('payment_of_id', 3250); //Employee Advance Claim
 	}
@@ -148,7 +155,7 @@ class Trip extends Model {
 					if ($visit_data['booking_method'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
 
-						$agent = $state->agents()->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
+						$agent = $state->agents()->where('company_id', Auth::user()->company_id)->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
 
 						if (!$agent) {
 							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count]]);
@@ -246,6 +253,64 @@ class Trip extends Model {
 		$data['trip'] = $trip;
 
 		return response()->json($data);
+	}
+
+	public function getEmployeeList($r) {
+		$trips = Trip::from('trips')
+			->join('visits as v', 'v.trip_id', 'trips.id')
+			->join('ncities as c', 'c.id', 'v.from_city_id')
+			->join('employees as e', 'e.id', 'trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
+			->join('configs as status', 'status.id', 'trips.status_id')
+			->select(
+				'trips.id',
+				'trips.number',
+				'e.code as ecode',
+				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
+				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				'purpose.name as purpose',
+				'trips.advance_received',
+				'status.name as status'
+			)
+			->where('e.company_id', Auth::user()->company_id)
+			->groupBy('trips.id')
+			->orderBy('trips.created_at', 'desc')
+		;
+		if (!Entrust::can('view-all-trips')) {
+			$trips->where('trips.employee_id', Auth::user()->entity_id);
+		}
+
+		//FILTERS
+		if ($request->number) {
+			$trips->where('trips.number', 'like', '%' . $request->number . '%');
+		}
+		if ($request->from_date && $request->to_date) {
+			$trips->where('v.date', '>=', $request->from_date);
+			$trips->where('v.date', '<=', $request->to_date);
+		} else {
+			$today = Carbon::today();
+			$from_date = $today->copy()->subMonths(3);
+			$to_date = $today->copy()->addMonths(3);
+			$trips->where('v.date', '>=', $from_date);
+			$trips->where('v.date', '<=', $to_date);
+		}
+
+		if ($request->status_ids && count($request->status_ids) > 0) {
+			$trips->whereIn('trips.status_id', $request->status_ids);
+		} else {
+			$trips->whereNotIn('trips.status_id', [3026]);
+		}
+		if ($request->purpose_ids && count($request->purpose_ids) > 0) {
+			$trips->whereIn('trips.purpose_id', $request->purpose_ids);
+		}
+		if ($request->from_city_id) {
+			$trips->whereIn('v.from_city_id', $request->from_city_id);
+		}
+		if ($request->to_city_id) {
+			$trips->whereIn('v.to_city_id', $request->to_city_id);
+		}
+		return $trips;
 	}
 
 	public static function getVerficationPendingList() {
