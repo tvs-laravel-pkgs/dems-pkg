@@ -8,11 +8,11 @@ use Uitoux\EYatra\Trip;
 class TripClaimController extends Controller {
 	public $successStatus = 200;
 
-	public function listCompletedTrips(Request $request) {
-		$trips = Trip::getEmployeeList();
+	public function listCompletedTrips(Request $r) {
+		$trips = Trip::getEmployeeList($r);
 		$trips = $trips
-			->whereRaw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") < CURDATE()')
-			->get()
+		// ->whereRaw('MAX(v.date) < CURDATE()')
+		->get()
 		;
 		return response()->json(['success' => true, 'trips' => $trips]);
 

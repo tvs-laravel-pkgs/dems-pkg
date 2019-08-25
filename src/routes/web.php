@@ -21,7 +21,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/verification/save', 'Uitoux\EYatra\Api\TripVerificationController@viewTrip');
 
 		//COMPLETED TRIP & CLAIM
-		Route::post('trip/claim/list', 'Uitoux\EYatra\Api\TripClaimController@listCompletedTrips');
+		Route::post('trip/completed/list', 'Uitoux\EYatra\Api\TripClaimController@listCompletedTrips');
 		Route::post('trip/claim/form/data', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
 
@@ -68,6 +68,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/state/save', 'Uitoux\EYatra\StateController@saveEYatraState')->name('saveEYatraState');
 		Route::get('eyatra/state/view/{state_id}', 'Uitoux\EYatra\StateController@viewEYatraState')->name('viewEYatraState');
 		Route::get('eyatra/state/delete/{state_id}', 'Uitoux\EYatra\StateController@deleteEYatraState')->name('deleteEYatraState');
+		Route::get('eyatra/state/filter/', 'Uitoux\EYatra\StateController@filterEYatraState')->name('filterEYatraState');
 
 		//CITY
 		Route::get('eyatra/city/get-list', 'Uitoux\EYatra\CityController@listEYatraCity')->name('listEYatraCity');
@@ -95,6 +96,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/employee/delete/{employee_id}', 'Uitoux\EYatra\EmployeeController@deleteEYatraEmployee')->name('deleteEYatraEmployee');
 		Route::post('eyatra/employee/manager/search', 'Uitoux\EYatra\EmployeeController@searchManager')->name('searchManager');
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
+		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
 
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
@@ -140,6 +142,7 @@ Route::group(['middleware' => ['web']], function () {
 		//FINANCE AGENT CLAIMS
 		Route::get('eyatra/finance/agent/claim/get-list', 'Uitoux\EYatra\AgentClaimController@listFinanceEYatraAgentClaimList')->name('listFinanceEYatraAgentClaimList');
 		Route::get('eyatra/finance/agent/claim/view/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@viewEYatraFinanceAgentClaim')->name('viewEYatraFinanceAgentClaim');
+		Route::post('eyatra/finance/agent-claim/payment', 'Uitoux\EYatra\AgentClaimController@payAgentClaimRequest')->name('payAgentClaimRequest');
 
 		//ADVANCE CLAIM REQUESTS
 		Route::get('eyatra/advance-claim/request/get-list', 'Uitoux\EYatra\AdvanceClaimRequestController@listAdvanceClaimRequest')->name('listAdvanceClaimRequest');

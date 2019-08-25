@@ -651,6 +651,174 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Trip Advance Requests',
 			],
 
+			//MASTERS > COA CATEGORIES
+			5580 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-coa-categories',
+				'display_name' => 'COA Categories',
+			],
+
+			//MASTERS > COA CATEGORIES > ACCOUNT TYPES
+			5600 => [
+				'display_order' => 1,
+				'parent_id' => 5580,
+				'name' => 'eyatra-coa-account-types',
+				'display_name' => 'COA Account Types',
+			],
+			5601 => [
+				'display_order' => 1,
+				'parent_id' => 5600,
+				'name' => 'eyatra-coa-account-types-add',
+				'display_name' => 'Add',
+			],
+			5602 => [
+				'display_order' => 2,
+				'parent_id' => 5600,
+				'name' => 'eyatra-coa-account-types-edit',
+				'display_name' => 'Edit',
+			],
+			5603 => [
+				'display_order' => 3,
+				'parent_id' => 5600,
+				'name' => 'eyatra-coa-account-types-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > COA CATEGORIES > BALANCE TYPES
+			5620 => [
+				'display_order' => 1,
+				'parent_id' => 5580,
+				'name' => 'eyatra-coa-balance-types',
+				'display_name' => 'COA Balance Types',
+			],
+			5621 => [
+				'display_order' => 1,
+				'parent_id' => 5620,
+				'name' => 'eyatra-coa-balance-types-add',
+				'display_name' => 'Add',
+			],
+			5622 => [
+				'display_order' => 2,
+				'parent_id' => 5620,
+				'name' => 'eyatra-coa-balance-types-edit',
+				'display_name' => 'Edit',
+			],
+			5623 => [
+				'display_order' => 3,
+				'parent_id' => 5620,
+				'name' => 'eyatra-coa-balance-types-delete',
+				'display_name' => 'Delete',
+			],
+			//MASTERS > COA CATEGORIES > FINAL STATEMENT
+			5640 => [
+				'display_order' => 1,
+				'parent_id' => 5580,
+				'name' => 'eyatra-coa-final-statement',
+				'display_name' => 'COA Final Statement',
+			],
+			5641 => [
+				'display_order' => 1,
+				'parent_id' => 5640,
+				'name' => 'eyatra-coa-final-statement-add',
+				'display_name' => 'Add',
+			],
+			5642 => [
+				'display_order' => 2,
+				'parent_id' => 5640,
+				'name' => 'eyatra-coa-final-statement-edit',
+				'display_name' => 'Edit',
+			],
+			5643 => [
+				'display_order' => 3,
+				'parent_id' => 5640,
+				'name' => 'eyatra-coa-final-statement-delete',
+				'display_name' => 'Delete',
+			],
+			//MASTERS > COA CATEGORIES > GROUPS
+			5660 => [
+				'display_order' => 1,
+				'parent_id' => 5580,
+				'name' => 'eyatra-coa-groups',
+				'display_name' => 'COA Groups',
+			],
+			5661 => [
+				'display_order' => 1,
+				'parent_id' => 5660,
+				'name' => 'eyatra-coa-groups-add',
+				'display_name' => 'Add',
+			],
+			5662 => [
+				'display_order' => 2,
+				'parent_id' => 5660,
+				'name' => 'eyatra-coa-groups-edit',
+				'display_name' => 'Edit',
+			],
+			5663 => [
+				'display_order' => 3,
+				'parent_id' => 5660,
+				'name' => 'eyatra-coa-groups-delete',
+				'display_name' => 'Delete',
+			],
+			//MASTERS > COA CATEGORIES > SUB GROUPS
+			5680 => [
+				'display_order' => 1,
+				'parent_id' => 5580,
+				'name' => 'eyatra-coa-sub-groups',
+				'display_name' => 'COA Groups',
+			],
+			5681 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-coa-sub-groups-add',
+				'display_name' => 'Add',
+			],
+			5682 => [
+				'display_order' => 2,
+				'parent_id' => 5680,
+				'name' => 'eyatra-coa-sub-groups-edit',
+				'display_name' => 'Edit',
+			],
+			5683 => [
+				'display_order' => 3,
+				'parent_id' => 5680,
+				'name' => 'eyatra-coa-sub-groups-delete',
+				'display_name' => 'Delete',
+			],
+
+			//MASTERS > COA CODES
+			5700 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-coa-codes',
+				'display_name' => 'COA Codes',
+			],
+			5701 => [
+				'display_order' => 1,
+				'parent_id' => 5700,
+				'name' => 'eyatra-coa-codes-add',
+				'display_name' => 'Add',
+			],
+			5702 => [
+				'display_order' => 2,
+				'parent_id' => 5700,
+				'name' => 'eyatra-coa-codes-edit',
+				'display_name' => 'Edit',
+			],
+			5703 => [
+				'display_order' => 3,
+				'parent_id' => 5700,
+				'name' => 'eyatra-coa-codes-delete',
+				'display_name' => 'Delete',
+			],
+
+			5580 => [
+				'display_order' => 7,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers',
+				'display_name' => 'Expense Vouchers',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

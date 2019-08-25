@@ -20,8 +20,32 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class EmployeeController extends Controller {
+
+	public function filterEYatraEmployee() {
+		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
+		$this->data['grade_list'] = $grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
+		$this->data['role_list'] = $role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
+
+		return response()->json($this->data);
+	}
+
 	public function listEYatraEmployee(Request $r) {
-		$employees = Employee::from('employees as e')
+		if (!empty($r->outlet)) {
+			$outlet = $r->outlet;
+		} else {
+			$outlet = null;
+		}
+		if (!empty($r->role)) {
+			$role = $r->role;
+		} else {
+			$role = null;
+		}
+		if (!empty($r->grade)) {
+			$grade = $r->grade;
+		} else {
+			$grade = null;
+		}
+		$employees = Employee::withTrashed()->from('employees as e')
 			->join('entities as grd', 'grd.id', 'e.grade_id')
 			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
 			->join('outlets as o', 'o.id', 'e.outlet_id')
@@ -31,10 +55,25 @@ class EmployeeController extends Controller {
 				'e.code',
 				'e.name',
 				'o.code as outlet_code',
-				'm.code as manager_code',
+				DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
 				'grd.name as grade',
 				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
 			)
+			->where(function ($query) use ($r, $outlet) {
+				if (!empty($outlet)) {
+					$query->where('o.id', $outlet);
+				}
+			})
+		// ->where(function ($query) use ($r, $role) {
+		// 	if (!empty($role)) {
+		// 		$query->where('roles.id', $role);
+		// 	}
+		// })
+			->where(function ($query) use ($r, $grade) {
+				if (!empty($grade)) {
+					$query->where('grd.id', $grade);
+				}
+			})
 			->where('e.company_id', Auth::user()->company_id)
 			->orderBy('e.code', 'asc');
 
@@ -57,9 +96,16 @@ class EmployeeController extends Controller {
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
 				onclick="angular.element(this).scope().deleteEmployee(' . $employee->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
+			})
+			->addColumn('status', function ($agent) {
+				if ($agent->status == 'Inactive') {
+					return '<span style="color:#ea4335;">Inactive</span>';
+				} else {
+					return '<span style="color:#63ce63;">Active</span>';
+				}
 			})
 			->make(true);
 	}
