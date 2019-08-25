@@ -45,7 +45,7 @@ app.component('eyatraTrips', {
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Trips</p><h3 class="title">Trips</h3>');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/trip/add" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/eyatra/trip/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
             '</a>'
         );

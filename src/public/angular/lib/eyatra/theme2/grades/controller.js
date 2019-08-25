@@ -260,15 +260,10 @@ app.component('eyatraGradeView', {
             self.extras = response.data.extras;
             self.action = response.data.action;
             self.grade_advanced = response.data.grade_advanced;
-            if (self.grade.deleted_at == null) {
+            if (response.data.grade.deleted_at == null) {
                 self.status = 'Active';
             } else {
                 self.status = 'Inactive';
-            }
-            if (self.grade_advanced[0] == 1) {
-                self.grade_advanced_value = "YES";
-            } else {
-                self.grade_advanced_value = "NO";
             }
         });
         $('.btn-nxt').on("click", function() {

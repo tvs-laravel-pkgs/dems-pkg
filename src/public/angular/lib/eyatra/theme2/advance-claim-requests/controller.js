@@ -86,6 +86,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
             self.extras = response.data.extras;
+            self.date = response.data.date;
             self.action = response.data.action;
 
             $scope.selectPaymentMode(self.trip.employee.payment_mode_id);

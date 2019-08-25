@@ -122,12 +122,16 @@ class Trip extends Model {
 				$trip->visits()->sync([]);
 
 			}
+			if ($request->advance_received) {
+				$trip->advance_received = $request->advance_received;
+				$trip->advance_request_approval_status_id = 3260;
+			}
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
 			// dd(Auth::user(), );
 			$trip->manager_id = Auth::user()->entity->reporting_to_id;
-			$trip->status_id = 3020; //NEW
+			$trip->status_id = 3021; //NEW
 			$trip->save();
 
 			$trip->number = 'TRP' . $trip->id;
@@ -259,7 +263,7 @@ class Trip extends Model {
 		return response()->json($data);
 	}
 
-	public function getEmployeeList($r) {
+	public static function getEmployeeList($request) {
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')

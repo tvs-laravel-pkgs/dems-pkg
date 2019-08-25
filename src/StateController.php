@@ -14,7 +14,21 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class StateController extends Controller {
+
+	public function filterEYatraState() {
+		$option = new NCountry;
+		$option->name = 'Select Country';
+		$option->id = null;
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		return response()->json($this->data);
+	}
+
 	public function listEYatraState(Request $r) {
+		if (!empty($r->country)) {
+			$country = $r->country;
+		} else {
+			$country = null;
+		}
 		$states = NState::withTrashed()->from('nstates')
 			->join('country as c', 'c.id', 'nstates.country_id')
 			->select(
@@ -24,6 +38,11 @@ class StateController extends Controller {
 				'c.name as country',
 				DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status')
 			)
+			->where(function ($query) use ($r, $country) {
+				if (!empty($country)) {
+					$query->where('c.id', $country);
+				}
+			})
 			->orderBy('nstates.name', 'asc');
 
 		return Datatables::of($states)
@@ -44,7 +63,7 @@ class StateController extends Controller {
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"
 				onclick="angular.element(this).scope().deleteStateConfirm(' . $state->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
 			})
