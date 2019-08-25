@@ -146,6 +146,7 @@ app.component('eyatraAgentClaimVerificationView', {
                 // Then add size (no units) to array
                 heights.push($(this).height());
             });
+            /* alert(heights); */
             // Find max Width of all elements
             var max = Math.max.apply( Math, heights);
             // Set all Width to max Width
@@ -153,7 +154,7 @@ app.component('eyatraAgentClaimVerificationView', {
                 $(this).css('height', max + 'px');
                 // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
             });    
-        }, 700);
+        }, 1500);
 
         $(".bottom-expand-btn").on('click', function() {
             if ($(".separate-bottom-fixed-layer").hasClass("in")) {
