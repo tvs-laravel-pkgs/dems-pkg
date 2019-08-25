@@ -68,6 +68,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/state/save', 'Uitoux\EYatra\StateController@saveEYatraState')->name('saveEYatraState');
 		Route::get('eyatra/state/view/{state_id}', 'Uitoux\EYatra\StateController@viewEYatraState')->name('viewEYatraState');
 		Route::get('eyatra/state/delete/{state_id}', 'Uitoux\EYatra\StateController@deleteEYatraState')->name('deleteEYatraState');
+		Route::get('eyatra/state/filter/', 'Uitoux\EYatra\StateController@filterEYatraState')->name('filterEYatraState');
 
 		//CITY
 		Route::get('eyatra/city/get-list', 'Uitoux\EYatra\CityController@listEYatraCity')->name('listEYatraCity');
@@ -93,6 +94,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/employee/delete/{employee_id}', 'Uitoux\EYatra\EmployeeController@deleteEYatraEmployee')->name('deleteEYatraEmployee');
 		Route::post('eyatra/employee/manager/search', 'Uitoux\EYatra\EmployeeController@searchManager')->name('searchManager');
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
+		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
 
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
