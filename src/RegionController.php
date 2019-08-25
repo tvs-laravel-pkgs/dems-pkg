@@ -25,6 +25,11 @@ class RegionController extends Controller {
 				DB::raw('IF(regions.deleted_at IS NULL, "Active","Inactive") as status')
 			)
 			->where('company_id', Auth::user()->company_id)
+			->where(function ($query) use ($r) {
+				if ($r->get('state_id')) {
+					$query->where("nstates.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
+				}
+			})
 			->orderBy('regions.id', 'desc');
 
 		return Datatables::of($regions)
@@ -159,6 +164,11 @@ class RegionController extends Controller {
 			return response()->json($this->data);
 		}
 		$this->data['region'] = $region;
+		$this->data['success'] = true;
+		return response()->json($this->data);
+	}
+	public function eyatraRegionFilterData() {
+		$this->data['state_list'] = NState::getList();
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

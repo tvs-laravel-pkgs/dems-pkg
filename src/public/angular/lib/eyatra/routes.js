@@ -220,6 +220,37 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Trip Claim',
     }).
 
+    //MANAGER - EMPLOYEE CLAIM VERIFICATION
+    when('/eyatra/trip/claim/verification1/list', {
+        template: '<eyatra-trip-claim-verification-one-list></eyatra-trip-claim-verification-one-list>',
+        title: 'Employee Claim Verification One',
+    }).
+    when('/eyatra/trip/claim/verification1/view/:trip_id', {
+        template: '<eyatra-trip-claim-verification-one-view></eyatra-trip-claim-verification-one-view>',
+        title: 'View Employee Claim Verification One',
+    }).
+
+    //MANAGER - EMPLOYEE CLAIM VERIFICATION
+    when('/eyatra/trip/claim/verification2/list', {
+        template: '<eyatra-trip-claim-verification-two-list></eyatra-trip-claim-verification-two-list>',
+        title: 'Employee Claim Verification Two',
+    }).
+    when('/eyatra/trip/claim/verification2/view/:trip_id', {
+        template: '<eyatra-trip-claim-verification-two-view></eyatra-trip-claim-verification-two-view>',
+        title: 'View Employee Claim Verification Two',
+    }).
+
+    //FINANCIER - EMPLOYEE CLAIM VERIFICATION
+    when('/eyatra/trip/claim/verification3/list', {
+        template: '<eyatra-trip-claim-verification-three-list></eyatra-trip-claim-verification-three-list>',
+        title: 'Employee Claim Verification Three',
+    }).
+    when('/eyatra/trip/claim/verification3/view/:trip_id', {
+        template: '<eyatra-trip-claim-verification-three-view></eyatra-trip-claim-verification-three-view>',
+        title: 'View Employee Claim Verification Three',
+    }).
+
+
     //TRIP VERIFICATION
     when('/eyatra/trip/verifications', {
         template: '<eyatra-trip-verifications></eyatra-trip-verifications>',
@@ -319,6 +350,24 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/petty-cash/view/:pettycash_id', {
         template: '<eyatra-petty-cash-view></eyatra-petty-cash-view>',
         title: 'View Petty Cash',
+    }).
+    //PETTY CASH VIEW AND LIST FOR MANAGER
+    when('/eyatra/petty-cash/manager/verification', {
+        template: '<eyatra-petty-cash-manager-list></eyatra-petty-cash-manager-list>',
+        title: 'Petty Cash Manager Verification',
+    }).
+    when('/eyatra/petty-cash/manager/verification/view/:pettycash_id', {
+        template: '<eyatra-petty-cash-manager-view></eyatra-petty-cash-manager-view>',
+        title: 'View Petty Cash Manager Verification',
+    }).
+    //PETTY CASH VIEW AND LIST FOR FINANCE
+    when('/eyatra/petty-cash/finance/verification', {
+        template: '<eyatra-petty-cash-finance-list></eyatra-petty-cash-finance-list>',
+        title: 'Petty Cash Finance Verification',
+    }).
+    when('/eyatra/petty-cash/finance/verification/view/:pettycash_id', {
+        template: '<eyatra-petty-cash-finance-view></eyatra-petty-cash-finance-view>',
+        title: 'View Petty Cash Finance Verification',
     }).
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {

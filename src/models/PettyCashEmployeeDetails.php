@@ -15,6 +15,7 @@ class PettyCashEmployeeDetails extends Model {
 		'employee_id',
 		'total',
 		'status',
+		'remarks',
 		'date',
 		'created_by',
 	];

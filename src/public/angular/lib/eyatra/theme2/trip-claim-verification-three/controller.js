@@ -1,11 +1,11 @@
-app.component('eyatraAgentClaimVerificationList', {
-    templateUrl: eyatra_finance_agent_claim_list_template_url,
+app.component('eyatraTripClaimVerificationThreeList', {
+    templateUrl: eyatra_trip_claim_verification_three_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_finance_agent_claim_list_table').DataTable({
+        var dataTable = $('#eyatra_trip_claim_verification_three_list_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate_2,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -21,85 +21,51 @@ app.component('eyatraAgentClaimVerificationList', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listFinanceEYatraAgentClaimList'],
+                url: laravel_routes['listEYatraTripClaimVerificationThreeList'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {}
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'date', name: 'ey_agent_claims.invoice_date', searchable: false },
-                { data: 'number', name: 'ey_agent_claims.number', searchable: true },
-                { data: 'agent_code', name: 'agents.code', searchable: true },
-                { data: 'agent_name', name: 'agents.name', searchable: true },
-                { data: 'invoice_number', name: 'ey_agent_claims.invoice_number', searchable: true },
-                { data: 'invoice_date', name: 'ey_agent_claims.invoice_date', searchable: true },
-                { data: 'invoice_amount', name: 'ey_agent_claims.invoice_amount', searchable: true },
-                { data: 'status', name: 'configs.name', searchable: true },
+                { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'start_date', name: 'v.date', searchable: true },
+                { data: 'end_date', name: 'v.date', searchable: true },
+                { data: 'cities', name: 'c.name', searchable: true },
+                { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+                { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
         $('.dataTables_length select').select2();
-        /* $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
-        $('.add_new_button').html(); */
 
-        /* Search Block */
-        setTimeout(function() {
-            var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_finance_agent_claim_list_table_filter');
-            /* var d = $('.search-block-hide-inner .dataTables_filter').position(); */
-            /* alert("Top: " + x.top + " Left: " + x.left); */
-            /* x.top = x.top + 7; */
-            x.left = x.left + 15;
-            /* d.style.position = "absolute"; */
-            d.style.left = x.left + 'px';
-            /* d.style.top = x.top+'px'; */
-        }, 500);
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification Three</h3>');
+        //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
 
-        $scope.deleteTrip = function(id) {
-            $('#del').val(id);
-        }
-        $scope.confirmDeleteTrip = function() {
-            $id = $('#del').val();
-            $http.get(
-                trip_delete_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors
-                    }).show();
-                } else {
-                    new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trips Deleted Successfully',
-                    }).show();
-                    $('#delete_emp').modal('hide');
-                    dataTable.ajax.reload(function(json) {});
-                }
-            });
-        }
+        $('.add_new_button').html();
+
         $rootScope.loading = false;
 
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraAgentClaimVerificationView', {
-    templateUrl: eyatra_finance_agent_claim_form_template_url,
-    controller: function($http, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.agent_claim_id) == 'undefined' ? eyatra_finance_agent_claim_view_data_url : eyatra_finance_agent_claim_view_data_url + '/' + $routeParams.agent_claim_id;
+
+app.component('eyatraTripClaimVerificationThreeView', {
+    templateUrl: eyatra_trip_claim_verification_three_view_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_verification_three_view_url + '/' : eyatra_trip_claim_verification_three_view_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.eyatra_trip_claim_verification_three_visit_attachment_url = eyatra_trip_claim_verification_three_visit_attachment_url;
+        self.eyatra_trip_claim_verification_three_lodging_attachment_url = eyatra_trip_claim_verification_three_lodging_attachment_url;
+        self.eyatra_trip_claim_verification_three_boarding_attachment_url = eyatra_trip_claim_verification_three_boarding_attachment_url;
+        self.eyatra_trip_claim_verification_three_local_travel_attachment_url = eyatra_trip_claim_verification_three_local_travel_attachment_url;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -107,30 +73,68 @@ app.component('eyatraAgentClaimVerificationView', {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: response.data.message,
+                    text: response.data.error,
                 }).show();
-                $location.path('/eyatra/agent/claim/verification1/list')
-                // $scope.$apply()
+                $location.path('/eyatra/trip/claim/verification3/list')
+                $scope.$apply()
                 return;
             }
-
-            self.agent = response.data.agent;
-            // console.log(response.data.agent);
-            $scope.selectPaymentMode(self.agent.payment_mode_id);
-            self.agent_claim_view = response.data.agent_claim_view;
-            self.total_trips = response.data.total_trips;
+            console.log(response.data.trip.lodgings.city);
+            self.trip = response.data.trip;
+            self.travel_cities = response.data.travel_cities;
+            self.travel_dates = response.data.travel_dates;
+            self.transport_total_amount = response.data.transport_total_amount;
+            self.lodging_total_amount = response.data.lodging_total_amount;
+            self.boardings_total_amount = response.data.boardings_total_amount;
+            self.local_travels_total_amount = response.data.local_travels_total_amount;
+            self.total_amount = response.data.total_amount;
+            self.date = response.data.date;
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
-            self.date = response.data.date;
-            self.booking_list = response.data.booking_list;
-            self.action = response.data.action;
-            self.agent_claim_rejection = response.data.agent_claim_rejection;
+            $scope.selectPaymentMode(self.trip.employee.payment_mode_id);
+
+
+            if (self.trip.advance_received) {
+                if (self.total_amount > self.trip.advance_received) {
+                    self.pay_to_employee = (self.total_amount - self.trip.advance_received);
+                    self.pay_to_company = 0.00;
+                } else if (self.total_amount < self.trip.advance_received) {
+                    self.pay_to_employee = 0.00;
+                    self.pay_to_company = (self.total_amount - self.trip.advance_received);
+                } else {
+                    self.pay_to_employee = 0.00;
+                    self.pay_to_company = 0.00;
+                }
+            } else {
+                self.pay_to_employee = self.total_amount;
+                self.pay_to_company = 0.00;
+            }
             $rootScope.loading = false;
+
         });
 
-        $scope.clearSearch = function() {
-            $scope.search = '';
-        };
+        $(".bottom-expand-btn").on('click', function() {
+            console.log(' click ==');
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                console.log(' has ==');
+
+                $(".separate-bottom-fixed-layer").removeClass("in");
+            } else {
+                console.log(' has not ==');
+
+                $(".separate-bottom-fixed-layer").addClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'none' });
+            }
+        });
+        $(".btn-close").on('click', function() {
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                $(".separate-bottom-fixed-layer").removeClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'inline-block' });
+            } else {
+                $(".separate-bottom-fixed-layer").addClass("in");
+            }
+        });
+
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
             if (payment_id == 3244) { //BANK
@@ -152,47 +156,12 @@ app.component('eyatraAgentClaimVerificationView', {
             }
         }
 
-        setTimeout(function() {
-            var heights = new Array();
-            // Loop to get all element Widths
-            $('.equal-column').each(function() {
-                // Need to let sizes be whatever they want so no overflow on resize
-                // Then add size (no units) to array
-                heights.push($(this).height());
-            });
-            /* alert(heights); */
-            // Find max Width of all elements
-            var max = Math.max.apply(Math, heights);
-            // Set all Width to max Width
-            $('.equal-column').each(function() {
-                $(this).css('height', max + 'px');
-                // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
-            });
-        }, 1500);
-
-        $(".bottom-expand-btn").on('click', function() {
-            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
-                $(".separate-bottom-fixed-layer").removeClass("in");
-            } else {
-                $(".separate-bottom-fixed-layer").addClass("in");
-                $(".bottom-expand-btn").css({ 'display': 'none' });
-            }
-        });
-        $(".btn-close").on('click', function() {
-            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
-                $(".separate-bottom-fixed-layer").removeClass("in");
-                $(".bottom-expand-btn").css({ 'display': 'inline-block' });
-            } else {
-                $(".separate-bottom-fixed-layer").addClass("in");
-            }
-        });
-
         $.validator.addMethod('positiveNumber',
             function(value) {
                 return Number(value) > 0;
             }, 'Enter a positive number.');
 
-        var form_id = '#agent-claim-form';
+        var form_id = '#trip-claim-finance-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
@@ -234,7 +203,7 @@ app.component('eyatraAgentClaimVerificationView', {
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['payAgentClaimRequest'],
+                        url: laravel_routes['approveTripClaimVerificationThree'],
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -253,9 +222,9 @@ app.component('eyatraAgentClaimVerificationView', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Agent Claim Paid successfully',
+                                text: 'Trip Claim Approved successfully',
                             }).show();
-                            $location.path('/eyatra/agent/claim/verification1/list')
+                            $location.path('/eyatra/trip/claim/verification3/list')
                             $scope.$apply()
                         }
                     })
@@ -266,9 +235,10 @@ app.component('eyatraAgentClaimVerificationView', {
             },
         });
 
+
         //Reject
         $(document).on('click', '.reject_btn', function() {
-            var form_id = '#trip-reject-form';
+            var form_id = '#trip-claim-reject-form';
             var v = jQuery(form_id).validate({
                 ignore: '',
 
@@ -277,7 +247,7 @@ app.component('eyatraAgentClaimVerificationView', {
                     let formData = new FormData($(form_id)[0]);
                     $('#reject_btn').button('loading');
                     $.ajax({
-                            url: laravel_routes['rejectAgentClaimRequest'],
+                            url: laravel_routes['rejectTripClaimVerificationThree'],
                             method: "POST",
                             data: formData,
                             processData: false,
@@ -296,22 +266,30 @@ app.component('eyatraAgentClaimVerificationView', {
                                 new Noty({
                                     type: 'success',
                                     layout: 'topRight',
-                                    text: 'Agent Claim Rejected successfully',
+                                    text: 'Trips Claim Rejected successfully',
                                 }).show();
-                                $('#alert-modal-reject').modal('hide');
+                                $('#trip-claim-modal-reject-three').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/agent/claim/verification1/list')
+                                    $location.path('/eyatra/trip/claim/verification3/list')
                                     $scope.$apply()
                                 }, 500);
 
                             }
                         })
                         .fail(function(xhr) {
-                            $('#submit').button('reset');
+                            $('#reject_btn').button('reset');
                             custom_noty('error', 'Something went wrong at server');
                         });
                 },
             });
+        });
+
+        /* Pane Next Button */
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
     }

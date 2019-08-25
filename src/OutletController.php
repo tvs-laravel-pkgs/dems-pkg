@@ -29,12 +29,32 @@ class OutletController extends Controller {
 				'outlets.name',
 				'city.name as city_name',
 				's.name as state_name',
-				DB::raw('IF(r.name IS NULL,"---","r.name") as region_name'),
+				DB::raw('IF(r.name IS NULL,"---",r.name) as region_name'),
 				'c.name as country_name',
 				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 			->where('outlets.company_id', Auth::user()->company_id)
 			->where('a.address_of_id', 3160)
+			->where(function ($query) use ($r) {
+					if ($r->get('region_id')) {
+						$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
+					}
+				})
+				->where(function ($query) use ($r) {
+					if ($r->get('city_id')) {
+						$query->where("city.id", $r->get('city_id'))->orWhere(DB::raw("-1"), $r->get('city_id'));
+					}
+				})
+				->where(function ($query) use ($r) {
+					if ($r->get('state_id')) {
+						$query->where("s.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
+					}
+				})
+				->where(function ($query) use ($r) {
+					if ($r->get('country_id')) {
+						$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
+					}
+				})
 			->groupBy('outlets.id');
 		// if (!Entrust::can('view-all-trips')) {
 		// $trips->where('trips.employee_id', Auth::user()->entity_id);
@@ -136,6 +156,16 @@ class OutletController extends Controller {
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
+	public function eyatraOutletFilterData() {
+			$this->data['region_list'] = Region::getList();
+			$this->data['city_list'] = NCity::getList();
+			$this->data['state_list'] = NState::getList();
+			$this->data['country_list'] = NCountry::getList();
+			$this->data['success'] = true;
+			//dd($this->data);
+		return response()->json($this->data);
+	}
+
 //SEARCH CASHIER
 	public function searchCashier(Request $r) {
 		$key = $r->key;

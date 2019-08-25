@@ -28,7 +28,7 @@ app.component('eyatraAgents', {
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'agents.code', searchable: true },
                 { data: 'name', name: 'agents.name', searchable: true },
                 { data: 'gstin', name: 'agents.gstin', searchable: true },
@@ -41,8 +41,13 @@ app.component('eyatraAgents', {
             }
         });
         $('.dataTables_length select').select2();
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('agent_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Agents</p><h3 class="title">Agents</h3>');
-        // $('.page-header-content .display-inline-block .data-table-title').html('Agents');
         $('.add_new_button').html(
             '<a href="#!/eyatra/agent/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-agent\')">' +
             'Add New' +

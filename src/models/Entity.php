@@ -64,7 +64,7 @@ class Entity extends Model {
 	}
 
 	public static function getGradeList() {
-		return Entity::where('entity_type_id', 500)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 500)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function getLodgeStayTypeList() {
@@ -96,6 +96,27 @@ class Entity extends Model {
 	public static function subGroupList() {
 		return Entity::where('entity_type_id', 517)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
+
+	public static function trip_request_rejection() {
+		return Entity::where('entity_type_id', 507)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function trip_advance_rejection() {
+		return Entity::where('entity_type_id', 508)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function trip_claim_rejection() {
+		return Entity::where('entity_type_id', 509)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function agent_claim_rejection() {
+		return Entity::where('entity_type_id', 510)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function voucher_claim_rejection() {
+		return Entity::where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
 	public static function create($sample_entities, $admin, $company) {
 		foreach ($sample_entities as $entity_type_id => $entities) {
 			foreach ($entities as $entity_name) {

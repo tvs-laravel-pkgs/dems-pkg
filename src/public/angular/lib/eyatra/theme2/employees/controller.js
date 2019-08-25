@@ -5,7 +5,7 @@ app.component('eyatraEmployees', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_employee_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,11 +24,15 @@ app.component('eyatraEmployees', {
                 url: laravel_routes['listEYatraEmployee'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.outlet = $('#outlet_id').val();
+                    d.role = $('#role_id').val();
+                    d.grade = $('#grade_id').val();
+                }
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'e.code', searchable: true },
                 { data: 'name', name: 'e.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
@@ -41,13 +45,42 @@ app.component('eyatraEmployees', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Employees</p><h3 class="title">Employees</h3>');
-        //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/employee/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-employees\')">' +
-            'Add New' +
-            '</a>'
-        );
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_employee_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        //Filter
+        $http.get(
+            employee_filter_url
+        ).then(function(response) {
+            console.log(response);
+            self.grade_list = response.data.grade_list;
+            self.outlet_list = response.data.outlet_list;
+            self.role_list = response.data.role_list;
+            $rootScope.loading = false;
+        });
+        var dataTableFilter = $('#eyatra_employee_table').dataTable();
+        $scope.onselectOutlet = function(id) {
+            $('#outlet_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectRole = function(id) {
+            $('#role_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectGrade = function(id) {
+            $('#grade_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.resetForm = function() {
+            $('#outlet_id').val(null);
+            $('#role_id').val(null);
+            $('#grade_id').val(null);
+            dataTableFilter.fnFilter();
+        }
 
         $scope.deleteEmployee = function(id) {
             $('#del').val(id);
@@ -399,6 +432,14 @@ app.component('eyatraEmployeeView', {
                 $scope.showWallet = false;
             }
         }
+
+        /* Pane Next Button */
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
     }
 });
 

@@ -6,7 +6,7 @@ app.component('eyatraStates', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_state_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -25,27 +25,46 @@ app.component('eyatraStates', {
                 url: laravel_routes['listEYatraState'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.country = $("#country_id").val();
+                }
             },
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'nstates.code', searchable: true },
                 { data: 'name', name: 'nstates.name', searchable: true },
                 { data: 'country', name: 'c.name', searchable: true },
-                { data: 'status', name: 'nstates.deleted_at', searchable: false },
+                { data: 'status', name: 'nstates.deleted_at', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / States</p><h3 class="title">States</h3>');
-        // $('.page-header-content .display-inline-block .data-table-title').html('States');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/state/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-state\')">' +
-            'Add New' +
-            '</a>'
-        );
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_state_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        //Filter
+        $http.get(
+            state_filter_url
+        ).then(function(response) {
+            self.country_list = response.data.country_list;
+            $rootScope.loading = false;
+        });
+        var dataTableFilter = $('#eyatra_state_table').dataTable();
+        $scope.onselectCountry = function(id) {
+            $('#country_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.resetForm = function() {
+            $('#country_id').val(null);
+            dataTableFilter.fnFilter();
+        }
+
         $scope.deleteStateConfirm = function($state_id) {
             $("#delete_state_id").val($state_id);
         }
