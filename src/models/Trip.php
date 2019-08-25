@@ -259,7 +259,7 @@ class Trip extends Model {
 		return response()->json($data);
 	}
 
-	public function getEmployeeList($r) {
+	public static function getEmployeeList($request) {
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
