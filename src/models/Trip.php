@@ -52,7 +52,7 @@ class Trip extends Model {
 	}
 
 	public function employee() {
-		return $this->belongsTo('Uitoux\EYatra\Employee');
+		return $this->belongsTo('Uitoux\EYatra\Employee')->withTrashed();
 	}
 
 	public function purpose() {
@@ -61,6 +61,10 @@ class Trip extends Model {
 
 	public function status() {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'status_id');
+	}
+
+	public function advanceRequestStatus() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'advance_request_approval_status_id');
 	}
 
 	public function lodgings() {
