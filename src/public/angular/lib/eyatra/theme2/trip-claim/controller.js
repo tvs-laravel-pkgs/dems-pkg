@@ -239,6 +239,8 @@ app.component('eyatraTripClaimForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
+
+
         // Lodgings
         self.addNewLodgings = function() {
             self.trip.lodgings.push({
@@ -323,6 +325,7 @@ app.component('eyatraTripClaimForm', {
                 }
                 travel_current_total = travel_amount + travel_tax;
                 total_travel_amount += travel_current_total;
+                $(this).closest('tr').find('.visit_booking_total_amount').val(travel_current_total);
             });
             // console.log(total_travel_amount);
             $('.transport_expenses').text('₹ ' + total_travel_amount.toFixed(2));

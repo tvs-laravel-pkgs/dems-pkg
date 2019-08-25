@@ -296,11 +296,13 @@ class AgentClaimController extends Controller {
 	}
 
 	public function viewEYatraFinanceAgentClaim($agent_claim_id) {
-		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
+		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')
+			->join('configs', 'configs.id', 'ey_agent_claims.status_id')->select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
-			'ey_agent_claims.tax',
+			'configs.name as status',
+			'ey_agent_claims.tax', 'ey_agent_claims.status_id',
 			'agents.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
@@ -324,7 +326,61 @@ class AgentClaimController extends Controller {
 		$this->data['total_trips'] = count($booking_list);
 		$this->data['success'] = true;
 		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
+
+		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+
+		$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_claim_view->agent_id);
+
+		$this->data['agent'] = $agent;
+		$this->data['payment_mode_list'] = $payment_mode_list;
+		$this->data['wallet_mode_list'] = $wallet_mode_list;
+
+		$this->data['date'] = date('d-m-Y');
 		return response()->json($this->data);
 	}
+	public function payAgentClaimRequest(Request $r) {
+
+		// dd($r->all());
+		$agent_claim = AgentClaim::find($r->agent_claim_id);
+		if (!$agent_claim) {
+			return response()->json(['success' => false, 'errors' => ['Agent Claim Request not found']]);
+		}
+		$agent_claim->status_id = 3243;
+		$agent_claim->save();
+
+		//PAYMENT SAVE
+		$payment = Payment::firstOrNew(['entity_id' => $agent_claim->id]);
+		$payment->date = strtotime('Y-m-d', $r->date);
+		$payment->fill($r->all());
+		$payment->payment_of_id = 3252;
+		$payment->entity_id = $agent_claim->id;
+		$payment->created_by = Auth::user()->id;
+		$payment->save();
+
+		//BANK DETAIL SAVE
+		if ($r->bank_name) {
+			$bank_detail = BankDetail::firstOrNew(['entity_id' => $agent_claim->id]);
+			$bank_detail->fill($r->all());
+			$bank_detail->detail_of_id = 3243;
+			$bank_detail->entity_id = $agent_claim->id;
+			$bank_detail->account_type_id = 3252;
+			$bank_detail->save();
+		}
+
+		//WALLET SAVE
+		if ($r->type_id) {
+			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent_claim->id]);
+			$wallet_detail->fill($r->all());
+			$wallet_detail->wallet_of_id = 3252;
+			$wallet_detail->entity_id = $agent_claim->id;
+			$wallet_detail->save();
+		}
+
+		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
+		return response()->json(['success' => true]);
+	}
+
+	// 3252
 
 }

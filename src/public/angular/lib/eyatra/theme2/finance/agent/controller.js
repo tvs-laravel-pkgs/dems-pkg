@@ -101,14 +101,22 @@ app.component('eyatraAgentClaimVerificationView', {
                 return;
             }
 
+            self.agent = response.data.agent;
+            // console.log(response.data.agent);
+            $scope.selectPaymentMode(self.agent.payment_mode_id);
             self.agent_claim_view = response.data.agent_claim_view;
             self.total_trips = response.data.total_trips;
+            self.payment_mode_list = response.data.payment_mode_list;
+            self.wallet_mode_list = response.data.wallet_mode_list;
+            self.date = response.data.date;
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
-
             $rootScope.loading = false;
         });
 
+        $scope.clearSearch = function() {
+            $scope.search = '';
+        };
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
             if (payment_id == 3244) { //BANK
@@ -145,6 +153,85 @@ app.component('eyatraAgentClaimVerificationView', {
             } else {
                 $(".separate-bottom-fixed-layer").addClass("in");
             }
+        });
+
+        $.validator.addMethod('positiveNumber',
+            function(value) {
+                return Number(value) > 0;
+            }, 'Enter a positive number.');
+
+        var form_id = '#agent-claim-form';
+        var v = jQuery(form_id).validate({
+            errorPlacement: function(error, element) {
+                error.insertAfter(element)
+            },
+            ignore: '',
+            rules: {
+                'amount': {
+                    min: 1,
+                    number: true,
+                    required: true,
+                },
+                'date': {
+                    required: true,
+                },
+                'bank_name': {
+                    required: true,
+                    maxlength: 100,
+                    minlength: 3,
+                },
+                'branch_name': {
+                    required: true,
+                    maxlength: 50,
+                    minlength: 3,
+                },
+                'account_number': {
+                    required: true,
+                    maxlength: 20,
+                    minlength: 3,
+                    positiveNumber: true,
+                },
+                'ifsc_code': {
+                    required: true,
+                    maxlength: 10,
+                    minlength: 3,
+                },
+            },
+            submitHandler: function(form) {
+
+                let formData = new FormData($(form_id)[0]);
+                $('#submit').button('loading');
+                $.ajax({
+                        url: laravel_routes['payAgentClaimRequest'],
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                    .done(function(res) {
+                        console.log(res.success);
+                        if (!res.success) {
+                            $('#submit').button('reset');
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Advance Claim Request Approved successfully',
+                            }).show();
+                            $location.path('/eyatra/advance-claim/requests')
+                            $scope.$apply()
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $('#submit').button('reset');
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+            },
         });
 
     }

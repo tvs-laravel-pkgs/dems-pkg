@@ -21,7 +21,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/verification/save', 'Uitoux\EYatra\Api\TripVerificationController@viewTrip');
 
 		//COMPLETED TRIP & CLAIM
-		Route::post('trip/claim/list', 'Uitoux\EYatra\Api\TripClaimController@listCompletedTrips');
+		Route::post('trip/completed/list', 'Uitoux\EYatra\Api\TripClaimController@listCompletedTrips');
 		Route::post('trip/claim/form/data', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
 
@@ -139,6 +139,7 @@ Route::group(['middleware' => ['web']], function () {
 		//FINANCE AGENT CLAIMS
 		Route::get('eyatra/finance/agent/claim/get-list', 'Uitoux\EYatra\AgentClaimController@listFinanceEYatraAgentClaimList')->name('listFinanceEYatraAgentClaimList');
 		Route::get('eyatra/finance/agent/claim/view/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@viewEYatraFinanceAgentClaim')->name('viewEYatraFinanceAgentClaim');
+		Route::post('eyatra/finance/agent-claim/payment', 'Uitoux\EYatra\AgentClaimController@payAgentClaimRequest')->name('payAgentClaimRequest');
 
 		//ADVANCE CLAIM REQUESTS
 		Route::get('eyatra/advance-claim/request/get-list', 'Uitoux\EYatra\AdvanceClaimRequestController@listAdvanceClaimRequest')->name('listAdvanceClaimRequest');

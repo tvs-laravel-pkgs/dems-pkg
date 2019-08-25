@@ -102,11 +102,35 @@ class EYatraRoleSeeder extends Seeder {
 					//EMPLOYEE CLAIM VERIFICATION 1
 					5500,
 
-					//EMPLOYEE CLAIM VERIFICATION 2
-					5520,
+					// //EMPLOYEE CLAIM VERIFICATION 2
+					// 5520,
 
 					//AGENT CLAIM VERIFICATION 1
 					5540,
+
+					//MASTERS > COA CATEGORIES
+					5580,
+
+					//MASTERS > COA CATEGORIES > ACCOUNT TYPES
+					5600, 5601, 5602, 5603,
+
+					//MASTERS > COA CATEGORIES > BALANCE TYPES
+					5620, 5621, 5622, 5623,
+
+					//MASTERS > COA CATEGORIES > FINAL STATEMENT
+					5640, 5641, 5642, 5643,
+
+					//MASTERS > COA CATEGORIES > GROUPS
+					5660, 5661, 5662, 5663,
+
+					//MASTERS > COA CATEGORIES > SUB GROUPS
+					5680, 5681, 5682, 5683,
+
+					//MASTERS > COA CODES
+					5700, 5701, 5702, 5703,
+
+					//EXPENSE VOUCHERS
+					5580,
 
 				],
 			],
@@ -125,6 +149,9 @@ class EYatraRoleSeeder extends Seeder {
 					//MOBILE PERMISSIONS
 					//TRIPS
 					9000, 9001, 9002, 9003, 9004, 9005,
+
+					//EXPENSE VOUCHERS
+					5580,
 
 				],
 			],
@@ -167,7 +194,7 @@ class EYatraRoleSeeder extends Seeder {
 				],
 			],
 
-			//EYATRA CAHIER
+			//EYATRA CASHIER
 			504 => [
 				//'company_id' => 1,
 				'display_order' => 1,

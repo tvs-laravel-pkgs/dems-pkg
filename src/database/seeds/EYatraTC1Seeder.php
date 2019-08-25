@@ -283,12 +283,12 @@ class EYatraTC1Seeder extends Seeder {
 
 			//OUTLET CASHIER CREATION
 			$code = $outlet->code . '/cash' . $i;
-			$cashier = Employee::create($company, $code, $outlet, $admin, $faker, $manager->id);
+			$cashier = Employee::create($company, $code, $outlet, $admin, $faker);
 			$this->command->info('------------------');
 			$this->command->info('Cashier Created : ' . $cashier->code);
 
 			$user_type_id = 3121;
-			$cashier_user = Employee::createUser($company, $user_type_id, $employee, $faker, $base_telephone_number . $i . $j . $k . '000000', $roles = 504);
+			$cashier_user = Employee::createUser($company, $user_type_id, $cashier, $faker, $base_telephone_number . '5' . $i . '00000000', $roles = 504);
 			$outlet->cashier_id = $cashier->id;
 			$outlet->save();
 
@@ -424,11 +424,11 @@ class EYatraTC1Seeder extends Seeder {
 			$grade->gradeEligibility()->sync($advance_eligibility);
 		}
 
-		$this->command->info('');
-		$this->command->info('CREATING TRIPS');
-		Trip::join('employees as e', 'e.id', 'trips.employee_id')->where('e.company_id', $company->id)->forceDelete();
-		$trip_number = 1;
 		if ($create_dummy_records == 'y') {
+			$this->command->info('-----------------');
+			$this->command->info('CREATING TRIPS');
+			Trip::join('employees as e', 'e.id', 'trips.employee_id')->where('e.company_id', $company->id)->forceDelete();
+			$trip_number = 1;
 			foreach ($company->employees()->whereNotNull('reporting_to_id')->limit(5)->orderBy('id')->get() as $employee) {
 				for ($i = 1; $i <= 100; $i++) {
 
@@ -565,6 +565,15 @@ class EYatraTC1Seeder extends Seeder {
 							$agent_claim = new AgentClaim;
 						}
 					}
+				}
+			}
+
+			$this->command->info('-----------------');
+			$this->command->info('CREATING EXPENSE VOUCHERS');
+			Trip::join('employees as e', 'e.id', 'trips.employee_id')->where('e.company_id', $company->id)->forceDelete();
+			$trip_number = 1;
+			foreach ($company->employees()->whereNotNull('reporting_to_id')->limit(5)->orderBy('id')->get() as $employee) {
+				for ($i = 1; $i <= 100; $i++) {
 				}
 			}
 		}
