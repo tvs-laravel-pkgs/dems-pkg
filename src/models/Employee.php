@@ -83,7 +83,7 @@ class Employee extends Model {
 		$employee->outlet_id = $outlet->id;
 		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
 		$employee->reporting_to_id = $manager_id;
-		$employee->payment_mode_id = $company->employeePaymentModes()->inRandomOrder()->first()->id;
+		$employee->payment_mode_id = Config::where('config_type_id', 514)->inRandomOrder()->first()->id;
 		$employee->created_by = $admin->id;
 		$employee->save();
 

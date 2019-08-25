@@ -651,6 +651,13 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Trip Advance Requests',
 			],
 
+			5580 => [
+				'display_order' => 7,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers',
+				'display_name' => 'Expense Vouchers',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
