@@ -91,6 +91,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Manager Approved',
 				'config_type_id' => 501,
 			],
+			3029 => [
+				'name' => 'Senior Manager Approval Pending',
+				'config_type_id' => 501,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [
@@ -237,6 +241,18 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3222 => [
 				'name' => 'Claim Requested',
+				'config_type_id' => 512,
+			],
+			3223 => [
+				'name' => 'Payment Pending',
+				'config_type_id' => 512,
+			],
+			3224 => [
+				'name' => 'Senior Manager Approval Pending',
+				'config_type_id' => 512,
+			],
+			3225 => [
+				'name' => 'Paid',
 				'config_type_id' => 512,
 			],
 

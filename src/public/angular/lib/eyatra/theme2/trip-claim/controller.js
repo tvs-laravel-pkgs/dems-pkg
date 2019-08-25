@@ -54,7 +54,7 @@ app.component('eyatraTripClaimList', {
         $scope.confirmDeleteTrip = function() {
             $id = $('#del').val();
             $http.get(
-                trip_delete_url + '/' + $id,
+                eyatra_trip_claim_delete_url + '/' + $id,
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
