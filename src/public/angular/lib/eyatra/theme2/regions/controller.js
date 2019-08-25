@@ -14,7 +14,7 @@ app.component('eyatraRegions', {
 
         var dataTable = $('#eyatra_region_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
