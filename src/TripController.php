@@ -33,6 +33,22 @@ class TripController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
+			
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
 			->groupBy('trips.id')
 		// ->orderBy('trips.created_at', 'desc');
 			->orderBy('trips.id', 'desc');
@@ -54,7 +70,7 @@ class TripController extends Controller {
 				<a href="#!/eyatra/trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
+				<a href="javascript:;" data-toggle="modal" data-target="#delete_trip"
 				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
@@ -89,6 +105,15 @@ class TripController extends Controller {
 
 	public function viewTrip($trip_id) {
 		return Trip::getViewData($trip_id);
+	}
+
+	public function eyatraTripFilterData() {
+			$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'),'id')->where('company_id',Auth::user()->company_id)->get();
+			$this->data['purpose_list'] =Entity::select('name','id')->where('entity_type_id',501)->where('company_id',Auth::user()->company_id)->get();
+			$this->data['trip_status_list'] =Config::select('name','id')->where('config_type_id',501)->get();
+			$this->data['success'] = true;
+			//dd($this->data);
+		return response()->json($this->data);
 	}
 
 	public function deleteTrip($trip_id) {

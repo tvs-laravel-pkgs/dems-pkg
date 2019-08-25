@@ -220,6 +220,37 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Trip Claim',
     }).
 
+    //MANAGER - EMPLOYEE CLAIM VERIFICATION
+    when('/eyatra/trip/claim/verification1/list', {
+        template: '<eyatra-trip-claim-verification-one-list></eyatra-trip-claim-verification-one-list>',
+        title: 'Employee Claim Verification One',
+    }).
+    when('/eyatra/trip/claim/verification1/view/:trip_id', {
+        template: '<eyatra-trip-claim-verification-one-view></eyatra-trip-claim-verification-one-view>',
+        title: 'View Employee Claim Verification One',
+    }).
+
+    //MANAGER - EMPLOYEE CLAIM VERIFICATION
+    when('/eyatra/trip/claim/verification2/list', {
+        template: '<eyatra-trip-claim-verification-two-list></eyatra-trip-claim-verification-two-list>',
+        title: 'Employee Claim Verification Two',
+    }).
+    when('/eyatra/trip/claim/verification2/view/:trip_id', {
+        template: '<eyatra-trip-claim-verification-two-view></eyatra-trip-claim-verification-two-view>',
+        title: 'View Employee Claim Verification Two',
+    }).
+
+    //FINANCIER - EMPLOYEE CLAIM VERIFICATION
+    when('/eyatra/trip/claim/verification3/list', {
+        template: '<eyatra-trip-claim-verification-three-list></eyatra-trip-claim-verification-three-list>',
+        title: 'Employee Claim Verification Three',
+    }).
+    when('/eyatra/trip/claim/verification3/view/:trip_id', {
+        template: '<eyatra-trip-claim-verification-three-view></eyatra-trip-claim-verification-three-view>',
+        title: 'View Employee Claim Verification Three',
+    }).
+
+
     //TRIP VERIFICATION
     when('/eyatra/trip/verifications', {
         template: '<eyatra-trip-verifications></eyatra-trip-verifications>',

@@ -7,8 +7,11 @@ use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\LocalTravel;
+use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
@@ -45,12 +48,12 @@ class TripClaimController extends Controller {
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img2 = asset('public/img/content/table/eye.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2_active = asset('public/img/content/table/eye-active.svg');
-				$img3 = asset('public/img/content/table/delete-default.svg');
-				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
 				<a href="#!/eyatra/trip/claim/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
@@ -299,7 +302,16 @@ class TripClaimController extends Controller {
 			$this->data['message'] = 'Trip not found';
 		} else {
 			$trip = Trip::with(
-				'visits',
+				'advanceRequestStatus',
+				'employee',
+				'employee.user',
+				'employee.grade',
+				'employee.designation',
+				'employee.reportingTo',
+				'employee.outlet',
+				'employee.Sbu',
+				'employee.Sbu.lob',
+				'selfVisits',
 				'purpose',
 				'lodgings',
 				'lodgings.city',
@@ -313,28 +325,74 @@ class TripClaimController extends Controller {
 				'localTravels.toCity',
 				'localTravels.travelMode',
 				'localTravels.attachments',
-				'visits.fromCity',
-				'visits.toCity',
-				'visits.travelMode',
-				'visits.bookingMethod',
-				'visits.selfBooking',
-				'visits.agent',
-				'visits.status',
-				'visits.attachments'
+				'selfVisits.fromCity',
+				'selfVisits.toCity',
+				'selfVisits.travelMode',
+				'selfVisits.bookingMethod',
+				'selfVisits.selfBooking',
+				'selfVisits.agent',
+				'selfVisits.status',
+				'selfVisits.attachments'
 			)->find($trip_id);
 
 			if (!$trip) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Trip not found';
 			}
+			$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
+				->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
+
+			$transport_total = Visit::select(
+				DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as amount'),
+				DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as tax')
+			)
+				->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+				->where('visits.trip_id', $trip_id)
+				->groupby('visits.id')
+				->first();
+			$transport_total_amount = $transport_total ? $transport_total->amount : 0.00;
+			$transport_total_tax = $transport_total ? $transport_total->tax : 0.00;
+			$this->data['transport_total_amount'] = $transport_total_amount;
+
+			$lodging_total = Lodging::select(
+				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+				DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+			)
+				->where('trip_id', $trip_id)
+				->groupby('trip_id')
+				->first();
+			$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
+			$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
+			$this->data['lodging_total_amount'] = $lodging_total_amount;
+
+			$boardings_total = Boarding::select(
+				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+				DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+			)
+				->where('trip_id', $trip_id)
+				->groupby('trip_id')
+				->first();
+			$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
+			$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
+			$this->data['boardings_total_amount'] = $boardings_total_amount;
+
+			$local_travels_total = LocalTravel::select(
+				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+				DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+			)
+				->where('trip_id', $trip_id)
+				->groupby('trip_id')
+				->first();
+			$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
+			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
+			$this->data['local_travels_total_amount'] = $local_travels_total_amount;
+
+			$this->data['total_amount'] = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+
+			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
+			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 			$this->data['success'] = true;
 		}
-		$this->data['extras'] = [
-			'purpose_list' => Entity::uiPurposeList(),
-			'travel_mode_list' => Entity::uiTravelModeList(),
-			'city_list' => NCity::getList(),
-			'state_type_list' => Entity::getLodgeStateTypeList(),
-		];
 		$this->data['trip'] = $trip;
 
 		return response()->json($this->data);

@@ -76,6 +76,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/city/save', 'Uitoux\EYatra\CityController@saveEYatraCity')->name('saveEYatraCity');
 		Route::get('eyatra/city/view/{city_id}', 'Uitoux\EYatra\CityController@viewEYatraCity')->name('viewEYatraCity');
 		Route::get('eyatra/city/delete/{city_id}', 'Uitoux\EYatra\CityController@deleteEYatraCity')->name('deleteEYatraCity');
+		Route::get('eyatra/city/get-filter-data', 'Uitoux\EYatra\CityController@eyatraCityFilterData')->name('eyatraCityFilterData');
 
 		//OUTLETS
 		Route::get('eyatra/outlet/get-list', 'Uitoux\EYatra\OutletController@listEYatraOutlet')->name('listEYatraOutlet');
@@ -85,6 +86,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/outlet/delete/{outlet_id}', 'Uitoux\EYatra\OutletController@deleteEYatraOutlet')->name('deleteEYatraOutlet');
 		Route::post('eyatra/outlet/cashier-search', 'Uitoux\EYatra\OutletController@searchCashier')->name('searchCashier');
 		Route::get('eyatra/lob/get-sbus', 'Uitoux\EYatra\LobController@getLobSbus')->name('getLobSbus');
+		Route::get('eyatra/outlet/get-filter-data', 'Uitoux\EYatra\OutletController@eyatraOutletFilterData')->name('eyatraOutletFilterData');
 
 		//EMPLOYEES
 		Route::get('eyatra/employee/get-list', 'Uitoux\EYatra\EmployeeController@listEYatraEmployee')->name('listEYatraEmployee');
@@ -110,6 +112,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/region/view/{region_id}', 'Uitoux\EYatra\RegionController@viewEYatraRegion')->name('viewEYatraRegion');
 		Route::get('eyatra/region/delete/{region_id}', 'Uitoux\EYatra\RegionController@deleteEYatraRegion')->name('deleteEYatraRegion');
 		Route::post('eyatra/region/get/state', 'Uitoux\EYatra\RegionController@getStateByCountry')->name('getStateByCountry');
+		Route::get('eyatra/region/get-filter-data', 'Uitoux\EYatra\RegionController@eyatraRegionFilterData')->name('eyatraRegionFilterData');
 
 		//TRIPS
 		Route::get('eyatra/trip/get-list', 'Uitoux\EYatra\TripController@listTrip')->name('listTrip');
@@ -124,13 +127,16 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('/eyatra/trip/visit/request-booking-cancel/{visit_id}', 'Uitoux\EYatra\TripController@requestCancelVisitBooking')->name('requestCancelVisitBooking');
 		// Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\TripController@searchCity')->name('searchCity');
 		Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
+		Route::get('eyatra/trip/get-filter-data', 'Uitoux\EYatra\TripController@eyatraTripFilterData')->name('eyatraTripFilterData');
 
 		//TRIPS VERIFICATION
 		Route::get('eyatra/trip/verification/get-list', 'Uitoux\EYatra\TripVerificationController@listTripVerification')->name('listTripVerification');
 		Route::get('eyatra/trip/verification/get-form-data/{trip_id?}', 'Uitoux\EYatra\TripVerificationController@tripVerificationFormData')->name('tripVerificationFormData');
 		Route::post('eyatra/trip/verification/save', 'Uitoux\EYatra\TripVerificationController@saveTripVerification')->name('saveTripVerification');
-		Route::get('eyatra/trip/verification/approve/{trip_id}', 'Uitoux\EYatra\TripVerificationController@approveTripVerification')->name('approveTripVerification');
-		Route::get('eyatra/trip/verification/reject/{trip_id}', 'Uitoux\EYatra\TripVerificationController@rejectTripVerification')->name('rejectTripVerification');
+
+		Route::get('eyatra/trip/verification/get-filter-data', 'Uitoux\EYatra\TripVerificationController@eyatraTripVerificationFilterData')->name('eyatraTripVerificationFilterData');
+		Route::post('eyatra/trip/verification/approve', 'Uitoux\EYatra\TripVerificationController@approveTripVerification')->name('approveTripVerification');
+		Route::post('eyatra/trip/verification/reject', 'Uitoux\EYatra\TripVerificationController@rejectTripVerification')->name('rejectTripVerification');
 
 		// FINANCE EMPLOYEE CLAIMS
 		Route::get('eyatra/finance-emp/claims/get-list', 'Uitoux\EYatra\FinanceEmployeeClaimController@listEYatraFinanceEmployeeClaim')->name('listEYatraFinanceEmployeeClaim');
@@ -140,13 +146,15 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/finance/agent/claim/get-list', 'Uitoux\EYatra\AgentClaimController@listFinanceEYatraAgentClaimList')->name('listFinanceEYatraAgentClaimList');
 		Route::get('eyatra/finance/agent/claim/view/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@viewEYatraFinanceAgentClaim')->name('viewEYatraFinanceAgentClaim');
 		Route::post('eyatra/finance/agent-claim/payment', 'Uitoux\EYatra\AgentClaimController@payAgentClaimRequest')->name('payAgentClaimRequest');
+		Route::post('eyatra/finance/agent-claim/reject', 'Uitoux\EYatra\AgentClaimController@rejectAgentClaimRequest')->name('rejectAgentClaimRequest');
 
 		//ADVANCE CLAIM REQUESTS
 		Route::get('eyatra/advance-claim/request/get-list', 'Uitoux\EYatra\AdvanceClaimRequestController@listAdvanceClaimRequest')->name('listAdvanceClaimRequest');
 		Route::get('eyatra/advance-claim/request/get-form-data/{trip_id?}', 'Uitoux\EYatra\AdvanceClaimRequestController@advanceClaimRequestFormData')->name('advanceClaimRequestFormData');
 		Route::post('eyatra/advance-claim/request/save', 'Uitoux\EYatra\AdvanceClaimRequestController@saveAdvanceClaimRequest')->name('saveAdvanceClaimRequest');
 		Route::get('eyatra/advance-claim/request/approve/{trip_id}', 'Uitoux\EYatra\AdvanceClaimRequestController@approveAdvanceClaimRequest')->name('approveAdvanceClaimRequest');
-		Route::get('eyatra/advance-claim/request/reject/{trip_id}', 'Uitoux\EYatra\AdvanceClaimRequestController@rejectAdvanceClaimRequest')->name('rejectAdvanceClaimRequest');
+		Route::post('eyatra/advance-claim/request/reject', 'Uitoux\EYatra\AdvanceClaimRequestController@rejectAdvanceClaimRequest')->name('rejectAdvanceClaimRequest');
+		Route::get('eyatra/trip/verification/get-filter-data', 'Uitoux\EYatra\AdvanceClaimRequestController@eyatraAdvanceClaimFilterData')->name('eyatraAdvanceClaimFilterData');
 
 		//AGENT REQUESTS
 		Route::get('eyatra/agent/request/get-list', 'Uitoux\EYatra\AgentRequestController@listAgentRequest')->name('listAgentRequest');
@@ -171,6 +179,18 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/claim/view/{trip_id?}', 'Uitoux\EYatra\TripClaimController@viewEYatraTripClaim')->name('viewEYatraTripClaim');
 		Route::get('eyatra/trip/claim/delete/{trip_id}', 'Uitoux\EYatra\TripClaimController@deleteEYatraTripClaim')->name('deleteEYatraTripClaim');
 		Route::get('eyatra/trip/claim/get-eligible-amount', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGrade')->name('getEligibleAmtBasedonCitycategoryGrade');
+
+		//TRIP CLAIM VERIFICATION ONE
+		Route::get('eyatra/trip/claim/verification/one/get-list', 'Uitoux\EYatra\TripClaimVerificationOneController@listEYatraTripClaimVerificationOneList')->name('listEYatraTripClaimVerificationOneList');
+		Route::get('eyatra/trip/claim/verification/one/view/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationOneController@viewEYatraTripClaimVerificationOne')->name('viewEYatraTripClaimVerificationOne');
+
+		//TRIP CLAIM VERIFICATION TWO
+		Route::get('eyatra/trip/claim/verification/two/get-list', 'Uitoux\EYatra\TripClaimVerificationTwoController@listEYatraTripClaimVerificationTwoList')->name('listEYatraTripClaimVerificationTwoList');
+		Route::get('eyatra/trip/claim/verification/two/view/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationTwoController@viewEYatraTripClaimVerificationTwo')->name('viewEYatraTripClaimVerificationTwo');
+
+		//TRIP CLAIM VERIFICATION THREE
+		Route::get('eyatra/trip/claim/verification/three/get-list', 'Uitoux\EYatra\TripClaimVerificationThreeController@listEYatraTripClaimVerificationThreeList')->name('listEYatraTripClaimVerificationThreeList');
+		Route::get('eyatra/trip/claim/verification/three/view/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationThreeController@viewEYatraTripClaimVerificationThree')->name('viewEYatraTripClaimVerificationThree');
 
 		//TRIPS BOOKING UPDATES
 		Route::get('eyatra/trips/booking-updates/get-list', 'Uitoux\EYatra\TripBookingUpdateController@listTripBookingUpdates')->name('listTripBookingUpdates');

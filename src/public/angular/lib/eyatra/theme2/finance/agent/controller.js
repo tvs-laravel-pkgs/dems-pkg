@@ -5,7 +5,7 @@ app.component('eyatraAgentClaimVerificationList', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_finance_agent_claim_list_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -42,8 +42,21 @@ app.component('eyatraAgentClaimVerificationList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
-        $('.add_new_button').html();
+        /* $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
+        $('.add_new_button').html(); */
+
+        /* Search Block */
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_finance_agent_claim_list_table_filter');
+            /* var d = $('.search-block-hide-inner .dataTables_filter').position(); */
+            /* alert("Top: " + x.top + " Left: " + x.left); */
+            /* x.top = x.top + 7; */
+            x.left = x.left + 15;
+            /* d.style.position = "absolute"; */
+            d.style.left = x.left + 'px';
+            /* d.style.top = x.top+'px'; */
+        }, 500);
 
         $scope.deleteTrip = function(id) {
             $('#del').val(id);
@@ -111,6 +124,7 @@ app.component('eyatraAgentClaimVerificationView', {
             self.date = response.data.date;
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
+            self.agent_claim_rejection = response.data.agent_claim_rejection;
             $rootScope.loading = false;
         });
 
@@ -138,22 +152,23 @@ app.component('eyatraAgentClaimVerificationView', {
             }
         }
 
-        setTimeout(function () {
+        setTimeout(function() {
             var heights = new Array();
             // Loop to get all element Widths
-            $('.equal-column').each(function() {    
+            $('.equal-column').each(function() {
                 // Need to let sizes be whatever they want so no overflow on resize
                 // Then add size (no units) to array
                 heights.push($(this).height());
             });
+            /* alert(heights); */
             // Find max Width of all elements
-            var max = Math.max.apply( Math, heights);
+            var max = Math.max.apply(Math, heights);
             // Set all Width to max Width
             $('.equal-column').each(function() {
                 $(this).css('height', max + 'px');
                 // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
-            });    
-        }, 700);
+            });
+        }, 1500);
 
         $(".bottom-expand-btn").on('click', function() {
             if ($(".separate-bottom-fixed-layer").hasClass("in")) {
@@ -238,9 +253,9 @@ app.component('eyatraAgentClaimVerificationView', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Advance Claim Request Approved successfully',
+                                text: 'Agent Claim Paid successfully',
                             }).show();
-                            $location.path('/eyatra/advance-claim/requests')
+                            $location.path('/eyatra/agent/claim/verification1/list')
                             $scope.$apply()
                         }
                     })
@@ -249,6 +264,54 @@ app.component('eyatraAgentClaimVerificationView', {
                         custom_noty('error', 'Something went wrong at server');
                     });
             },
+        });
+
+        //Reject
+        $(document).on('click', '.reject_btn', function() {
+            var form_id = '#trip-reject-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#reject_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['rejectAgentClaimRequest'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#reject_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Agent Claim Rejected successfully',
+                                }).show();
+                                $('#alert-modal-reject').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/eyatra/agent/claim/verification1/list')
+                                    $scope.$apply()
+                                }, 500);
+
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
         });
 
     }

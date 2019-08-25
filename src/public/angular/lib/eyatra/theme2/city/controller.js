@@ -3,9 +3,18 @@ app.component('eyatraCity', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+
+        $http.get(
+            city_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.state_list = response.data.state_list;
+            $rootScope.loading = false;
+        });
+
         var dataTable = $('#eyatra_city_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,10 +33,12 @@ app.component('eyatraCity', {
                 url: laravel_routes['listEYatraCity'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.state_id = $('#state_id').val();
+                }
             },
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'city_name', name: 'ncities.name', searchable: true },
                 { data: 'name', name: 'entities.name', searchable: true },
                 { data: 'state_name', name: 'nstates.name', searchable: true },
@@ -38,13 +49,31 @@ app.component('eyatraCity', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Cities</p><h3 class="title">Cities</h3>');
-        // $('.page-header-content .display-inline-block .data-table-title').html('City');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-city\')">' +
-            'Add New' +
-            '</a>'
-        );
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_city_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+
+        $scope.get_state_data = function(query) {
+            $('#state_id').val(query);
+            dataTable.draw();
+        }
+        $scope.reset_filter = function(query) {
+            $('#state_id').val(-1);
+            dataTable.draw();
+        }
+
+        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Cities</p><h3 class="title">Cities</h3>');
+        // // $('.page-header-content .display-inline-block .data-table-title').html('City');
+        // $('.add_new_button').html(
+        //     '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-city\')">' +
+        //     'Add New' +
+        //     '</a>'
+        // );
         $scope.deleteCityConfirm = function($city_id) {
             $("#delete_city_id").val($city_id);
         }

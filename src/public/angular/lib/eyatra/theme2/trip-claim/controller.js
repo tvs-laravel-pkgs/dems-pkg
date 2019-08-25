@@ -54,7 +54,7 @@ app.component('eyatraTripClaimList', {
         $scope.confirmDeleteTrip = function() {
             $id = $('#del').val();
             $http.get(
-                trip_delete_url + '/' + $id,
+                eyatra_trip_claim_delete_url + '/' + $id,
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
@@ -556,9 +556,29 @@ app.component('eyatraTripClaimView', {
                 return;
             }
             console.log(response.data.trip.lodgings.city);
-            console.log(response.data.extras);
-            self.extras = response.data.extras;
             self.trip = response.data.trip;
+            self.travel_cities = response.data.travel_cities;
+            self.travel_dates = response.data.travel_dates;
+            self.transport_total_amount = response.data.transport_total_amount;
+            self.lodging_total_amount = response.data.lodging_total_amount;
+            self.boardings_total_amount = response.data.boardings_total_amount;
+            self.local_travels_total_amount = response.data.local_travels_total_amount;
+            self.total_amount = response.data.total_amount.toFixed(2);
+            if (self.trip.advance_received) {
+                if (self.total_amount > self.trip.advance_received) {
+                    self.pay_to_employee = (self.total_amount - self.trip.advance_received);
+                    self.pay_to_company = 0.00;
+                } else if (self.total_amount < self.trip.advance_received) {
+                    self.pay_to_employee = 0.00;
+                    self.pay_to_company = (self.trip.advance_received - self.advance_received);
+                } else {
+                    self.pay_to_employee = 0.00;
+                    self.pay_to_company = 0.00;
+                }
+            } else {
+                self.pay_to_employee = self.total_amount;
+                self.pay_to_company = 0.00;
+            }
             $rootScope.loading = false;
 
         });

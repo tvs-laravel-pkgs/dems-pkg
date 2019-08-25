@@ -432,6 +432,14 @@ app.component('eyatraEmployeeView', {
                 $scope.showWallet = false;
             }
         }
+
+        /* Pane Next Button */
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
     }
 });
 

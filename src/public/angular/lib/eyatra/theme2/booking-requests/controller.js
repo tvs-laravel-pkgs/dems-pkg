@@ -32,6 +32,7 @@ app.component('eyatraTripBookingRequests', {
                 { data: 'ename', name: 'e.name', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'agent', name: 'a.name', searchable: true },
+                { data: 'created_on', name: 'a.name', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -214,36 +215,36 @@ app.component('eyatraTripBookingRequestsView', {
                 },
             });
         });
-        
+
         // Select and loop the container element of the elements you want to equalise
-        setTimeout(function () {
+        setTimeout(function() {
             // Cache the highest
             var highestBox = new Array();
             // Loop to get all element Widths
-            $('.match-height').each(function() { 
+            $('.match-height').each(function() {
                 // Need to let sizes be whatever they want so no overflow on resize   
                 // Then add size (no units) to array
                 highestBox.push($(this).height());
             });
             // Find max Width of all elements
-            var max = Math.max.apply( Math, highestBox );
+            var max = Math.max.apply(Math, highestBox);
             // Set the height of all those children to whichever was highest 
-            $('.match-height').height(max);                
+            $('.match-height').height(max);
 
             // Cache the highest
             var highestBox_1 = new Array();
             // Loop to get all element Widths
-            $('.match-height-1').each(function() {    
+            $('.match-height-1').each(function() {
                 // Need to let sizes be whatever they want so no overflow on resize
                 // Then add size (no units) to array
                 highestBox_1.push($(this).height());
             });
             // Find max Width of all elements
-            var max_1 = Math.max.apply( Math, highestBox_1 );
+            var max_1 = Math.max.apply(Math, highestBox_1);
             // Set the height of all those children to whichever was highest 
             $('.match-height-1').height(max_1);
 
-        }, 1200);
+        }, 1400);
 
         self.approveTrip = function() {
             self.trip.visits.push({
