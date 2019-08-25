@@ -811,6 +811,14 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-coa-codes-delete',
 				'display_name' => 'Delete',
 			],
+
+			5580 => [
+				'display_order' => 7,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers',
+				'display_name' => 'Expense Vouchers',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

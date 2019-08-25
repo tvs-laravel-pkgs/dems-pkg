@@ -102,8 +102,8 @@ class EYatraRoleSeeder extends Seeder {
 					//EMPLOYEE CLAIM VERIFICATION 1
 					5500,
 
-					//EMPLOYEE CLAIM VERIFICATION 2
-					5520,
+					// //EMPLOYEE CLAIM VERIFICATION 2
+					// 5520,
 
 					//AGENT CLAIM VERIFICATION 1
 					5540,
@@ -128,6 +128,10 @@ class EYatraRoleSeeder extends Seeder {
 
 					//MASTERS > COA CODES
 					5700, 5701, 5702, 5703,
+
+					//EXPENSE VOUCHERS
+					5580,
+
 				],
 			],
 
@@ -145,6 +149,9 @@ class EYatraRoleSeeder extends Seeder {
 					//MOBILE PERMISSIONS
 					//TRIPS
 					9000, 9001, 9002, 9003, 9004, 9005,
+
+					//EXPENSE VOUCHERS
+					5580,
 
 				],
 			],
