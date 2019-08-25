@@ -138,6 +138,23 @@ app.component('eyatraAgentClaimVerificationView', {
             }
         }
 
+        setTimeout(function () {
+            var heights = new Array();
+            // Loop to get all element Widths
+            $('.equal-column').each(function() {    
+                // Need to let sizes be whatever they want so no overflow on resize
+                // Then add size (no units) to array
+                heights.push($(this).height());
+            });
+            // Find max Width of all elements
+            var max = Math.max.apply( Math, heights);
+            // Set all Width to max Width
+            $('.equal-column').each(function() {
+                $(this).css('height', max + 'px');
+                // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
+            });    
+        }, 700);
+
         $(".bottom-expand-btn").on('click', function() {
             if ($(".separate-bottom-fixed-layer").hasClass("in")) {
                 $(".separate-bottom-fixed-layer").removeClass("in");
