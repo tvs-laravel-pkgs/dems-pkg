@@ -27,6 +27,10 @@ class LocalTravel extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
 	}
 
+	public function getDateAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
 	public function fromCity() {
 		return $this->belongsTo('Uitoux\EYatra\NCity', 'from_id');
 	}

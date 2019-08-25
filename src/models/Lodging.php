@@ -33,6 +33,14 @@ class Lodging extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
 	}
 
+	public function getCheckInDateAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
+	public function getCheckoutDateAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
 	public function city() {
 		return $this->belongsTo('Uitoux\EYatra\NCity', 'city_id');
 	}

@@ -226,7 +226,8 @@ class GradeController extends Controller {
 			'city_category_list' => $city_category_list,
 			'local_travel_types_list' => $local_travel_types_list,
 		];
-		$this->data['grade_advanced'] = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
+		$grade_advanced = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
+		$this->data['grade_advanced'] = count($grade_advanced) ? 'Yes' : 'No';
 		$this->data['action'] = 'View';
 		$this->data['success'] = true;
 		return response()->json($this->data);

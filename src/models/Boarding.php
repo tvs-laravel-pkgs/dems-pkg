@@ -25,6 +25,9 @@ class Boarding extends Model {
 	public function trip() {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
 	}
+	public function getDateAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
 
 	public function city() {
 		return $this->belongsTo('Uitoux\EYatra\NCity', 'city_id');
