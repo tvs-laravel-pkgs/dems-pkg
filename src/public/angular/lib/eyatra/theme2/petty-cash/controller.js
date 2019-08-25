@@ -35,7 +35,7 @@ app.component('eyatraPettyCashList', {
                 { data: 'ocode', name: 'outlets.code', searchable: true },
                 { data: 'date', name: 'date', searchable: false },
                 { data: 'total', name: 'total', searchable: true },
-                // { data: 'status', name: 'status', searchable: false },
+                { data: 'status', name: 'configs.name', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');

@@ -22,7 +22,9 @@ class PettyCashController extends Controller {
 			'outlets.name as oname',
 			'employees.code as ecode',
 			'outlets.code as ocode',
+			'configs.name as status'
 		)
+			->leftJoin('configs', 'configs.id', 'petty_cash_employee_details.status')
 			->join('employees', 'employees.id', 'petty_cash_employee_details.employee_id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->orderBy('petty_cash_employee_details.id', 'desc')
@@ -98,16 +100,17 @@ class PettyCashController extends Controller {
 	}
 
 	public function getemployee($searchText) {
-		$employee_list = Employee::select('name', 'id', 'code')->where('name', 'LIKE', '%' . $searchText . '%')->get();
+		$employee_list = Employee::select('name', 'id', 'code')->where('employees.company_id', Auth::user()->company_id)->where('name', 'LIKE', '%' . $searchText . '%')->orWhere('code', 'LIKE', '%' . $searchText . '%')->get();
 		return response()->json(['employee_list' => $employee_list]);
 	}
 
 	public function pettycashView($pettycash_id) {
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
-		$this->data['petty_cash'] = $petty_cash = PettyCash::select('petty_cash.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type')
+		$this->data['petty_cash'] = $petty_cash = PettyCash::select('petty_cash.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type', 'configs.name as status')
 			->join('petty_cash_employee_details', 'petty_cash_employee_details.id', 'petty_cash.petty_cash_employee_details_id')
 			->join('entities', 'entities.id', 'petty_cash.expence_type')
 			->join('entities as purpose', 'purpose.id', 'petty_cash.purpose_id')
+			->join('configs', 'configs.id', 'petty_cash_employee_details.status')
 			->join('entities as travel', 'travel.id', 'petty_cash.travel_mode_id')
 			->where('petty_cash_employee_details.id', $pettycash_id)
 			->where('petty_cash.expence_type', $localconveyance_id->id)->get();
@@ -159,7 +162,7 @@ class PettyCashController extends Controller {
 			$petty_cash_employee_edit = PettyCashEmployeeDetails::firstOrNew(['petty_cash_employee_details.id' => $request->id]);
 			$petty_cash_employee_edit->employee_id = $request->employee_id;
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
-			$petty_cash_employee_edit->status = 3240;
+			$petty_cash_employee_edit->status = 3280;
 			$petty_cash_employee_edit->date = Carbon::now();
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
 			$petty_cash_employee_edit->save();

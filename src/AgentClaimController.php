@@ -19,6 +19,7 @@ class AgentClaimController extends Controller {
 		$agent_claim_list = Agentclaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
+			'ey_agent_claims.status_id as claim_status',
 			'ey_agent_claims.invoice_date',
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.invoice_amount',
@@ -41,10 +42,22 @@ class AgentClaimController extends Controller {
 				$img2_active = asset('public/img/content/table/eye-active.svg');
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
+
+				if ($agent_claim_list->claim_status == '3024') {
+					return '
+						<a href="#!/eyatra/agent/claim/edit/' . $agent_claim_list->id . '">
+							<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+						</a>
+						<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>
+						';
+				} else {
+					return '
+						<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>';
+				}
 
 			})
 			->make(true);
@@ -335,7 +348,7 @@ class AgentClaimController extends Controller {
 		$this->data['agent'] = $agent;
 		$this->data['payment_mode_list'] = $payment_mode_list;
 		$this->data['wallet_mode_list'] = $wallet_mode_list;
-
+		$this->data['agent_claim_rejection'] = $agent_claim_rejection = Entity::agent_claim_rejection();
 		$this->data['date'] = date('d-m-Y');
 		return response()->json($this->data);
 	}
@@ -378,6 +391,19 @@ class AgentClaimController extends Controller {
 		}
 
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
+		return response()->json(['success' => true]);
+	}
+	public function rejectAgentClaimRequest(Request $r) {
+
+		$agent_claim = AgentClaim::find($r->agent_claim_view_id);
+		if (!$agent_claim) {
+			return response()->json(['success' => false, 'errors' => ['Agent Claim Request not found']]);
+		}
+		$agent_claim->rejection_id = $r->reject_id;
+		$agent_claim->rejection_remarks = $r->remarks;
+		$agent_claim->status_id = 3024;
+		$agent_claim->save();
+
 		return response()->json(['success' => true]);
 	}
 

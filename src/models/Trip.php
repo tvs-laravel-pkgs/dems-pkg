@@ -321,7 +321,17 @@ class Trip extends Model {
 		return $trips;
 	}
 
-	public static function getVerficationPendingList() {
+	public static function getVerficationPendingList($r) {
+		/*if(isset($r->period))
+		{
+			$date = explode(' to ', $r->period);
+			$from_date = $date[0];
+			$to_date = $date[1];
+			dd($from_date,$to_date);
+			$from_date = date('Y-m-d', strtotime($from_date));
+			$to_date = date('Y-m-d', strtotime($to_date));
+		}*/
+
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -346,6 +356,27 @@ class Trip extends Model {
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
+			/*->where(function ($query) use ($r) {
+				if ($r->get('period')) {
+					$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
+					
+				}
+			})*/
 		;
 
 		if (!Entrust::can('trip-verification-all')) {
