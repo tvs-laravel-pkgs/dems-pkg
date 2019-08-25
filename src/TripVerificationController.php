@@ -6,6 +6,7 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
 
@@ -58,11 +59,14 @@ class TripVerificationController extends Controller {
 		}
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
+		$trip->end_date = $end_date->end_date;
+		$trip->days = $days->days;
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
+		$this->data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();
 		return response()->json($this->data);
 	}
 
@@ -79,8 +83,9 @@ class TripVerificationController extends Controller {
 	}
 
 
-	public function approveTripVerification($trip_id) {
-		$trip = Trip::find($trip_id);
+	public function approveTripVerification(Request $r) {
+		// dd($r->all());
+		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
@@ -91,11 +96,14 @@ class TripVerificationController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
-	public function rejectTripVerification($trip_id) {
-		$trip = Trip::find($trip_id);
+	public function rejectTripVerification(Request $r) {
+
+		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3022;
 		$trip->save();
 

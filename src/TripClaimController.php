@@ -48,12 +48,12 @@ class TripClaimController extends Controller {
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img2 = asset('public/img/content/table/eye.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2_active = asset('public/img/content/table/eye-active.svg');
-				$img3 = asset('public/img/content/table/delete-default.svg');
-				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
 				<a href="#!/eyatra/trip/claim/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
