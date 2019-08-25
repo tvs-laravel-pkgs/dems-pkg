@@ -12,6 +12,7 @@ use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
+use Uitoux\EYatra\VisitBooking;
 use Yajra\Datatables\Datatables;
 
 class TripClaimController extends Controller {
@@ -91,6 +92,8 @@ class TripClaimController extends Controller {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Trip not found';
 			}
+
+			$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 			$this->data['success'] = true;
 
 			$this->data['employee'] = $employee = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
@@ -103,6 +106,12 @@ class TripClaimController extends Controller {
 			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 		}
+
+		if (!empty($to_cities)) {
+			$city_list = collect(NCity::select('id', 'name')->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
+		} else {
+			$city_list = [];
+		}
 		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
 		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
 		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
@@ -111,7 +120,7 @@ class TripClaimController extends Controller {
 		$this->data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
-			'city_list' => NCity::getList(),
+			'city_list' => $city_list,
 			'stay_type_list' => $stay_type_list,
 			'booking_type_list' => $booking_type_list,
 		];
@@ -157,9 +166,17 @@ class TripClaimController extends Controller {
 				foreach ($request->visits as $visit_data) {
 					if (!empty($visit_data['id'])) {
 						$visit = Visit::find($visit_data['id']);
-						$visit->departure_date = date('Y-m-d H:i:s'); //$visit_data['departure_date'];
-						$visit->arrival_date = date('Y-m-d H:i:s'); //$visit_data['arrival_date'];
+						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
+						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
 						$visit->save();
+
+						//UPDATE VISIT BOOKING STATUS
+						$visit_booking = VisitBooking::where('visit_id', $visit_data['id'])->first();
+						$visit_booking->amount = $visit_data['amount'];
+						$visit_booking->tax = $visit_data['tax'];
+						$visit_booking->total = $visit_data['total'];
+						$visit_booking->status_id = 3241; //Claimed
+						$visit_booking->save();
 					}
 				}
 			}
