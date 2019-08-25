@@ -3,6 +3,15 @@ app.component('eyatraRegions', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+
+        $http.get(
+            region_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.state_list = response.data.state_list;
+            $rootScope.loading = false;
+        });
+
         var dataTable = $('#eyatra_region_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate,
@@ -24,7 +33,9 @@ app.component('eyatraRegions', {
                 url: laravel_routes['listEYatraRegion'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.state_id = $('#state_id').val();
+                }
             },
 
             columns: [
@@ -39,12 +50,29 @@ app.component('eyatraRegions', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Regions</p><h3 class="title">Regions</h3>');
+        /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Regions</p><h3 class="title">Regions</h3>');
         $('.add_new_button').html(
             '<a href="#!/eyatra/region/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-region\')">' +
             'Add New' +
             '</a>'
-        );
+        );*/
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_region_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+
+        $scope.get_state_data = function(query) {
+            $('#state_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.reset_filter = function(query) {
+            $('#state_id').val(-1);
+            dataTable.draw();
+        }
 
         $scope.deleteRegion = function(id) {
             $('#del').val(id);

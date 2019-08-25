@@ -23,4 +23,15 @@ class Region extends Model {
 	public function state() {
 		return $this->belongsTo('Uitoux\EYatra\NState', 'state_id');
 	}
+
+	public static function getList() {
+		$data = [];
+		$option = new Region;
+		$option->name = 'Select Region';
+		$option->id = -1;
+		$regon_list = Region::select('id', 'name')->get();
+		$data = $regon_list->prepend($option);
+		return $data;
+	}
+	
 }

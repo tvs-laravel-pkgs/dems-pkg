@@ -15,7 +15,7 @@ use Yajra\Datatables\Datatables;
 class CityController extends Controller {
 
 	public function listEYatraCity(Request $r) {
-
+//dd($r->all());
 		$cities = NCity::withTrashed()->join('nstates', 'nstates.id', 'ncities.state_id')
 			->leftjoin('entities', 'entities.id', 'ncities.category_id')
 			->select(
@@ -25,7 +25,13 @@ class CityController extends Controller {
 				'entities.name',
 				DB::raw('IF(ncities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
+
 			->orderBy('ncities.id', 'asc')
+			->where(function ($query) use ($r) {
+				if ($r->get('state_id')) {
+					$query->where("nstates.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
+				}
+			})
 		;
 		// dd($cities);
 		return Datatables::of($cities)
@@ -46,7 +52,7 @@ class CityController extends Controller {
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_city"
 				onclick="angular.element(this).scope().deleteCityConfirm(' . $city->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
 			})
@@ -123,6 +129,12 @@ class CityController extends Controller {
 		$this->data['city'] = $city;
 		$this->data['success'] = true;
 
+		return response()->json($this->data);
+	}
+
+	public function eyatraCityFilterData() {
+			$this->data['state_list'] = NState::getList();
+			$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
