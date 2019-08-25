@@ -14,7 +14,7 @@ use Yajra\Datatables\Datatables;
 
 class TripClaimVerificationThreeController extends Controller {
 	public function listEYatraTripClaimVerificationThreeList(Request $r) {
-		$trips = Trip::from('trips')
+		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
@@ -32,7 +32,7 @@ class TripClaimVerificationThreeController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->where('trips.status_id', 3023)
+			->where('ey_employee_claims.status_id', 3223) //PAYMENT PENDING
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -62,6 +62,8 @@ class TripClaimVerificationThreeController extends Controller {
 				'employee',
 				'employee.user',
 				'employee.grade',
+				'employee.bankDetail',
+				'employee.walletDetail',
 				'employee.designation',
 				'employee.reportingTo',
 				'employee.outlet',
@@ -143,15 +145,90 @@ class TripClaimVerificationThreeController extends Controller {
 			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
 			$this->data['local_travels_total_amount'] = $local_travels_total_amount;
 
-			$this->data['total_amount'] = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
 
 			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
+			$this->data['date'] = date('d-m-Y');
+			$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
+			$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+			$this->data['payment_mode_list'] = $payment_mode_list;
+			$this->data['wallet_mode_list'] = $wallet_mode_list;
 			$this->data['success'] = true;
 		}
 		$this->data['trip'] = $trip;
 
 		return response()->json($this->data);
+	}
+
+	public function approveTripClaimVerificationThree(Request $r) {
+
+		$trip = Trip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim->status_id = 3225; //PAID
+		$employee_claim->save();
+
+		$trip->status_id = 3026; //PAID
+		$trip->save();
+
+		//PAYMENT SAVE
+		$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
+		$payment->date = strtotime('Y-m-d', $r->date);
+		$payment->fill($r->all());
+		$payment->payment_of_id = 3252;
+		$payment->entity_id = $trip->id;
+		$payment->created_by = Auth::user()->id;
+		$payment->save();
+
+		//BANK DETAIL SAVE
+		if ($r->bank_name) {
+			$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
+			$bank_detail->fill($r->all());
+			$bank_detail->detail_of_id = 3243;
+			$bank_detail->entity_id = $trip->id;
+			$bank_detail->account_type_id = 3252;
+			$bank_detail->save();
+		}
+
+		//WALLET SAVE
+		if ($r->type_id) {
+			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
+			$wallet_detail->fill($r->all());
+			$wallet_detail->wallet_of_id = 3252;
+			$wallet_detail->entity_id = $trip->id;
+			$wallet_detail->save();
+		}
+
+		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
+		return response()->json(['success' => true]);
+	}
+
+	public function rejectTripClaimVerificationThree(Request $r) {
+
+		$trip = Trip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim->status_id = 3226; //Claim Rejected
+		$employee_claim->save();
+
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
+		$trip->status_id = 3024; //Claim Rejected
+		$trip->save();
+
+		return response()->json(['success' => true]);
 	}
 
 }

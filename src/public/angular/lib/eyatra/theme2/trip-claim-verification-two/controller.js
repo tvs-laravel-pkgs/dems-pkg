@@ -82,19 +82,20 @@ app.component('eyatraTripClaimVerificationTwoView', {
             console.log(response.data.trip.lodgings.city);
             self.trip = response.data.trip;
             self.travel_cities = response.data.travel_cities;
+            self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.travel_dates = response.data.travel_dates;
             self.transport_total_amount = response.data.transport_total_amount;
             self.lodging_total_amount = response.data.lodging_total_amount;
             self.boardings_total_amount = response.data.boardings_total_amount;
             self.local_travels_total_amount = response.data.local_travels_total_amount;
-            self.total_amount = response.data.total_amount.toFixed(2);
+            self.total_amount = response.data.total_amount;
             if (self.trip.advance_received) {
                 if (self.total_amount > self.trip.advance_received) {
                     self.pay_to_employee = (self.total_amount - self.trip.advance_received);
                     self.pay_to_company = 0.00;
                 } else if (self.total_amount < self.trip.advance_received) {
                     self.pay_to_employee = 0.00;
-                    self.pay_to_company = (self.trip.advance_received - self.advance_received);
+                    self.pay_to_company = (self.total_amount - self.trip.advance_received);
                 } else {
                     self.pay_to_employee = 0.00;
                     self.pay_to_company = 0.00;
@@ -105,6 +106,87 @@ app.component('eyatraTripClaimVerificationTwoView', {
             }
             $rootScope.loading = false;
 
+        });
+
+        $scope.tripClaimApproveTwo = function(trip_id) {
+            $('#modal_trip_id').val(trip_id);
+        }
+        $scope.confirmTripClaimApproveTwo = function() {
+            $trip_id = $('#modal_trip_id').val();
+            $http.get(
+                eyatra_trip_claim_verification_two_approve_url + '/' + $trip_id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors
+                    }).show();
+                } else {
+                    new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trips Claim Approved Successfully',
+                    }).show();
+                    $('#trip-claim-modal-approve-two').modal('hide');
+                    $location.path('/eyatra/trip/claim/verification2/list')
+                    $scope.$apply()
+                }
+
+            });
+        }
+
+
+        //Reject
+        $(document).on('click', '.reject_btn', function() {
+            var form_id = '#trip-claim-reject-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#reject_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['rejectTripClaimVerificationTwo'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#reject_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Trips Claim Rejected successfully',
+                                }).show();
+                                $('#trip-claim-modal-reject-two').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/eyatra/trip/claim/verification2/list')
+                                    $scope.$apply()
+                                }, 500);
+
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#reject_btn').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
         });
 
         /* Pane Next Button */

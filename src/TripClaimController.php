@@ -387,8 +387,8 @@ class TripClaimController extends Controller {
 			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
 			$this->data['local_travels_total_amount'] = $local_travels_total_amount;
 
-			$this->data['total_amount'] = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
-
+			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
 			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 			$this->data['success'] = true;

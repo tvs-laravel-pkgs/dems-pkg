@@ -255,6 +255,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Paid',
 				'config_type_id' => 512,
 			],
+			3226 => [
+				'name' => 'Claim Rejected',
+				'config_type_id' => 512,
+			],
 
 			//VISIT BOOKING STATUSES
 			3240 => [
