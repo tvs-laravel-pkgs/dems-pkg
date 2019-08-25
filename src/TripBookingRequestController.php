@@ -23,7 +23,7 @@ class TripBookingRequestController extends Controller {
 				'e.code as ecode', 'e.name as ename',
 				'status.name as status',
 				'a.name as agent',
-				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as date')
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on')
 			)
 			->groupBy('v.trip_id')
 			->orderBy('trips.created_at', 'desc')

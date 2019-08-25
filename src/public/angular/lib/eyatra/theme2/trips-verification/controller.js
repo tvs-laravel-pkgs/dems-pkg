@@ -78,10 +78,10 @@ app.component('eyatraTripVerificationForm', {
                 return;
             }
             self.trip = response.data.trip;
+            self.trip_reject_reasons = response.data.trip_reject_reasons;
             self.extras = response.data.extras;
             self.action = response.data.action;
             $rootScope.loading = false;
-
         });
 
         self.approveTrip = function() {
@@ -96,6 +96,10 @@ app.component('eyatraTripVerificationForm', {
         self.approveTrip = function(id) {
             $('#trip_id').val(id);
         }
+
+        $scope.clearSearch = function() {
+            $scope.search = '';
+        };
 
         self.confirmApproveTrip = function() {
             $id = $('#trip_id').val();
@@ -118,7 +122,7 @@ app.component('eyatraTripVerificationForm', {
                         layout: 'topRight',
                         text: 'Trip Approved Successfully',
                     }).show();
-                    $('#approval_modal').modal('hide');
+                    $('#alert-approval_modal').modal('hide');
                     $timeout(function() {
                         $location.path('/eyatra/trip/verifications')
                         $scope.$apply()
@@ -128,100 +132,102 @@ app.component('eyatraTripVerificationForm', {
             });
         }
 
-        //REJECT TRIP
-        self.rejectTrip = function(id, type) {
-            $('#trip_id').val(id);
-        }
+        //Approve
+        $(document).on('click', '.approve_btn', function() {
+            var form_id = '#trip-approve-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
 
-        self.confirmRejectTrip = function() {
-            $id = $('#trip_id').val();
-            $http.get(
-                trip_verification_reject_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors
-                    }).show();
-                } else {
-                    new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trip Rejected Successfully',
-                    }).show();
-                    $('#reject_modal').modal('hide');
-                    $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
-                        $scope.$apply()
-                    }, 500);
-                }
+                submitHandler: function(form) {
 
-            });
-        }
+                    let formData = new FormData($(form_id)[0]);
+                    $('#approve_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['approveTripVerification'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#approve_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Manager Approved successfully',
+                                }).show();
+                                $('#alert-modal-approve').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/eyatra/trip/verifications')
+                                    $scope.$apply()
+                                }, 500);
 
-
-        var form_id = '#trip-form';
-        var v = jQuery(form_id).validate({
-            errorPlacement: function(error, element) {
-                error.insertAfter(element)
-            },
-            ignore: '',
-            rules: {
-                'purpose_id': {
-                    required: true,
-                },
-                'description': {
-                    maxlength: 255,
-                },
-                'advance_received': {
-                    maxlength: 10,
-                },
-            },
-            messages: {
-                'description': {
-                    maxlength: 'Please enter maximum of 255 letters',
-                },
-            },
-            submitHandler: function(form) {
-
-                let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
-                $.ajax({
-                        url: laravel_routes['saveTrip'],
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                    })
-                    .done(function(res) {
-                        console.log(res.success);
-                        if (!res.success) {
-                            $('#submit').button('reset');
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
                             }
-                            custom_noty('error', errors);
-                        } else {
-                            new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Trip saves successfully',
-                            }).show();
-                            $location.path('/eyatra/trips')
-                            $scope.$apply()
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#submit').button('reset');
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-            },
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
         });
+
+
+        //Reject
+        $(document).on('click', '.reject_btn', function() {
+            var form_id = '#trip-reject-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#reject_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['rejectTripVerification'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#reject_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Manager Rejected successfully',
+                                }).show();
+                                $('#alert-modal-reject').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/eyatra/trip/verifications')
+                                    $scope.$apply()
+                                }, 500);
+
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+
     }
 });
