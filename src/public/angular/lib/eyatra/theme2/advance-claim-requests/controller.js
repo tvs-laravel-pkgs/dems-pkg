@@ -1,11 +1,21 @@
 app.component('eyatraAdvanceClaimRequests', {
     templateUrl: eyatra_advance_claim_request_list_template_url,
-    controller: function(HelperService, $rootScope) {
+    controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            trip_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.purpose_list = response.data.purpose_list;
+            self.trip_status_list = response.data.trip_status_list;
+            $rootScope.loading = false;
+        });
+
         var dataTable = $('#eyatra_advance_claim_request_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,7 +34,12 @@ app.component('eyatraAdvanceClaimRequests', {
                 url: laravel_routes['listAdvanceClaimRequest'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.employee_id = $('#employee_id').val();
+                    d.purpose_id = $('#purpose_id').val();
+                    d.status_id = $('#status_id').val();
+                    d.period = $('#period').val();
+                }
             },
 
             columns: [
@@ -44,8 +59,36 @@ app.component('eyatraAdvanceClaimRequests', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Advance Claim Request</p><h3 class="title">Advance Claim Request</h3>');
-        $('.add_new_button').html();
+        /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Advance Claim Request</p><h3 class="title">Advance Claim Request</h3>');
+        $('.add_new_button').html();*/
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_advance_claim_request_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+
+        $scope.getEmployeeData = function(query) {
+            //alert(query);
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getPurposeData = function(query) {
+            $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getStatusData = function(query) {
+            $('#status_id').val(query);
+            dataTable.draw();
+        }
+        $scope.reset_filter = function(query) {
+            $('#employee_id').val(-1);
+            $('#purpose_id').val(-1);
+            $('#status_id').val(-1);
+            dataTable.draw();
+        }
+
         $rootScope.loading = false;
 
     }

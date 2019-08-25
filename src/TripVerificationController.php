@@ -11,7 +11,7 @@ use Yajra\Datatables\Datatables;
 
 class TripVerificationController extends Controller {
 	public function listTripVerification(Request $r) {
-		$trips = Trip::getVerficationPendingList();
+		$trips = Trip::getVerficationPendingList($r);
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
@@ -69,6 +69,15 @@ class TripVerificationController extends Controller {
 	public function saveTripVerification(Request $r) {
 		return Trip::saveTripVerification($r);
 	}
+	public function eyatraTripVerificationFilterData() {
+			$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'),'id')->where('company_id',Auth::user()->company_id)->get();
+			$this->data['purpose_list'] =Entity::select('name','id')->where('entity_type_id',501)->where('company_id',Auth::user()->company_id)->get();
+			$this->data['trip_status_list'] =Config::select('name','id')->where('config_type_id',501)->get();
+			$this->data['success'] = true;
+			//dd($this->data);
+		return response()->json($this->data);
+	}
+
 
 	public function approveTripVerification($trip_id) {
 		$trip = Trip::find($trip_id);
