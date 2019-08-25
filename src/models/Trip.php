@@ -118,12 +118,16 @@ class Trip extends Model {
 				$trip->visits()->sync([]);
 
 			}
+			if ($request->advance_received) {
+				$trip->advance_received = $request->advance_received;
+				$trip->advance_request_approval_status_id = 3260;
+			}
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
 			// dd(Auth::user(), );
 			$trip->manager_id = Auth::user()->entity->reporting_to_id;
-			$trip->status_id = 3020; //NEW
+			$trip->status_id = 3021; //NEW
 			$trip->save();
 
 			$trip->number = 'TRP' . $trip->id;

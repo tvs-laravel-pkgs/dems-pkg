@@ -86,6 +86,7 @@ class AgentRequestController extends Controller {
 		$trip_status = 'not_booked';
 		$ticket_amount = 0;
 		$service_charge = 0;
+		$total_amount = 0;
 		foreach ($visits as $key => $value) {
 			if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062) {
 				$trip_status = 'booked';
@@ -103,8 +104,6 @@ class AgentRequestController extends Controller {
 			$ticket_amount = $visits->amount + $visits->tax;
 			$service_charge = $visits->service_charge;
 			$total_amount = $visits->paid_amount;
-		} else {
-			$total_amount = 0;
 		}
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
