@@ -54,7 +54,7 @@ class OutletController extends Controller {
 					if ($r->get('country_id')) {
 						$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
 					}
-					})
+				})
 			->groupBy('outlets.id');
 		// if (!Entrust::can('view-all-trips')) {
 		// $trips->where('trips.employee_id', Auth::user()->entity_id);
