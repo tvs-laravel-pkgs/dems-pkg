@@ -85,6 +85,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
             self.trip = response.data.trip;
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
+            self.trip_advance_rejection = response.data.trip_advance_rejection;
             self.extras = response.data.extras;
             self.date = response.data.date;
             self.action = response.data.action;
@@ -196,83 +197,140 @@ app.component('eyatraAdvanceClaimRequestForm', {
             });
         }
 
-        $.validator.addMethod('positiveNumber',
-            function(value) {
-                return Number(value) > 0;
-            }, 'Enter a positive number.');
 
-        var form_id = '#advance-request-form';
-        var v = jQuery(form_id).validate({
-            errorPlacement: function(error, element) {
-                error.insertAfter(element)
-            },
-            ignore: '',
-            rules: {
-                'amount': {
-                    min: 1,
-                    number: true,
-                    required: true,
-                },
-                'date': {
-                    required: true,
-                },
-                'bank_name': {
-                    required: true,
-                    maxlength: 100,
-                    minlength: 3,
-                },
-                'branch_name': {
-                    required: true,
-                    maxlength: 50,
-                    minlength: 3,
-                },
-                'account_number': {
-                    required: true,
-                    maxlength: 20,
-                    minlength: 3,
-                    positiveNumber: true,
-                },
-                'ifsc_code': {
-                    required: true,
-                    maxlength: 10,
-                    minlength: 3,
-                },
-            },
-            submitHandler: function(form) {
 
-                let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
-                $.ajax({
-                        url: laravel_routes['saveAdvanceClaimRequest'],
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                    })
-                    .done(function(res) {
-                        console.log(res.success);
-                        if (!res.success) {
-                            $('#submit').button('reset');
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
+        //Approve
+        $(document).on('click', '.approve_btn', function() {
+
+            var form_id = '#advance-request-form';
+            $.validator.addMethod('positiveNumber',
+                function(value) {
+                    return Number(value) > 0;
+                }, 'Enter a positive number.');
+            var v = jQuery(form_id).validate({
+                errorPlacement: function(error, element) {
+                    error.insertAfter(element)
+                },
+                ignore: '',
+                rules: {
+                    'amount': {
+                        min: 1,
+                        number: true,
+                        required: true,
+                    },
+                    'date': {
+                        required: true,
+                    },
+                    'bank_name': {
+                        required: true,
+                        maxlength: 100,
+                        minlength: 3,
+                    },
+                    'branch_name': {
+                        required: true,
+                        maxlength: 50,
+                        minlength: 3,
+                    },
+                    'account_number': {
+                        required: true,
+                        maxlength: 20,
+                        minlength: 3,
+                        positiveNumber: true,
+                    },
+                    'ifsc_code': {
+                        required: true,
+                        maxlength: 10,
+                        minlength: 3,
+                    },
+                },
+                submitHandler: function(form) {
+                    // alert('cecew');
+                    let formData = new FormData($(form_id)[0]);
+                    $('#submit').button('loading');
+                    $.ajax({
+                            url: laravel_routes['saveAdvanceClaimRequest'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#submit').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Advance Claim Request Approved successfully',
+                                }).show();
+                                setTimeout(function() {
+                                    $location.path('/eyatra/advance-claim/requests')
+                                    $scope.$apply()
+                                }, 500);
+
                             }
-                            custom_noty('error', errors);
-                        } else {
-                            new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Advance Claim Request Approved successfully',
-                            }).show();
-                            $location.path('/eyatra/advance-claim/requests')
-                            $scope.$apply()
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#submit').button('reset');
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-            },
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+
+
+        //Reject
+        $(document).on('click', '.reject_btn', function() {
+            var form_id = '#trip-reject-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#reject_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['rejectAdvanceClaimRequest'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#reject_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Manager Rejected successfully',
+                                }).show();
+                                $('#alert-modal-reject').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/eyatra/advance-claim/requests')
+                                    $scope.$apply()
+                                }, 500);
+
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
         });
     }
 });

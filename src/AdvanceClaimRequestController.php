@@ -97,6 +97,7 @@ class AdvanceClaimRequestController extends Controller {
 		$this->data['trip'] = $trip;
 		$this->data['date'] = date('d-m-Y');
 		$this->data['success'] = true;
+		$this->data['trip_advance_rejection'] = $trip_advance_rejection = Entity::trip_advance_rejection();
 		return response()->json($this->data);
 	}
 
@@ -151,11 +152,13 @@ class AdvanceClaimRequestController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
-	public function rejectAdvanceClaimRequest($trip_id) {
-		$trip = Trip::find($trip_id);
+	public function rejectAdvanceClaimRequest(Request $r) {
+		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3022;
 		$trip->save();
 

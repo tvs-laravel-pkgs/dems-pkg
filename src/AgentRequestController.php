@@ -101,9 +101,13 @@ class AgentRequestController extends Controller {
 				->where('visits.trip_id', $trip_id)
 				->groupBy('visits.trip_id')
 				->first();
-			$ticket_amount = $visits->amount + $visits->tax;
-			$service_charge = $visits->service_charge;
-			$total_amount = $visits->paid_amount;
+
+			if ($visits) {
+				$ticket_amount = $visits->amount + $visits->tax;
+				$service_charge = $visits->service_charge;
+				$total_amount = $visits->paid_amount;
+			}
+
 		}
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
