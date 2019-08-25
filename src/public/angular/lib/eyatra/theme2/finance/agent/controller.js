@@ -5,7 +5,7 @@ app.component('eyatraAgentClaimVerificationList', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_finance_agent_claim_list_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -42,8 +42,21 @@ app.component('eyatraAgentClaimVerificationList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
-        $('.add_new_button').html();
+        /* $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
+        $('.add_new_button').html(); */
+
+        /* Search Block */
+        setTimeout(function () {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_finance_agent_claim_list_table_filter');
+            /* var d = $('.search-block-hide-inner .dataTables_filter').position(); */
+            /* alert("Top: " + x.top + " Left: " + x.left); */
+            /* x.top = x.top + 7; */
+            x.left = x.left + 15;
+            /* d.style.position = "absolute"; */
+            d.style.left = x.left+'px';
+            /* d.style.top = x.top+'px'; */
+        }, 500);
 
         $scope.deleteTrip = function(id) {
             $('#del').val(id);
@@ -146,6 +159,7 @@ app.component('eyatraAgentClaimVerificationView', {
                 // Then add size (no units) to array
                 heights.push($(this).height());
             });
+            /* alert(heights); */
             // Find max Width of all elements
             var max = Math.max.apply( Math, heights);
             // Set all Width to max Width
@@ -153,7 +167,7 @@ app.component('eyatraAgentClaimVerificationView', {
                 $(this).css('height', max + 'px');
                 // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
             });    
-        }, 700);
+        }, 1500);
 
         $(".bottom-expand-btn").on('click', function() {
             if ($(".separate-bottom-fixed-layer").hasClass("in")) {

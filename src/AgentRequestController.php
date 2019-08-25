@@ -106,9 +106,11 @@ class AgentRequestController extends Controller {
 			$total_amount = $visits->paid_amount;
 		}
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $start_date->end_date;
+		$trip->end_date = $end_date->end_date;
+		$trip->days = $days->days;
 		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::travelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
 		$this->data['trip'] = $trip;
 		$this->data['trip_status'] = $trip_status;

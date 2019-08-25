@@ -32,6 +32,7 @@ class EYatraConfigSeeder extends Seeder {
 			515 => 'Payment of - EYatra',
 			516 => 'Advance Request Approval Statuses - EYatra',
 			517 => 'Reimbursement status - EYatra',
+			518 => 'Petty Cash - EYatra',
 		];
 
 		$configs = [
@@ -300,6 +301,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Agent Booking Claim',
 				'config_type_id' => 515,
 			],
+			3253 => [
+				'name' => 'Employee Petty Cash Claim',
+				'config_type_id' => 515,
+			],
 
 			//ADVANCE REQUEST APPROVAL STATUSES
 			3260 => [
@@ -316,15 +321,36 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			//REIMBURSEMENT HISTORY STATUS
-			3264 => [
-				'name' => 'Claim',
+			3270 => [
+				'name' => 'Reimbursement Claim',
 				'config_type_id' => 517,
 			],
-			3265 => [
+			3271 => [
 				'name' => 'Cash Topup',
 				'config_type_id' => 517,
 			],
 
+			//PETTY CASH
+			3280 => [
+				'name' => 'Manager Approval Pending',
+				'config_type_id' => 518,
+			],
+			3281 => [
+				'name' => 'Manager Approved',
+				'config_type_id' => 518,
+			],
+			3282 => [
+				'name' => 'Manager Rejected',
+				'config_type_id' => 518,
+			],
+			3283 => [
+				'name' => 'Paid',
+				'config_type_id' => 518,
+			],
+			3284 => [
+				'name' => 'Claim Rejected',
+				'config_type_id' => 518,
+			],
 		];
 		foreach ($config_types as $config_type_id => $config_type_name) {
 			$config_type = ConfigType::firstOrNew([
