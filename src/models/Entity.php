@@ -64,7 +64,7 @@ class Entity extends Model {
 	}
 
 	public static function getGradeList() {
-		return Entity::where('entity_type_id', 500)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 500)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function getLodgeStayTypeList() {

@@ -244,7 +244,7 @@ app.component('eyatraTripBookingRequestsView', {
             // Set the height of all those children to whichever was highest 
             $('.match-height-1').height(max_1);
 
-        }, 1200);
+        }, 1400);
 
         self.approveTrip = function() {
             self.trip.visits.push({

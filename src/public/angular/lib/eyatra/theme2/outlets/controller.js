@@ -3,9 +3,21 @@ app.component('eyatraOutlets', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+
+        $http.get(
+            outlet_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.region_list = response.data.region_list;
+            self.city_list = response.data.city_list;
+            self.state_list = response.data.state_list;
+            self.country_list = response.data.country_list;
+            $rootScope.loading = false;
+        });
+
         var dataTable = $('#eyatra_outlet_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,7 +36,12 @@ app.component('eyatraOutlets', {
                 url: laravel_routes['listEYatraOutlet'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.region_id = $('#region_id').val();
+                    d.city_id = $('#city_id').val();
+                    d.state_id = $('#state_id').val();
+                    d.country_id = $('#country_id').val();
+                }
             },
 
             columns: [
@@ -42,13 +59,45 @@ app.component('eyatraOutlets', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Outlets</p><h3 class="title">Outlets</h3>');
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_outlet_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Outlets</p><h3 class="title">Outlets</h3>');
         // $('.page-header-content .display-inline-block .data-table-title').html('Outlets');
         $('.add_new_button').html(
             '<a href="#!/eyatra/outlet/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-outlet\')">' +
             'Add New' +
             '</a>'
-        );
+        );*/
+        $scope.getRegionData = function(query) {
+            $('#region_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getCityData = function(query) {
+            $('#city_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getStateData = function(query) {
+            $('#state_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getCountryData = function(query) {
+            //alert(1);
+            $('#country_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.reset_filter = function(query) {
+            $('#region_id').val(-1);
+            $('#city_id').val(-1);
+            $('#state_id').val(-1);
+            $('#country_id').val(-1);
+            dataTable.draw();
+        }
         $scope.deleteOutletConfirm = function($outlet_id) {
             $("#delete_outlet_id").val($outlet_id);
         }

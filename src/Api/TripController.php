@@ -2,10 +2,6 @@
 
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
-use Auth;
-use Carbon\Carbon;
-use DB;
-use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Trip;
 
@@ -13,7 +9,7 @@ class TripController extends Controller {
 	public $successStatus = 200;
 
 	public function listTrip(Request $r) {
-		$trips = Trip::getEmployeeList($r)
+		$trips = Trip::getEmployeeList($r);
 
 		$trips = $trips->get()
 		;
