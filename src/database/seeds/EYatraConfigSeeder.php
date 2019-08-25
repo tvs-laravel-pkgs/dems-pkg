@@ -287,7 +287,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//ADVANCE REQUEST APPROVAL STATUSES
 			3260 => [
-				'name' => 'New',
+				'name' => 'Requested',
 				'config_type_id' => 516,
 			],
 			3261 => [
