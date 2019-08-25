@@ -57,6 +57,14 @@ class Company extends Model {
 	public function outlets() {
 		return $this->hasMany('Uitoux\EYatra\Outlet');
 	}
+
+	public function lobs() {
+		return $this->hasMany('Uitoux\EYatra\Lob');
+	}
+
+	public function designations() {
+		return $this->hasMany('Uitoux\EYatra\Designation');
+	}
 	//ENDS EYATRA RELATIONSHIPS
 
 }

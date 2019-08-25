@@ -197,7 +197,9 @@ class Trip extends Model {
 	public static function getViewData($trip_id) {
 		$data = [];
 		$trip = Trip::with([
-			'visits',
+			'visits' => function ($q) {
+				$q->orderBy('visits.id');
+			},
 			'visits.fromCity',
 			'visits.toCity',
 			'visits.travelMode',
@@ -340,14 +342,14 @@ class Trip extends Model {
 
 	public static function getVerficationPendingList($r) {
 		/*if(isset($r->period))
-		{
-			$date = explode(' to ', $r->period);
-			$from_date = $date[0];
-			$to_date = $date[1];
-			dd($from_date,$to_date);
-			$from_date = date('Y-m-d', strtotime($from_date));
-			$to_date = date('Y-m-d', strtotime($to_date));
-		}*/
+			{
+				$date = explode(' to ', $r->period);
+				$from_date = $date[0];
+				$to_date = $date[1];
+				dd($from_date,$to_date);
+				$from_date = date('Y-m-d', strtotime($from_date));
+				$to_date = date('Y-m-d', strtotime($to_date));
+		*/
 
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
@@ -388,10 +390,10 @@ class Trip extends Model {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			/*->where(function ($query) use ($r) {
+		/*->where(function ($query) use ($r) {
 				if ($r->get('period')) {
 					$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
-					
+
 				}
 			})*/
 		;
@@ -403,20 +405,46 @@ class Trip extends Model {
 		return $trips;
 	}
 
-	public static function saveTripVerification($r) {
+	// public static function saveTripVerification($r) {
+	// 	$trip = Trip::find($r->trip_id);
+	// 	if (!$trip) {
+	// 		return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+	// 	}
+
+	// 	if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
+	// 		return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
+	// 	}
+
+	// 	$trip->status_id = 3021;
+	// 	$trip->save();
+
+	// 	$trip->visits()->update(['manager_verification_status_id' => 3080]);
+	// 	return response()->json(['success' => true]);
+	// }
+
+	public static function approveTrip($r) {
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-
-		if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
-			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
-		}
-
-		$trip->status_id = 3021;
+		$trip->status_id = 3028;
 		$trip->save();
 
-		$trip->visits()->update(['manager_verification_status_id' => 3080]);
+		$trip->visits()->update(['manager_verification_status_id' => 3081]);
+		return response()->json(['success' => true]);
+	}
+
+	public static function rejectTrip($r) {
+		$trip = Trip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
+		$trip->status_id = 3022;
+		$trip->save();
+
+		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true]);
 	}
 }

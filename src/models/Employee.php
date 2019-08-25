@@ -43,7 +43,7 @@ class Employee extends Model {
 	}
 
 	public function designation() {
-		return $this->belongsTo('Uitoux\EYatra\Entity', 'designation_id');
+		return $this->belongsTo('Uitoux\EYatra\Designation');
 	}
 
 	public function outlet() {
@@ -59,6 +59,10 @@ class Employee extends Model {
 	}
 
 	public function reportingTo() {
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
+	}
+
+	public function manager() {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
 	}
 
@@ -82,6 +86,11 @@ class Employee extends Model {
 		$employee->name = $faker->name;
 		$employee->outlet_id = $outlet->id;
 		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
+		$lob = $company->lobs()->inRandomOrder()->first();
+		$employee->sbu_id = $lob->sbus()->inRandomOrder()->first()->id;
+		$employee->designation_id = $company->designations()->inRandomOrder()->first()->id;
+		$employee->aadhar_no = $faker->creditCardNumber;
+		$employee->pan_no = $faker->swiftBicNumber;
 		$employee->reporting_to_id = $manager_id;
 		$employee->payment_mode_id = Config::where('config_type_id', 514)->inRandomOrder()->first()->id;
 		$employee->created_by = $admin->id;
@@ -96,7 +105,7 @@ class Employee extends Model {
 			'username' => $entity->code,
 		]);
 		$user->entity_id = $entity->id;
-		// $user->mobile_number = $faker->unique()->numberBetween(1234500000, 1234599999);
+		$user->email = $faker->safeEmail;
 		$user->mobile_number = $mobile_number;
 
 		$user->password = 'Test@123';

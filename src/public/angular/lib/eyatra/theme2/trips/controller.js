@@ -152,8 +152,8 @@ app.component('eyatraTripForm', {
                 return;
             }
             console.log(response.data);
-            self.employee_eligible_grade = response.data.employee_eligible_grade;
-            if (self.employee_eligible_grade.advanced_eligibility == 1) {
+            self.advance_eligibility = response.data.advance_eligibility;
+            if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }
             self.trip = response.data.trip;
