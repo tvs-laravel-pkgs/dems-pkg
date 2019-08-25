@@ -27,9 +27,9 @@ class Visit extends Model {
 		// 'date',
 	];
 
-	public function setDateAttribute($v) {
-		$this->attributes['date'] = $v ? date('Y-m-d', strtotime($v)) : NULL;
-	}
+	// public function setDateAttribute($v) {
+	// 	$this->attributes['date'] = $v ? date('Y-m-d', strtotime($v)) : NULL;
+	// }
 
 	public function getDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));

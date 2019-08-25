@@ -97,9 +97,16 @@ class Trip extends Model {
 				'purpose_id' => [
 					'required',
 				],
+				'visits' => [
+					'required',
+				],
 			]);
 			if ($validator->fails()) {
-				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+				return response()->json([
+					'success' => false,
+					'message' => 'Validation Errors',
+					'errors' => $validator->errors()->all(),
+				]);
 			}
 
 			DB::beginTransaction();
@@ -150,13 +157,18 @@ class Trip extends Model {
 					}
 					$visit = new Visit;
 					$visit->fill($visit_data);
+					// dump($visit_data['date']);
+					// dump(Carbon::createFromFormat('d/m/Y', $visit_data['date']));
+					$visit->date = Carbon::createFromFormat('d/m/Y', $visit_data['date']);
+					// dd($visit);
 					$visit->from_city_id = $from_city_id;
 					$visit->trip_id = $trip->id;
-					$visit->booking_method_id = $visit_data['booking_method'] == 'Self' ? 3040 : 3042;
+					//booking_method_name - changed for API - Dont revert - ABDUL
+					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
 					$visit->booking_status_id = 3060; //PENDING
 					$visit->status_id = 3220; //NEW
 					$visit->manager_verification_status_id = 3080; //NEW
-					if ($visit_data['booking_method'] == 'Agent') {
+					if ($visit_data['booking_method_name'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
 
 						$agent = $state->agents()->where('company_id', Auth::user()->company_id)->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
@@ -171,7 +183,7 @@ class Trip extends Model {
 				}
 			}
 			DB::commit();
-			return response()->json(['success' => true, 'message' => 'Trip saved successfully!']);
+			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
@@ -215,7 +227,10 @@ class Trip extends Model {
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days;
+		$trip->purpose_name = $trip->purpose->name;
+		$trip->status_name = $trip->status->name;
 		$data['trip'] = $trip;
+		// dd($trip);
 		$data['success'] = true;
 		return response()->json($data);
 
@@ -227,7 +242,8 @@ class Trip extends Model {
 			$data['action'] = 'New';
 			$trip = new Trip;
 			$visit = new Visit;
-			$visit->booking_method = 'Self';
+			//Changed for API. dont revert. - Abdul
+			$visit->booking_method = new Config(['name' => 'Self']);
 			$trip->visits = [$visit];
 			$data['success'] = true;
 		} else {
@@ -241,9 +257,9 @@ class Trip extends Model {
 		$grade = Auth::user()->entity;
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
-			$data['employee_eligible_grade'] = $grade_eligibility;
+			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
 		} else {
-			$data['employee_eligible_grade'] = '';
+			$data['advance_eligibility'] = '';
 		}
 
 		$data['extras'] = [
@@ -273,9 +289,10 @@ class Trip extends Model {
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
+				//Changed to purpose_name. do not revert - Abdul
+				'purpose.name as purpose_name',
 				'trips.advance_received',
-				'status.name as status'
+				'status.name as status_name'
 			)
 			->where('e.company_id', Auth::user()->company_id)
 			->groupBy('trips.id')
