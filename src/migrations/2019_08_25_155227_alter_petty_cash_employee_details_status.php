@@ -12,7 +12,7 @@ class AlterPettyCashEmployeeDetailsStatus extends Migration {
 	 */
 	public function up() {
 		Schema::table('petty_cash_employee_details', function (Blueprint $table) {
-			$table->unsignedDecimal('rejection_id')->nullable()->after('total');
+			$table->unsignedInteger('rejection_id')->nullable()->after('total');
 			$table->string('remarks', 191)->nullable()->after('rejection_id');
 			$table->unsignedInteger('status')->change();
 			$table->foreign('rejection_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');

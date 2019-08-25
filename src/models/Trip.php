@@ -340,70 +340,70 @@ class Trip extends Model {
 		return $trips;
 	}
 
-	public static function getVerficationPendingList($r) {
-		/*if(isset($r->period))
-			{
-				$date = explode(' to ', $r->period);
-				$from_date = $date[0];
-				$to_date = $date[1];
-				dd($from_date,$to_date);
-				$from_date = date('Y-m-d', strtotime($from_date));
-				$to_date = date('Y-m-d', strtotime($to_date));
-		*/
+	// public static function getVerficationPendingList($r) {
+	// 	/*if(isset($r->period))
+	// 		{
+	// 			$date = explode(' to ', $r->period);
+	// 			$from_date = $date[0];
+	// 			$to_date = $date[1];
+	// 			dd($from_date,$to_date);
+	// 			$from_date = date('Y-m-d', strtotime($from_date));
+	// 			$to_date = date('Y-m-d', strtotime($to_date));
+	// 	*/
 
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
-			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				'purpose.name as purpose',
-				'trips.advance_received',
-				'trips.created_at',
-				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
-				'status.name as status'
+	// 	$trips = Trip::from('trips')
+	// 		->join('visits as v', 'v.trip_id', 'trips.id')
+	// 		->join('ncities as c', 'c.id', 'v.from_city_id')
+	// 		->join('employees as e', 'e.id', 'trips.employee_id')
+	// 		->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
+	// 		->join('configs as status', 'status.id', 'trips.status_id')
+	// 		->select(
+	// 			'trips.id',
+	// 			'trips.number',
+	// 			'e.code as ecode',
+	// 			DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
+	// 			DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
+	// 			DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+	// 			'purpose.name as purpose',
+	// 			'trips.advance_received',
+	// 			'trips.created_at',
+	// 			//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
+	// 			'status.name as status'
 
-			)
-			->where('trips.status_id', 3021) //MANAGER APPROVAL PENDING
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc')
-			->orderBy('trips.status_id', 'desc')
-			->where(function ($query) use ($r) {
-				if ($r->get('employee_id')) {
-					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('purpose_id')) {
-					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('status_id')) {
-					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
-				}
-			})
-		/*->where(function ($query) use ($r) {
-				if ($r->get('period')) {
-					$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
+	// 		)
+	// 		->where('trips.status_id', 3021) //MANAGER APPROVAL PENDING
+	// 		->groupBy('trips.id')
+	// 		->orderBy('trips.created_at', 'desc')
+	// 		->orderBy('trips.status_id', 'desc')
+	// 		->where(function ($query) use ($r) {
+	// 			if ($r->get('employee_id')) {
+	// 				$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+	// 			}
+	// 		})
+	// 		->where(function ($query) use ($r) {
+	// 			if ($r->get('purpose_id')) {
+	// 				$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+	// 			}
+	// 		})
+	// 		->where(function ($query) use ($r) {
+	// 			if ($r->get('status_id')) {
+	// 				$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+	// 			}
+	// 		})
+	// 	/*->where(function ($query) use ($r) {
+	// 			if ($r->get('period')) {
+	// 				$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
 
-				}
-			})*/
-		;
+	// 			}
+	// 		})*/
+	// 	;
 
-		if (!Entrust::can('trip-verification-all')) {
-			$trips->where('trips.manager_id', Auth::user()->entity_id);
-		}
+	// 	if (!Entrust::can('trip-verification-all')) {
+	// 		$trips->where('trips.manager_id', Auth::user()->entity_id);
+	// 	}
 
-		return $trips;
-	}
+	// 	return $trips;
+	// }
 
 	// public static function saveTripVerification($r) {
 	// 	$trip = Trip::find($r->trip_id);
@@ -446,5 +446,83 @@ class Trip extends Model {
 
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true]);
+	}
+
+	public static function getClaimFormData($trip_id) {
+		// if (!$trip_id) {
+		// 	$this->data['success'] = false;
+		// 	$this->data['message'] = 'Trip not found';
+		// 	$this->data['employee'] = [];
+		// } else {
+		$data = [];
+		$trip = Trip::with(
+			'visits' => function ($q) {
+				$q->orderBy('visits.id');
+			},
+			'visits.fromCity',
+			'visits.toCity',
+			'visits.travelMode',
+			'visits.bookingMethod',
+			'visits.bookingStatus',
+			'visits.agent',
+			'visits.status',
+			'visits.managerVerificationStatus',
+			'employee',
+			'purpose',
+			'status',
+
+			'selfVisits',
+			'lodgings',
+			'boardings',
+			'localTravels',
+			'selfVisits.fromCity',
+			'selfVisits.toCity',
+			'selfVisits.travelMode',
+			'selfVisits.bookingMethod',
+			'selfVisits.selfBooking',
+			'selfVisits.agent',
+			'selfVisits.status',
+			'selfVisits.attachments'
+
+		)->find($trip_id);
+		if (!$trip) {
+			$data['success'] = false;
+			$data['message'] = 'Trip not found';
+		}
+
+		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
+		$data['success'] = true;
+
+		$data['employee'] = $employee = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
+			->leftjoin('designations', 'designations.id', 'employees.designation_id')
+			->leftjoin('entities', 'entities.id', 'employees.grade_id')
+			->where('employees.id', $trip->employee_id)->first();
+
+		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
+			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
+		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
+		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
+		// }
+
+		if (!empty($to_cities)) {
+			$city_list = collect(NCity::select('id', 'name')->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
+		} else {
+			$city_list = [];
+		}
+		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
+		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
+		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
+		$stay_type_list = collect(Entity::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
+
+		$data['extras'] = [
+			'purpose_list' => $purpose_list,
+			'travel_mode_list' => $travel_mode_list,
+			'city_list' => $city_list,
+			'stay_type_list' => $stay_type_list,
+			'booking_type_list' => $booking_type_list,
+		];
+		$data['trip'] = $trip;
+
+		return response()->json($data);
 	}
 }
