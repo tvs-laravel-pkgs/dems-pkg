@@ -320,6 +320,24 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-petty-cash-view></eyatra-petty-cash-view>',
         title: 'View Petty Cash',
     }).
+    //PETTY CASH VIEW AND LIST FOR MANAGER
+    when('/eyatra/petty-cash/manager/verification', {
+        template: '<eyatra-petty-cash-manager-list></eyatra-petty-cash-manager-list>',
+        title: 'Petty Cash Manager Verification',
+    }).
+    when('/eyatra/petty-cash/manager/verification/view/:pettycash_id', {
+        template: '<eyatra-petty-cash-manager-view></eyatra-petty-cash-manager-view>',
+        title: 'View Petty Cash Manager Verification',
+    }).
+    //PETTY CASH VIEW AND LIST FOR FINANCE
+    when('/eyatra/petty-cash/finance/verification', {
+        template: '<eyatra-petty-cash-finance-list></eyatra-petty-cash-finance-list>',
+        title: 'Petty Cash Finance Verification',
+    }).
+    when('/eyatra/petty-cash/finance/verification/view/:pettycash_id', {
+        template: '<eyatra-petty-cash-finance-view></eyatra-petty-cash-finance-view>',
+        title: 'View Petty Cash Finance Verification',
+    }).
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
         template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
