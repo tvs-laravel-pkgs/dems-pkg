@@ -34,6 +34,21 @@ class AdvanceClaimRequestController extends Controller {
 			->whereNotNull('trips.advance_received')
 			->where('trips.status_id', 3028) //MANAGER APPROVED
 			->where('trips.advance_request_approval_status_id', 3260) //NEW
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
@@ -152,8 +167,17 @@ class AdvanceClaimRequestController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
-	public function rejectAdvanceClaimRequest(Request $r) {
-		$trip = Trip::find($r->trip_id);
+	public function eyatraAdvanceClaimFilterData() {
+		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'), 'id')->where('company_id', Auth::user()->company_id)->get();
+		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
+		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		$this->data['success'] = true;
+		//dd($this->data);
+		return response()->json($this->data);
+	}
+
+	public function rejectAdvanceClaimRequest($trip_id) {
+		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
