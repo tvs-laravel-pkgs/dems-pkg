@@ -157,6 +157,9 @@ class TripClaimVerificationThreeController extends Controller {
 			$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 			$this->data['payment_mode_list'] = $payment_mode_list;
 			$this->data['wallet_mode_list'] = $wallet_mode_list;
+
+			$this->data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
+
 			$this->data['success'] = true;
 		}
 		$this->data['trip'] = $trip;
