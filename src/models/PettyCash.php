@@ -9,19 +9,11 @@ class PettyCash extends Model {
 	protected $table = 'petty_cash';
 
 	protected $fillable = [
-		'id',
-		'petty_cash_employee_details_id',
-		'expence_type',
+		'employee_id',
+		'total',
+		'status',
+		'remarks',
 		'date',
-		'purpose_id',
-		'travel_mode_id',
-		'from_place',
-		'to_place',
-		'from_KM_reading',
-		'to_KM_reading',
-		'amount',
-		'tax',
-		'details',
 		'created_by',
 	];
 
