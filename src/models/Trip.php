@@ -519,8 +519,8 @@ class Trip extends Model {
 		}
 		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
 		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => -1, 'name' => 'Select Purpose']));
-		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
-		$stay_type_list = collect(Entity::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
+		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => -1, 'name' => 'Select Travel Mode']));
+		$stay_type_list = collect(Entity::getLodgeStayTypeList()->prepend(['id' => -1, 'name' => 'Select Stay Type']));
 
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
