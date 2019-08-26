@@ -99,12 +99,12 @@ app.component('eyatraTrips', {
         $scope.confirmDeleteTrip = function() {
             $id = $('#del').val();
             $http.get(
-                eyatra_trip_claim_delete_url + '/' + $id,
+                trip_delete_url + '/' + $id,
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                    for (var i in response.errors) {
+                        errors += '<li>' + response.errors[i] + '</li>';
                     }
                     new Noty({
                         type: 'error',

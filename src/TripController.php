@@ -33,7 +33,7 @@ class TripController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			
+
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -108,11 +108,11 @@ class TripController extends Controller {
 	}
 
 	public function eyatraTripFilterData() {
-			$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'),'id')->where('company_id',Auth::user()->company_id)->get();
-			$this->data['purpose_list'] =Entity::select('name','id')->where('entity_type_id',501)->where('company_id',Auth::user()->company_id)->get();
-			$this->data['trip_status_list'] =Config::select('name','id')->where('config_type_id',501)->get();
-			$this->data['success'] = true;
-			//dd($this->data);
+		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'), 'id')->where('company_id', Auth::user()->company_id)->get();
+		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
+		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		$this->data['success'] = true;
+		//dd($this->data);
 		return response()->json($this->data);
 	}
 
@@ -122,7 +122,13 @@ class TripController extends Controller {
 		if ($agent_visits_booked) {
 			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
 		}
-		$trip = Trip::where('id', $trip_id)->delete();
+		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
+		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022])->first();
+		if (!$status_exist) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
+		}
+
+		$trip = Trip::where('id', $trip_id)->forceDelete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
