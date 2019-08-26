@@ -109,7 +109,7 @@ app.component('eyatraPettyCashFinanceView', {
                             }).show();
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/finance/verification')
+                                $location.path('/eyatra/petty-cash/verification2')
                             }, 500);
                         }
                     })
@@ -167,7 +167,7 @@ app.component('eyatraPettyCashFinanceView', {
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/finance/verification')
+                                $location.path('/eyatra/petty-cash/verification2')
                             }, 500);
                         }
                     })

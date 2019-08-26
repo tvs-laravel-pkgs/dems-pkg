@@ -6,7 +6,7 @@ app.component('eyatraAgentClaimList', {
         // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -42,12 +42,19 @@ app.component('eyatraAgentClaimList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
+        /* $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
         $('.add_new_button').html(
             '<a href="#!/eyatra/agent/claim/add" type="button" class="btn btn-secondary">' +
             'Add New' +
             '</a>'
-        );
+        ); */
+        /* Search Block */
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('agent_claim_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
         $scope.deleteAgentClaimconfirm = function($id) {
             $('#delete_agent_claim').val($id);
         }
@@ -107,14 +114,18 @@ app.component('eyatraAgentClaimForm', {
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             self.gstin_tax = response.data.gstin_tax;
-            // console.log(self.booking_list);
+            console.log(self.booking_list);
+
+
             if (self.action == 'Edit') {
-                var total = 0;
-                $.each(self.booking_list, function(key, value) {
-                    total += parseFloat(value.total);
-                });
-                $(".amount").html(total.toFixed(2));
-                $("#count").html(self.booking_list.length);
+                self.trips_count = response.data.trips_count;
+                $("#count").html(self.trips_count);
+                $(".amount").html(response.data.agent_claim.net_amount);
+                $(".separate-bottom-layer").addClass("in");
+                $("button.payment-btn").css({ 'display': 'none' });
+                $("button.advance-btn").css({ 'display': 'none' });
+                $(".btn-close").css({ 'display': 'inline-block' });
+                $(".payment-btn").prop('disabled', false);
             } else {
                 $(".amount").html(0);
                 $("#count").html(0);
@@ -154,7 +165,10 @@ app.component('eyatraAgentClaimForm', {
             $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
             if (count > 0) {
-                $(".payment-btn").prop('disabled', false);
+                if (self.action != 'Edit') {
+
+                    $(".payment-btn").prop('disabled', false);
+                }
             } else {
                 $(".payment-btn").prop('disabled', true);
                 $(".separate-bottom-layer").removeClass("in");
@@ -187,7 +201,9 @@ app.component('eyatraAgentClaimForm', {
             $("#count").html(count);
             $(".payment-btn").prop('disabled', true);
             if (count > 0) {
-                $(".payment-btn").prop('disabled', false);
+                if (self.action == 'Edit') {
+                    $(".payment-btn").prop('disabled', false);
+                }
             } else {
                 $(".separate-bottom-layer").removeClass("in");
                 $("button.payment-btn").css({ 'display': 'inline-block' });
@@ -215,6 +231,9 @@ app.component('eyatraAgentClaimForm', {
                 $(".separate-bottom-layer").removeClass("in");
                 $("button.payment-btn").css({ 'display': 'inline-block' });
                 $("button.advance-btn").css({ 'display': 'inline-block' });
+                if (self.action == 'Edit') {
+                    $("button.payment-btn").prop('disabled', false);
+                }
                 $(".btn-close").css({ 'display': 'none' });
                 $(".bottom-item").css({ 'display': 'inline-block' });
                 $(".bottom-title").css({ 'display': 'none' });
@@ -263,9 +282,7 @@ app.component('eyatraAgentClaimForm', {
                 // 'invoice_attachmet': {
                 //     extension: "docx|rtf|doc|pdf",
                 // },
-                'booking_list[]': {
-                    required: true,
-                },
+
             },
             messages: {
                 'invoice_number': {
@@ -341,6 +358,7 @@ app.component('eyatraAgentClaimView', {
             self.agent_claim_view = response.data.agent_claim_view;
             self.booking_list = response.data.booking_list;
             self.gstin_tax = response.data.gstin_tax;
+            self.total_trips = response.data.total_trips;
             self.action = "View ";
             if (self.gstin_tax[0].gstin == null || self.gstin_tax[0].gstin == '') {
                 $("#total_amt").hide().prop('disabled', true);
@@ -350,23 +368,23 @@ app.component('eyatraAgentClaimView', {
             self.count = self.booking_list.length;
         });
         $rootScope.loading = false;
-        setTimeout(function () {
+        setTimeout(function() {
             var heights = new Array();
             // Loop to get all element Widths
-            $('.equal-column').each(function() {    
+            $('.equal-column').each(function() {
                 // Need to let sizes be whatever they want so no overflow on resize
                 // Then add size (no units) to array
                 heights.push($(this).height());
             });
             // Find max Width of all elements
-            var max = Math.max.apply( Math, heights);
+            var max = Math.max.apply(Math, heights);
             // Set all Width to max Width
             $('.equal-column').each(function() {
                 $(this).css('height', max + 'px');
                 // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
-            });    
+            });
         }, 1000);
-        
+
     }
 });
 

@@ -13,11 +13,15 @@ use Yajra\Datatables\Datatables;
 
 class GradeController extends Controller {
 	public function listEYatraGrade(Request $r) {
-		$grade_list = Entity::withTrashed()->select('entities.id', 'entities.deleted_at', 'entities.name as grade_name', DB::RAW('count(DISTINCT(grade_local_travel_mode.local_travel_mode_id)) as local_travel_count'), DB::RAW('count(DISTINCT(grade_travel_mode.travel_mode_id)) as travel_count'), DB::RAW('count(DISTINCT(grade_expense_type.expense_type_id)) as expense_count'), DB::RAW('count(DISTINCT(grade_trip_purpose.trip_purpose_id)) as trip_count'))
+		$grade_list = Entity::withTrashed()->select('entities.id', 'entities.deleted_at', 'entities.name as grade_name', DB::RAW('count(DISTINCT(grade_local_travel_mode.local_travel_mode_id)) as local_travel_count'), DB::RAW('count(DISTINCT(grade_travel_mode.travel_mode_id)) as travel_count'), DB::RAW('count(DISTINCT(grade_expense_type.expense_type_id)) as expense_count'), DB::RAW('count(DISTINCT(grade_trip_purpose.trip_purpose_id)) as trip_count'),
+			// DB::raw('CASE WHEN grade_advanced_eligibility.advanced_eligibility == 0 THEN No ELSE Yes END as grade_eligiblity')
+			DB::raw('IF(grade_advanced_eligibility.advanced_eligibility = 0, "No", "Yes") as grade_eligiblity')
+		)
 			->leftjoin('grade_local_travel_mode', 'grade_local_travel_mode.grade_id', 'entities.id')
 			->leftjoin('grade_travel_mode', 'grade_travel_mode.grade_id', 'entities.id')
 			->leftjoin('grade_expense_type', 'grade_expense_type.grade_id', 'entities.id')
 			->leftjoin('grade_trip_purpose', 'grade_trip_purpose.grade_id', 'entities.id')
+			->leftjoin('grade_advanced_eligibility', 'grade_advanced_eligibility.grade_id', 'entities.id')
 			->where('entities.entity_type_id', 500)
 			->where('entities.company_id', Auth::user()->company_id)
 			->groupBy('entities.id')

@@ -173,6 +173,12 @@ class EYatraRoleSeeder extends Seeder {
 
 					//CLAIM VERIFICATION 1
 					5500,
+
+					//PETTY CASH
+					5580,
+
+					//PETTY CASH VERIFICATION
+					5581,
 				],
 			],
 
@@ -207,13 +213,19 @@ class EYatraRoleSeeder extends Seeder {
 					5014,
 
 					//EMPLOYEE CLAIM VERIFICATION 2
-					5520,
+					5521,
 
 					//AGENT CLAIM VERIFICATION 1
 					5540,
 
 					//ADVANCE REQUESTS
 					5560,
+
+					//PETTY CASH
+					5580,
+
+					//PETTY CASH VERIFICATION
+					5582,
 
 				],
 			],

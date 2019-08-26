@@ -151,7 +151,6 @@ class Trip extends Model {
 				foreach ($request->visits as $key => $visit_data) {
 					//if no agent found display visit count
 					// dd(Auth::user()->entity->outlet->address);
-
 					$visit_count = $i + 1;
 					if ($i == 0) {
 						$from_city_id = Auth::user()->entity->outlet->address->city->id;
@@ -163,7 +162,7 @@ class Trip extends Model {
 					$visit->fill($visit_data);
 					// dump($visit_data['date']);
 					// dump(Carbon::createFromFormat('d/m/Y', $visit_data['date']));
-					$visit->date = Carbon::createFromFormat('d/m/Y', $visit_data['date']);
+					$visit->date = date('Y-m-d', strtotime($visit_data['date']));
 					// dd($visit);
 					$visit->from_city_id = $from_city_id;
 					$visit->trip_id = $trip->id;
@@ -340,70 +339,70 @@ class Trip extends Model {
 		return $trips;
 	}
 
-	// public static function getVerficationPendingList($r) {
-	// 	/*if(isset($r->period))
-	// 		{
-	// 			$date = explode(' to ', $r->period);
-	// 			$from_date = $date[0];
-	// 			$to_date = $date[1];
-	// 			dd($from_date,$to_date);
-	// 			$from_date = date('Y-m-d', strtotime($from_date));
-	// 			$to_date = date('Y-m-d', strtotime($to_date));
-	// 	*/
+	public static function getVerficationPendingList($r) {
+		/*if(isset($r->period))
+			{
+				$date = explode(' to ', $r->period);
+				$from_date = $date[0];
+				$to_date = $date[1];
+				dd($from_date,$to_date);
+				$from_date = date('Y-m-d', strtotime($from_date));
+				$to_date = date('Y-m-d', strtotime($to_date));
+		*/
 
-	// 	$trips = Trip::from('trips')
-	// 		->join('visits as v', 'v.trip_id', 'trips.id')
-	// 		->join('ncities as c', 'c.id', 'v.from_city_id')
-	// 		->join('employees as e', 'e.id', 'trips.employee_id')
-	// 		->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-	// 		->join('configs as status', 'status.id', 'trips.status_id')
-	// 		->select(
-	// 			'trips.id',
-	// 			'trips.number',
-	// 			'e.code as ecode',
-	// 			DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-	// 			DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-	// 			DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-	// 			'purpose.name as purpose',
-	// 			'trips.advance_received',
-	// 			'trips.created_at',
-	// 			//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
-	// 			'status.name as status'
+		$trips = Trip::from('trips')
+			->join('visits as v', 'v.trip_id', 'trips.id')
+			->join('ncities as c', 'c.id', 'v.from_city_id')
+			->join('employees as e', 'e.id', 'trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
+			->join('configs as status', 'status.id', 'trips.status_id')
+			->select(
+				'trips.id',
+				'trips.number',
+				'e.code as ecode',
+				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
+				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				'purpose.name as purpose',
+				'trips.advance_received',
+				'trips.created_at',
+				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
+				'status.name as status'
 
-	// 		)
-	// 		->where('trips.status_id', 3021) //MANAGER APPROVAL PENDING
-	// 		->groupBy('trips.id')
-	// 		->orderBy('trips.created_at', 'desc')
-	// 		->orderBy('trips.status_id', 'desc')
-	// 		->where(function ($query) use ($r) {
-	// 			if ($r->get('employee_id')) {
-	// 				$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
-	// 			}
-	// 		})
-	// 		->where(function ($query) use ($r) {
-	// 			if ($r->get('purpose_id')) {
-	// 				$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
-	// 			}
-	// 		})
-	// 		->where(function ($query) use ($r) {
-	// 			if ($r->get('status_id')) {
-	// 				$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
-	// 			}
-	// 		})
-	// 	/*->where(function ($query) use ($r) {
-	// 			if ($r->get('period')) {
-	// 				$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
+			)
+			->where('trips.status_id', 3021) //MANAGER APPROVAL PENDING
+			->groupBy('trips.id')
+			->orderBy('trips.created_at', 'desc')
+			->orderBy('trips.status_id', 'desc')
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
+		/*->where(function ($query) use ($r) {
+				if ($r->get('period')) {
+					$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
 
-	// 			}
-	// 		})*/
-	// 	;
+				}
+			})*/
+		;
 
-	// 	if (!Entrust::can('trip-verification-all')) {
-	// 		$trips->where('trips.manager_id', Auth::user()->entity_id);
-	// 	}
+		if (!Entrust::can('trip-verification-all')) {
+			$trips->where('trips.manager_id', Auth::user()->entity_id);
+		}
 
-	// 	return $trips;
-	// }
+		return $trips;
+	}
 
 	// public static function saveTripVerification($r) {
 	// 	$trip = Trip::find($r->trip_id);
