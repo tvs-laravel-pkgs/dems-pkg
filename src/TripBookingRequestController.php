@@ -15,7 +15,7 @@ use Yajra\Datatables\Datatables;
 class TripBookingRequestController extends Controller {
 
 	public function filterEYatraTripBookingRequests() {
-		$this->data['employee_list'] = $employee_list = Employee::select(DB::raw('concat(code,"/",name) as name,id'))
+		$this->data['employee_list'] = $employee_list = Employee::select(DB::raw('concat(code, "-" ,name) as name,id'))
 			->get();
 		$this->data['status_list'] = $status_list = Config::select('name', 'id')->where('config_type_id', 501)->get();
 
