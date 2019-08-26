@@ -6,7 +6,7 @@ app.component('eyatraAgentClaimList', {
         // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -42,12 +42,19 @@ app.component('eyatraAgentClaimList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
+        /* $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
         $('.add_new_button').html(
             '<a href="#!/eyatra/agent/claim/add" type="button" class="btn btn-secondary">' +
             'Add New' +
             '</a>'
-        );
+        ); */
+        /* Search Block */
+        setTimeout(function () {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('agent_claim_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left+'px';
+        }, 500);
         $scope.deleteAgentClaimconfirm = function($id) {
             $('#delete_agent_claim').val($id);
         }
