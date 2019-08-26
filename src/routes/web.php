@@ -61,6 +61,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/agent/view/{agent_id}', 'Uitoux\EYatra\AgentController@viewEYatraAgent')->name('viewEYatraAgent');
 		Route::get('eyatra/agent/delete/{agent_id}', 'Uitoux\EYatra\AgentController@deleteEYatraAgent')->name('deleteEYatraAgent');
 
+		Route::get('eyatra/agent/filter', 'Uitoux\EYatra\AgentController@eyatraAgentsfilter')->name('eyatraAgentsfilter');
+
 		//STATES
 		Route::get('eyatra/state/get-list', 'Uitoux\EYatra\StateController@listEYatraState')->name('listEYatraState');
 		Route::get('eyatra/state/get-form-data/{state_id?}', 'Uitoux\EYatra\StateController@eyatraStateFormData')->name('eyatraStateFormData');
