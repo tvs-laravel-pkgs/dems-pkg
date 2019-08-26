@@ -115,10 +115,17 @@ class TripClaimController extends Controller {
 						$visit->save();
 
 						//UPDATE VISIT BOOKING STATUS
-						$visit_booking = VisitBooking::where('visit_id', $visit_data['id'])->first();
+						$visit_booking = VisitBooking::firstOrNew('visit_id', $visit_data['id']);
+						$visit_booking->visit_id = $visit_data['id'];
+						$visit_booking->type_id = 3100;
+						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
+						$visit_booking->reference_number = $visit_data['remarks'];
 						$visit_booking->amount = $visit_data['amount'];
 						$visit_booking->tax = $visit_data['tax'];
+						$visit_booking->service_charge = '0.00';
 						$visit_booking->total = $visit_data['total'];
+						$visit_booking->paid_amount = $visit_data['paid_amount'];
+						$visit_booking->created_by = Auth::user()->entity_id;
 						$visit_booking->status_id = 3241; //Claimed
 						$visit_booking->save();
 					}
