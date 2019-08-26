@@ -157,6 +157,9 @@ class TripClaimVerificationThreeController extends Controller {
 			$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 			$this->data['payment_mode_list'] = $payment_mode_list;
 			$this->data['wallet_mode_list'] = $wallet_mode_list;
+
+			$this->data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
+
 			$this->data['success'] = true;
 		}
 		$this->data['trip'] = $trip;
@@ -165,51 +168,57 @@ class TripClaimVerificationThreeController extends Controller {
 	}
 
 	public function approveTripClaimVerificationThree(Request $r) {
+		// dd($r->all());
+		try {
+			DB::beginTransaction();
+			$trip = Trip::find($r->trip_id);
+			if (!$trip) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			}
+			$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+			if (!$employee_claim) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			}
+			$employee_claim->status_id = 3225; //PAID
+			$employee_claim->save();
 
-		$trip = Trip::find($r->trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			$trip->status_id = 3026; //PAID
+			$trip->save();
+
+			//PAYMENT SAVE
+			$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
+			$payment->fill($r->all());
+			$payment->date = date('Y-m-d', strtotime($r->date));
+			$payment->payment_of_id = 3252;
+			$payment->entity_id = $trip->id;
+			$payment->created_by = Auth::user()->id;
+			$payment->save();
+
+			//BANK DETAIL SAVE
+			if ($r->bank_name) {
+				$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
+				$bank_detail->fill($r->all());
+				$bank_detail->detail_of_id = 3243;
+				$bank_detail->entity_id = $trip->id;
+				$bank_detail->account_type_id = 3252;
+				$bank_detail->save();
+			}
+
+			//WALLET SAVE
+			if ($r->type_id) {
+				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
+				$wallet_detail->fill($r->all());
+				$wallet_detail->wallet_of_id = 3252;
+				$wallet_detail->entity_id = $trip->id;
+				$wallet_detail->save();
+			}
+
+			DB::commit();
+			return response()->json(['success' => true]);
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
-		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
-		if (!$employee_claim) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$employee_claim->status_id = 3225; //PAID
-		$employee_claim->save();
-
-		$trip->status_id = 3026; //PAID
-		$trip->save();
-
-		//PAYMENT SAVE
-		$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
-		$payment->date = strtotime('Y-m-d', $r->date);
-		$payment->fill($r->all());
-		$payment->payment_of_id = 3252;
-		$payment->entity_id = $trip->id;
-		$payment->created_by = Auth::user()->id;
-		$payment->save();
-
-		//BANK DETAIL SAVE
-		if ($r->bank_name) {
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
-			$bank_detail->fill($r->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $trip->id;
-			$bank_detail->account_type_id = 3252;
-			$bank_detail->save();
-		}
-
-		//WALLET SAVE
-		if ($r->type_id) {
-			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
-			$wallet_detail->fill($r->all());
-			$wallet_detail->wallet_of_id = 3252;
-			$wallet_detail->entity_id = $trip->id;
-			$wallet_detail->save();
-		}
-
-		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
-		return response()->json(['success' => true]);
 	}
 
 	public function rejectTripClaimVerificationThree(Request $r) {

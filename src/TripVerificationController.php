@@ -63,7 +63,7 @@ class TripVerificationController extends Controller {
 		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
-		$trip->days = $days->days;
+		$trip->days = $days->days + 1;
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
 		$this->data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();

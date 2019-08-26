@@ -637,6 +637,13 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Employee Claim Verification 2',
 			],
 
+			5521 => [
+				'display_order' => 6,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-financier-claims-verification3',
+				'display_name' => 'Financier Claim Verification 3',
+			],
+
 			5540 => [
 				'display_order' => 6,
 				'parent_id' => 5001,
