@@ -159,6 +159,12 @@ app.component('eyatraTripForm', {
             self.trip = response.data.trip;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            if (self.action == 'New') {
+                self.trip.visits[0].booking_method = 'Self';
+                self.trip.visits.push({
+                    booking_method: 'Self'
+                });
+            }
             $rootScope.loading = false;
             $scope.showBank = false;
             $scope.showCheque = false;
