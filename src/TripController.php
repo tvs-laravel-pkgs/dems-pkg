@@ -227,6 +227,9 @@ class TripController extends Controller {
 		$this->data['trip'] = $visit->trip;
 		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$this->data['bookings'] = $visit->bookings;
+		}else
+		{
+			$this->data['bookings']=[];
 		}
 		$this->data['success'] = true;
 		return response()->json($this->data);

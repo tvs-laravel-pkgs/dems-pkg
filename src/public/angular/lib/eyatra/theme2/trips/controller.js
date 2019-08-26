@@ -539,7 +539,7 @@ app.component('eyatraTripVisitView', {
             self.visit = response.data.visit;
             self.trip = response.data.trip;
             self.bookings = response.data.bookings;
-            // console.log(response.data.trip);
+            console.log(response.data.bookings);
             $rootScope.loading = false;
 
         });
