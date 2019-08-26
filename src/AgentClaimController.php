@@ -368,7 +368,7 @@ class AgentClaimController extends Controller {
 
 		//PAYMENT SAVE
 		$payment = Payment::firstOrNew(['entity_id' => $agent_claim->id]);
-		$payment->date = strtotime('Y-m-d', $r->date);
+		$payment->date = date('Y-m-d', strtotime($r->date));
 		$payment->fill($r->all());
 		$payment->payment_of_id = 3252;
 		$payment->entity_id = $agent_claim->id;
