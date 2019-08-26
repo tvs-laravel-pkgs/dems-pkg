@@ -64,23 +64,27 @@ class AgentClaimController extends Controller {
 	}
 
 	public function eyatraAgentClaimFormData($agent_claim_id = NULL) {
-		//dd($agent_claim_id);
+		dd($agent_claim_id);
 
-		$this->data['action'] = 'New';
-		$agent_claim = new AgentClaim;
-		$this->data['success'] = true;
-		$this->data['attachment'] = [];
+		if ($agent_claim_id) {
 
-		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
-			'employees.name as employee_name', 'configs.name as status')
-			->join('visits', 'visits.id', 'visit_bookings.visit_id')
-			->join('trips', 'trips.id', 'visits.trip_id')
-			->join('employees', 'employees.id', 'trips.employee_id')
-			->join('configs', 'configs.id', 'trips.status_id')
-			->where('visit_bookings.created_by', Auth::user()->id)
-			->where('visit_bookings.status_id', 3240)
-			->groupBy('trips.id')
-			->get();
+		} else {
+			$this->data['action'] = 'New';
+			$agent_claim = new AgentClaim;
+			$this->data['success'] = true;
+			$this->data['attachment'] = [];
+
+			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
+				'employees.name as employee_name', 'configs.name as status')
+				->join('visits', 'visits.id', 'visit_bookings.visit_id')
+				->join('trips', 'trips.id', 'visits.trip_id')
+				->join('employees', 'employees.id', 'trips.employee_id')
+				->join('configs', 'configs.id', 'trips.status_id')
+				->where('visit_bookings.created_by', Auth::user()->id)
+				->where('visit_bookings.status_id', 3240)
+				->groupBy('trips.id')
+				->get();
+		}
 
 		// $this->data['booking_list'] = $booking_list = VisitBooking::select(
 		// 	'visit_bookings.id',

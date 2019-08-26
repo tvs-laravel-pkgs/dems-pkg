@@ -107,7 +107,7 @@ app.component('eyatraAgentClaimForm', {
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             self.gstin_tax = response.data.gstin_tax;
-            // console.log(self.booking_list);
+            console.log(self.booking_list);
             if (self.action == 'Edit') {
                 var total = 0;
                 $.each(self.booking_list, function(key, value) {
@@ -350,23 +350,23 @@ app.component('eyatraAgentClaimView', {
             self.count = self.booking_list.length;
         });
         $rootScope.loading = false;
-        setTimeout(function () {
+        setTimeout(function() {
             var heights = new Array();
             // Loop to get all element Widths
-            $('.equal-column').each(function() {    
+            $('.equal-column').each(function() {
                 // Need to let sizes be whatever they want so no overflow on resize
                 // Then add size (no units) to array
                 heights.push($(this).height());
             });
             // Find max Width of all elements
-            var max = Math.max.apply( Math, heights);
+            var max = Math.max.apply(Math, heights);
             // Set all Width to max Width
             $('.equal-column').each(function() {
                 $(this).css('height', max + 'px');
                 // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
-            });    
+            });
         }, 1000);
-        
+
     }
 });
 
