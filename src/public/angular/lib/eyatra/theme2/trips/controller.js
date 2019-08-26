@@ -99,12 +99,12 @@ app.component('eyatraTrips', {
         $scope.confirmDeleteTrip = function() {
             $id = $('#del').val();
             $http.get(
-                eyatra_trip_claim_delete_url + '/' + $id,
+                trip_delete_url + '/' + $id,
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                    for (var i in response.data.errors) {
+                        errors += '<li>' + response.data.errors[i] + '</li>';
                     }
                     new Noty({
                         type: 'error',
@@ -159,6 +159,12 @@ app.component('eyatraTripForm', {
             self.trip = response.data.trip;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            if (self.action == 'New') {
+                self.trip.visits[0].booking_method = 'Self';
+                self.trip.visits.push({
+                    booking_method: 'Self'
+                });
+            }
             $rootScope.loading = false;
             $scope.showBank = false;
             $scope.showCheque = false;
@@ -329,6 +335,7 @@ app.component('eyatraTripView', {
     templateUrl: trip_view_template_url,
 
     controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
+
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -336,6 +343,7 @@ app.component('eyatraTripView', {
         ).then(function(response) {
             self.trip = response.data.trip;
         });
+
 
         //REQUEST AGENT FOR CANCEL VISIT BOOKING
         $scope.requestVisitBookingPopup = function(visit_id) {
@@ -510,6 +518,7 @@ app.component('eyatraTripView', {
 app.component('eyatraTripVisitView', {
     templateUrl: trip_visit_view_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+
         if (typeof($routeParams.visit_id) == 'undefined') {
             $location.path('/eyatra/trips')
             $scope.$apply()
@@ -532,10 +541,11 @@ app.component('eyatraTripVisitView', {
                 $scope.$apply()
                 return;
             }
+            //console.log(response.data.visit)
             self.visit = response.data.visit;
             self.trip = response.data.trip;
             self.bookings = response.data.bookings;
-            // console.log(response.data.trip);
+            console.log(response.data.bookings);
             $rootScope.loading = false;
 
         });

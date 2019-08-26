@@ -30,7 +30,7 @@ app.component('eyatraStates', {
                 }
             },
             columns: [
-                { data: 'action', searchable: false, class: 'action text-left' },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'nstates.code', searchable: true },
                 { data: 'name', name: 'nstates.name', searchable: true },
                 { data: 'country', name: 'c.name', searchable: true },

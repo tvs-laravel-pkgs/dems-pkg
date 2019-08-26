@@ -25,8 +25,8 @@ app.component('eyatraAgents', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.agent = $('#agent_id').val();
-                    // d.travel_mode = $('#tm_id').val();
+                    // d.agent = $('#agent_id').val();
+                    d.tm = $('#tm_id').val();
                     d.status_id = $('#status').val();
                 }
             },
@@ -55,31 +55,31 @@ app.component('eyatraAgents', {
         $http.get(
             agents_filter_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.agent_list = response.data.agent_list;
-            // self.tm_list = response.data.tm_list;
+            self.tm_list = response.data.tm_list;
             self.status_list = response.data.status_list;
             // $rootScope.loading = false;
         });
         var dataTableFilter = $('#agent_list').dataTable();
 
-        $scope.onselectAgent = function(id) {
-            //alert(query);
-            $('#agent_id').val(id);
+        // $scope.onselectAgent = function(id) {
+        //     //alert(query);
+        //     $('#agent_id').val(id);
+        //     dataTableFilter.fnFilter();
+        // }
+        $scope.onselectTravelMode = function(id) {
+            $('#tm_id').val(id);
             dataTableFilter.fnFilter();
         }
-        // $scope.onselectTravelMode = function(query) {
-        //     $('#tm_id').val(query);
-        //     dataTable.draw();
-        // }
         $scope.onselectStatus = function(id) {
             $('#status').val(id);
             dataTableFilter.fnFilter();
         }
 
         $scope.reset_filter = function() {
-            $('#agent_id').val(null);
-            // $('#tm_id').val(null);
+            // $('#agent_id').val(null);
+            $('#tm_id').val(null);
             $('#status').val(null);
             dataTableFilter.fnFilter();
         }
