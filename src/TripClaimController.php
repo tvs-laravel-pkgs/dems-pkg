@@ -113,9 +113,9 @@ class TripClaimController extends Controller {
 						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
 						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
 						$visit->save();
-
+						// dd($visit_data['id']);
 						//UPDATE VISIT BOOKING STATUS
-						$visit_booking = VisitBooking::firstOrNew('visit_id', $visit_data['id']);
+						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
 						$visit_booking->visit_id = $visit_data['id'];
 						$visit_booking->type_id = 3100;
 						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
@@ -124,7 +124,7 @@ class TripClaimController extends Controller {
 						$visit_booking->tax = $visit_data['tax'];
 						$visit_booking->service_charge = '0.00';
 						$visit_booking->total = $visit_data['total'];
-						$visit_booking->paid_amount = $visit_data['paid_amount'];
+						$visit_booking->paid_amount = $visit_data['total'];
 						$visit_booking->created_by = Auth::user()->entity_id;
 						$visit_booking->status_id = 3241; //Claimed
 						$visit_booking->save();
