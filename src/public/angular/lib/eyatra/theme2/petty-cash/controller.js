@@ -109,6 +109,8 @@ app.component('eyatraPettyCashForm', {
             self.employee_list = response.data.employee_list;
             self.employee = response.data.employee;
             self.petty_cash_other = response.data.petty_cash_other;
+            self.user_role = response.data.user_role;
+            self.emp_details = response.data.emp_details;
             self.petty_cash_removal_id = [];
             self.petty_cash_other_removal_id = [];
 

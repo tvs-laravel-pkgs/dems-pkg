@@ -17,7 +17,41 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class AgentController extends Controller {
+
+	public function eyatraAgentsfilter() {
+
+		$option = new Agent;
+		$option->name = 'Select Agent Name/Code';
+		$option->id = NULL;
+		$this->data['agent_list'] = $agent_list = Agent::select(DB::raw('concat(code, " / " ,name) as name,id'))->where('company_id', Auth::user()->company_id)->get();
+		$this->data['agent_list'] = $agent_list->prepend($option);
+		// $option = new Entity;
+		// $option->name = 'Select Travel Mode';
+		// $option->id = NULL;
+		// $this->data['tm_list'] = $tm_list = Entity::travelModeList();
+		// $this->data['tm_list'] = $tm_list->prepend($option);
+
+		$this->data['status_list'] = array(
+			array('name' => "Select Status", 'id' => null),
+			array('name' => "All", 'id' => "-1"),
+			array('name' => "Active", 'id' => "2"),
+			array('name' => "Inactive", 'id' => "1"),
+		);
+		return response()->json($this->data);
+	}
+
 	public function listEYatraAgent(Request $r) {
+		if (!empty($r->agent)) {
+			$agent = $r->agent;
+		} else {
+			$agent = null;
+		}
+		if (!empty($request->status)) {
+			$status = $request->status;
+		} else {
+			$status = null;
+		}
+
 		$agent_list = Agent::withTrashed()->select(
 			'agents.id',
 			'agents.code',
@@ -29,6 +63,24 @@ class AgentController extends Controller {
 			->join('users', 'users.entity_id', 'agents.id')
 			->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
 			->leftJoin('entities as tm', 'tm.id', 'agent_travel_mode.travel_mode_id')
+
+			->where(function ($query) use ($r, $agent) {
+				if (!empty($agent)) {
+					$query->where('agents.id', $agent);
+				}
+			})
+		// ->where(function ($query) use ($r) {
+		// 	if ($r->get('agent_id')) {
+		// 		$query->where("agents.id", $r->get('agent_id'))->orWhere(DB::raw("-1"), $r->get('agent_id'));
+		// 	}
+		// })
+			->where(function ($query) use ($r, $status) {
+				if ($status == '2') {
+					$query->whereNull('agents.deleted_at');
+				} elseif ($status == '1') {
+					$query->whereNotNull('agents.deleted_at');
+				}
+			})
 			->where('users.user_type_id', 3122)
 			->where('agents.company_id', Auth::user()->company_id)
 			->groupby('agent_travel_mode.agent_id')

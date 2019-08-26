@@ -83,6 +83,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
             self.trip = response.data.trip;
             self.travel_cities = response.data.travel_cities;
             self.travel_dates = response.data.travel_dates;
+            self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.transport_total_amount = response.data.transport_total_amount;
             self.lodging_total_amount = response.data.lodging_total_amount;
             self.boardings_total_amount = response.data.boardings_total_amount;
