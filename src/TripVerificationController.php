@@ -63,52 +63,33 @@ class TripVerificationController extends Controller {
 		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
-		$trip->days = $days->days;
+		$trip->days = $days->days + 1;
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
 		$this->data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();
 		return response()->json($this->data);
 	}
 
-	public function saveTripVerification(Request $r) {
-		return Trip::saveTripVerification($r);
-	}
+	// public function saveTripVerification(Request $r) {
+	// 	return Trip::saveTripVerification($r);
+	// }
+
 	public function eyatraTripVerificationFilterData() {
-			$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'),'id')->where('company_id',Auth::user()->company_id)->get();
-			$this->data['purpose_list'] =Entity::select('name','id')->where('entity_type_id',501)->where('company_id',Auth::user()->company_id)->get();
-			$this->data['trip_status_list'] =Config::select('name','id')->where('config_type_id',501)->get();
-			$this->data['success'] = true;
-			//dd($this->data);
+		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'), 'id')->where('company_id', Auth::user()->company_id)->get();
+		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
+		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		$this->data['success'] = true;
+		//dd($this->data);
 		return response()->json($this->data);
 	}
 
-
-	public function approveTripVerification(Request $r) {
-		// dd($r->all());
-		$trip = Trip::find($r->trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->status_id = 3028;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3081]);
-		return response()->json(['success' => true]);
+	public function approveTrip(Request $r) {
+		return Trip::approveTrip($r);
 	}
 
-	public function rejectTripVerification(Request $r) {
+	public function rejectTrip(Request $r) {
+		return Trip::rejectTrip($r);
 
-		$trip = Trip::find($r->trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->rejection_id = $r->reject_id;
-		$trip->rejection_remarks = $r->remarks;
-		$trip->status_id = 3022;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3082]);
-		return response()->json(['success' => true]);
 	}
 
 }

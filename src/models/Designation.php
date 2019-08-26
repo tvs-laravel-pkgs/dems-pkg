@@ -9,11 +9,22 @@ class Designation extends Model {
 	protected $table = 'designations';
 	protected $fillable = [
 		'id',
+		'company_id',
 		'name',
-		'code',
 	];
 
 	public static function designationList() {
 		return Designation::select('id', 'name')->get()->keyBy('id');
+	}
+
+	public static function create($company, $admin) {
+		for ($i = 1; $i < 15; $i++) {
+			$designation = Designation::firstOrNew([
+				'company_id' => $company->id,
+				'name' => 'c' . $company->id . '/d' . $i,
+			]);
+			$designation->created_by = $admin->id;
+			$designation->save();
+		}
 	}
 }

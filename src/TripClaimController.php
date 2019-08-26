@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\EmployeeClaim;
-use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\NCity;
@@ -70,66 +69,8 @@ class TripClaimController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraTripClaimFormData($trip_id = NULL) {
-		if (!$trip_id) {
-			$this->data['success'] = false;
-			$this->data['message'] = 'Trip not found';
-			$this->data['employee'] = [];
-		} else {
-			$trip = Trip::with(
-				'selfVisits',
-				'purpose',
-				'lodgings',
-				'boardings',
-				'localTravels',
-				'selfVisits.fromCity',
-				'selfVisits.toCity',
-				'selfVisits.travelMode',
-				'selfVisits.bookingMethod',
-				'selfVisits.selfBooking',
-				'selfVisits.agent',
-				'selfVisits.status',
-				'selfVisits.attachments'
-			)->find($trip_id);
-			if (!$trip) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
-			}
-
-			$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
-			$this->data['success'] = true;
-
-			$this->data['employee'] = $employee = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
-				->leftjoin('designations', 'designations.id', 'employees.designation_id')
-				->leftjoin('entities', 'entities.id', 'employees.grade_id')
-				->where('employees.id', $trip->employee_id)->first();
-
-			$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
-				->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
-			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
-			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
-		}
-
-		if (!empty($to_cities)) {
-			$city_list = collect(NCity::select('id', 'name')->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
-		} else {
-			$city_list = [];
-		}
-		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
-		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
-		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
-		$stay_type_list = collect(Entity::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
-
-		$this->data['extras'] = [
-			'purpose_list' => $purpose_list,
-			'travel_mode_list' => $travel_mode_list,
-			'city_list' => $city_list,
-			'stay_type_list' => $stay_type_list,
-			'booking_type_list' => $booking_type_list,
-		];
-		$this->data['trip'] = $trip;
-
-		return response()->json($this->data);
+	public function eyatraTripClaimFormData($trip_id) {
+		return Trip::getClaimFormData($trip_id);
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
@@ -174,10 +115,17 @@ class TripClaimController extends Controller {
 						$visit->save();
 
 						//UPDATE VISIT BOOKING STATUS
-						$visit_booking = VisitBooking::where('visit_id', $visit_data['id'])->first();
+						$visit_booking = VisitBooking::firstOrNew('visit_id', $visit_data['id']);
+						$visit_booking->visit_id = $visit_data['id'];
+						$visit_booking->type_id = 3100;
+						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
+						$visit_booking->reference_number = $visit_data['remarks'];
 						$visit_booking->amount = $visit_data['amount'];
 						$visit_booking->tax = $visit_data['tax'];
+						$visit_booking->service_charge = '0.00';
 						$visit_booking->total = $visit_data['total'];
+						$visit_booking->paid_amount = $visit_data['paid_amount'];
+						$visit_booking->created_by = Auth::user()->entity_id;
 						$visit_booking->status_id = 3241; //Claimed
 						$visit_booking->save();
 					}
@@ -387,8 +335,8 @@ class TripClaimController extends Controller {
 			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
 			$this->data['local_travels_total_amount'] = $local_travels_total_amount;
 
-			$this->data['total_amount'] = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
-
+			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
 			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 			$this->data['success'] = true;

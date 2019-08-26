@@ -3,7 +3,6 @@
 namespace Uitoux\EYatra\Database\Seeds;
 
 use App\Config;
-use App\ConfigType;
 use Illuminate\Database\Seeder;
 
 class EYatraConfigSeeder extends Seeder {
@@ -92,7 +91,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 501,
 			],
 			3029 => [
-				'name' => 'Senior Manager Approval Pending',
+				'name' => 'Senior Manager Claim Approval Pending',
 				'config_type_id' => 501,
 			],
 
@@ -248,11 +247,15 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 512,
 			],
 			3224 => [
-				'name' => 'Senior Manager Approval Pending',
+				'name' => 'Senior Manager Claim Approval Pending',
 				'config_type_id' => 512,
 			],
 			3225 => [
 				'name' => 'Paid',
+				'config_type_id' => 512,
+			],
+			3226 => [
+				'name' => 'Claim Rejected',
 				'config_type_id' => 512,
 			],
 
@@ -325,10 +328,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Reimbursement Claim',
 				'config_type_id' => 517,
 			],
-			3271 => [
-				'name' => 'Cash Topup',
-				'config_type_id' => 517,
-			],
+			// 3271 => [
+			// 	'name' => 'Cash Topup',
+			// 	'config_type_id' => 517,
+			// ],
 
 			//PETTY CASH
 			3280 => [
@@ -352,13 +355,13 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 518,
 			],
 		];
-		foreach ($config_types as $config_type_id => $config_type_name) {
-			$config_type = ConfigType::firstOrNew([
-				'id' => $config_type_id,
-			]);
-			$config_type->name = $config_type_name;
-			$config_type->save();
-		}
+		// foreach ($config_types as $config_type_id => $config_type_name) {
+		// 	$config_type = ConfigType::firstOrNew([
+		// 		'id' => $config_type_id,
+		// 	]);
+		// 	$config_type->name = $config_type_name;
+		// 	$config_type->save();
+		// }
 
 		foreach ($configs as $id => $config_data) {
 			$config = Config::firstOrNew([

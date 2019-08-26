@@ -6,6 +6,7 @@ use Auth;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Boarding;
+use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\Trip;
@@ -14,7 +15,7 @@ use Yajra\Datatables\Datatables;
 
 class TripClaimVerificationOneController extends Controller {
 	public function listEYatraTripClaimVerificationOneList(Request $r) {
-		$trips = Trip::from('trips')
+		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
@@ -32,7 +33,8 @@ class TripClaimVerificationOneController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->where('trips.status_id', 3023)
+			->where('ey_employee_claims.status_id', 3222) //CLAIM REQUESTED
+			->where('e.reporting_to_id', Auth::user()->entity_id) //MANAGER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -143,15 +145,62 @@ class TripClaimVerificationOneController extends Controller {
 			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
 			$this->data['local_travels_total_amount'] = $local_travels_total_amount;
 
-			$this->data['total_amount'] = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
-
+			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
 			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
+
+			$this->data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
+
 			$this->data['success'] = true;
 		}
 		$this->data['trip'] = $trip;
 
 		return response()->json($this->data);
+	}
+
+	public function approveTripClaimVerificationOne($trip_id) {
+
+		$trip = Trip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		if ($employee_claim->is_deviation == 0) {
+			$employee_claim->status_id = 3223; //Payment Pending
+			$trip->status_id = 3025; //Payment Pending
+		} else {
+			$employee_claim->status_id = 3224; //Senior Manager Approval Pending
+			$trip->status_id = 3029; //Senior Manager Approval Pending
+		}
+		$employee_claim->save();
+		$trip->save();
+		return response()->json(['success' => true]);
+	}
+
+	public function rejectTripClaimVerificationOne(Request $r) {
+
+		$trip = Trip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+
+		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim->status_id = 3226; //Claim Rejected
+		$employee_claim->save();
+
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
+		$trip->status_id = 3024; //Claim Rejected
+		$trip->save();
+
+		return response()->json(['success' => true]);
 	}
 
 }

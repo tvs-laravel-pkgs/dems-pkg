@@ -12,6 +12,7 @@ use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\AgentClaim;
 use Uitoux\EYatra\Company;
 use Uitoux\EYatra\Config;
+use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
@@ -140,6 +141,8 @@ class EYatraTC1Seeder extends Seeder {
 				],
 			],
 		];
+
+		Designation::create($company, $admin);
 		NCountry::create($countries, $admin, $company);
 		//NCountry::createDummies($admin);
 
