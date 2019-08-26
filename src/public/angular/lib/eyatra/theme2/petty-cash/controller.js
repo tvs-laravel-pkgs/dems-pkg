@@ -101,7 +101,7 @@ app.component('eyatraPettyCashForm', {
                 $location.path('/eyatra/petty-cash')
                 return;
             }
-            // console.log(response);
+            console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
