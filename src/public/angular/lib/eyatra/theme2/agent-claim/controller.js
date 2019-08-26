@@ -6,7 +6,7 @@ app.component('eyatraAgentClaimList', {
         // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -42,12 +42,19 @@ app.component('eyatraAgentClaimList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
+        /* $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
         $('.add_new_button').html(
             '<a href="#!/eyatra/agent/claim/add" type="button" class="btn btn-secondary">' +
             'Add New' +
             '</a>'
-        );
+        ); */
+        /* Search Block */
+        setTimeout(function () {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('agent_claim_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left+'px';
+        }, 500);
         $scope.deleteAgentClaimconfirm = function($id) {
             $('#delete_agent_claim').val($id);
         }
@@ -107,7 +114,7 @@ app.component('eyatraAgentClaimForm', {
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             self.gstin_tax = response.data.gstin_tax;
-            // console.log(self.booking_list);
+            console.log(self.booking_list);
             if (self.action == 'Edit') {
                 var total = 0;
                 $.each(self.booking_list, function(key, value) {
@@ -350,23 +357,23 @@ app.component('eyatraAgentClaimView', {
             self.count = self.booking_list.length;
         });
         $rootScope.loading = false;
-        setTimeout(function () {
+        setTimeout(function() {
             var heights = new Array();
             // Loop to get all element Widths
-            $('.equal-column').each(function() {    
+            $('.equal-column').each(function() {
                 // Need to let sizes be whatever they want so no overflow on resize
                 // Then add size (no units) to array
                 heights.push($(this).height());
             });
             // Find max Width of all elements
-            var max = Math.max.apply( Math, heights);
+            var max = Math.max.apply(Math, heights);
             // Set all Width to max Width
             $('.equal-column').each(function() {
                 $(this).css('height', max + 'px');
                 // Note: IF box-sizing is border-box, would need to manually add border and padding to Width (or tallest element will overflow by amount of vertical border + vertical padding)
-            });    
+            });
         }, 1000);
-        
+
     }
 });
 

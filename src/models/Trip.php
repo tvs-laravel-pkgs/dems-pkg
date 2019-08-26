@@ -151,7 +151,6 @@ class Trip extends Model {
 				foreach ($request->visits as $key => $visit_data) {
 					//if no agent found display visit count
 					// dd(Auth::user()->entity->outlet->address);
-
 					$visit_count = $i + 1;
 					if ($i == 0) {
 						$from_city_id = Auth::user()->entity->outlet->address->city->id;
@@ -163,7 +162,7 @@ class Trip extends Model {
 					$visit->fill($visit_data);
 					// dump($visit_data['date']);
 					// dump(Carbon::createFromFormat('d/m/Y', $visit_data['date']));
-					$visit->date = Carbon::createFromFormat('d/m/Y', $visit_data['date']);
+					$visit->date = date('Y-m-d', strtotime($visit_data['date']));
 					// dd($visit);
 					$visit->from_city_id = $from_city_id;
 					$visit->trip_id = $trip->id;

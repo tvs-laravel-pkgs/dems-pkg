@@ -42,7 +42,12 @@ app.component('eyatraTripBookingRequests', {
                 $(row).addClass('highlight-row');
             }
         });
+
+        /* Search Block */
+
+
         $('.dataTables_length select').select2();
+
         // $('.page-header-content .display-inline-block .data-table-title').html('Trip Requests');
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
@@ -75,6 +80,9 @@ app.component('eyatraTripBookingRequests', {
             $('#status_id').val(null);
             dataTableFilter.fnFilter();
         }
+
+        /* $('.page-header-content .display-inline-block .data-table-title').html('Trip Requests');
+        $('.add_new_button').html(); */
         $rootScope.loading = false;
 
     }
