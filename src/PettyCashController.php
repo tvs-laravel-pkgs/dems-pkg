@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Storage;
 use Uitoux\EYatra\Employee;
@@ -27,6 +28,7 @@ class PettyCashController extends Controller {
 			->leftJoin('configs', 'configs.id', 'petty_cash.status_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->where('petty_cash.employee_id', Auth::user()->entity_id)
 			->orderBy('petty_cash.id', 'desc')
 		;
 
@@ -103,7 +105,15 @@ class PettyCashController extends Controller {
 		];
 		$this->data['petty_cash'] = $petty_cash;
 		$this->data['petty_cash_other'] = $petty_cash_other;
-
+		$emp_details = [];
+		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
+			$user_role = 'Cashier';
+		} else {
+			$user_role = 'Employee';
+			$emp_details = Employee::where('id', Auth::user()->entity_id)->first();
+		}
+		$this->data['user_role'] = $user_role;
+		$this->data['emp_details'] = $emp_details;
 		return response()->json($this->data);
 	}
 
