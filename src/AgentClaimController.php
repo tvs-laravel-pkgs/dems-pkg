@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Storage;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\AgentClaim;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\VisitBooking;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -274,6 +275,10 @@ class AgentClaimController extends Controller {
 
 	public function listFinanceEYatraAgentClaimList(Request $r) {
 
+		$created_date_filter = date('Y-m-d', strtotime($r->created_date));
+		$invoice_date_filter = date('Y-m-d', strtotime($r->invoice_date));
+		$Agent_name = $r->Agent_name;
+		$Agent_status = $r->Agent_status;
 		$agent_claim_list = Agentclaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
@@ -287,6 +292,26 @@ class AgentClaimController extends Controller {
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
 		// ->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
+			->where(function ($query) use ($created_date_filter) {
+				if ($created_date_filter != "1970-01-01") {
+					$query->whereDate('ey_agent_claims.created_at', '=', $created_date_filter);
+				}
+			})
+			->where(function ($query) use ($Agent_name) {
+				if ($Agent_name != Null) {
+					$query->where('ey_agent_claims.agent_id', '=', $Agent_name);
+				}
+			})
+			->where(function ($query) use ($Agent_status) {
+				if ($Agent_status != Null) {
+					$query->where('ey_agent_claims.status_id', '=', $Agent_status);
+				}
+			})
+			->where(function ($query) use ($invoice_date_filter) {
+				if ($invoice_date_filter != "1970-01-01") {
+					$query->whereDate('ey_agent_claims.invoice_date', '=', $invoice_date_filter);
+				}
+			})
 			->orderBy('ey_agent_claims.id', 'desc');
 		// ->get();
 
@@ -308,6 +333,19 @@ class AgentClaimController extends Controller {
 			->make(true);
 	}
 
+	public function filter_data() {
+
+		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'agents.name', 'agents.id')
+			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
+			->groupBy('agents.name')
+			->orderBy('ey_agent_claims.id', 'desc')
+			->get();
+		$this->data['status'] = $status = Config::select('name', 'id')
+			->where('config_type_id', '=', 512)
+			->get();
+
+		return response()->json($this->data);
+	}
 	public function viewEYatraFinanceAgentClaim($agent_claim_id) {
 		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->join('configs', 'configs.id', 'ey_agent_claims.status_id')->select(
