@@ -456,35 +456,35 @@ class Trip extends Model {
 		// } else {
 		$data = [];
 		$trip = Trip::with(
-			'visits' => function ($q) {
+			['visits' => function ($q) {
 				$q->orderBy('visits.id');
 			},
-			'visits.fromCity',
-			'visits.toCity',
-			'visits.travelMode',
-			'visits.bookingMethod',
-			'visits.bookingStatus',
-			'visits.agent',
-			'visits.status',
-			'visits.managerVerificationStatus',
-			'employee',
-			'purpose',
-			'status',
+				'visits.fromCity',
+				'visits.toCity',
+				'visits.travelMode',
+				'visits.bookingMethod',
+				'visits.bookingStatus',
+				'visits.agent',
+				'visits.status',
+				'visits.managerVerificationStatus',
+				'employee',
+				'purpose',
+				'status',
 
-			'selfVisits',
-			'lodgings',
-			'boardings',
-			'localTravels',
-			'selfVisits.fromCity',
-			'selfVisits.toCity',
-			'selfVisits.travelMode',
-			'selfVisits.bookingMethod',
-			'selfVisits.selfBooking',
-			'selfVisits.agent',
-			'selfVisits.status',
-			'selfVisits.attachments'
+				'selfVisits',
+				'lodgings',
+				'boardings',
+				'localTravels',
+				'selfVisits.fromCity',
+				'selfVisits.toCity',
+				'selfVisits.travelMode',
+				'selfVisits.bookingMethod',
+				'selfVisits.selfBooking',
+				'selfVisits.agent',
+				'selfVisits.status',
+				'selfVisits.attachments',
 
-		)->find($trip_id);
+			])->find($trip_id);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
