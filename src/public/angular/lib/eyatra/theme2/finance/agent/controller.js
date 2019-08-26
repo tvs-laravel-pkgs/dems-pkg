@@ -3,91 +3,130 @@ app.component('eyatraAgentClaimVerificationList', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#eyatra_finance_agent_claim_list_table').DataTable({
-            stateSave: true,
-            "dom": dom_structure_separate_2,
-            "language": {
-                "search": "",
-                "searchPlaceholder": "Search",
-                "lengthMenu": "Rows Per Page _MENU_",
-                "paginate": {
-                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
-                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+
+        $eyatra_agent_data = eyatra_agent_data_url;
+        $http.get(
+            $eyatra_agent_data
+        ).then(function(response) {
+            console.log();
+            self.agent_claim_data = response.data.agent_claim_data;
+            self.status = response.data.status;
+
+            var dataTable = $('#eyatra_finance_agent_claim_list_table').DataTable({
+                stateSave: true,
+                "dom": dom_structure_separate_2,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search",
+                    "lengthMenu": "Rows Per Page _MENU_",
+                    "paginate": {
+                        "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                        "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                    },
                 },
-            },
-            pageLength: 10,
-            processing: true,
-            serverSide: true,
-            paging: true,
-            ordering: false,
-            ajax: {
-                url: laravel_routes['listFinanceEYatraAgentClaimList'],
-                type: "GET",
-                dataType: "json",
-                data: function(d) {}
-            },
-            columns: [
-                { data: 'action', searchable: false, class: 'action' },
-                { data: 'date', name: 'ey_agent_claims.invoice_date', searchable: false },
-                { data: 'number', name: 'ey_agent_claims.number', searchable: true },
-                { data: 'agent_code', name: 'agents.code', searchable: true },
-                { data: 'agent_name', name: 'agents.name', searchable: true },
-                { data: 'invoice_number', name: 'ey_agent_claims.invoice_number', searchable: true },
-                { data: 'invoice_date', name: 'ey_agent_claims.invoice_date', searchable: true },
-                { data: 'invoice_amount', name: 'ey_agent_claims.invoice_amount', searchable: true },
-                { data: 'status', name: 'configs.name', searchable: true },
-            ],
-            rowCallback: function(row, data) {
-                $(row).addClass('highlight-row');
-            }
-        });
-        $('.dataTables_length select').select2();
-        /* $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
-        $('.add_new_button').html(); */
-
-        /* Search Block */
-        setTimeout(function() {
-            var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_finance_agent_claim_list_table_filter');
-            /* var d = $('.search-block-hide-inner .dataTables_filter').position(); */
-            /* alert("Top: " + x.top + " Left: " + x.left); */
-            /* x.top = x.top + 7; */
-            x.left = x.left + 15;
-            /* d.style.position = "absolute"; */
-            d.style.left = x.left + 'px';
-            /* d.style.top = x.top+'px'; */
-        }, 500);
-
-        $scope.deleteTrip = function(id) {
-            $('#del').val(id);
-        }
-        $scope.confirmDeleteTrip = function() {
-            $id = $('#del').val();
-            $http.get(
-                trip_delete_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                pageLength: 10,
+                processing: true,
+                serverSide: true,
+                paging: true,
+                ordering: false,
+                ajax: {
+                    url: laravel_routes['listFinanceEYatraAgentClaimList'],
+                    type: "GET",
+                    dataType: "json",
+                    data: function(d) {
+                        d.created_date = $('#created_date_filter').val();
+                        d.invoice_date = $('#invoice_date_filter').val();
+                        d.Agent_name = $('#Agent_id').val();
+                        d.Agent_status = $('#Status_id').val();
                     }
-                    new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors
-                    }).show();
-                } else {
-                    new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trips Deleted Successfully',
-                    }).show();
-                    $('#delete_emp').modal('hide');
-                    dataTable.ajax.reload(function(json) {});
+                },
+                columns: [
+                    { data: 'action', searchable: false, class: 'action' },
+                    { data: 'date', name: 'ey_agent_claims.invoice_date', searchable: false },
+                    { data: 'number', name: 'ey_agent_claims.number', searchable: true },
+                    { data: 'agent_code', name: 'agents.code', searchable: true },
+                    { data: 'agent_name', name: 'agents.name', searchable: true },
+                    { data: 'invoice_number', name: 'ey_agent_claims.invoice_number', searchable: true },
+                    { data: 'invoice_date', name: 'ey_agent_claims.invoice_date', searchable: true },
+                    { data: 'invoice_amount', name: 'ey_agent_claims.invoice_amount', searchable: true },
+                    { data: 'status', name: 'configs.name', searchable: true },
+                ],
+                rowCallback: function(row, data) {
+                    $(row).addClass('highlight-row');
                 }
             });
-        }
-        $rootScope.loading = false;
+            $('.dataTables_length select').select2();
+            $('.page-header-content .display-inline-block .data-table-title').html('Claimed Trips');
+            $('.add_new_button').html();
+
+            $('#created_date_filter').change(function() {
+
+                dataTable.draw();
+            });
+            $('#invoice_date_filter').change(function() {
+
+                dataTable.draw();
+            });
+            $scope.getAgentClaimId = function(id) {
+                $('#Agent_id').val(id);
+                dataTable.draw();
+            }
+            $scope.getAgentStatusId = function(id) {
+                $('#Status_id').val(id);
+                dataTable.draw();
+            }
+            $('#reset_values').click(function() {
+                $('#Agent_id').val('');
+                $('#Status_id').val('');
+                $('#invoice_date_filter').val('');
+                $('#created_date_filter').val('');
+                dataTable.draw();
+            });
+
+            /* Search Block */
+            setTimeout(function() {
+                var x = $('.separate-page-header-inner.search .custom-filter').position();
+                var d = document.getElementById('eyatra_finance_agent_claim_list_table_filter');
+                /* var d = $('.search-block-hide-inner .dataTables_filter').position(); */
+                /* alert("Top: " + x.top + " Left: " + x.left); */
+                /* x.top = x.top + 7; */
+                x.left = x.left + 15;
+                /* d.style.position = "absolute"; */
+                d.style.left = x.left + 'px';
+                /* d.style.top = x.top+'px'; */
+            }, 500);
+
+            $scope.deleteTrip = function(id) {
+                $('#del').val(id);
+            }
+            $scope.confirmDeleteTrip = function() {
+                $id = $('#del').val();
+                $http.get(
+                    trip_delete_url + '/' + $id,
+                ).then(function(response) {
+                    if (!response.data.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        new Noty({
+                            type: 'error',
+                            layout: 'topRight',
+                            text: errors
+                        }).show();
+                    } else {
+                        new Noty({
+                            type: 'success',
+                            layout: 'topRight',
+                            text: 'Trips Deleted Successfully',
+                        }).show();
+                        $('#delete_emp').modal('hide');
+                        dataTable.ajax.reload(function(json) {});
+                    }
+                });
+            }
+            $rootScope.loading = false;
+        });
 
     }
 });

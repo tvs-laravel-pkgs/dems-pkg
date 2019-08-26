@@ -99,12 +99,12 @@ app.component('eyatraTrips', {
         $scope.confirmDeleteTrip = function() {
             $id = $('#del').val();
             $http.get(
-                eyatra_trip_claim_delete_url + '/' + $id,
+                trip_delete_url + '/' + $id,
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                    for (var i in response.data.errors) {
+                        errors += '<li>' + response.data.errors[i] + '</li>';
                     }
                     new Noty({
                         type: 'error',
@@ -159,6 +159,12 @@ app.component('eyatraTripForm', {
             self.trip = response.data.trip;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            if (self.action == 'New') {
+                self.trip.visits[0].booking_method = 'Self';
+                self.trip.visits.push({
+                    booking_method: 'Self'
+                });
+            }
             $rootScope.loading = false;
             $scope.showBank = false;
             $scope.showCheque = false;
@@ -539,7 +545,7 @@ app.component('eyatraTripVisitView', {
             self.visit = response.data.visit;
             self.trip = response.data.trip;
             self.bookings = response.data.bookings;
-            // console.log(response.data.trip);
+            console.log(response.data.bookings);
             $rootScope.loading = false;
 
         });

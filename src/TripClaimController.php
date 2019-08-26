@@ -59,11 +59,7 @@ class TripClaimController extends Controller {
 				</a>
 				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_claimed_trip"
-				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
-                </a>';
+				</a>';
 
 			})
 			->make(true);
@@ -352,7 +348,7 @@ class TripClaimController extends Controller {
 		if ($agent_visits_booked) {
 			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
 		}
-		$trip = Trip::where('id', $trip_id)->delete();
+		$trip = Trip::where('id', $trip_id)->forceDelete();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
