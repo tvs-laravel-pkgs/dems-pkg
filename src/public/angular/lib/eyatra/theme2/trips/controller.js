@@ -329,6 +329,7 @@ app.component('eyatraTripView', {
     templateUrl: trip_view_template_url,
 
     controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
+
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -336,6 +337,7 @@ app.component('eyatraTripView', {
         ).then(function(response) {
             self.trip = response.data.trip;
         });
+
 
         //REQUEST AGENT FOR CANCEL VISIT BOOKING
         $scope.requestVisitBookingPopup = function(visit_id) {
@@ -510,6 +512,7 @@ app.component('eyatraTripView', {
 app.component('eyatraTripVisitView', {
     templateUrl: trip_visit_view_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+
         if (typeof($routeParams.visit_id) == 'undefined') {
             $location.path('/eyatra/trips')
             $scope.$apply()
@@ -532,6 +535,7 @@ app.component('eyatraTripVisitView', {
                 $scope.$apply()
                 return;
             }
+            //console.log(response.data.visit)
             self.visit = response.data.visit;
             self.trip = response.data.trip;
             self.bookings = response.data.bookings;

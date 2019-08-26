@@ -25,11 +25,13 @@ class AgentController extends Controller {
 		$option->id = NULL;
 		$this->data['agent_list'] = $agent_list = Agent::select(DB::raw('concat(code, " / " ,name) as name,id'))->where('company_id', Auth::user()->company_id)->get();
 		$this->data['agent_list'] = $agent_list->prepend($option);
-		// $option = new Entity;
-		// $option->name = 'Select Travel Mode';
-		// $option->id = NULL;
-		// $this->data['tm_list'] = $tm_list = Entity::travelModeList();
-		// $this->data['tm_list'] = $tm_list->prepend($option);
+
+		$option = new Entity;
+		$option->name = 'Select Travel Mode';
+		$option->id = NULL;
+		$this->data['tm_list'] = $tm_list = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
+
+		$this->data['tm_list'] = $tm_list->prepend($option);
 
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
@@ -41,10 +43,17 @@ class AgentController extends Controller {
 	}
 
 	public function listEYatraAgent(Request $r) {
+
 		if (!empty($r->agent)) {
 			$agent = $r->agent;
 		} else {
 			$agent = null;
+		}
+
+		if (!empty($r->tm)) {
+			$tm = $r->tm;
+		} else {
+			$tm = null;
 		}
 		if (!empty($request->status)) {
 			$status = $request->status;
@@ -69,11 +78,11 @@ class AgentController extends Controller {
 					$query->where('agents.id', $agent);
 				}
 			})
-		// ->where(function ($query) use ($r) {
-		// 	if ($r->get('agent_id')) {
-		// 		$query->where("agents.id", $r->get('agent_id'))->orWhere(DB::raw("-1"), $r->get('agent_id'));
-		// 	}
-		// })
+			->where(function ($query) use ($r, $tm) {
+				if (!empty($tm)) {
+					$query->where('tm.id', $tm);
+				}
+			})
 			->where(function ($query) use ($r, $status) {
 				if ($status == '2') {
 					$query->whereNull('agents.deleted_at');

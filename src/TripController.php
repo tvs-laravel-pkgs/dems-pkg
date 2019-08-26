@@ -177,6 +177,7 @@ class TripController extends Controller {
 	public function visitFormData($visit_id) {
 
 		$visit = Visit::find($visit_id);
+		//dd($visit);
 		if (!$visit) {
 			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
 		}
@@ -190,10 +191,22 @@ class TripController extends Controller {
 			'bookingStatus',
 			'agent',
 			'status',
+			'attachments',
 			'managerVerificationStatus',
 			'trip.employee',
 			'trip.purpose',
 			'trip.status',
+			'trip.lodgings',
+			'trip.lodgings.city',
+			'trip.lodgings.stateType',
+			'trip.boardings',
+			'trip.boardings.city',
+			'trip.boardings.attachments',
+			'trip.localTravels',
+			'trip.localTravels.fromCity',
+			'trip.localTravels.toCity',
+			'trip.localTravels.travelMode',
+			'trip.localTravels.attachments'
 		];
 
 		//Booking Status
