@@ -825,6 +825,18 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-indv-expense-vouchers',
 				'display_name' => 'Expense Vouchers',
 			],
+			5581 => [
+				'display_order' => 8,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers-verification1',
+				'display_name' => 'Expense Vouchers Verfication1',
+			],
+			5582 => [
+				'display_order' => 9,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers-verification2',
+				'display_name' => 'Expense Vouchers Verfication2',
+			],
 
 		];
 
