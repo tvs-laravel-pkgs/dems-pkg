@@ -5,7 +5,7 @@ app.component('eyatraTripBookingRequests', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_booking_requests_table').DataTable({
             stateSave: true,
-            "dom": dom_structure,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -39,9 +39,18 @@ app.component('eyatraTripBookingRequests', {
                 $(row).addClass('highlight-row');
             }
         });
+
+        /* Search Block */
+        setTimeout(function () {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_trip_booking_requests_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left+'px';
+        }, 500);
+
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Trip Requests');
-        $('.add_new_button').html();
+        /* $('.page-header-content .display-inline-block .data-table-title').html('Trip Requests');
+        $('.add_new_button').html(); */
         $rootScope.loading = false;
 
     }
