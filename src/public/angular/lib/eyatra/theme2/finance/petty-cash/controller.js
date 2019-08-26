@@ -55,7 +55,7 @@ app.component('eyatraPettyCashManagerView', {
         $http.get(
             petty_cash_manager_view_url + '/' + $routeParams.pettycash_id
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.petty_cash = response.data.petty_cash;
             self.petty_cash_other = response.data.petty_cash_other;
             self.rejection_list = response.data.rejection_list;
@@ -109,7 +109,7 @@ app.component('eyatraPettyCashManagerView', {
                             }).show();
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/manager/verification')
+                                $location.path('/eyatra/petty-cash/verification1')
                             }, 500);
                         }
                     })
@@ -161,7 +161,7 @@ app.component('eyatraPettyCashManagerView', {
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/manager/verification')
+                                $location.path('/eyatra/petty-cash/verification1')
                             }, 500);
                         }
                     })

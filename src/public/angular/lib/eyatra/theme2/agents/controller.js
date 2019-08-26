@@ -5,7 +5,7 @@ app.component('eyatraAgents', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#agent_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,11 +24,15 @@ app.component('eyatraAgents', {
                 url: laravel_routes['listEYatraAgent'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    // d.agent = $('#agent_id').val();
+                    d.tm = $('#tm_id').val();
+                    d.status_id = $('#status').val();
+                }
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action text-left' },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'agents.code', searchable: true },
                 { data: 'name', name: 'agents.name', searchable: true },
                 { data: 'gstin', name: 'agents.gstin', searchable: true },
@@ -47,12 +51,40 @@ app.component('eyatraAgents', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Agents</p><h3 class="title">Agents</h3>');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/agent/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-agent\')">' +
-            'Add New' +
-            '</a>'
-        );
+
+        $http.get(
+            agents_filter_url
+        ).then(function(response) {
+            // console.log(response.data);
+            self.agent_list = response.data.agent_list;
+            self.tm_list = response.data.tm_list;
+            self.status_list = response.data.status_list;
+            // $rootScope.loading = false;
+        });
+        var dataTableFilter = $('#agent_list').dataTable();
+
+        // $scope.onselectAgent = function(id) {
+        //     //alert(query);
+        //     $('#agent_id').val(id);
+        //     dataTableFilter.fnFilter();
+        // }
+        $scope.onselectTravelMode = function(id) {
+            $('#tm_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectStatus = function(id) {
+            $('#status').val(id);
+            dataTableFilter.fnFilter();
+        }
+
+        $scope.reset_filter = function() {
+            // $('#agent_id').val(null);
+            $('#tm_id').val(null);
+            $('#status').val(null);
+            dataTableFilter.fnFilter();
+        }
+        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Agents</p><h3 class="title">Agents</h3>');
+        // $('.add_new_button').html()
         $scope.deleteAgentConfirm = function($id) {
             $("#deleteAgent_id").val($id);
         }

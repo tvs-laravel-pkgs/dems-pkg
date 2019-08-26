@@ -637,6 +637,13 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Employee Claim Verification 2',
 			],
 
+			5521 => [
+				'display_order' => 6,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-financier-claims-verification3',
+				'display_name' => 'Financier Claim Verification 3',
+			],
+
 			5540 => [
 				'display_order' => 6,
 				'parent_id' => 5001,
@@ -817,6 +824,18 @@ class EYatraPermissionSeeder extends Seeder {
 				'parent_id' => 5001,
 				'name' => 'eyatra-indv-expense-vouchers',
 				'display_name' => 'Expense Vouchers',
+			],
+			5581 => [
+				'display_order' => 8,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers-verification1',
+				'display_name' => 'Expense Vouchers Verfication1',
+			],
+			5582 => [
+				'display_order' => 9,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers-verification2',
+				'display_name' => 'Expense Vouchers Verfication2',
 			],
 
 		];

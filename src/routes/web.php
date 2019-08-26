@@ -53,6 +53,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/coa-code/save', 'Uitoux\EYatra\CoaCodeController@saveEYatraCoaCode')->name('saveEYatraCoaCode');
 		Route::get('eyatra/coa-code/view/{coa_code_id}', 'Uitoux\EYatra\CoaCodeController@viewEYatraCoaCode')->name('viewEYatraCoaCode');
 		Route::get('eyatra/coa-code/delete/{coa_code_id}', 'Uitoux\EYatra\CoaCodeController@deleteEYatraCoaCode')->name('deleteEYatraCoaCode');
+		Route::get('eyatra/coa-code/filter', 'Uitoux\EYatra\CoaCodeController@eyatraCoaCodeFilter')->name('eyatraCoaCodeFilter');
 
 		//AGENTS
 		Route::get('eyatra/agent/get-list', 'Uitoux\EYatra\AgentController@listEYatraAgent')->name('listEYatraAgent');
@@ -60,6 +61,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/agent/save', 'Uitoux\EYatra\AgentController@saveEYatraAgent')->name('saveEYatraAgent');
 		Route::get('eyatra/agent/view/{agent_id}', 'Uitoux\EYatra\AgentController@viewEYatraAgent')->name('viewEYatraAgent');
 		Route::get('eyatra/agent/delete/{agent_id}', 'Uitoux\EYatra\AgentController@deleteEYatraAgent')->name('deleteEYatraAgent');
+
+		Route::get('eyatra/agent/filter', 'Uitoux\EYatra\AgentController@eyatraAgentsfilter')->name('eyatraAgentsfilter');
 
 		//STATES
 		Route::get('eyatra/state/get-list', 'Uitoux\EYatra\StateController@listEYatraState')->name('listEYatraState');
@@ -171,6 +174,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/agent/claim/save', 'Uitoux\EYatra\AgentClaimController@saveEYatraAgentClaim')->name('saveEYatraAgentClaim');
 		Route::get('eyatra/agent/claim/view/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@viewEYatraAgentClaim')->name('viewEYatraAgentClaim');
 		Route::get('eyatra/agent/claim/delete/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@deleteEYatraAgentClaim')->name('deleteEYatraAgentClaim');
+		Route::get('eyatra/agent/claim/filter_datas', 'Uitoux\EYatra\AgentClaimController@filter_data')->name('AgentClaim_filter_data');
 
 		//TRIP CLAIM
 		Route::get('eyatra/trip/claim/get-list', 'Uitoux\EYatra\TripClaimController@listEYatraTripClaimList')->name('listEYatraTripClaimList');
@@ -226,7 +230,9 @@ Route::group(['middleware' => ['web']], function () {
 
 		//PETTY CASH VERIFICATION VIEW FOR Finance
 		Route::get('eyatra/petty-cash/finance/get-list', 'Uitoux\EYatra\PettyCashFinanceVerificationController@listPettyCashVerificationFinance')->name('listPettyCashVerificationFinance');
+		Route::get('eyatra/petty-cash/finance/get-form-data/{pettycash_id?}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashfinanceFormData')->name('pettycashfinanceFormData');
 		Route::post('eyatra/petty-cash/finance/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationSave')->name('pettycashFinanceVerificationSave');
+		Route::post('eyatra/petty-cash/finance/form/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceSave')->name('pettycashFinanceSave');
 		Route::get('eyatra/petty-cash/finance/view/{pettycash_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationView')->name('pettycashFinanceVerificationView');
 	});
 });
