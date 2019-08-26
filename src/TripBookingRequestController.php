@@ -6,12 +6,34 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Config;
+use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 
 class TripBookingRequestController extends Controller {
+
+	public function filterEYatraTripBookingRequests() {
+		$this->data['employee_list'] = $employee_list = Employee::select(DB::raw('concat(code,"/",name) as name,id'))
+			->get();
+		$this->data['status_list'] = $status_list = Config::select('name', 'id')->where('config_type_id', 501)->get();
+
+		return response()->json($this->data);
+	}
+
 	public function listTripBookingRequests(Request $r) {
+		// dd($r->employee);
+		if (!empty($r->employee)) {
+			$employee = $r->employee;
+		} else {
+			$employee = null;
+		}
+		if (!empty($r->status)) {
+			$status = $r->status;
+		} else {
+			$status = null;
+		}
 
 		$visits = Trip::join('employees as e', 'e.id', 'trips.employee_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
@@ -25,6 +47,17 @@ class TripBookingRequestController extends Controller {
 				'a.name as agent',
 				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on')
 			)
+			->where(function ($query) use ($r, $employee) {
+				if (!empty($employee)) {
+					$query->where('e.id', $employee);
+				}
+			})
+
+			->where(function ($query) use ($r, $status) {
+				if (!empty($status)) {
+					$query->where('status.id', $status);
+				}
+			})
 			->groupBy('v.trip_id')
 			->orderBy('trips.created_at', 'desc')
 			->where('cb.company_id', Auth::user()->company_id)
@@ -72,12 +105,12 @@ class TripBookingRequestController extends Controller {
 		return Datatables::of($visits)
 			->addColumn('action', function ($visit) {
 
-				$img1 = asset('public/img/content/table/edit-yellow.svg');
-				$img2 = asset('public/img/content/table/eye.svg');
-				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
-				$img2_active = asset('public/img/content/table/eye-active.svg');
-				$img3 = asset('public/img/content/table/delete-default.svg');
-				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
 				<a href="#!/eyatra/trips/booking-requests/view/' . $visit->trip_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
