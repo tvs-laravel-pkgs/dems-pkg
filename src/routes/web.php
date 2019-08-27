@@ -46,6 +46,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/grade/save', 'Uitoux\EYatra\GradeController@saveEYatraGrade')->name('saveEYatraGrade');
 		Route::get('eyatra/grade/view/{grade_id}', 'Uitoux\EYatra\GradeController@viewEYatraGrade')->name('viewEYatraGrade');
 		Route::get('eyatra/grade/delete/{grade_id}', 'Uitoux\EYatra\GradeController@deleteEYatraGrade')->name('deleteEYatraGrade');
+		Route::get('eyatra/grade/filter', 'Uitoux\EYatra\GradeController@eyatraGradeFilter')->name('eyatraGradeFilter');
 
 		//COA-CODES
 		Route::get('eyatra/coa-code/get-list', 'Uitoux\EYatra\CoaCodeController@listEYatraCoaCode')->name('listEYatraCoaCode');
