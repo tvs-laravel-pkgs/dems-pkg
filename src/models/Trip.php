@@ -43,8 +43,13 @@ class Trip extends Model {
 	public function selfVisits() {
 		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
 	}
+
 	public function agentVisits() {
 		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+	}
+
+	public function cliam() {
+		return $this->hasOne('Uitoux\EYatra\EmployeeClaim');
 	}
 
 	public function advanceRequestPayment() {
@@ -287,13 +292,16 @@ class Trip extends Model {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->leftJoin('ey_employee_claims as claim', 'claim.trp_id', 'trips.id')
+
 			->select(
 				'trips.id',
 				'trips.number',
-				'e.code as ecode',
+				DB::raw('CONCAT(e.code," / ",e.name) as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				DB::raw('FORMAT(claim.total_amount,2) as claim_amount'),
 				//Changed to purpose_name. do not revert - Abdul
 				'purpose.name as purpose_name',
 				'trips.advance_received',
@@ -449,9 +457,9 @@ class Trip extends Model {
 
 	public static function getClaimFormData($trip_id) {
 		// if (!$trip_id) {
-		// 	$this->data['success'] = false;
-		// 	$this->data['message'] = 'Trip not found';
-		// 	$this->data['employee'] = [];
+		// 	$data['success'] = false;
+		// 	$data['message'] = 'Trip not found';
+		// 	$data['employee'] = [];
 		// } else {
 		$data = [];
 		$trip = Trip::with(
@@ -529,6 +537,111 @@ class Trip extends Model {
 			'stay_type_list' => $stay_type_list,
 			'booking_type_list' => $booking_type_list,
 		];
+		$data['trip'] = $trip;
+
+		return response()->json($data);
+	}
+
+	public static function getClaimViewData($trip_id) {
+		$data = [];
+		if (!$trip_id) {
+			$data['success'] = false;
+			$data['message'] = 'Trip not found';
+			return response()->json($data);
+		}
+
+		$trip = Trip::with(
+			'advanceRequestStatus',
+			'employee',
+			'employee.user',
+			'employee.grade',
+			'employee.designation',
+			'employee.reportingTo',
+			'employee.outlet',
+			'employee.Sbu',
+			'employee.Sbu.lob',
+			'selfVisits',
+			'purpose',
+			'lodgings',
+			'lodgings.city',
+			'lodgings.stateType',
+			'lodgings.attachments',
+			'boardings',
+			'boardings.city',
+			'boardings.attachments',
+			'localTravels',
+			'localTravels.fromCity',
+			'localTravels.toCity',
+			'localTravels.travelMode',
+			'localTravels.attachments',
+			'selfVisits.fromCity',
+			'selfVisits.toCity',
+			'selfVisits.travelMode',
+			'selfVisits.bookingMethod',
+			'selfVisits.selfBooking',
+			'selfVisits.agent',
+			'selfVisits.status',
+			'selfVisits.attachments'
+		)->find($trip_id);
+
+		if (!$trip) {
+			$data['success'] = false;
+			$data['message'] = 'Trip not found';
+		}
+		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
+			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
+
+		$transport_total = Visit::select(
+			DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as amount'),
+			DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as tax')
+		)
+			->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+			->where('visits.trip_id', $trip_id)
+			->groupby('visits.id')
+			->first();
+		$transport_total_amount = $transport_total ? $transport_total->amount : 0.00;
+		$transport_total_tax = $transport_total ? $transport_total->tax : 0.00;
+		$data['transport_total_amount'] = $transport_total_amount;
+
+		$lodging_total = Lodging::select(
+			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+			DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		)
+			->where('trip_id', $trip_id)
+			->groupby('trip_id')
+			->first();
+		$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
+		$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
+		$data['lodging_total_amount'] = $lodging_total_amount;
+
+		$boardings_total = Boarding::select(
+			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+			DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		)
+			->where('trip_id', $trip_id)
+			->groupby('trip_id')
+			->first();
+		$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
+		$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
+		$data['boardings_total_amount'] = $boardings_total_amount;
+
+		$local_travels_total = LocalTravel::select(
+			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+			DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		)
+			->where('trip_id', $trip_id)
+			->groupby('trip_id')
+			->first();
+		$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
+		$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
+		$data['local_travels_total_amount'] = $local_travels_total_amount;
+
+		$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+		$data['total_amount'] = number_format($total_amount, 2, '.', '');
+		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
+		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
+		$data['success'] = true;
+
 		$data['trip'] = $trip;
 
 		return response()->json($data);
