@@ -5,7 +5,7 @@ app.component('eyatraGrades', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_grade_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,11 +24,14 @@ app.component('eyatraGrades', {
                 url: laravel_routes['listEYatraGrade'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.advanced_eligibility = $('#adv_eligibility_id').val();
+                    d.status = $('#status').val();
+                }
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action' },
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'grade_name', name: 'entities.name', searchable: true },
                 { data: 'grade_eligiblity', searchable: false },
                 { data: 'expense_count', searchable: false },
@@ -42,13 +45,44 @@ app.component('eyatraGrades', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Grades</p><h3 class="title">Grades</h3>');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-grade\')">' +
-            'Add New' +
-            '</a>'
-        );
-        $rootScope.loading = false;
+        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Grades</p><h3 class="title">Grades</h3>');
+        // $('.add_new_button').html(
+        //     '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-grade\')">' +
+        //     'Add New' +
+        //     '</a>'
+        // );
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_grade_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        //Filter
+        $http.get(
+            grade_filter_url
+        ).then(function(response) {
+            console.log(response);
+            self.advanced_eligibility_list = response.data.advanced_eligibility_list;
+            self.status_list = response.data.status_list;
+            $rootScope.loading = false;
+        });
+        var dataTableFilter = $('#eyatra_grade_table').dataTable();
+        $scope.onselectAdvEligible = function(id) {
+            $('#adv_eligibility_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectStatus = function(id) {
+            $('#status').val(id);
+            dataTableFilter.fnFilter();
+        }
+
+        $scope.resetForm = function() {
+            $('#adv_eligibility_id').val(null);
+            $('#status').val(null);
+            dataTableFilter.fnFilter();
+        }
 
         $scope.deleteGrade = function($id) {
             $('#del').val($id);
@@ -78,6 +112,7 @@ app.component('eyatraGrades', {
                 dataTable.ajax.reload(function(json) {});
             });
         }
+        $rootScope.loading = false;
 
 
     }

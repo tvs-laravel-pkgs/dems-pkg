@@ -166,6 +166,13 @@ class PettyCashFinanceVerificationController extends Controller {
 
 		return response()->json($this->data);
 	}
+	public function pettycashFinanceVerificationgetEmployee($emp_id) {
+		$this->data['emp_details'] = $emp_details = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
+			->leftjoin('designations', 'designations.id', 'employees.designation_id')
+			->leftjoin('entities', 'entities.id', 'employees.grade_id')
+			->where('employees.id', $emp_id)->first();
+		return response()->json($this->data);
+	}
 
 	public function pettycashFinanceSave(Request $request) {
 		try {
@@ -187,8 +194,9 @@ class PettyCashFinanceVerificationController extends Controller {
 			}
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
 			$petty_cash_employee_edit->status_id = 3280;
-			$petty_cash_employee_edit->date = Carbon::now();
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
+			$petty_cash_employee_edit->created_at = Carbon::now();
+			$petty_cash_employee_edit->updated_at = NULL;
 			$petty_cash_employee_edit->save();
 			if ($request->petty_cash) {
 				if (!empty($request->petty_cash_removal_id)) {
@@ -277,11 +285,11 @@ class PettyCashFinanceVerificationController extends Controller {
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
-				$petty_cash_finance_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3283, 'remarks' => '', 'rejection_id' => NULL]);
+				$petty_cash_finance_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3283, 'remarks' => '', 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
-				$petty_cash_finance_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3284, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id]);
+				$petty_cash_finance_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3284, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
