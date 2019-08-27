@@ -44,7 +44,7 @@ app.component('eyatraPettyCashList', {
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Expense Voucher Claim</h3>');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/petty-cash/add" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+            '<a href="#!/eyatra/petty-cash/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
             'Add New' +
             '</a>'
         );
