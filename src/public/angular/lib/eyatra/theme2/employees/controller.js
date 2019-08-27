@@ -197,7 +197,23 @@ app.component('eyatraEmployeeForm', {
             }
         }
 
-
+        $scope.getDesignation = function(grade_id) {
+            if (grade_id) {
+                $.ajax({
+                        url: get_designation_by_grade,
+                        method: "POST",
+                        data: { grade_id: grade_id },
+                    })
+                    .done(function(res) {
+                        self.extras.designation_list = [];
+                        self.extras.designation_list = res.designation_list;
+                        $scope.$apply()
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
             if (payment_id == 3244) { //BANK
