@@ -5,7 +5,7 @@ app.component('eyatraOutletReimbursement', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#outlet_reimpursement_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -41,6 +41,13 @@ app.component('eyatraOutletReimbursement', {
         });
 
         $('.dataTables_length select').select2();
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('outlet_reimpursement_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
         var add_url = '#!/eyatra/entity/add/' + self.id;
         if (self.id) {
             $('.add_new_button').html(
@@ -181,16 +188,18 @@ app.component('eyatraEntityForm1', {
     }
 });
 
-app.component('eyatraEntityView', {
-    templateUrl: eyatra_entity_view_template_url,
+app.component('eyatraOutletReimbursementView', {
+    templateUrl: eyatra_outlet_reimpursement_view_template_url,
 
     controller: function($http, $location, $routeParams, HelperService, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            eyatra_entity_view_url + '/' + $routeParams.entity_id
+            eyatra_outlet_reimpursement_view_url + '/' + $routeParams.outlet_id,
         ).then(function(response) {
-            self.entity = response.data.entity;
+            console.log(response.data);
+            self.reimpurseimpurse_outlet_data = response.data.reimpurseimpurse_outlet_data;
+            self.reimpurseimpurse_transactions = response.data.reimpurseimpurse_transactions;
         });
     }
 });
