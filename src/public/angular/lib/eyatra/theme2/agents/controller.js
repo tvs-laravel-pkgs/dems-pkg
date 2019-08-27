@@ -298,7 +298,7 @@ app.component('eyatraAgentForm', {
                 'agent_name': {
                     required: true,
                     minlength: 3,
-                    maxlength: 191,
+                    maxlength: 255,
                 },
                 'gstin': {
                     minlength: 3,
@@ -383,21 +383,18 @@ app.component('eyatraAgentForm', {
             },
             messages: {
                 'agent_code': {
-                    required: 'Agent code is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'agent_name': {
-                    required: 'Agent name is required',
                     minlength: 'Please enter minimum of 3 letters',
-                    maxlength: 'Please enter maximum of 191 letters',
+                    maxlength: 'Please enter maximum of 255 letters',
                 },
                 'gstin': {
                     minlength: 'Enter Minimum 3 Characters!',
                     maxlength: 'Enter Maximum 20 Characters!',
                 },
                 'address_line1': {
-                    required: 'Address Line1 is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 255 letters',
                 },
@@ -405,50 +402,35 @@ app.component('eyatraAgentForm', {
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 255 letters',
                 },
-                'country': {
-                    required: 'Country is Required',
-                },
-                'state': {
-                    required: 'State is Required',
-                },
-                'city': {
-                    required: 'City is Required',
-                },
+
                 'pincode': {
-                    required: 'PinCode is Required',
                     minlength: 'Please enter minimum of 6 numbers',
                     maxlength: 'Please enter maximum of 6 letters',
                     numbers: 'Enter numbers only',
                 },
                 'mobile_number': {
-                    required: 'Enter Mobile Number',
                     minlength: 'Please enter minimum of 8 numbers',
                     maxlength: 'Please enter maximum of 10 letters',
                 },
                 'email': {
-                    email: 'Enter Valid Email',
                     minlength: 'Please enter minimum of 6 numbers',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'username': {
-                    required: 'Username is Required',
                     minlength: 'Please enter minimum of 4 numbers',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'password': {
-                    required: 'Password is required',
                     minlength: 'Please enter minimum of 5 numbers',
                     maxlength: 'Please enter maximum of 16 letters',
                 },
-                'travel_mode[]': {
-                    required: 'Travel mode is Required',
-                }
+
             },
             invalidHandler: function(event, validator) {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Please check in each tab and fix errors!'
+                    text: 'You have errors,Please check all tabs'
                 }).show();
             },
             submitHandler: function(form) {
