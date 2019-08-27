@@ -105,12 +105,13 @@ class PettyCashController extends Controller {
 		];
 		$this->data['petty_cash'] = $petty_cash;
 		$this->data['petty_cash_other'] = $petty_cash_other;
+		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
 		$emp_details = [];
 		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
 			$user_role = 'Cashier';
-		} else {
+		} else if (Entrust::can('eyatra-employees')) {
 			$user_role = 'Employee';
-			$emp_details = Employee::where('id', Auth::user()->entity_id)->first();
+			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id')->join('entities', 'entities.id', 'employees.grade_id')->where('employees.id', Auth::user()->entity_id)->first();
 		}
 		$this->data['user_role'] = $user_role;
 		$this->data['emp_details'] = $emp_details;
@@ -178,11 +179,16 @@ class PettyCashController extends Controller {
 			DB::beginTransaction();
 
 			$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
-			$petty_cash_employee_edit->employee_id = $request->employee_id;
+			if ($request->employee_id) {
+				$petty_cash_employee_edit->employee_id = $request->employee_id;
+			} else {
+				$petty_cash_employee_edit->employee_id = Auth::user()->entity_id;
+			}
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
 			$petty_cash_employee_edit->status_id = 3280;
 			$petty_cash_employee_edit->date = Carbon::now();
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
+			$petty_cash_employee_edit->updated_at = NULL;
 			$petty_cash_employee_edit->save();
 			if ($request->petty_cash) {
 				if (!empty($request->petty_cash_removal_id)) {

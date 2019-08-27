@@ -228,7 +228,7 @@ class Trip extends Model {
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date))+1 as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days;
@@ -499,7 +499,16 @@ class Trip extends Model {
 
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
-		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
+
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date))+1 as days'))->first();
+		$trip->start_date = $start_date->start_date;
+		$trip->end_date = $end_date->end_date;
+		$trip->days = $days->days;
+
+		//DONT REVERT - ABDUL
+		$trip->cities = $data['cities'] = count($travel_cities) > 0 ? trim(implode(', ', $travel_cities)) : '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 		// }
 
@@ -509,9 +518,9 @@ class Trip extends Model {
 			$city_list = [];
 		}
 		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
-		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
-		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
-		$stay_type_list = collect(Entity::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
+		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => -1, 'name' => 'Select Purpose']));
+		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => -1, 'name' => 'Select Travel Mode']));
+		$stay_type_list = collect(Entity::getLodgeStayTypeList()->prepend(['id' => -1, 'name' => 'Select Stay Type']));
 
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,

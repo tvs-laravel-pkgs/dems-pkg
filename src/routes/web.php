@@ -231,7 +231,10 @@ Route::group(['middleware' => ['web']], function () {
 
 		//PETTY CASH VERIFICATION VIEW FOR Finance
 		Route::get('eyatra/petty-cash/finance/get-list', 'Uitoux\EYatra\PettyCashFinanceVerificationController@listPettyCashVerificationFinance')->name('listPettyCashVerificationFinance');
+		Route::get('eyatra/petty-cash/finance/get-form-data/{pettycash_id?}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashfinanceFormData')->name('pettycashfinanceFormData');
 		Route::post('eyatra/petty-cash/finance/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationSave')->name('pettycashFinanceVerificationSave');
+		Route::post('eyatra/petty-cash/finance/form/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceSave')->name('pettycashFinanceSave');
 		Route::get('eyatra/petty-cash/finance/view/{pettycash_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationView')->name('pettycashFinanceVerificationView');
+		Route::get('eyatra/petty-cash/finance/employee_details/get/{emp_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationgetEmployee')->name('pettycashFinanceVerificationgetEmployee');
 	});
 });
