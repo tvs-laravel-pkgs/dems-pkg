@@ -44,7 +44,7 @@ app.component('eyatraPettyCashFinanceList', {
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Expense Voucher Claim</h3>');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/petty-cash/verification2/add" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'add-petty-cash-verification2\')">' +
+            '<a href="#!/eyatra/petty-cash/verification2/add" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers-verification2\')">' +
             'Add New' +
             '</a>'
         );
@@ -71,7 +71,7 @@ app.component('eyatraPettyCashFinanceForm', {
                 $location.path('/eyatra/petty-cash')
                 return;
             }
-            console.log(response);
+            // console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -103,8 +103,16 @@ app.component('eyatraPettyCashFinanceForm', {
             /* Datepicker With Current Date */
 
         });
-        self.selectempname = function(id) {
-            alert(id);
+        $scope.selectempname = function(id) {
+            if (id) {
+                $http.get(
+                    get_employee_details_finance + '/' + id
+                ).then(function(response) {
+                    self.employee_list = response.data.emp_details;
+                });
+            } else {
+                self.employee_list = '';
+            }
         }
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");

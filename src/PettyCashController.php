@@ -188,6 +188,7 @@ class PettyCashController extends Controller {
 			$petty_cash_employee_edit->status_id = 3280;
 			$petty_cash_employee_edit->date = Carbon::now();
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
+			$petty_cash_employee_edit->updated_at = NULL;
 			$petty_cash_employee_edit->save();
 			if ($request->petty_cash) {
 				if (!empty($request->petty_cash_removal_id)) {
