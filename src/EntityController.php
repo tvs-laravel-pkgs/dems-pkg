@@ -55,6 +55,14 @@ class EntityController extends Controller {
 				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
 
 			})
+			->addColumn('status', function ($entity) {
+				if ($entity->status == 'Inactive') {
+					return '<span style="color:#ea4335;">Inactive</span>';
+				} else {
+					return '<span style="color:#63ce63;">Active</span>';
+				}
+
+			})
 			->make(true);
 	}
 

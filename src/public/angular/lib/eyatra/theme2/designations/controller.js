@@ -114,25 +114,19 @@ app.component('eyatraDesignationForm', {
         var v = jQuery(form_id).validate({
             ignore: '',
             rules: {
-                'code': {
+
+                'name': {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
                 },
-                'name': {
-                    required: true,
-                    minlength: 3,
-                    maxlength: 80,
-                },
             },
             messages: {
-                'code': {
+
+                'name': {
+                    required: 'Designation name is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
-                },
-                'name': {
-                    minlength: 'Please enter minimum of 3 letters',
-                    maxlength: 'Please enter maximum of 80 letters',
                 },
             },
             submitHandler: function(form) {
