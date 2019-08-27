@@ -129,23 +129,23 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		}
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
-		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
-		$designation_list = collect(Designation::designationList())->prepend(['id' => '', 'name' => 'Select Designation']);
+		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
+		$designation_list = [];
 		// dd($designation_list);
 		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
 		$sbu_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
-			'grade_list' => $grade_list,
 			'payment_mode_list' => $payment_mode_list,
 			'wallet_mode_list' => $wallet_mode_list,
 			'role_list' => $role_list,
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
+			'grade_list' => $grade_list,
 			'designation_list' => $designation_list,
 		];
 		// dd($this->data['extras']);
@@ -322,7 +322,15 @@ class EmployeeController extends Controller {
 			->get();
 		return response()->json($manager_list);
 	}
+	public function getDesignationByGrade(Request $request) {
+		if (!empty($request->grade_id)) {
 
+			$designation_list = collect(Designation::where('grade_id', $request->grade_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Designation']);
+		} else {
+			$designation_list = [];
+		}
+		return response()->json(['designation_list' => $designation_list]);
+	}
 	public function getSbuByLob(Request $request) {
 		//dd($request);
 		if (!empty($request->lob_id)) {

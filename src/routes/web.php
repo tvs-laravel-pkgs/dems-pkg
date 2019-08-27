@@ -20,7 +20,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/verification/reject/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
 
 		//COMPLETED TRIP & CLAIM
-		Route::post('trip/completed/list', 'Uitoux\EYatra\Api\TripClaimController@listCompletedTrips');
+		Route::post('trip/claim/view/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimViewData');
 		Route::post('trip/claim/get-form-data/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
 
@@ -39,6 +39,14 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/entity/save/{entity_type_id}', 'Uitoux\EYatra\EntityController@saveEYatraEntity')->name('saveEYatraEntity');
 		Route::get('eyatra/entity/view/{entity_id}', 'Uitoux\EYatra\EntityController@viewEYatraEntity')->name('viewEYatraEntity');
 		Route::get('eyatra/entity/delete/{entity_id}', 'Uitoux\EYatra\EntityController@deleteEYatraEntity')->name('deleteEYatraEntity');
+
+		//REJECTION REASON ENTITIES
+		// Route::get('eyatra/rejection-reason-entity/get-list-data/{entity_type_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@getRejectionReasonEntityListData')->name('getRejectionReasonEntityListData');
+		// Route::get('eyatra/rejection-reason-entity/get-list', 'Uitoux\EYatra\rejectionReasonEntityController@listEYatraRejectionReasonEntity')->name('listEYatraRejectionReasonEntity');
+		// Route::get('eyatra/rejection-reason-entity/get-form-data/{entity_type_id}/{entity_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@eyatraRejectionReasonEntityFormData')->name('eyatraRejectionReasonEntityFormData');
+		// Route::post('eyatra/rejection-reason-entity/save/{entity_type_id}', 'Uitoux\EYatra\rejectionReasonEntityController@saveEYatraRejectionReasonEntity')->name('saveEYatraRejectionReasonEntity');
+		// Route::get('eyatra/rejection-reason-entity/view/{entity_id}', 'Uitoux\EYatra\rejectionReasonEntityController@viewEYatraRejectionReasonEntity')->name('viewEYatraRejectionReasonEntity');
+		// Route::get('eyatra/rejection-reason-entity/delete/{entity_id}', 'Uitoux\EYatra\rejectionReasonEntityController@deleteEYatraRejectionReasonEntity')->name('deleteEYatraRejectionReasonEntity');
 
 		//GRADES
 		Route::get('eyatra/grade/get-list', 'Uitoux\EYatra\GradeController@listEYatraGrade')->name('listEYatraGrade');
@@ -100,6 +108,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/employee/manager/search', 'Uitoux\EYatra\EmployeeController@searchManager')->name('searchManager');
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
 		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
+		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
 
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
