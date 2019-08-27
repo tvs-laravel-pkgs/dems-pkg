@@ -306,7 +306,7 @@ class Trip extends Model {
 				'purpose.name as purpose_name',
 				'trips.advance_received',
 				'status.name as status_name',
-				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as created_at')
+				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
 			)
 			->where('e.company_id', Auth::user()->company_id)
 			->groupBy('trips.id')
