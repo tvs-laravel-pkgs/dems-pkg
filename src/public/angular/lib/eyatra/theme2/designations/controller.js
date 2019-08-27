@@ -30,6 +30,7 @@ app.component('eyatraDesignation', {
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'name', name: 'designations.name', searchable: true },
+                { data: 'grade_name', name: 'grade.name', searchable: true },
                 { data: 'status', name: 'designations.deleted_at', searchable: false },
             ],
             rowCallback: function(row, data) {
@@ -103,7 +104,7 @@ app.component('eyatraDesignationForm', {
             console.log(response);
             self.designation = response.data.designation;
             self.designation.status = response.data.status;
-            //self.status = response.data.status;
+            self.grade_list = response.data.grade_list;
             self.action = response.data.action;
 
         });
@@ -114,25 +115,23 @@ app.component('eyatraDesignationForm', {
         var v = jQuery(form_id).validate({
             ignore: '',
             rules: {
-                'code': {
+
+                'name': {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
                 },
-                'name': {
+                'grade_id': {
                     required: true,
-                    minlength: 3,
-                    maxlength: 80,
+
                 },
             },
             messages: {
-                'code': {
+
+                'name': {
+                    required: 'Designation name is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
-                },
-                'name': {
-                    minlength: 'Please enter minimum of 3 letters',
-                    maxlength: 'Please enter maximum of 80 letters',
                 },
             },
             submitHandler: function(form) {
