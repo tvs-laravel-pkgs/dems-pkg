@@ -12,11 +12,56 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class GradeController extends Controller {
+
+	public function eyatraGradeFilter() {
+		$this->data['advanced_eligibility_list'] = $advanced_eligibility_list = array(
+			array('name' => "Select Advanced Eligibility", 'id' => null),
+			array('name' => "All", 'id' => "-1"),
+			array('name' => "Yes", 'id' => "1"),
+			array('name' => "No", 'id' => "0"),
+		);
+		$this->data['status_list'] = array(
+			array('name' => "Select Status", 'id' => null),
+			array('name' => "All", 'id' => "-1"),
+			array('name' => "Active", 'id' => "2"),
+			array('name' => "In Active", 'id' => "1"),
+		);
+
+		return response()->json($this->data);
+	}
 	public function listEYatraGrade(Request $r) {
+		if (!empty($r->advanced_eligibility)) {
+			// dd($r->advanced_eligibility);
+
+			$advanced_eligibility = $r->advanced_eligibility;
+		} else {
+			$advanced_eligibility = null;
+		}
+
+		if (!empty($r->status)) {
+			$status = $r->status;
+		} else {
+			$status = null;
+		}
 		$grade_list = Entity::withTrashed()->select('entities.id', 'entities.deleted_at', 'entities.name as grade_name', DB::RAW('count(DISTINCT(grade_local_travel_mode.local_travel_mode_id)) as local_travel_count'), DB::RAW('count(DISTINCT(grade_travel_mode.travel_mode_id)) as travel_count'), DB::RAW('count(DISTINCT(grade_expense_type.expense_type_id)) as expense_count'), DB::RAW('count(DISTINCT(grade_trip_purpose.trip_purpose_id)) as trip_count'),
 			// DB::raw('CASE WHEN grade_advanced_eligibility.advanced_eligibility == 0 THEN No ELSE Yes END as grade_eligiblity')
 			DB::raw('IF(grade_advanced_eligibility.advanced_eligibility = 0, "No", "Yes") as grade_eligiblity')
 		)
+			->where(function ($query) use ($r, $advanced_eligibility) {
+				if ($advanced_eligibility == '1') {
+					$query->where('grade_advanced_eligibility.advanced_eligibility', $advanced_eligibility);
+					// $query->where('grade_advanced_eligibility.advanced_eligibility = 1');
+				} elseif ($advanced_eligibility == '0') {
+					$query->where('grade_advanced_eligibility.advanced_eligibility', $advanced_eligibility);
+				}
+			})
+			->where(function ($query) use ($r, $status) {
+				if ($status == '2') {
+					$query->whereNull('entities.deleted_at');
+				} elseif ($status == '1') {
+					$query->whereNotNull('entities.deleted_at');
+				}
+			})
 			->leftjoin('grade_local_travel_mode', 'grade_local_travel_mode.grade_id', 'entities.id')
 			->leftjoin('grade_travel_mode', 'grade_travel_mode.grade_id', 'entities.id')
 			->leftjoin('grade_expense_type', 'grade_expense_type.grade_id', 'entities.id')

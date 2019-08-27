@@ -18,8 +18,12 @@ class TripClaimController extends Controller {
 
 	}
 
-	public function getClaimFormData($trip_id, Request $request) {
+	public function getClaimFormData($trip_id) {
 		return Trip::getClaimFormData($trip_id);
+	}
+
+	public function getClaimViewData($trip_id) {
+		return Trip::getClaimViewData($trip_id);
 	}
 
 	public function saveClaim(Request $r) {

@@ -13,13 +13,16 @@ use Yajra\Datatables\Datatables;
 
 class DesignationController extends Controller {
 	public function listEYatraDesignation(Request $r) {
-		$designations = Designation::withTrashed()->select(
-			'designations.id',
-			'designations.name',
-			'designations.deleted_at',
-			DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
-		)
-			->orderBy('designations.name', 'asc');
+		$designations = Designation::withTrashed()
+			->leftjoin('entities as grade', 'grade.id', 'designations.grade_id')
+			->select(
+				'designations.id',
+				'designations.name',
+				DB::raw('IF(grade.name IS NULL,"---",grade.name) as grade_name'),
+				'designations.deleted_at',
+				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
+			)
+			->orderBy('designations.id', 'asc');
 
 		return Datatables::of($designations)
 			->addColumn('action', function ($designations) {
@@ -73,7 +76,7 @@ class DesignationController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-
+		$this->data['grade_list'] = $grade_list = Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get();
 		$this->data['success'] = true;
 		$this->data['designation'] = $designation;
 

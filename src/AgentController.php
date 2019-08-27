@@ -128,8 +128,9 @@ class AgentController extends Controller {
 	}
 
 	public function eyatraAgentFormData($agent_id = NULL) {
+		//dd($agent_id);
 		if (!$agent_id) {
-			$this->data['action'] = 'New';
+			$this->data['action'] = 'Add';
 			$agent = new Agent;
 			$address = new Address;
 			$user = new User;
@@ -158,11 +159,12 @@ class AgentController extends Controller {
 			'travel_mode_list' => Entity::travelModeList(),
 			'country_list' => NCountry::getList(),
 
-			'state_list' => $this->data['action'] == 'New' ? [] : NState::getList($agent->address->city->state->country_id),
-			'city_list' => $this->data['action'] == 'New' ? [] : NCity::getList($agent->address->city->state_id),
+			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($agent->address->city->state->country_id),
+			'city_list' => $this->data['action'] == 'Add' ? [] : NCity::getList($agent->address->city->state_id),
 			'payment_mode_list' => $payment_mode_list,
 			'wallet_mode_list' => $wallet_mode_list,
 		];
+		//dd($agent);
 		$this->data['agent'] = $agent;
 		$this->data['address'] = $agent->address;
 		$this->data['user'] = $user;
@@ -171,7 +173,7 @@ class AgentController extends Controller {
 	}
 
 	public function saveEYatraAgent(Request $request) {
-		// dd($request->all());
+		//dd($request->all());
 		try {
 			if (empty(count($request->travel_mode))) {
 				return response()->json(['success' => false, 'errors' => ['Travel Mode is Required']]);

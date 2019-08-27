@@ -166,9 +166,8 @@ app.component('eyatraOutletForm', {
             if (self.action == 'Edit') {
                 $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
                 $scope.AmountEligible(self.outlet.amount_eligible);
-                // self.outlet.cashier = response.data.cashier_name;
-                // alert(response.data.cashier_name);
             }
+
             $rootScope.loading = false;
 
         });
@@ -433,8 +432,6 @@ app.component('eyatraOutletForm', {
                 },
                 'cashier_id': {
                     required: true,
-                    minlength: 3,
-                    maxlength: 191,
                 },
                 'amount_limit': {
                     required: true,
@@ -489,8 +486,6 @@ app.component('eyatraOutletForm', {
                 },
                 'cashier_id': {
                     required: 'Cashier name is required',
-                    minlength: 'Please enter minimum of 3 characters',
-                    maxlength: 'Please enter maximum of 191 characters',
                 },
                 'amount_limit': {
                     required: 'Petty cash threshold is required',

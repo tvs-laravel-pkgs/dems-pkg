@@ -85,12 +85,24 @@ app.component('eyatraTripClaimList', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripClaimForm', {
     templateUrl: eyatra_trip_claim_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $element, $scope) {
+    controller: function($http, $location, HelperService, $routeParams, $rootScope, $element, $mdSelect, $scope) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_form_data_url + '/' : eyatra_trip_claim_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var lodgings_removal_id = [];
         var boardings_removal_id = [];
         var local_travels_removal_id = [];
+
+        $scope.searchTravelMode;
+        $scope.clearSearchTravelMode = function() {
+            $scope.searchTravelMode = '';
+        };
+
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
 
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -140,19 +152,13 @@ app.component('eyatraTripClaimForm', {
 
         });
 
-        $element.find('input').on('keydown', function(ev) {
-            ev.stopPropagation();
-        });
 
         $scope.searchBookedBy;
         $scope.clearSearchBookedBy = function() {
             $scope.searchBookedBy = '';
         };
 
-        $scope.searchTravelMode;
-        $scope.clearSearchTravelMode = function() {
-            $scope.searchTravelMode = '';
-        };
+
 
         $scope.searchLodgingCity;
         $scope.clearSearchLodgingCity = function() {
