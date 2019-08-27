@@ -97,11 +97,11 @@ class PettyCashManagerVerificationController extends Controller {
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
-				$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'rejection_id' => NULL]);
+				$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
-				$petty_cash_manager_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3282, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id]);
+				$petty_cash_manager_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3282, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				DB::commit();
 				return response()->json(['success' => true]);
 			}

@@ -12,8 +12,43 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class CoaCodeController extends Controller {
-	public function listEYatraCoaCode(Request $r) {
 
+	public function eyatraCoaCodeFilter() {
+
+		$this->data['acc_type_list'] = $acc_type_list = Entity::where('entity_type_id', 513)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
+
+		$this->data['group_list'] = $group_list = Entity::where('entity_type_id', 516)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
+		$this->data['sub_group_list'] = $sub_group_list = Entity::where('entity_type_id', 517)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
+		$this->data['status_list'] = array(
+			array('name' => "Select Status", 'id' => null),
+			array('name' => "All", 'id' => "-1"),
+			array('name' => "Active", 'id' => "2"),
+			array('name' => "Inactive", 'id' => "1"),
+		);
+		return response()->json($this->data);
+	}
+
+	public function listEYatraCoaCode(Request $r) {
+		if (!empty($r->account_type)) {
+			$account_type = $r->account_type;
+		} else {
+			$account_type = null;
+		}
+		if (!empty($r->group_id)) {
+			$group_id = $r->group_id;
+		} else {
+			$group_id = null;
+		}
+		if (!empty($r->sub_group_id)) {
+			$sub_group_id = $r->sub_group_id;
+		} else {
+			$sub_group_id = null;
+		}
+		if (!empty($request->status)) {
+			$status = $request->status;
+		} else {
+			$status = null;
+		}
 		$coacodes = CoaCode::withTrashed()
 			->join('entities as e', 'e.id', 'coa_codes.account_types')
 			->leftjoin('entities as e1', 'e1.id', 'coa_codes.normal_balance')
@@ -32,6 +67,29 @@ class CoaCodeController extends Controller {
 				'e4.name as sub_group',
 				DB::raw('IF(coa_codes.deleted_at IS NULL,"Active","Inactive") as status')
 			)
+			->where(function ($query) use ($r, $account_type) {
+				if (!empty($account_type)) {
+					$query->where('e.id', $account_type);
+				}
+			})
+			->where(function ($query) use ($r, $group_id) {
+				if (!empty($group_id)) {
+					$query->where('e3.id', $group_id);
+				}
+			})
+			->where(function ($query) use ($r, $sub_group_id) {
+				if (!empty($sub_group_id)) {
+					$query->where('e4.id', $sub_group_id);
+				}
+			})
+			->where(function ($query) use ($r, $status) {
+				if ($status == '2') {
+					$query->whereNull('coa_codes.deleted_at');
+				} elseif ($status == '1') {
+					$query->whereNotNull('coa_codes.deleted_at');
+				}
+			})
+
 			->orderBy('coa_codes.id', 'asc');
 
 		return Datatables::of($coacodes)

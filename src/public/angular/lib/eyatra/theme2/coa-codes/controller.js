@@ -1,11 +1,11 @@
 app.component('eyatraCoaCode', {
     templateUrl: eyatra_coa_code_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http) {
+    controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_coa_code_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,7 +24,12 @@ app.component('eyatraCoaCode', {
                 url: laravel_routes['listEYatraCoaCode'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.account_type = $('#acc_type_id').val();
+                    d.group_id = $('#group_id').val();
+                    d.sub_group_id = $('#sub_group_id').val();
+                    d.status = $('#status').val();
+                }
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
@@ -43,13 +48,49 @@ app.component('eyatraCoaCode', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Coa Codes</p><h3 class="title">Coa Codes</h3>');
-        // $('.page-header-content .display-inline-block .data-table-title').html('City');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/coa-code/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-coa-code\')">' +
-            'Add New' +
-            '</a>'
-        );
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_coa_code_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        //Filter
+        $http.get(
+            coa_code_filter_url
+        ).then(function(response) {
+            // console.log(response);
+            self.acc_type_list = response.data.acc_type_list;
+            self.group_list = response.data.group_list;
+            self.sub_group_list = response.data.sub_group_list;
+            self.status_list = response.data.status_list;
+            $rootScope.loading = false;
+        });
+        var dataTableFilter = $('#eyatra_coa_code_table').dataTable();
+        $scope.onselectAccountType = function(id) {
+            $('#acc_type_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectGroup = function(id) {
+            $('#group_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectSubGroup = function(id) {
+            $('#sub_group_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectStatus = function(id) {
+            $('#status').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.resetForm = function() {
+            $('#acc_type_id').val(null);
+            $('#group_id').val(null);
+            $('#sub_group_id').val(null);
+            $('#status').val(null);
+            dataTableFilter.fnFilter();
+        }
         $scope.deleteCoaCodeConfirm = function($coa_code_id) {
             $("#del").val($coa_code_id);
         }

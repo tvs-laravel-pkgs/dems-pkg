@@ -365,6 +365,14 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-petty-cash-finance-list></eyatra-petty-cash-finance-list>',
         title: 'Petty Cash Finance Verification',
     }).
+    when('/eyatra/petty-cash/verification2/add', {
+        template: '<eyatra-petty-cash-finance-form></eyatra-petty-cash-finance-form>',
+        title: 'Add Petty Cash Finance Verification',
+    }).
+    when('/eyatra/petty-cash/verification2/edit/:pettycash_id', {
+        template: '<eyatra-petty-cash-finance-form></eyatra-petty-cash-finance-form>',
+        title: 'Edit Petty Cash Finance Verification',
+    }).
     when('/eyatra/petty-cash/verification2/view/:pettycash_id', {
         template: '<eyatra-petty-cash-finance-view></eyatra-petty-cash-finance-view>',
         title: 'View Petty Cash Finance Verification',
