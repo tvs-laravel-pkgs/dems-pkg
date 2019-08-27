@@ -36,25 +36,25 @@ class OutletController extends Controller {
 			->where('outlets.company_id', Auth::user()->company_id)
 			->where('a.address_of_id', 3160)
 			->where(function ($query) use ($r) {
-					if ($r->get('region_id')) {
-						$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
-					}
-				})
-				->where(function ($query) use ($r) {
-					if ($r->get('city_id')) {
-						$query->where("city.id", $r->get('city_id'))->orWhere(DB::raw("-1"), $r->get('city_id'));
-					}
-				})
-				->where(function ($query) use ($r) {
-					if ($r->get('state_id')) {
-						$query->where("s.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
-					}
-				})
-				->where(function ($query) use ($r) {
-					if ($r->get('country_id')) {
-						$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
-					}
-				})
+				if ($r->get('region_id')) {
+					$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('city_id')) {
+					$query->where("city.id", $r->get('city_id'))->orWhere(DB::raw("-1"), $r->get('city_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('state_id')) {
+					$query->where("s.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('country_id')) {
+					$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
+				}
+			})
 			->groupBy('outlets.id');
 		// if (!Entrust::can('view-all-trips')) {
 		// $trips->where('trips.employee_id', Auth::user()->entity_id);
@@ -112,9 +112,9 @@ class OutletController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 			if ($outlet->amount_eligible == 1) {
-				$outlet->eligible_amount = 'Yes';
+				$outlet->amount_eligible = 1;
 			} else {
-				$outlet->eligible_amount = 'No';
+				$outlet->amount_eligible = 0;
 			}
 			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
@@ -157,12 +157,12 @@ class OutletController extends Controller {
 		return response()->json($this->data);
 	}
 	public function eyatraOutletFilterData() {
-			$this->data['region_list'] = Region::getList();
-			$this->data['city_list'] = NCity::getList();
-			$this->data['state_list'] = NState::getList();
-			$this->data['country_list'] = NCountry::getList();
-			$this->data['success'] = true;
-			//dd($this->data);
+		$this->data['region_list'] = Region::getList();
+		$this->data['city_list'] = NCity::getList();
+		$this->data['state_list'] = NState::getList();
+		$this->data['country_list'] = NCountry::getList();
+		$this->data['success'] = true;
+		//dd($this->data);
 		return response()->json($this->data);
 	}
 
@@ -236,7 +236,7 @@ class OutletController extends Controller {
 				$outlet->deleted_at = date('Y-m-d H:i:s');
 				$outlet->deleted_by = Auth::user()->id;
 			}
-			if ($request->eligible_amount == 1) {
+			if ($request->amount_eligible == 1) {
 				$outlet->amount_eligible = 1;
 				$outlet->amount_limit = $request->amount_limit;
 			} else {
