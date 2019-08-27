@@ -297,7 +297,7 @@ class Trip extends Model {
 			->select(
 				'trips.id',
 				'trips.number',
-				DB::raw('CONCAT(e.code," / ",e.name) as ecode'),
+				DB::raw('CONCAT(e.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
