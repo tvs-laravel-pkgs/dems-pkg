@@ -36,25 +36,25 @@ class OutletController extends Controller {
 			->where('outlets.company_id', Auth::user()->company_id)
 			->where('a.address_of_id', 3160)
 			->where(function ($query) use ($r) {
-					if ($r->get('region_id')) {
-						$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
-					}
-				})
-				->where(function ($query) use ($r) {
-					if ($r->get('city_id')) {
-						$query->where("city.id", $r->get('city_id'))->orWhere(DB::raw("-1"), $r->get('city_id'));
-					}
-				})
-				->where(function ($query) use ($r) {
-					if ($r->get('state_id')) {
-						$query->where("s.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
-					}
-				})
-				->where(function ($query) use ($r) {
-					if ($r->get('country_id')) {
-						$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
-					}
-				})
+				if ($r->get('region_id')) {
+					$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('city_id')) {
+					$query->where("city.id", $r->get('city_id'))->orWhere(DB::raw("-1"), $r->get('city_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('state_id')) {
+					$query->where("s.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('country_id')) {
+					$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
+				}
+			})
 			->groupBy('outlets.id');
 		// if (!Entrust::can('view-all-trips')) {
 		// $trips->where('trips.employee_id', Auth::user()->entity_id);
@@ -76,7 +76,7 @@ class OutletController extends Controller {
         </a>
         <a href="javascript:;" data-toggle="modal" data-target="#delete_outlet"
         onclick="angular.element(this).scope().deleteOutletConfirm(' . $outlet->id . ')" dusk = "delete-btn" title="Delete">
-        <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+        <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
         </a>';
 			})
 			->addColumn('status', function ($outlet) {
@@ -157,12 +157,12 @@ class OutletController extends Controller {
 		return response()->json($this->data);
 	}
 	public function eyatraOutletFilterData() {
-			$this->data['region_list'] = Region::getList();
-			$this->data['city_list'] = NCity::getList();
-			$this->data['state_list'] = NState::getList();
-			$this->data['country_list'] = NCountry::getList();
-			$this->data['success'] = true;
-			//dd($this->data);
+		$this->data['region_list'] = Region::getList();
+		$this->data['city_list'] = NCity::getList();
+		$this->data['state_list'] = NState::getList();
+		$this->data['country_list'] = NCountry::getList();
+		$this->data['success'] = true;
+		//dd($this->data);
 		return response()->json($this->data);
 	}
 
