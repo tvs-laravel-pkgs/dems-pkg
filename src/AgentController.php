@@ -128,6 +128,7 @@ class AgentController extends Controller {
 	}
 
 	public function eyatraAgentFormData($agent_id = NULL) {
+		//dd($agent_id);
 		if (!$agent_id) {
 			$this->data['action'] = 'New';
 			$agent = new Agent;
@@ -163,6 +164,7 @@ class AgentController extends Controller {
 			'payment_mode_list' => $payment_mode_list,
 			'wallet_mode_list' => $wallet_mode_list,
 		];
+		//dd($agent);
 		$this->data['agent'] = $agent;
 		$this->data['address'] = $agent->address;
 		$this->data['user'] = $user;
@@ -171,7 +173,7 @@ class AgentController extends Controller {
 	}
 
 	public function saveEYatraAgent(Request $request) {
-		// dd($request->all());
+		//dd($request->all());
 		try {
 			if (empty(count($request->travel_mode))) {
 				return response()->json(['success' => false, 'errors' => ['Travel Mode is Required']]);

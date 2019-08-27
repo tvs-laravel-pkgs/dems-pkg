@@ -144,6 +144,11 @@ app.component('eyatraAgentForm', {
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
+            console.log(response.data.agent);
+            //console.log(response.data.agent.code);
+            if (response.data.agent.payment_mode_id == null || !response.data.agent.payment_mode_id) {
+                self.agent.payment_mode_id = 3244;
+            }
             // console.log(self.user.id);
             if (self.action == 'Edit') {
                 //$("#hide_password").hide();
@@ -160,7 +165,7 @@ app.component('eyatraAgentForm', {
                     self.switch_password = 'No';
                 }
 
-                $scope.selectPaymentMode(self.agent.payment_mode_id);
+                //$scope.selectPaymentMode(self.agent.payment_mode_id);
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
@@ -191,7 +196,7 @@ app.component('eyatraAgentForm', {
         });
 
         //SELECT PAYMENT MODE
-        $scope.selectPaymentMode = function(payment_id) {
+        /*$scope.selectPaymentMode = function(payment_id) {
             if (payment_id == 3244) { //BANK
                 $scope.showBank = true;
                 $scope.showCheque = false;
@@ -209,7 +214,7 @@ app.component('eyatraAgentForm', {
                 $scope.showCheque = false;
                 $scope.showWallet = false;
             }
-        }
+        }*/
 
         $scope.psw_change = function(val) {
             if (val == 'No') {
@@ -360,24 +365,79 @@ app.component('eyatraAgentForm', {
                     required: true,
                 },
                 'bank_name': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 100,
                     minlength: 3,
                 },
                 'branch_name': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 50,
                     minlength: 3,
                 },
                 'account_number': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 20,
                     minlength: 3,
                     positiveNumber: true,
                 },
                 'ifsc_code': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 10,
+                    minlength: 3,
+                },
+                'check_favour': {
+                    required: function(element) {
+                        if ($("#cheque").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    maxlength: 100,
+                    minlength: 3,
+                },
+                'type_id': {
+                    required: function(element) {
+                        if ($("#wallet").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                },
+                'value': {
+                    required: function(element) {
+                        if ($("#wallet").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    maxlength: 20,
                     minlength: 3,
                 },
             },
