@@ -30,6 +30,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function listEYatraEmployee(Request $r) {
+		//dd($r->all());
 		if (!empty($r->outlet)) {
 			$outlet = $r->outlet;
 		} else {
@@ -115,6 +116,7 @@ class EmployeeController extends Controller {
 		if (!$employee_id) {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
+			//dd($employee);
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -219,11 +221,15 @@ class EmployeeController extends Controller {
 			$user->company_id = Auth::user()->company_id;
 			$user->entity_id = $employee->id;
 			$user->fill($request->all());
+			//dd($request->password_change);
 			if ($request->password_change == 'Yes') {
 				if (!empty($request->user['password'])) {
 					$user->password = $request->user['password'];
 				}
 				$user->force_password_change = 1;
+			}else
+			{
+				$user->force_password_change = 0;
 			}
 			if ($request->status == 0) {
 				$user->deleted_at = date('Y-m-d H:i:s');
@@ -233,7 +239,7 @@ class EmployeeController extends Controller {
 				$user->deleted_at = NULL;
 			}
 			$user->save();
-
+//dd($user);
 			//USER ROLE SYNC
 			$user->roles()->sync(json_decode($request->roles));
 

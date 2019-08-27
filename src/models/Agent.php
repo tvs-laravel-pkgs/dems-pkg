@@ -13,6 +13,7 @@ class Agent extends Model {
 		'code',
 		'name',
 		'gstin',
+		'payment_mode_id',
 		'created_by',
 	];
 
