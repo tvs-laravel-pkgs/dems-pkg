@@ -39,7 +39,7 @@ app.component('eyatraEntityList', {
                     },
                 },
                 columns: [
-                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                    { data: 'action', searchable: false, class: 'action' },
                     { data: 'name', name: 'entities.name' },
                     { data: 'created_by', name: 'users.username' },
                     { data: 'updated_by', name: 'updater.username' },
@@ -64,6 +64,14 @@ app.component('eyatraEntityList', {
                     '</a>'
                 );
             }
+
+            setTimeout(function() {
+                var x = $('.separate-page-header-inner.search .custom-filter').position();
+                var d = document.getElementById('entity_table');
+                x.left = x.left + 15;
+                d.style.left = x.left + 'px';
+            }, 500);
+
             $scope.deleteEntityDetail = function($id) {
                 $('#del').val($id);
             }
@@ -121,20 +129,20 @@ app.component('eyatraEntityForm', {
             $rootScope.loading = false;
 
         });
-        $('input').on('blur keyup', function() {
-            if ($("#entity_form").valid()) {
-                $('#submit').prop('disabled', false);
-            } else {
-                $('#submit').prop('disabled', 'disabled');
-            }
-        });
-        $('#submit').click(function() {
-            if ($("#entity_form").valid()) {
-                $('#submit').prop('disabled', false);
-            } else {
-                $('#submit').prop('disabled', 'disabled');
-            }
-        });
+        // $('input').on('blur keyup', function() {
+        //     if ($("#entity_form").valid()) {
+        //         $('#submit').prop('disabled', false);
+        //     } else {
+        //         $('#submit').prop('disabled', 'disabled');
+        //     }
+        // });
+        // $('#submit').click(function() {
+        //     if ($("#entity_form").valid()) {
+        //         $('#submit').prop('disabled', false);
+        //     } else {
+        //         $('#submit').prop('disabled', 'disabled');
+        //     }
+        // });
         var form_id = form_ids = '#entity_form';
         var v = jQuery(form_ids).validate({
             errorPlacement: function(error, element) {
@@ -156,11 +164,12 @@ app.component('eyatraEntityForm', {
             messages: {
                 'name': {
                     minlength: 'Please enter minimum of 1 characters',
-                    minlength: 'Please enter maximum of 191 characters',
+                    maxlength: 'Please enter maximum of 191 characters',
                 },
             },
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
+                $('#submit').button('loading');
                 $.ajax({
                         url: eyatra_save_entity_url + '/' + $routeParams.entity_type_id,
                         method: "POST",
@@ -171,7 +180,8 @@ app.component('eyatraEntityForm', {
                     .done(function(res) {
                         console.log(res.success);
                         if (!res.success) {
-                            $('#submit').prop('disabled', 'disabled');
+                            $('#submit').button('reset');
+                            // $('#submit').prop('disabled', 'disabled');
                             var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';

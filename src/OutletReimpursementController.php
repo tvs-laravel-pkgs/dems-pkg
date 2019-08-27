@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCountry;
+use Uitoux\EYatra\ReimbursementTranscations;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
 use Validator;
@@ -37,8 +38,8 @@ class OutletReimpursementController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/state/edit/' . $outlets->outlet_id . '">
-					<img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
+				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
 				</a>';
 
 			})
@@ -173,31 +174,32 @@ class OutletReimpursementController extends Controller {
 		}
 	}
 
-	public function viewEYatraState($state_id) {
-
-		$state = NState::with([
-
-			'country',
-		])->select('*', DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status'))
-			->withTrashed()
-			->find($state_id);
-		$state_travel = DB::table('state_agent_travel_mode')->select('entities.name as travel_mode_name', 'agents.name', 'service_charge')->where('state_id', $state_id)->where('entities.company_id', Auth::user()->company_id)
-			->leftJoin('entities', 'entities.id', 'state_agent_travel_mode.travel_mode_id')
-			->leftJoin('agents', 'agents.id', 'state_agent_travel_mode.agent_id')
-			->get()->toArray();
-		$this->data['travel_mode_name'] = $travel_mode_name = array_column($state_travel, 'travel_mode_name');
-		$this->data['agents'] = $agents = array_column($state_travel, 'name');
-		$this->data['service_charge'] = $service_charge = array_column($state_travel, 'service_charge');
-		$this->data['action'] = 'View';
-		if (!$state) {
-			$this->data['success'] = false;
-			$this->data['errors'] = ['State not found'];
+		public function viewEYatraOutletReimpursement($outlet_id) {
+			//dd($outlet_id);
+			$reimpurseimpurse_transactions=ReimbursementTranscations::select(
+			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
+			'amount',
+			'balance_amount',
+			'configs.name as description'
+			)
+			->join('configs','configs.id','reimbursement_transcations.transcation_id')
+			->where('outlet_id',$outlet_id)
+			->get();
+			//dd($reimpurseimpurse_transactions);
+			$reimpurseimpurse_outlet_data=Outlet::select(
+			'outlets.name as outlet_name',
+			'outlets.code as outlet_code',
+			'employees.name as cashier_name',
+			'outlets.reimbursement_amount as reimbursement_amount'
+			)
+			->join('employees','employees.id','outlets.cashier_id')
+			->where('outlets.id',$outlet_id)
+			->first();
+			$this->data['reimpurseimpurse_transactions'] = $reimpurseimpurse_transactions;
+			$this->data['reimpurseimpurse_outlet_data'] = $reimpurseimpurse_outlet_data;
+			$this->data['success'] = true;
 			return response()->json($this->data);
 		}
-		$this->data['state'] = $state;
-		$this->data['success'] = true;
-		return response()->json($this->data);
-	}
 
 	public function deleteEYatraState($state_id) {
 		$state = Nstate::withTrashed()->where('id', $state_id)->first();

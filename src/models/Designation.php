@@ -11,6 +11,7 @@ class Designation extends Model {
 		'id',
 		'company_id',
 		'name',
+		'grade_id',
 	];
 
 	public static function designationList() {

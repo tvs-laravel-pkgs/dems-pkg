@@ -109,6 +109,9 @@ class PettyCashController extends Controller {
 		$emp_details = [];
 		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
 			$user_role = 'Cashier';
+
+			// } else(Entrust::can('eyatra-employees')) {
+
 		} else {
 			$user_role = 'Employee';
 			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id', 'configs.name as designation')
