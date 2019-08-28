@@ -27,6 +27,7 @@ app.component('eyatraTrips', {
             pageLength: 10,
             processing: true,
             serverSide: true,
+            "bProcessing": true,
             paging: true,
             ordering: false,
             ajax: {

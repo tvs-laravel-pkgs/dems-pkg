@@ -11,8 +11,7 @@ use Yajra\Datatables\Datatables;
 
 class AdvanceClaimRequestController extends Controller {
 	public function listAdvanceClaimRequest(Request $r) {
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
+		$trips = Trip::join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
@@ -31,9 +30,10 @@ class AdvanceClaimRequestController extends Controller {
 				'status.name as status'
 
 			)
-			->whereNotNull('trips.advance_received')
-			->where('trips.status_id', 3028) //MANAGER APPROVED
-			->where('trips.advance_request_approval_status_id', 3260) //NEW
+		// ->whereNotNull('trips.advance_received')
+		// ->where('trips.status_id', 3028) //MANAGER APPROVED
+		// ->where('trips.status_id', '!=', 3261) //ADVANCE REQUEST APPROVED
+		// ->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -55,6 +55,10 @@ class AdvanceClaimRequestController extends Controller {
 		;
 
 		return Datatables::of($trips)
+			->addColumn('checkbox', function ($trip) {
+				return '<input id="trip_' . $trip->id . '" type="checkbox" class="check-bottom-layer booking_list " name="booking_list" value="' . $trip->id . '" data-trip_id="' . $trip->id . '">
+                                                        <label for="role_' . $trip->id . '"></label>';
+			})
 			->addColumn('action', function ($trip) {
 
 				$img1 = asset('public/img/content/yatra/table/edit.svg');

@@ -175,13 +175,13 @@ app.component('eyatraCoaCodeForm', {
                     error.insertAfter(element)
                 }
             },
-            invalidHandler: function(event, validator) {
-                new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
-                }).show();
-            },
+            // invalidHandler: function(event, validator) {
+            //     new Noty({
+            //         type: 'error',
+            //         layout: 'topRight',
+            //         text: 'You have errors,Please check all tabs'
+            //     }).show();
+            // },
             ignore: '',
             rules: {
 
@@ -219,34 +219,17 @@ app.component('eyatraCoaCodeForm', {
             },
             messages: {
                 'number': {
-                    required: 'Coa Code Number Required',
                     number: 'Enter numbers only',
                 },
                 'account_description': {
-                    required: 'Account Description Required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
-                },
-                'account_types': {
-                    required: 'Account Type Required',
-                },
-                'normal_balance': {
-                    required: 'Normal Balance Required',
                 },
                 'description': {
-                    required: 'Description required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
-                },
-                'final_statement': {
-                    required: 'Final Statement Required',
-                },
-                'group': {
-                    required: 'Group Required',
-                },
-                'sub_group': {
-                    required: 'Sub Group required',
                 }
+
             },
             submitHandler: function(form) {
 

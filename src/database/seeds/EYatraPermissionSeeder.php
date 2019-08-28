@@ -832,7 +832,7 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Expense Vouchers Verfication1',
 			],
 			5582 => [
-				'display_order' => 9,
+				'display_order' => 8,
 				'parent_id' => 5001,
 				'name' => 'eyatra-indv-expense-vouchers-verification2',
 				'display_name' => 'Expense Vouchers Verfication2',

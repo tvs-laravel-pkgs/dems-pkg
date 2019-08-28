@@ -377,6 +377,21 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-petty-cash-finance-view></eyatra-petty-cash-finance-view>',
         title: 'View Petty Cash Finance Verification',
     }).
+
+    //ALTERNATE APPROVE LIST
+    when('/eyatra/alternate-approve', {
+        template: '<eyatra-alternate-approve-list></eyatra-alternate-approve-list>',
+        title: 'Alternate Approve List',
+    }).
+    when('/eyatra/alternate-approve/add', {
+        template: '<eyatra-alternate-approve-form></eyatra-alternate-approve-form>',
+        title: 'Add Alternate Approve',
+    }).
+    when('/eyatra/alternate-approve/edit/:alternate_id', {
+        template: '<eyatra-alternate-approve-form></eyatra-alternate-approve-form>',
+        title: 'Edit Alternate Approve',
+    }).
+
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
         template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',

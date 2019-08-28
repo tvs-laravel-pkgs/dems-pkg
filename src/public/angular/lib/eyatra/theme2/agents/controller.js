@@ -144,6 +144,11 @@ app.component('eyatraAgentForm', {
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
+            console.log(response.data.agent);
+            //console.log(response.data.agent.code);
+            if (response.data.agent.payment_mode_id == null || !response.data.agent.payment_mode_id) {
+                self.agent.payment_mode_id = 3244;
+            }
             // console.log(self.user.id);
             if (self.action == 'Edit') {
                 //$("#hide_password").hide();
@@ -160,7 +165,7 @@ app.component('eyatraAgentForm', {
                     self.switch_password = 'No';
                 }
 
-                $scope.selectPaymentMode(self.agent.payment_mode_id);
+                //$scope.selectPaymentMode(self.agent.payment_mode_id);
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
@@ -191,7 +196,7 @@ app.component('eyatraAgentForm', {
         });
 
         //SELECT PAYMENT MODE
-        $scope.selectPaymentMode = function(payment_id) {
+        /*$scope.selectPaymentMode = function(payment_id) {
             if (payment_id == 3244) { //BANK
                 $scope.showBank = true;
                 $scope.showCheque = false;
@@ -209,7 +214,7 @@ app.component('eyatraAgentForm', {
                 $scope.showCheque = false;
                 $scope.showWallet = false;
             }
-        }
+        }*/
 
         $scope.psw_change = function(val) {
             if (val == 'No') {
@@ -298,7 +303,7 @@ app.component('eyatraAgentForm', {
                 'agent_name': {
                     required: true,
                     minlength: 3,
-                    maxlength: 191,
+                    maxlength: 255,
                 },
                 'gstin': {
                     minlength: 3,
@@ -360,44 +365,96 @@ app.component('eyatraAgentForm', {
                     required: true,
                 },
                 'bank_name': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 100,
                     minlength: 3,
                 },
                 'branch_name': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 50,
                     minlength: 3,
                 },
                 'account_number': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 20,
                     minlength: 3,
                     positiveNumber: true,
                 },
                 'ifsc_code': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 10,
+                    minlength: 3,
+                },
+                'check_favour': {
+                    required: function(element) {
+                        if ($("#cheque").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    maxlength: 100,
+                    minlength: 3,
+                },
+                'type_id': {
+                    required: function(element) {
+                        if ($("#wallet").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                },
+                'value': {
+                    required: function(element) {
+                        if ($("#wallet").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    maxlength: 20,
                     minlength: 3,
                 },
             },
             messages: {
                 'agent_code': {
-                    required: 'Agent code is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'agent_name': {
-                    required: 'Agent name is required',
                     minlength: 'Please enter minimum of 3 letters',
-                    maxlength: 'Please enter maximum of 191 letters',
+                    maxlength: 'Please enter maximum of 255 letters',
                 },
                 'gstin': {
                     minlength: 'Enter Minimum 3 Characters!',
                     maxlength: 'Enter Maximum 20 Characters!',
                 },
                 'address_line1': {
-                    required: 'Address Line1 is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 255 letters',
                 },
@@ -405,50 +462,35 @@ app.component('eyatraAgentForm', {
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 255 letters',
                 },
-                'country': {
-                    required: 'Country is Required',
-                },
-                'state': {
-                    required: 'State is Required',
-                },
-                'city': {
-                    required: 'City is Required',
-                },
+
                 'pincode': {
-                    required: 'PinCode is Required',
                     minlength: 'Please enter minimum of 6 numbers',
                     maxlength: 'Please enter maximum of 6 letters',
                     numbers: 'Enter numbers only',
                 },
                 'mobile_number': {
-                    required: 'Enter Mobile Number',
                     minlength: 'Please enter minimum of 8 numbers',
                     maxlength: 'Please enter maximum of 10 letters',
                 },
                 'email': {
-                    email: 'Enter Valid Email',
                     minlength: 'Please enter minimum of 6 numbers',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'username': {
-                    required: 'Username is Required',
                     minlength: 'Please enter minimum of 4 numbers',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 'password': {
-                    required: 'Password is required',
                     minlength: 'Please enter minimum of 5 numbers',
                     maxlength: 'Please enter maximum of 16 letters',
                 },
-                'travel_mode[]': {
-                    required: 'Travel mode is Required',
-                }
+
             },
             invalidHandler: function(event, validator) {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Please check in each tab and fix errors!'
+                    text: 'You have errors,Please check all tabs'
                 }).show();
             },
             submitHandler: function(form) {

@@ -27,7 +27,7 @@ app.component('eyatraAdvanceClaimRequests', {
             },
             pageLength: 10,
             processing: true,
-            serverSide: true,
+            serverSide: false,
             paging: true,
             ordering: false,
             ajax: {
@@ -43,6 +43,7 @@ app.component('eyatraAdvanceClaimRequests', {
             },
 
             columns: [
+                { data: 'checkbox', searchable: false, class: 'action' },
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
@@ -68,7 +69,9 @@ app.component('eyatraAdvanceClaimRequests', {
             d.style.left = x.left + 'px';
         }, 500);
 
-
+        setTimeout(function() {
+            $('#employee-export').css({ 'display': 'inline-block' });
+        }, 2500);
         $scope.getEmployeeData = function(query) {
             //alert(query);
             $('#employee_id').val(query);
@@ -88,6 +91,40 @@ app.component('eyatraAdvanceClaimRequests', {
             $('#status_id').val(-1);
             dataTable.draw();
         }
+
+        $('#head_booking').on('click', function() {
+            alert('dd');
+            var total_amount = 0;
+            var count = 0;
+            var amount = 0;
+            if (event.target.checked == true) {
+                $('.booking_list').prop('checked', true);
+                $.each($('.booking_list:checked'), function() {
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
+                });
+            } else {
+                $('.booking_list').prop('checked', false);
+                $.each($('.booking_list:checked'), function() {
+                    count++;
+                    amount += parseFloat($(this).attr('data-amount'));
+                });
+                self.total_amount = 0;
+            }
+            $(".amount").html(amount.toFixed(2));
+            $(".net_amount").val(amount.toFixed(2));
+            $("#count").html(count);
+            $(".payment-btn").prop('disabled', true);
+            if (count > 0) {
+                if (self.action == 'Edit') {
+                    $(".payment-btn").prop('disabled', false);
+                }
+            } else {
+                $(".separate-bottom-layer").removeClass("in");
+                $("button.payment-btn").css({ 'display': 'inline-block' });
+                $(".btn-close").css({ 'display': 'none' });
+            }
+        });
 
         $rootScope.loading = false;
 
