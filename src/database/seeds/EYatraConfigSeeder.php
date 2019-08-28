@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra\Database\Seeds;
 
 use App\Config;
+use App\ConfigType;
 use Illuminate\Database\Seeder;
 
 class EYatraConfigSeeder extends Seeder {
@@ -428,15 +429,38 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Delete',
 				'config_type_id' => 520,
 			],
-
+			3323 => [
+				'name' => 'Approve',
+				'config_type_id' => 520,
+			],
+			3324 => [
+				'name' => 'Reject',
+				'config_type_id' => 520,
+			],
+			3325 => [
+				'name' => 'Book',
+				'config_type_id' => 520,
+			],
+			3326 => [
+				'name' => 'Cancel',
+				'config_type_id' => 520,
+			],
+			3327 => [
+				'name' => 'Claim',
+				'config_type_id' => 520,
+			],
+			3328 => [
+				'name' => 'Paid',
+				'config_type_id' => 520,
+			],
 		];
-		// foreach ($config_types as $config_type_id => $config_type_name) {
-		// 	$config_type = ConfigType::firstOrNew([
-		// 		'id' => $config_type_id,
-		// 	]);
-		// 	$config_type->name = $config_type_name;
-		// 	$config_type->save();
-		// }
+		foreach ($config_types as $config_type_id => $config_type_name) {
+			$config_type = ConfigType::firstOrNew([
+				'id' => $config_type_id,
+			]);
+			$config_type->name = $config_type_name;
+			$config_type->save();
+		}
 
 		foreach ($configs as $id => $config_data) {
 			$config = Config::firstOrNew([
