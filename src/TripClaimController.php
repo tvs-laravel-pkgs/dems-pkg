@@ -240,7 +240,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function viewEYatraTripClaim($trip_id) {
-		return Trip::getClaimViewData($trip_id)
+		return Trip::getClaimViewData($trip_id);
 	}
 
 	public function deleteEYatraTripClaim($trip_id) {
