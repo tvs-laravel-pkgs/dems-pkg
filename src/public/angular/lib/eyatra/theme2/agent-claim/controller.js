@@ -116,7 +116,6 @@ app.component('eyatraAgentClaimForm', {
             self.gstin_tax = response.data.gstin_tax;
             console.log(self.booking_list);
 
-
             if (self.action == 'Edit') {
                 self.trips_count = response.data.trips_count;
                 $("#count").html(self.trips_count);
@@ -202,6 +201,8 @@ app.component('eyatraAgentClaimForm', {
             $(".payment-btn").prop('disabled', true);
             if (count > 0) {
                 if (self.action == 'Edit') {
+                    $(".payment-btn").prop('disabled', false);
+                } else {
                     $(".payment-btn").prop('disabled', false);
                 }
             } else {

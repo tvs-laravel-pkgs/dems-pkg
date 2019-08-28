@@ -168,6 +168,7 @@ class Trip extends Model {
 					// dump($visit_data['date']);
 					// dump(Carbon::createFromFormat('d/m/Y', $visit_data['date']));
 					$visit->date = date('Y-m-d', strtotime($visit_data['date']));
+					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					// dd($visit);
 					$visit->from_city_id = $from_city_id;
 					$visit->trip_id = $trip->id;
