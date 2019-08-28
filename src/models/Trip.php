@@ -439,7 +439,7 @@ class Trip extends Model {
 		$trip->save();
 
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
-		return response()->json(['success' => true]);
+		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
 
 	public static function rejectTrip($r) {
@@ -453,7 +453,7 @@ class Trip extends Model {
 		$trip->save();
 
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
-		return response()->json(['success' => true]);
+		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
 
 	public static function getClaimFormData($trip_id) {

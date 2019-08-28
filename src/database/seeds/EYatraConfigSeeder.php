@@ -32,6 +32,8 @@ class EYatraConfigSeeder extends Seeder {
 			516 => 'Advance Request Approval Statuses - EYatra',
 			517 => 'Reimbursement status - EYatra',
 			518 => 'Petty Cash - EYatra',
+			519 => 'Activity Log Entity Types - EYatra',
+			520 => 'Activity Log Activities - EYatra',
 		];
 
 		$configs = [
@@ -354,6 +356,79 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Claim Rejected',
 				'config_type_id' => 518,
 			],
+
+			//ACTIVITY LOG ENTITY TYPES
+			3300 => [
+				'name' => 'Trip',
+				'config_type_id' => 519,
+			],
+			3301 => [
+				'name' => 'Employee',
+				'config_type_id' => 519,
+			],
+			3302 => [
+				'name' => 'Outlet',
+				'config_type_id' => 519,
+			],
+			3303 => [
+				'name' => 'Employee Grade',
+				'config_type_id' => 519,
+			],
+			3304 => [
+				'name' => 'State',
+				'config_type_id' => 519,
+			],
+			3305 => [
+				'name' => 'City',
+				'config_type_id' => 519,
+			],
+			3306 => [
+				'name' => 'COA Codes',
+				'config_type_id' => 519,
+			],
+			3307 => [
+				'name' => 'Agent',
+				'config_type_id' => 519,
+			],
+			3308 => [
+				'name' => 'Travel Modes',
+				'config_type_id' => 519,
+			],
+			3309 => [
+				'name' => 'Local Travel Modes',
+				'config_type_id' => 519,
+			],
+			3310 => [
+				'name' => 'City Categories',
+				'config_type_id' => 519,
+			],
+			3311 => [
+				'name' => 'Employee Designations',
+				'config_type_id' => 519,
+			],
+			3312 => [
+				'name' => 'Regions',
+				'config_type_id' => 519,
+			],
+			3313 => [
+				'name' => 'Agent Claims',
+				'config_type_id' => 519,
+			],
+
+			//ACTIVITIES
+			3320 => [
+				'name' => 'Add',
+				'config_type_id' => 520,
+			],
+			3321 => [
+				'name' => 'Edit',
+				'config_type_id' => 520,
+			],
+			3322 => [
+				'name' => 'Delete',
+				'config_type_id' => 520,
+			],
+
 		];
 		// foreach ($config_types as $config_type_id => $config_type_name) {
 		// 	$config_type = ConfigType::firstOrNew([
