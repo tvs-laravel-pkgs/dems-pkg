@@ -54,7 +54,7 @@ class TripVerificationController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
-		if (!Entrust::can('trip-verification-all') && $trip->manager_id != Auth::user()->entity_id) {
+		if (!Entrust::can('verify-all-trips') && $trip->manager_id != Auth::user()->entity_id) {
 			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		}
 

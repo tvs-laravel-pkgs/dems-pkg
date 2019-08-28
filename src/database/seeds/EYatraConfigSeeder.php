@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra\Database\Seeds;
 
 use App\Config;
+use App\ConfigType;
 use Illuminate\Database\Seeder;
 
 class EYatraConfigSeeder extends Seeder {
@@ -430,14 +431,17 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 		];
-		// foreach ($config_types as $config_type_id => $config_type_name) {
-		// 	$config_type = ConfigType::firstOrNew([
-		// 		'id' => $config_type_id,
-		// 	]);
-		// 	$config_type->name = $config_type_name;
-		// 	$config_type->save();
-		// }
 
+		//SAVING CONFIG TYPES
+		foreach ($config_types as $config_type_id => $config_type_name) {
+			$config_type = ConfigType::firstOrNew([
+				'id' => $config_type_id,
+			]);
+			$config_type->name = $config_type_name;
+			$config_type->save();
+		}
+
+		//SAVING CONFIGS
 		foreach ($configs as $id => $config_data) {
 			$config = Config::firstOrNew([
 				'id' => $id,

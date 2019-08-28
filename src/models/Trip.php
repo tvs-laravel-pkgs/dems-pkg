@@ -406,7 +406,7 @@ class Trip extends Model {
 			})*/
 		;
 
-		if (!Entrust::can('trip-verification-all')) {
+		if (!Entrust::can('verify-all-trips')) {
 			$trips->where('trips.manager_id', Auth::user()->entity_id);
 		}
 
