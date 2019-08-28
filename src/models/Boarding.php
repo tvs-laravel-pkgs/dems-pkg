@@ -16,6 +16,7 @@ class Boarding extends Model {
 		// 'date',
 		'amount',
 		'tax',
+		'eligible_amount',
 		'remarks',
 		'created_by',
 		'updated_by',
