@@ -115,7 +115,8 @@ class TripClaimController extends Controller {
 						$visit_booking->visit_id = $visit_data['id'];
 						$visit_booking->type_id = 3100;
 						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
-						$visit_booking->reference_number = $visit_data['remarks'];
+						$visit_booking->reference_number = $visit_data['reference_number'];
+						$visit_booking->remarks = $visit_data['remarks'];
 						$visit_booking->amount = $visit_data['amount'];
 						$visit_booking->tax = $visit_data['tax'];
 						$visit_booking->service_charge = '0.00';
@@ -140,8 +141,8 @@ class TripClaimController extends Controller {
 					]);
 					$lodging->fill($lodging_data);
 					$lodging->trip_id = $request->trip_id;
-					$lodging->check_in_date = date('Y-m-d H:i:s'); //$lodging_data['check_in_date'];
-					$lodging->checkout_date = date('Y-m-d H:i:s'); //$lodging_data['checkout_date'];
+					$lodging->check_in_date = date('Y-m-d H:i:s', strtotime($lodging_data['check_in_date']));
+					$lodging->checkout_date = date('Y-m-d H:i:s', strtotime($lodging_data['checkout_date']));
 					$lodging->created_by = Auth::user()->id;
 					$lodging->save();
 
@@ -265,4 +266,51 @@ class TripClaimController extends Controller {
 		}
 		return response()->json(['grade_expense_type' => $grade_expense_type]);
 	}
+	public function eyatraTripExpenseData(Request $request) {
+		// $lodgings = array();
+		$travelled_cities_with_dates = array();
+		$lodge_cities = array();
+		// $boarding_to_date = '';
+		if (!empty($request->visits)) {
+			foreach ($request->visits as $visit_key => $visit) {
+				$city_category_id = NCity::where('id', $visit['to_city_id'])->first();
+				$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
+				$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+				$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+				$loadge_eligible_amount = $lodging_expense_type ? $lodging_expense_type->eligible_amount : '0.00';
+				$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
+				$local_travel_eligible_amount = $local_travel_expense_type ? $local_travel_expense_type->eligible_amount : '0.00';
+
+				$lodge_cities[$visit_key]['city'] = $visit['to_city'];
+				$lodge_cities[$visit_key]['city_id'] = $visit['to_city_id'];
+				$lodge_cities[$visit_key]['loadge_eligible_amount'] = $loadge_eligible_amount;
+				// $next = $visit_key;
+				// $next++;
+				// $lodgings[$visit_key]['city'] = $visit['to_city'];
+				// $lodgings[$visit_key]['checkin_enable'] = $visit['arrival_date'];
+				// if (isset($request->visits[$next])) {
+				// 	// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
+				// 	$boarding_to_date = $request->visits[$next]['arrival_date'];
+				// } else {
+				// 	// $lodgings[$visit_key]['checkout_disable'] = $visit['arrival_date'];
+				// 	$boarding_to_date = $visit['arrival_date'];
+				// }
+				$range = Trip::getDatesFromRange($visit['departure_date'], $visit['arrival_date']);
+				if (!empty($range)) {
+					foreach ($range as $range_key => $range_val) {
+						$travelled_cities_with_dates[$visit_key][$range_key]['city'] = $visit['to_city'];
+						$travelled_cities_with_dates[$visit_key][$range_key]['city_id'] = $visit['to_city_id'];
+						$travelled_cities_with_dates[$visit_key][$range_key]['date'] = $range_val;
+						$travelled_cities_with_dates[$visit_key][$range_key]['board_eligible_amount'] = $board_eligible_amount;
+						$travelled_cities_with_dates[$visit_key][$range_key]['local_travel_eligible_amount'] = $local_travel_eligible_amount;
+					}
+				}
+			}
+		} else {
+			$travelled_cities_with_dates = array();
+			$lodge_cities = array();
+		}
+		return response()->json(['travelled_cities_with_dates' => $travelled_cities_with_dates, 'lodge_cities' => $lodge_cities]);
+	}
+
 }

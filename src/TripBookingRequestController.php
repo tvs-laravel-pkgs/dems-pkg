@@ -42,10 +42,13 @@ class TripBookingRequestController extends Controller {
 			->join('users as cb', 'cb.id', 'trips.created_by')
 			->leftjoin('agents as a', 'a.id', 'v.agent_id')
 			->select('trips.id as trip_id',
+				'trips.number as trip_number',
 				'e.code as ecode', 'e.name as ename',
 				'status.name as status',
 				'a.name as agent',
-				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on')
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on'),
+				DB::raw('COUNT(v.id) as tickets_count')
+
 			)
 			->where(function ($query) use ($r, $employee) {
 				if (!empty($employee)) {
@@ -103,6 +106,18 @@ class TripBookingRequestController extends Controller {
 
 		// dd($visits);
 		return Datatables::of($visits)
+			->addColumn('booking_status', function ($visit) {
+				$bookings = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_status_id', 3060)
+					->count();
+				// if ($bookings) {
+				// 	return "Pending";
+				// } else {
+				// 	return "Booked";
+				// }
+				// dd($bookings);
+				return $bookings ? "Pending" : "Booked";
+			})
 			->addColumn('action', function ($visit) {
 
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
