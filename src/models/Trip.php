@@ -292,12 +292,12 @@ class Trip extends Model {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
-			->leftJoin('ey_employee_claims as claim', 'claim.trp_id', 'trips.id')
+			->leftJoin('ey_employee_claims as claim', 'claim.trip_id', 'trips.id')
 
 			->select(
 				'trips.id',
 				'trips.number',
-				DB::raw('CONCAT(e.code," / ",e.name) as ecode'),
+				DB::raw('CONCAT(e.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
@@ -305,7 +305,8 @@ class Trip extends Model {
 				//Changed to purpose_name. do not revert - Abdul
 				'purpose.name as purpose_name',
 				'trips.advance_received',
-				'status.name as status_name'
+				'status.name as status_name',
+				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
 			)
 			->where('e.company_id', Auth::user()->company_id)
 			->groupBy('trips.id')
