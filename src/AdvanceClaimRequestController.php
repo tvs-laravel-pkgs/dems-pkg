@@ -32,7 +32,8 @@ class AdvanceClaimRequestController extends Controller {
 
 			)
 			->whereNotNull('trips.advance_received')
-			->where('trips.status_id', 3028) //MANAGER APPROVED
+		// ->where('trips.status_id', 3028) //MANAGER APPROVED
+			->where('trips.status_id', '!=', 3261) //ADVANCE REQUEST APPROVED
 			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {

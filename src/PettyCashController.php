@@ -109,9 +109,18 @@ class PettyCashController extends Controller {
 		$emp_details = [];
 		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
 			$user_role = 'Cashier';
-		} else if (Entrust::can('eyatra-employees')) {
+
+			// } else(Entrust::can('eyatra-employees')) {
+
+		} else {
 			$user_role = 'Employee';
-			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id')->join('entities', 'entities.id', 'employees.grade_id')->where('employees.id', Auth::user()->entity_id)->first();
+			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id', 'configs.name as designation')
+				->join('entities', 'entities.id', 'employees.grade_id')
+				->join('users', 'users.entity_id', 'employees.id')
+				->join('configs', 'configs.id', 'users.user_type_id')
+				->where('users.user_type_id', 3121)
+				->where('users.company_id', Auth::user()->company_id)
+				->first();
 		}
 		$this->data['user_role'] = $user_role;
 		$this->data['emp_details'] = $emp_details;

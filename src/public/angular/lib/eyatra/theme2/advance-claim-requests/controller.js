@@ -68,7 +68,9 @@ app.component('eyatraAdvanceClaimRequests', {
             d.style.left = x.left + 'px';
         }, 500);
 
-
+        setTimeout(function() {
+            $('#employee-export').css({ 'display': 'inline-block' });
+        }, 2500);
         $scope.getEmployeeData = function(query) {
             //alert(query);
             $('#employee_id').val(query);

@@ -19,8 +19,8 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
 		Route::post('trip/verification/reject/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
 
-		//COMPLETED TRIP & CLAIM
-		Route::post('trip/completed/list', 'Uitoux\EYatra\Api\TripClaimController@listCompletedTrips');
+		//TRIP CLAIM
+		Route::post('trip/claim/view/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimViewData');
 		Route::post('trip/claim/get-form-data/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
 
@@ -39,6 +39,14 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/entity/save/{entity_type_id}', 'Uitoux\EYatra\EntityController@saveEYatraEntity')->name('saveEYatraEntity');
 		Route::get('eyatra/entity/view/{entity_id}', 'Uitoux\EYatra\EntityController@viewEYatraEntity')->name('viewEYatraEntity');
 		Route::get('eyatra/entity/delete/{entity_id}', 'Uitoux\EYatra\EntityController@deleteEYatraEntity')->name('deleteEYatraEntity');
+
+		//REJECTION REASON ENTITIES
+		// Route::get('eyatra/rejection-reason-entity/get-list-data/{entity_type_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@getRejectionReasonEntityListData')->name('getRejectionReasonEntityListData');
+		// Route::get('eyatra/rejection-reason-entity/get-list', 'Uitoux\EYatra\rejectionReasonEntityController@listEYatraRejectionReasonEntity')->name('listEYatraRejectionReasonEntity');
+		// Route::get('eyatra/rejection-reason-entity/get-form-data/{entity_type_id}/{entity_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@eyatraRejectionReasonEntityFormData')->name('eyatraRejectionReasonEntityFormData');
+		// Route::post('eyatra/rejection-reason-entity/save/{entity_type_id}', 'Uitoux\EYatra\rejectionReasonEntityController@saveEYatraRejectionReasonEntity')->name('saveEYatraRejectionReasonEntity');
+		// Route::get('eyatra/rejection-reason-entity/view/{entity_id}', 'Uitoux\EYatra\rejectionReasonEntityController@viewEYatraRejectionReasonEntity')->name('viewEYatraRejectionReasonEntity');
+		// Route::get('eyatra/rejection-reason-entity/delete/{entity_id}', 'Uitoux\EYatra\rejectionReasonEntityController@deleteEYatraRejectionReasonEntity')->name('deleteEYatraRejectionReasonEntity');
 
 		//GRADES
 		Route::get('eyatra/grade/get-list', 'Uitoux\EYatra\GradeController@listEYatraGrade')->name('listEYatraGrade');
@@ -100,6 +108,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/employee/manager/search', 'Uitoux\EYatra\EmployeeController@searchManager')->name('searchManager');
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
 		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
+		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
 
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
@@ -210,6 +219,7 @@ Route::group(['middleware' => ['web']], function () {
 
 		//OUTLET REIMPURSEMENT
 		Route::get('eyatra/outlet-reimpursement/get-list', 'Uitoux\EYatra\OutletReimpursementController@listOutletReimpursement')->name('listOutletReimpursement');
+		Route::get('eyatra/outlet-reimpursement/view/{outlet_id}', 'Uitoux\EYatra\OutletReimpursementController@viewEYatraOutletReimpursement')->name('viewEYatraOutletReimpursement');
 
 		//HELPERS
 		Route::post('eyatra/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
@@ -236,5 +246,12 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/petty-cash/finance/form/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceSave')->name('pettycashFinanceSave');
 		Route::get('eyatra/petty-cash/finance/view/{pettycash_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationView')->name('pettycashFinanceVerificationView');
 		Route::get('eyatra/petty-cash/finance/employee_details/get/{emp_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationgetEmployee')->name('pettycashFinanceVerificationgetEmployee');
+
+		//ALTERNATE APPROVE LIST
+		Route::get('eyatra/alternate-approve/request/get-list', 'Uitoux\EYatra\AlternateApproveController@listAlternateApproveRequest')->name('listAlternateApproveRequest');
+		Route::get('eyatra/alternate-approve/request/get-form-data/{alternate_id?}', 'Uitoux\EYatra\AlternateApproveController@alternateapproveFormData')->name('alternateapproveFormData');
+		Route::post('eyatra/alternate-approve/request/save', 'Uitoux\EYatra\AlternateApproveController@alternateapproveSave')->name('alternateapproveSave');
+		Route::get('eyatra/alternate-approve/manager/{searchText}', 'Uitoux\EYatra\AlternateApproveController@getmanagerList')->name('getmanagerList');
+		Route::get('eyatra/alternate-approve/request/delete/{alternate_id}', 'Uitoux\EYatra\AlternateApproveController@alternateapproveDelete')->name('alternateapproveDelete');
 	});
 });

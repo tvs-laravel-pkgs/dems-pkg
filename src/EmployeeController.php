@@ -30,6 +30,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function listEYatraEmployee(Request $r) {
+		//dd($r->all());
 		if (!empty($r->outlet)) {
 			$outlet = $r->outlet;
 		} else {
@@ -115,6 +116,7 @@ class EmployeeController extends Controller {
 		if (!$employee_id) {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
+			//dd($employee);
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -127,23 +129,23 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		}
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
-		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
-		$designation_list = collect(Designation::designationList())->prepend(['id' => '', 'name' => 'Select Designation']);
+		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
+		$designation_list = [];
 		// dd($designation_list);
 		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
 		$sbu_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
-			'grade_list' => $grade_list,
 			'payment_mode_list' => $payment_mode_list,
 			'wallet_mode_list' => $wallet_mode_list,
 			'role_list' => $role_list,
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
+			'grade_list' => $grade_list,
 			'designation_list' => $designation_list,
 		];
 		
@@ -220,11 +222,15 @@ class EmployeeController extends Controller {
 			$user->company_id = Auth::user()->company_id;
 			$user->entity_id = $employee->id;
 			$user->fill($request->all());
+			//dd($request->password_change);
 			if ($request->password_change == 'Yes') {
 				if (!empty($request->user['password'])) {
 					$user->password = $request->user['password'];
 				}
 				$user->force_password_change = 1;
+			}else
+			{
+				$user->force_password_change = 0;
 			}
 			if ($request->status == 0) {
 				$user->deleted_at = date('Y-m-d H:i:s');
@@ -234,7 +240,7 @@ class EmployeeController extends Controller {
 				$user->deleted_at = NULL;
 			}
 			$user->save();
-
+//dd($user);
 			//USER ROLE SYNC
 			$user->roles()->sync(json_decode($request->roles));
 
@@ -317,7 +323,15 @@ class EmployeeController extends Controller {
 			->get();
 		return response()->json($manager_list);
 	}
+	public function getDesignationByGrade(Request $request) {
+		if (!empty($request->grade_id)) {
 
+			$designation_list = collect(Designation::where('grade_id', $request->grade_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Designation']);
+		} else {
+			$designation_list = [];
+		}
+		return response()->json(['designation_list' => $designation_list]);
+	}
 	public function getSbuByLob(Request $request) {
 		//dd($request);
 		if (!empty($request->lob_id)) {
