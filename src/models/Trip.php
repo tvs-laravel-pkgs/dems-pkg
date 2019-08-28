@@ -124,7 +124,7 @@ class Trip extends Model {
 				$trip->created_by = Auth::user()->id;
 				$trip->created_at = Carbon::now();
 				$trip->updated_at = NULL;
-
+				$activity['activity'] = "add";
 			} else {
 				$trip = Trip::find($request->id);
 
@@ -132,6 +132,7 @@ class Trip extends Model {
 				$trip->updated_at = Carbon::now();
 
 				$trip->visits()->sync([]);
+				$activity['activity'] = "edit";
 
 			}
 			if ($request->advance_received) {
@@ -148,7 +149,8 @@ class Trip extends Model {
 
 			$trip->number = 'TRP' . $trip->id;
 			$trip->save();
-
+			$activity['entity_id'] = $trip->id;
+			$activity['entity_type'] = 'trip';
 			//SAVING VISITS
 			if ($request->visits) {
 				$visit_count = count($request->visits);
@@ -191,6 +193,7 @@ class Trip extends Model {
 					$i++;
 				}
 			}
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
@@ -440,7 +443,7 @@ class Trip extends Model {
 		$trip->save();
 
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
-		return response()->json(['success' => true]);
+		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
 
 	public static function rejectTrip($r) {
@@ -454,7 +457,7 @@ class Trip extends Model {
 		$trip->save();
 
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
-		return response()->json(['success' => true]);
+		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
 
 	public static function getClaimFormData($trip_id) {
