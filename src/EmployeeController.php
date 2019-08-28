@@ -146,6 +146,7 @@ class EmployeeController extends Controller {
 			'sbu_list' => $sbu_list,
 			'designation_list' => $designation_list,
 		];
+		
 		// dd($this->data['extras']);
 		$this->data['employee'] = $employee;
 
