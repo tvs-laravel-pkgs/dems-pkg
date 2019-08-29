@@ -188,7 +188,7 @@ class Trip extends Model {
 						$agent = $state->agents()->where('company_id', Auth::user()->company_id)->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
 
 						if (!$agent) {
-							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count]]);
+							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count], 'message' => 'No agent found for visit - ' . $visit_count]);
 						}
 						$visit->agent_id = $agent->id;
 					}
@@ -196,7 +196,7 @@ class Trip extends Model {
 					$i++;
 				}
 			}
-			$activity_log = ActivityLog::saveLog($activity);
+			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
@@ -220,6 +220,7 @@ class Trip extends Model {
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
+			'employee.user',
 			'purpose',
 			'status',
 		])
@@ -299,12 +300,13 @@ class Trip extends Model {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('users as u', 'u.entity_id', 'e.id')
 			->leftJoin('ey_employee_claims as claim', 'claim.trip_id', 'trips.id')
 
 			->select(
 				'trips.id',
 				'trips.number',
-				DB::raw('CONCAT(e.name," ( ",e.code," ) ") as ecode'),
+				DB::raw('CONCAT(u.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
@@ -315,6 +317,7 @@ class Trip extends Model {
 				'status.name as status_name',
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
 			)
+			->where('u.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')

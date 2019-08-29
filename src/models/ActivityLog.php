@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActivityLog extends Model {
 	public function saveLog($activity) {
-		dd($activity);
 		$activity = new ActivityLog;
 		$activity->date_time = date("Y-m-d H:i:s");
 		$activity->user_id = Auth::user()->id;
