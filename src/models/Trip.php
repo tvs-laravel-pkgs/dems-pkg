@@ -2,7 +2,7 @@
 
 namespace Uitoux\EYatra;
 
-use App\Mail\TripNotificationMail;
+// use App\Mail\TripNotificationMail;
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -14,7 +14,6 @@ use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Mail;
-use Uitoux\EYatra\ActivityLog;
 use Validator;
 
 class Trip extends Model {
@@ -201,11 +200,10 @@ class Trip extends Model {
 					$i++;
 				}
 			}
-			// $activity_log = ActivityLog::saveLog($activity);
 			if (!$request->id) {
-				self::sendTripNotificationMail($trip);
+				// self::sendTripNotificationMail($trip);
 			}
-			$activity_log = ActivityLog::saveLog($activity);
+			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
@@ -340,14 +338,14 @@ class Trip extends Model {
 			$trips->where('trips.number', 'like', '%' . $request->number . '%');
 		}
 		if ($request->from_date && $request->to_date) {
-			$trips->where('v.date', '>=', $request->from_date);
-			$trips->where('v.date', '<=', $request->to_date);
+			$trips->where('v.departure_date', '>=', $request->from_date);
+			$trips->where('v.departure_date', '<=', $request->to_date);
 		} else {
 			$today = Carbon::today();
 			$from_date = $today->copy()->subMonths(3);
 			$to_date = $today->copy()->addMonths(3);
-			$trips->where('v.date', '>=', $from_date);
-			$trips->where('v.date', '<=', $to_date);
+			$trips->where('v.departure_date', '>=', $from_date);
+			$trips->where('v.departure_date', '<=', $to_date);
 		}
 
 		if ($request->status_ids && count($request->status_ids) > 0) {
@@ -427,7 +425,6 @@ class Trip extends Model {
 				}
 			})*/
 		;
-
 		if (!Entrust::can('verify-all-trips')) {
 			$trips->where('trips.manager_id', Auth::user()->entity_id);
 		}
@@ -459,7 +456,12 @@ class Trip extends Model {
 		}
 		$trip->status_id = 3028;
 		$trip->save();
-
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = NULL;
+		$activity['activity'] = "approve";
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
@@ -473,6 +475,12 @@ class Trip extends Model {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3022;
 		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['activity'] = "reject";
+		$activity['details'] = $r->remarks;
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
 
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
@@ -646,7 +654,7 @@ class Trip extends Model {
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		$data['success'] = true;
-		//dd($this->data);
+		//dd($data);
 		return response()->json($data);
 	}
 	// Function to get all the dates in given range

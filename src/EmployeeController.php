@@ -77,6 +77,7 @@ class EmployeeController extends Controller {
 					$query->where('grd.id', $grade);
 				}
 			})
+			->where('u.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 			->orderBy('e.code', 'asc');
 

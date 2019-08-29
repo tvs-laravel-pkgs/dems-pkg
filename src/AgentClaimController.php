@@ -445,6 +445,11 @@ class AgentClaimController extends Controller {
 		// $payment->payment_mode_id = $agent_claim->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
+		$activity['entity_id'] = $agent_claim->id;
+		$activity['entity_type'] = 'Agent';
+		$activity['details'] = NULL;
+		$activity['activity'] = "paid";
+		$activity_log = ActivityLog::saveLog($activity);
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);
 	}
@@ -458,6 +463,11 @@ class AgentClaimController extends Controller {
 		$agent_claim->rejection_remarks = $r->remarks;
 		$agent_claim->status_id = 3024;
 		$agent_claim->save();
+		$activity['entity_id'] = $agent_claim->id;
+		$activity['entity_type'] = 'Agent';
+		$activity['details'] = NULL;
+		$activity['activity'] = "reject";
+		$activity_log = ActivityLog::saveLog($activity);
 
 		return response()->json(['success' => true]);
 	}

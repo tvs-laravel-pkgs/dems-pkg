@@ -27,7 +27,7 @@ app.component('eyatraAgents', {
                 data: function(d) {
                     // d.agent = $('#agent_id').val();
                     d.tm = $('#tm_id').val();
-                    d.status_id = $('#status').val();
+                    d.status = $('#status').val();
                 }
             },
 

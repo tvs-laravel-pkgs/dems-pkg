@@ -82,7 +82,7 @@ app.component('eyatraEmployees', {
             $('#grade_id').val(null);
             dataTableFilter.fnFilter();
         }
-         $scope.resetForm();
+        $scope.resetForm();
         $scope.deleteEmployee = function(id) {
             $('#del').val(id);
         }
@@ -145,21 +145,21 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
-                
+
 
             self.employee = response.data.employee;
             self.extras = response.data.extras;
-          
+
 
             self.action = response.data.action;
             if (response.data.employee.payment_mode_id == null || !response.data.employee.payment_mode_id) {
                 self.employee.payment_mode_id = 3244;
             }
-           
+
             if (self.action == 'Edit') {
-                   self.switch_password = 'No';
-                    $("#hide_password").hide();
-                    $("#password").prop('disabled', true);
+                self.switch_password = 'No';
+                $("#hide_password").hide();
+                $("#password").prop('disabled', true);
                 $scope.getDesignation(self.employee.grade_id);
                 //$scope.selectPaymentMode(self.employee.payment_mode_id);
                 $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
@@ -211,7 +211,7 @@ app.component('eyatraEmployeeForm', {
                         data: { grade_id: grade_id },
                     })
                     .done(function(res) {
-                       
+
                         self.extras.designation_list = [];
                         self.extras.designation_list = res.designation_list;
                         $scope.$apply()
