@@ -10,14 +10,6 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class RejectionController extends Controller {
-	/*public function getEntityListData($entity_type_id) {
-		$entity_type = EntityType::find($entity_type_id);
-		if (!$entity_type) {
-			return response()->json(['success' => false, 'error' => "Entity Type Not found"]);
-		}
-		$this->data['entity_type'] = $entity_type;
-		return response()->json($this->data);
-	}*/
 
 	public function listEYatraEntityNg(Request $r) {
 
@@ -53,7 +45,8 @@ class RejectionController extends Controller {
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/entity/data/edit/' . $entity->id . '">
+
+				<a href="#!/eyatra/rejection-reason/edit/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
 				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity_modal" onclick="angular.element(this).scope().deleteEntityData(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
@@ -88,13 +81,7 @@ class RejectionController extends Controller {
 		}
 		$entity_type_ids = [507, 508, 509, 510, 511];
 		$this->data['reject_type_list'] = DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get();
-		/*
-			$entity_type = DB::table('entity_types');
-			$entity_type->name = 'Select Entity Type';
-			$entity_type->id = null;
-			$entity_type_list = DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get();
-			$this->data['reject_type_list'] = $entity_type_list->prepend($entity_type);
-		*/
+
 		$this->data['entity'] = $entity;
 		$this->data['success'] = true;
 		return response()->json($this->data);

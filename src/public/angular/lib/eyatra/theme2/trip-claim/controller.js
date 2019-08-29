@@ -279,6 +279,25 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
+        $scope.getEligibleAmtBasedonCitycategoryGradeStayType = function(grade_id, city_id, expense_type_id, key, stay_type_id) {
+            if (city_id && grade_id && expense_type_id && stay_type_id) {
+                $.ajax({
+                        url: get_eligible_amount_by_city_category_grade_staytype,
+                        method: "GET",
+                        data: { city_id: city_id, grade_id: grade_id, expense_type_id: expense_type_id, stay_type_id: stay_type_id },
+                    })
+                    .done(function(res) {
+                        var eligible_amount_after_per = res.eligible_amount;
+                        self.trip.lodgings[key].eligible_amount = eligible_amount_after_per;
+                        $scope.$apply()
+                        $scope.stayDaysEach();
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
+
         $scope.isDeviation = function() {
             var is_deviation = false;
             $('.is_deviation_amount').each(function() {
@@ -316,6 +335,8 @@ app.component('eyatraTripClaimForm', {
                 } else {
                     stayed_eligible_amount_with_days = stayed_days * stayed_base_eligible_amount;
                 }
+                stayed_eligible_amount_with_days = parseFloat(Math.round(stayed_eligible_amount_with_days * 100) / 100).toFixed(2);
+
                 $(this).closest('tr').find('.eligible_amount').val(stayed_eligible_amount_with_days);
                 $(this).closest('tr').find('.eligible_amount_label').html('Eligible - ₹ ' + stayed_eligible_amount_with_days);
                 $scope.isDeviation();
@@ -332,6 +353,8 @@ app.component('eyatraTripClaimForm', {
             } else {
                 stayed_eligible_amount_with_days = stayed_days * stayed_base_eligible_amount;
             }
+            stayed_eligible_amount_with_days = parseFloat(Math.round(stayed_eligible_amount_with_days * 100) / 100).toFixed(2);
+
             $(this).closest('tr').find('.eligible_amount').val(stayed_eligible_amount_with_days);
             $(this).closest('tr').find('.eligible_amount_label').html('Eligible - ₹ ' + stayed_eligible_amount_with_days);
             $scope.isDeviation();
@@ -385,6 +408,7 @@ app.component('eyatraTripClaimForm', {
                     days_c = days;
                     eligible_amount_with_days = days * base_eligible_amount;
                 }
+                eligible_amount_with_days = parseFloat(Math.round(eligible_amount_with_days * 100) / 100).toFixed(2);
                 $(this).closest('tr').find('.stayed_days').val(days_c);
                 $(this).closest('tr').find('.eligible_amount').val(eligible_amount_with_days);
                 $(this).closest('tr').find('.eligible_amount_label').html('Eligible - ₹ ' + eligible_amount_with_days);

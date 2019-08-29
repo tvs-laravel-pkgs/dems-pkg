@@ -13,7 +13,6 @@ class Visit extends Model {
 		'trip_id',
 		'from_city_id',
 		'to_city_id',
-		'date',
 		'travel_mode_id',
 		'booking_method_id',
 		'booking_status_id',
