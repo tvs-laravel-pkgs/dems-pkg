@@ -11,6 +11,7 @@ use DB;
 use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Uitoux\EYatra\ActivityLog;
 use Validator;
 
 class Trip extends Model {
@@ -154,6 +155,7 @@ class Trip extends Model {
 			$trip->save();
 			$activity['entity_id'] = $trip->id;
 			$activity['entity_type'] = 'trip';
+			$activity['details'] = NULL;
 			//SAVING VISITS
 			if ($request->visits) {
 				$visit_count = count($request->visits);
