@@ -38,6 +38,16 @@ class TripClaimController extends Controller {
 			)
 			->where('e.company_id', Auth::user()->company_id)
 			->where('trips.status_id', 3023)
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -67,6 +77,9 @@ class TripClaimController extends Controller {
 
 	public function eyatraTripClaimFormData($trip_id) {
 		return Trip::getClaimFormData($trip_id);
+	}
+	public function eyatraTripClaimFilterData() {
+		return Trip::getFilterData();
 	}
 
 	public function saveEYatraTripClaim(Request $request) {

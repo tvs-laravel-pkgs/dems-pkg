@@ -11,7 +11,6 @@ class Agent extends Model {
 	protected $fillable = [
 		'company_id',
 		'code',
-		'name',
 		'gstin',
 		'payment_mode_id',
 		'created_by',
