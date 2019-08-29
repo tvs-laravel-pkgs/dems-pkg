@@ -35,6 +35,7 @@ class EYatraConfigSeeder extends Seeder {
 			518 => 'Petty Cash - EYatra',
 			519 => 'Activity Log Entity Types - EYatra',
 			520 => 'Activity Log Activities - EYatra',
+			521 => 'Lodging Stay',
 		];
 
 		$configs = [
@@ -452,6 +453,16 @@ class EYatraConfigSeeder extends Seeder {
 			3328 => [
 				'name' => 'Paid',
 				'config_type_id' => 520,
+			],
+
+			//LODGING STAY
+			3340 => [
+				'name' => 'Normal',
+				'config_type_id' => 521,
+			],
+			3341 => [
+				'name' => 'Home',
+				'config_type_id' => 521,
 			],
 		];
 
