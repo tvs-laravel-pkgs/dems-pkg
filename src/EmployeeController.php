@@ -221,6 +221,7 @@ class EmployeeController extends Controller {
 			$user->entity_type = 0;
 			$user->user_type_id = 3121;
 			$user->company_id = Auth::user()->company_id;
+			$user->name = $request->name;
 			$user->entity_id = $employee->id;
 			$user->fill($request->all());
 			//dd($request->password_change);

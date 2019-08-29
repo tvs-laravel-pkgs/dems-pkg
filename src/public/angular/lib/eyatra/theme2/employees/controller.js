@@ -34,7 +34,7 @@ app.component('eyatraEmployees', {
             columns: [
                 { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'e.code', searchable: true },
-                { data: 'name', name: 'e.name', searchable: true },
+                { data: 'name', name: 'users.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
                 { data: 'manager_code', name: 'm.code', searchable: true },
                 { data: 'grade', name: 'grd.name', searchable: true },
@@ -333,7 +333,9 @@ app.component('eyatraEmployeeForm', {
                     },
                     maxlength: 20,
                     minlength: 3,
-                    positiveNumber: true,
+                    min: 1,
+                    number: true,
+                    // positiveNumber: true,
                 },
                 'ifsc_code': {
                     required: function(element) {

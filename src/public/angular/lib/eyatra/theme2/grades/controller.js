@@ -242,6 +242,11 @@ app.component('eyatraGradeForm', {
                     minlength: 2,
                     maxlength: 191,
                 },
+                'discount_percentage': {
+                    required: true,
+                    min: 1,
+                    max: 100,
+                },
             },
 
             submitHandler: function(form) {

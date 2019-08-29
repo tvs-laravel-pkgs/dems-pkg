@@ -11,7 +11,6 @@ class Employee extends Model {
 	protected $fillable = [
 		'id',
 		'code',
-		'name',
 		'outlet_id',
 		'reporting_to_id',
 		'grade_id',
@@ -79,7 +78,10 @@ class Employee extends Model {
 	}
 
 	public static function getList() {
-		return Employee::select('name', 'id')->get();
+		return Employee::select('users.name', 'employees.id')
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->get();
 	}
 
 	public static function create($company, $code, $outlet, $admin, $faker, $manager_id = null) {

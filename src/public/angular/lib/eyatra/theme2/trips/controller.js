@@ -46,7 +46,7 @@ app.component('eyatraTrips', {
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'created_date', name: 'trips.created_date', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'ename', name: 'e.name', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
@@ -74,7 +74,6 @@ app.component('eyatraTrips', {
 
 
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
@@ -290,7 +289,7 @@ app.component('eyatraTripForm', {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Check all tabs for errors'
+                    text: 'You have errors,Please check all tabs'
                 }).show();
             },
             submitHandler: function(form) {
