@@ -4,11 +4,11 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use Excel;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
-use Excel;
 
 class AdvanceClaimRequestController extends Controller {
 	public function listAdvanceClaimRequest(Request $r) {
@@ -22,8 +22,8 @@ class AdvanceClaimRequestController extends Controller {
 				'trips.number',
 				'e.code as ecode',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'trips.created_at',
@@ -34,7 +34,7 @@ class AdvanceClaimRequestController extends Controller {
 		// ->whereNotNull('trips.advance_received')
 		// ->where('trips.status_id', 3028) //MANAGER APPROVED
 		// ->where('trips.status_id', '!=', 3261) //ADVANCE REQUEST APPROVED
-		// ->where('trips.advance_request_approval_status_id', 3260) //NEW
+			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -197,39 +197,38 @@ class AdvanceClaimRequestController extends Controller {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true]);
 	}
-	public function AdvanceClaimRequestExport(request $request)
-	{
-	//dd($request->all());
+	public function AdvanceClaimRequestExport(request $request) {
+		//dd($request->all());
 		DB::beginTransaction();
-		try{
-			if($request->export_ids)
-			{
-				$trip_ids=explode(',', $request->export_ids);
-			}else
-			{
+		try {
+			if ($request->export_ids) {
+				$trip_ids = explode(',', $request->export_ids);
+			} else {
 				return back()->with('error', 'Trips not found');
 			}
-			$trips=Trip::select('employees.name','employees.code','bank_details.account_number','bank_details.ifsc_code','trips.advance_received')
-			->join('employees','employees.id','trips.employee_id')
-			->leftjoin('bank_details','bank_details.entity_id','employees.id')
-			->whereIn('trips.id',$trip_ids)
-			->get();
+			$trips = Trip::select('users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received')
+				->join('employees', 'employees.id', 'trips.employee_id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->leftjoin('bank_details', 'bank_details.entity_id', 'employees.id')
+				->whereIn('trips.id', $trip_ids)
+				->where('users.user_type_id', 3121)
+				->get();
 
-			$trips_status_update=Trip::whereIn('id',$trip_ids)->update(['advance_request_approval_status_id' => 3261]);
+			$trips_status_update = Trip::whereIn('id', $trip_ids)->update(['advance_request_approval_status_id' => 3261]);
 			DB::commit();
 			//dd($trips);
-			$trips_header = ['S.NO', 'Employee Name', 'Code', 'Account Number', 'Ifsc code', 'Advance Received'];
+			$trips_header = ['Employee Name', 'Employee Code', 'Account Number', 'Ifsc code', 'Amount'];
 			$logs_details = array();
 			if (count($trips) > 0) {
 				$count_logs = 1;
 				foreach ($trips as $key => $value) {
 					if ($value->name) {
-						$employee_name =  $value->name;
+						$employee_name = $value->name;
 					} else {
-						$employee_name =  '--';
+						$employee_name = '--';
 					}
 					if ($value->code) {
-						$employee_code =  $value->code;
+						$employee_code = $value->code;
 					} else {
 						$employee_code = '-';
 					}
@@ -242,29 +241,29 @@ class AdvanceClaimRequestController extends Controller {
 						$ifsc_code = $value->ifsc_code;
 					} else {
 						$ifsc_code = '-';
-					}	
+					}
 					if ($value->advance_received) {
 						$advance_received = $value->advance_received;
 					} else {
 						$advance_received = '-';
-					}	
-					$logs_details[] = [$count_logs, $employee_name,$employee_code, $account_number, $ifsc_code, $advance_received];
+					}
+					$logs_details[] = [$employee_name, $employee_code, $account_number, $ifsc_code, $advance_received];
 					$count_logs++;
 				}
 			}
 			//dd($logs_details);
-			Excel::create('advance_claim_request_report', function ($excel) use ($trips_header,$logs_details) {
-				$excel->sheet('advance_claim_request', function ($sheet) use ($trips_header,$logs_details) {
+			Excel::create('advance_claim_request_report', function ($excel) use ($trips_header, $logs_details) {
+				$excel->sheet('advance_claim_request', function ($sheet) use ($trips_header, $logs_details) {
 					$sheet->fromArray($logs_details);
 					$sheet->row(1, $trips_header);
 				});
 			})->export('xls');
 			return back();
-		}catch (Exception $e) {
-		DB::rollBack();
-		return back()->with('error', 'Trips advance request have erros');
-		//return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		} catch (Exception $e) {
+			DB::rollBack();
+			return back()->with('error', 'Trips advance request have erros');
+			//return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}
-}
+	}
 
 }
