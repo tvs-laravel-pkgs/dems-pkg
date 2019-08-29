@@ -31,10 +31,11 @@ app.component('eyatraTripBookingRequests', {
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
-                { data: 'trip_id', name: 'trips.id', searchable: true },
+                { data: 'trip_number', name: 'trips.id', searchable: true },
                 { data: 'ename', name: 'e.name', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'agent', name: 'a.name', searchable: true },
+                { data: 'tickets_count', searchable: false },
+                { data: 'booking_status', searchable: false },
                 { data: 'created_on', name: 'a.name', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],

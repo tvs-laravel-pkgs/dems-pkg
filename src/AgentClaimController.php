@@ -25,11 +25,13 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.invoice_amount',
 			'agents.code as agent_code',
-			'agents.name as agent_name',
+			'users.name as agent_name',
 			'configs.name as status',
 			DB::raw('DATE_FORMAT(ey_agent_claims.created_at,"%d/%m/%Y") as date'))
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
 			->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
 			->orderBy('ey_agent_claims.id', 'desc');
 		// ->get();
@@ -261,9 +263,11 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
 			'ey_agent_claims.tax',
-			'agents.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
+			'users.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
 			->where('ey_agent_claims.id', $agent_claim_id)->first();
 
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
@@ -309,11 +313,13 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.invoice_amount',
 			'agents.code as agent_code',
-			'agents.name as agent_name',
+			'users.name as agent_name',
 			'configs.name as status',
 			DB::raw('DATE_FORMAT(ey_agent_claims.created_at,"%d/%m/%Y") as date'))
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
 		// ->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
 			->where(function ($query) use ($created_date_filter) {
 				if ($created_date_filter != "1970-01-01") {
@@ -358,9 +364,11 @@ class AgentClaimController extends Controller {
 
 	public function filter_data() {
 
-		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'agents.name', 'agents.id')
+		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'users.name', 'agents.id')
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
-			->groupBy('agents.name')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
+			->groupBy('users.name')
 			->orderBy('ey_agent_claims.id', 'desc')
 			->get();
 		$this->data['status'] = $status = Config::select('name', 'id')
@@ -377,10 +385,12 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.net_amount',
 			'configs.name as status',
 			'ey_agent_claims.tax', 'ey_agent_claims.status_id',
-			'agents.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
+			'users.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
-			->where('ey_agent_claims.id', $agent_claim_id)->first();
+			->where('ey_agent_claims.id', $agent_claim_id)
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)->first();
 
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
 			'visit_bookings.id',
@@ -389,11 +399,13 @@ class AgentClaimController extends Controller {
 			'trips.number as trip',
 			'trips.id as trip_id',
 			'employees.code as employee_code',
-			'employees.name as employee_name')
+			'users.name as employee_name')
 			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
 			->leftJoin('trips', 'trips.id', 'visits.trip_id')
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
 			->join('configs', 'configs.id', 'trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
 			->where('visit_bookings.agent_claim_id', $agent_claim_id)
 			->groupBy('trips.id')
 			->get();
@@ -402,21 +414,18 @@ class AgentClaimController extends Controller {
 		$this->data['success'] = true;
 		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
 
-		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
-		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$payment_mode_list = collect(Config::agentPaymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 
 		$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_claim_view->agent_id);
 
 		$this->data['agent'] = $agent;
 		$this->data['payment_mode_list'] = $payment_mode_list;
-		$this->data['wallet_mode_list'] = $wallet_mode_list;
 		$this->data['agent_claim_rejection'] = $agent_claim_rejection = Entity::agent_claim_rejection();
 		$this->data['date'] = date('d-m-Y');
 		return response()->json($this->data);
 	}
 	public function payAgentClaimRequest(Request $r) {
 
-		// dd($r->all());
 		$agent_claim = AgentClaim::find($r->agent_claim_id);
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim Request not found']]);
@@ -426,32 +435,12 @@ class AgentClaimController extends Controller {
 
 		//PAYMENT SAVE
 		$payment = Payment::firstOrNew(['entity_id' => $agent_claim->id]);
-		$payment->date = date('Y-m-d', strtotime($r->date));
 		$payment->fill($r->all());
+		$payment->date = date('Y-m-d', strtotime($r->date));
 		$payment->payment_of_id = 3252;
-		$payment->entity_id = $agent_claim->id;
+		// $payment->payment_mode_id = $agent_claim->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
-
-		//BANK DETAIL SAVE
-		if ($r->bank_name) {
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $agent_claim->id]);
-			$bank_detail->fill($r->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $agent_claim->id;
-			$bank_detail->account_type_id = 3252;
-			$bank_detail->save();
-		}
-
-		//WALLET SAVE
-		if ($r->type_id) {
-			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent_claim->id]);
-			$wallet_detail->fill($r->all());
-			$wallet_detail->wallet_of_id = 3252;
-			$wallet_detail->entity_id = $agent_claim->id;
-			$wallet_detail->save();
-		}
-
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);
 	}

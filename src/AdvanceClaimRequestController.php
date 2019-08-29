@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
+use Excel;
 
 class AdvanceClaimRequestController extends Controller {
 	public function listAdvanceClaimRequest(Request $r) {
@@ -56,8 +57,8 @@ class AdvanceClaimRequestController extends Controller {
 
 		return Datatables::of($trips)
 			->addColumn('checkbox', function ($trip) {
-				return '<input id="trip_' . $trip->id . '" type="checkbox" class="check-bottom-layer booking_list " name="booking_list" value="' . $trip->id . '" data-trip_id="' . $trip->id . '">
-                                                        <label for="role_' . $trip->id . '"></label>';
+				return '<input id="trip_' . $trip->id . '" type="checkbox" class="check-bottom-layer booking_list " name="booking_list"  value="' . $trip->id . '" data-trip_id="' . $trip->id . '" >
+                                                        <label for="trip_' . $trip->id . '"></label>';
 			})
 			->addColumn('action', function ($trip) {
 
@@ -172,7 +173,10 @@ class AdvanceClaimRequestController extends Controller {
 	}
 
 	public function eyatraAdvanceClaimFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'), 'id')->where('company_id', Auth::user()->company_id)->get();
+		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)->get();
 		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
 		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
 		$this->data['success'] = true;
@@ -193,5 +197,74 @@ class AdvanceClaimRequestController extends Controller {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true]);
 	}
+	public function AdvanceClaimRequestExport(request $request)
+	{
+	//dd($request->all());
+		DB::beginTransaction();
+		try{
+			if($request->export_ids)
+			{
+				$trip_ids=explode(',', $request->export_ids);
+			}else
+			{
+				return back()->with('error', 'Trips not found');
+			}
+			$trips=Trip::select('employees.name','employees.code','bank_details.account_number','bank_details.ifsc_code','trips.advance_received')
+			->join('employees','employees.id','trips.employee_id')
+			->leftjoin('bank_details','bank_details.entity_id','employees.id')
+			->whereIn('trips.id',$trip_ids)
+			->get();
+
+			$trips_status_update=Trip::whereIn('id',$trip_ids)->update(['advance_request_approval_status_id' => 3261]);
+			DB::commit();
+			//dd($trips);
+			$trips_header = ['S.NO', 'Employee Name', 'Code', 'Account Number', 'Ifsc code', 'Advance Received'];
+			$logs_details = array();
+			if (count($trips) > 0) {
+				$count_logs = 1;
+				foreach ($trips as $key => $value) {
+					if ($value->name) {
+						$employee_name =  $value->name;
+					} else {
+						$employee_name =  '--';
+					}
+					if ($value->code) {
+						$employee_code =  $value->code;
+					} else {
+						$employee_code = '-';
+					}
+					if ($value->account_number) {
+						$account_number = $value->account_number;
+					} else {
+						$account_number = '-';
+					}
+					if ($value->ifsc_code) {
+						$ifsc_code = $value->ifsc_code;
+					} else {
+						$ifsc_code = '-';
+					}	
+					if ($value->advance_received) {
+						$advance_received = $value->advance_received;
+					} else {
+						$advance_received = '-';
+					}	
+					$logs_details[] = [$count_logs, $employee_name,$employee_code, $account_number, $ifsc_code, $advance_received];
+					$count_logs++;
+				}
+			}
+			//dd($logs_details);
+			Excel::create('advance_claim_request_report', function ($excel) use ($trips_header,$logs_details) {
+				$excel->sheet('advance_claim_request', function ($sheet) use ($trips_header,$logs_details) {
+					$sheet->fromArray($logs_details);
+					$sheet->row(1, $trips_header);
+				});
+			})->export('xls');
+			return back();
+		}catch (Exception $e) {
+		DB::rollBack();
+		return back()->with('error', 'Trips advance request have erros');
+		//return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
+}
 
 }

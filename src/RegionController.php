@@ -144,7 +144,14 @@ class RegionController extends Controller {
 			$region->save();
 
 			DB::commit();
-			return response()->json(['success' => true]);
+			// return response()->json(['success' => true]);
+			if (empty($request->id)) {
+
+				return response()->json(['success' => true, 'message' => ['Region Added Successfully']]);
+			} else {
+
+				return response()->json(['success' => true, 'message' => ['Region Updated Successfully']]);
+			}
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);

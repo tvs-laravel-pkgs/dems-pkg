@@ -15,8 +15,10 @@ use Yajra\Datatables\Datatables;
 class TripBookingRequestController extends Controller {
 
 	public function filterEYatraTripBookingRequests() {
-		$this->data['employee_list'] = $employee_list = Employee::select(DB::raw('concat(code, "-" ,name) as name,id'))
-			->where('company_id', Auth::user()->company_id)->get();
+		$this->data['employee_list'] = $employee_list = Employee::select(DB::raw('concat(employees.code, "-" ,users.name) as name,employees.id'))
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)->get();
 		$this->data['status_list'] = $status_list = Config::select('name', 'id')->where('config_type_id', 501)->get();
 
 		return response()->json($this->data);
@@ -41,11 +43,15 @@ class TripBookingRequestController extends Controller {
 			->join('configs as status', 'status.id', 'v.status_id')
 			->join('users as cb', 'cb.id', 'trips.created_by')
 			->leftjoin('agents as a', 'a.id', 'v.agent_id')
+			->leftJoin('users', 'users.entity_id', 'e.id')
+			->where('users.user_type_id', 3121)
 			->select('trips.id as trip_id',
-				'e.code as ecode', 'e.name as ename',
+				'trips.number as trip_number',
+				'e.code as ecode', 'users.name as ename',
 				'status.name as status',
-				'a.name as agent',
-				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on')
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on'),
+				DB::raw('COUNT(v.id) as tickets_count')
+
 			)
 			->where(function ($query) use ($r, $employee) {
 				if (!empty($employee)) {
@@ -103,6 +109,18 @@ class TripBookingRequestController extends Controller {
 
 		// dd($visits);
 		return Datatables::of($visits)
+			->addColumn('booking_status', function ($visit) {
+				$bookings = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_status_id', 3060)
+					->count();
+				// if ($bookings) {
+				// 	return "Pending";
+				// } else {
+				// 	return "Booked";
+				// }
+				// dd($bookings);
+				return $bookings ? "Pending" : "Booked";
+			})
 			->addColumn('action', function ($visit) {
 
 				$img1 = asset('public/img/content/yatra/table/edit.svg');

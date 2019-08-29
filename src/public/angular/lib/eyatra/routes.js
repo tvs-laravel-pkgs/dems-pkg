@@ -17,6 +17,36 @@ app.config(['$routeProvider', function($routeProvider) {
 
     }).
 
+
+     //REJECTION REASON
+    when('/eyatra/rejection-reason/list', {
+        template: '<entity-data-list></entity-data-list>',
+        title: 'Entity list',
+    }).
+    when('/eyatra/rejection-reason/add', {
+        template: '<entity-data-form></entity-data-form>',
+        title: 'Add Entity',
+    }).
+    when('/eyatra/rejection-reason/edit/:entity_id', {
+        template: '<entity-data-form></entity-data-form>',
+        title: 'Edit Entity',
+    }).
+
+    //COA SUB MASTERS
+    when('/eyatra/coa-sub-master/list', {
+        template: '<coa-data-list></coa-data-list>',
+        title: 'COA list',
+    }).
+    when('/eyatra/coa-sub-master/add', {
+        template: '<coa-data-form></coa-data-form>',
+        title: 'Add COA',
+    }).
+    when('/eyatra/coa-sub-master/edit/:entity_id', {
+        template: '<coa-data-form></coa-data-form>',
+        title: 'Edit COA',
+    }).
+
+    
     //GRADES
     when('/eyatra/grades', {
         template: '<eyatra-grades></eyatra-grades>',

@@ -467,7 +467,7 @@ app.component('eyatraOutletForm', {
                     required: true,
                 }
             },
-            messages: {
+           /* messages: {
                 'code': {
                     required: 'Outlet code is required',
                     minlength: 'Please enter minimum of 3 characters',
@@ -518,7 +518,7 @@ app.component('eyatraOutletForm', {
                 'sbus[]': {
                     required: 'Sbu is Required',
                 }
-            },
+            },*/
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
