@@ -19,11 +19,13 @@ class TripController extends Controller {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
 			->select(
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
-				'e.name as ename',
+				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				// DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				// DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
@@ -109,7 +111,10 @@ class TripController extends Controller {
 	}
 
 	public function eyatraTripFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'), 'id')->where('company_id', Auth::user()->company_id)->get();
+		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)->get();
 		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
 		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
 		$this->data['success'] = true;
@@ -207,7 +212,7 @@ class TripController extends Controller {
 			'trip.localTravels.fromCity',
 			'trip.localTravels.toCity',
 			'trip.localTravels.travelMode',
-			'trip.localTravels.attachments'
+			'trip.localTravels.attachments',
 		];
 
 		//Booking Status
@@ -228,9 +233,8 @@ class TripController extends Controller {
 		$this->data['trip'] = $visit->trip;
 		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$this->data['bookings'] = $visit->bookings;
-		}else
-		{
-			$this->data['bookings']=[];
+		} else {
+			$this->data['bookings'] = [];
 		}
 		$this->data['success'] = true;
 		return response()->json($this->data);

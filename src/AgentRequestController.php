@@ -73,6 +73,8 @@ class AgentRequestController extends Controller {
 			'agentVisits.managerVerificationStatus',
 			'employee',
 			'employee.user',
+			'employee.grade',
+			'employee.designation',
 			'purpose',
 			'status',
 		])

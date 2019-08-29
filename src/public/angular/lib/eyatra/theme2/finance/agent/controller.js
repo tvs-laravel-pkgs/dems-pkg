@@ -45,7 +45,7 @@ app.component('eyatraAgentClaimVerificationList', {
                     { data: 'date', name: 'ey_agent_claims.invoice_date', searchable: false },
                     { data: 'number', name: 'ey_agent_claims.number', searchable: true },
                     { data: 'agent_code', name: 'agents.code', searchable: true },
-                    { data: 'agent_name', name: 'agents.name', searchable: true },
+                    { data: 'agent_name', name: 'users.name', searchable: true },
                     { data: 'invoice_number', name: 'ey_agent_claims.invoice_number', searchable: true },
                     { data: 'invoice_date', name: 'ey_agent_claims.invoice_date', searchable: true },
                     { data: 'invoice_amount', name: 'ey_agent_claims.invoice_amount', searchable: true },
