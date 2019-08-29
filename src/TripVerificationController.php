@@ -47,6 +47,8 @@ class TripVerificationController extends Controller {
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
+			'employee.user',
+			'employee.designation',
 			'purpose',
 			'status',
 		])
@@ -60,9 +62,9 @@ class TripVerificationController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		}
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days + 1;
@@ -77,7 +79,6 @@ class TripVerificationController extends Controller {
 	// }
 
 	public function eyatraTripVerificationFilterData() {
-		dd('cew');
 		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 			->leftJoin('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3122)

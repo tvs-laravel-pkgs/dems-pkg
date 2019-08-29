@@ -21,18 +21,36 @@ class TripClaimVerificationOneController extends Controller {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
 			->select(
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
 			->where('ey_employee_claims.status_id', 3222) //CLAIM REQUESTED
 			->where('e.reporting_to_id', Auth::user()->entity_id) //MANAGER
 			->groupBy('trips.id')
@@ -59,7 +77,7 @@ class TripClaimVerificationOneController extends Controller {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
 		} else {
-			$trip = Trip::with(
+			$trip = Trip::with([
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
@@ -69,7 +87,9 @@ class TripClaimVerificationOneController extends Controller {
 				'employee.outlet',
 				'employee.Sbu',
 				'employee.Sbu.lob',
-				'selfVisits',
+				'selfVisits' => function ($q) {
+					$q->orderBy('id', 'asc');
+				},
 				'purpose',
 				'lodgings',
 				'lodgings.city',
@@ -90,8 +110,8 @@ class TripClaimVerificationOneController extends Controller {
 				'selfVisits.selfBooking',
 				'selfVisits.agent',
 				'selfVisits.status',
-				'selfVisits.attachments'
-			)->find($trip_id);
+				'selfVisits.attachments',
+			])->find($trip_id);
 
 			if (!$trip) {
 				$this->data['success'] = false;
