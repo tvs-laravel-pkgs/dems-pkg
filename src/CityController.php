@@ -15,7 +15,6 @@ use Yajra\Datatables\Datatables;
 class CityController extends Controller {
 
 	public function listEYatraCity(Request $r) {
-//dd($r->all());
 		if (!empty($r->country)) {
 			$country = $r->country;
 		} else {

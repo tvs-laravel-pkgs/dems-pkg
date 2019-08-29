@@ -63,6 +63,7 @@ class AgentController extends Controller {
 			'users.mobile_number',
 			DB::raw('IF(agents.deleted_at IS NULL,"Active","In-Active") as status'),
 			DB::raw('GROUP_CONCAT(tm.name) as travel_name'))
+			->leftJoin('users', 'users.entity_id', 'agents.id')
 			->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
 			->leftJoin('entities as tm', 'tm.id', 'agent_travel_mode.travel_mode_id')
 			->where('users.user_type_id', 3122)

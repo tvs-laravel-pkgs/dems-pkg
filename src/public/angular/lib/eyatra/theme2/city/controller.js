@@ -3,17 +3,6 @@ app.component('eyatraCity', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-
-        $http.get(
-            city_filter_data_url
-        ).then(function(response) {
-            console.log(response.data);
-            self.country_list = response.data.country_list;
-            self.state_list = response.data.state_list;
-            self.status_list = response.data.status_list;
-            $rootScope.loading = false;
-        });
-
         var dataTable = $('#eyatra_city_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -61,6 +50,34 @@ app.component('eyatraCity', {
             d.style.left = x.left + 'px';
         }, 500);
 
+        $scope.loadState = function(country_id) {
+            $.ajax({
+                    url: get_state_by_country,
+                    method: "POST",
+                    data: { country_id: country_id },
+                })
+                .done(function(res) {
+                    self.state_list = [];
+                    $(res).each(function(i, v) {
+                        self.state_list.push({
+                            id: v['id'],
+                            name: v['name'],
+                        });
+                    });
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+        }
+        $http.get(
+            city_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.country_list = response.data.country_list;
+            self.state_list = response.data.state_list;
+            self.status_list = response.data.status_list;
+            $rootScope.loading = false;
+        });
         var dataTableFilter = $('#eyatra_city_table').dataTable();
         $scope.get_country_data = function(country_id) {
             // alert(country_id);
@@ -76,6 +93,7 @@ app.component('eyatraCity', {
             dataTableFilter.fnFilter();
         }
         $scope.reset_filter = function() {
+            $('#country_id').val(null);
             $('#state_id').val(null);
             $('#status').val(null);
             dataTableFilter.fnFilter();
