@@ -181,6 +181,11 @@ class TripClaimVerificationOneController extends Controller {
 		}
 		$employee_claim->save();
 		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V1 Approved";
+		$activity['activity'] = "approve";
+		$activity_log = ActivityLog::saveLog($activity);
 		return response()->json(['success' => true]);
 	}
 
@@ -202,7 +207,11 @@ class TripClaimVerificationOneController extends Controller {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024; //Claim Rejected
 		$trip->save();
-
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V1 Rejected";
+		$activity['activity'] = "reject";
+		$activity_log = ActivityLog::saveLog($activity);
 		return response()->json(['success' => true]);
 	}
 

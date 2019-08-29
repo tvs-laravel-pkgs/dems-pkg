@@ -206,7 +206,7 @@ class AdvanceClaimRequestController extends Controller {
 			} else {
 				return back()->with('error', 'Trips not found');
 			}
-			$trips = Trip::select('users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received')
+			$trips = Trip::select('users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->leftjoin('bank_details', 'bank_details.entity_id', 'employees.id')
@@ -249,9 +249,14 @@ class AdvanceClaimRequestController extends Controller {
 					}
 					$logs_details[] = [$employee_name, $employee_code, $account_number, $ifsc_code, $advance_received];
 					$count_logs++;
+					$activity['entity_id'] = $value->id;
+					$activity['entity_type'] = 'trip';
+					$activity['details'] = "Trip Advance Request Approved";
+					$activity['activity'] = "approve";
+					$activity_log = ActivityLog::saveLog($activity);
 				}
 			}
-			//dd($logs_details);
+
 			Excel::create('advance_claim_request_report', function ($excel) use ($trips_header, $logs_details) {
 				$excel->sheet('advance_claim_request', function ($sheet) use ($trips_header, $logs_details) {
 					$sheet->fromArray($logs_details);
