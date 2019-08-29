@@ -89,6 +89,15 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/city/delete/{city_id}', 'Uitoux\EYatra\CityController@deleteEYatraCity')->name('deleteEYatraCity');
 		Route::get('eyatra/city/get-filter-data', 'Uitoux\EYatra\CityController@eyatraCityFilterData')->name('eyatraCityFilterData');
 
+		//Roles
+		Route::get('eyatra/masters/role/get/list', 'Uitoux\EYatra\RoleController@getRolesList')->name('EyatragetRolesList');
+		Route::get('eyatra/masters/roles/get-form-data/{id?}', 'Uitoux\EYatra\RoleController@editRolesAngular')->name('eyatraeditRolesAngular');
+		Route::post('eyatra/masters/roles/save', 'Uitoux\EYatra\RoleController@saveRolesAngular')->name('EyatrasaveRolesAngular');
+		// Route::get('/masters/role/add', 'Masters\RoleController@add')->name('addRoles');
+		// Route::get('eyatra/masters/role/add', 'Uitoux\EYatra\OutletController@add')->name('addRole');
+		// Route::get('eyatra/masters/role/edit/{id}', 'Uitoux\EYatra\OutletController@edit')->name('editRoles');
+		// Route::post('eyatra/masters/role/save', 'Uitoux\EYatra\OutletController@save')->name('saveRoles');
+
 		//OUTLETS
 		Route::get('eyatra/outlet/get-list', 'Uitoux\EYatra\OutletController@listEYatraOutlet')->name('listEYatraOutlet');
 		Route::get('eyatra/outlet/get-form-data/{outlet_id?}', 'Uitoux\EYatra\OutletController@eyatraOutletFormData')->name('eyatraOutletFormData');
