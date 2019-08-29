@@ -2,13 +2,13 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use App\User;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
@@ -29,7 +29,7 @@ class TripController extends Controller {
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				// DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				// DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				DB::raw('CONCAT(DATE_FORMAT(MIN(v.date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.date),"%d/%m/%Y")) as travel_period'),
+				DB::raw('CONCAT(DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',

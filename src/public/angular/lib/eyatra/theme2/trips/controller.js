@@ -290,7 +290,7 @@ app.component('eyatraTripForm', {
                 new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Check all tabs for errors'
+                    text: 'You have errors,Please check all tabs'
                 }).show();
             },
             submitHandler: function(form) {
