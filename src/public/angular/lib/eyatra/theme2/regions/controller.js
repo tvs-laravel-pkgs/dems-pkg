@@ -9,6 +9,7 @@ app.component('eyatraRegions', {
         ).then(function(response) {
             console.log(response.data);
             self.state_list = response.data.state_list;
+            self.status_list = response.data.status_list;
             $rootScope.loading = false;
         });
 
@@ -35,6 +36,7 @@ app.component('eyatraRegions', {
                 dataType: "json",
                 data: function(d) {
                     d.state_id = $('#state_id').val();
+                    d.status = $('#status').val();
                 }
             },
 
@@ -69,8 +71,13 @@ app.component('eyatraRegions', {
             dataTable.draw();
         }
 
+        $scope.get_status_data = function(query) {
+            $('#status').val(query);
+            dataTable.draw();
+        }
         $scope.reset_filter = function(query) {
             $('#state_id').val(-1);
+            $('#status').val(null);
             dataTable.draw();
         }
 

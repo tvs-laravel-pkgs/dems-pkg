@@ -3,6 +3,7 @@ app.component('eyatraEmployees', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+
         var dataTable = $('#eyatra_employee_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -81,7 +82,7 @@ app.component('eyatraEmployees', {
             $('#grade_id').val(null);
             dataTableFilter.fnFilter();
         }
-
+        $scope.resetForm();
         $scope.deleteEmployee = function(id) {
             $('#del').val(id);
         }
@@ -144,23 +145,22 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response.data.employee);
+
 
             self.employee = response.data.employee;
             self.extras = response.data.extras;
+
+
             self.action = response.data.action;
             if (response.data.employee.payment_mode_id == null || !response.data.employee.payment_mode_id) {
                 self.employee.payment_mode_id = 3244;
             }
-            // console.log(response.data.extras);
+
             if (self.action == 'Edit') {
-                if (self.employee.user.force_password_change == 1) {
-                    self.switch_password = 'No';
-                    $("#hide_password").hide();
-                    $("#password").prop('disabled', true);
-                } else {
-                    self.switch_password = 'Yes';
-                }
+                self.switch_password = 'No';
+                $("#hide_password").hide();
+                $("#password").prop('disabled', true);
+                $scope.getDesignation(self.employee.grade_id);
                 //$scope.selectPaymentMode(self.employee.payment_mode_id);
                 $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
             } else {
@@ -203,6 +203,7 @@ app.component('eyatraEmployeeForm', {
         }
 
         $scope.getDesignation = function(grade_id) {
+            // alert(grade_id);
             if (grade_id) {
                 $.ajax({
                         url: get_designation_by_grade,
@@ -210,6 +211,7 @@ app.component('eyatraEmployeeForm', {
                         data: { grade_id: grade_id },
                     })
                     .done(function(res) {
+
                         self.extras.designation_list = [];
                         self.extras.designation_list = res.designation_list;
                         $scope.$apply()
@@ -429,7 +431,7 @@ app.component('eyatraEmployeeForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -465,7 +467,7 @@ app.component('eyatraEmployeeForm', {
                             }
                         )
                         .then(function(response) {
-                            console.log(response.data);
+                            // console.log(response.data);
                             resolve(response.data);
                         });
                     //reject(response);

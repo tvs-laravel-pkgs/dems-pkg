@@ -15,7 +15,22 @@ use Yajra\Datatables\Datatables;
 class CityController extends Controller {
 
 	public function listEYatraCity(Request $r) {
-//dd($r->all());
+		if (!empty($r->country)) {
+			$country = $r->country;
+		} else {
+			$country = null;
+		}
+
+		if (!empty($r->state_id)) {
+			$state_id = $r->state_id;
+		} else {
+			$state_id = null;
+		}
+		if (!empty($r->status)) {
+			$status = $r->status;
+		} else {
+			$status = null;
+		}
 		$cities = NCity::withTrashed()->join('nstates', 'nstates.id', 'ncities.state_id')
 			->leftjoin('entities', 'entities.id', 'ncities.category_id')
 			->select(
@@ -27,9 +42,23 @@ class CityController extends Controller {
 			)
 
 			->orderBy('ncities.id', 'asc')
-			->where(function ($query) use ($r) {
-				if ($r->get('state_id')) {
-					$query->where("nstates.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
+			->where(function ($query) use ($r, $country) {
+				if (!empty($country)) {
+					$query->where('nstates.country_id', $country);
+				}
+
+			})
+			->where(function ($query) use ($r, $state_id) {
+				if (!empty($state_id)) {
+					$query->where('nstates.id', $state_id);
+				}
+
+			})
+			->where(function ($query) use ($r, $status) {
+				if ($status == '2') {
+					$query->whereNull('ncities.deleted_at');
+				} elseif ($status == '1') {
+					$query->whereNotNull('ncities.deleted_at');
 				}
 			})
 		;
@@ -133,8 +162,19 @@ class CityController extends Controller {
 	}
 
 	public function eyatraCityFilterData() {
-			$this->data['state_list'] = NState::getList();
-			$this->data['success'] = true;
+
+		$option = new NCountry;
+		$option->name = 'Select Country';
+		$option->id = null;
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['state_list'] = NState::getList();
+		$this->data['status_list'] = array(
+			array('name' => "Select Status", 'id' => null),
+			array('name' => "All", 'id' => "-1"),
+			array('name' => "Active", 'id' => "2"),
+			array('name' => "Inactive", 'id' => "1"),
+		);
+		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 

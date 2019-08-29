@@ -2,7 +2,7 @@
 
 namespace Uitoux\EYatra;
 
-use App\Mail\TripNotificationMail;
+// use App\Mail\TripNotificationMail;
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -14,7 +14,6 @@ use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Mail;
-use Uitoux\EYatra\ActivityLog;
 use Validator;
 
 class Trip extends Model {
@@ -201,11 +200,10 @@ class Trip extends Model {
 					$i++;
 				}
 			}
-			// $activity_log = ActivityLog::saveLog($activity);
 			if (!$request->id) {
-				self::sendTripNotificationMail($trip);
+				// self::sendTripNotificationMail($trip);
 			}
-			$activity_log = ActivityLog::saveLog($activity);
+			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
@@ -340,14 +338,14 @@ class Trip extends Model {
 			$trips->where('trips.number', 'like', '%' . $request->number . '%');
 		}
 		if ($request->from_date && $request->to_date) {
-			$trips->where('v.date', '>=', $request->from_date);
-			$trips->where('v.date', '<=', $request->to_date);
+			$trips->where('v.departure_date', '>=', $request->from_date);
+			$trips->where('v.departure_date', '<=', $request->to_date);
 		} else {
 			$today = Carbon::today();
 			$from_date = $today->copy()->subMonths(3);
 			$to_date = $today->copy()->addMonths(3);
-			$trips->where('v.date', '>=', $from_date);
-			$trips->where('v.date', '<=', $to_date);
+			$trips->where('v.departure_date', '>=', $from_date);
+			$trips->where('v.departure_date', '<=', $to_date);
 		}
 
 		if ($request->status_ids && count($request->status_ids) > 0) {
@@ -427,7 +425,6 @@ class Trip extends Model {
 				}
 			})*/
 		;
-
 		if (!Entrust::can('verify-all-trips')) {
 			$trips->where('trips.manager_id', Auth::user()->entity_id);
 		}

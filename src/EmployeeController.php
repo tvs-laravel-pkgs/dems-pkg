@@ -77,6 +77,7 @@ class EmployeeController extends Controller {
 					$query->where('grd.id', $grade);
 				}
 			})
+			->where('u.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 			->orderBy('e.code', 'asc');
 
@@ -157,6 +158,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function saveEYatraEmployee(Request $request) {
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -221,13 +223,15 @@ class EmployeeController extends Controller {
 			$user->entity_type = 0;
 			$user->user_type_id = 3121;
 			$user->company_id = Auth::user()->company_id;
-			$user->name = $request->name;
 			$user->entity_id = $employee->id;
 			$user->fill($request->all());
 			//dd($request->password_change);
 			if ($request->password_change == 'Yes') {
-				if (!empty($request->user['password'])) {
-					$user->password = $request->user['password'];
+				// if (!empty($request->user['password'])) {
+				// 	$user->password = $request->user['password'];
+				// }
+				if (!empty($request->password)) {
+					$user->password = $request->password;
 				}
 				$user->force_password_change = 1;
 			} else {
@@ -312,13 +316,13 @@ class EmployeeController extends Controller {
 	public function searchManager(Request $r) {
 		$key = $r->key;
 		$manager_list = Employee::select(
-			'name',
+			// 'name',
 			'code',
 			'id'
 		)
 			->where(function ($q) use ($key) {
-				$q->where('name', 'like', '%' . $key . '%')
-					->orWhere('code', 'like', '%' . $key . '%')
+				$q->where('code', 'like', '%' . $key . '%')
+				// ->where('name', 'like', '%' . $key . '%')
 				;
 			})
 			->get();
