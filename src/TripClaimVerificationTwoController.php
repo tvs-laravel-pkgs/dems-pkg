@@ -77,7 +77,7 @@ class TripClaimVerificationTwoController extends Controller {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
 		} else {
-			$trip = Trip::with(
+			$trip = Trip::with([
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
@@ -87,7 +87,9 @@ class TripClaimVerificationTwoController extends Controller {
 				'employee.outlet',
 				'employee.Sbu',
 				'employee.Sbu.lob',
-				'selfVisits',
+				'selfVisits' => function ($q) {
+					$q->orderBy('id', 'asc');
+				},
 				'purpose',
 				'lodgings',
 				'lodgings.city',
@@ -108,8 +110,8 @@ class TripClaimVerificationTwoController extends Controller {
 				'selfVisits.selfBooking',
 				'selfVisits.agent',
 				'selfVisits.status',
-				'selfVisits.attachments'
-			)->find($trip_id);
+				'selfVisits.attachments',
+			])->find($trip_id);
 
 			if (!$trip) {
 				$this->data['success'] = false;
