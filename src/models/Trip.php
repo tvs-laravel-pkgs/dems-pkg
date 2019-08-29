@@ -806,7 +806,7 @@ class Trip extends Model {
 						$arr['to_email'] = 'parthiban@uitoux.in';
 						$arr['to_name'] = 'parthiban';
 						//dd($user_details_cc['email']);
-						$arr['subject'] = 'Employee ticket booking notification';
+						$arr['subject'] = 'Ticket booking request';
 						$arr['body'] = 'Employee ticket booking notification';
 						$arr['visits'] = $visit_agent;
 						$arr['type'] = 1;
@@ -837,10 +837,10 @@ class Trip extends Model {
 				if ($visit_manager) {
 					$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Manager';
-					$arr['to_email'] = 'saravanan@uitoux.in';
+					$arr['to_email'] = 'parthiban@uitoux.in';
 					$arr['to_name'] = 'parthiban';
 					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Employee ticket booking notification';
+					$arr['subject'] = 'Trip Approval Request';
 					$arr['body'] = 'Employee ticket booking notification';
 					$arr['visits'] = $visit_manager;
 					$arr['type'] = 2;
@@ -872,10 +872,10 @@ class Trip extends Model {
 				if ($visit_financier_count > 0) {
 					$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Financier';
-					$arr['to_email'] = 'saravanan@uitoux.in';
+					$arr['to_email'] = 'parthiban@uitoux.in';
 					$arr['to_name'] = 'parthiban';
 					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Employee ticket booking notification';
+					$arr['subject'] = 'Trip Advance Request';
 					$arr['body'] = 'Employee ticket booking notification';
 					$arr['visits'] = $visit_financier;
 					$arr['type'] = 3;

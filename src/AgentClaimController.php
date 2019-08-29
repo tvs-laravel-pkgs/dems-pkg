@@ -79,10 +79,12 @@ class AgentClaimController extends Controller {
 				'trips.number as trip',
 				'trips.id as trip_id',
 				'employees.code as employee_code',
-				'employees.name as employee_name')
+				'users.name as employee_name')
 				->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
 				->leftJoin('trips', 'trips.id', 'visits.trip_id')
 				->leftJoin('employees', 'employees.id', 'trips.employee_id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
 				->join('configs', 'configs.id', 'trips.status_id')
 				->where('visit_bookings.agent_claim_id', $agent_claim_id)
 				->groupBy('trips.id')
@@ -96,11 +98,13 @@ class AgentClaimController extends Controller {
 			$this->data['attachment'] = [];
 
 			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
-				'employees.name as employee_name', 'configs.name as status')
+				'users.name as employee_name', 'configs.name as status')
 				->join('visits', 'visits.id', 'visit_bookings.visit_id')
 				->join('trips', 'trips.id', 'visits.trip_id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('configs', 'configs.id', 'trips.status_id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
 				->where('visit_bookings.created_by', Auth::user()->id)
 				->where('visit_bookings.status_id', 3240)
 				->groupBy('trips.id')

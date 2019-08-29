@@ -107,7 +107,7 @@ class Visit extends Model {
 		$visit->trip_id = $trip->id;
 		$visit->from_city_id = $src_city->id;
 		$visit->to_city_id = $dest_city->id;
-		$visit->date = $visit1_date;
+		$visit->departure_date = $visit1_date;
 		$visit->travel_mode_id = $company->travelModes()->inRandomOrder()->first()->id;
 		$visit->booking_method_id = $booking_method_id;
 		$visit->booking_status_id = $booking_status_id;
