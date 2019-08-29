@@ -50,11 +50,13 @@ class EmployeeController extends Controller {
 			->join('entities as grd', 'grd.id', 'e.grade_id')
 			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
 			->join('outlets as o', 'o.id', 'e.outlet_id')
+			->leftJoin('users', 'users.entity_id', 'e.id')
+			->where('users.user_type_id', 3121)
 			->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
-				'e.name',
+				'users.name',
 				'o.code as outlet_code',
 				DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
 				'grd.name as grade',
@@ -219,6 +221,7 @@ class EmployeeController extends Controller {
 			$user->entity_type = 0;
 			$user->user_type_id = 3121;
 			$user->company_id = Auth::user()->company_id;
+			$user->name = $request->name;
 			$user->entity_id = $employee->id;
 			$user->fill($request->all());
 			//dd($request->password_change);
@@ -227,8 +230,7 @@ class EmployeeController extends Controller {
 					$user->password = $request->user['password'];
 				}
 				$user->force_password_change = 1;
-			}else
-			{
+			} else {
 				$user->force_password_change = 0;
 			}
 			if ($request->status == 0) {

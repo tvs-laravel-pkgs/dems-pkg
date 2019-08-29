@@ -159,7 +159,6 @@ app.component('eyatraAgentClaimVerificationView', {
             self.agent_claim_view = response.data.agent_claim_view;
             self.total_trips = response.data.total_trips;
             self.payment_mode_list = response.data.payment_mode_list;
-            self.wallet_mode_list = response.data.wallet_mode_list;
             self.date = response.data.date;
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
