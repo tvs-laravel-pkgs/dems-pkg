@@ -856,8 +856,8 @@ class Trip extends Model {
 				->where('visits.trip_id',$trip_id)
 				->where('trips.advance_received','>',0)
 				->get();
-				//dd($visit_financier);
-				if($visit_financier)
+				$visit_financier_count = $visit_financier->count();
+				if($visit_financier_count > 0)
 				{
 					$arr['from_mail'] ='saravanan@uitoux.in';
 					$arr['from_name'] = 'Financier';
