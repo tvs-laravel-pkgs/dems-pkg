@@ -8,6 +8,7 @@ use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
+use App\User;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {

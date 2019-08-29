@@ -34,7 +34,7 @@ app.component('eyatraEmployees', {
             columns: [
                 { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'e.code', searchable: true },
-                { data: 'name', name: 'e.name', searchable: true },
+                { data: 'name', name: 'users.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
                 { data: 'manager_code', name: 'm.code', searchable: true },
                 { data: 'grade', name: 'grd.name', searchable: true },

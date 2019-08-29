@@ -23,7 +23,10 @@ class AgentController extends Controller {
 		$option = new Agent;
 		$option->name = 'Select Agent Name/Code';
 		$option->id = NULL;
-		$this->data['agent_list'] = $agent_list = Agent::select(DB::raw('concat(code, " / " ,name) as name,id'))->where('company_id', Auth::user()->company_id)->get();
+		$this->data['agent_list'] = $agent_list = Agent::select(DB::raw('concat(agents.code, " / " ,users.name) as name,agents.id'))
+			->leftJoin('users', 'users.entity_id', 'agents.id')
+			->where('users.user_type_id', 3122)
+			->where('agents.company_id', Auth::user()->company_id)->get();
 		$this->data['agent_list'] = $agent_list->prepend($option);
 
 		$option = new Entity;
@@ -69,7 +72,6 @@ class AgentController extends Controller {
 			'users.mobile_number',
 			DB::raw('IF(agents.deleted_at IS NULL,"Active","In-Active") as status'),
 			DB::raw('GROUP_CONCAT(tm.name) as travel_name'))
-			->join('users', 'users.entity_id', 'agents.id')
 			->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
 			->leftJoin('entities as tm', 'tm.id', 'agent_travel_mode.travel_mode_id')
 			->leftJoin('users', 'users.entity_id', 'agents.id')
@@ -91,11 +93,10 @@ class AgentController extends Controller {
 					$query->whereNotNull('agents.deleted_at');
 				}
 			})
-			->where('users.user_type_id', 3122)
 			->where('agents.company_id', Auth::user()->company_id)
 			->groupby('agent_travel_mode.agent_id')
-			->orderby('agents.id', 'desc');
-
+			->orderby('agents.id', 'desc')
+		;
 		return Datatables::of($agent_list)
 			->addColumn('action', function ($agent) {
 
@@ -140,7 +141,7 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
+			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state', 'user')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			// dd($user);
@@ -240,7 +241,6 @@ class AgentController extends Controller {
 			}
 			$agent->company_id = $company_id;
 			$agent->code = $request->agent_code;
-			$agent->name = $request->agent_name;
 			$agent->fill($request->all());
 			if ($request->status == 'Active') {
 				$agent->deleted_by = NULL;
@@ -268,6 +268,7 @@ class AgentController extends Controller {
 			$user->entity_type = 0;
 			$user->user_type_id = 3122;
 			$user->company_id = $company_id;
+			$user->name = $request->agent_name;
 			$user->entity_id = $agent->id;
 			$user->fill($request->all());
 			if ($request->password_change == 'Yes') {
@@ -299,7 +300,6 @@ class AgentController extends Controller {
 				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent->id]);
 				$wallet_detail->fill($request->all());
 				$wallet_detail->wallet_of_id = 3243;
-				$wallet_detail->entity_id = $agent->id;
 				$wallet_detail->save();
 			}
 

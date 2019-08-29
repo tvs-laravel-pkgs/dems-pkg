@@ -11,7 +11,6 @@ class Employee extends Model {
 	protected $fillable = [
 		'id',
 		'code',
-		'name',
 		'outlet_id',
 		'reporting_to_id',
 		'grade_id',
@@ -81,7 +80,10 @@ class Employee extends Model {
 	}
 
 	public static function getList() {
-		return Employee::select('name', 'id')->get();
+		return Employee::select('users.name', 'employees.id')
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->get();
 	}
 
 	public static function create($company, $code, $outlet, $admin, $faker, $manager_id = null) {
@@ -89,7 +91,6 @@ class Employee extends Model {
 			'company_id' => $company->id,
 			'code' => $code,
 		]);
-		$employee->name = $faker->name;
 		$employee->outlet_id = $outlet->id;
 		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
 		$lob = $company->lobs()->inRandomOrder()->first();
@@ -110,6 +111,7 @@ class Employee extends Model {
 			'user_type_id' => $user_type_id,
 			'username' => $entity->code,
 		]);
+		$user->name = $faker->name;
 		$user->entity_id = $entity->id;
 		$user->email = $faker->safeEmail;
 		$user->mobile_number = $mobile_number;

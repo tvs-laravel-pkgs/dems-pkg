@@ -40,6 +40,22 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/entity/view/{entity_id}', 'Uitoux\EYatra\EntityController@viewEYatraEntity')->name('viewEYatraEntity');
 		Route::get('eyatra/entity/delete/{entity_id}', 'Uitoux\EYatra\EntityController@deleteEYatraEntity')->name('deleteEYatraEntity');
 
+		//ENTITIES NG
+		Route::get('entity/get-form-data-ng/{entity_id?}', 'Uitoux\EYatra\RejectionController@eyatraEntityFormDataNg')->name('eyatraEntityFormDataNg');
+
+		Route::get('entity/get-data-list', 'Uitoux\EYatra\RejectionController@listEYatraEntityNg')->name('listEYatraEntityNg');
+		Route::post('entity/save/ng', 'Uitoux\EYatra\RejectionController@saveEYatraEntityNg')->name('saveEYatraEntityNg');
+		Route::get('entity/delete/ng/{entity_id}', 'Uitoux\EYatra\RejectionController@deleteEYatraEntityNg')->name('deleteEYatraEntityNg');
+		//END
+
+		//COA NG
+		Route::get('coa/get-form-data-ng/{entity_id?}', 'Uitoux\EYatra\CoaController@eyatraCoaFormDataNg')->name('eyatraCoaFormDataNg');
+
+		Route::get('coa/get-data-list', 'Uitoux\EYatra\CoaController@listEYatraCoaNg')->name('listEYatraCoaNg');
+		Route::post('coa/save/ng', 'Uitoux\EYatra\CoaController@saveEYatraCoaNg')->name('saveEYatraCoaNg');
+		Route::get('coa/delete/ng/{entity_id}', 'Uitoux\EYatra\CoaController@deleteEYatraCoaNg')->name('deleteEYatraCoaNg');
+		//END
+
 		//REJECTION REASON ENTITIES
 		// Route::get('eyatra/rejection-reason-entity/get-list-data/{entity_type_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@getRejectionReasonEntityListData')->name('getRejectionReasonEntityListData');
 		// Route::get('eyatra/rejection-reason-entity/get-list', 'Uitoux\EYatra\rejectionReasonEntityController@listEYatraRejectionReasonEntity')->name('listEYatraRejectionReasonEntity');
@@ -88,6 +104,15 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/city/view/{city_id}', 'Uitoux\EYatra\CityController@viewEYatraCity')->name('viewEYatraCity');
 		Route::get('eyatra/city/delete/{city_id}', 'Uitoux\EYatra\CityController@deleteEYatraCity')->name('deleteEYatraCity');
 		Route::get('eyatra/city/get-filter-data', 'Uitoux\EYatra\CityController@eyatraCityFilterData')->name('eyatraCityFilterData');
+
+		//Roles
+		Route::get('eyatra/masters/role/get/list', 'Uitoux\EYatra\RoleController@getRolesList')->name('EyatragetRolesList');
+		Route::get('eyatra/masters/roles/get-form-data/{id?}', 'Uitoux\EYatra\RoleController@editRolesAngular')->name('eyatraeditRolesAngular');
+		Route::post('eyatra/masters/roles/save', 'Uitoux\EYatra\RoleController@saveRolesAngular')->name('EyatrasaveRolesAngular');
+		// Route::get('/masters/role/add', 'Masters\RoleController@add')->name('addRoles');
+		// Route::get('eyatra/masters/role/add', 'Uitoux\EYatra\OutletController@add')->name('addRole');
+		// Route::get('eyatra/masters/role/edit/{id}', 'Uitoux\EYatra\OutletController@edit')->name('editRoles');
+		// Route::post('eyatra/masters/role/save', 'Uitoux\EYatra\OutletController@save')->name('saveRoles');
 
 		//OUTLETS
 		Route::get('eyatra/outlet/get-list', 'Uitoux\EYatra\OutletController@listEYatraOutlet')->name('listEYatraOutlet');
@@ -167,6 +192,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/advance-claim/request/approve/{trip_id}', 'Uitoux\EYatra\AdvanceClaimRequestController@approveAdvanceClaimRequest')->name('approveAdvanceClaimRequest');
 		Route::post('eyatra/advance-claim/request/reject', 'Uitoux\EYatra\AdvanceClaimRequestController@rejectAdvanceClaimRequest')->name('rejectAdvanceClaimRequest');
 		Route::get('eyatra/trip/verification/get-filter-data', 'Uitoux\EYatra\AdvanceClaimRequestController@eyatraAdvanceClaimFilterData')->name('eyatraAdvanceClaimFilterData');
+		Route::post('eyatra/advance-claim/request/export', 'Uitoux\EYatra\AdvanceClaimRequestController@AdvanceClaimRequestExport')->name('AdvanceClaimRequestExport');
 
 		//AGENT REQUESTS
 		Route::get('eyatra/agent/request/get-list', 'Uitoux\EYatra\AgentRequestController@listAgentRequest')->name('listAgentRequest');
@@ -194,6 +220,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/claim/view/{trip_id?}', 'Uitoux\EYatra\TripClaimController@viewEYatraTripClaim')->name('viewEYatraTripClaim');
 		Route::get('eyatra/trip/claim/delete/{trip_id}', 'Uitoux\EYatra\TripClaimController@deleteEYatraTripClaim')->name('deleteEYatraTripClaim');
 		Route::get('eyatra/trip/claim/get-eligible-amount', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGrade')->name('getEligibleAmtBasedonCitycategoryGrade');
+		Route::get('eyatra/trip/claim/get-eligible-amount/by-staytype', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGradeStaytype')->name('getEligibleAmtBasedonCitycategoryGradeStaytype');
 
 		//TRIP CLAIM VERIFICATION ONE
 		Route::get('eyatra/trip/claim/verification/one/get-list', 'Uitoux\EYatra\TripClaimVerificationOneController@listEYatraTripClaimVerificationOneList')->name('listEYatraTripClaimVerificationOneList');
