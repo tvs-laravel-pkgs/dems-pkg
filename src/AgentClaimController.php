@@ -25,11 +25,13 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.invoice_amount',
 			'agents.code as agent_code',
-			'agents.name as agent_name',
+			'users.name as agent_name',
 			'configs.name as status',
 			DB::raw('DATE_FORMAT(ey_agent_claims.created_at,"%d/%m/%Y") as date'))
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
 			->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
 			->orderBy('ey_agent_claims.id', 'desc');
 		// ->get();
@@ -261,9 +263,11 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
 			'ey_agent_claims.tax',
-			'agents.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
+			'users.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
 			->where('ey_agent_claims.id', $agent_claim_id)->first();
 
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
@@ -309,11 +313,13 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.invoice_amount',
 			'agents.code as agent_code',
-			'agents.name as agent_name',
+			'users.name as agent_name',
 			'configs.name as status',
 			DB::raw('DATE_FORMAT(ey_agent_claims.created_at,"%d/%m/%Y") as date'))
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('configs', 'configs.id', 'ey_agent_claims.status_id')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
 		// ->where('ey_agent_claims.agent_id', Auth::user()->entity_id)
 			->where(function ($query) use ($created_date_filter) {
 				if ($created_date_filter != "1970-01-01") {
@@ -358,9 +364,11 @@ class AgentClaimController extends Controller {
 
 	public function filter_data() {
 
-		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'agents.name', 'agents.id')
+		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'users.name', 'agents.id')
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
-			->groupBy('agents.name')
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)
+			->groupBy('users.name')
 			->orderBy('ey_agent_claims.id', 'desc')
 			->get();
 		$this->data['status'] = $status = Config::select('name', 'id')
@@ -377,10 +385,12 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.net_amount',
 			'configs.name as status',
 			'ey_agent_claims.tax', 'ey_agent_claims.status_id',
-			'agents.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
+			'users.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
-			->where('ey_agent_claims.id', $agent_claim_id)->first();
+			->where('ey_agent_claims.id', $agent_claim_id)
+			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->where('users.user_type_id', 3122)->first();
 
 		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
 			'visit_bookings.id',
@@ -389,11 +399,13 @@ class AgentClaimController extends Controller {
 			'trips.number as trip',
 			'trips.id as trip_id',
 			'employees.code as employee_code',
-			'employees.name as employee_name')
+			'users.name as employee_name')
 			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
 			->leftJoin('trips', 'trips.id', 'visits.trip_id')
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
 			->join('configs', 'configs.id', 'trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
 			->where('visit_bookings.agent_claim_id', $agent_claim_id)
 			->groupBy('trips.id')
 			->get();

@@ -214,9 +214,11 @@ class StateController extends Controller {
 		])->select('*', DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($state_id);
-		$state_travel = DB::table('state_agent_travel_mode')->select('entities.name as travel_mode_name', 'agents.name', DB::raw('format(service_charge,2,"en_IN") as service_charge'))->where('state_id', $state_id)->where('entities.company_id', Auth::user()->company_id)
+		$state_travel = DB::table('state_agent_travel_mode')->select('entities.name as travel_mode_name', 'users.name', DB::raw('format(service_charge,2,"en_IN") as service_charge'))->where('state_id', $state_id)->where('entities.company_id', Auth::user()->company_id)
 			->leftJoin('entities', 'entities.id', 'state_agent_travel_mode.travel_mode_id')
 			->leftJoin('agents', 'agents.id', 'state_agent_travel_mode.agent_id')
+			->leftJoin('users', 'users.entity_id', 'agents.id')
+			->where('users.user_type_id', 3122)
 			->get()->toArray();
 		$this->data['travel_mode_name'] = $travel_mode_name = array_column($state_travel, 'travel_mode_name');
 		$this->data['agents'] = $agents = array_column($state_travel, 'name');
