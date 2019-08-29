@@ -254,8 +254,6 @@ app.component('eyatraTripClaimForm', {
             $scope.searchBookedBy = '';
         };
 
-
-
         $scope.searchLodgingCity;
         $scope.clearSearchLodgingCity = function() {
             $scope.searchLodgingCity = '';
@@ -286,6 +284,14 @@ app.component('eyatraTripClaimForm', {
             $scope.searchLocalTravelTo = '';
         };
 
+        $(document).on('mouseover', ".separate-btn-default", function() {
+            var $this = $(this);
+            $this.tooltip({
+                title: $this.data('text'),
+                placement: "top"
+            });
+            $this.tooltip('show');
+        });
 
         $scope.getEligibleAmtBasedonCitycategoryGrade = function(grade_id, city_id, expense_type_id, key) {
             if (city_id && grade_id && expense_type_id) {
