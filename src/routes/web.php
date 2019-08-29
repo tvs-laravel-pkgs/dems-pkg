@@ -40,6 +40,22 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/entity/view/{entity_id}', 'Uitoux\EYatra\EntityController@viewEYatraEntity')->name('viewEYatraEntity');
 		Route::get('eyatra/entity/delete/{entity_id}', 'Uitoux\EYatra\EntityController@deleteEYatraEntity')->name('deleteEYatraEntity');
 
+		//ENTITIES NG
+		Route::get('entity/get-form-data-ng/{entity_id?}', 'Uitoux\EYatra\RejectionController@eyatraEntityFormDataNg')->name('eyatraEntityFormDataNg');
+
+		Route::get('entity/get-data-list', 'Uitoux\EYatra\RejectionController@listEYatraEntityNg')->name('listEYatraEntityNg');
+		Route::post('entity/save/ng', 'Uitoux\EYatra\RejectionController@saveEYatraEntityNg')->name('saveEYatraEntityNg');
+		Route::get('entity/delete/ng/{entity_id}', 'Uitoux\EYatra\RejectionController@deleteEYatraEntityNg')->name('deleteEYatraEntityNg');
+		//END
+
+		//COA NG
+		Route::get('coa/get-form-data-ng/{entity_id?}', 'Uitoux\EYatra\CoaController@eyatraCoaFormDataNg')->name('eyatraCoaFormDataNg');
+
+		Route::get('coa/get-data-list', 'Uitoux\EYatra\CoaController@listEYatraCoaNg')->name('listEYatraCoaNg');
+		Route::post('coa/save/ng', 'Uitoux\EYatra\CoaController@saveEYatraCoaNg')->name('saveEYatraCoaNg');
+		Route::get('coa/delete/ng/{entity_id}', 'Uitoux\EYatra\CoaController@deleteEYatraCoaNg')->name('deleteEYatraCoaNg');
+		//END
+
 		//REJECTION REASON ENTITIES
 		// Route::get('eyatra/rejection-reason-entity/get-list-data/{entity_type_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@getRejectionReasonEntityListData')->name('getRejectionReasonEntityListData');
 		// Route::get('eyatra/rejection-reason-entity/get-list', 'Uitoux\EYatra\rejectionReasonEntityController@listEYatraRejectionReasonEntity')->name('listEYatraRejectionReasonEntity');
