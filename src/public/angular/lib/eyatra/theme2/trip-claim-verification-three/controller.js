@@ -30,6 +30,7 @@ app.component('eyatraTripClaimVerificationThreeList', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: false },
                 { data: 'start_date', name: 'v.date', searchable: true },
                 { data: 'end_date', name: 'v.date', searchable: true },
                 { data: 'cities', name: 'c.name', searchable: true },

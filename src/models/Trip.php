@@ -230,6 +230,7 @@ class Trip extends Model {
 			'visits.managerVerificationStatus',
 			'employee',
 			'employee.user',
+			'employee.designation',
 			'purpose',
 			'status',
 		])
