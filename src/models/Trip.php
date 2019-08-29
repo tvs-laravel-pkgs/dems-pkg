@@ -257,7 +257,6 @@ class Trip extends Model {
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
 		$data['trip'] = $trip;
-		// dd($trip);
 		$data['success'] = true;
 		return response()->json($data);
 
@@ -636,6 +635,19 @@ class Trip extends Model {
 		return response()->json($data);
 	}
 
+	public static function getFilterData() {
+		$data = [];
+		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)
+				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$data['success'] = true;
+		//dd($this->data);
+		return response()->json($data);
+	}
 	// Function to get all the dates in given range
 	public static function getDatesFromRange($start, $end, $format = 'd-m-Y') {
 		// Declare an empty array
@@ -652,20 +664,6 @@ class Trip extends Model {
 		}
 		// Return the array elements
 		return $array;
-	}
-
-	public static function getFilterData() {
-		$data = [];
-		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->where('employees.company_id', Auth::user()->company_id)
-				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
-		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
-		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
-		$data['success'] = true;
-		//dd($this->data);
-		return response()->json($data);
 	}
 
 	public static function getClaimViewData($trip_id) {
@@ -884,7 +882,6 @@ class Trip extends Model {
 					$Mail = Mail::send($MailInstance);
 				}
 			}
-
 		} catch (Exception $e) {
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}
