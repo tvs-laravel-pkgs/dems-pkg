@@ -3,9 +3,19 @@ app.component('eyatraTripClaimList', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            trip_claim_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.purpose_list = response.data.purpose_list;
+            self.trip_status_list = response.data.trip_status_list;
+            $rootScope.loading = false;
+        });
+
         var dataTable = $('#eyatra_trip_claim_list_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,7 +34,11 @@ app.component('eyatraTripClaimList', {
                 url: laravel_routes['listEYatraTripClaimList'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.employee_id = $('#employee_id').val();
+                    d.purpose_id = $('#purpose_id').val();
+                    d.status_id = $('#status_id').val();
+                }
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
@@ -43,10 +57,32 @@ app.component('eyatraTripClaimList', {
         });
         $('.dataTables_length select').select2();
 
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips</h3>');
-        //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_trip_claim_list_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
 
-        $('.add_new_button').html();
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getPurposeData = function(query) {
+            $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getStatusData = function(query) {
+            $('#status_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.reset_filter = function(query) {
+            $('#employee_id').val(-1);
+            $('#purpose_id').val(-1);
+            $('#status_id').val(-1);
+            dataTable.draw();
+        }
 
         $scope.deleteTrip = function(id) {
             $('#del').val(id);
@@ -218,8 +254,6 @@ app.component('eyatraTripClaimForm', {
             $scope.searchBookedBy = '';
         };
 
-
-
         $scope.searchLodgingCity;
         $scope.clearSearchLodgingCity = function() {
             $scope.searchLodgingCity = '';
@@ -250,6 +284,21 @@ app.component('eyatraTripClaimForm', {
             $scope.searchLocalTravelTo = '';
         };
 
+        $(document).on('mouseover', ".separate-btn-default", function() {
+            var $this = $(this);
+            console.log($this.data('text'));
+            $this.tooltip({
+                title: $this.data('text'),
+                placement: "top"
+            });
+            $this.tooltip('show');
+        });
+
+        $(document).on('input', ".tooltip_remarks", function() {
+            var value = $(this).val();
+            console.log(' == value ==' + value);
+            $(this).closest('.separate-btn-default').data('text', value);
+        });
 
         $scope.getEligibleAmtBasedonCitycategoryGrade = function(grade_id, city_id, expense_type_id, key) {
             if (city_id && grade_id && expense_type_id) {
@@ -272,6 +321,25 @@ app.component('eyatraTripClaimForm', {
                             self.trip.local_travels[key].eligible_amount = eligible_amount;
                         }
                         $scope.$apply()
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
+
+        $scope.getEligibleAmtBasedonCitycategoryGradeStayType = function(grade_id, city_id, expense_type_id, key, stay_type_id) {
+            if (city_id && grade_id && expense_type_id && stay_type_id) {
+                $.ajax({
+                        url: get_eligible_amount_by_city_category_grade_staytype,
+                        method: "GET",
+                        data: { city_id: city_id, grade_id: grade_id, expense_type_id: expense_type_id, stay_type_id: stay_type_id },
+                    })
+                    .done(function(res) {
+                        var eligible_amount_after_per = res.eligible_amount;
+                        self.trip.lodgings[key].eligible_amount = eligible_amount_after_per;
+                        $scope.$apply()
+                        $scope.stayDaysEach();
                     })
                     .fail(function(xhr) {
                         console.log(xhr);
@@ -316,6 +384,8 @@ app.component('eyatraTripClaimForm', {
                 } else {
                     stayed_eligible_amount_with_days = stayed_days * stayed_base_eligible_amount;
                 }
+                stayed_eligible_amount_with_days = parseFloat(Math.round(stayed_eligible_amount_with_days * 100) / 100).toFixed(2);
+
                 $(this).closest('tr').find('.eligible_amount').val(stayed_eligible_amount_with_days);
                 $(this).closest('tr').find('.eligible_amount_label').html('Eligible - ₹ ' + stayed_eligible_amount_with_days);
                 $scope.isDeviation();
@@ -332,6 +402,8 @@ app.component('eyatraTripClaimForm', {
             } else {
                 stayed_eligible_amount_with_days = stayed_days * stayed_base_eligible_amount;
             }
+            stayed_eligible_amount_with_days = parseFloat(Math.round(stayed_eligible_amount_with_days * 100) / 100).toFixed(2);
+
             $(this).closest('tr').find('.eligible_amount').val(stayed_eligible_amount_with_days);
             $(this).closest('tr').find('.eligible_amount_label').html('Eligible - ₹ ' + stayed_eligible_amount_with_days);
             $scope.isDeviation();
@@ -385,6 +457,7 @@ app.component('eyatraTripClaimForm', {
                     days_c = days;
                     eligible_amount_with_days = days * base_eligible_amount;
                 }
+                eligible_amount_with_days = parseFloat(Math.round(eligible_amount_with_days * 100) / 100).toFixed(2);
                 $(this).closest('tr').find('.stayed_days').val(days_c);
                 $(this).closest('tr').find('.eligible_amount').val(eligible_amount_with_days);
                 $(this).closest('tr').find('.eligible_amount_label').html('Eligible - ₹ ' + eligible_amount_with_days);

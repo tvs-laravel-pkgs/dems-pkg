@@ -30,14 +30,24 @@ class TripClaimController extends Controller {
 				'trips.number',
 				'e.code as ecode',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
 			->where('trips.status_id', 3023)
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -67,6 +77,9 @@ class TripClaimController extends Controller {
 
 	public function eyatraTripClaimFormData($trip_id) {
 		return Trip::getClaimFormData($trip_id);
+	}
+	public function eyatraTripClaimFilterData() {
+		return Trip::getFilterData();
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
@@ -261,11 +274,39 @@ class TripClaimController extends Controller {
 		if (!empty($request->city_id) && !empty($request->grade_id) && !empty($request->expense_type_id)) {
 			$city_category_id = NCity::where('id', $request->city_id)->first();
 			$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
+			if (!$grade_expense_type) {
+				$grade_expense_type = [];
+			}
 		} else {
 			$grade_expense_type = [];
 		}
 		return response()->json(['grade_expense_type' => $grade_expense_type]);
 	}
+
+	public function getEligibleAmtBasedonCitycategoryGradeStaytype(Request $request) {
+		if (!empty($request->city_id) && !empty($request->grade_id) && !empty($request->expense_type_id) && !empty($request->stay_type_id)) {
+			$city_category_id = NCity::where('id', $request->city_id)->first();
+			$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
+			if ($grade_expense_type) {
+				if ($request->stay_type_id == 3341) {
+					//STAY TYPE HOME
+					$percentage = 25;
+					$totalWidth = $grade_expense_type->eligible_amount;
+					$eligible_amount = ($percentage / 100) * $totalWidth;
+				} else {
+					$eligible_amount = $grade_expense_type->eligible_amount;
+				}
+			} else {
+				$eligible_amount = '0.00';
+			}
+
+		} else {
+			$eligible_amount = '0.00';
+		}
+		$eligible_amount = number_format((float) $eligible_amount, 2, '.', '');
+		return response()->json(['eligible_amount' => $eligible_amount]);
+	}
+
 	public function eyatraTripExpenseData(Request $request) {
 		// $lodgings = array();
 		$travelled_cities_with_dates = array();

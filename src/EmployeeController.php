@@ -48,14 +48,15 @@ class EmployeeController extends Controller {
 		}
 		$employees = Employee::withTrashed()->from('employees as e')
 			->join('entities as grd', 'grd.id', 'e.grade_id')
-			->join('users as u', 'u.entity_id', 'e.id')
 			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
 			->join('outlets as o', 'o.id', 'e.outlet_id')
+			->leftJoin('users', 'users.entity_id', 'e.id')
+			->where('users.user_type_id', 3121)
 			->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
-				'u.name',
+				'users.name',
 				'o.code as outlet_code',
 				DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
 				'grd.name as grade',
@@ -157,6 +158,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function saveEYatraEmployee(Request $request) {
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -225,8 +227,11 @@ class EmployeeController extends Controller {
 			$user->fill($request->all());
 			//dd($request->password_change);
 			if ($request->password_change == 'Yes') {
-				if (!empty($request->user['password'])) {
-					$user->password = $request->user['password'];
+				// if (!empty($request->user['password'])) {
+				// 	$user->password = $request->user['password'];
+				// }
+				if (!empty($request->password)) {
+					$user->password = $request->password;
 				}
 				$user->force_password_change = 1;
 			} else {
@@ -311,13 +316,13 @@ class EmployeeController extends Controller {
 	public function searchManager(Request $r) {
 		$key = $r->key;
 		$manager_list = Employee::select(
-			'name',
+			// 'name',
 			'code',
 			'id'
 		)
 			->where(function ($q) use ($key) {
-				$q->where('name', 'like', '%' . $key . '%')
-					->orWhere('code', 'like', '%' . $key . '%')
+				$q->where('code', 'like', '%' . $key . '%')
+				// ->where('name', 'like', '%' . $key . '%')
 				;
 			})
 			->get();

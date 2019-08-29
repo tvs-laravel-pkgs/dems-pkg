@@ -4,6 +4,7 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use Excel;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
@@ -21,8 +22,8 @@ class AdvanceClaimRequestController extends Controller {
 				'trips.number',
 				'e.code as ecode',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'trips.created_at',
@@ -33,7 +34,7 @@ class AdvanceClaimRequestController extends Controller {
 		// ->whereNotNull('trips.advance_received')
 		// ->where('trips.status_id', 3028) //MANAGER APPROVED
 		// ->where('trips.status_id', '!=', 3261) //ADVANCE REQUEST APPROVED
-		// ->where('trips.advance_request_approval_status_id', 3260) //NEW
+			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -56,8 +57,8 @@ class AdvanceClaimRequestController extends Controller {
 
 		return Datatables::of($trips)
 			->addColumn('checkbox', function ($trip) {
-				return '<input id="trip_' . $trip->id . '" type="checkbox" class="check-bottom-layer booking_list " name="booking_list" value="' . $trip->id . '" data-trip_id="' . $trip->id . '">
-                                                        <label for="role_' . $trip->id . '"></label>';
+				return '<input id="trip_' . $trip->id . '" type="checkbox" class="check-bottom-layer booking_list " name="booking_list"  value="' . $trip->id . '" data-trip_id="' . $trip->id . '" >
+                                                        <label for="trip_' . $trip->id . '"></label>';
 			})
 			->addColumn('action', function ($trip) {
 
@@ -105,12 +106,12 @@ class AdvanceClaimRequestController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
-		$trip->days = $days->days;
+		$trip->days = $days->days + 1;
 		$this->data['payment_mode_list'] = $payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['wallet_mode_list'] = $wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$this->data['trip'] = $trip;
@@ -195,6 +196,74 @@ class AdvanceClaimRequestController extends Controller {
 
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true]);
+	}
+	public function AdvanceClaimRequestExport(request $request) {
+		//dd($request->all());
+		DB::beginTransaction();
+		try {
+			if ($request->export_ids) {
+				$trip_ids = explode(',', $request->export_ids);
+			} else {
+				return back()->with('error', 'Trips not found');
+			}
+			$trips = Trip::select('users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received')
+				->join('employees', 'employees.id', 'trips.employee_id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->leftjoin('bank_details', 'bank_details.entity_id', 'employees.id')
+				->whereIn('trips.id', $trip_ids)
+				->where('users.user_type_id', 3121)
+				->get();
+
+			$trips_status_update = Trip::whereIn('id', $trip_ids)->update(['advance_request_approval_status_id' => 3261]);
+			DB::commit();
+			//dd($trips);
+			$trips_header = ['Employee Name', 'Employee Code', 'Account Number', 'Ifsc code', 'Amount'];
+			$logs_details = array();
+			if (count($trips) > 0) {
+				$count_logs = 1;
+				foreach ($trips as $key => $value) {
+					if ($value->name) {
+						$employee_name = $value->name;
+					} else {
+						$employee_name = '--';
+					}
+					if ($value->code) {
+						$employee_code = $value->code;
+					} else {
+						$employee_code = '-';
+					}
+					if ($value->account_number) {
+						$account_number = $value->account_number;
+					} else {
+						$account_number = '-';
+					}
+					if ($value->ifsc_code) {
+						$ifsc_code = $value->ifsc_code;
+					} else {
+						$ifsc_code = '-';
+					}
+					if ($value->advance_received) {
+						$advance_received = $value->advance_received;
+					} else {
+						$advance_received = '-';
+					}
+					$logs_details[] = [$employee_name, $employee_code, $account_number, $ifsc_code, $advance_received];
+					$count_logs++;
+				}
+			}
+			//dd($logs_details);
+			Excel::create('advance_claim_request_report', function ($excel) use ($trips_header, $logs_details) {
+				$excel->sheet('advance_claim_request', function ($sheet) use ($trips_header, $logs_details) {
+					$sheet->fromArray($logs_details);
+					$sheet->row(1, $trips_header);
+				});
+			})->export('xls');
+			return back();
+		} catch (Exception $e) {
+			DB::rollBack();
+			return back()->with('error', 'Trips advance request have erros');
+			//return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
 	}
 
 }

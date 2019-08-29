@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
@@ -92,7 +93,7 @@ class FinanceEmployeeClaimController extends Controller {
 			'purpose_list' => Entity::uiPurposeList(),
 			'travel_mode_list' => Entity::uiTravelModeList(),
 			'city_list' => NCity::getList(),
-			'state_type_list' => Entity::getLodgeStayTypeList(),
+			'state_type_list' => Config::getLodgeStayTypeList(),
 		];
 		$this->data['trip'] = '';
 

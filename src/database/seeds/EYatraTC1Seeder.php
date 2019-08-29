@@ -67,6 +67,7 @@ class EYatraTC1Seeder extends Seeder {
 		]);
 		$admin->user_type_id = 3120;
 		$admin->mobile_number = $base_telephone_number . '100000000';
+		$admin->name = $company->name . ' / Admin 1';
 		$admin->password = 'Test@123';
 		$admin->save();
 		$admin->roles()->sync(500);
@@ -189,6 +190,7 @@ class EYatraTC1Seeder extends Seeder {
 			],
 			504 => [
 				'Normal',
+				'Home',
 			],
 			505 => [
 				'Paytm',
@@ -338,7 +340,6 @@ class EYatraTC1Seeder extends Seeder {
 				'company_id' => $company_id,
 				'code' => 'c' . $company_id . '/agt' . $i,
 			]);
-			$agent->name = 'Company ' . $company->id . ' / Agent ' . $i;
 			$agent->created_by = $admin->id;
 			$agent->save();
 
