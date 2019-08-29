@@ -60,6 +60,8 @@ class EmployeeController extends Controller {
 				'grd.name as grade',
 				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
 			)
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3122),
 			->where(function ($query) use ($r, $outlet) {
 				if (!empty($outlet)) {
 					$query->where('o.id', $outlet);

@@ -447,7 +447,7 @@ app.component('eyatraAgentForm', {
             },
             messages: {
                 'agent_code': {
-                    required: 'This Field is required',
+                    required: 'This field is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
