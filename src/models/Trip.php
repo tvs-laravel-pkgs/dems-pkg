@@ -12,9 +12,9 @@ use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\User;
-use Uitoux\EYatra\Mail\TripNotificationMail;
+use App\Mail\TripNotificationMail;
 use Validator;
-
+use Mail;
 class Trip extends Model {
 	use SoftDeletes;
 
@@ -756,6 +756,7 @@ class Trip extends Model {
 			//dd($trip);
 			$trip_id = $trip->id;
 			$trip_visits=$trip->visits;
+			//dd($trip_visits);
 			if($trip_visits)
 			{ 	//agent Booking Count checking
 				$visit_agents=Visit::select('visits.id','trips.id as trip_id','users.name as employee_name','fromcity.name as fromcity_name','tocity.name as tocity_name','travel_modes.name as travel_mode_name','booking_modes.name as booking_method_name')
@@ -768,7 +769,7 @@ class Trip extends Model {
 				->where('booking_method_id',3042)->where('trip_id',$trip_id)
 				->get();
 				$visit_agent_count = $visit_agents->count();
-				dd($visit_agents);
+				//dd($visit_agent_count);
 				if($visit_agent_count > 0)
 				{ // Agent Mail Trigger
 					foreach ($visit_agents as $key => $visit_agent) {
@@ -788,135 +789,9 @@ class Trip extends Model {
 					}
 				}
 			}
-
-
 			dd($trip_visits);
 
-			$time_estimate_detail = TimeEstimationDetail::findOrFail($ticket_id);
-			$created_by_email = User::Select('name', 'email')->where('id', $time_estimate_detail->created_by)->first();
-
-			if ($time_estimate_detail->ticket_approver_mail_status > 0) {
-				if ($time_estimate_detail->ticket_approver_mail_status == 1) {
-					$approver_details = $time_estimate_detail->approvers()->wherePivot('level', '!=', 1)->get();
-					$stake_holders_mail = $time_estimate_detail->stake_holders;
-
-					$merged = $approver_details->merge($stake_holders_mail);
-					if ($request->id) {
-
-						$body_text = $request->ticket_body_description . '- ticket updated';
-					} else {
-
-						$body_text = $request->ticket_body_description . '- ticket created';
-					}
-
-					if ($merged) {
-						$user_details_cc = [];
-
-						foreach ($merged as $key => $user_cc_mail) {
-							$user = User::Select('name', 'email')->where('id', $user_cc_mail->id)->first();
-							$user_details_cc['name'][$key] = $user->name;
-							$user_details_cc['email'][$key] = $user->email;
-						}
-						$this->data['user_details_cc'] = $user_details_cc;
-					} else {
-						$user_details_cc = [];
-					}
-					// $result = $this->data['user_details_cc']->merge($created_by_email);
-
-					$user_cc_name = $user_details_cc['name'];
-
-				} else if ($time_estimate_detail->ticket_approver_mail_status == 2) {
-					$approver_details = $time_estimate_detail->approvers()->wherePivot('level', '!=', 2)->get();
-					$approver1_detail = $time_estimate_detail->approvers()->wherePivot('level', '=', 1)->first();
-					$stake_holders_mail = $time_estimate_detail->stake_holders;
-
-					$merged = $approver_details->merge($stake_holders_mail);
-					$body_text = $request->ticket_body_description . 'Dear sir,
-
-Please find below ticket details - ' . $approver1_detail->name . ' approved';
-					if ($merged) {
-						$user_details_cc = [];
-
-						foreach ($merged as $key => $user_cc_mail) {
-							$user = User::Select('name', 'email')->where('id', $user_cc_mail->id)->first();
-							$user_details_cc['name'][$key] = $user->name;
-							$user_details_cc['email'][$key] = $user->email;
-						}
-
-						$this->data['user_details_cc'] = $user_details_cc;
-					} else {
-						$user_details_cc = [];
-					}
-					$user_cc_name = $user_details_cc['name'];
-
-				} else if ($time_estimate_detail->ticket_approver_mail_status == 3) {
-
-					$approver_details = $time_estimate_detail->approvers()->wherePivot('level', '!=', 3)->get();
-					$approver2_detail = $time_estimate_detail->approvers()->wherePivot('level', '=', 2)->first();
-					$stake_holders_mail = $time_estimate_detail->stake_holders;
-					$merged = $approver_details->merge($stake_holders_mail);
-					$body_text = $request->ticket_body_description . 'Dear sir,
-
-Please find below ticket details - ' . $approver2_detail->name . ' approved';
-					if ($merged) {
-						$user_details_cc = [];
-
-						foreach ($merged as $key => $user_cc_mail) {
-							$user = User::Select('name', 'email')->where('id', $user_cc_mail->id)->first();
-							$user_details_cc['name'][$key] = $user->name;
-							$user_details_cc['email'][$key] = $user->email;
-						}
-						$this->data['user_details_cc'] = $user_details_cc;
-					} else {
-						$user_details_cc = [];
-					}
-					$user_cc_name = $user_details_cc['name'];
-				} else if ($time_estimate_detail->ticket_approver_mail_status == 4) {
-
-					$approver_details = $time_estimate_detail->approvers()->wherePivot('level', '!=', 4)->get();
-					$approver3_detail = $time_estimate_detail->approvers()->wherePivot('level', '=', 3)->first();
-					$stake_holders_mail = $time_estimate_detail->stake_holders;
-					$merged = $approver_details->merge($stake_holders_mail);
-					$body_text = $request->ticket_body_description . 'Dear sir,
-
-Please find below ticket details - ' . $approver3_detail->name . ' approved';
-					if ($merged) {
-						$user_details_cc = [];
-
-						foreach ($merged as $key => $user_cc_mail) {
-							$user = User::Select('name', 'email')->where('id', $user_cc_mail->id)->first();
-							$user_details_cc['name'][$key] = $user->name;
-							$user_details_cc['email'][$key] = $user->email;
-						}
-						$this->data['user_details_cc'] = $user_details_cc;
-					} else {
-						$user_details_cc = [];
-					}
-					$user_cc_name = $user_details_cc['name'];
-				}
-
-				if (isset($user_details_cc) && sizeof($user_details_cc) > 0) {
-					$project = Project::where('id', $project_id)->first();
-					$from_user = User::select('email', 'name', 'designation')->where('id', Auth::id())->first();
-					/*$arr['from_mail'] = $from_user->email;
-					$arr['from_name'] = $from_user->name;*/
-					$arr['from_mail'] = config('custom.COMMON_EMAIL');
-					$arr['from_name'] = config('custom.COMMON_EMAIL_NAME');
-					$arr['cc_email'] = $user_details_cc['email'];
-					$arr['cc_user_name'] = $user_cc_name;
-					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Ticket-' . $time_estimate_detail->id . '-' . $project->short_name . '-' . $time_estimate_detail->module;
-					$arr['body'] = $body_text;
-					$arr['project_id'] = $project_id;
-					$arr['signature_role'] = $from_user->designation;
-					$arr['time_estimation_detail'] = $time_estimate_detail;
-					$MailInstance = new TicketMail($arr);
-					$Mail = Mail::send($MailInstance);
-					//session()->flash('success', 'Project Daily Report Sent Successfully!!!');
-					return response()->json(['success' => true]);
-				}
-
-			} 
+			 
 		} catch (Exception $e) {
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}
