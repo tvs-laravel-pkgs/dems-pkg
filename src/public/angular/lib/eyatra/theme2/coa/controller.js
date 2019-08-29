@@ -48,9 +48,10 @@ app.component('coaDataList', {
                 }
 
             });
+            
             $('.dataTables_length select').select2();
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Coa' + '</p><h3 class="title">' + 'List'+ '</h3>');
-            var add_url = '#!/coa/data/add/';
+            var add_url = '#!/eyatra/coa-sub-master/add/';
                 $('.add_new_button').html(
                     '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
                     'Add New' +
@@ -107,7 +108,7 @@ app.component('coaDataForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/coa/data/list')
+                $location.path('/eyatra/coa-sub-master/list')
                 $scope.$apply()
                 return;
             }
@@ -168,7 +169,7 @@ app.component('coaDataForm', {
                                 layout: 'topRight',
                                 text: res.message,
                             }).show();
-                            $location.path('/coa/data/list')
+                            $location.path('/eyatra/coa-sub-master/list')
                             $scope.$apply()
                         }
                     })
