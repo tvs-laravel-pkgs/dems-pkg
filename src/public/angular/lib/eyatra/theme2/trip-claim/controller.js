@@ -286,11 +286,18 @@ app.component('eyatraTripClaimForm', {
 
         $(document).on('mouseover', ".separate-btn-default", function() {
             var $this = $(this);
+            console.log($this.data('text'));
             $this.tooltip({
                 title: $this.data('text'),
                 placement: "top"
             });
             $this.tooltip('show');
+        });
+
+        $(document).on('input', ".tooltip_remarks", function() {
+            var value = $(this).val();
+            console.log(' == value ==' + value);
+            $(this).closest('.separate-btn-default').data('text', value);
         });
 
         $scope.getEligibleAmtBasedonCitycategoryGrade = function(grade_id, city_id, expense_type_id, key) {
