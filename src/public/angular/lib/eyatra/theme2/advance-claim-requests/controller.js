@@ -2,6 +2,9 @@ app.component('eyatraAdvanceClaimRequests', {
     templateUrl: eyatra_advance_claim_request_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
+        self.export_url = advance_claim_export_data_url;
+        self.csrf = $('#csrf').val();
+        //console.log(self.export_url, self.csrf);
         self.hasPermission = HelperService.hasPermission;
         $http.get(
             trip_filter_data_url
@@ -69,9 +72,9 @@ app.component('eyatraAdvanceClaimRequests', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('#employee-export').css({ 'display': 'inline-block' });
-        }, 2500);
+        // setTimeout(function() {
+        //     $('#employee-export').css({ 'display': 'inline-block' });
+        // }, 500);
         $scope.getEmployeeData = function(query) {
             //alert(query);
             $('#employee_id').val(query);
@@ -93,39 +96,48 @@ app.component('eyatraAdvanceClaimRequests', {
         }
 
         $('#head_booking').on('click', function() {
-            alert('dd');
-            var total_amount = 0;
             var count = 0;
-            var amount = 0;
+            selected_trips = [];
             if (event.target.checked == true) {
                 $('.booking_list').prop('checked', true);
                 $.each($('.booking_list:checked'), function() {
                     count++;
-                    amount += parseFloat($(this).attr('data-amount'));
+                    selected_trips.push($(this).val());
                 });
             } else {
+                console.log('unchecked');
                 $('.booking_list').prop('checked', false);
-                $.each($('.booking_list:checked'), function() {
-                    count++;
-                    amount += parseFloat($(this).attr('data-amount'));
-                });
-                self.total_amount = 0;
             }
-            $(".amount").html(amount.toFixed(2));
-            $(".net_amount").val(amount.toFixed(2));
-            $("#count").html(count);
-            $(".payment-btn").prop('disabled', true);
+            console.log(count);
+            console.log(selected_trips);
             if (count > 0) {
-                if (self.action == 'Edit') {
-                    $(".payment-btn").prop('disabled', false);
-                }
-            } else {
-                $(".separate-bottom-layer").removeClass("in");
-                $("button.payment-btn").css({ 'display': 'inline-block' });
-                $(".btn-close").css({ 'display': 'none' });
-            }
-        });
+                $('#employee_export').css({ 'display': 'block' });
 
+            } else {
+                $('#employee_export').css({ 'display': 'none' });
+
+            }
+            $('.export_ids').val(selected_trips);
+        });
+        $
+        $(document.body).on('click', '.booking_list', function() {
+            var count = 0;
+            selected_trips = [];
+            $.each($('.booking_list:checked'), function() {
+                count++;
+                selected_trips.push($(this).val());
+            });
+            console.log(count);
+            console.log(selected_trips);
+            if (count > 0) {
+                $('#employee_export').css({ 'display': 'block' });
+
+            } else {
+                $('#employee_export').css({ 'display': 'none' });
+
+            }
+            $('.export_ids').val(selected_trips);
+        });
         $rootScope.loading = false;
 
     }
