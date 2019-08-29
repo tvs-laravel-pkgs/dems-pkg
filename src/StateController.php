@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -20,6 +21,12 @@ class StateController extends Controller {
 		$option->name = 'Select Country';
 		$option->id = null;
 		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['status_list'] = array(
+			array('name' => "Select Status", 'id' => null),
+			array('name' => "All", 'id' => "-1"),
+			array('name' => "Active", 'id' => "2"),
+			array('name' => "Inactive", 'id' => "1"),
+		);
 		return response()->json($this->data);
 	}
 
@@ -28,6 +35,11 @@ class StateController extends Controller {
 			$country = $r->country;
 		} else {
 			$country = null;
+		}
+		if (!empty($r->status)) {
+			$status = $r->status;
+		} else {
+			$status = null;
 		}
 		$states = NState::withTrashed()->from('nstates')
 			->join('country as c', 'c.id', 'nstates.country_id')
@@ -41,6 +53,13 @@ class StateController extends Controller {
 			->where(function ($query) use ($r, $country) {
 				if (!empty($country)) {
 					$query->where('c.id', $country);
+				}
+			})
+			->where(function ($query) use ($r, $status) {
+				if ($status == '2') {
+					$query->whereNull('nstates.deleted_at');
+				} elseif ($status == '1') {
+					$query->whereNotNull('nstates.deleted_at');
 				}
 			})
 			->orderBy('nstates.name', 'asc');
@@ -108,8 +127,10 @@ class StateController extends Controller {
 		$option = new Agent;
 		$option->name = 'Select Agent';
 		$option->id = null;
-		$this->data['agents_list'] = $agents_list = Agent::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
-
+		$this->data['agents_list'] = $agents_list = Agent::select('users.name as name', 'agents.id')
+			->leftJoin('users', 'users.entity_id', 'agents.id')
+			->where('users.user_type_id', 3122)
+			->where('agents.company_id', Auth::user()->company_id)->get()->prepend($option);
 		// dd($state->travelModes()->withPivot()->get());
 		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
 			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;

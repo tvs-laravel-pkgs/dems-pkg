@@ -27,6 +27,7 @@ app.component('eyatraStates', {
                 dataType: "json",
                 data: function(d) {
                     d.country = $("#country_id").val();
+                    d.status = $("#status").val();
                 }
             },
             columns: [
@@ -53,6 +54,7 @@ app.component('eyatraStates', {
             state_filter_url
         ).then(function(response) {
             self.country_list = response.data.country_list;
+            self.status_list = response.data.status_list;
             $rootScope.loading = false;
         });
         var dataTableFilter = $('#eyatra_state_table').dataTable();
@@ -60,8 +62,13 @@ app.component('eyatraStates', {
             $('#country_id').val(id);
             dataTableFilter.fnFilter();
         }
+        $scope.onselectStatus = function(id) {
+            $('#status').val(id);
+            dataTableFilter.fnFilter();
+        }
         $scope.resetForm = function() {
             $('#country_id').val(null);
+            $('#status').val(null);
             dataTableFilter.fnFilter();
         }
 

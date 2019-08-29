@@ -8,7 +8,9 @@ app.component('eyatraCity', {
             city_filter_data_url
         ).then(function(response) {
             console.log(response.data);
+            self.country_list = response.data.country_list;
             self.state_list = response.data.state_list;
+            self.status_list = response.data.status_list;
             $rootScope.loading = false;
         });
 
@@ -34,7 +36,9 @@ app.component('eyatraCity', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
+                    d.country = $('#country_id').val();
                     d.state_id = $('#state_id').val();
+                    d.status = $('#status').val();
                 }
             },
             columns: [
@@ -57,14 +61,24 @@ app.component('eyatraCity', {
             d.style.left = x.left + 'px';
         }, 500);
 
-
-        $scope.get_state_data = function(query) {
-            $('#state_id').val(query);
-            dataTable.draw();
+        var dataTableFilter = $('#eyatra_city_table').dataTable();
+        $scope.get_country_data = function(country_id) {
+            // alert(country_id);
+            $('#country_id').val(country_id);
+            dataTableFilter.fnFilter();
         }
-        $scope.reset_filter = function(query) {
-            $('#state_id').val(-1);
-            dataTable.draw();
+        $scope.get_state_data = function(id) {
+            $('#state_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.get_status_data = function(id) {
+            $('#status').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.reset_filter = function() {
+            $('#state_id').val(null);
+            $('#status').val(null);
+            dataTableFilter.fnFilter();
         }
 
         // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Cities</p><h3 class="title">Cities</h3>');

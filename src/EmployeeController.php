@@ -48,13 +48,14 @@ class EmployeeController extends Controller {
 		}
 		$employees = Employee::withTrashed()->from('employees as e')
 			->join('entities as grd', 'grd.id', 'e.grade_id')
+			->join('users as u', 'u.entity_id', 'e.id')
 			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
 			->join('outlets as o', 'o.id', 'e.outlet_id')
 			->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
-				'e.name',
+				'u.name',
 				'o.code as outlet_code',
 				DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
 				'grd.name as grade',
@@ -75,6 +76,7 @@ class EmployeeController extends Controller {
 					$query->where('grd.id', $grade);
 				}
 			})
+			->where('u.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 			->orderBy('e.code', 'asc');
 
@@ -227,8 +229,7 @@ class EmployeeController extends Controller {
 					$user->password = $request->user['password'];
 				}
 				$user->force_password_change = 1;
-			}else
-			{
+			} else {
 				$user->force_password_change = 0;
 			}
 			if ($request->status == 0) {

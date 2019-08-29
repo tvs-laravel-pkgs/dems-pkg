@@ -20,12 +20,6 @@ class AgentController extends Controller {
 
 	public function eyatraAgentsfilter() {
 
-		$option = new Agent;
-		$option->name = 'Select Agent Name/Code';
-		$option->id = NULL;
-		$this->data['agent_list'] = $agent_list = Agent::select(DB::raw('concat(code, " / " ,name) as name,id'))->where('company_id', Auth::user()->company_id)->get();
-		$this->data['agent_list'] = $agent_list->prepend($option);
-
 		$option = new Entity;
 		$option->name = 'Select Travel Mode';
 		$option->id = NULL;
@@ -55,8 +49,8 @@ class AgentController extends Controller {
 		} else {
 			$tm = null;
 		}
-		if (!empty($request->status)) {
-			$status = $request->status;
+		if (!empty($r->status)) {
+			$status = $r->status;
 		} else {
 			$status = null;
 		}
@@ -72,7 +66,6 @@ class AgentController extends Controller {
 			->join('users', 'users.entity_id', 'agents.id')
 			->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
 			->leftJoin('entities as tm', 'tm.id', 'agent_travel_mode.travel_mode_id')
-			->leftJoin('users', 'users.entity_id', 'agents.id')
 			->where('users.user_type_id', 3122)
 			->where(function ($query) use ($r, $agent) {
 				if (!empty($agent)) {
@@ -236,7 +229,6 @@ class AgentController extends Controller {
 			}
 			$agent->company_id = $company_id;
 			$agent->code = $request->agent_code;
-			$agent->name = $request->agent_name;
 			$agent->fill($request->all());
 			if ($request->status == 'Active') {
 				$agent->deleted_by = NULL;
@@ -261,6 +253,7 @@ class AgentController extends Controller {
 
 			//ADD USER
 			$user->mobile_number = $request->mobile_number;
+			$user->name = $request->agent_name;
 			$user->entity_type = 0;
 			$user->user_type_id = 3122;
 			$user->company_id = $company_id;
