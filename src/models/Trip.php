@@ -372,10 +372,12 @@ class Trip extends Model {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'e.id')
 			->select(
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
@@ -386,6 +388,7 @@ class Trip extends Model {
 				'status.name as status'
 
 			)
+			->where('users.user_type_id', 3122)
 			->where('trips.status_id', 3021) //MANAGER APPROVAL PENDING
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')

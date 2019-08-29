@@ -75,7 +75,11 @@ class TripVerificationController extends Controller {
 	// }
 
 	public function eyatraTripVerificationFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(name, " / ", code) as name'), 'id')->where('company_id', Auth::user()->company_id)->get();
+		dd('cew');
+		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3122)
+			->where('company_id', Auth::user()->company_id)->get();
 		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
 		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
 		$this->data['success'] = true;

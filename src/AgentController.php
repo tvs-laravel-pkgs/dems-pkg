@@ -64,7 +64,7 @@ class AgentController extends Controller {
 		$agent_list = Agent::withTrashed()->select(
 			'agents.id',
 			'agents.code',
-			'agents.name',
+			'users.name',
 			DB::raw('IF(agents.gstin IS NULL,"---",agents.gstin) as gstin'),
 			'users.mobile_number',
 			DB::raw('IF(agents.deleted_at IS NULL,"Active","In-Active") as status'),
@@ -72,7 +72,8 @@ class AgentController extends Controller {
 			->join('users', 'users.entity_id', 'agents.id')
 			->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
 			->leftJoin('entities as tm', 'tm.id', 'agent_travel_mode.travel_mode_id')
-
+			->leftJoin('users', 'users.entity_id', 'agents.id')
+			->where('users.user_type_id', 3122)
 			->where(function ($query) use ($r, $agent) {
 				if (!empty($agent)) {
 					$query->where('agents.id', $agent);

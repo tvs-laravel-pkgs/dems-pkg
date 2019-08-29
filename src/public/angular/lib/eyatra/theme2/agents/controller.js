@@ -34,7 +34,7 @@ app.component('eyatraAgents', {
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'agents.code', searchable: true },
-                { data: 'name', name: 'agents.name', searchable: true },
+                { data: 'name', name: 'users.name', searchable: true },
                 { data: 'gstin', name: 'agents.gstin', searchable: true },
                 { data: 'mobile_number', name: 'users.mobile_number', searchable: true },
                 { data: 'travel_name', name: 'tm.name', searchable: true },
