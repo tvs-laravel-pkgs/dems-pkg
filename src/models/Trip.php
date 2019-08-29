@@ -2,6 +2,8 @@
 
 namespace Uitoux\EYatra;
 
+use App\Mail\TripNotificationMail;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DateInterval;
@@ -11,11 +13,10 @@ use DB;
 use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\User;
-use App\Mail\TripNotificationMail;
+use Mail;
 use Uitoux\EYatra\ActivityLog;
 use Validator;
-use Mail;
+
 class Trip extends Model {
 	use SoftDeletes;
 
@@ -256,7 +257,6 @@ class Trip extends Model {
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
 		$data['trip'] = $trip;
-		// dd($trip);
 		$data['success'] = true;
 		return response()->json($data);
 
@@ -753,47 +753,46 @@ class Trip extends Model {
 
 		return response()->json($data);
 	}
-		public static function sendTripNotificationMail($trip) {
+	public static function sendTripNotificationMail($trip) {
 		try {
 			//dd($trip);
 			$trip_id = $trip->id;
-			$trip_visits=$trip->visits;
+			$trip_visits = $trip->visits;
 			//dd($trip_visits);
-			if($trip_visits)
-			{ 	//agent Booking Count checking
-				$visit_agents=Visit::select('visits.id','trips.id as trip_id','users.name as employee_name','fromcity.name as fromcity_name','tocity.name as tocity_name','travel_modes.name as travel_mode_name','booking_modes.name as booking_method_name')
-				->join('trips','trips.id','visits.trip_id')
-				->leftjoin('users','trips.employee_id','users.id')
-				->join('ncities as fromcity','fromcity.id','visits.from_city_id')
-				->join('ncities as tocity','tocity.id','visits.to_city_id')
-				->join('entities as travel_modes','travel_modes.id','visits.travel_mode_id')
-				->join('configs as booking_modes','booking_modes.id','visits.booking_method_id')
-				->where('booking_method_id',3042)->where('trip_id',$trip_id)
-				->get();
+			if ($trip_visits) {
+				//agent Booking Count checking
+				$visit_agents = Visit::select('visits.id', 'trips.id as trip_id', 'users.name as employee_name', 'fromcity.name as fromcity_name', 'tocity.name as tocity_name', 'travel_modes.name as travel_mode_name', 'booking_modes.name as booking_method_name')
+					->join('trips', 'trips.id', 'visits.trip_id')
+					->leftjoin('users', 'trips.employee_id', 'users.id')
+					->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+					->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+					->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
+					->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
+					->where('booking_method_id', 3042)->where('trip_id', $trip_id)
+					->get();
 				$visit_agent_count = $visit_agents->count();
 				//dd($visit_agent_count);
-				if($visit_agent_count > 0)
-				{ // Agent Mail Trigger
+				if ($visit_agent_count > 0) {
+					// Agent Mail Trigger
 					foreach ($visit_agents as $key => $visit_agent) {
-					//$from_user = User::select('email', 'name', 'designation')->where('id', Auth::id())->first();
-					/*$arr['from_mail'] = $from_user->email;
+						//$from_user = User::select('email', 'name', 'designation')->where('id', Auth::id())->first();
+						/*$arr['from_mail'] = $from_user->email;
 					$arr['from_name'] = $from_user->name;*/
-					$arr['from_mail'] ='saravanan@uitoux.in';
-					$arr['from_name'] = 'Agent';
-					$arr['to_email'] = 'parthiban@uitoux.in';
-					$arr['to_name'] = 'parthiban';
-					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Employee ticket booked notification';
-					$arr['body'] = 'Employee ticket booked notification';
-					$arr['visit'] = $visit_agent;
-					$MailInstance = new TripNotificationMail($arr);
-					$Mail = Mail::send($MailInstance);
+						$arr['from_mail'] = 'saravanan@uitoux.in';
+						$arr['from_name'] = 'Agent';
+						$arr['to_email'] = 'parthiban@uitoux.in';
+						$arr['to_name'] = 'parthiban';
+						//dd($user_details_cc['email']);
+						$arr['subject'] = 'Employee ticket booked notification';
+						$arr['body'] = 'Employee ticket booked notification';
+						$arr['visit'] = $visit_agent;
+						$MailInstance = new TripNotificationMail($arr);
+						$Mail = Mail::send($MailInstance);
 					}
 				}
 			}
-			dd($trip_visits);
+			//dd($trip_visits);
 
-			 
 		} catch (Exception $e) {
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}

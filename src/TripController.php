@@ -2,13 +2,14 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use App\User;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
@@ -27,9 +28,9 @@ class TripController extends Controller {
 				'e.code as ecode',
 				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				// DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				// DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				DB::raw('CONCAT(DATE_FORMAT(MIN(v.date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.date),"%d/%m/%Y")) as travel_period'),
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				DB::raw('CONCAT(DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
@@ -118,12 +119,12 @@ class TripController extends Controller {
 		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
 		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
 		$this->data['success'] = true;
-		//dd($this->data);
 		return response()->json($this->data);
 	}
 
 	public function deleteTrip($trip_id) {
 		//CHECK IF AGENT BOOKED TRIP VISITS
+		//dump($trip_id);
 		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
 		if ($agent_visits_booked) {
 			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
@@ -133,8 +134,18 @@ class TripController extends Controller {
 		if (!$status_exist) {
 			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
 		}
+		$trip = Trip::where('id', $trip_id)->first();
 
-		$trip = Trip::where('id', $trip_id)->forceDelete();
+		$activity['entity_id'] = $trip->id;
+		$trip = $trip->forceDelete();
+
+		//$trip = Trip::where('id', $trip_id)->forceDelete();
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = NULL;
+		$activity['activity'] = "delete";
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
+
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
@@ -147,6 +158,12 @@ class TripController extends Controller {
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = NULL;
+		$activity['activity'] = "cancel";
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
 		$visit = Visit::where('trip_id', $trip_id)->update(['status_id' => 3221]);
 
 		return response()->json(['success' => true]);
@@ -174,6 +191,12 @@ class TripController extends Controller {
 			$visit = Visit::where('id', $visit_id)->first();
 			$visit->booking_status_id = 3062; // Booking cancelled
 			$visit->save();
+			$activity['entity_id'] = $trip->id;
+			$activity['entity_type'] = 'trip';
+			$activity['details'] = NULL;
+			$activity['activity'] = "cancel";
+			//dd($activity);
+			$activity_log = ActivityLog::saveLog($activity);
 			return response()->json(['success' => true]);
 		} else {
 			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
@@ -183,7 +206,6 @@ class TripController extends Controller {
 	public function visitFormData($visit_id) {
 
 		$visit = Visit::find($visit_id);
-		//dd($visit);
 		if (!$visit) {
 			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
 		}
