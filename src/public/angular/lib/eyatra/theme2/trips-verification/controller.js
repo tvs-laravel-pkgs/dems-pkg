@@ -237,7 +237,7 @@ app.component('eyatraTripVerificationForm', {
                                 new Noty({
                                     type: 'success',
                                     layout: 'topRight',
-                                    text: 'Manager Approved successfully',
+                                    text: res.message,
                                 }).show();
                                 $('#alert-modal-approve').modal('hide');
                                 setTimeout(function() {

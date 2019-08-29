@@ -32,6 +32,10 @@ class Employee extends Model {
 		return $this->belongsTo('App\Company');
 	}
 
+	public function tripEmployeeClaim() {
+		return $this->hasOne('Uitoux\EYatra\EmployeeClaim');
+	}
+
 	public function Sbu() {
 		return $this->belongsTo('Uitoux\EYatra\Sbu');
 	}

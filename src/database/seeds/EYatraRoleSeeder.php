@@ -45,6 +45,9 @@ class EYatraRoleSeeder extends Seeder {
 					//MASTERS
 					5080,
 
+					//ROLES
+					5010, 5600, 5601, 5602,
+
 					//MASTERS > OUTLETS
 					5020, 5021, 5022, 5023,
 
