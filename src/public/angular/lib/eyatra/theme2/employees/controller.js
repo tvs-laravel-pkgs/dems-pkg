@@ -127,10 +127,10 @@ app.component('eyatraEmployeeForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-        $scope.showBank = true;
-        $scope.showCheque = true;
-        $scope.showWallet = true;
-        // console.log('Bank ' + $scope.showBank);
+        $scope.showBank = false;
+        $scope.showCheque = false;
+        $scope.showWallet = false;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -144,14 +144,9 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response.data.employee);
-
             self.employee = response.data.employee;
             self.extras = response.data.extras;
             self.action = response.data.action;
-            if (response.data.employee.payment_mode_id == null || !response.data.employee.payment_mode_id) {
-                self.employee.payment_mode_id = 3244;
-            }
             // console.log(response.data.extras);
             if (self.action == 'Edit') {
                 if (self.employee.user.force_password_change == 1) {
@@ -161,7 +156,7 @@ app.component('eyatraEmployeeForm', {
                 } else {
                     self.switch_password = 'Yes';
                 }
-                //$scope.selectPaymentMode(self.employee.payment_mode_id);
+                $scope.selectPaymentMode(self.employee.payment_mode_id);
                 $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
             } else {
                 $("#hide_password").show();
@@ -202,23 +197,7 @@ app.component('eyatraEmployeeForm', {
             }
         }
 
-        $scope.getDesignation = function(grade_id) {
-            if (grade_id) {
-                $.ajax({
-                        url: get_designation_by_grade,
-                        method: "POST",
-                        data: { grade_id: grade_id },
-                    })
-                    .done(function(res) {
-                        self.extras.designation_list = [];
-                        self.extras.designation_list = res.designation_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
-        }
+
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
             if (payment_id == 3244) { //BANK
@@ -302,79 +281,24 @@ app.component('eyatraEmployeeForm', {
                     minlength: 8,
                 },
                 'bank_name': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 100,
                     minlength: 3,
                 },
                 'branch_name': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 50,
                     minlength: 3,
                 },
                 'account_number': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 20,
                     minlength: 3,
                     positiveNumber: true,
                 },
                 'ifsc_code': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 10,
-                    minlength: 3,
-                },
-                'check_favour': {
-                    required: function(element) {
-                        if ($("#cheque").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                    maxlength: 100,
-                    minlength: 3,
-                },
-                'type_id': {
-                    required: function(element) {
-                        if ($("#wallet").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                },
-                'value': {
-                    required: function(element) {
-                        if ($("#wallet").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                    maxlength: 20,
                     minlength: 3,
                 },
                 'mobile_number': {

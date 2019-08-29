@@ -153,7 +153,7 @@ class AgentController extends Controller {
 		}
 
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
-		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Type']);
 
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
@@ -182,6 +182,7 @@ class AgentController extends Controller {
 				'agent_code.required' => 'Agent Code is Required',
 				'agent_code.unique' => 'Agent Code is already taken',
 				'agent_name.required' => 'Agent Name is Required',
+				'gstin.unique' => 'GSTIN is already taken',
 				'address_line1.required' => 'Address Line1 is Required',
 				'country.required' => 'Country is Required',
 				'state.required' => 'State is Required',
@@ -196,6 +197,9 @@ class AgentController extends Controller {
 				'agent_code' => [
 					'required:true',
 					'unique:agents,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				],
+				'gstin' => [
+					'unique:agents,gstin,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				],
 				'mobile_number' => [
 					'required:true',
