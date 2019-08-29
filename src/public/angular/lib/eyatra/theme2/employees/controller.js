@@ -333,7 +333,9 @@ app.component('eyatraEmployeeForm', {
                     },
                     maxlength: 20,
                     minlength: 3,
-                    positiveNumber: true,
+                    min: 1,
+                    number: true,
+                    // positiveNumber: true,
                 },
                 'ifsc_code': {
                     required: function(element) {
