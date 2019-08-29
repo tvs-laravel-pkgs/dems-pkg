@@ -63,15 +63,19 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 502)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
+	public static function uiLocaTravelModeList() {
+		return Entity::where('entity_type_id', 503)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
+	}
+
 	public static function getGradeList() {
 		return Entity::where('entity_type_id', 500)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function getLodgeStayTypeList() {
-		return Entity::where('entity_type_id', 504)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 504)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 	public static function walletModeList() {
-		return Entity::where('entity_type_id', 505)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 505)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 	public static function cityCategoryList() {
 		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();

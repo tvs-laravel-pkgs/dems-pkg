@@ -414,21 +414,18 @@ class AgentClaimController extends Controller {
 		$this->data['success'] = true;
 		$this->data['gstin_tax'] = Agent::select('gstin')->where('id', Auth::user()->entity_id)->get();
 
-		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
-		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$payment_mode_list = collect(Config::agentPaymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 
 		$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_claim_view->agent_id);
 
 		$this->data['agent'] = $agent;
 		$this->data['payment_mode_list'] = $payment_mode_list;
-		$this->data['wallet_mode_list'] = $wallet_mode_list;
 		$this->data['agent_claim_rejection'] = $agent_claim_rejection = Entity::agent_claim_rejection();
 		$this->data['date'] = date('d-m-Y');
 		return response()->json($this->data);
 	}
 	public function payAgentClaimRequest(Request $r) {
 
-		// dd($r->all());
 		$agent_claim = AgentClaim::find($r->agent_claim_id);
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim Request not found']]);
@@ -438,32 +435,12 @@ class AgentClaimController extends Controller {
 
 		//PAYMENT SAVE
 		$payment = Payment::firstOrNew(['entity_id' => $agent_claim->id]);
-		$payment->date = date('Y-m-d', strtotime($r->date));
 		$payment->fill($r->all());
+		$payment->date = date('Y-m-d', strtotime($r->date));
 		$payment->payment_of_id = 3252;
-		$payment->entity_id = $agent_claim->id;
+		// $payment->payment_mode_id = $agent_claim->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
-
-		//BANK DETAIL SAVE
-		if ($r->bank_name) {
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $agent_claim->id]);
-			$bank_detail->fill($r->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $agent_claim->id;
-			$bank_detail->account_type_id = 3252;
-			$bank_detail->save();
-		}
-
-		//WALLET SAVE
-		if ($r->type_id) {
-			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent_claim->id]);
-			$wallet_detail->fill($r->all());
-			$wallet_detail->wallet_of_id = 3252;
-			$wallet_detail->entity_id = $agent_claim->id;
-			$wallet_detail->save();
-		}
-
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);
 	}
