@@ -106,12 +106,12 @@ class AdvanceClaimRequestController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date)) as days'))->first();
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
-		$trip->days = $days->days;
+		$trip->days = $days->days + 1;
 		$this->data['payment_mode_list'] = $payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['wallet_mode_list'] = $wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$this->data['trip'] = $trip;
