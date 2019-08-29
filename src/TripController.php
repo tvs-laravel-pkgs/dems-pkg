@@ -191,12 +191,12 @@ class TripController extends Controller {
 			$visit = Visit::where('id', $visit_id)->first();
 			$visit->booking_status_id = 3062; // Booking cancelled
 			$visit->save();
-			$activity['entity_id'] = $trip->id;
-			$activity['entity_type'] = 'trip';
-			$activity['details'] = NULL;
-			$activity['activity'] = "cancel";
-			//dd($activity);
-			$activity_log = ActivityLog::saveLog($activity);
+			/*$activity['entity_id'] = $visit->id;
+				$activity['entity_type'] = 'visit';
+				$activity['details'] = NULL;
+				$activity['activity'] = "cancel";
+				//dd($activity);
+			*/
 			return response()->json(['success' => true]);
 		} else {
 			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
@@ -269,6 +269,13 @@ class TripController extends Controller {
 		if (!$visit) {
 			return response()->json(['success' => false, 'errors' => ['Booking Details not Found']]);
 		}
+
+		/*$activity['entity_id'] = $visit->id;
+			$activity['entity_type'] = 'visit';
+			$activity['details'] = NULL;
+			$activity['activity'] = "cancel";
+			//dd($activity);
+		*/
 
 		return response()->json(['success' => true]);
 	}
