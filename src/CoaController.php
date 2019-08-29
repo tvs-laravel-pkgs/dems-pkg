@@ -45,7 +45,7 @@ class CoaController extends Controller {
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/coa/data/edit/' . $entity->id . '">
+				<a href="#!/eyatra/coa-sub-master/edit/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
 				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_coa_modal" onclick="angular.element(this).scope().deleteCoaData(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';

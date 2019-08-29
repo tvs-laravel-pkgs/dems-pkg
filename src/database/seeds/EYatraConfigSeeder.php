@@ -35,6 +35,7 @@ class EYatraConfigSeeder extends Seeder {
 			518 => 'Petty Cash - EYatra',
 			519 => 'Activity Log Entity Types - EYatra',
 			520 => 'Activity Log Activities - EYatra',
+			521 => 'Lodging Stay',
 			522 => 'Agent Payment Mode - EYatra',
 		];
 
@@ -473,6 +474,15 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 522,
 			],
 
+			//LODGING STAY
+			3340 => [
+				'name' => 'Normal',
+				'config_type_id' => 521,
+			],
+			3341 => [
+				'name' => 'Home',
+				'config_type_id' => 521,
+			],
 		];
 
 		//SAVING CONFIG TYPES
