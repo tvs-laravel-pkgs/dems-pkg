@@ -2,6 +2,8 @@
 
 namespace Uitoux\EYatra;
 
+use App\Mail\TripNotificationMail;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DateInterval;
@@ -11,11 +13,10 @@ use DB;
 use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\User;
-use App\Mail\TripNotificationMail;
+use Mail;
 use Uitoux\EYatra\ActivityLog;
 use Validator;
-use Mail;
+
 class Trip extends Model {
 	use SoftDeletes;
 
@@ -192,7 +193,7 @@ class Trip extends Model {
 						$agent = $state->agents()->where('company_id', Auth::user()->company_id)->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
 
 						if (!$agent) {
-							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count]]);
+							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count], 'message' => 'No agent found for visit - ' . $visit_count]);
 						}
 						$visit->agent_id = $agent->id;
 					}
@@ -200,12 +201,11 @@ class Trip extends Model {
 					$i++;
 				}
 			}
-
+			// $activity_log = ActivityLog::saveLog($activity);
 			if (!$request->id) {
 				self::sendTripNotificationMail($trip);
 			}
 			$activity_log = ActivityLog::saveLog($activity);
-
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
@@ -229,6 +229,7 @@ class Trip extends Model {
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
+			'employee.user',
 			'purpose',
 			'status',
 		])
@@ -247,9 +248,9 @@ class Trip extends Model {
 			return response()->json($data);
 		}
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date))+1 as days'))->first();
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days;
@@ -308,12 +309,13 @@ class Trip extends Model {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('users as u', 'u.entity_id', 'e.id')
 			->leftJoin('ey_employee_claims as claim', 'claim.trip_id', 'trips.id')
 
 			->select(
 				'trips.id',
 				'trips.number',
-				DB::raw('CONCAT(e.name," ( ",e.code," ) ") as ecode'),
+				DB::raw('CONCAT(u.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
@@ -324,6 +326,7 @@ class Trip extends Model {
 				'status.name as status_name',
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
 			)
+			->where('u.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
@@ -597,9 +600,9 @@ class Trip extends Model {
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.date),MIN(visits.date))+1 as days'))->first();
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days;
@@ -617,11 +620,13 @@ class Trip extends Model {
 		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
 		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => -1, 'name' => 'Select Purpose']));
 		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => -1, 'name' => 'Select Travel Mode']));
-		$stay_type_list = collect(Entity::getLodgeStayTypeList()->prepend(['id' => -1, 'name' => 'Select Stay Type']));
+		$local_travel_mode_list = collect(Entity::uiLocaTravelModeList()->prepend(['id' => -1, 'name' => 'Select Local Travel Mode']));
+		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => -1, 'name' => 'Select Stay Type']));
 
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
+			'local_travel_mode_list' => $local_travel_mode_list,
 			'city_list' => $city_list,
 			'stay_type_list' => $stay_type_list,
 			'booking_type_list' => $booking_type_list,
@@ -753,12 +758,11 @@ class Trip extends Model {
 
 		return response()->json($data);
 	}
-		public static function sendTripNotificationMail($trip) {
+	public static function sendTripNotificationMail($trip) {
 		try {
-			//dd($trip);
+		
 			$trip_id = $trip->id;
-			$trip_visits=$trip->visits;
-			//dd($trip_visits);
+			$trip_visits = $trip->visits;
 			if($trip_visits)
 			{ 	//agent Booking Count checking
 				$visit_agents=Visit::select(
@@ -781,12 +785,9 @@ class Trip extends Model {
 				->get();
 				$visit_agent_count = $visit_agents->count();
 				//dd($visit_agent_count);
-				if($visit_agent_count > 0)
-				{ // Agent Mail Trigger
+				if ($visit_agent_count > 0) {
+					// Agent Mail Trigger
 					foreach ($visit_agents as $key => $visit_agent) {
-					//$from_user = User::select('email', 'name', 'designation')->where('id', Auth::id())->first();
-					/*$arr['from_mail'] = $from_user->email;
-					$arr['from_name'] = $from_user->name;*/
 					$arr['from_mail'] ='saravanan@uitoux.in';
 					$arr['from_name'] = 'Agent';
 					$arr['to_email'] = 'parthiban@uitoux.in';
@@ -871,7 +872,7 @@ class Trip extends Model {
 					$Mail = Mail::send($MailInstance);
 				}
 			}
-			 
+
 		} catch (Exception $e) {
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}

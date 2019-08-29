@@ -211,6 +211,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/claim/view/{trip_id?}', 'Uitoux\EYatra\TripClaimController@viewEYatraTripClaim')->name('viewEYatraTripClaim');
 		Route::get('eyatra/trip/claim/delete/{trip_id}', 'Uitoux\EYatra\TripClaimController@deleteEYatraTripClaim')->name('deleteEYatraTripClaim');
 		Route::get('eyatra/trip/claim/get-eligible-amount', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGrade')->name('getEligibleAmtBasedonCitycategoryGrade');
+		Route::get('eyatra/trip/claim/get-eligible-amount/by-staytype', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGradeStaytype')->name('getEligibleAmtBasedonCitycategoryGradeStaytype');
 
 		//TRIP CLAIM VERIFICATION ONE
 		Route::get('eyatra/trip/claim/verification/one/get-list', 'Uitoux\EYatra\TripClaimVerificationOneController@listEYatraTripClaimVerificationOneList')->name('listEYatraTripClaimVerificationOneList');

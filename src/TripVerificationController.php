@@ -35,7 +35,9 @@ class TripVerificationController extends Controller {
 	public function tripVerificationFormData($trip_id) {
 
 		$trip = Trip::with([
-			'visits',
+			'visits' => function ($q) {
+				$q->orderBy('visits.id', 'asc');
+			},
 			'visits.fromCity',
 			'visits.toCity',
 			'visits.travelMode',

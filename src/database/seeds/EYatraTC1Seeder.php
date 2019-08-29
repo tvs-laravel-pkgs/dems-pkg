@@ -190,6 +190,7 @@ class EYatraTC1Seeder extends Seeder {
 			],
 			504 => [
 				'Normal',
+				'Home',
 			],
 			505 => [
 				'Paytm',
