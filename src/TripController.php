@@ -2,13 +2,13 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use App\User;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
@@ -29,7 +29,7 @@ class TripController extends Controller {
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				// DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
 				// DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
-				DB::raw('CONCAT(DATE_FORMAT(MIN(v.date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.date),"%d/%m/%Y")) as travel_period'),
+				DB::raw('CONCAT(DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
@@ -111,15 +111,7 @@ class TripController extends Controller {
 	}
 
 	public function eyatraTripFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->where('users.user_type_id', 3121)
-			->where('employees.company_id', Auth::user()->company_id)->get();
-		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
-		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
-		$this->data['success'] = true;
-		//dd($this->data);
-		return response()->json($this->data);
+		return Trip::getFilterData();
 	}
 
 	public function deleteTrip($trip_id) {

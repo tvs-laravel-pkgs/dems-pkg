@@ -3,9 +3,19 @@ app.component('eyatraTripClaimList', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            trip_claim_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.purpose_list = response.data.purpose_list;
+            self.trip_status_list = response.data.trip_status_list;
+            $rootScope.loading = false;
+        });
+
         var dataTable = $('#eyatra_trip_claim_list_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -24,7 +34,11 @@ app.component('eyatraTripClaimList', {
                 url: laravel_routes['listEYatraTripClaimList'],
                 type: "GET",
                 dataType: "json",
-                data: function(d) {}
+                data: function(d) {
+                    d.employee_id = $('#employee_id').val();
+                    d.purpose_id = $('#purpose_id').val();
+                    d.status_id = $('#status_id').val();
+                }
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
@@ -43,10 +57,32 @@ app.component('eyatraTripClaimList', {
         });
         $('.dataTables_length select').select2();
 
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips</h3>');
-        //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_trip_claim_list_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
 
-        $('.add_new_button').html();
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getPurposeData = function(query) {
+            $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getStatusData = function(query) {
+            $('#status_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.reset_filter = function(query) {
+            $('#employee_id').val(-1);
+            $('#purpose_id').val(-1);
+            $('#status_id').val(-1);
+            dataTable.draw();
+        }
 
         $scope.deleteTrip = function(id) {
             $('#del').val(id);
