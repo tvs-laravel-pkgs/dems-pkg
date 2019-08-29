@@ -174,12 +174,12 @@ app.component('eyatraRegionForm', {
             rules: {
                 'code': {
                     required: true,
-                    maxlength: 191,
-                    minlength: 3,
+                    maxlength: 4,
+                    minlength: 1,
                 },
                 'name': {
                     required: true,
-                    maxlength: 80,
+                    maxlength: 191,
                     minlength: 3,
                 },
                 'outlet_id': {
@@ -191,10 +191,10 @@ app.component('eyatraRegionForm', {
             },
             messages: {
                 'code': {
-                    maxlength: 'Please enter maximum of 191 letters',
+                    maxlength: 'Please enter maximum of 4 letters',
                 },
                 'name': {
-                    maxlength: 'Please enter maximum of 80 letters',
+                    maxlength: 'Please enter maximum of 191 letters',
                 },
             },
             submitHandler: function(form) {
@@ -221,7 +221,7 @@ app.component('eyatraRegionForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Region updated successfully',
+                                text: res.message,
                             }).show();
                             $location.path('/eyatra/regions')
                             $scope.$apply()

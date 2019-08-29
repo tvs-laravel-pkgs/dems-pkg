@@ -17,6 +17,36 @@ app.config(['$routeProvider', function($routeProvider) {
 
     }).
 
+
+     //ENTITIES
+    when('/entity/data/list', {
+        template: '<entity-data-list></entity-data-list>',
+        title: 'Entity list',
+    }).
+    when('/entity/data/add', {
+        template: '<entity-data-form></entity-data-form>',
+        title: 'Add Entity',
+    }).
+    when('/entity/data/edit/:entity_id', {
+        template: '<entity-data-form></entity-data-form>',
+        title: 'Edit Entity',
+    }).
+
+    //COA
+    when('/coa/data/list', {
+        template: '<coa-data-list></coa-data-list>',
+        title: 'COA list',
+    }).
+    when('/coa/data/add', {
+        template: '<coa-data-form></coa-data-form>',
+        title: 'Add COA',
+    }).
+    when('/coa/data/edit/:entity_id', {
+        template: '<coa-data-form></coa-data-form>',
+        title: 'Edit COA',
+    }).
+
+    
     //GRADES
     when('/eyatra/grades', {
         template: '<eyatra-grades></eyatra-grades>',
