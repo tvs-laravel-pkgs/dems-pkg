@@ -295,7 +295,7 @@ app.component('eyatraTripForm', {
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
+                $('#btn-submit').button('loading');
                 $.ajax({
                         url: laravel_routes['saveTrip'],
                         method: "POST",
@@ -306,7 +306,7 @@ app.component('eyatraTripForm', {
                     .done(function(res) {
                         console.log(res.success);
                         if (!res.success) {
-                            $('#submit').button('reset');
+                            $('#btn-submit').button('reset');
                             var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
@@ -323,7 +323,7 @@ app.component('eyatraTripForm', {
                         }
                     })
                     .fail(function(xhr) {
-                        $('#submit').button('reset');
+                        $('#btn-submit').button('reset');
                         custom_noty('error', 'Something went wrong at server');
                     });
             },
