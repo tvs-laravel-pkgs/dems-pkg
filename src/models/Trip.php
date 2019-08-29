@@ -2,6 +2,8 @@
 
 namespace Uitoux\EYatra;
 
+use App\Mail\TripNotificationMail;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DateInterval;
@@ -11,6 +13,8 @@ use DB;
 use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Mail;
+use Uitoux\EYatra\ActivityLog;
 use Validator;
 
 class Trip extends Model {
@@ -154,6 +158,7 @@ class Trip extends Model {
 			$trip->save();
 			$activity['entity_id'] = $trip->id;
 			$activity['entity_type'] = 'trip';
+			$activity['details'] = NULL;
 			//SAVING VISITS
 			if ($request->visits) {
 				$visit_count = count($request->visits);
@@ -172,7 +177,7 @@ class Trip extends Model {
 					$visit->fill($visit_data);
 					// dump($visit_data['date']);
 					// dump(Carbon::createFromFormat('d/m/Y', $visit_data['date']));
-					$visit->date = date('Y-m-d', strtotime($visit_data['date']));
+					// $visit->date = date('Y-m-d', strtotime($visit_data['date']));
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					// dd($visit);
 					$visit->from_city_id = $from_city_id;
@@ -196,7 +201,10 @@ class Trip extends Model {
 					$i++;
 				}
 			}
-			// $activity_log = ActivityLog::saveLog($activity);
+			if (!$request->id) {
+				self::sendTripNotificationMail($trip);
+			}
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
@@ -281,7 +289,7 @@ class Trip extends Model {
 
 		$data['extras'] = [
 			// 'purpose_list' => Entity::uiPurposeList(),
-			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get(),
+			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
 			// 'travel_mode_list' => Entity::uiTravelModeList(),
 			'travel_mode_list' => DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get(),
 			'city_list' => NCity::getList(),
@@ -746,4 +754,49 @@ class Trip extends Model {
 
 		return response()->json($data);
 	}
+	public static function sendTripNotificationMail($trip) {
+		try {
+			//dd($trip);
+			$trip_id = $trip->id;
+			$trip_visits = $trip->visits;
+			//dd($trip_visits);
+			if ($trip_visits) {
+				//agent Booking Count checking
+				$visit_agents = Visit::select('visits.id', 'trips.id as trip_id', 'users.name as employee_name', 'fromcity.name as fromcity_name', 'tocity.name as tocity_name', 'travel_modes.name as travel_mode_name', 'booking_modes.name as booking_method_name')
+					->join('trips', 'trips.id', 'visits.trip_id')
+					->leftjoin('users', 'trips.employee_id', 'users.id')
+					->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+					->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+					->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
+					->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
+					->where('booking_method_id', 3042)->where('trip_id', $trip_id)
+					->get();
+				$visit_agent_count = $visit_agents->count();
+				//dd($visit_agent_count);
+				if ($visit_agent_count > 0) {
+					// Agent Mail Trigger
+					foreach ($visit_agents as $key => $visit_agent) {
+						//$from_user = User::select('email', 'name', 'designation')->where('id', Auth::id())->first();
+						/*$arr['from_mail'] = $from_user->email;
+					$arr['from_name'] = $from_user->name;*/
+						$arr['from_mail'] = 'saravanan@uitoux.in';
+						$arr['from_name'] = 'Agent';
+						$arr['to_email'] = 'parthiban@uitoux.in';
+						$arr['to_name'] = 'parthiban';
+						//dd($user_details_cc['email']);
+						$arr['subject'] = 'Employee ticket booked notification';
+						$arr['body'] = 'Employee ticket booked notification';
+						$arr['visit'] = $visit_agent;
+						$MailInstance = new TripNotificationMail($arr);
+						$Mail = Mail::send($MailInstance);
+					}
+				}
+			}
+			dd($trip_visits);
+
+		} catch (Exception $e) {
+			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
+	}
+
 }

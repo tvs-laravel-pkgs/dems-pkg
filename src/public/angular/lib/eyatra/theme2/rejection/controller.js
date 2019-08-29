@@ -50,7 +50,7 @@ app.component('entityDataList', {
             });
             $('.dataTables_length select').select2();
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Rejection' + '</p><h3 class="title">' + 'List'+ '</h3>');
-            var add_url = '#!/entity/data/add/';
+            var add_url = '#!/eyatra/rejection-reason/add/';
                 $('.add_new_button').html(
                     '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
                     'Add New' +
@@ -107,7 +107,7 @@ app.component('entityDataForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/entity/data/list')
+                $location.path('/eyatra/rejection-reason/list')
                 $scope.$apply()
                 return;
             }
@@ -168,7 +168,7 @@ app.component('entityDataForm', {
                                 layout: 'topRight',
                                 text: res.message,
                             }).show();
-                            $location.path('/entity/data/list')
+                            $location.path('/eyatra/rejection-reason/list')
                             $scope.$apply()
                         }
                     })

@@ -87,7 +87,6 @@ class Employee extends Model {
 			'company_id' => $company->id,
 			'code' => $code,
 		]);
-		$employee->name = $faker->name;
 		$employee->outlet_id = $outlet->id;
 		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
 		$lob = $company->lobs()->inRandomOrder()->first();
@@ -108,6 +107,7 @@ class Employee extends Model {
 			'user_type_id' => $user_type_id,
 			'username' => $entity->code,
 		]);
+		$user->name = $faker->name;
 		$user->entity_id = $entity->id;
 		$user->email = $faker->safeEmail;
 		$user->mobile_number = $mobile_number;
