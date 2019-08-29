@@ -160,7 +160,7 @@ class EYatraPermissionSeeder extends Seeder {
 			5061 => [
 				'display_order' => 1,
 				'parent_id' => 5001,
-				'name' => 'view-all-trip-verifications',
+				'name' => 'verify-all-trips',
 				'display_name' => 'All',
 			],
 
@@ -836,6 +836,26 @@ class EYatraPermissionSeeder extends Seeder {
 				'parent_id' => 5001,
 				'name' => 'eyatra-indv-expense-vouchers-verification2',
 				'display_name' => 'Expense Vouchers Verfication2',
+			],
+
+			//ROLES
+			5600 => [
+				'display_order' => 8,
+				'parent_id' => 5010,
+				'name' => 'eyatra-role-add',
+				'display_name' => 'Add',
+			],
+			5601 => [
+				'display_order' => 8,
+				'parent_id' => 5010,
+				'name' => 'eyatra-role-edit',
+				'display_name' => 'Edit',
+			],
+			5602 => [
+				'display_order' => 8,
+				'parent_id' => 5010,
+				'name' => 'eyatra-role-delete',
+				'display_name' => 'Delete',
 			],
 
 		];

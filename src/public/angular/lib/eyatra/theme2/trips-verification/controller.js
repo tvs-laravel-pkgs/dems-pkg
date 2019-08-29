@@ -45,6 +45,7 @@ app.component('eyatraTripVerifications', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'v.date', searchable: true },
                 { data: 'end_date', name: 'v.date', searchable: true },
                 { data: 'cities', name: 'c.name', searchable: true },
@@ -237,7 +238,7 @@ app.component('eyatraTripVerificationForm', {
                                 new Noty({
                                     type: 'success',
                                     layout: 'topRight',
-                                    text: 'Manager Approved successfully',
+                                    text: res.message,
                                 }).show();
                                 $('#alert-modal-approve').modal('hide');
                                 setTimeout(function() {

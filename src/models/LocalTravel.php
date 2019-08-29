@@ -12,16 +12,22 @@ class LocalTravel extends Model {
 		'id',
 		'trip_id',
 		'mode_id',
+		'city_id',
 		// 'date',
-		'from_id',
-		'to_id',
+		'from',
+		'to',
 		'amount',
 		'tax',
+		'eligible_amount',
 		'description',
 		'created_by',
 		'updated_by',
 		'deleted_by',
 	];
+
+	public function city() {
+		return $this->belongsTo('Uitoux\EYatra\NCity', 'city_id');
+	}
 
 	public function trip() {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
