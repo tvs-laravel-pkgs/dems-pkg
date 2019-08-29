@@ -27,4 +27,8 @@ class Config extends Model {
 	public static function getBookingTypeTypeList() {
 		return Config::where('config_type_id', 502)->select('id', 'name')->get();
 	}
+
+	public static function agentPaymentModeList() {
+		return Config::where('config_type_id', 522)->select('id', 'name')->get();
+	}
 }

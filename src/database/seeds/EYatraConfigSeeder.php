@@ -35,6 +35,7 @@ class EYatraConfigSeeder extends Seeder {
 			518 => 'Petty Cash - EYatra',
 			519 => 'Activity Log Entity Types - EYatra',
 			520 => 'Activity Log Activities - EYatra',
+			522 => 'Agent Payment Mode - EYatra',
 		];
 
 		$configs = [
@@ -453,6 +454,25 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Paid',
 				'config_type_id' => 520,
 			],
+
+			//AGENT PAYMENT MODES
+			3229 => [
+				'name' => 'DD',
+				'config_type_id' => 522,
+			],
+			3230 => [
+				'name' => 'NEFT',
+				'config_type_id' => 522,
+			],
+			3231 => [
+				'name' => 'RTGS',
+				'config_type_id' => 522,
+			],
+			3232 => [
+				'name' => 'IMPS',
+				'config_type_id' => 522,
+			],
+
 		];
 
 		//SAVING CONFIG TYPES
