@@ -79,7 +79,6 @@ class TripVerificationController extends Controller {
 	// }
 
 	public function eyatraTripVerificationFilterData() {
-		dd('cew');
 		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 			->leftJoin('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3122)
