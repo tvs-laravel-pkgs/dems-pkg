@@ -142,7 +142,7 @@ class AlternateApproveController extends Controller {
 			$alternate_approve->fill($request->all());
 			$alternate_approve->save();
 			DB::commit();
-			$request->session()->flash('success', 'Alternate Approve List saved successfully!');
+			// $request->session()->flash('success', 'Alternate Approver updated successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
