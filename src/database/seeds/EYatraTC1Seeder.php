@@ -143,7 +143,6 @@ class EYatraTC1Seeder extends Seeder {
 			],
 		];
 
-		Designation::create($company, $admin);
 		NCountry::create($countries, $admin, $company);
 		//NCountry::createDummies($admin);
 
@@ -254,6 +253,12 @@ class EYatraTC1Seeder extends Seeder {
 
 		];
 		Entity::create($sample_entities, $admin, $company);
+		Designation::create($company, $admin);
+		foreach ($company->designations as $designation) {
+			$grade = $company->employeeGrades()->inRandomOrder()->first();
+			$designation->grade_id = $grade->id;
+			$designation->save();
+		}
 
 		foreach (NCity::get() as $city) {
 			$city->category_id = $company->cityCategories()->inRandomOrder()->first()->id;
@@ -293,21 +298,34 @@ class EYatraTC1Seeder extends Seeder {
 			$this->command->info('Cashier Created : ' . $cashier->code);
 
 			$user_type_id = 3121;
-			$cashier_user = Employee::createUser($company, $user_type_id, $cashier, $faker, $base_telephone_number . '5' . $i . '00000000', $roles = 504);
+			$cashier_user = Employee::createUser($company, $user_type_id, $cashier, $faker, $base_telephone_number . '5' . $i . '10000000', $roles = 504);
 			$outlet->cashier_id = $cashier->id;
 			$outlet->save();
+
+			//Sr.MANAGER
+			$code = $outlet->code . '/sm' . $i;
+			$sr_manager = Employee::create($company, $code, $outlet, $admin, $faker);
+			$this->command->info('------------------');
+			$this->command->info('Sr.Manager Created : ' . $sr_manager->code);
+
+			//USER ACCOUNT
+			$user_type_id = 3121;
+			$user = Employee::createUser($company, $user_type_id, $sr_manager, $faker, $base_telephone_number . $i . '20000000', $roles = 502);
 
 			//MANAGERS
 			for ($j = 1; $j <= $number_of_items; $j++) {
 				dump($j, $number_of_items);
-				$code = $outlet->code . '/mngr' . $j;
-				$manager = Employee::create($company, $code, $outlet, $admin, $faker);
+
+				//MANAGERS
+				$code = $sr_manager->code . '/mngr' . $j;
+				$manager = Employee::create($company, $code, $outlet, $admin, $faker, $sr_manager->id);
 				$this->command->info('------------------');
 				$this->command->info('Manager Created : ' . $manager->code);
 
 				//USER ACCOUNT
 				$user_type_id = 3121;
 				$user = Employee::createUser($company, $user_type_id, $manager, $faker, $base_telephone_number . $i . $j . '0000000', $roles = 502);
+
 				//EMPLOYEES - REGULAR
 				for ($k = 1; $k <= $number_of_items; $k++) {
 					$code = $manager->code . '/e' . $k;

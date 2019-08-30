@@ -44,10 +44,11 @@ class CoaCodeController extends Controller {
 		} else {
 			$sub_group_id = null;
 		}
-		if (!empty($request->status)) {
-			$status = $request->status;
+		if (!empty($r->status)) {
+			$status = $r->status;
 		} else {
 			$status = null;
+
 		}
 		$coacodes = CoaCode::withTrashed()
 			->join('entities as e', 'e.id', 'coa_codes.account_types')
@@ -90,6 +91,7 @@ class CoaCodeController extends Controller {
 				}
 			})
 
+			->groupBy('coa_codes.id')
 			->orderBy('coa_codes.id', 'asc');
 
 		return Datatables::of($coacodes)

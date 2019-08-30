@@ -77,17 +77,20 @@ class TripClaimVerificationOneController extends Controller {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
 		} else {
-			$trip = Trip::with(
+			$trip = Trip::with([
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
 				'employee.grade',
 				'employee.designation',
 				'employee.reportingTo',
+				'employee.reportingTo.user',
 				'employee.outlet',
 				'employee.Sbu',
 				'employee.Sbu.lob',
-				'selfVisits',
+				'selfVisits' => function ($q) {
+					$q->orderBy('id', 'asc');
+				},
 				'purpose',
 				'lodgings',
 				'lodgings.city',
@@ -108,8 +111,8 @@ class TripClaimVerificationOneController extends Controller {
 				'selfVisits.selfBooking',
 				'selfVisits.agent',
 				'selfVisits.status',
-				'selfVisits.attachments'
-			)->find($trip_id);
+				'selfVisits.attachments',
+			])->find($trip_id);
 
 			if (!$trip) {
 				$this->data['success'] = false;
@@ -119,16 +122,22 @@ class TripClaimVerificationOneController extends Controller {
 				->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
 			$transport_total = Visit::select(
-				DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as amount'),
-				DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as tax')
+				DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
+				DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax')
 			)
 				->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.trip_id', $trip_id)
 				->groupby('visits.id')
-				->first();
-			$transport_total_amount = $transport_total ? $transport_total->amount : 0.00;
-			$transport_total_tax = $transport_total ? $transport_total->tax : 0.00;
-			$this->data['transport_total_amount'] = $transport_total_amount;
+				->get()
+				->toArray();
+			$visit_amounts = array_column($transport_total, 'visit_amount');
+			$visit_taxes = array_column($transport_total, 'visit_tax');
+			$visit_amounts_total = array_sum($visit_amounts);
+			$visit_taxes_total = array_sum($visit_taxes);
+
+			$transport_total_amount = $visit_amounts_total ? $visit_amounts_total : 0.00;
+			$transport_total_tax = $visit_taxes_total ? $visit_taxes_total : 0.00;
+			$this->data['transport_total_amount'] = number_format($transport_total_amount, 2, '.', '');
 
 			$lodging_total = Lodging::select(
 				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -139,7 +148,7 @@ class TripClaimVerificationOneController extends Controller {
 				->first();
 			$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
 			$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
-			$this->data['lodging_total_amount'] = $lodging_total_amount;
+			$this->data['lodging_total_amount'] = number_format($lodging_total_amount, 2, '.', '');
 
 			$boardings_total = Boarding::select(
 				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -150,7 +159,7 @@ class TripClaimVerificationOneController extends Controller {
 				->first();
 			$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
 			$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
-			$this->data['boardings_total_amount'] = $boardings_total_amount;
+			$this->data['boardings_total_amount'] = number_format($boardings_total_amount, 2, '.', '');
 
 			$local_travels_total = LocalTravel::select(
 				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -161,7 +170,7 @@ class TripClaimVerificationOneController extends Controller {
 				->first();
 			$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
 			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
-			$this->data['local_travels_total_amount'] = $local_travels_total_amount;
+			$this->data['local_travels_total_amount'] = number_format($local_travels_total_amount, 2, '.', '');
 
 			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
 			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
@@ -196,6 +205,11 @@ class TripClaimVerificationOneController extends Controller {
 		}
 		$employee_claim->save();
 		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V1 Approved";
+		$activity['activity'] = "approve";
+		$activity_log = ActivityLog::saveLog($activity);
 		return response()->json(['success' => true]);
 	}
 
@@ -217,7 +231,11 @@ class TripClaimVerificationOneController extends Controller {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024; //Claim Rejected
 		$trip->save();
-
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V1 Rejected";
+		$activity['activity'] = "reject";
+		$activity_log = ActivityLog::saveLog($activity);
 		return response()->json(['success' => true]);
 	}
 

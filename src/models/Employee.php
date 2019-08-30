@@ -20,6 +20,8 @@ class Employee extends Model {
 		'date_of_joining',
 		'aadhar_no',
 		'pan_no',
+		'gender',
+		'date_of_birth',
 		'created_by',
 		'updated_by',
 		'deleted_by',
@@ -127,5 +129,16 @@ class Employee extends Model {
 	public function getDateOfJoiningAttribute($value) {
 		return date('d-m-Y', strtotime($value));
 	}
+
+
+	public function setDateOfBirthAttribute($value) {
+		return $this->attributes['date_of_birth'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
+	}
+
+	public function getDateOfBirthAttribute($value) {
+		return date('d-m-Y', strtotime($value));
+	}
+
+
 
 }

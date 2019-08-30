@@ -177,6 +177,9 @@ class EYatraRoleSeeder extends Seeder {
 					//CLAIM VERIFICATION 1
 					5500,
 
+					//CLAIM VERIFICATION 2
+					5520,
+
 					//PETTY CASH
 					5580,
 

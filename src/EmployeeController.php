@@ -50,15 +50,17 @@ class EmployeeController extends Controller {
 			->join('entities as grd', 'grd.id', 'e.grade_id')
 			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
 			->join('outlets as o', 'o.id', 'e.outlet_id')
-			->leftJoin('users', 'users.entity_id', 'e.id')
-			->where('users.user_type_id', 3121)
+			->join('users as u', 'u.entity_id', 'e.id')
+			->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
+		// ->where('users.user_type_id', 3121)
 			->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
-				'users.name',
+				'u.name',
 				'o.code as outlet_code',
 				DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
+				// DB::raw('IF(mngr.name IS NULL,"--",mngr.name) as manager_name'),
 				'grd.name as grade',
 				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
 			)
@@ -77,8 +79,16 @@ class EmployeeController extends Controller {
 					$query->where('grd.id', $grade);
 				}
 			})
+			->where(function ($query) use ($r, $grade) {
+
+				$query->where('u.user_type_id', 3121)->orWhere('mngr.user_type_id', 3121);
+
+			})
+		// ->
+		// ->orWhere('mngr.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
-			->orderBy('e.code', 'asc');
+			->orderBy('e.code', 'asc')
+			->groupBy('e.id');
 
 		return Datatables::of($employees)
 			->addColumn('action', function ($employee) {
@@ -118,6 +128,7 @@ class EmployeeController extends Controller {
 		if (!$employee_id) {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
+			$employee['date_of_birth'] = date('Y-m-d');
 			//dd($employee);
 			$this->data['success'] = true;
 		} else {
@@ -137,7 +148,7 @@ class EmployeeController extends Controller {
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$designation_list = [];
 		// dd($designation_list);
-		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		$lob_list = collect(Lob::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Lob']);
 		$sbu_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
@@ -150,6 +161,7 @@ class EmployeeController extends Controller {
 			'grade_list' => $grade_list,
 			'designation_list' => $designation_list,
 		];
+		
 		// dd($this->data['extras']);
 		$this->data['employee'] = $employee;
 
@@ -289,6 +301,9 @@ class EmployeeController extends Controller {
 			'paymentMode',
 		])
 			->find($employee_id);
+		$dob = $employee['date_of_birth'];
+		$diff = (date('Y') - date('Y',strtotime($dob)));
+	    $employee['age'] = $diff;
 		if (!$employee) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Employee not found'];
@@ -315,10 +330,12 @@ class EmployeeController extends Controller {
 	public function searchManager(Request $r) {
 		$key = $r->key;
 		$manager_list = Employee::select(
-			// 'name',
+			'name',
 			'code',
-			'id'
+			'employees.id'
 		)
+			->join('users as u', 'u.entity_id', 'employees.id')
+			->where('u.user_type_id', 3121)
 			->where(function ($q) use ($key) {
 				$q->where('code', 'like', '%' . $key . '%')
 				// ->where('name', 'like', '%' . $key . '%')
@@ -339,7 +356,7 @@ class EmployeeController extends Controller {
 	public function getSbuByLob(Request $request) {
 		//dd($request);
 		if (!empty($request->lob_id)) {
-			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);
+			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sub Business']);
 		} else {
 			$sbu_list = [];
 		}

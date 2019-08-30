@@ -2,7 +2,7 @@
 
 namespace Uitoux\EYatra;
 
-use App\Mail\TripNotificationMail;
+// use App\Mail\TripNotificationMail;
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -14,7 +14,6 @@ use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Mail;
-use Uitoux\EYatra\ActivityLog;
 use Validator;
 
 class Trip extends Model {
@@ -48,11 +47,11 @@ class Trip extends Model {
 	}
 
 	public function selfVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040)->orderBy('id', 'ASC'); //Employee visits
 	}
 
 	public function agentVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042)->orderBy('id', 'ASC');
 	}
 
 	public function cliam() {
@@ -201,11 +200,10 @@ class Trip extends Model {
 					$i++;
 				}
 			}
-			// $activity_log = ActivityLog::saveLog($activity);
 			if (!$request->id) {
-				self::sendTripNotificationMail($trip);
+				// self::sendTripNotificationMail($trip);
 			}
-			$activity_log = ActivityLog::saveLog($activity);
+			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
 		} catch (Exception $e) {
@@ -226,6 +224,7 @@ class Trip extends Model {
 			'visits.bookingMethod',
 			'visits.bookingStatus',
 			'visits.agent',
+			'visits.agent.user',
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
@@ -340,14 +339,14 @@ class Trip extends Model {
 			$trips->where('trips.number', 'like', '%' . $request->number . '%');
 		}
 		if ($request->from_date && $request->to_date) {
-			$trips->where('v.date', '>=', $request->from_date);
-			$trips->where('v.date', '<=', $request->to_date);
+			$trips->where('v.departure_date', '>=', $request->from_date);
+			$trips->where('v.departure_date', '<=', $request->to_date);
 		} else {
 			$today = Carbon::today();
 			$from_date = $today->copy()->subMonths(3);
 			$to_date = $today->copy()->addMonths(3);
-			$trips->where('v.date', '>=', $from_date);
-			$trips->where('v.date', '<=', $to_date);
+			$trips->where('v.departure_date', '>=', $from_date);
+			$trips->where('v.departure_date', '<=', $to_date);
 		}
 
 		if ($request->status_ids && count($request->status_ids) > 0) {
@@ -427,7 +426,6 @@ class Trip extends Model {
 				}
 			})*/
 		;
-
 		if (!Entrust::can('verify-all-trips')) {
 			$trips->where('trips.manager_id', Auth::user()->entity_id);
 		}
@@ -459,7 +457,12 @@ class Trip extends Model {
 		}
 		$trip->status_id = 3028;
 		$trip->save();
-
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = NULL;
+		$activity['activity'] = "approve";
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
@@ -473,6 +476,12 @@ class Trip extends Model {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3022;
 		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['activity'] = "reject";
+		$activity['details'] = $r->remarks;
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
 
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
@@ -540,8 +549,8 @@ class Trip extends Model {
 			$travelled_cities_with_dates = array();
 			$lodge_cities = array();
 			// $boarding_to_date = '';
-			if (!empty($trip->selfVisits)) {
-				foreach ($trip->selfVisits as $visit_key => $visit) {
+			if (!empty($trip->visits)) {
+				foreach ($trip->visits as $visit_key => $visit) {
 					$city_category_id = NCity::where('id', $visit->to_city_id)->first();
 					$grade_id = $trip->employee ? $trip->employee->grade_id : '';
 					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
@@ -559,9 +568,9 @@ class Trip extends Model {
 					$next++;
 					// $lodgings[$visit_key]['city'] = $visit['to_city'];
 					// $lodgings[$visit_key]['checkin_enable'] = $visit['arrival_date'];
-					if (isset($trip->selfVisits[$next])) {
+					if (isset($trip->visits[$next])) {
 						// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
-						$next_departure_date = $trip->selfVisits[$next]->departure_date;
+						$next_departure_date = $trip->visits[$next]->departure_date;
 					} else {
 						// $lodgings[$visit_key]['checkout_disable'] = $visit['arrival_date'];
 						$next_departure_date = $visit->departure_date;
@@ -646,7 +655,7 @@ class Trip extends Model {
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		$data['success'] = true;
-		//dd($this->data);
+		//dd($data);
 		return response()->json($data);
 	}
 	// Function to get all the dates in given range
@@ -675,17 +684,20 @@ class Trip extends Model {
 			return response()->json($data);
 		}
 
-		$trip = Trip::with(
+		$trip = Trip::with([
 			'advanceRequestStatus',
 			'employee',
 			'employee.user',
 			'employee.grade',
 			'employee.designation',
 			'employee.reportingTo',
+			'employee.reportingTo.user',
 			'employee.outlet',
 			'employee.Sbu',
 			'employee.Sbu.lob',
-			'selfVisits',
+			'selfVisits' => function ($q) {
+				$q->orderBy('id', 'asc');
+			},
 			'purpose',
 			'lodgings',
 			'lodgings.city',
@@ -706,8 +718,8 @@ class Trip extends Model {
 			'selfVisits.selfBooking',
 			'selfVisits.agent',
 			'selfVisits.status',
-			'selfVisits.attachments'
-		)->find($trip_id);
+			'selfVisits.attachments',
+		])->find($trip_id);
 
 		if (!$trip) {
 			$data['success'] = false;
@@ -717,16 +729,22 @@ class Trip extends Model {
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
 		$transport_total = Visit::select(
-			DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as amount'),
-			DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as tax')
+			DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
+			DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax')
 		)
 			->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->where('visits.trip_id', $trip_id)
 			->groupby('visits.id')
-			->first();
-		$transport_total_amount = $transport_total ? $transport_total->amount : 0.00;
-		$transport_total_tax = $transport_total ? $transport_total->tax : 0.00;
-		$data['transport_total_amount'] = $transport_total_amount;
+			->get()
+			->toArray();
+		$visit_amounts = array_column($transport_total, 'visit_amount');
+		$visit_taxes = array_column($transport_total, 'visit_tax');
+		$visit_amounts_total = array_sum($visit_amounts);
+		$visit_taxes_total = array_sum($visit_taxes);
+
+		$transport_total_amount = $visit_amounts_total ? $visit_amounts_total : 0.00;
+		$transport_total_tax = $visit_taxes_total ? $visit_taxes_total : 0.00;
+		$data['transport_total_amount'] = number_format($transport_total_amount, 2, '.', '');
 
 		$lodging_total = Lodging::select(
 			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -737,7 +755,7 @@ class Trip extends Model {
 			->first();
 		$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
 		$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
-		$data['lodging_total_amount'] = $lodging_total_amount;
+		$data['lodging_total_amount'] = number_format($lodging_total_amount, 2, '.', '');
 
 		$boardings_total = Boarding::select(
 			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -748,7 +766,7 @@ class Trip extends Model {
 			->first();
 		$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
 		$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
-		$data['boardings_total_amount'] = $boardings_total_amount;
+		$data['boardings_total_amount'] = number_format($boardings_total_amount, 2, '.', '');
 
 		$local_travels_total = LocalTravel::select(
 			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -759,7 +777,7 @@ class Trip extends Model {
 			->first();
 		$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
 		$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
-		$data['local_travels_total_amount'] = $local_travels_total_amount;
+		$data['local_travels_total_amount'] = number_format($local_travels_total_amount, 2, '.', '');
 
 		$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
 		$data['total_amount'] = number_format($total_amount, 2, '.', '');
@@ -806,7 +824,7 @@ class Trip extends Model {
 						$arr['to_email'] = 'parthiban@uitoux.in';
 						$arr['to_name'] = 'parthiban';
 						//dd($user_details_cc['email']);
-						$arr['subject'] = 'Employee ticket booking notification';
+						$arr['subject'] = 'Ticket booking request';
 						$arr['body'] = 'Employee ticket booking notification';
 						$arr['visits'] = $visit_agent;
 						$arr['type'] = 1;
@@ -837,10 +855,10 @@ class Trip extends Model {
 				if ($visit_manager) {
 					$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Manager';
-					$arr['to_email'] = 'saravanan@uitoux.in';
+					$arr['to_email'] = 'parthiban@uitoux.in';
 					$arr['to_name'] = 'parthiban';
 					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Employee ticket booking notification';
+					$arr['subject'] = 'Trip Approval Request';
 					$arr['body'] = 'Employee ticket booking notification';
 					$arr['visits'] = $visit_manager;
 					$arr['type'] = 2;
@@ -872,10 +890,10 @@ class Trip extends Model {
 				if ($visit_financier_count > 0) {
 					$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Financier';
-					$arr['to_email'] = 'saravanan@uitoux.in';
+					$arr['to_email'] = 'parthiban@uitoux.in';
 					$arr['to_name'] = 'parthiban';
 					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Employee ticket booking notification';
+					$arr['subject'] = 'Trip Advance Request';
 					$arr['body'] = 'Employee ticket booking notification';
 					$arr['visits'] = $visit_financier;
 					$arr['type'] = 3;

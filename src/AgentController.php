@@ -20,15 +20,6 @@ class AgentController extends Controller {
 
 	public function eyatraAgentsfilter() {
 
-		$option = new Agent;
-		$option->name = 'Select Agent Name/Code';
-		$option->id = NULL;
-		$this->data['agent_list'] = $agent_list = Agent::select(DB::raw('concat(agents.code, " / " ,users.name) as name,agents.id'))
-			->leftJoin('users', 'users.entity_id', 'agents.id')
-			->where('users.user_type_id', 3122)
-			->where('agents.company_id', Auth::user()->company_id)->get();
-		$this->data['agent_list'] = $agent_list->prepend($option);
-
 		$option = new Entity;
 		$option->name = 'Select Travel Mode';
 		$option->id = NULL;
@@ -58,8 +49,8 @@ class AgentController extends Controller {
 		} else {
 			$tm = null;
 		}
-		if (!empty($request->status)) {
-			$status = $request->status;
+		if (!empty($r->status)) {
+			$status = $r->status;
 		} else {
 			$status = null;
 		}
@@ -72,9 +63,9 @@ class AgentController extends Controller {
 			'users.mobile_number',
 			DB::raw('IF(agents.deleted_at IS NULL,"Active","In-Active") as status'),
 			DB::raw('GROUP_CONCAT(tm.name) as travel_name'))
+			->leftJoin('users', 'users.entity_id', 'agents.id')
 			->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
 			->leftJoin('entities as tm', 'tm.id', 'agent_travel_mode.travel_mode_id')
-			->leftJoin('users', 'users.entity_id', 'agents.id')
 			->where('users.user_type_id', 3122)
 			->where(function ($query) use ($r, $agent) {
 				if (!empty($agent)) {
@@ -155,7 +146,7 @@ class AgentController extends Controller {
 		}
 
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
-		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Type']);
 
 		$this->data['extras'] = [
 			'travel_mode_list' => Entity::travelModeList(),
@@ -184,6 +175,7 @@ class AgentController extends Controller {
 				'agent_code.required' => 'Agent Code is Required',
 				'agent_code.unique' => 'Agent Code is already taken',
 				'agent_name.required' => 'Agent Name is Required',
+				'gstin.unique' => 'GSTIN is already taken',
 				'address_line1.required' => 'Address Line1 is Required',
 				'country.required' => 'Country is Required',
 				'state.required' => 'State is Required',
@@ -198,6 +190,9 @@ class AgentController extends Controller {
 				'agent_code' => [
 					'required:true',
 					'unique:agents,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				],
+				'gstin' => [
+					'unique:agents,gstin,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				],
 				'mobile_number' => [
 					'required:true',
@@ -261,6 +256,7 @@ class AgentController extends Controller {
 
 			//ADD USER
 			$user->mobile_number = $request->mobile_number;
+			$user->name = $request->agent_name;
 			$user->entity_type = 0;
 			$user->user_type_id = 3122;
 			$user->company_id = $company_id;

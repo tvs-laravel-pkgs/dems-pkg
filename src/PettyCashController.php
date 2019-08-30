@@ -19,7 +19,7 @@ class PettyCashController extends Controller {
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
 			'petty_cash.total',
-			'employees.name as ename',
+			'users.name as ename',
 			'outlets.name as oname',
 			'employees.code as ecode',
 			'outlets.code as ocode',
@@ -27,9 +27,12 @@ class PettyCashController extends Controller {
 		)
 			->leftJoin('configs', 'configs.id', 'petty_cash.status_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
+			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->where('petty_cash.employee_id', Auth::user()->entity_id)
+			->where('users.user_type_id', 3121)
 			->orderBy('petty_cash.id', 'desc')
+			->groupBy('petty_cash.id')
 		;
 
 		return Datatables::of($petty_cash)
@@ -79,10 +82,12 @@ class PettyCashController extends Controller {
 			// dd($petty_cash);
 			$petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
 				DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'),
-				'petty_cash.id as petty_cash_id', 'petty_cash.employee_id', 'employees.name as ename', 'entities.name as other_expence')
+				'petty_cash.id as petty_cash_id', 'petty_cash.employee_id', 'users.name as ename', 'entities.name as other_expence')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
+				->join('users', 'users.entity_id', 'employees.id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
+				->where('users.user_type_id', 3121)
 				->where('petty_cash.id', $pettycash_id)
 				->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
 
@@ -91,10 +96,15 @@ class PettyCashController extends Controller {
 				$this->data['message'] = 'Petty Cash not found';
 			}
 			$this->data['success'] = true;
-			$this->data['employee_list'] = Employee::select('name', 'id', 'code')->get();
-			$this->data['employee'] = $employee = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
+			$this->data['employee_list'] = Employee::select('users.name', 'employees.id', 'employees.code')
+				->leftjoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->get();
+			$this->data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
+				->leftjoin('users', 'users.entity_id', 'employees.id')
 				->leftjoin('designations', 'designations.id', 'employees.designation_id')
 				->leftjoin('entities', 'entities.id', 'employees.grade_id')
+				->where('users.user_type_id', 3121)
 				->where('employees.id', $petty_cash_other[0]->employee_id)->first();
 		}
 
@@ -114,7 +124,7 @@ class PettyCashController extends Controller {
 
 		} else {
 			$user_role = 'Employee';
-			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id', 'configs.name as designation')
+			$emp_details = Employee::select('entities.name as empgrade', 'users.name', 'employees.code', 'employees.id as employee_id', 'configs.name as designation')
 				->join('entities', 'entities.id', 'employees.grade_id')
 				->join('users', 'users.entity_id', 'employees.id')
 				->join('configs', 'configs.id', 'users.user_type_id')

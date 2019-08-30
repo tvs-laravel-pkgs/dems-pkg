@@ -35,9 +35,10 @@ app.component('eyatraEmployees', {
             columns: [
                 { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'e.code', searchable: true },
-                { data: 'name', name: 'users.name', searchable: true },
+                { data: 'name', name: 'u.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
                 { data: 'manager_code', name: 'm.code', searchable: true },
+                // { data: 'manager_name', name: 'mngr.name', searchable: true },
                 { data: 'grade', name: 'grd.name', searchable: true },
                 { data: 'status', name: 'c.name', searchable: false },
             ],
@@ -82,7 +83,7 @@ app.component('eyatraEmployees', {
             $('#grade_id').val(null);
             dataTableFilter.fnFilter();
         }
-         $scope.resetForm();
+        $scope.resetForm();
         $scope.deleteEmployee = function(id) {
             $('#del').val(id);
         }
@@ -128,10 +129,10 @@ app.component('eyatraEmployeeForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-        $scope.showBank = true;
-        $scope.showCheque = true;
-        $scope.showWallet = true;
-        // console.log('Bank ' + $scope.showBank);
+        $scope.showBank = false;
+        $scope.showCheque = false;
+        $scope.showWallet = false;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -145,21 +146,19 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
-                
-
             self.employee = response.data.employee;
             self.extras = response.data.extras;
-          
+
 
             self.action = response.data.action;
             if (response.data.employee.payment_mode_id == null || !response.data.employee.payment_mode_id) {
                 self.employee.payment_mode_id = 3244;
             }
-           
+
             if (self.action == 'Edit') {
-                   self.switch_password = 'No';
-                    $("#hide_password").hide();
-                    $("#password").prop('disabled', true);
+                self.switch_password = 'No';
+                $("#hide_password").hide();
+                $("#password").prop('disabled', true);
                 $scope.getDesignation(self.employee.grade_id);
                 //$scope.selectPaymentMode(self.employee.payment_mode_id);
                 $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
@@ -211,7 +210,7 @@ app.component('eyatraEmployeeForm', {
                         data: { grade_id: grade_id },
                     })
                     .done(function(res) {
-                       
+
                         self.extras.designation_list = [];
                         self.extras.designation_list = res.designation_list;
                         $scope.$apply()
@@ -304,35 +303,17 @@ app.component('eyatraEmployeeForm', {
                     minlength: 8,
                 },
                 'bank_name': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 100,
                     minlength: 3,
                 },
                 'branch_name': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 50,
                     minlength: 3,
                 },
                 'account_number': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 20,
                     minlength: 3,
                     min: 1,
@@ -340,45 +321,8 @@ app.component('eyatraEmployeeForm', {
                     // positiveNumber: true,
                 },
                 'ifsc_code': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 10,
-                    minlength: 3,
-                },
-                'check_favour': {
-                    required: function(element) {
-                        if ($("#cheque").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                    maxlength: 100,
-                    minlength: 3,
-                },
-                'type_id': {
-                    required: function(element) {
-                        if ($("#wallet").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                },
-                'value': {
-                    required: function(element) {
-                        if ($("#wallet").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                    maxlength: 20,
                     minlength: 3,
                 },
                 'mobile_number': {

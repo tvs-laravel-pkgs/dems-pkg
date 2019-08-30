@@ -279,7 +279,7 @@ app.component('eyatraRoleForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response.data.selected_permissions);
+            // console.log(response.data.role.deleted_at);
             self.role = response.data.role;
             self.action = response.data.action;
             self.company_list = response.data.company_list;
@@ -291,6 +291,17 @@ app.component('eyatraRoleForm', {
             self.permission_sub_list = response.data.permission_sub_list;
             self.permission_sub_child_list = response.data.permission_sub_child_list;
             // console.log(self.permission_sub_child_list);
+            if (response.data.role.deleted_at == null) {
+
+                self.switch_value = 'Active';
+
+
+            } else {
+                self.switch_value = 'Inactive';
+            }
+
+
+            self.cb2 = 'Active';
             $rootScope.loading = false;
         });
         var form_id = '#form';

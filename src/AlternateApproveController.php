@@ -73,6 +73,7 @@ class AlternateApproveController extends Controller {
 		} else {
 
 			$this->data['action'] = 'Edit';
+
 			$alternate_approve = AlternateApprove::with([
 				'employee',
 				'employee.user',
@@ -94,7 +95,6 @@ class AlternateApproveController extends Controller {
 					->where('emp_user.user_type_id', 3121)
 					->where('alter_user.user_type_id', 3121)
 			*/
-
 			if (!$alternate_id) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Alternate Approve not found';

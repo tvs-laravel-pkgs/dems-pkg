@@ -15,6 +15,11 @@ use Yajra\Datatables\Datatables;
 
 class RegionController extends Controller {
 	public function listEYatraRegion(Request $r) {
+		if (!empty($r->status)) {
+			$status = $r->status;
+		} else {
+			$status = null;
+		}
 		$regions = Region::withTrashed()
 			->join('nstates', 'nstates.id', 'regions.state_id')
 			->select(
@@ -28,6 +33,13 @@ class RegionController extends Controller {
 			->where(function ($query) use ($r) {
 				if ($r->get('state_id')) {
 					$query->where("nstates.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
+				}
+			})
+			->where(function ($query) use ($r, $status) {
+				if ($status == '2') {
+					$query->whereNull('regions.deleted_at');
+				} elseif ($status == '1') {
+					$query->whereNotNull('regions.deleted_at');
 				}
 			})
 			->orderBy('regions.id', 'desc');
@@ -176,6 +188,12 @@ class RegionController extends Controller {
 	}
 	public function eyatraRegionFilterData() {
 		$this->data['state_list'] = NState::getList();
+		$this->data['status_list'] = array(
+			array('name' => "Select Status", 'id' => null),
+			array('name' => "All", 'id' => "-1"),
+			array('name' => "Active", 'id' => "2"),
+			array('name' => "Inactive", 'id' => "1"),
+		);
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
