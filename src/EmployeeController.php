@@ -301,6 +301,9 @@ class EmployeeController extends Controller {
 			'paymentMode',
 		])
 			->find($employee_id);
+		$dob = $employee['date_of_birth'];
+		$diff = (date('Y') - date('Y',strtotime($dob)));
+	    $employee['age'] = $diff;
 		if (!$employee) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Employee not found'];
