@@ -32,11 +32,13 @@ class CityController extends Controller {
 			$status = null;
 		}
 		$cities = NCity::withTrashed()->join('nstates', 'nstates.id', 'ncities.state_id')
+			->leftjoin('country', 'country.id', 'nstates.country_id')
 			->leftjoin('entities', 'entities.id', 'ncities.category_id')
 			->select(
 				'ncities.id',
 				'ncities.name as city_name',
 				'nstates.name as state_name',
+				'country.name as country_name',
 				'entities.name',
 				DB::raw('IF(ncities.deleted_at IS NULL,"Active","Inactive") as status')
 			)

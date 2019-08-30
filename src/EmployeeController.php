@@ -50,15 +50,17 @@ class EmployeeController extends Controller {
 			->join('entities as grd', 'grd.id', 'e.grade_id')
 			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
 			->join('outlets as o', 'o.id', 'e.outlet_id')
-			->leftJoin('users', 'users.entity_id', 'e.id')
-			->where('users.user_type_id', 3121)
+			->join('users as u', 'u.entity_id', 'e.id')
+			->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
+		// ->where('users.user_type_id', 3121)
 			->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
-				'users.name',
+				'u.name',
 				'o.code as outlet_code',
 				DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
+				// DB::raw('IF(mngr.name IS NULL,"--",mngr.name) as manager_name'),
 				'grd.name as grade',
 				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
 			)
@@ -77,9 +79,16 @@ class EmployeeController extends Controller {
 					$query->where('grd.id', $grade);
 				}
 			})
-			->where('u.user_type_id', 3121)
+			->where(function ($query) use ($r, $grade) {
+
+				$query->where('u.user_type_id', 3121)->orWhere('mngr.user_type_id', 3121);
+
+			})
+		// ->
+		// ->orWhere('mngr.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
-			->orderBy('e.code', 'asc');
+			->orderBy('e.code', 'asc')
+			->groupBy('e.id');
 
 		return Datatables::of($employees)
 			->addColumn('action', function ($employee) {

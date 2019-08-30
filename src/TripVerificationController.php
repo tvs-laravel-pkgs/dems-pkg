@@ -44,6 +44,7 @@ class TripVerificationController extends Controller {
 			'visits.bookingMethod',
 			'visits.bookingStatus',
 			'visits.agent',
+			'visits.agent.user',
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
