@@ -147,7 +147,7 @@ class EmployeeController extends Controller {
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$designation_list = [];
 		// dd($designation_list);
-		$lob_list = collect(Lob::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Lob']);
+		$lob_list = collect(Lob::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Lob']);
 		$sbu_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
@@ -325,10 +325,12 @@ class EmployeeController extends Controller {
 	public function searchManager(Request $r) {
 		$key = $r->key;
 		$manager_list = Employee::select(
-			// 'name',
+			'name',
 			'code',
-			'id'
+			'employees.id'
 		)
+			->join('users as u', 'u.entity_id', 'employees.id')
+			->where('u.user_type_id', 3121)
 			->where(function ($q) use ($key) {
 				$q->where('code', 'like', '%' . $key . '%')
 				// ->where('name', 'like', '%' . $key . '%')
@@ -349,7 +351,7 @@ class EmployeeController extends Controller {
 	public function getSbuByLob(Request $request) {
 		//dd($request);
 		if (!empty($request->lob_id)) {
-			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sbu']);
+			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sub Business']);
 		} else {
 			$sbu_list = [];
 		}
