@@ -10,7 +10,7 @@
     "minimum-stability": "dev",
     "require":
     {
-        "laravel/passport": "^7.3",
+        "laravel/passport": "^7.3"
     },
     "autoload":
     {
