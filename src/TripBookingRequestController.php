@@ -19,7 +19,7 @@ class TripBookingRequestController extends Controller {
 			->leftJoin('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)->get();
-		$this->data['status_list'] = $status_list = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		$this->data['status_list'] = $status_list = Config::select('name', 'id')->where('config_type_id', 512)->get();
 
 		return response()->json($this->data);
 	}
@@ -36,6 +36,8 @@ class TripBookingRequestController extends Controller {
 		} else {
 			$status = null;
 		}
+
+		// dd('dew');
 
 		$visits = Trip::join('employees as e', 'e.id', 'trips.employee_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')

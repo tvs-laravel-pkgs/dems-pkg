@@ -35,6 +35,7 @@ app.component('eyatraCity', {
                 { data: 'city_name', name: 'ncities.name', searchable: true },
                 { data: 'name', name: 'entities.name', searchable: true },
                 { data: 'state_name', name: 'nstates.name', searchable: true },
+                { data: 'country_name', name: 'country.name', searchable: true },
                 { data: 'status', name: 'ncities.deleted_at', searchable: false },
             ],
             rowCallback: function(row, data) {

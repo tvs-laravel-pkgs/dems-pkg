@@ -224,6 +224,7 @@ class Trip extends Model {
 			'visits.bookingMethod',
 			'visits.bookingStatus',
 			'visits.agent',
+			'visits.agent.user',
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
