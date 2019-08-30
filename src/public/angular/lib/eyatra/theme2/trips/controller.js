@@ -265,20 +265,24 @@ app.component('eyatraTripForm', {
                     required: true,
                 },
                 'description': {
+                    minlength: 3,
                     maxlength: 255,
                 },
                 'advance_received': {
+                    minlength: 3,
                     maxlength: 10,
                 },
                 'trip_mode[]': {
                     required: true,
-                },
+                },  
             },
             messages: {
                 'description': {
+                    minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 255 letters',
                 },
                 'advance_received': {
+                    minlength: 'Please enter minimum of 3 Numbers',
                     maxlength: 'Please enter maximum of 10 Numbers',
                 },
                 'trip_mode[]': {

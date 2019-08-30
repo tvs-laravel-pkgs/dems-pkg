@@ -102,18 +102,19 @@ app.component('eyatraAlternateApproveForm', {
                 $location.path('/eyatra/alternate-approve')
                 return;
             }
-            // console.log(response);
+          
             self.alternate_approve = response.data.alternate_approve;
-            self.selectedItem = self.alternate_approve.emp_name;
+            /*self.selectedItem = self.alternate_approve.emp_name;
             self.selectedItem1 = self.alternate_approve.alt_emp_name;
             $(".employee_id").val(self.alternate_approve.employee_id);
-            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);
+            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);*/
             self.extras = response.data.extras;
             if ($routeParams.alternate_id != undefined) {
-                self.date = self.alternate_approve.fromdate + ' to ' + self.alternate_approve.todate;
+                self.date = self.alternate_approve.from + ' to ' + self.alternate_approve.to;
             } else {
                 self.date = '';
             }
+           
         });
         $('.daterange').daterangepicker({
             autoUpdateInput: false,
@@ -141,7 +142,50 @@ app.component('eyatraAlternateApproveForm', {
             $(this).val('');
         });
 
-        $scope.getmanagerList = function(searchText, chkval) {
+        //SEARCH EMPLOYEE
+        self.searchEmployee = function(query) {
+            
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            get_manager_name, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            
+                            resolve(response.data);
+                        });
+                  
+                });
+            } else {
+                return [];
+            }
+        }
+
+        //SEARCH ALTERNATIVE EMPLOYEE
+        self.searchAltEmployee = function(query) {
+            
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            get_manager_name, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                           
+                            resolve(response.data);
+                        });
+                   
+                });
+            } else {
+                return [];
+            }
+        }
+       /* $scope.getmanagerList = function(searchText, chkval) {
 
             if (chkval == 1) {
                 return $http
@@ -158,7 +202,7 @@ app.component('eyatraAlternateApproveForm', {
                         self.selectedItem = res.data.employee_list[0];
                     });
             }
-        }
+        }*/
 
         $(document).on('click', '#submit', function(e) {
 

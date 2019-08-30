@@ -280,7 +280,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/alternate-approve/request/get-list', 'Uitoux\EYatra\AlternateApproveController@listAlternateApproveRequest')->name('listAlternateApproveRequest');
 		Route::get('eyatra/alternate-approve/request/get-form-data/{alternate_id?}', 'Uitoux\EYatra\AlternateApproveController@alternateapproveFormData')->name('alternateapproveFormData');
 		Route::post('eyatra/alternate-approve/request/save', 'Uitoux\EYatra\AlternateApproveController@alternateapproveSave')->name('alternateapproveSave');
-		Route::get('eyatra/alternate-approve/manager/{searchText}', 'Uitoux\EYatra\AlternateApproveController@getmanagerList')->name('getmanagerList');
+		Route::post('eyatra/alternate-approve/manager', 'Uitoux\EYatra\AlternateApproveController@getmanagerList')->name('getmanagerList');
 		Route::get('eyatra/alternate-approve/request/delete/{alternate_id}', 'Uitoux\EYatra\AlternateApproveController@alternateapproveDelete')->name('alternateapproveDelete');
 	});
 });

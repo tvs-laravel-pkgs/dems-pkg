@@ -17,4 +17,19 @@ class AlternateApprove extends Model {
 		'created_by',
 	];
 
+	public function getFromAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+	public function getToAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
+	public function employee() {
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'employee_id');
+	}
+
+	public function altEmployee() {
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'alternate_employee_id');
+	}
+
 }
