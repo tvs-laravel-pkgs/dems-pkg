@@ -35,7 +35,7 @@ app.component('eyatraTripBookingRequests', {
                 { data: 'ename', name: 'e.name', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'tickets_count', searchable: false },
-                { data: 'booking_status', searchable: false },
+                // { data: 'booking_status', searchable: false },
                 { data: 'created_on', name: 'a.name', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],

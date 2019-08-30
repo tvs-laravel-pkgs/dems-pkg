@@ -254,8 +254,6 @@ app.component('eyatraTripClaimForm', {
             $scope.searchBookedBy = '';
         };
 
-
-
         $scope.searchLodgingCity;
         $scope.clearSearchLodgingCity = function() {
             $scope.searchLodgingCity = '';
@@ -286,6 +284,21 @@ app.component('eyatraTripClaimForm', {
             $scope.searchLocalTravelTo = '';
         };
 
+        $(document).on('mouseover', ".separate-btn-default", function() {
+            var $this = $(this);
+            console.log($this.data('text'));
+            $this.tooltip({
+                title: $this.data('text'),
+                placement: "top"
+            });
+            $this.tooltip('show');
+        });
+
+        $(document).on('input', ".tooltip_remarks", function() {
+            var value = $(this).val();
+            // console.log(' == value ==' + value);
+            $(this).closest('.separate-btn-default').data('text', value);
+        });
 
         $scope.getEligibleAmtBasedonCitycategoryGrade = function(grade_id, city_id, expense_type_id, key) {
             if (city_id && grade_id && expense_type_id) {
@@ -296,6 +309,7 @@ app.component('eyatraTripClaimForm', {
                         data: { city_id: city_id, grade_id: grade_id, expense_type_id: expense_type_id },
                     })
                     .done(function(res) {
+                        // console.log(res.grade_expense_type);
                         var eligible_amount = res.grade_expense_type ? res.grade_expense_type.eligible_amount : '0.00';
                         // console.log(' == eligible_amount ==' + eligible_amount);
                         if (expense_type_id == 3000) { //TRANSPORT EXPENSES

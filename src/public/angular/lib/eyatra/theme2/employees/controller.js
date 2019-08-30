@@ -3,6 +3,7 @@ app.component('eyatraEmployees', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+
         var dataTable = $('#eyatra_employee_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -34,9 +35,10 @@ app.component('eyatraEmployees', {
             columns: [
                 { data: 'action', searchable: false, class: 'action text-left' },
                 { data: 'code', name: 'e.code', searchable: true },
-                { data: 'name', name: 'users.name', searchable: true },
+                { data: 'name', name: 'u.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
                 { data: 'manager_code', name: 'm.code', searchable: true },
+                // { data: 'manager_name', name: 'mngr.name', searchable: true },
                 { data: 'grade', name: 'grd.name', searchable: true },
                 { data: 'status', name: 'c.name', searchable: false },
             ],
@@ -81,7 +83,7 @@ app.component('eyatraEmployees', {
             $('#grade_id').val(null);
             dataTableFilter.fnFilter();
         }
-
+        $scope.resetForm();
         $scope.deleteEmployee = function(id) {
             $('#del').val(id);
         }
@@ -146,17 +148,19 @@ app.component('eyatraEmployeeForm', {
             }
             self.employee = response.data.employee;
             self.extras = response.data.extras;
+
+
             self.action = response.data.action;
-            // console.log(response.data.extras);
+            if (response.data.employee.payment_mode_id == null || !response.data.employee.payment_mode_id) {
+                self.employee.payment_mode_id = 3244;
+            }
+
             if (self.action == 'Edit') {
-                if (self.employee.user.force_password_change == 1) {
-                    self.switch_password = 'No';
-                    $("#hide_password").hide();
-                    $("#password").prop('disabled', true);
-                } else {
-                    self.switch_password = 'Yes';
-                }
-                $scope.selectPaymentMode(self.employee.payment_mode_id);
+                self.switch_password = 'No';
+                $("#hide_password").hide();
+                $("#password").prop('disabled', true);
+                $scope.getDesignation(self.employee.grade_id);
+                //$scope.selectPaymentMode(self.employee.payment_mode_id);
                 $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
             } else {
                 $("#hide_password").show();
@@ -197,7 +201,25 @@ app.component('eyatraEmployeeForm', {
             }
         }
 
+        $scope.getDesignation = function(grade_id) {
+            // alert(grade_id);
+            if (grade_id) {
+                $.ajax({
+                        url: get_designation_by_grade,
+                        method: "POST",
+                        data: { grade_id: grade_id },
+                    })
+                    .done(function(res) {
 
+                        self.extras.designation_list = [];
+                        self.extras.designation_list = res.designation_list;
+                        $scope.$apply()
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
             if (payment_id == 3244) { //BANK
@@ -353,7 +375,7 @@ app.component('eyatraEmployeeForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -389,7 +411,7 @@ app.component('eyatraEmployeeForm', {
                             }
                         )
                         .then(function(response) {
-                            console.log(response.data);
+                            // console.log(response.data);
                             resolve(response.data);
                         });
                     //reject(response);

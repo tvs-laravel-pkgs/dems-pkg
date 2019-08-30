@@ -14,17 +14,23 @@ class AlternateApproveController extends Controller {
 	public function listAlternateApproveRequest() {
 		$alternate_approve = AlternateApprove::select(
 			'alternative_approvers.id',
-			'employees.name as empname',
+			// 'employees.name as empname',
+			'emp_user.name as empname',
 			'employees.code as empcode',
-			'alternateemp.name as altempname',
+			// 'alternateemp.name as altempname',
+			'alter_user.name as altempname',
 			'alternateemp.code as altempcode',
 			'alternative_approvers.type',
 			DB::raw('DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") as fromdate'),
 			DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
-			DB::raw('DATEDIFF(alternative_approvers.to , NOW()) as status'),
+			DB::raw('DATEDIFF(alternative_approvers.to , NOW()) as status')
 		)
 			->join('employees', 'employees.id', 'alternative_approvers.employee_id')
 			->join('employees as alternateemp', 'alternateemp.id', 'alternative_approvers.alternate_employee_id')
+			->leftJoin('users as emp_user', 'emp_user.entity_id', 'alternative_approvers.id')
+			->leftJoin('users as alter_user', 'alter_user.entity_id', 'alternative_approvers.id')
+			->where('emp_user.user_type_id', 3121)
+			->where('alter_user.user_type_id', 3121)
 		// ->where('alternative_approvers.company_id', Auth::user()->company_id)
 			->orderBy('alternative_approvers.id', 'desc')
 		;
@@ -70,10 +76,15 @@ class AlternateApproveController extends Controller {
 			$alternate_approve = AlternateApprove::select('alternative_approvers.*',
 				DB::raw('DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") as fromdate'),
 				DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
-				'employees.name as emp_name', 'alt_employee_id.name as alt_emp_name')
+				'emp_user.name as emp_name', 'alter_user.name as alt_emp_name')
 				->join('employees', 'employees.id', 'alternative_approvers.employee_id')
 				->join('employees as alt_employee_id', 'alt_employee_id.id', 'alternative_approvers.alternate_employee_id')
-				->where('alternative_approvers.id', $alternate_id)->first();
+				->leftJoin('users as emp_user', 'emp_user.entity_id', 'alternative_approvers.id')
+				->leftJoin('users as alter_user', 'alter_user.entity_id', 'alternative_approvers.id')
+				->where('emp_user.user_type_id', 3121)
+				->where('alter_user.user_type_id', 3121)
+				->where('alternative_approvers.id', $alternate_id)
+				->first();
 
 			// dd($petty_cash);
 			if (!$alternate_id) {

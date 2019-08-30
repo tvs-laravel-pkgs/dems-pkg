@@ -46,7 +46,7 @@ class Lodging extends Model {
 	}
 
 	public function stateType() {
-		return $this->belongsTo('Uitoux\EYatra\Entity', 'stay_type_id');
+		return $this->belongsTo('Uitoux\EYatra\Config', 'stay_type_id');
 	}
 
 	public function attachments() {
