@@ -125,6 +125,14 @@ app.component('eyatraEntityForm', {
             }
             self.entity = response.data.entity;
             self.entity_type = response.data.entity_type;
+            str = response.data.entity_type.name;
+            if (str.substring(str.length - 1) == 's') {
+                self.entity_name = str.substring(0, str.length - 1);
+
+            } else {
+                self.entity_name = str;
+
+            }
             self.action = response.data.action;
             $rootScope.loading = false;
 

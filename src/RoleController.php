@@ -80,7 +80,7 @@ class RoleController extends Controller {
 
 	}
 	public function saveRolesAngular(Request $request) {
-		// dd($request->all());
+		//dd($request->all());
 		try {
 			$error_messages = [
 				'display_name.required' => 'Role name is required',
@@ -113,11 +113,11 @@ class RoleController extends Controller {
 			$roles->display_name = $request->display_name;
 			$roles->name = $request->display_name;
 			$roles->description = $request->description;
-			// if ($request->deleted_at == 1) {
-			// 	$roles->deleted_at = null;
-			// } else {
-			// 	$roles->deleted_at = date('Y-m-d');
-			// }
+			if ($request->deleted_at == "Active") {
+				$roles->deleted_at = null;
+			} else {
+				$roles->deleted_at = date('Y-m-d');
+			}
 			$roles->save();
 			$roles->permissions()->attach($request->permission_ids);
 			//dd($request->permission_ids);
