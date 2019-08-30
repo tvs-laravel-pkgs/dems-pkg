@@ -47,11 +47,11 @@ class Trip extends Model {
 	}
 
 	public function selfVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040)->orderBy('id', 'ASC'); //Employee visits
 	}
 
 	public function agentVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042)->orderBy('id', 'ASC');
 	}
 
 	public function cliam() {
