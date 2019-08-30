@@ -84,6 +84,7 @@ class TripClaimVerificationTwoController extends Controller {
 				'employee.grade',
 				'employee.designation',
 				'employee.reportingTo',
+				'employee.reportingTo.user',
 				'employee.outlet',
 				'employee.Sbu',
 				'employee.Sbu.lob',
