@@ -728,8 +728,8 @@ class Trip extends Model {
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
 		$transport_total = Visit::select(
-			DB::raw('COALESCE(visit_bookings.amount, 0.00) as visit_amount'),
-			DB::raw('COALESCE(visit_bookings.tax, 0.00) as visit_tax')
+			DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
+			DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax')
 		)
 			->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->where('visits.trip_id', $trip_id)
