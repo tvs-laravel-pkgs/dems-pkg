@@ -27,7 +27,7 @@ app.component('eyatraAgents', {
                 data: function(d) {
                     // d.agent = $('#agent_id').val();
                     d.tm = $('#tm_id').val();
-                    d.status = $('#status').val();
+                    d.status_id = $('#status').val();
                 }
             },
 
@@ -166,6 +166,12 @@ app.component('eyatraAgentForm', {
                 }
 
                 //$scope.selectPaymentMode(self.agent.payment_mode_id);
+
+                if($('.travelcheckbox:checked').length == $('.travelcheckbox').length)
+                {
+                  $('#travel_mode').prop('checked', true);
+                }
+
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
@@ -185,8 +191,6 @@ app.component('eyatraAgentForm', {
             return value;
         }
 
-
-
         $("#travel_mode").on('click', function() {
             if (event.target.checked == true) {
                 $('.travelcheckbox').prop('checked', true);
@@ -194,27 +198,27 @@ app.component('eyatraAgentForm', {
                 $('.travelcheckbox').prop('checked', false);
             }
         });
-
+        
         //SELECT PAYMENT MODE
-        /*$scope.selectPaymentMode = function(payment_id) {
-            if (payment_id == 3244) { //BANK
-                $scope.showBank = true;
-                $scope.showCheque = false;
-                $scope.showWallet = false;
-            } else if (payment_id == 3245) { //CHEQUE
-                $scope.showBank = false;
-                $scope.showCheque = true;
-                $scope.showWallet = false;
-            } else if (payment_id == 3246) { //WALLET
-                $scope.showBank = false;
-                $scope.showCheque = false;
-                $scope.showWallet = true;
-            } else {
-                $scope.showBank = false;
-                $scope.showCheque = false;
-                $scope.showWallet = false;
-            }
-        }*/
+        // $scope.selectPaymentMode = function(payment_id) {
+        //     if (payment_id == 3244) { //BANK
+        //         $scope.showBank = true;
+        //         $scope.showCheque = false;
+        //         $scope.showWallet = false;
+        //     } else if (payment_id == 3245) { //CHEQUE
+        //         $scope.showBank = false;
+        //         $scope.showCheque = true;
+        //         $scope.showWallet = false;
+        //     } else if (payment_id == 3246) { //WALLET
+        //         $scope.showBank = false;
+        //         $scope.showCheque = false;
+        //         $scope.showWallet = true;
+        //     } else {
+        //         $scope.showBank = false;
+        //         $scope.showCheque = false;
+        //         $scope.showWallet = false;
+        //     }
+        // }
 
         $scope.psw_change = function(val) {
             if (val == 'No') {
@@ -443,6 +447,7 @@ app.component('eyatraAgentForm', {
             },
             messages: {
                 'agent_code': {
+                    required: 'This field is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
@@ -561,14 +566,17 @@ app.component('eyatraAgentView', {
                 $scope.showBank = true;
                 $scope.showCheque = false;
                 $scope.showWallet = false;
+                self.payment = 'BANK';
             } else if (payment_id == 3245) { //CHEQUE
                 $scope.showBank = false;
                 $scope.showCheque = true;
                 $scope.showWallet = false;
+                self.payment = 'CHEQUE';
             } else if (payment_id == 3246) { //WALLET
                 $scope.showBank = false;
                 $scope.showCheque = false;
                 $scope.showWallet = true;
+                self.payment = 'WALLET';
             } else {
                 $scope.showBank = false;
                 $scope.showCheque = false;

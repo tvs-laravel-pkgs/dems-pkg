@@ -281,10 +281,12 @@ class AgentClaimController extends Controller {
 			'trips.number as trip',
 			'trips.id as trip_id',
 			'employees.code as employee_code',
-			'employees.name as employee_name')
+			'users.name as employee_name')
 			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
 			->leftJoin('trips', 'trips.id', 'visits.trip_id')
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
 			->join('configs', 'configs.id', 'trips.status_id')
 			->where('visit_bookings.agent_claim_id', $agent_claim_id)
 			->groupBy('trips.id')
