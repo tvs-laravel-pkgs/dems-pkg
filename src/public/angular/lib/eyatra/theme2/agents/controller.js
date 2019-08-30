@@ -51,7 +51,8 @@ app.component('eyatraAgents', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#agent_list_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $http.get(
             agents_filter_url
         ).then(function(response) {
@@ -125,6 +126,7 @@ app.component('eyatraAgentForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $('#on_focus').focus();
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -167,9 +169,8 @@ app.component('eyatraAgentForm', {
 
                 //$scope.selectPaymentMode(self.agent.payment_mode_id);
 
-                if($('.travelcheckbox:checked').length == $('.travelcheckbox').length)
-                {
-                  $('#travel_mode').prop('checked', true);
+                if ($('.travelcheckbox:checked').length == $('.travelcheckbox').length) {
+                    $('#travel_mode').prop('checked', true);
                 }
 
             } else {
@@ -198,7 +199,7 @@ app.component('eyatraAgentForm', {
                 $('.travelcheckbox').prop('checked', false);
             }
         });
-        
+
         //SELECT PAYMENT MODE
         // $scope.selectPaymentMode = function(payment_id) {
         //     if (payment_id == 3244) { //BANK

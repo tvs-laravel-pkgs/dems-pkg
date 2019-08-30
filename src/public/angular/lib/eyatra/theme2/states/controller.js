@@ -48,7 +48,8 @@ app.component('eyatraStates', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#eyatra_state_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         //Filter
         $http.get(
             state_filter_url
@@ -136,7 +137,7 @@ app.component('eyatraStateForm', {
             self.action = response.data.action;
 
         });
-
+        $('#on_focus').focus();
         $('#travel_mode').on('click', function() {
             if (event.target.checked == true) {
                 $('.travelmodecheckbox').prop('checked', true);

@@ -42,6 +42,8 @@ app.component('eyatraCity', {
                 $(row).addClass('highlight-row');
             }
         });
+        $('#eyatra_city_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $('.dataTables_length select').select2();
 
         setTimeout(function() {
@@ -169,6 +171,7 @@ app.component('eyatraCityForm', {
             self.action = response.data.action;
 
         });
+        $('#on_focus').focus();
 
         $('#travel_mode').on('click', function() {
             if (event.target.checked == true) {
