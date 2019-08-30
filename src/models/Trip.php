@@ -549,8 +549,8 @@ class Trip extends Model {
 			$travelled_cities_with_dates = array();
 			$lodge_cities = array();
 			// $boarding_to_date = '';
-			if (!empty($trip->selfVisits)) {
-				foreach ($trip->selfVisits as $visit_key => $visit) {
+			if (!empty($trip->visits)) {
+				foreach ($trip->visits as $visit_key => $visit) {
 					$city_category_id = NCity::where('id', $visit->to_city_id)->first();
 					$grade_id = $trip->employee ? $trip->employee->grade_id : '';
 					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
@@ -568,9 +568,9 @@ class Trip extends Model {
 					$next++;
 					// $lodgings[$visit_key]['city'] = $visit['to_city'];
 					// $lodgings[$visit_key]['checkin_enable'] = $visit['arrival_date'];
-					if (isset($trip->selfVisits[$next])) {
+					if (isset($trip->visits[$next])) {
 						// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
-						$next_departure_date = $trip->selfVisits[$next]->departure_date;
+						$next_departure_date = $trip->visits[$next]->departure_date;
 					} else {
 						// $lodgings[$visit_key]['checkout_disable'] = $visit['arrival_date'];
 						$next_departure_date = $visit->departure_date;
@@ -691,6 +691,7 @@ class Trip extends Model {
 			'employee.grade',
 			'employee.designation',
 			'employee.reportingTo',
+			'employee.reportingTo.user',
 			'employee.outlet',
 			'employee.Sbu',
 			'employee.Sbu.lob',
@@ -728,8 +729,8 @@ class Trip extends Model {
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
 		$transport_total = Visit::select(
-			DB::raw('COALESCE(visit_bookings.amount, 0.00) as visit_amount'),
-			DB::raw('COALESCE(visit_bookings.tax, 0.00) as visit_tax')
+			DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
+			DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax')
 		)
 			->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->where('visits.trip_id', $trip_id)

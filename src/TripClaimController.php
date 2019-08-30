@@ -275,10 +275,10 @@ class TripClaimController extends Controller {
 			$city_category_id = NCity::where('id', $request->city_id)->first();
 			$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
 			if (!$grade_expense_type) {
-				$grade_expense_type = [];
+				$grade_expense_type = '';
 			}
 		} else {
-			$grade_expense_type = [];
+			$grade_expense_type = '';
 		}
 		return response()->json(['grade_expense_type' => $grade_expense_type]);
 	}
