@@ -43,7 +43,7 @@ app.component('eyatraAlternateApproveList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Master / Alternate Approvers / List</p><h3 class="title">Alternate Approvers</h3>');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Master / Alternate Approvers</p><h3 class="title">Alternate Approvers</h3>');
         $('.add_new_button').html(
             '<a href="#!/eyatra/alternate-approve/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\' \')">' +
             'Add New' +
@@ -102,18 +102,19 @@ app.component('eyatraAlternateApproveForm', {
                 $location.path('/eyatra/alternate-approve')
                 return;
             }
-            // console.log(response);
+
             self.alternate_approve = response.data.alternate_approve;
-            self.selectedItem = self.alternate_approve.emp_name;
+            /*self.selectedItem = self.alternate_approve.emp_name;
             self.selectedItem1 = self.alternate_approve.alt_emp_name;
             $(".employee_id").val(self.alternate_approve.employee_id);
-            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);
+            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);*/
             self.extras = response.data.extras;
             if ($routeParams.alternate_id != undefined) {
-                self.date = self.alternate_approve.fromdate + ' to ' + self.alternate_approve.todate;
+                self.date = self.alternate_approve.from + ' to ' + self.alternate_approve.to;
             } else {
                 self.date = '';
             }
+
         });
         $('.daterange').daterangepicker({
             autoUpdateInput: false,
@@ -141,24 +142,67 @@ app.component('eyatraAlternateApproveForm', {
             $(this).val('');
         });
 
-        $scope.getmanagerList = function(searchText, chkval) {
+        //SEARCH EMPLOYEE
+        self.searchEmployee = function(query) {
 
-            if (chkval == 1) {
-                return $http
-                    .get(get_manager_name + '/' + searchText)
-                    .then(function(res) {
-                        employee_list = res.data.employee_list;
-                        return employee_list;
-                    });
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            get_manager_name, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+
+                            resolve(response.data);
+                        });
+
+                });
             } else {
-                $http
-                    .get(get_manager_name + '/' + searchText)
-                    .then(function(res) {
-                        // console.log(res.data.employee_list[0]);
-                        self.selectedItem = res.data.employee_list[0];
-                    });
+                return [];
             }
         }
+
+        //SEARCH ALTERNATIVE EMPLOYEE
+        self.searchAltEmployee = function(query) {
+
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            get_manager_name, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+
+                            resolve(response.data);
+                        });
+
+                });
+            } else {
+                return [];
+            }
+        }
+        /* $scope.getmanagerList = function(searchText, chkval) {
+
+             if (chkval == 1) {
+                 return $http
+                     .get(get_manager_name + '/' + searchText)
+                     .then(function(res) {
+                         employee_list = res.data.employee_list;
+                         return employee_list;
+                     });
+             } else {
+                 $http
+                     .get(get_manager_name + '/' + searchText)
+                     .then(function(res) {
+                         // console.log(res.data.employee_list[0]);
+                         self.selectedItem = res.data.employee_list[0];
+                     });
+             }
+         }*/
 
         $(document).on('click', '#submit', function(e) {
 

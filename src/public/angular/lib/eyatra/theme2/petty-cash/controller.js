@@ -29,7 +29,7 @@ app.component('eyatraPettyCashList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'ename', name: 'employees.name', searchable: true },
+                { data: 'ename', name: 'employees.code', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'oname', name: 'outlets.name', searchable: true },
                 { data: 'ocode', name: 'outlets.code', searchable: true },

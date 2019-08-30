@@ -44,8 +44,8 @@ app.component('eyatraTripClaimList', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
+                { data: 'start_date', name: 'v.departure_date', searchable: true },
+                { data: 'end_date', name: 'v.departure_date', searchable: true },
                 { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
@@ -296,7 +296,7 @@ app.component('eyatraTripClaimForm', {
 
         $(document).on('input', ".tooltip_remarks", function() {
             var value = $(this).val();
-            console.log(' == value ==' + value);
+            // console.log(' == value ==' + value);
             $(this).closest('.separate-btn-default').data('text', value);
         });
 
@@ -309,6 +309,7 @@ app.component('eyatraTripClaimForm', {
                         data: { city_id: city_id, grade_id: grade_id, expense_type_id: expense_type_id },
                     })
                     .done(function(res) {
+                        // console.log(res.grade_expense_type);
                         var eligible_amount = res.grade_expense_type ? res.grade_expense_type.eligible_amount : '0.00';
                         // console.log(' == eligible_amount ==' + eligible_amount);
                         if (expense_type_id == 3000) { //TRANSPORT EXPENSES

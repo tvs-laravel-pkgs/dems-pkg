@@ -7,7 +7,6 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
-use Uitoux\EYatra\Employee;
 use Yajra\Datatables\Datatables;
 
 class AlternateApproveController extends Controller {
@@ -27,8 +26,8 @@ class AlternateApproveController extends Controller {
 		)
 			->join('employees', 'employees.id', 'alternative_approvers.employee_id')
 			->join('employees as alternateemp', 'alternateemp.id', 'alternative_approvers.alternate_employee_id')
-			->leftJoin('users as emp_user', 'emp_user.entity_id', 'alternative_approvers.id')
-			->leftJoin('users as alter_user', 'alter_user.entity_id', 'alternative_approvers.id')
+			->leftJoin('users as emp_user', 'emp_user.entity_id', 'alternative_approvers.employee_id')
+			->leftJoin('users as alter_user', 'alter_user.entity_id', 'alternative_approvers.alternate_employee_id')
 			->where('emp_user.user_type_id', 3121)
 			->where('alter_user.user_type_id', 3121)
 		// ->where('alternative_approvers.company_id', Auth::user()->company_id)
@@ -72,21 +71,30 @@ class AlternateApproveController extends Controller {
 			$this->data['employee_list'] = [];
 			$this->data['employee'] = '';
 		} else {
-			$this->data['action'] = 'Edit';
-			$alternate_approve = AlternateApprove::select('alternative_approvers.*',
-				DB::raw('DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") as fromdate'),
-				DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
-				'emp_user.name as emp_name', 'alter_user.name as alt_emp_name')
-				->join('employees', 'employees.id', 'alternative_approvers.employee_id')
-				->join('employees as alt_employee_id', 'alt_employee_id.id', 'alternative_approvers.alternate_employee_id')
-				->leftJoin('users as emp_user', 'emp_user.entity_id', 'alternative_approvers.id')
-				->leftJoin('users as alter_user', 'alter_user.entity_id', 'alternative_approvers.id')
-				->where('emp_user.user_type_id', 3121)
-				->where('alter_user.user_type_id', 3121)
-				->where('alternative_approvers.id', $alternate_id)
-				->first();
 
-			// dd($petty_cash);
+			$this->data['action'] = 'Edit';
+
+			$alternate_approve = AlternateApprove::with([
+				'employee',
+				'employee.user',
+				'altEmployee',
+				'altEmployee.user',
+			])
+				->find($alternate_id);
+
+			/*$alternate_approve = AlternateApprove::select('alternative_approvers.*',
+					DB::raw('DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") as fromdate'),
+					DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
+					'emp_user.name as emp_name',
+					'alter_user.name as alt_emp_name'
+				)
+					->join('employees', 'employees.id', 'alternative_approvers.employee_id')
+					->join('employees as alt_employee_id', 'alt_employee_id.id', 'alternative_approvers.alternate_employee_id')
+					->leftJoin('users as emp_user', 'emp_user.entity_id', 'alternative_approvers.id')
+					->leftJoin('users as alter_user', 'alter_user.entity_id', 'alternative_approvers.id')
+					->where('emp_user.user_type_id', 3121)
+					->where('alter_user.user_type_id', 3121)
+			*/
 			if (!$alternate_id) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Alternate Approve not found';
@@ -107,9 +115,29 @@ class AlternateApproveController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function getmanagerList($searchText) {
-		$employee_list = Employee::select('name', 'id', 'code')->where('employees.company_id', Auth::user()->company_id)->where('name', 'LIKE', '%' . $searchText . '%')->orWhere('code', 'LIKE', '%' . $searchText . '%')->get();
+	/*public function getmanagerList($searchText) {
+		$employee_list = Employee::leftJoin('users as emp_user', 'emp_user.entity_id', 'employees.id')->select('employees.id', 'employees.code', 'emp_user.name')->where('employees.company_id', Auth::user()->company_id)
+			->where('emp_user.name', 'LIKE', '%' . $searchText . '%')
+			->orWhere('employees.code', 'LIKE', '%' . $searchText . '%')->get();
+
 		return response()->json(['employee_list' => $employee_list]);
+	}*/
+
+	public function getmanagerList(Request $r) {
+
+		$key = $r->key;
+		$employee_list = Employee::leftJoin('users as emp_user', 'emp_user.entity_id', 'employees.id')->select(
+			'emp_user.name',
+			'employees.code',
+			'employees.id'
+		)
+			->where(function ($q) use ($key) {
+				$q->where('employees.code', 'like', '%' . $key . '%')
+					->orWhere('emp_user.name', 'like', '%' . $key . '%')
+				;
+			})->where('emp_user.user_type_id', 3121)->where('employees.company_id', Auth::user()->company_id)
+			->get();
+		return response()->json($employee_list);
 	}
 
 	public function alternateapproveSave(Request $request) {
@@ -141,6 +169,7 @@ class AlternateApproveController extends Controller {
 			$alternate_approve->type = $request->type_id;
 			$alternate_approve->fill($request->all());
 			$alternate_approve->save();
+
 			DB::commit();
 			// $request->session()->flash('success', 'Alternate Approver updated successfully!');
 			return response()->json(['success' => true]);

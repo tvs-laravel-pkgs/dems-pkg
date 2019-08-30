@@ -47,11 +47,11 @@ class Trip extends Model {
 	}
 
 	public function selfVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040)->orderBy('id', 'ASC'); //Employee visits
 	}
 
 	public function agentVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042)->orderBy('id', 'ASC');
 	}
 
 	public function cliam() {
@@ -549,8 +549,8 @@ class Trip extends Model {
 			$travelled_cities_with_dates = array();
 			$lodge_cities = array();
 			// $boarding_to_date = '';
-			if (!empty($trip->selfVisits)) {
-				foreach ($trip->selfVisits as $visit_key => $visit) {
+			if (!empty($trip->visits)) {
+				foreach ($trip->visits as $visit_key => $visit) {
 					$city_category_id = NCity::where('id', $visit->to_city_id)->first();
 					$grade_id = $trip->employee ? $trip->employee->grade_id : '';
 					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
@@ -568,9 +568,9 @@ class Trip extends Model {
 					$next++;
 					// $lodgings[$visit_key]['city'] = $visit['to_city'];
 					// $lodgings[$visit_key]['checkin_enable'] = $visit['arrival_date'];
-					if (isset($trip->selfVisits[$next])) {
+					if (isset($trip->visits[$next])) {
 						// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
-						$next_departure_date = $trip->selfVisits[$next]->departure_date;
+						$next_departure_date = $trip->visits[$next]->departure_date;
 					} else {
 						// $lodgings[$visit_key]['checkout_disable'] = $visit['arrival_date'];
 						$next_departure_date = $visit->departure_date;
