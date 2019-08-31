@@ -83,6 +83,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
+		// dd(Auth::user()->id);
 		// dd($request->all());
 		//validation
 		try {
@@ -135,7 +136,7 @@ class TripClaimController extends Controller {
 						$visit_booking->service_charge = '0.00';
 						$visit_booking->total = $visit_data['total'];
 						$visit_booking->paid_amount = $visit_data['total'];
-						$visit_booking->created_by = Auth::user()->entity_id;
+						$visit_booking->created_by = Auth::user()->id;
 						$visit_booking->status_id = 3241; //Claimed
 						$visit_booking->save();
 					}
