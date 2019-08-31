@@ -129,10 +129,10 @@ app.component('eyatraEmployeeForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-        $scope.showBank = true;
-        $scope.showCheque = true;
-        $scope.showWallet = true;
-        // console.log('Bank ' + $scope.showBank);
+        $scope.showBank = false;
+        $scope.showCheque = false;
+        $scope.showWallet = false;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -146,8 +146,6 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
-
-
             self.employee = response.data.employee;
             self.extras = response.data.extras;
 
@@ -305,35 +303,17 @@ app.component('eyatraEmployeeForm', {
                     minlength: 8,
                 },
                 'bank_name': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 100,
                     minlength: 3,
                 },
                 'branch_name': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 50,
                     minlength: 3,
                 },
                 'account_number': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 20,
                     minlength: 3,
                     min: 1,
@@ -341,45 +321,8 @@ app.component('eyatraEmployeeForm', {
                     // positiveNumber: true,
                 },
                 'ifsc_code': {
-                    required: function(element) {
-                        if ($("#bank").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
+                    required: true,
                     maxlength: 10,
-                    minlength: 3,
-                },
-                'check_favour': {
-                    required: function(element) {
-                        if ($("#cheque").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                    maxlength: 100,
-                    minlength: 3,
-                },
-                'type_id': {
-                    required: function(element) {
-                        if ($("#wallet").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                },
-                'value': {
-                    required: function(element) {
-                        if ($("#wallet").is(':checked')) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    },
-                    maxlength: 20,
                     minlength: 3,
                 },
                 'mobile_number': {

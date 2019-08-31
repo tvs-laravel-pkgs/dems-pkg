@@ -128,6 +128,7 @@ class EmployeeController extends Controller {
 		if (!$employee_id) {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
+			$employee['date_of_birth'] = date('Y-m-d');
 			//dd($employee);
 			$this->data['success'] = true;
 		} else {
@@ -160,6 +161,7 @@ class EmployeeController extends Controller {
 			'grade_list' => $grade_list,
 			'designation_list' => $designation_list,
 		];
+		
 		// dd($this->data['extras']);
 		$this->data['employee'] = $employee;
 
@@ -299,6 +301,9 @@ class EmployeeController extends Controller {
 			'paymentMode',
 		])
 			->find($employee_id);
+		$dob = $employee['date_of_birth'];
+		$diff = (date('Y') - date('Y',strtotime($dob)));
+	    $employee['age'] = $diff;
 		if (!$employee) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Employee not found'];

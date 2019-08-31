@@ -47,11 +47,11 @@ class Trip extends Model {
 	}
 
 	public function selfVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040); //Employee visits
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3040)->orderBy('id', 'ASC'); //Employee visits
 	}
 
 	public function agentVisits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042);
+		return $this->hasMany('Uitoux\EYatra\Visit')->where('booking_method_id', 3042)->orderBy('id', 'ASC');
 	}
 
 	public function cliam() {
@@ -316,8 +316,8 @@ class Trip extends Model {
 				'trips.number',
 				DB::raw('CONCAT(u.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				DB::raw('FORMAT(claim.total_amount,2) as claim_amount'),
 				//Changed to purpose_name. do not revert - Abdul
 				'purpose.name as purpose_name',
@@ -459,7 +459,7 @@ class Trip extends Model {
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = NULL;
+		$activity['details'] = 'sdd';
 		$activity['activity'] = "approve";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
