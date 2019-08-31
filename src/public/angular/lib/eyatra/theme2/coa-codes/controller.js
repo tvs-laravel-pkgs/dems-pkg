@@ -54,8 +54,10 @@ app.component('eyatraCoaCode', {
             var d = document.getElementById('eyatra_coa_code_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
-        }, 500);
 
+        }, 500);
+        $('#eyatra_coa_code_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         //Filter
         $http.get(
             coa_code_filter_url
@@ -154,7 +156,7 @@ app.component('eyatraCoaCodeForm', {
 
         });
 
-
+        $('#on_focus').focus();
 
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");

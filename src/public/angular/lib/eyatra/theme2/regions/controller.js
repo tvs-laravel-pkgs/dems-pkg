@@ -58,6 +58,8 @@ app.component('eyatraRegions', {
             'Add New' +
             '</a>'
         );*/
+        $('#eyatra_region_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('eyatra_region_table_filter');
@@ -151,7 +153,7 @@ app.component('eyatraRegionForm', {
             $rootScope.loading = false;
 
         });
-
+        $('#on_focus').focus();
         $scope.getStateByCountry = function(country_id) {
             if (country_id) {
                 $.ajax({

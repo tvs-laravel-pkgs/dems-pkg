@@ -43,7 +43,7 @@ app.component('eyatraAlternateApproveList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Master / Alternate Approvers</p><h3 class="title">Alternate Approvers</h3>');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Master / Notification / List</p><h3 class="title">Alternate Approve List</h3>');
         $('.add_new_button').html(
             '<a href="#!/eyatra/alternate-approve/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\' \')">' +
             'Add New' +
@@ -102,7 +102,7 @@ app.component('eyatraAlternateApproveForm', {
                 $location.path('/eyatra/alternate-approve')
                 return;
             }
-          
+
             self.alternate_approve = response.data.alternate_approve;
             /*self.selectedItem = self.alternate_approve.emp_name;
             self.selectedItem1 = self.alternate_approve.alt_emp_name;
@@ -111,10 +111,26 @@ app.component('eyatraAlternateApproveForm', {
             self.extras = response.data.extras;
             if ($routeParams.alternate_id != undefined) {
                 self.date = self.alternate_approve.from + ' to ' + self.alternate_approve.to;
+                $('.daterange').daterangepicker({
+                    autoUpdateInput: false,
+                     startDate: self.alternate_approve.from,
+                     endDate: self.alternate_approve.to,
+                     "opens": "left", 
+                    locale: {
+                        cancelLabel: 'Clear',
+                        format: "DD-MM-YYYY",
+                    }
+                });
+                    $('.daterange').on('apply.daterangepicker', function(ev, picker) {
+                        $(this).val(picker.startDate.format('DD-MM-YYYY') + ' to ' + picker.endDate.format('DD-MM-YYYY'));
+                    });
+                    $('.daterange').on('cancel.daterangepicker', function(ev, picker) {
+                        $(this).val('');
+                    });
             } else {
                 self.date = '';
             }
-           
+
         });
         $('.daterange').daterangepicker({
             autoUpdateInput: false,
@@ -125,6 +141,7 @@ app.component('eyatraAlternateApproveForm', {
             }
         });
 
+    
         $('.align-left.daterange').daterangepicker({
             autoUpdateInput: false,
             "opens": "left",
@@ -144,7 +161,7 @@ app.component('eyatraAlternateApproveForm', {
 
         //SEARCH EMPLOYEE
         self.searchEmployee = function(query) {
-            
+
             if (query) {
                 return new Promise(function(resolve, reject) {
                     $http
@@ -154,10 +171,10 @@ app.component('eyatraAlternateApproveForm', {
                             }
                         )
                         .then(function(response) {
-                            
+
                             resolve(response.data);
                         });
-                  
+
                 });
             } else {
                 return [];
@@ -166,7 +183,7 @@ app.component('eyatraAlternateApproveForm', {
 
         //SEARCH ALTERNATIVE EMPLOYEE
         self.searchAltEmployee = function(query) {
-            
+
             if (query) {
                 return new Promise(function(resolve, reject) {
                     $http
@@ -176,33 +193,33 @@ app.component('eyatraAlternateApproveForm', {
                             }
                         )
                         .then(function(response) {
-                           
+
                             resolve(response.data);
                         });
-                   
+
                 });
             } else {
                 return [];
             }
         }
-       /* $scope.getmanagerList = function(searchText, chkval) {
+        /* $scope.getmanagerList = function(searchText, chkval) {
 
-            if (chkval == 1) {
-                return $http
-                    .get(get_manager_name + '/' + searchText)
-                    .then(function(res) {
-                        employee_list = res.data.employee_list;
-                        return employee_list;
-                    });
-            } else {
-                $http
-                    .get(get_manager_name + '/' + searchText)
-                    .then(function(res) {
-                        // console.log(res.data.employee_list[0]);
-                        self.selectedItem = res.data.employee_list[0];
-                    });
-            }
-        }*/
+             if (chkval == 1) {
+                 return $http
+                     .get(get_manager_name + '/' + searchText)
+                     .then(function(res) {
+                         employee_list = res.data.employee_list;
+                         return employee_list;
+                     });
+             } else {
+                 $http
+                     .get(get_manager_name + '/' + searchText)
+                     .then(function(res) {
+                         // console.log(res.data.employee_list[0]);
+                         self.selectedItem = res.data.employee_list[0];
+                     });
+             }
+         }*/
 
         $(document).on('click', '#submit', function(e) {
 

@@ -134,17 +134,17 @@ app.component('eyatraTripClaimVerificationTwoView', {
             if (self.trip.advance_received) {
                 if (self.total_amount > self.trip.advance_received) {
                     self.pay_to_employee = (self.total_amount - self.trip.advance_received);
-                    self.pay_to_company = 0.00;
+                    self.pay_to_company = '0.00';
                 } else if (self.total_amount < self.trip.advance_received) {
-                    self.pay_to_employee = 0.00;
+                    self.pay_to_employee = '0.00';
                     self.pay_to_company = (self.total_amount - self.trip.advance_received);
                 } else {
-                    self.pay_to_employee = 0.00;
-                    self.pay_to_company = 0.00;
+                    self.pay_to_employee = '0.00';
+                    self.pay_to_company = '0.00';
                 }
             } else {
                 self.pay_to_employee = self.total_amount;
-                self.pay_to_company = 0.00;
+                self.pay_to_company = '0.00';
             }
             $rootScope.loading = false;
 

@@ -127,10 +127,10 @@ class StateController extends Controller {
 		$option = new Agent;
 		$option->name = 'Select Agent';
 		$option->id = null;
-		$this->data['agents_list'] = $agents_list = Agent::select('users.name as name', 'agents.id')
-			->leftJoin('users', 'users.entity_id', 'agents.id')
-			->where('users.user_type_id', 3122)
-			->where('agents.company_id', Auth::user()->company_id)->get()->prepend($option);
+		$this->data['agents_list'] = $agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
+				->leftJoin('users', 'users.entity_id', 'agents.id')
+				->where('users.user_type_id', 3122)
+				->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
 		// dd($state->travelModes()->withPivot()->get());
 		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
 			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
@@ -255,6 +255,23 @@ class StateController extends Controller {
 		return response()->json($this->data);
 	}
 
+	//SEARCH AGENT
+	// public function searchAgent(Request $r) {
+	// 	$key = $r->key;
+
+	// 	$agents_list = Agent::select('users.name as name', 'agents.code', 'agents.id')
+	// 		->leftJoin('users', 'users.entity_id', 'agents.id')
+	// 		->where('users.user_type_id', 3122)
+	// 		->where('agents.company_id', Auth::user()->company_id)
+
+	// 		->where(function ($q) use ($key) {
+	// 			$q->where('name', 'like', '%' . $key . '%')
+	// 				->orWhere('code', 'like', '%' . $key . '%')
+	// 			;
+	// 		})
+	// 		->get();
+	// 	return response()->json($agents_list);
+	// }
 	public function deleteEYatraState($state_id) {
 		$state = Nstate::withTrashed()->where('id', $state_id)->first();
 		$state->forceDelete();
