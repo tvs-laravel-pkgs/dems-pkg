@@ -258,6 +258,7 @@ class Trip extends Model {
 		$trip->status_name = $trip->status->name;
 		$data['trip'] = $trip;
 		$data['success'] = true;
+		//dd($data);
 		return response()->json($data);
 
 	}

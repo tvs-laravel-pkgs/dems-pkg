@@ -34,7 +34,7 @@ class TripController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('CONCAT("₹",FORMAT(trips.advance_received,2,"en_IN")) as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)

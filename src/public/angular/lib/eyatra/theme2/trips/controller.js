@@ -274,7 +274,7 @@ app.component('eyatraTripForm', {
                 },
                 'trip_mode[]': {
                     required: true,
-                },  
+                },
             },
             messages: {
                 'description': {
@@ -346,6 +346,10 @@ app.component('eyatraTripView', {
             trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
+            console.log(response.data.trip);
+            amt = response.data.trip.advance_received;
+
+            self.advance_received = Number(amt).toLocaleString("en-IN", { style: "currency", currency: "INR" });
         });
 
 

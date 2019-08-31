@@ -135,7 +135,13 @@ class EntityController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
-
+			$e_name = EntityType::where('id', $request->type_id)->first();
+			//dd($e_name);
+			$activity['entity_id'] = $entity->id;
+			$activity['entity_type'] = $e_name->name;
+			$activity['details'] = empty($request->id) ? $e_name->name . " Added" : $e_name->name . " updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Entity added successfully']);
@@ -149,7 +155,15 @@ class EntityController extends Controller {
 	}
 
 	public function deleteEYatraEntity($entity_id) {
-		$entity = Entity::withTrashed()->where('id', $entity_id)->forceDelete();
+		dd('ss');
+		$entity = Entity::withTrashed()->where('id', $entity_id)->first();
+		$e_name = EntityType::where('id', $request->type_id)->first();
+		$activity['entity_id'] = $entity->id;
+		$activity['entity_type'] = $e_name->name;
+		$activity['details'] = $e_name->name . " is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$entity->forceDelete();
 
 		if (!$entity) {
 			return response()->json(['success' => false, 'errors' => ['Entity not found']]);

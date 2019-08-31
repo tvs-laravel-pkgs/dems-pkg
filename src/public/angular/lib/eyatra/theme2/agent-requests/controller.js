@@ -21,7 +21,7 @@ app.component('eyatraAgentRequestForm', {
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
-                $location.path('/eyatra / agent / requests')
+                $location.path('/eyatra/agent/requests')
                 $scope.$apply()
                 return;
             }
@@ -36,6 +36,7 @@ app.component('eyatraAgentRequestForm', {
                 return;
             }
             self.trip = response.data.trip;
+
             self.travel_mode_list = response.data.travel_mode_list;
             self.action = response.data.action;
             $rootScope.loading = false;
