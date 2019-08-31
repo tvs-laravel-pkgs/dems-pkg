@@ -18,7 +18,7 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
 
-     //REJECTION REASON
+    //REJECTION REASON
     when('/eyatra/rejection-reason/list', {
         template: '<entity-data-list></entity-data-list>',
         title: 'Entity list',
@@ -46,7 +46,7 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit COA',
     }).
 
-    
+
     //GRADES
     when('/eyatra/grades', {
         template: '<eyatra-grades></eyatra-grades>',
@@ -365,19 +365,19 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Finance Employee Claims Add',
     }).
     //PETTY CASH
-    when('/eyatra/petty-cash', {
+    when('/eyatra/petty-cash/:type_id', {
         template: '<eyatra-petty-cash-list></eyatra-petty-cash-list>',
         title: 'Petty Cash',
     }).
-    when('/eyatra/petty-cash/add', {
+    when('/eyatra/petty-cash/add/:type_id', {
         template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
         title: 'Add Petty Cash',
     }).
-    when('/eyatra/petty-cash/edit/:pettycash_id', {
+    when('/eyatra/petty-cash/edit/:type_id/:pettycash_id', {
         template: '<eyatra-petty-cash-form></eyatra-petty-cash-form>',
         title: 'Edit Petty Cash',
     }).
-    when('/eyatra/petty-cash/view/:pettycash_id', {
+    when('/eyatra/petty-cash/view/:type_id/:pettycash_id', {
         template: '<eyatra-petty-cash-view></eyatra-petty-cash-view>',
         title: 'View Petty Cash',
     }).
