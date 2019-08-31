@@ -58,6 +58,7 @@ app.component('eyatraOutlets', {
                 $(row).addClass('highlight-row');
             }
         });
+
         $('.dataTables_length select').select2();
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
@@ -65,7 +66,8 @@ app.component('eyatraOutlets', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#eyatra_outlet_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Outlets</p><h3 class="title">Outlets</h3>');
         // $('.page-header-content .display-inline-block .data-table-title').html('Outlets');
         $('.add_new_button').html(
@@ -141,7 +143,7 @@ app.component('eyatraOutletForm', {
         self.angular_routes = angular_routes;
         $scope.showAmountLimit = false;
         $scope.checkedAmountEligible = false;
-
+        $('#on_focus').focus();
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -467,58 +469,58 @@ app.component('eyatraOutletForm', {
                     required: true,
                 }
             },
-           /* messages: {
-                'code': {
-                    required: 'Outlet code is required',
-                    minlength: 'Please enter minimum of 3 characters',
-                    maxlength: 'Please enter maximum of 191 characters',
-                },
-                'outlet_name': {
-                    required: 'Outlet name is required',
-                    minlength: 'Please enter minimum of 3 characters',
-                    maxlength: 'Please enter maximum of 191 characters',
-                },
-                'lob_id': {
-                    required: 'Lob is required',
-                },
-                'sbu_id': {
-                    required: 'Sbu is required',
-                },
-                'cashier_id': {
-                    required: 'Cashier name is required',
-                },
-                'amount_limit': {
-                    required: 'Petty cash threshold is required',
-                    number: 'Enter number only',
-                },
-                'line_1': {
-                    required: 'Address Line1 is required',
-                    minlength: 'Please enter minimum of 3 characters',
-                    maxlength: 'Please enter maximum of 255 characters',
-                },
-                'line_2': {
-                    minlength: 'Please enter minimum of 3 characters',
-                    maxlength: 'Please enter maximum of 255 characters',
-                },
-                'country_id': {
-                    required: 'Country is Required',
-                },
-                'state_id': {
-                    required: 'State is Required',
-                },
-                'city_id': {
-                    required: 'City is Required',
-                },
-                'pincode': {
-                    required: 'PinCode is Required',
-                    number: 'Enter numbers only',
-                    minlength: 'Please enter minimum of 6 numbers',
-                    maxlength: 'Please enter maximum of 6 numbers',
-                },
-                'sbus[]': {
-                    required: 'Sbu is Required',
-                }
-            },*/
+            /* messages: {
+                 'code': {
+                     required: 'Outlet code is required',
+                     minlength: 'Please enter minimum of 3 characters',
+                     maxlength: 'Please enter maximum of 191 characters',
+                 },
+                 'outlet_name': {
+                     required: 'Outlet name is required',
+                     minlength: 'Please enter minimum of 3 characters',
+                     maxlength: 'Please enter maximum of 191 characters',
+                 },
+                 'lob_id': {
+                     required: 'Lob is required',
+                 },
+                 'sbu_id': {
+                     required: 'Sbu is required',
+                 },
+                 'cashier_id': {
+                     required: 'Cashier name is required',
+                 },
+                 'amount_limit': {
+                     required: 'Petty cash threshold is required',
+                     number: 'Enter number only',
+                 },
+                 'line_1': {
+                     required: 'Address Line1 is required',
+                     minlength: 'Please enter minimum of 3 characters',
+                     maxlength: 'Please enter maximum of 255 characters',
+                 },
+                 'line_2': {
+                     minlength: 'Please enter minimum of 3 characters',
+                     maxlength: 'Please enter maximum of 255 characters',
+                 },
+                 'country_id': {
+                     required: 'Country is Required',
+                 },
+                 'state_id': {
+                     required: 'State is Required',
+                 },
+                 'city_id': {
+                     required: 'City is Required',
+                 },
+                 'pincode': {
+                     required: 'PinCode is Required',
+                     number: 'Enter numbers only',
+                     minlength: 'Please enter minimum of 6 numbers',
+                     maxlength: 'Please enter maximum of 6 numbers',
+                 },
+                 'sbus[]': {
+                     required: 'Sbu is Required',
+                 }
+             },*/
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);

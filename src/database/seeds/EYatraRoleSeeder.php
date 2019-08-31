@@ -36,11 +36,11 @@ class EYatraRoleSeeder extends Seeder {
 					//TRIPS
 					5001, 5002, 5003, 5004, 5005, 5480,
 
-					//TRIPS VERIFICATION
-					5060, 5061, 5482,
+					// //TRIPS VERIFICATION
+					// 5060, 5061, 5482,
 
-					//TRIPS BOOKING REQUESTS
-					5160, 5161,
+					// //TRIPS BOOKING REQUESTS
+					// 5160, 5161,
 
 					//MASTERS
 					5080,
@@ -102,14 +102,14 @@ class EYatraRoleSeeder extends Seeder {
 					//MASTERS > REJECTION REASONS > VOUCHER CLAIM REJECT
 					5460, 5461, 5462, 5463,
 
-					//EMPLOYEE CLAIM VERIFICATION 1
-					5500,
+					// //EMPLOYEE CLAIM VERIFICATION 1
+					// 5500,
 
-					// //EMPLOYEE CLAIM VERIFICATION 2
-					// 5520,
+					// // //EMPLOYEE CLAIM VERIFICATION 2
+					// // 5520,
 
-					//AGENT CLAIM VERIFICATION 1
-					5540,
+					// //AGENT CLAIM VERIFICATION 1
+					// 5540,
 
 					//MASTERS > COA CATEGORIES
 					5580,

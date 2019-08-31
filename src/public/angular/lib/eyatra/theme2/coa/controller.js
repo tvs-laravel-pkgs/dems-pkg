@@ -63,7 +63,8 @@ app.component('coaDataList', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#coa_data_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $scope.deleteCoaData = function($id) {
             $('#del').val($id);
         }
@@ -119,7 +120,7 @@ app.component('coaDataForm', {
             $rootScope.loading = false;
 
         });
-
+        $('#on_focus').focus();
         var form_id = form_ids = '#entity_form';
         var v = jQuery(form_ids).validate({
             errorPlacement: function(error, element) {
