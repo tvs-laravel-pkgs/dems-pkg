@@ -111,8 +111,10 @@ app.component('eyatraStateForm', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.state_id) == 'undefined' ? state_form_data_url : state_form_data_url + '/' + $routeParams.state_id;
         var self = this;
+
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -134,8 +136,44 @@ app.component('eyatraStateForm', {
             self.agents_list = response.data.agents_list;
             self.state.agent = response.data.agent;
             self.action = response.data.action;
+            // if (self.action == 'Add') {
+            //     $('.sc_').addClass('charge');
+            // } else {
+            //     $('.sc_').removeClass('charge');
+
+            // }
 
         });
+        $scope.searchAgent;
+        $scope.clearSearchAgent = function() {
+            $scope.searchAgent = '';
+        };
+
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
+        // self.searchAgent = function(query) {
+        //     if (query) {
+        //         return new Promise(function(resolve, reject) {
+        //             $http
+        //                 .post(
+        //                     search_agent_url, {
+        //                         key: query,
+        //                     }
+        //                 )
+        //                 .then(function(response) {
+        //                     console.log(response.data);
+        //                     resolve(response.data);
+        //                 });
+        //         });
+        //     } else {
+        //         return [];
+        //     }
+        // }
+
 
         $('#travel_mode').on('click', function() {
             if (event.target.checked == true) {
@@ -229,6 +267,19 @@ app.component('eyatraStateForm', {
         $scope.prev = function() {}
 
         var form_id = '#state-form';
+
+        // $.validator.addMethod('positiveNumber', function(value, element) {
+        //     if (value != "") {
+        //         return Number(value) > 0;
+        //     } else {
+        //         return true;
+        //     }
+        // }, "Enter a positive number");
+        // $.validator.addClassRules({
+        //     charge: {
+        //         positiveNumber: true,
+        //     }
+        // });
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 if (element.hasClass("code")) {
