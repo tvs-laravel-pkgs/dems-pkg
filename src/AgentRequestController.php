@@ -86,6 +86,11 @@ class AgentRequestController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
+		$age = '--';
+		// dd(date('Y', strtotime($trip->employee->date_of_birth)));
+		if ($trip->employee) {
+			$age = date('Y') - date('Y', strtotime($trip->employee->date_of_birth));
+		}
 		$visits = $trip->visits;
 		$trip_status = 'not_booked';
 		$ticket_amount = 0;
@@ -121,6 +126,7 @@ class AgentRequestController extends Controller {
 		$trip->days = $days->days;
 		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::travelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
 		$this->data['trip'] = $trip;
+		$this->data['age'] = $age;
 		$this->data['trip_status'] = $trip_status;
 		$this->data['total_amount'] = $total_amount;
 		$this->data['ticket_amount'] = $ticket_amount;

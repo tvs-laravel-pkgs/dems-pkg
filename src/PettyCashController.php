@@ -15,6 +15,7 @@ use Yajra\Datatables\Datatables;
 
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
+		$type_id = $r->type_id;
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
@@ -29,14 +30,16 @@ class PettyCashController extends Controller {
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->leftjoin('petty_cash_employee_details', 'petty_cash_employee_details.petty_cash_id', 'petty_cash.id')
 			->where('petty_cash.employee_id', Auth::user()->entity_id)
 			->where('users.user_type_id', 3121)
+			->where('petty_cash_employee_details.petty_cash_type', $type_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
 		;
 
 		return Datatables::of($petty_cash)
-			->addColumn('action', function ($petty_cash) {
+			->addColumn('action', function ($petty_cash) use ($type_id) {
 
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
 				$img2 = asset('public/img/content/yatra/table/view.svg');
@@ -45,10 +48,10 @@ class PettyCashController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/petty-cash/edit/' . $petty_cash->id . '">
+				<a href="#!/eyatra/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a>
-				<a href="#!/eyatra/petty-cash/view/' . $petty_cash->id . '">
+				<a href="#!/eyatra/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#petty_cash_confirm_box"
@@ -60,7 +63,7 @@ class PettyCashController extends Controller {
 			->make(true);
 	}
 
-	public function pettycashFormData($pettycash_id = NULL) {
+	public function pettycashFormData($type_id = NULL, $pettycash_id = NULL) {
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
 		if (!$pettycash_id) {
 			$petty_cash = new PettyCashEmployeeDetails;
@@ -73,39 +76,47 @@ class PettyCashController extends Controller {
 
 		} else {
 			$this->data['action'] = 'Edit';
-			$petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
-				DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date'),
-				'petty_cash.id as petty_cash_id')
-				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
-				->where('petty_cash.id', $pettycash_id)
-				->where('petty_cash_employee_details.expence_type', $localconveyance_id->id)->get();
-			// dd($petty_cash);
-			$petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
-				DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'),
-				'petty_cash.id as petty_cash_id', 'petty_cash.employee_id', 'users.name as ename', 'entities.name as other_expence')
-				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
-				->join('employees', 'employees.id', 'petty_cash.employee_id')
-				->join('users', 'users.entity_id', 'employees.id')
-				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
-				->where('users.user_type_id', 3121)
-				->where('petty_cash.id', $pettycash_id)
-				->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
-
-			if (!$petty_cash) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'Petty Cash not found';
+			if ($type_id == 1) {
+				$petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
+					DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date'),
+					'petty_cash.id as petty_cash_id')
+					->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
+					->where('petty_cash.id', $pettycash_id)
+					->where('petty_cash_employee_details.expence_type', $localconveyance_id->id)->get();
+				// if (empty($petty_cash)) {
+				// 	$this->data['success'] = false;
+				// 	$this->data['message'] = 'Petty Cash not found';
+				// }
+			} else {
+				$petty_cash = [];
 			}
+
 			$this->data['success'] = true;
 			$this->data['employee_list'] = Employee::select('users.name', 'employees.id', 'employees.code')
 				->leftjoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
 				->get();
-			$this->data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
-				->leftjoin('users', 'users.entity_id', 'employees.id')
-				->leftjoin('designations', 'designations.id', 'employees.designation_id')
-				->leftjoin('entities', 'entities.id', 'employees.grade_id')
-				->where('users.user_type_id', 3121)
-				->where('employees.id', $petty_cash_other[0]->employee_id)->first();
+			if ($type_id == 2) {
+				//OTHER
+				$petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
+					DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'),
+					'petty_cash.id as petty_cash_id', 'petty_cash.employee_id', 'users.name as ename', 'entities.name as other_expence')
+					->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
+					->join('employees', 'employees.id', 'petty_cash.employee_id')
+					->join('users', 'users.entity_id', 'employees.id')
+					->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
+					->where('users.user_type_id', 3121)
+					->where('petty_cash.id', $pettycash_id)
+					->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
+				$this->data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
+					->leftjoin('users', 'users.entity_id', 'employees.id')
+					->leftjoin('designations', 'designations.id', 'employees.designation_id')
+					->leftjoin('entities', 'entities.id', 'employees.grade_id')
+					->where('users.user_type_id', 3121)
+					->where('employees.id', $petty_cash_other[0]->employee_id)->first();
+			} else {
+				$petty_cash_other = [];
+			}
 		}
 
 		$this->data['extras'] = [
@@ -217,17 +228,11 @@ class PettyCashController extends Controller {
 				// dd($expence_type->id);
 				foreach ($request->petty_cash as $petty_cash_data) {
 					$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
+					$petty_cash->fill($petty_cash_data);
 					$petty_cash->petty_cash_id = $petty_cash_employee_edit->id;
 					$petty_cash->expence_type = $petty_cash_data['localconveyance'];
 					$date = date("Y-m-d", strtotime($petty_cash_data['date']));
 					$petty_cash->date = $date;
-					$petty_cash->purpose_id = $petty_cash_data['purpose_id'];
-					$petty_cash->travel_mode_id = $petty_cash_data['travel_mode_id'];
-					$petty_cash->from_place = $petty_cash_data['from_place'];
-					$petty_cash->to_place = $petty_cash_data['to_place'];
-					$petty_cash->from_km = $petty_cash_data['from_km'];
-					$petty_cash->to_km = $petty_cash_data['to_km'];
-					$petty_cash->amount = $petty_cash_data['amount'];
 					$petty_cash->created_by = Auth::user()->id;
 					$petty_cash->created_at = Carbon::now();
 					$petty_cash->save();
@@ -255,13 +260,11 @@ class PettyCashController extends Controller {
 				}
 				foreach ($request->petty_cash_other as $petty_cash_data_other) {
 					$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
+					$petty_cash_other->fill($petty_cash_data_other);
 					$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
 					$petty_cash_other->petty_cash_id = $petty_cash_employee_edit->id;
 					$date = date("Y-m-d", strtotime($petty_cash_data_other['date_other']));
 					$petty_cash_other->date = $date;
-					$petty_cash_other->amount = $petty_cash_data_other['amount'];
-					$petty_cash_other->tax = $petty_cash_data_other['tax'];
-					$petty_cash_other->remarks = $petty_cash_data_other['remarks'];
 					$petty_cash_other->created_by = Auth::user()->id;
 					$petty_cash_other->created_at = Carbon::now();
 					$petty_cash_other->save();

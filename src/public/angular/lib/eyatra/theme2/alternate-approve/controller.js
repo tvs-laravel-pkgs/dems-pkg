@@ -107,6 +107,10 @@ app.component('eyatraAlternateApproveForm', {
             }
 
             self.alternate_approve = response.data.alternate_approve;
+            console.log(response.data.alternate_approve);
+            console.log(response.data.alternate_approve.alternate_employee_id);
+            console.log(response.data.alternate_approve.employee_id);
+            // console.log(response.data.alternate_approve);
             /*self.selectedItem = self.alternate_approve.emp_name;
             self.selectedItem1 = self.alternate_approve.alt_emp_name;
             $(".employee_id").val(self.alternate_approve.employee_id);
