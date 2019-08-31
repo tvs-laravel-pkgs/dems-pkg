@@ -92,8 +92,8 @@ class EYatraTC1Seeder extends Seeder {
 		$countries = [
 			5 => [
 				'data' => [
-					'name' => 'Canada',
-					'code' => 'CA',
+					'name' => 'India',
+					'code' => 'IN',
 				],
 				'states' => [
 					'TN' => [
