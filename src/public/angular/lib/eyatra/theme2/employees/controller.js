@@ -53,7 +53,8 @@ app.component('eyatraEmployees', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#eyatra_employee_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         //Filter
         $http.get(
             employee_filter_url
@@ -132,7 +133,7 @@ app.component('eyatraEmployeeForm', {
         $scope.showBank = false;
         $scope.showCheque = false;
         $scope.showWallet = false;
-
+        $('#on_focus').focus();
         $http.get(
             $form_data_url
         ).then(function(response) {

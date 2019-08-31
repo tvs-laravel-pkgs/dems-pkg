@@ -37,6 +37,8 @@ app.component('eyatraDesignation', {
                 $(row).addClass('highlight-row');
             }
         });
+        $('#eyatra_designation_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Designations</p><h3 class="title">Designations</h3>');
         //$('.page-header-content .display-inline-block .data-table-title').html('Designations');
@@ -88,6 +90,7 @@ app.component('eyatraDesignationForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $('#on_focus').focus();
         $http.get(
             $form_data_url
         ).then(function(response) {
