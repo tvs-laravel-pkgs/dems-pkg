@@ -56,14 +56,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('coa/delete/ng/{entity_id}', 'Uitoux\EYatra\CoaController@deleteEYatraCoaNg')->name('deleteEYatraCoaNg');
 		//END
 
-		//REJECTION REASON ENTITIES
-		// Route::get('eyatra/rejection-reason-entity/get-list-data/{entity_type_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@getRejectionReasonEntityListData')->name('getRejectionReasonEntityListData');
-		// Route::get('eyatra/rejection-reason-entity/get-list', 'Uitoux\EYatra\rejectionReasonEntityController@listEYatraRejectionReasonEntity')->name('listEYatraRejectionReasonEntity');
-		// Route::get('eyatra/rejection-reason-entity/get-form-data/{entity_type_id}/{entity_id?}', 'Uitoux\EYatra\rejectionReasonEntityController@eyatraRejectionReasonEntityFormData')->name('eyatraRejectionReasonEntityFormData');
-		// Route::post('eyatra/rejection-reason-entity/save/{entity_type_id}', 'Uitoux\EYatra\rejectionReasonEntityController@saveEYatraRejectionReasonEntity')->name('saveEYatraRejectionReasonEntity');
-		// Route::get('eyatra/rejection-reason-entity/view/{entity_id}', 'Uitoux\EYatra\rejectionReasonEntityController@viewEYatraRejectionReasonEntity')->name('viewEYatraRejectionReasonEntity');
-		// Route::get('eyatra/rejection-reason-entity/delete/{entity_id}', 'Uitoux\EYatra\rejectionReasonEntityController@deleteEYatraRejectionReasonEntity')->name('deleteEYatraRejectionReasonEntity');
-
 		//GRADES
 		Route::get('eyatra/grade/get-list', 'Uitoux\EYatra\GradeController@listEYatraGrade')->name('listEYatraGrade');
 		Route::get('eyatra/grade/get-form-data/{grade_id?}', 'Uitoux\EYatra\GradeController@eyatraGradeFormData')->name('eyatraGradeFormData');
@@ -96,6 +88,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/state/view/{state_id}', 'Uitoux\EYatra\StateController@viewEYatraState')->name('viewEYatraState');
 		Route::get('eyatra/state/delete/{state_id}', 'Uitoux\EYatra\StateController@deleteEYatraState')->name('deleteEYatraState');
 		Route::get('eyatra/state/filter/', 'Uitoux\EYatra\StateController@filterEYatraState')->name('filterEYatraState');
+		Route::post('eyatra/state/agent-search', 'Uitoux\EYatra\StateController@searchAgent')->name('searchAgent');
 
 		//CITY
 		Route::get('eyatra/city/get-list', 'Uitoux\EYatra\CityController@listEYatraCity')->name('listEYatraCity');
