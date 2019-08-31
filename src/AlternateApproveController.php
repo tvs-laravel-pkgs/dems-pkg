@@ -112,6 +112,13 @@ class AlternateApproveController extends Controller {
 			])
 				->where('employee_id',$alternate_id)->first();
 				//dd($alternate_approve);
+				if(!$alternate_approve)
+				{
+					$alternate_approve = new AlternateApprove;
+					$alternate_approve['employee']=$employee =Employee::find($alternate_id);
+					$this->data['success'] = true;	
+				}
+				
 
 			/*$alternate_approve = AlternateApprove::select('alternative_approvers.*',
 					DB::raw('DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") as fromdate'),
@@ -142,6 +149,7 @@ class AlternateApproveController extends Controller {
 		];
 		// dd($this->data['extras']);
 		$this->data['alternate_approve'] = $alternate_approve;
+		//$this->data['employee'] = $employee;
 
 		return response()->json($this->data);
 	}
@@ -172,7 +180,7 @@ class AlternateApproveController extends Controller {
 	}
 
 	public function alternateapproveSave(Request $request) {
-		// dd($request->all());
+		 //dd($request->all());
 		try {
 			// $validator = Validator::make($request->all(), [
 			// 	'purpose_id' => [
@@ -183,24 +191,34 @@ class AlternateApproveController extends Controller {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
 			DB::beginTransaction();
-			if (!$request->id) {
+			if($request->employee_id)
+			{
+				$alternate_approve=AlternateApprove::firstOrNew(['employee_id' => $request->employee_id]);
+
+				/*if (!$request->id) {
 				$alternate_approve = new AlternateApprove;
 				$alternate_approve->created_by = Auth::user()->id;
 				$alternate_approve->created_at = Carbon::now();
 				$alternate_approve->updated_by = NULL;
-			} else {
+				} else {
 				$alternate_approve = AlternateApprove::find($request->id);
 				$alternate_approve->updated_by = Auth::user()->id;
 				$alternate_approve->updated_at = Carbon::now();
-			}
-			$date = explode(' to ', $request->date);
-			$alternate_approve->alternate_employee_id = $request->alt_employee_id;
-			$alternate_approve->from = date("Y-m-d", strtotime($date[0]));
-			$alternate_approve->to = date("Y-m-d", strtotime($date[1]));
-			$alternate_approve->type = $request->type_id;
-			$alternate_approve->fill($request->all());
-			$alternate_approve->save();
+				}*/
+				$alternate_approve->fill($request->all());
+				$alternate_approve->created_by = Auth::user()->id;
+				$alternate_approve->created_at = Carbon::now();
+				$alternate_approve->updated_by = NULL;
 
+				$date = explode(' to ', $request->date);
+				$alternate_approve->employee_id = $request->employee_id;
+				$alternate_approve->alternate_employee_id = $request->alt_employee_id;
+				$alternate_approve->from = date("Y-m-d", strtotime($date[0]));
+				$alternate_approve->to = date("Y-m-d", strtotime($date[1]));
+				$alternate_approve->type = $request->type_id;
+				//dd($alternate_approve);
+				$alternate_approve->save();
+			}
 			DB::commit();
 			// $request->session()->flash('success', 'Alternate Approver updated successfully!');
 			return response()->json(['success' => true]);

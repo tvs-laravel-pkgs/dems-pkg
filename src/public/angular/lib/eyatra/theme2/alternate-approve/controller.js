@@ -1,6 +1,7 @@
 app.component('eyatraAlternateApproveList', {
     templateUrl: eyatra_alternate_approve_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
+        //alert();
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#alternate_approve_list').DataTable({
@@ -107,16 +108,12 @@ app.component('eyatraAlternateApproveForm', {
             }
 
             self.alternate_approve = response.data.alternate_approve;
-            console.log(response.data.alternate_approve);
-            console.log(response.data.alternate_approve.alternate_employee_id);
-            console.log(response.data.alternate_approve.employee_id);
-            // console.log(response.data.alternate_approve);
             /*self.selectedItem = self.alternate_approve.emp_name;
             self.selectedItem1 = self.alternate_approve.alt_emp_name;
             $(".employee_id").val(self.alternate_approve.employee_id);
             $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);*/
             self.extras = response.data.extras;
-            if ($routeParams.alternate_id != undefined) {
+            if (response.data.alternate_approve.from != undefined) {
                 self.date = self.alternate_approve.from + ' to ' + self.alternate_approve.to;
                 $('.daterange').daterangepicker({
                     autoUpdateInput: false,
