@@ -101,7 +101,9 @@ class Visit extends Model {
 	public function attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3180)->where('attachment_type_id', 3200);
 	}
-
+	public function changeIndianMoneyFormat($value) {
+		return IND_money_format($value);
+	}
 	public static function create($trip, $src_city, $dest_city, $visit1_date, $company, $booking_method_id, $booking_status_id, $trip_status_id, $manager_verification_status_id, $employee, $faker) {
 		$visit = new Visit();
 		$visit->trip_id = $trip->id;

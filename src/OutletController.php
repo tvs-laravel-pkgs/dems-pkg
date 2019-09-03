@@ -154,6 +154,7 @@ class OutletController extends Controller {
 		$this->data['outlet'] = $outlet;
 		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
+		//dd($outlet);
 		return response()->json($this->data);
 	}
 	public function eyatraOutletFilterData() {
@@ -170,13 +171,13 @@ class OutletController extends Controller {
 	public function searchCashier(Request $r) {
 		$key = $r->key;
 		$cashier_list = Employee::select(
-			'name',
+			//'name',
 			'code',
 			'id'
 		)
 			->where(function ($q) use ($key) {
-				$q->where('name', 'like', '%' . $key . '%')
-					->orWhere('code', 'like', '%' . $key . '%')
+				$q //->where('name', 'like', '%' . $key . '%')
+				->where('code', 'like', '%' . $key . '%')
 				;
 			})
 			->get();
@@ -296,7 +297,7 @@ class OutletController extends Controller {
 			'Sbu',
 			'Sbu.lob',
 			'employee',
-		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
+		])->select('*', DB::raw('FORMAT(outlets.amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
 		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', 'amount')->where('outlet_id', $outlet_id)
@@ -316,6 +317,8 @@ class OutletController extends Controller {
 		$this->data['action'] = 'View';
 		$this->data['outlet'] = $outlet;
 		$this->data['success'] = true;
+		//dd($this->data);
+
 		return response()->json($this->data);
 	}
 	public function deleteEYatraOutlet($outlet_id) {

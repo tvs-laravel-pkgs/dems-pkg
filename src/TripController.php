@@ -250,9 +250,11 @@ class TripController extends Controller {
 		$this->data['trip'] = $visit->trip;
 		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$this->data['bookings'] = $visit->bookings;
+			//dd($this->data['bookings'][0]->total, IND_money_format($this->data['bookings'][0]->total));
 		} else {
 			$this->data['bookings'] = [];
 		}
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
