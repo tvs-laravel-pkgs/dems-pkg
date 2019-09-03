@@ -92,7 +92,9 @@ app.component('eyatraEntityList', {
                                 speed: 500 // unavailable - no need
                             },
                         }).show();
-
+                        setTimeout(function() {
+                            $noty.close();
+                        }, 1000);
                     }
                     dataTable.ajax.reload(function(json) {});
 

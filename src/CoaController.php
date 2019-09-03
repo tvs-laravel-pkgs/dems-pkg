@@ -143,7 +143,7 @@ class CoaController extends Controller {
 			$activity['activity'] = empty($request->id) ? "add" : "delete";
 			//dd($activity);
 
-			$activity_log = ActivityLog::saveLog($activity);
+			//$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Coa added successfully']);

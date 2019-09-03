@@ -160,6 +160,12 @@ app.component('eyatraTripVerificationForm', {
                 return;
             }
             self.trip = response.data.trip;
+            console.log('sds');
+            self.advance_received = Number(response.data.trip.advance_received).toLocaleString('en-IN', {
+                maximumFractionDigits: 2,
+                style: 'currency',
+                currency: 'INR'
+            });
             self.trip_reject_reasons = response.data.trip_reject_reasons;
             self.extras = response.data.extras;
             self.action = response.data.action;

@@ -101,7 +101,7 @@ app.component('eyatraEmployees', {
                     $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
                         animation: {
                             speed: 500 // unavailable - no need
                         },

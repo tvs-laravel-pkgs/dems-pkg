@@ -281,13 +281,14 @@ class Trip extends Model {
 			}
 		}
 		$grade = Auth::user()->entity;
-		dd($grade, $grade->grade_id);
+		//dd('ss', Auth::user()->id, Auth::user()->entity->outlet, Auth::user()->entity->outlet->address);
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
 		} else {
 			$data['advance_eligibility'] = '';
 		}
+		//dd(Auth::user()->entity->outlet->address);
 
 		$data['extras'] = [
 			// 'purpose_list' => Entity::uiPurposeList(),
@@ -377,7 +378,7 @@ class Trip extends Model {
 				$from_date = date('Y-m-d', strtotime($from_date));
 				$to_date = date('Y-m-d', strtotime($to_date));
 		*/
-
+		//dd('d');
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -394,7 +395,7 @@ class Trip extends Model {
 				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'trips.created_at',
 				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
 				'status.name as status'
