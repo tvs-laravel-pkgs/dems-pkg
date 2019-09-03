@@ -33,7 +33,8 @@ class TripClaimVerificationOneController extends Controller {
 				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
+
 				'status.name as status'
 			)
 
@@ -163,7 +164,7 @@ class TripClaimVerificationOneController extends Controller {
 
 			$transport_total_amount = $visit_amounts_total ? $visit_amounts_total : 0.00;
 			$transport_total_tax = $visit_taxes_total ? $visit_taxes_total : 0.00;
-			$this->data['transport_total_amount'] = number_format($transport_total_amount, 2, '.', '');
+			$this->data['transport_total_amount'] = IND_money_format($transport_total_amount);
 
 			$lodging_total = Lodging::select(
 				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -174,7 +175,7 @@ class TripClaimVerificationOneController extends Controller {
 				->first();
 			$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
 			$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
-			$this->data['lodging_total_amount'] = number_format($lodging_total_amount, 2, '.', '');
+			$this->data['lodging_total_amount'] = IND_money_format($lodging_total_amount);
 
 			$boardings_total = Boarding::select(
 				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -185,7 +186,7 @@ class TripClaimVerificationOneController extends Controller {
 				->first();
 			$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
 			$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
-			$this->data['boardings_total_amount'] = number_format($boardings_total_amount, 2, '.', '');
+			$this->data['boardings_total_amount'] = IND_money_format($boardings_total_amount);
 
 			$local_travels_total = LocalTravel::select(
 				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
@@ -196,7 +197,7 @@ class TripClaimVerificationOneController extends Controller {
 				->first();
 			$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
 			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
-			$this->data['local_travels_total_amount'] = number_format($local_travels_total_amount, 2, '.', '');
+			$this->data['local_travels_total_amount'] = IND_money_format($local_travels_total_amount);
 
 			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
 			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');

@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Entity;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -111,7 +112,7 @@ class RejectionController extends Controller {
 			//validate
 
 			DB::beginTransaction();
-
+			//dd($request->all());
 			if (!$request->id) {
 				$entity = new Entity;
 				$entity->created_by = Auth::user()->id;
@@ -137,7 +138,12 @@ class RejectionController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
-
+			$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
+			$activity['entity_id'] = $entity->id;
+			$activity['entity_type'] = "Budget not allocated"; //entity_type_id =511
+			$activity['details'] = empty($request->id) ? "Rejection Reason added" : "Rejection Reason Updated";
+			$activity['activity'] = empty($request->id) ? "add" : "Update";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Entity added successfully']);

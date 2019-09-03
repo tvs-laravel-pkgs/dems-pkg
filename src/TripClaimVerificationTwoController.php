@@ -188,9 +188,15 @@ class TripClaimVerificationTwoController extends Controller {
 	public function approveTripClaimVerificationTwo($trip_id) {
 
 		$trip = Trip::find($trip_id);
+
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V2 Approved";
+		$activity['activity'] = "approve";
+		$activity_log = ActivityLog::saveLog($activity);
 		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -219,7 +225,11 @@ class TripClaimVerificationTwoController extends Controller {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024; //Claim Rejected
 		$trip->save();
-
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V2 Rejected";
+		$activity['activity'] = "reject";
+		$activity_log = ActivityLog::saveLog($activity);
 		return response()->json(['success' => true]);
 	}
 
