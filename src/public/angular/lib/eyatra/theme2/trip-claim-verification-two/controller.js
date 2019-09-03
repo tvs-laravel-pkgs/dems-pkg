@@ -112,11 +112,17 @@ app.component('eyatraTripClaimVerificationTwoView', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/trip/claim/verification2/list')
                 $scope.$apply()
                 return;
@@ -163,17 +169,29 @@ app.component('eyatraTripClaimVerificationTwoView', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trips Claim Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#trip-claim-modal-approve-two').modal('hide');
                     $location.path('/eyatra/trip/claim/verification2/list')
                     $scope.$apply()
@@ -210,11 +228,17 @@ app.component('eyatraTripClaimVerificationTwoView', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                new Noty({
+                                $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
                                     text: 'Trips Claim Rejected successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
                                 }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
                                 $('#trip-claim-modal-reject-two').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/eyatra/trip/claim/verification2/list')

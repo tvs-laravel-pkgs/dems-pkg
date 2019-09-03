@@ -28,7 +28,7 @@
 //                 delete_role_url + '/' + $id,
 //             ).then(function(response) {
 //                 if (response.data.success) {
-//                     new Noty({
+//                     $noty =new Noty({
 //                         type: 'success',
 //                         layout: 'topRight',
 //                         text: 'Role Deleted Successfully',
@@ -270,11 +270,17 @@ app.component('eyatraRoleForm', {
             get_form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/roles/list/')
                 $scope.$apply()
                 return;
@@ -343,30 +349,48 @@ app.component('eyatraRoleForm', {
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
                             }
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'error',
                                 layout: 'topRight',
-                                text: errors
+                                text: errors,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
 
                         } else {
                             $location.path('/eyatra/roles/list/')
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Role saved Successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $scope.$apply()
                             location.reload();
                         }
                     })
                     .fail(function(xhr) {
                         $('#submit').button('reset');
-                        new Noty({
+                        $noty = new Noty({
                             type: 'error',
                             layout: 'topRight',
                             text: 'Something went wrong at server',
+                            animation: {
+                                speed: 500 // unavailable - no need
+                            },
                         }).show();
+                        setTimeout(function() {
+                            $noty.close();
+                        }, 1000);
                     });
             },
         });

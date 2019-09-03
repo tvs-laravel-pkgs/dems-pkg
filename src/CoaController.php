@@ -136,7 +136,14 @@ class CoaController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
+			$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
+			$activity['entity_id'] = $entity->id;
+			$activity['entity_type'] = $e_name->name;
+			$activity['details'] = empty($request->id) ? $e_name->name . " added" : $e_name->name . " updated";
+			$activity['activity'] = empty($request->id) ? "add" : "delete";
+			//dd($activity);
 
+			//$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Coa added successfully']);

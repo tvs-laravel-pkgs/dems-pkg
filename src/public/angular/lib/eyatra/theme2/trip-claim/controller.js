@@ -97,17 +97,29 @@ app.component('eyatraTripClaimList', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trips Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#delete_emp').modal('hide');
                     dataTable.ajax.reload(function(json) {});
                 }
@@ -147,11 +159,14 @@ app.component('eyatraTripClaimForm', {
             $form_data_url
         ).then(function(response) {
             /*if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
+                setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 $location.path('/eyatra/trip/claim/list')
                 $scope.$apply()
                 return;
@@ -765,11 +780,17 @@ app.component('eyatraTripClaimForm', {
 
         var v = jQuery(form_id).validate({
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Kindly check in each tab to fix errors'
+                    text: 'Kindly check in each tab to fix errors',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             ignore: "",
             rules: {},
@@ -794,11 +815,17 @@ app.component('eyatraTripClaimForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Claim saved successfully!!',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
 
                             $location.path('/eyatra/trip/claim/list')
                             $scope.$apply()
@@ -831,11 +858,17 @@ app.component('eyatraTripClaimView', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/trip/claim/list')
                 $scope.$apply()
                 return;

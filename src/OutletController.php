@@ -186,6 +186,7 @@ class OutletController extends Controller {
 		return response()->json($cashier_list);
 	}
 	public function saveEYatraOutlet(Request $request) {
+
 		//validation
 		try {
 			$error_messages = [
@@ -247,17 +248,23 @@ class OutletController extends Controller {
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());
 			$outlet->save();
+			//dd('s');
+			$activity['entity_id'] = $outlet->id;
+			$activity['entity_type'] = "Outlet";
+			$activity['details'] = empty($request->id) ? "Outlet is  Added" : "Outlet is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING ADDRESS
 			$address->address_of_id = 3160;
 			$address->entity_id = $outlet->id;
 			$address->name = 'Primary';
 			$address->fill($request->all());
 			$address->save();
-			// dd($address);
+			//dd($address);
 			//SAVING OUTLET BUDGET
-			$sbu_ids = array_column($request->sbus, 'sbu_id');
+			//$sbu_ids = array_column($request->sbus, 'sbu_id');
 			// dd($sbu_ids);
-			if (count($request->sbus) > 0) {
+			/*if (count($request->sbus) > 0) {
 				foreach ($request->sbus as $sbu) {
 					if (!isset($sbu['sbu_id'])) {
 						continue;
@@ -266,7 +273,7 @@ class OutletController extends Controller {
 						'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
 					]);
 				}
-			}
+			}*/
 			DB::commit();
 			$request->session()->flash('success', 'outlet saved successfully!');
 			if (empty($request->id)) {
@@ -313,7 +320,13 @@ class OutletController extends Controller {
 		return response()->json($this->data);
 	}
 	public function deleteEYatraOutlet($outlet_id) {
-		$outlet = Outlet::where('id', $outlet_id)->forceDelete();
+		$outlet = Outlet::where('id', $outlet_id)->first();
+		$activity['entity_id'] = $outlet->id;
+		$activity['entity_type'] = "outlet";
+		$activity['details'] = "Outlet is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$outlet->forceDelete();
 		if (!$outlet) {
 			return response()->json(['success' => false, 'errors' => ['Outlet not found']]);
 		}

@@ -161,7 +161,7 @@ class EmployeeController extends Controller {
 			'grade_list' => $grade_list,
 			'designation_list' => $designation_list,
 		];
-		
+
 		// dd($this->data['extras']);
 		$this->data['employee'] = $employee;
 
@@ -225,7 +225,11 @@ class EmployeeController extends Controller {
 				$employee->deleted_at = NULL;
 			}
 			$employee->save();
-
+			$activity['entity_id'] = $employee->id;
+			$activity['entity_type'] = "Employee";
+			$activity['details'] = empty($request->id) ? "Employee is  Added" : "Employee is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//USER ACCOUNT
 			$user = User::withTrashed()->firstOrNew([
 				'id' => $request->user_id,
@@ -302,8 +306,8 @@ class EmployeeController extends Controller {
 		])
 			->find($employee_id);
 		$dob = $employee['date_of_birth'];
-		$diff = (date('Y') - date('Y',strtotime($dob)));
-	    $employee['age'] = $diff;
+		$diff = (date('Y') - date('Y', strtotime($dob)));
+		$employee['age'] = $diff;
 		if (!$employee) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Employee not found'];
@@ -316,7 +320,15 @@ class EmployeeController extends Controller {
 	}
 
 	public function deleteEYatraEmployee($employee_id) {
-		$user = User::withTrashed()->where('entity_id', $employee_id)->forcedelete();
+		$user = User::withTrashed()->where('entity_id', $employee_id)->first();
+
+		$e_name = EntityType::where('id', $entity->entity_type_id)->first();
+		$activity['entity_id'] = $user->id;
+		$activity['entity_type'] = "Employee";
+		$activity['details'] = "Employee is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$user->forceDelete();
 		if (!$user) {
 			return response()->json(['success' => false, 'errors' => ['User not found']]);
 		}

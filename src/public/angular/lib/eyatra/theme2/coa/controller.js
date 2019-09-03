@@ -77,11 +77,17 @@ app.component('coaDataList', {
                 console.log(response.data);
                 if (response.data.success) {
 
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Entity Detail Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
                 dataTable.ajax.reload(function(json) {});
 
@@ -104,11 +110,18 @@ app.component('coaDataForm', {
         ).then(function(response) {
 
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/coa-sub-master/list')
                 $scope.$apply()
                 return;
@@ -165,11 +178,17 @@ app.component('coaDataForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/coa-sub-master/list')
                             $scope.$apply()
                         }
