@@ -182,7 +182,7 @@ app.component('eyatraOutletForm', {
             self.address = response.data.address;
             self.extras = response.data.extras;
             self.lob_outlet = response.data.lob_outlet;
-            self.sbu_outlet = response.data.sbu_outlet;
+            self.sbu = response.data.sbu;
             self.action = response.data.action;
 
             if (self.action == 'Edit') {
@@ -220,27 +220,7 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getSbus = function() {
-            var lob_ids = [];
-            $.each($(".lobcheckbox:checked"), function() {
-                lob_ids.push($(this).val())
-            });
-            $.ajax({
-                    url: get_sbu_by_lob_outlet,
-                    method: "GET",
-                    data: { lob_ids: lob_ids },
-                })
-                .done(function(res) {
-                    self.extras.sbu_list = [];
-                    self.extras.sbu_list = res.sbus;
 
-                    console.log(self.extras.sbu_list);
-                    $scope.$apply()
-                })
-                .fail(function(xhr) {
-                    console.log(xhr);
-                });
-        }
 
 
 
@@ -303,41 +283,63 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getDataBasedonLob = function() {
-            if (event.target.checked == true) {
-                $http.get(
-                    lob_sbu_url + '/' + id
-                ).then(function(response) {
-                    // alert(response.data.sbu_outlet)
-                    response.data.sbu_outlet.forEach(function(v) {
+        $scope.getSbus = function() {
+            var lob_ids = [];
+            $.each($(".lobcheckbox:checked"), function() {
+                lob_ids.push($(this).val())
+            });
+            $.ajax({
+                    url: get_sbu_by_lob_outlet,
+                    method: "GET",
+                    data: { lob_ids: lob_ids },
+                })
+                .done(function(res) {
+                    self.sbu_list = [];
+                    self.extras.sbu_list = res.sbus;
 
-                        self.sbu_outlet.push({
-                            "name": v.name,
-                            "id": v.id
-                        });
-                    });
+                    console.log(self.extras.sbu_list);
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
                 });
-            } else {
-                if ($('.lobcheckbox:checked').length > 0) {
-                    self.sbu_outlet = [];
-                    $.each($(".lobcheckbox:checked"), function() {
-                        $scope.test($(this).val())
-                    });
-
-                } else {
-                    $('#lob').prop('checked', false);
-                    $('#sbu tbody tr').html('');
-                }
-            }
         }
+        // $scope.getDataBasedonLob = function() {
+        //     if (event.target.checked == true) {
+        //         $http.get(
+        //             lob_sbu_url + '/' + id
+        //         ).then(function(response) {
+        //             // alert(response.data.sbu_outlet)
+        //             response.data.sbu.forEach(function(v) {
+
+        //                 self.sbu.push({
+        //                     "name": v.name,
+        //                     "id": v.id
+        //                 });
+        //             });
+        //         });
+        //     } else {
+        if ($('.lobcheckbox:checked').length > 0) {
+            self.sbu_list = [];
+            $.each($(".lobcheckbox:checked"), function() {
+                $scope.test($(this).val())
+            });
+
+        } else {
+            // $('#lob').prop('checked', false);
+            // $('#sbu tbody tr').addClass('ng-hide');
+
+        }
+        // }
+        // }
         $scope.test = function(id) {
             $http.get(
                 lob_sbu_url + '/' + id
             ).then(function(response) {
-                response.data.sbu_outlet.forEach(function(v) {
+                response.data.sbu.forEach(function(v) {
                     // alert(v.lob_id)
                     if (id) {
-                        self.sbu_outlet.push({
+                        self.sbu.push({
                             "name": v.name,
                             "id": v.id
                         });
@@ -349,57 +351,53 @@ app.component('eyatraOutletForm', {
         $('.select_all_sbu').on('click', function() {
             if (event.target.checked == true) {
                 $('.sbucheckbox').prop('checked', true);
-                // $('#budget_table').css('display', 'block');
                 $.each($('.sbucheckbox:checked'), function() {
                     $scope.getamountonSbu($(this).val());
                     $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
+                    $("#amount").addClass('required');
                 });
             } else {
                 $('.sbucheckbox').prop('checked', false);
                 $.each($('.sbucheckbox'), function() {
-                    $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide');
+                    $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide').removeClass('required error');
+                    // $(".amount").removeClass('required');
                 });
             }
         });
         $scope.getamountonSbu = function(id) {
             if (event.target.checked == true) {
                 $("#amount" + id).removeClass('ng-hide');
+                $("#amount" + id).addClass('required');
             } else {
                 $("#amount" + id).addClass('ng-hide');
-                // $("#dms_" + id).val('');
+                $("#amount" + id).removeClass('required');
             }
         }
 
 
-        // $('#select_all_sbu').prop('disabled', 'disabled');
         $('#select_all_lob').on('click', function() {
             if (event.target.checked == true) {
-                $('#sbu tbody tr').html('');
+                // $('#sbu tbody tr').html('');
+                // $('.sbu_table tbody tr #sbu' + $(this).val()).removeClass('ng-hide');
+
                 $('.lobcheckbox').prop('checked', true);
-                $('#select_all_sbu').prop('checked', true);
-                $('.sbucheckbox').prop('checked', true);
                 $.each($(".lobcheckbox:checked"), function() {
+                    $scope.getSbus($(this).val())
+                    // $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
                     // $('.sbucheckbox').prop('checked', true);
-                    $scope.getDataBasedonLob($(this).val())
+
                 });
+
+
+
             } else {
-                $('.lobcheckbox').prop('checked', false);
-                $('.sbucheckbox').prop('checked', false);
-                $('#select_all_sbu').prop('checked', false);
+                var unselectall = $('.lobcheckbox').prop('checked', false)
+                if (unselectall) {
+                    $scope.getSbus()
+                }
                 $('#sbu tbody tr').html('');
             }
         });
-
-        // $('#select_all_sbu').on('click', function() {
-        //     if (event.target.checked == true) {
-        //         $('.sbucheckbox').prop('checked', true);
-        //     } else {
-        //         $('.sbucheckbox').prop('checked', false);
-        //     }
-        // });
-
-
-
 
         var form_id = '#outlet-form';
         var v = jQuery(form_id).validate({

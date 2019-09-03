@@ -146,7 +146,6 @@ class OutletController extends Controller {
 			'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
-		// $this->data['lob_outlet'] = $lob_outlet = Lob::select('name', 'id')->get();
 		$this->data['sbu_outlet'] = [];
 		// foreach ($lob_outlet->sbus as $lob_sbu) {
 		// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;
@@ -171,15 +170,20 @@ class OutletController extends Controller {
 	public function searchCashier(Request $r) {
 		$key = $r->key;
 		$cashier_list = Employee::select(
-			//'name',
-			'code',
-			'id'
+
+			'users.name',
+			'employees.code',
+			'employees.id'
 		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
 				$q //->where('name', 'like', '%' . $key . '%')
 				->where('code', 'like', '%' . $key . '%')
 				;
 			})
+
 			->get();
 		return response()->json($cashier_list);
 	}
@@ -191,14 +195,11 @@ class OutletController extends Controller {
 				'code.required' => 'Outlet Code is Required',
 				'outlet_name.required' => 'Outlet Name is Required',
 				'line_1.required' => 'Address Line1 is Required',
-				// 'country_id.required' => 'Country is Required',
-				// 'state_id.required' => 'State is Required',
 				'city_id.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
 				'cashier_id.required' => "Cashier Name is Required",
-				// 'amount_eligible.required' => "Amount Eligible is Required",
 			];
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
@@ -297,10 +298,12 @@ class OutletController extends Controller {
 			'Sbu',
 			'Sbu.lob',
 			'employee',
-		])->select('*', DB::raw('FORMAT(outlets.amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
+
+			'employee.user',
+		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
-		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', 'amount')->where('outlet_id', $outlet_id)
+		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(amount,2,"en_IN") as amount'))->where('outlet_budget.outlet_id', $outlet_id)
 
 			->leftJoin('sbus', 'sbus.id', 'outlet_budget.sbu_id')
 			->leftJoin('lobs', 'lobs.id', 'sbus.lob_id')
