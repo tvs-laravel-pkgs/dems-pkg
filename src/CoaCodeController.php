@@ -216,7 +216,11 @@ class CoaCodeController extends Controller {
 
 			$coacode->fill($request->all());
 			$coacode->save();
-
+			$activity['entity_id'] = $coacode->id;
+			$activity['entity_type'] = 'COA Codes';
+			$activity['details'] = empty($request->id) ? "COA Codes Added" : "COA Codes updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			$request->session()->flash('success', 'Coa Code saved successfully!');
 			if (empty($request->id)) {
@@ -255,6 +259,11 @@ class CoaCodeController extends Controller {
 
 	public function deleteEYatraCoaCode($coa_code_id) {
 		$coacode = CoaCode::withTrashed()->where('id', $coa_code_id)->first();
+		$activity['entity_id'] = $coacode->id;
+		$activity['entity_type'] = 'COA Codes';
+		$activity['details'] = "COA Codes deleted";
+		$activity['activity'] = "delete";
+		$activity_log = ActivityLog::saveLog($activity);
 		$coacode->forceDelete();
 		if (!$coacode) {
 			return response()->json(['success' => false, 'errors' => ['Coa Code not found']]);

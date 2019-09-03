@@ -97,17 +97,29 @@ app.component('eyatraGrades', {
                 console.log(response.data);
                 if (response.data.success) {
 
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Grade Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Grade not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
                 $('#delete_grade').modal('hide');
                 dataTable.ajax.reload(function(json) {});
@@ -133,11 +145,17 @@ app.component('eyatraGradeForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/grades')
                 // $scope.$apply()
                 return;
@@ -231,11 +249,17 @@ app.component('eyatraGradeForm', {
                 error.insertAfter(element)
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             ignore: '',
             rules: {
@@ -272,11 +296,17 @@ app.component('eyatraGradeForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Grade Updated successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/grades')
                             $scope.$apply()
                         }

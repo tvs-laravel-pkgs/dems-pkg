@@ -65,20 +65,32 @@ app.component('eyatraAgentClaimList', {
                 eyatra_agent_claim_delete_data_url + '/' + id,
             ).then(function(response) {
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Agent Claim Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#agent_claim_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agent/claim/list');
                     // $scope.$apply();
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Agent Claim not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -98,11 +110,17 @@ app.component('eyatraAgentClaimForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.message,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/agent/claim/list')
                 // $scope.$apply()
                 return;
@@ -328,11 +346,17 @@ app.component('eyatraAgentClaimForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/agent/claim/list')
                             $scope.$apply()
                         }

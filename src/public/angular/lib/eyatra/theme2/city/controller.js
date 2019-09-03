@@ -120,19 +120,31 @@ app.component('eyatraCity', {
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'City Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'City not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -154,11 +166,17 @@ app.component('eyatraCityForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/cities')
                 $scope.$apply()
                 return;
@@ -277,11 +295,17 @@ app.component('eyatraCityForm', {
                 // }
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             submitHandler: function(form) {
 
@@ -304,12 +328,18 @@ app.component('eyatraCityForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'City saved successfully',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/cities')
                             $scope.$apply()
                         }

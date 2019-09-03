@@ -135,7 +135,7 @@ class TripController extends Controller {
 
 		//$trip = Trip::where('id', $trip_id)->forceDelete();
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = NULL;
+		$activity['details'] = 'Trip is Deleted';
 		$activity['activity'] = "delete";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
@@ -154,7 +154,7 @@ class TripController extends Controller {
 		}
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = NULL;
+		$activity['details'] = 'Trip is Cancelled';
 		$activity['activity'] = "cancel";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
@@ -187,7 +187,7 @@ class TripController extends Controller {
 			$visit->save();
 			/*$activity['entity_id'] = $visit->id;
 				$activity['entity_type'] = 'visit';
-				$activity['details'] = NULL;
+				$activity['details'] = 'Visit Booking is Cancelled';
 				$activity['activity'] = "cancel";
 				//dd($activity);
 			*/
@@ -266,7 +266,7 @@ class TripController extends Controller {
 
 		/*$activity['entity_id'] = $visit->id;
 			$activity['entity_type'] = 'visit';
-			$activity['details'] = NULL;
+			$activity['details'] = 'Visit Booking cancel request';
 			$activity['activity'] = "cancel";
 			//dd($activity);
 		*/

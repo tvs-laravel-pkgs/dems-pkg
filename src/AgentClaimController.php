@@ -449,7 +449,7 @@ class AgentClaimController extends Controller {
 		$payment->save();
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
-		$activity['details'] = NULL;
+		$activity['details'] = "Claim is paid by Cashier";
 		$activity['activity'] = "paid";
 		$activity_log = ActivityLog::saveLog($activity);
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
@@ -467,7 +467,7 @@ class AgentClaimController extends Controller {
 		$agent_claim->save();
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
-		$activity['details'] = NULL;
+		$activity['details'] = "Agent claim is rejected by Cashier";
 		$activity['activity'] = "reject";
 		$activity_log = ActivityLog::saveLog($activity);
 

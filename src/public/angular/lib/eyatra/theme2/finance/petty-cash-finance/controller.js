@@ -63,11 +63,15 @@ app.component('eyatraPettyCashFinanceForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+
                 $location.path('/eyatra/petty-cash')
                 return;
             }
@@ -230,11 +234,17 @@ app.component('eyatraPettyCashFinanceForm', {
             },
             ignore: '',
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Check all tabs for errors'
+                    text: 'Check all tabs for errors',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             submitHandler: function(form) {
 
@@ -257,11 +267,17 @@ app.component('eyatraPettyCashFinanceForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Petty Cash saves successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/petty-cash/verification2')
                             $scope.$apply()
                         }
@@ -331,11 +347,17 @@ app.component('eyatraPettyCashFinanceView', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Petty Cash Approved successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
                                 $location.path('/eyatra/petty-cash/verification2')
@@ -388,11 +410,17 @@ app.component('eyatraPettyCashFinanceView', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Petty Cash Rejected successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {

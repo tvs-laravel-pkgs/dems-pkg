@@ -210,6 +210,12 @@ class GradeController extends Controller {
 			$grade->entity_type_id = 500;
 			$grade->save();
 
+			$activity['entity_id'] = $grade->id;
+			$activity['entity_type'] = "Employee Grade";
+			$activity['details'] = empty($request->id) ? "Employee Grade is  Added" : "Employee Grade is updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
+
 			if ($request->grade_advanced == 'Yes') {
 				$request->grade_advanced = 1;
 			} else {
@@ -283,7 +289,13 @@ class GradeController extends Controller {
 	}
 
 	public function deleteEYatraGrade($grade_id) {
-		$grade = Entity::where('id', $grade_id)->forceDelete();
+		$grade = Entity::where('id', $grade_id)->first();
+		$activity['entity_id'] = $grade->id;
+		$activity['entity_type'] = "Employee Grade";
+		$activity['details'] = "Employee Grade is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$grade->forceDelete();
 		if (!$grade) {
 			return response()->json(['success' => false, 'errors' => ['Grade Not Found']]);
 		}

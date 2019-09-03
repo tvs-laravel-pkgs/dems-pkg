@@ -71,17 +71,29 @@ app.component('eyatraPettyCashList', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Petty Cash Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     dataTable.ajax.reload(function(json) {});
                 }
             });
@@ -108,11 +120,17 @@ app.component('eyatraPettyCashForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
                 return;
             }
@@ -292,11 +310,17 @@ app.component('eyatraPettyCashForm', {
             },
             ignore: '',
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Check all tabs for errors'
+                    text: 'Check all tabs for errors',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             submitHandler: function(form) {
 
@@ -319,11 +343,17 @@ app.component('eyatraPettyCashForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Petty Cash saves successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
                             $scope.$apply()
                         }

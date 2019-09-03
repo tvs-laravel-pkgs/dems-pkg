@@ -157,7 +157,7 @@ class Trip extends Model {
 			$trip->save();
 			$activity['entity_id'] = $trip->id;
 			$activity['entity_type'] = 'trip';
-			$activity['details'] = NULL;
+			$activity['details'] = 'Trip is Added';
 			//SAVING VISITS
 			if ($request->visits) {
 				$visit_count = count($request->visits);
@@ -281,6 +281,7 @@ class Trip extends Model {
 			}
 		}
 		$grade = Auth::user()->entity;
+		dd($grade, $grade->grade_id);
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
@@ -459,7 +460,7 @@ class Trip extends Model {
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = 'sdd';
+		$activity['details'] = 'Trip is Approved by Manager';
 		$activity['activity'] = "approve";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
@@ -479,7 +480,7 @@ class Trip extends Model {
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['activity'] = "reject";
-		$activity['details'] = $r->remarks;
+		$activity['details'] = 'Trip is Rejected by Manager';
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
 

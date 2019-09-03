@@ -115,6 +115,11 @@ class TripClaimController extends Controller {
 			$employee_claim->status_id = 3222;
 			$employee_claim->created_by = Auth::user()->id;
 			$employee_claim->save();
+			$activity['entity_id'] = $trip->id;
+			$activity['entity_type'] = "Trip";
+			$activity['details'] = "Trip is Claimed";
+			$activity['activity'] = "claim";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING VISITS
 			if ($request->visits) {
 				foreach ($request->visits as $visit_data) {
