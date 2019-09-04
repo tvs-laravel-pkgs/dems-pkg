@@ -354,23 +354,33 @@ app.component('eyatraOutletForm', {
                 $.each($('.sbucheckbox:checked'), function() {
                     $scope.getamountonSbu($(this).val());
                     $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
-                    $("#amount").addClass('required');
+                    // $("#amount").addClass('required');
+                    // alert($(this).val())
                 });
             } else {
                 $('.sbucheckbox').prop('checked', false);
                 $.each($('.sbucheckbox'), function() {
-                    $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide').removeClass('required error');
-                    // $(".amount").removeClass('required');
+                    $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide');
+                    // $('.sbu_table tbody label  #amount' + $(this).val()).remove(
+                    // 'This field is required');
+                    $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('error');
+                    $('.sbu_table tbody tr #amount' + $(this).val()).closest('.form-group').find('label.error').remove();
                 });
             }
         });
         $scope.getamountonSbu = function(id) {
+            // alert(id);
             if (event.target.checked == true) {
                 $("#amount" + id).removeClass('ng-hide');
                 $("#amount" + id).addClass('required');
+                $("#amount" + id).addClass('error');
             } else {
                 $("#amount" + id).addClass('ng-hide');
                 $("#amount" + id).removeClass('required');
+                $("#amount" + id).removeClass('error');
+                $("#amount" + id).closest('.form-group').find('label.error').remove();
+                // $('.sbu_table tbody tr  #amount' + $(this).val()).remove(
+                // 'label');
             }
         }
 
@@ -488,10 +498,10 @@ app.component('eyatraOutletForm', {
                     minlength: 6,
                     maxlength: 6,
                     min: 1,
-                },
-                'sbus[]': {
-                    required: true,
                 }
+                // 'sbus[]': {
+                //     required: true,
+                // }
             },
             /* messages: {
                  'code': {
