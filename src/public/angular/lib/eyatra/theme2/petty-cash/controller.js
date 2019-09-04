@@ -172,16 +172,19 @@ app.component('eyatraPettyCashForm', {
 
         //LOCAL CONVEYANCE FROM KM & TO KM AMOUNT CALC
         $(document).on('input', '.localconveyance_km', function() {
-            var localconveyance_from_km = $(this).closest('td').find('.localconveyance_from_km').val();
-            var localconveyance_to_km = $(this).closest('td').find('.localconveyance_to_km').val();
-            if (!$.isNumeric(localconveyance_from_km)) {
-                localconveyance_from_km = 0;
+            var localConveyance_amount = 0;
+            var localconveyance_from_km = $(this).closest('tr').find('.localconveyance_from_km').val();
+            var localconveyance_to_km = $(this).closest('tr').find('.localconveyance_to_km').val();
+            if (localconveyance_from_km && localconveyance_to_km) {
+                var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
+                var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
+                localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
+                console.log(' == localconveyance_from_km ==' + localconveyance_from_km + ' == localconveyance_to_km ==' + localconveyance_to_km + ' == localConveyance_from_to_diff ==' + localConveyance_from_to_diff + ' === localConveyance_amount ==' + localConveyance_amount);
+                $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
+            } else {
+                $(this).closest('tr').find('.localConveyance_amount').val('');
             }
-            if (!$.isNumeric(localconveyance_to_km)) {
-                localconveyance_to_km = 0;
-            }
-            var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
-            var localconveyance_base_per_km_amount = $(this).closest('tr').find('.base_per_km_amount').val();
+
         });
 
         self.localConveyanceCal = function() {
