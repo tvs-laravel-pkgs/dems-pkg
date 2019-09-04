@@ -171,16 +171,16 @@ class OutletController extends Controller {
 		$key = $r->key;
 		$cashier_list = Employee::select(
 
-			'users.name',
-			'employees.code',
+			'name',
+			'code',
 			'employees.id'
 		)
 			->join('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
-				$q //->where('name', 'like', '%' . $key . '%')
-				->where('code', 'like', '%' . $key . '%')
+				$q->where('code', 'like', '%' . $key . '%')
+				// ->where('name', 'like', '%' . $key . '%')
 				;
 			})
 

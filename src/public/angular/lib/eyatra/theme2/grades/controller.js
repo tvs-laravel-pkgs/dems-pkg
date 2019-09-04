@@ -220,6 +220,7 @@ app.component('eyatraGradeForm', {
                     $.each($('.' + class_name), function() {
                         $scope.getexpense_type($(this).val());
                     });
+
                 }
             }
         });
@@ -235,6 +236,8 @@ app.component('eyatraGradeForm', {
                 $(".sub_class_" + id).removeClass("required");
                 $(".sub_class_" + id).prop('required', false);
                 $(".sub_class_" + id).prop("disabled", true);
+                $('.sub_class_' + id).removeClass('error');
+                $('.sub_class_' + id).closest('.form-group').find('label.error').remove();
             }
         }
 

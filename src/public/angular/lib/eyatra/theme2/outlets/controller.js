@@ -354,15 +354,11 @@ app.component('eyatraOutletForm', {
                 $.each($('.sbucheckbox:checked'), function() {
                     $scope.getamountonSbu($(this).val());
                     $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
-                    // $("#amount").addClass('required');
-                    // alert($(this).val())
                 });
             } else {
                 $('.sbucheckbox').prop('checked', false);
                 $.each($('.sbucheckbox'), function() {
                     $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide');
-                    // $('.sbu_table tbody label  #amount' + $(this).val()).remove(
-                    // 'This field is required');
                     $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('error');
                     $('.sbu_table tbody tr #amount' + $(this).val()).closest('.form-group').find('label.error').remove();
                 });
@@ -387,19 +383,10 @@ app.component('eyatraOutletForm', {
 
         $('#select_all_lob').on('click', function() {
             if (event.target.checked == true) {
-                // $('#sbu tbody tr').html('');
-                // $('.sbu_table tbody tr #sbu' + $(this).val()).removeClass('ng-hide');
-
                 $('.lobcheckbox').prop('checked', true);
                 $.each($(".lobcheckbox:checked"), function() {
                     $scope.getSbus($(this).val())
-                    // $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
-                    // $('.sbucheckbox').prop('checked', true);
-
                 });
-
-
-
             } else {
                 var unselectall = $('.lobcheckbox').prop('checked', false)
                 if (unselectall) {
