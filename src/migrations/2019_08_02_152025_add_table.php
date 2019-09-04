@@ -48,7 +48,6 @@ class AddTable extends Migration {
 			$table->string('name', 191);
 			$table->unique(['config_type_id', 'name']);
 		});
-
 		Schema::create('users', function (Blueprint $table) {
 			$table->increments('id');
 			$table->unsignedInteger('company_id')->nullable();
@@ -60,7 +59,7 @@ class AddTable extends Migration {
 			$table->string('mobile_number', 10)->nullable();
 			$table->string('password', 255);
 			$table->string('email', 15)->nullable();
-			$table->unsignedInteger('force_password_change')->nullable();
+			$table->boolean('force_password_change')->nullable();
 			$table->string('imei', 15)->nullable();
 			$table->string('otp', 6)->nullable();
 			$table->string('mpin', 10)->nullable();
@@ -80,9 +79,81 @@ class AddTable extends Migration {
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 		});
+		Schema::create('lobs', function (Blueprint $table) {
+			$table->increments('id');
+			$table->unsignedInteger('company_id');
+			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
+			$table->string('name', 191);
+			$table->unique(['company_id', 'name']);
+			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('updated_by')->nullable();
+			$table->unsignedInteger('deleted_by')->nullable();
+			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->timestamps();
+			$table->softdeletes();
+		});
+		Schema::create('sbus', function (Blueprint $table) {
+			$table->increments('id');
+			$table->unsignedInteger('lob_id');
+			$table->foreign('lob_id')->references('id')->on('lobs')->onDelete('cascade')->onUpdate('cascade');
+			$table->string('name', 191);
+			$table->unique(['lob_id', 'name']);
+			$table->timestamps();
+			$table->softdeletes();
+			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('updated_by')->nullable();
+			$table->unsignedInteger('deleted_by')->nullable();
+			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+		});
 		Schema::table('companies', function (Blueprint $table) {
 			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+		});
+		Schema::create('entity_types', function (Blueprint $table) {
+			$table->increments('id');
+			$table->string('name', 191)->unique();
+		});
+		Schema::create('entities', function (Blueprint $table) {
+			$table->increments('id');
+			$table->unsignedInteger('company_id');
+			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
+			$table->unsignedInteger('entity_type_id');
+			$table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade')->onUpdate('cascade');
+			$table->string('name', 191);
+
+			$table->unique(['company_id', 'entity_type_id', 'name']);
+			$table->unsignedInteger('display_order')->default('9999999');
+			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('updated_by')->nullable();
+			$table->unsignedInteger('deleted_by')->nullable();
+			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->softdeletes();
+
+		});
+
+		Schema::create('designations', function (Blueprint $table) {
+			$table->increments('id');
+			$table->unsignedInteger('company_id');
+			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
+			$table->string('name', 191)->unique();
+			$table->unsignedInteger('grade_id');
+			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
+
+			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('updated_by')->nullable();
+			$table->unsignedInteger('deleted_by')->nullable();
+			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->softdeletes();
+
 		});
 	}
 
@@ -92,26 +163,22 @@ class AddTable extends Migration {
 	 * @return void
 	 */
 	public function down() {
-
+		Schema::dropIfExists('designations');
+		Schema::table('entity_types', function (Blueprint $table) {
+			$table->dropUnique('entity_types_name_unique');
+		});
+		Schema::table('entities', function (Blueprint $table) {
+			$table->dropUnique('entities_company_id_entity_type_id_name_unique');
+		});
 		Schema::table('companies', function (Blueprint $table) {
 			$table->dropForeign('companies_created_by_foreign');
 			$table->dropForeign('companies_updated_by_foreign');
 			$table->dropForeign('companies_deleted_by_foreign');
 			$table->dropUnique('companies_code_unique');
-			$table->dropUnique('companies_name_unique');
+
 			$table->dropUnique('companies_cin_number_unique');
 			$table->dropUnique('companies_gst_number_unique');
-
 		});
-		Schema::dropIfExists('companies');
-		Schema::drop('config_types');
-
-		Schema::table('configs', function (Blueprint $table) {
-			$table->dropForeign('configs_config_type_id_foreign');
-			$table->dropUnique('configs_config_type_id_name_unique');
-
-		});
-		Schema::dropIfExists('configs');
 		Schema::table('users', function (Blueprint $table) {
 			$table->dropForeign('users_company_id_foreign');
 			$table->dropForeign('users_user_type_id_foreign');
@@ -122,8 +189,21 @@ class AddTable extends Migration {
 			$table->dropUnique('users_company_id_mobile_number_unique');
 
 		});
+		Schema::table('configs', function (Blueprint $table) {
+			$table->dropForeign('configs_config_type_id_foreign');
+			$table->dropUnique('configs_config_type_id_name_unique');
+
+		});
 		Schema::dropIfExists('users');
+		Schema::dropIfExists('sbus');
+		Schema::dropIfExists('lobs');
 		Schema::dropIfExists('countries');
+		Schema::dropIfExists('config_types');
+		Schema::dropIfExists('companies');
+		Schema::dropIfExists('configs');
+		Schema::dropIfExists('entities');
+		Schema::dropIfExists('entity_types');
+		Schema::dropIfExists('companies');
 		//
 	}
 }
