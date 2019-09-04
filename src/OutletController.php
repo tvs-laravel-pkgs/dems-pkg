@@ -262,9 +262,9 @@ class OutletController extends Controller {
 			$address->save();
 			//dd($address);
 			//SAVING OUTLET BUDGET
-			//$sbu_ids = array_column($request->sbus, 'sbu_id');
+			$sbu_ids = array_column($request->sbus, 'sbu_id');
 			// dd($sbu_ids);
-			/*if (count($request->sbus) > 0) {
+			if (count($request->sbus) > 0) {
 				foreach ($request->sbus as $sbu) {
 					if (!isset($sbu['sbu_id'])) {
 						continue;
@@ -273,7 +273,7 @@ class OutletController extends Controller {
 						'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
 					]);
 				}
-			}*/
+			}
 			DB::commit();
 			$request->session()->flash('success', 'outlet saved successfully!');
 			if (empty($request->id)) {
