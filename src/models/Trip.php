@@ -558,9 +558,9 @@ class Trip extends Model {
 					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
 					$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
 					$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
-					$loadge_eligible_amount = $lodging_expense_type ? $lodging_expense_type->eligible_amount : '0.00';
+					$loadge_eligible_amount = $lodging_expense_type ? IND_money_format($lodging_expense_type->eligible_amount) : '0.00';
 					$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
-					$local_travel_eligible_amount = $local_travel_expense_type ? $local_travel_expense_type->eligible_amount : '0.00';
+					$local_travel_eligible_amount = $local_travel_expense_type ? IND_money_format($local_travel_expense_type->eligible_amount) : '0.00';
 
 					$lodge_cities[$visit_key]['city'] = $visit->toCity ? $visit->toCity->name : '';
 					$lodge_cities[$visit_key]['city_id'] = $visit->to_city_id;
