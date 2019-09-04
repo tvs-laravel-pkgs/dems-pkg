@@ -322,7 +322,7 @@ class EmployeeController extends Controller {
 	public function deleteEYatraEmployee($employee_id) {
 		$user = User::withTrashed()->where('entity_id', $employee_id)->first();
 
-		$e_name = EntityType::where('id', $entity->entity_type_id)->first();
+		$e_name = DB::table('entity_types')->where('id', $user->entity_type_id)->first();
 		$activity['entity_id'] = $user->id;
 		$activity['entity_type'] = "Employee";
 		$activity['details'] = "Employee is deleted";

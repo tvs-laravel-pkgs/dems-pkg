@@ -153,6 +153,7 @@ class OutletController extends Controller {
 		$this->data['outlet'] = $outlet;
 		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
+		//dd($outlet);
 		return response()->json($this->data);
 	}
 	public function eyatraOutletFilterData() {
@@ -169,6 +170,7 @@ class OutletController extends Controller {
 	public function searchCashier(Request $r) {
 		$key = $r->key;
 		$cashier_list = Employee::select(
+
 			'users.name',
 			'employees.code',
 			'employees.id'
@@ -177,8 +179,8 @@ class OutletController extends Controller {
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
-				$q->where('name', 'like', '%' . $key . '%')
-					->orWhere('code', 'like', '%' . $key . '%')
+				$q //->where('name', 'like', '%' . $key . '%')
+				->where('code', 'like', '%' . $key . '%')
 				;
 			})
 
@@ -296,6 +298,7 @@ class OutletController extends Controller {
 			'Sbu',
 			'Sbu.lob',
 			'employee',
+
 			'employee.user',
 		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
@@ -317,6 +320,8 @@ class OutletController extends Controller {
 		$this->data['action'] = 'View';
 		$this->data['outlet'] = $outlet;
 		$this->data['success'] = true;
+		//dd($this->data);
+
 		return response()->json($this->data);
 	}
 	public function deleteEYatraOutlet($outlet_id) {

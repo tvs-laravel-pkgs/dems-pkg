@@ -1,6 +1,7 @@
 app.component('eyatraEmployees', {
     templateUrl: eyatra_employee_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
+        console.log('s');
         var self = this;
         self.hasPermission = HelperService.hasPermission;
 
@@ -138,7 +139,7 @@ app.component('eyatraEmployees', {
 app.component('eyatraEmployeeForm', {
     templateUrl: employee_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.employee_id) == 'undefined' ? employee_form_data_url : employee_form_data_url + '/' + $routeParams.employee_id;
+        $form_data_url = typeof($routeParams.employee_id) == 'undefined' ? employee_form_data_url : employee_form_data_url + '/' + $routeParams.employee_id
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -281,7 +282,7 @@ app.component('eyatraEmployeeForm', {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Kindly check in each tab to fix errors'
+                    text: 'Kindly check in each tab to fix errors',
                     animation: {
                         speed: 500 // unavailable - no need
                     },
