@@ -171,16 +171,16 @@ class OutletController extends Controller {
 		$key = $r->key;
 		$cashier_list = Employee::select(
 
-			'users.name',
-			'employees.code',
+			'name',
+			'code',
 			'employees.id'
 		)
 			->join('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
-				$q //->where('name', 'like', '%' . $key . '%')
-				->where('code', 'like', '%' . $key . '%')
+				$q->where('code', 'like', '%' . $key . '%')
+				// ->where('name', 'like', '%' . $key . '%')
 				;
 			})
 
@@ -264,9 +264,9 @@ class OutletController extends Controller {
 			$address->save();
 			//dd($address);
 			//SAVING OUTLET BUDGET
-			//$sbu_ids = array_column($request->sbus, 'sbu_id');
+			$sbu_ids = array_column($request->sbus, 'sbu_id');
 			// dd($sbu_ids);
-			/*if (count($request->sbus) > 0) {
+			if (count($request->sbus) > 0) {
 				foreach ($request->sbus as $sbu) {
 					if (!isset($sbu['sbu_id'])) {
 						continue;
@@ -275,7 +275,7 @@ class OutletController extends Controller {
 						'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
 					]);
 				}
-			}*/
+			}
 			DB::commit();
 			$request->session()->flash('success', 'outlet saved successfully!');
 			if (empty($request->id)) {
