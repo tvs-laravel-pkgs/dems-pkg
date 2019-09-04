@@ -199,7 +199,11 @@ class StateController extends Controller {
 
 			$state->fill($request->all());
 			$state->save();
-
+			$activity['entity_id'] = $state->id;
+			$activity['entity_type'] = "State";
+			$activity['details'] = empty($request->id) ? "State is added" : "State is updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING state_agent_travel_mode
 			if (count($request->travel_modes) > 0) {
 				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
@@ -274,6 +278,11 @@ class StateController extends Controller {
 	// }
 	public function deleteEYatraState($state_id) {
 		$state = Nstate::withTrashed()->where('id', $state_id)->first();
+		$activity['entity_id'] = $state->id;
+		$activity['entity_type'] = "State";
+		$activity['details'] = empty($request->id) ? "State is added" : "State is updated";
+		$activity['activity'] = empty($request->id) ? "add" : "edit";
+		$activity_log = ActivityLog::saveLog($activity);
 		$state->forceDelete();
 		if (!$state) {
 			return response()->json(['success' => false, 'errors' => ['State not found']]);

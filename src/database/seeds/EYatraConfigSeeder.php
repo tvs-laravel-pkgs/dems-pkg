@@ -402,7 +402,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 519,
 			],
 			3310 => [
-				'name' => 'City Categories',
+				'name' => 'City Category',
 				'config_type_id' => 519,
 			],
 			3311 => [
@@ -415,6 +415,14 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3313 => [
 				'name' => 'Agent Claims',
+				'config_type_id' => 519,
+			],
+			3314 => [
+				'name' => 'Rejection Reasons',
+				'config_type_id' => 519,
+			],
+			3314 => [
+				'name' => 'COA Sub Groups',
 				'config_type_id' => 519,
 			],
 
