@@ -1,6 +1,7 @@
 app.component('eyatraEmployees', {
     templateUrl: eyatra_employee_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
+        console.log('s');
         var self = this;
         self.hasPermission = HelperService.hasPermission;
 
@@ -98,17 +99,29 @@ app.component('eyatraEmployees', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Employee Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#delete_emp').modal('hide');
                     dataTable.ajax.reload(function(json) {});
                 }
@@ -126,7 +139,7 @@ app.component('eyatraEmployees', {
 app.component('eyatraEmployeeForm', {
     templateUrl: employee_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
-        $form_data_url = typeof($routeParams.employee_id) == 'undefined' ? employee_form_data_url : employee_form_data_url + '/' + $routeParams.employee_id;
+        $form_data_url = typeof($routeParams.employee_id) == 'undefined' ? employee_form_data_url : employee_form_data_url + '/' + $routeParams.employee_id
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -138,11 +151,17 @@ app.component('eyatraEmployeeForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/employees')
                 $scope.$apply()
                 return;
@@ -260,11 +279,17 @@ app.component('eyatraEmployeeForm', {
         var form_id = '#employee_form';
         var v = jQuery(form_id).validate({
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Kindly check in each tab to fix errors'
+                    text: 'Kindly check in each tab to fix errors',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             errorPlacement: function(error, element) {
                 error.insertAfter(element)
@@ -385,11 +410,17 @@ app.component('eyatraEmployeeForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Employee updated successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/employees')
                             $scope.$apply()
                         }

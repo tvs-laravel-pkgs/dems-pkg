@@ -56,19 +56,31 @@ app.component('eyatraStates', {
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'State Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'State not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -90,11 +102,17 @@ app.component('eyatraStateForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/states')
                 $scope.$apply()
                 return;
@@ -151,15 +169,15 @@ app.component('eyatraStateForm', {
         // }
 
         // $(document).on('click', '#submit', function() {
-            //     //     var id = $(this).val();
-            //     //     if ($(this).prop("checked") == true) {
-            //     $(".sc_").prop('required', true);
-            //     $(".sc_").prop('number', true);
-            //     $(".sc_").prop('min', 1);
-            //     //         $(".agent_select_" + id).prop('required', true);
-            //     // }
+        //     //     var id = $(this).val();
+        //     //     if ($(this).prop("checked") == true) {
+        //     $(".sc_").prop('required', true);
+        //     $(".sc_").prop('number', true);
+        //     $(".sc_").prop('min', 1);
+        //     //         $(".agent_select_" + id).prop('required', true);
+        //     // }
 
-            // });
+        // });
 
         // $('#travel_mode').on('click', function() {
         //     if (event.target.checked == true) {
@@ -220,11 +238,17 @@ app.component('eyatraStateForm', {
                 }
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             ignore: '',
             rules: {
@@ -242,10 +266,10 @@ app.component('eyatraStateForm', {
                     required: true,
                 },
                 // 'service_charge[]': {
-    //     required: true,
-    //     number: true,
-    //     min: 1,
-    // },
+                //     required: true,
+                //     number: true,
+                //     min: 1,
+                // },
                 // 'travel_modes[{{travel_mode.id}}][agent_id]': {
                 //     required: true,
                 // },
@@ -266,8 +290,8 @@ app.component('eyatraStateForm', {
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 // 'travel_modes[]': {
-    //     required: 'Travel mode required',
-    // }
+                //     required: 'Travel mode required',
+                // }
             },
             submitHandler: function(form) {
 
@@ -290,12 +314,18 @@ app.component('eyatraStateForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'State saved successfully',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/states')
                             $scope.$apply()
                         }

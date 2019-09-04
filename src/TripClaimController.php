@@ -33,7 +33,7 @@ class TripClaimController extends Controller {
 				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
@@ -83,6 +83,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
+		// dd(Auth::user()->id);
 		// dd($request->all());
 		//validation
 		try {
@@ -114,6 +115,11 @@ class TripClaimController extends Controller {
 			$employee_claim->status_id = 3222;
 			$employee_claim->created_by = Auth::user()->id;
 			$employee_claim->save();
+			$activity['entity_id'] = $trip->id;
+			$activity['entity_type'] = "Trip";
+			$activity['details'] = "Trip is Claimed";
+			$activity['activity'] = "claim";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING VISITS
 			if ($request->visits) {
 				foreach ($request->visits as $visit_data) {
@@ -135,7 +141,7 @@ class TripClaimController extends Controller {
 						$visit_booking->service_charge = '0.00';
 						$visit_booking->total = $visit_data['total'];
 						$visit_booking->paid_amount = $visit_data['total'];
-						$visit_booking->created_by = Auth::user()->entity_id;
+						$visit_booking->created_by = Auth::user()->id;
 						$visit_booking->status_id = 3241; //Claimed
 						$visit_booking->save();
 					}

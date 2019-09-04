@@ -96,20 +96,32 @@ app.component('eyatraAgents', {
                 agent_delete_url + '/' + id,
             ).then(function(response) {
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Agent Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#agent_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agents');
                     // $scope.$apply();
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Agent not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -131,13 +143,19 @@ app.component('eyatraAgentForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/agents')
-                $scope.$apply()
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/eyatra/agents');
+                $scope.$apply();
                 return;
             }
             self.agent = response.data.agent;
@@ -493,11 +511,14 @@ app.component('eyatraAgentForm', {
 
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: 'You have errors,Please check all tabs'
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             submitHandler: function(form) {
 
@@ -520,13 +541,19 @@ app.component('eyatraAgentForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/agents')
-                            $scope.$apply()
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/eyatra/agents');
+                            $scope.$apply();
                         }
                     })
                     .fail(function(xhr) {
