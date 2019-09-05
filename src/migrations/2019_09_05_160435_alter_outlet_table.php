@@ -4,15 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AlterTableUsers extends Migration {
+class AlterOutletTable extends Migration {
 	/**
 	 * Run the migrations.
 	 *
 	 * @return void
 	 */
 	public function up() {
-		Schema::table('users', function (Blueprint $table) {
-			$table->string('email', 15)->nullable()->after('password');
+		Schema::table('outlets', function (Blueprint $table) {
+			$table->tinyInteger('claim_req_approver')->nullable()->after('sbu_id');
 		});
 	}
 
@@ -22,6 +22,8 @@ class AlterTableUsers extends Migration {
 	 * @return void
 	 */
 	public function down() {
-		//
+		Schema::table('outlets', function (Blueprint $table) {
+			$table->dropColumn('claim_req_approver');
+		});
 	}
 }

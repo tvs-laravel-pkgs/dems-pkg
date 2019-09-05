@@ -183,10 +183,12 @@ app.component('eyatraTripForm', {
                     booking_method: 'Self'
                 });
             }
+
             $rootScope.loading = false;
             $scope.showBank = false;
             $scope.showCheque = false;
             $scope.showWallet = false;
+
 
         });
         $("#advance").hide().prop('disabled', true);
@@ -221,7 +223,14 @@ app.component('eyatraTripForm', {
                 booking_method: 'Self',
                 preferred_travel_modes: '',
             });
+            $('.add_multi_trip').show();
+
         }
+        // $('.visits-wrp').hide();
+
+        // $(".add_visit").on('click', function() {
+ //     $('.add_multi_trip').hide();
+ // });
 
         $scope.trip_mode = function(id) {
             if (id == 1) {
@@ -229,6 +238,7 @@ app.component('eyatraTripForm', {
                 $scope.round_trip = false;
                 $scope.multi_trip = false;
             } else if (id == 2) {
+
                 $scope.single_trip = false;
                 $scope.round_trip = true;
                 $scope.multi_trip = false;
@@ -236,6 +246,8 @@ app.component('eyatraTripForm', {
                 $scope.round_trip = false;
                 $scope.single_trip = false;
                 $scope.multi_trip = true;
+
+                $('.add_multi_trip').hide();
             }
         }
 

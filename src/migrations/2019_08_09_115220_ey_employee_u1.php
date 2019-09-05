@@ -24,7 +24,7 @@ class EyEmployeeU1 extends Migration {
 	 */
 	public function down() {
 		Schema::table('employees', function (Blueprint $table) {
-			$table->dropColumn('name');
+			//$table->dropColumn('name');
 		});
 
 	}

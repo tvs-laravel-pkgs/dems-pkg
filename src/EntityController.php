@@ -137,9 +137,10 @@ class EntityController extends Controller {
 			$entity->save();
 			//dd('ss');
 			$e_name = EntityType::where('id', $request->type_id)->first();
+			//dd($e_name);
 			$activity['entity_id'] = $entity->id;
 			$activity['entity_type'] = $e_name->name;
-			$activity['details'] = empty($request->id) ? $e_name->name . " Added" : $e_name->name . " updated";
+			$activity['details'] = empty($request->id) ? $e_name->name . " is Added" : $e_name->name . " is updated";
 			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
 			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
@@ -159,7 +160,7 @@ class EntityController extends Controller {
 		$e_name = EntityType::where('id', $entity->entity_type_id)->first();
 		$activity['entity_id'] = $entity->id;
 		$activity['entity_type'] = $e_name->name;
-		$activity['details'] = $e_name->name . " deleted";
+		$activity['details'] = $e_name->name . " is deleted";
 		$activity['activity'] = "Delete";
 		$activity_log = ActivityLog::saveLog($activity);
 		$entity->forceDelete();

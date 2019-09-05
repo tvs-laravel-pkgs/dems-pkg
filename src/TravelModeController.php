@@ -5,35 +5,38 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
 use Validator;
 use Yajra\Datatables\Datatables;
 
-class CoaController extends Controller {
+class TravelModeController extends Controller {
 
-	public function listEYatraCoaNg(Request $r) {
-
+	public function listEYatraTravelMode(Request $r) {
 		$entities = Entity::withTrashed()->from('entities')
 			->select(
 				'entities.id',
 				'entities.entity_type_id',
 				'entities.name',
+				'c.name as category_name',
 				'users.username as created_by',
-				'entity_types.name as entity_type',
 				DB::raw('IF(updater.username IS NULL,"---",updater.username) as updated_by'),
 				DB::raw('IF(deactivator.username IS NULL,"---",deactivator.username) as deleted_by'),
 				'entities.created_at',
+				//'entities.updated_at',
 				DB::raw('IF(entities.updated_at IS NULL,"---",entities.updated_at) as updated_at1'),
 				DB::raw('IF(entities.deleted_at IS NULL,"---",entities.deleted_at) as deleted_at'),
-				DB::raw('IF(entities.deleted_at IS NULL,"Active","Inactive") as status')
+				DB::raw('IF(entities.deleted_at IS NULL,"ACTIVE","INACTIVE") as status')
 			)
 
-			->join('entity_types', 'entity_types.id', '=', 'entities.entity_type_id')
 			->join('users', 'users.id', '=', 'entities.created_by')
 			->leftjoin('users as updater', 'updater.id', '=', 'entities.updated_by')
 			->leftjoin('users as deactivator', 'deactivator.id', '=', 'entities.deleted_by')
+			->leftjoin('travel_mode_category_type as tm', 'tm.travel_mode_id', '=', 'entities.id')
+			->leftjoin('configs as c', 'c.id', '=', 'tm.category_id')
 			->where('entities.company_id', Auth::user()->company_id)
-			->whereIn('entities.entity_type_id', [513, 514, 515, 516, 517])
+			->where('entities.entity_type_id', 502)
+			->where('c.config_type_id', 525)
 			->orderBy('entities.id', 'desc');
 
 		// dd($entities->get());
@@ -45,10 +48,11 @@ class CoaController extends Controller {
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/coa-sub-master/edit/' . $entity->id . '">
+
+				<a href="#!/eyatra/travel-mode/edit/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_coa_modal" onclick="angular.element(this).scope().deleteCoaData(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
+				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_travel_mode" onclick="angular.element(this).scope().deleteTravelMode(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
 
 			})
 			->addColumn('status', function ($entity) {
@@ -62,31 +66,34 @@ class CoaController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraCoaFormDataNg($entity_id = NULL) {
+	public function eyatraTravelModeFormData($travel_mode_id = NULL) {
 
-		if (!$entity_id) {
+		if (!$travel_mode_id) {
 			$entity = new Entity;
 			$this->data['action'] = 'Add';
 			$entity->status = 'Active';
 
 		} else {
-			$entity = Entity::withTrashed()->find($entity_id);
-
+			$entity = Entity::withTrashed()->find($travel_mode_id);
 			if (!$entity) {
-				return response()->json(['success' => false, 'error' => 'Entity not found']);
+				return response()->json(['success' => false, 'error' => 'Travel Mode not found']);
 			}
+
 			$entity->status = $entity->deleted_at == NULL ? 'Active' : 'Inactive';
 			$this->data['action'] = 'Edit';
 		}
-		$entity_type_ids = [513, 514, 515, 516, 517];
-		$this->data['reject_type_list'] = DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get();
+		$type_list = collect(Config::categoryList())->prepend(['id' => '', 'name' => 'Select Category']);
+
+		$this->data['extras'] = [
+			'category_type_list' => $type_list,
+		];
 
 		$this->data['entity'] = $entity;
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
-	public function saveEYatraCoaNg(Request $request) {
+	public function saveEYatraTravelMode(Request $request) {
 		// dd($request->all());
 
 		try {
@@ -98,7 +105,7 @@ class CoaController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'name' => [
 					'required',
-					'unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,' . $request->reject_type,
+					'unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,' . 502,
 					'max:191',
 				],
 
@@ -110,7 +117,7 @@ class CoaController extends Controller {
 			//validate
 
 			DB::beginTransaction();
-
+			//dd($request->all());
 			if (!$request->id) {
 				$entity = new Entity;
 				$entity->created_by = Auth::user()->id;
@@ -119,13 +126,13 @@ class CoaController extends Controller {
 			} else {
 				$entity = Entity::withTrashed()->find($request->id);
 				if (!$entity) {
-					return response()->json(['success' => false, 'errors' => ['Entity not found']]);
+					return response()->json(['success' => false, 'errors' => ['Travel Mode not found']]);
 				}
 				$entity->updated_by = Auth::user()->id;
 			}
 
 			$entity->company_id = Auth::user()->company_id;
-			$entity->entity_type_id = $request->reject_type;
+			$entity->entity_type_id = 502;
 			$entity->name = $request->name;
 
 			if ($request->status == 0) {
@@ -136,20 +143,20 @@ class CoaController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
-			//$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
-			//dd($e_name->name);
+			$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
 			$activity['entity_id'] = $entity->id;
-			$activity['entity_type'] = "COA Sub Groups";
-			$activity['details'] = empty($request->id) ? "COA Sub Group is added" : "COA Sub Group is updated";
+			$activity['entity_type'] = "Travel Modes"; //entity_type_id =511
+			$activity['details'] = empty($request->id) ? "Travel Mode is added" : "Travel Mode is Updated";
 			$activity['activity'] = empty($request->id) ? "add" : "edit";
-			//dd($activity);
-
 			$activity_log = ActivityLog::saveLog($activity);
+			//SAVING travel_mode_category
+
+			$entity->categories()->sync($request->category_id);
 			DB::commit();
 			if (empty($request->id)) {
-				return response()->json(['success' => true, 'message' => 'Coa added successfully']);
+				return response()->json(['success' => true, 'message' => 'Travel Mode added successfully']);
 			} else {
-				return response()->json(['success' => true, 'message' => 'Coa updated successfully']);
+				return response()->json(['success' => true, 'message' => 'Travel Mode updated successfully']);
 			}
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -157,16 +164,17 @@ class CoaController extends Controller {
 		}
 	}
 
-	public function deleteEYatraCoaNg($entity_id) {
-		$entity = Entity::withTrashed()->where('id', $entity_id)->first();
+	public function deleteEYatraTravelMode($travel_mode_id) {
+		$entity = Entity::withTrashed()->where('id', $travel_mode_id)->first();
+		$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
 		$activity['entity_id'] = $entity->id;
-		$activity['entity_type'] = "COA Sub Groups";
-		$activity['details'] = "COA Sub Group is deleted";
-		$activity['activity'] = "Delete";
+		$activity['entity_type'] = "Travel Modes"; //entity_type_id =511
+		$activity['details'] = "Travel Mode is deleted";
+		$activity['activity'] = "delete";
 		$activity_log = ActivityLog::saveLog($activity);
 		$entity->forceDelete();
 		if (!$entity) {
-			return response()->json(['success' => false, 'errors' => ['Entity not found']]);
+			return response()->json(['success' => false, 'errors' => ['Travel Mode not found']]);
 		}
 
 		return response()->json(['success' => true]);

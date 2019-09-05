@@ -17,9 +17,7 @@ class AlterUsersTable extends Migration {
 		Schema::table('agents', function (Blueprint $table) {
 			$table->dropColumn('name');
 		});
-		Schema::table('users', function (Blueprint $table) {
-			$table->string('name', 255)->nullable()->after('username');
-		});
+
 	}
 
 	/**
@@ -28,8 +26,6 @@ class AlterUsersTable extends Migration {
 	 * @return void
 	 */
 	public function down() {
-		Schema::table('users', function (Blueprint $table) {
-			$table->dropColumn('name');
-		});
+
 	}
 }

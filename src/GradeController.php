@@ -8,6 +8,7 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -147,8 +148,7 @@ class GradeController extends Controller {
 					$local_travel_types_list[$local_travel_type->id]->checked = true;
 				}
 			}
-
-			$this->data['grade_advanced'] = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
+			$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity')->first();
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
@@ -183,17 +183,21 @@ class GradeController extends Controller {
 
 			if (!$request->id) {
 				$grade = new Entity;
+				$grade_details = new GradeAdvancedEligiblity;
+				// $grade_eligiblity = new GradeAdvancedEligiblity;
 				$grade->created_by = Auth::user()->id;
 				$grade->created_at = Carbon::now();
 				$grade->updated_at = NULL;
 
 			} else {
 				$grade = Entity::withTrashed()->find($request->id);
+				$grade_details = GradeAdvancedEligiblity::firstOrNew(['grade_id' => $request->id]);
+				// $grade_eligiblity = GradeAdvancedEligiblity::find($request->id);
 				$grade->expenseTypes()->sync([]);
 				$grade->tripPurposes()->sync([]);
 				$grade->travelModes()->sync([]);
 				$grade->localTravelModes()->sync([]);
-				$grade->gradeEligibility()->sync([]);
+				// $grade->gradeEligibility()->sync([]);
 				$grade->updated_by = Auth::user()->id;
 				$grade->updated_at = Carbon::now();
 
@@ -216,13 +220,28 @@ class GradeController extends Controller {
 			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
 			$activity_log = ActivityLog::saveLog($activity);
 
-			if ($request->grade_advanced == 'Yes') {
-				$request->grade_advanced = 1;
-			} else {
-				$request->grade_advanced = 0;
-			}
+			// if ($request->grade_advanced == 'Yes') {
+			// 	$request->grade_advanced = 1;
+			// } else {
+			// 	$request->grade_advanced = 0;
+			// }
 
-			$grade->gradeEligibility()->sync($request->grade_advanced);
+			//Update Grade Details
+			$grade_details->grade_id = $grade->id;
+			if ($request->grade_advanced == 'Yes') {
+				$grade_details->advanced_eligibility = 1;
+			} else {
+				$grade_details->advanced_eligibility = 0;
+			}
+			$grade_details->stay_type_disc = $request->discount_percentage;
+			if ($request->deviation_eligiblity == 'Yes') {
+				$grade_details->deviation_eligiblity = 1;
+			} else {
+				$grade_details->deviation_eligiblity = 2;
+			}
+			$grade_details->save();
+
+			// $grade->gradeEligibility()->sync($request->grade_advanced);
 
 			//Save Expense Mode
 			if (count($request->expense_types) > 0) {

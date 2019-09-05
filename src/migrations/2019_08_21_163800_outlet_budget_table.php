@@ -13,7 +13,7 @@ class OutletBudgetTable extends Migration {
 	public function up() {
 		Schema::create('outlet_budget', function (Blueprint $table) {
 			$table->unsignedInteger('outlet_id');
-			$table->integer('sbu_id');
+			$table->unsignedInteger('sbu_id');
 			$table->decimal('amount', 16, 2);
 			$table->foreign('outlet_id')->references('id')->on('outlets')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('sbu_id')->references('id')->on('sbus')->onDelete('cascade')->onUpdate('cascade');

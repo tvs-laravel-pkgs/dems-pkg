@@ -175,9 +175,13 @@ app.component('eyatraOutletForm', {
                 $scope.$apply()
                 return;
             }
+            console.log(response);
             self.outlet = response.data.outlet;
-            console.log(response.data.outlet.amount_limit);
             self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
+            self.amount_eligible = response.data.amount_eligible;
+            self.amount_approver = response.data.amount_approver;
+            console.log(response.data.outlet.amount_limit);
+            // self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
@@ -187,7 +191,7 @@ app.component('eyatraOutletForm', {
 
             if (self.action == 'Edit') {
                 $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
-                $scope.AmountEligible(self.outlet.amount_eligible);
+                $scope.AmountEligible(self.amount_eligible);
             }
 
             $rootScope.loading = false;
@@ -598,10 +602,16 @@ app.component('eyatraOutletView', {
             outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
             self.outlet = response.data.outlet;
+            console.log(self.outlet);
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
             self.amount = response.data.amount;
             self.action = response.data.action;
+            if (self.outlet.claim_req_approver == 0) {
+                self.claim_req_approver = 'Financier';
+            } else {
+                self.claim_req_approver = 'Cashier';
+            }
         });
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");

@@ -140,9 +140,9 @@ class RejectionController extends Controller {
 			$entity->save();
 			$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
 			$activity['entity_id'] = $entity->id;
-			$activity['entity_type'] = "Budget not allocated"; //entity_type_id =511
-			$activity['details'] = empty($request->id) ? "Rejection Reason added" : "Rejection Reason Updated";
-			$activity['activity'] = empty($request->id) ? "add" : "Update";
+			$activity['entity_type'] = "Rejection Reasons"; //entity_type_id =511
+			$activity['details'] = empty($request->id) ? "Rejection Reason is added" : "Rejection Reason is Updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
 			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
@@ -157,8 +157,14 @@ class RejectionController extends Controller {
 	}
 
 	public function deleteEYatraEntityNg($entity_id) {
-		$entity = Entity::withTrashed()->where('id', $entity_id)->forceDelete();
-
+		$entity = Entity::withTrashed()->where('id', $entity_id)->first();
+		$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
+		$activity['entity_id'] = $entity->id;
+		$activity['entity_type'] = "Rejection Reasons"; //entity_type_id =511
+		$activity['details'] = "Rejection Reason is deleted";
+		$activity['activity'] = "delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$entity->forceDelete();
 		if (!$entity) {
 			return response()->json(['success' => false, 'errors' => ['Entity not found']]);
 		}
