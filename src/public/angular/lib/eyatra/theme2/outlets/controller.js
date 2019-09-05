@@ -178,6 +178,7 @@ app.component('eyatraOutletForm', {
             self.outlet = response.data.outlet;
             console.log(response.data.outlet.amount_limit);
             self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
+            self.amount_eligible = response.data.amount_eligible;
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
