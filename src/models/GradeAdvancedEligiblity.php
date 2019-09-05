@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GradeAdvancedEligiblity extends Model {
 	protected $table = 'grade_advanced_eligibility';
-
+	public $timestamps = false;
 	protected $fillable = [
 		'grade_id',
 		'advanced_eligibility',
