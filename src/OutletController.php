@@ -114,9 +114,9 @@ class OutletController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 			if ($outlet->amount_eligible == 1) {
-				$this->data['amount_eligible'] = 'Yes';
+				$this->data['amount_eligiblity'] = 'Yes';
 			} else {
-				$this->data['amount_eligible'] = 'No';
+				$this->data['amount_eligiblity'] = 'No';
 			}
 			if ($outlet->claim_req_approver == 1) {
 				$this->data['amount_approver'] = 'Cashier';
@@ -246,12 +246,11 @@ class OutletController extends Controller {
 				$outlet->deleted_at = date('Y-m-d H:i:s');
 				$outlet->deleted_by = Auth::user()->id;
 			}
-			if ($request->amount_eligible == 1) {
-				$outlet->amount_eligible = 1;
-				$outlet->amount_limit = $request->amount_limit;
-			} else {
+			if ($request->amount_eligiblity == 'No') {
 				$outlet->amount_eligible = 0;
 				$outlet->amount_limit = NULL;
+			} else {
+				$outlet->amount_eligible = 1;
 			}
 			if ($request->amount_approver == 'Cashier') {
 				$outlet->claim_req_approver = 1;

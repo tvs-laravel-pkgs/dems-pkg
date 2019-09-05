@@ -16,7 +16,20 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit Entity Master',
 
     }).
+// //TRAVEL MODE
+// when('/eyatra/tr/list/:entity_type_id', {
+//         template: '<eyatra-entity-list></eyatra-entity-list>',
+//         title: 'Entity Master List',
+//     }).
+//     when('/eyatra/entity/add/:entity_type_id', {
+//         template: '<eyatra-entity-form></eyatra-entity-form>',
+//         title: 'Add Entity Master',
+//     }).
+//     when('/eyatra/entity/edit/:entity_type_id/:entity_id', {
+//         template: '<eyatra-entity-form></eyatra-entity-form>',
+//         title: 'Edit Entity Master',
 
+//     }).
 
     //REJECTION REASON
     when('/eyatra/rejection-reason/list', {
