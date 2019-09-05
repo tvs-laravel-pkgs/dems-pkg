@@ -33,8 +33,12 @@ class Entity extends Model {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_travel_mode', 'grade_id', 'travel_mode_id');
 	}
 
+	// public function gradeEligibility() {
+	// 	return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_advanced_eligibility', 'grade_id', 'advanced_eligibility');
+	// }
+
 	public function gradeEligibility() {
-		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_advanced_eligibility', 'grade_id', 'advanced_eligibility');
+		return $this->hasOne('Uitoux\EYatra\GradeAdvancedEligiblity', 'grade_id');
 	}
 
 	public static function purposeList() {
