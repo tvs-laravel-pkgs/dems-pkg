@@ -19,7 +19,9 @@ class Config extends Model {
 	public static function expenseList() {
 		return Config::where('config_type_id', 500)->select('id', 'name')->get()->keyBy('id');
 	}
-
+	public static function categoryList() {
+		return Config::where('config_type_id', 525)->select('id', 'name')->get()->keyBy('id');
+	}
 	public static function paymentModeList() {
 		return Config::where('config_type_id', 514)->select('id', 'name')->get();
 	}
