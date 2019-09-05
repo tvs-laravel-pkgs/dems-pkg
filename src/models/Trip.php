@@ -539,7 +539,7 @@ class Trip extends Model {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
 		}
-		if (count($trip->lodgings) > 0) {
+		if (count($trip->localTravels) > 0) {
 			$data['action'] = 'Edit';
 			$travelled_cities_with_dates = array();
 			$lodge_cities = array();
@@ -550,6 +550,7 @@ class Trip extends Model {
 			// $lodgings = array();
 			$travelled_cities_with_dates = array();
 			$lodge_cities = array();
+
 			// $boarding_to_date = '';
 			if (!empty($trip->visits)) {
 				foreach ($trip->visits as $visit_key => $visit) {
@@ -562,10 +563,6 @@ class Trip extends Model {
 					$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
 					$local_travel_eligible_amount = $local_travel_expense_type ? $local_travel_expense_type->eligible_amount : '0.00';
 
-					$lodge_cities[$visit_key]['city'] = $visit->toCity ? $visit->toCity->name : '';
-					$lodge_cities[$visit_key]['city_id'] = $visit->to_city_id;
-					$lodge_cities[$visit_key]['loadge_eligible_amount'] = $loadge_eligible_amount;
-
 					$next = $visit_key;
 					$next++;
 					// $lodgings[$visit_key]['city'] = $visit['to_city'];
@@ -573,11 +570,19 @@ class Trip extends Model {
 					if (isset($trip->visits[$next])) {
 						// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
 						$next_departure_date = $trip->visits[$next]->departure_date;
+						$next_arrival_date = $trip->visits[$next]->arrival_date;
+
+						$lodge_cities[$visit_key]['city'] = $visit->toCity ? $visit->toCity->name : '';
+						$lodge_cities[$visit_key]['city_id'] = $visit->to_city_id;
+						$lodge_cities[$visit_key]['loadge_eligible_amount'] = $loadge_eligible_amount;
+
 					} else {
 						// $lodgings[$visit_key]['checkout_disable'] = $visit['arrival_date'];
 						$next_departure_date = $visit->departure_date;
+						$next_arrival_date = $visit->arrival_date;
 					}
 
+					//TRAVELLED CITIES WITH DATES NOT USED FOR NOW
 					$range = Trip::getDatesFromRange($visit->departure_date, $next_departure_date);
 					if (!empty($range)) {
 						foreach ($range as $range_key => $range_val) {
@@ -609,6 +614,7 @@ class Trip extends Model {
 
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
+
 		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
@@ -628,11 +634,16 @@ class Trip extends Model {
 		} else {
 			$city_list = [];
 		}
+		$travel_cities_list = collect(Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
+				->where('visits.trip_id', $trip->id)
+				->select('cities.id', 'cities.name')
+				->orderBy('visits.id', 'asc')
+				->get()->prepend(['id' => '', 'name' => 'Select City']));
 		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
-		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => -1, 'name' => 'Select Purpose']));
-		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => -1, 'name' => 'Select Travel Mode']));
-		$local_travel_mode_list = collect(Entity::uiLocaTravelModeList()->prepend(['id' => -1, 'name' => 'Select Local Travel Mode']));
-		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => -1, 'name' => 'Select Stay Type']));
+		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
+		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
+		$local_travel_mode_list = collect(Entity::uiLocaTravelModeList()->prepend(['id' => '', 'name' => 'Select Local Travel Mode']));
+		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
 
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
@@ -641,6 +652,7 @@ class Trip extends Model {
 			'city_list' => $city_list,
 			'stay_type_list' => $stay_type_list,
 			'booking_type_list' => $booking_type_list,
+			'travel_cities_list' => $travel_cities_list,
 		];
 		$data['trip'] = $trip;
 
