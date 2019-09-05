@@ -70,6 +70,7 @@ class AgentRequestController extends Controller {
 			'agentVisits.bookingStatus',
 			'agentVisits.bookings',
 			'agentVisits.bookings.travelMode',
+			'agentVisits.bookings.bookingMode',
 			'agentVisits.agent',
 			'agentVisits.status',
 			'agentVisits.managerVerificationStatus',
@@ -125,6 +126,7 @@ class AgentRequestController extends Controller {
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days;
 		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::travelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
+		$this->data['booking_mode_list'] = $booking_mode_list = collect(Entity::bookingModeList())->prepend(['id' => '', 'name' => 'Select Booking Method']);
 		$this->data['trip'] = $trip;
 		$this->data['age'] = $age;
 		$this->data['trip_status'] = $trip_status;
