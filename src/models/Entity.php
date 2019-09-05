@@ -32,11 +32,15 @@ class Entity extends Model {
 	public function travelModes() {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_travel_mode', 'grade_id', 'travel_mode_id');
 	}
-
+	public function categories() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'travel_mode_category_type', 'travel_mode_id', 'category_id');
+	}
 	// public function gradeEligibility() {
 	// 	return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_advanced_eligibility', 'grade_id', 'advanced_eligibility');
 	// }
-
+	public function travelModeCategory() {
+		return $this->hasOne('Uitoux\EYatra\Config', 'entity_id')->where('address_of_id', 3160);
+	}
 	public function gradeEligibility() {
 		return $this->hasOne('Uitoux\EYatra\GradeAdvancedEligiblity', 'grade_id');
 	}
@@ -47,6 +51,10 @@ class Entity extends Model {
 
 	public static function travelModeList() {
 		return Entity::where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
+	}
+
+	public static function bookingModeList() {
+		return Entity::where('entity_type_id', 518)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 
 	public static function localTravelModeList() {

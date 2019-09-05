@@ -11,7 +11,7 @@ class RegionsMaster extends Migration {
 	public function up() {
 		Schema::create('regions', function ($table) {
 			$table->increments('id');
-			$table->unsignedInteger('name');
+			$table->string('name', 191);
 			$table->unsignedInteger('company_id');
 			$table->string('code', 191);
 			$table->unsignedInteger('state_id');
@@ -25,8 +25,7 @@ class RegionsMaster extends Migration {
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
-			$table->unique("name");
-			$table->unique("code");
+			$table->unique(['company_id', 'code']);
 		});
 	}
 

@@ -70,6 +70,7 @@ class AddTable extends Migration {
 			$table->unsignedInteger('created_by')->nullable();
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
+			$table->timestamps();
 			$table->softdeletes();
 			$table->unique(['company_id', 'mobile_number']);
 			$table->unique(['company_id', 'username']);
@@ -109,32 +110,35 @@ class AddTable extends Migration {
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 		});
+
 		Schema::table('companies', function (Blueprint $table) {
 			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 		});
+
 		Schema::create('entity_types', function (Blueprint $table) {
 			$table->increments('id');
 			$table->string('name', 191)->unique();
 		});
+
 		Schema::create('entities', function (Blueprint $table) {
 			$table->increments('id');
 			$table->unsignedInteger('company_id');
-			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
 			$table->unsignedInteger('entity_type_id');
-			$table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade')->onUpdate('cascade');
 			$table->string('name', 191);
-
-			$table->unique(['company_id', 'entity_type_id', 'name']);
 			$table->unsignedInteger('display_order')->default('9999999');
 			$table->unsignedInteger('created_by')->nullable();
 			$table->unsignedInteger('updated_by')->nullable();
 			$table->unsignedInteger('deleted_by')->nullable();
+			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('entity_type_id')->references('id')->on('entity_types')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->timestamps();
 			$table->softdeletes();
+			$table->unique(['company_id', 'entity_type_id', 'name']);
 
 		});
 
@@ -143,7 +147,7 @@ class AddTable extends Migration {
 			$table->unsignedInteger('company_id');
 			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
 			$table->string('name', 191)->unique();
-			$table->unsignedInteger('grade_id');
+			$table->unsignedInteger('grade_id')->nullable();
 			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
 
 			$table->unsignedInteger('created_by')->nullable();
@@ -152,8 +156,66 @@ class AddTable extends Migration {
 			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->timestamps();
 			$table->softdeletes();
 
+		});
+
+		Schema::create('permissions', function (Blueprint $table) {
+			$table->increments('id');
+			$table->boolean('mobile_menu');
+			$table->unsignedInteger('parent_id')->nullable();
+			$table->string('mobile_name', 50)->nullable();
+			$table->unsignedInteger('display_order')->default(999);
+			$table->string('name', 191);
+			$table->string('display_name', 255);
+			$table->string('route', 255)->nullable();
+			$table->string('description', 191)->nullable();
+			$table->foreign('parent_id')->references('id')->on('permissions')->onDelete('cascade')->onUpdate('cascade');
+			$table->timestamps();
+		});
+
+		Schema::create('roles', function (Blueprint $table) {
+			$table->increments('id');
+			$table->unsignedInteger('display_order')->default(999);
+			$table->string('name', 191)->unique();
+			$table->string('display_name', 255);
+			$table->string('description', 191)->nullable();
+			$table->boolean('fixed_roles');
+			$table->timestamps();
+			$table->softdeletes();
+			$table->unsignedInteger('created_by')->nullable();
+			$table->unsignedInteger('updated_by')->nullable();
+			$table->unsignedInteger('deleted_by')->nullable();
+			$table->foreign('created_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+		});
+
+		Schema::create('permission_role', function (Blueprint $table) {
+			$table->unsignedInteger('permission_id');
+			$table->unsignedInteger('role_id');
+			$table->foreign('permission_id')->references('id')->on('permissions')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
+			$table->unique(['permission_id', 'role_id']);
+		});
+
+		Schema::create('role_user', function (Blueprint $table) {
+			$table->unsignedInteger('user_id');
+			$table->unsignedInteger('role_id');
+			$table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
+			$table->unique(['user_id', 'role_id']);
+		});
+
+		Schema::create('attachments', function (Blueprint $table) {
+			$table->increments('id');
+			$table->unsignedInteger('attachment_of_id');
+			$table->unsignedInteger('attachment_type_id');
+			$table->unsignedInteger('entity_id');
+			$table->string('name', 255);
+			$table->foreign('attachment_of_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('attachment_type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 		});
 	}
 
@@ -204,6 +266,11 @@ class AddTable extends Migration {
 		Schema::dropIfExists('entities');
 		Schema::dropIfExists('entity_types');
 		Schema::dropIfExists('companies');
+		Schema::dropIfExists('permissions');
+		Schema::dropIfExists('roles');
+		Schema::dropIfExists('permission_role');
+		Schema::dropIfExists('role_user');
+		Schema::dropIfExists('attachments');
 		//
 	}
 }

@@ -16,6 +16,7 @@ class Boarding extends Model {
 		// 'date',
 		'amount',
 		'tax',
+		'days',
 		'eligible_amount',
 		'remarks',
 		'created_by',
@@ -26,7 +27,10 @@ class Boarding extends Model {
 	public function trip() {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
 	}
-	public function getDateAttribute($value) {
+	public function getFromDateAttribute($value) {
+		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+	public function getToDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
 	}
 
