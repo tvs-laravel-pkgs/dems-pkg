@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class NCountry extends Model {
 
-	protected $table = 'country';
+	protected $table = 'countries';
 
 	protected $fillable = [
 		'id',

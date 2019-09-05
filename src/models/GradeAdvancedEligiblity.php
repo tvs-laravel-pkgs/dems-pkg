@@ -4,7 +4,9 @@ namespace Uitoux\EYatra;
 use Illuminate\Database\Eloquent\Model;
 
 class GradeAdvancedEligiblity extends Model {
+
 	protected $table = 'grade_advanced_eligibility';
+	public $timestamps = false;
 
 	protected $fillable = [
 		'grade_id',
@@ -12,8 +14,6 @@ class GradeAdvancedEligiblity extends Model {
 		'stay_type_disc',
 		'deviation_eligiblity',
 	];
-
-	public $timestamps = false;
 
 	public function gradeinfo() {
 		return $this->belongsTo('Uitoux\EYatra\GradeAdvancedEligiblity', 'grade_id');
