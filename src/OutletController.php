@@ -95,7 +95,7 @@ class OutletController extends Controller {
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
-			$this->data['amount_eligible'] = 'No';
+			$this->data['amount_eligiblity'] = 'No';
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -113,9 +113,9 @@ class OutletController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 			if ($outlet->amount_eligible == 1) {
-				$this->data['amount_eligible'] = 'Yes';
+				$this->data['amount_eligiblity'] = 'Yes';
 			} else {
-				$this->data['amount_eligible'] = 'No';
+				$this->data['amount_eligiblity'] = 'No';
 			}
 			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
@@ -189,7 +189,7 @@ class OutletController extends Controller {
 		return response()->json($cashier_list);
 	}
 	public function saveEYatraOutlet(Request $request) {
-
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -240,12 +240,11 @@ class OutletController extends Controller {
 				$outlet->deleted_at = date('Y-m-d H:i:s');
 				$outlet->deleted_by = Auth::user()->id;
 			}
-			if ($request->amount_eligible == 1) {
-				$outlet->amount_eligible = 1;
-				$outlet->amount_limit = $request->amount_limit;
-			} else {
+			if ($request->amount_eligiblity == 'No') {
 				$outlet->amount_eligible = 0;
 				$outlet->amount_limit = NULL;
+			} else {
+				$outlet->amount_eligible = 1;
 			}
 			$outlet->name = $request->outlet_name;
 			$outlet->company_id = Auth::user()->company_id;
