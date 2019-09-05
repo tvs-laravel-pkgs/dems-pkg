@@ -13,6 +13,8 @@ class GradeAdvancedEligiblity extends Model {
 		'deviation_eligiblity',
 	];
 
+	public $timestamps = false;
+
 	public function gradeinfo() {
 		return $this->belongsTo('Uitoux\EYatra\GradeAdvancedEligiblity', 'grade_id');
 	}

@@ -5,6 +5,7 @@ namespace Uitoux\EYatra;
 use Illuminate\Database\Eloquent\Model;
 
 class NCountry extends Model {
+
 	protected $table = 'country';
 
 	protected $fillable = [
@@ -49,8 +50,8 @@ class NCountry extends Model {
 						'company_id' => $company->id,
 						'state_id' => $state->id,
 						'code' => $region_code,
+						'name' => $region_name,
 					]);
-					$region->name = $region_name;
 					$region->created_by = $admin->id;
 					$region->save();
 				}

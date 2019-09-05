@@ -37,6 +37,8 @@ class EYatraConfigSeeder extends Seeder {
 			520 => 'Activity Log Activities - EYatra',
 			521 => 'Lodging Stay',
 			522 => 'Agent Payment Mode - EYatra',
+			524 => 'Import Type - EYatra',
+			523 => 'Import Status - EYatra',
 		];
 
 		$configs = [
@@ -490,6 +492,46 @@ class EYatraConfigSeeder extends Seeder {
 			3341 => [
 				'name' => 'Home',
 				'config_type_id' => 521,
+			],
+
+			//IMPORT STATUS
+			3361 => [
+				'name' => 'Pending',
+				'config_type_id' => 524,
+			],
+			3362 => [
+				'name' => 'Calculating Total Records',
+				'config_type_id' => 524,
+			],
+			3363 => [
+				'name' => 'Inprogress',
+				'config_type_id' => 524,
+			],
+			3364 => [
+				'name' => 'Completed',
+				'config_type_id' => 524,
+			],
+			3365 => [
+				'name' => 'Cancelled',
+				'config_type_id' => 524,
+			],
+			3366 => [
+				'name' => 'Server Error',
+				'config_type_id' => 524,
+			],
+			3367 => [
+				'name' => 'Error',
+				'config_type_id' => 524,
+			],
+
+			//IMPORT TYPE
+			3380 => [
+				'name' => 'Employee',
+				'config_type_id' => 523,
+			],
+			3381 => [
+				'name' => 'Outlet',
+				'config_type_id' => 523,
 			],
 		];
 

@@ -31,6 +31,7 @@ class EYatraETSeeder extends Seeder {
 			515 => 'COA Final Statement',
 			516 => 'COA Groups',
 			517 => 'COA Sub Groups',
+			518 => 'Railway Ticket Types',
 
 		];
 
