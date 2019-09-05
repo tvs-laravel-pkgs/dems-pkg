@@ -33,6 +33,7 @@ class CreateTableImportJobs extends Migration {
 			$table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('status_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
+			$table->timestamps();
 			$table->softdeletes();
 		});
 	}
