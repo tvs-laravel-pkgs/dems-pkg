@@ -207,6 +207,16 @@ class AddTable extends Migration {
 			$table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade')->onUpdate('cascade');
 			$table->unique(['user_id', 'role_id']);
 		});
+
+		Schema::create('attachments', function (Blueprint $table) {
+			$table->increments('id');
+			$table->unsignedInteger('attachment_of_id');
+			$table->unsignedInteger('attachment_type_id');
+			$table->unsignedInteger('entity_id');
+			$table->string('name', 255);
+			$table->foreign('attachment_of_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('attachment_type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
+		});
 	}
 
 	/**
@@ -260,6 +270,7 @@ class AddTable extends Migration {
 		Schema::dropIfExists('roles');
 		Schema::dropIfExists('permission_role');
 		Schema::dropIfExists('role_user');
+		Schema::dropIfExists('attachments');
 		//
 	}
 }
