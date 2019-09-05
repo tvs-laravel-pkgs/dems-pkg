@@ -12,7 +12,7 @@ class PasswordChangeUser extends Migration {
 	 */
 	public function up() {
 		Schema::table('users', function (Blueprint $table) {
-			$table->boolean('force_password_change')->nullable()->after('email');
+			//$table->boolean('force_password_change')->nullable();
 		});
 	}
 

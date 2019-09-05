@@ -8,6 +8,7 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -147,8 +148,7 @@ class GradeController extends Controller {
 					$local_travel_types_list[$local_travel_type->id]->checked = true;
 				}
 			}
-
-			$this->data['grade_advanced'] = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
+			$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity')->first();
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
@@ -164,7 +164,7 @@ class GradeController extends Controller {
 
 	public function saveEYatraGrade(Request $request) {
 		//validation
-		// dd($request->all());
+		dd($request->all());
 		try {
 
 			$error_messages = [
@@ -193,7 +193,7 @@ class GradeController extends Controller {
 				$grade->tripPurposes()->sync([]);
 				$grade->travelModes()->sync([]);
 				$grade->localTravelModes()->sync([]);
-				$grade->gradeEligibility()->sync([]);
+				// $grade->gradeEligibility()->sync([]);
 				$grade->updated_by = Auth::user()->id;
 				$grade->updated_at = Carbon::now();
 
@@ -222,7 +222,14 @@ class GradeController extends Controller {
 				$request->grade_advanced = 0;
 			}
 
-			$grade->gradeEligibility()->sync($request->grade_advanced);
+			//Update Grade Details
+			$grade_details = GradeAdvancedEligiblity::firstOrNew(['grade_id' => $grade_id]);
+			// $grade_details->advanced_eligibility = ;
+			// $grade_details->stay_type_disc = ;
+			// $grade_details->deviation_eligiblity = ;
+			$grade_details->save();
+
+			// $grade->gradeEligibility()->sync($request->grade_advanced);
 
 			//Save Expense Mode
 			if (count($request->expense_types) > 0) {

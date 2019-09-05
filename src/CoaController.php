@@ -136,14 +136,15 @@ class CoaController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
-			$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
+			//$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
+			//dd($e_name->name);
 			$activity['entity_id'] = $entity->id;
-			$activity['entity_type'] = $e_name->name;
-			$activity['details'] = empty($request->id) ? $e_name->name . " added" : $e_name->name . " updated";
-			$activity['activity'] = empty($request->id) ? "add" : "delete";
+			$activity['entity_type'] = "COA Sub Groups";
+			$activity['details'] = empty($request->id) ? "COA Sub Group is added" : "COA Sub Group is updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
 			//dd($activity);
 
-			//$activity_log = ActivityLog::saveLog($activity);
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Coa added successfully']);
@@ -157,8 +158,13 @@ class CoaController extends Controller {
 	}
 
 	public function deleteEYatraCoaNg($entity_id) {
-		$entity = Entity::withTrashed()->where('id', $entity_id)->forceDelete();
-
+		$entity = Entity::withTrashed()->where('id', $entity_id)->first();
+		$activity['entity_id'] = $entity->id;
+		$activity['entity_type'] = "COA Sub Groups";
+		$activity['details'] = "COA Sub Group is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$entity->forceDelete();
 		if (!$entity) {
 			return response()->json(['success' => false, 'errors' => ['Entity not found']]);
 		}

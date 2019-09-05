@@ -235,7 +235,11 @@ class CityController extends Controller {
 
 			$city->fill($request->all());
 			$city->save();
-
+			$activity['entity_id'] = $city->id;
+			$activity['entity_type'] = "City";
+			$activity['details'] = empty($request->id) ? "City is added" : "City is updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING state_agent_travel_mode
 			// if (count($request->travel_modes) > 0) {
 			// 	foreach ($request->travel_modes as $travel_mode => $pivot_data) {
@@ -282,7 +286,13 @@ class CityController extends Controller {
 	}
 
 	public function deleteEYatraCity($city_id) {
-		$city = NCity::withTrashed()->where('id', $city_id)->forceDelete();
+		$city = NCity::withTrashed()->where('id', $city_id)->first();
+		$activity['entity_id'] = $city->id;
+		$activity['entity_type'] = "City";
+		$activity['details'] = "City is deleted";
+		$activity['activity'] = "delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$city->forceDelete();
 		if (!$city) {
 			return response()->json(['success' => false, 'errors' => ['City not found']]);
 		}

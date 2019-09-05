@@ -25,7 +25,25 @@ class VisitBooking extends Model {
 		'updated_by',
 		'deleted_by',
 	];
-
+	public function getAmountAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getTaxAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getServiceChargeAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getTotalAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getPaidAmountAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	/*public function setAmountAttribute($value) {
+		$this->attributes['amount'] = IND_money_format($value);
+		dd();
+	}*/
 	public function visit() {
 		return $this->belongsTo('Uitoux\EYatra\Visit');
 	}

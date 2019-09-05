@@ -37,7 +37,7 @@ class AlterTableRejectReasons extends Migration {
 		});
 
 		Schema::table('ey_agent_claims', function (Blueprint $table) {
-			$table->dropForeign('trips_rejection_id_foreign');
+			$table->dropForeign('ey_agent_claims_rejection_id_foreign');
 			$table->dropColumn('rejection_id');
 			$table->dropColumn('rejection_remarks');
 		});

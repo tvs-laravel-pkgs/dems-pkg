@@ -12,8 +12,8 @@ class AlterTableDesignation extends Migration {
 	 */
 	public function up() {
 		Schema::table('designations', function (Blueprint $table) {
-			$table->unsignedInteger('grade_id')->nullable()->after('name');
-			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
+			/*$table->unsignedInteger('grade_id')->nullable()->after('name');
+			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');*/
 		});
 	}
 
@@ -23,9 +23,9 @@ class AlterTableDesignation extends Migration {
 	 * @return void
 	 */
 	public function down() {
-		Schema::table('designations', function (Blueprint $table) {
+		/*Schema::table('designations', function (Blueprint $table) {
 			$table->dropForeign('designations_grade_id_foreign');
 			$table->dropColumn('grade_id');
-		});
+		});*/
 	}
 }

@@ -163,11 +163,11 @@ app.component('eyatraGradeForm', {
             self.entity = response.data.grade;
             self.extras = response.data.extras;
             self.action = response.data.action;
-            self.grade_advanced = response.data.grade_advanced;
+            self.grade_details = response.data.grade_details;
             $rootScope.loading = false;
 
             if (self.action == 'Edit') {
-                if (self.grade_advanced[0] == 1) {
+                if (self.grade_details.advanced_eligibility == 1) {
                     self.grade_advanced_value = 'Yes';
                     // $(".grade_advanced").prop('checked', true);
                 } else {
@@ -178,6 +178,12 @@ app.component('eyatraGradeForm', {
                     self.switch_value = 'Active';
                 } else {
                     self.switch_value = 'Inactive';
+                }
+
+                if (self.grade_details.deviation_eligiblity == 1) {
+                    self.deviation_eligiblity = 'Yes';
+                } else {
+                    self.deviation_eligiblity = 'No';
                 }
 
                 $timeout(function() {
@@ -192,6 +198,7 @@ app.component('eyatraGradeForm', {
             } else {
                 self.switch_value = 'Active';
                 self.grade_advanced_value = 'Yes';
+                self.deviation_eligiblity = 'No';
             }
         });
 
@@ -220,6 +227,7 @@ app.component('eyatraGradeForm', {
                     $.each($('.' + class_name), function() {
                         $scope.getexpense_type($(this).val());
                     });
+
                 }
             }
         });
@@ -235,6 +243,8 @@ app.component('eyatraGradeForm', {
                 $(".sub_class_" + id).removeClass("required");
                 $(".sub_class_" + id).prop('required', false);
                 $(".sub_class_" + id).prop("disabled", true);
+                $('.sub_class_' + id).removeClass('error');
+                $('.sub_class_' + id).closest('.form-group').find('label.error').remove();
             }
         }
 

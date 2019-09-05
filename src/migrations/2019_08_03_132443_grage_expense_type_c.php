@@ -14,6 +14,7 @@ class GrageExpenseTypeC extends Migration {
 		Schema::create('grade_expense_type', function (Blueprint $table) {
 			$table->unsignedInteger('grade_id');
 			$table->unsignedInteger('expense_type_id');
+			$table->unsignedInteger('city_category_id');
 			$table->unsignedDecimal('eligible_amount', 10, 2);
 
 			$table->foreign('grade_id')->references('id')->on('entities')->onDelete('cascade')->onUpdate('cascade');
