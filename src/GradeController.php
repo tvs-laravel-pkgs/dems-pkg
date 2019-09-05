@@ -164,7 +164,7 @@ class GradeController extends Controller {
 
 	public function saveEYatraGrade(Request $request) {
 		//validation
-		dd($request->all());
+		// dd($request->all());
 		try {
 
 			$error_messages = [
@@ -183,12 +183,16 @@ class GradeController extends Controller {
 
 			if (!$request->id) {
 				$grade = new Entity;
+				$grade_details = new GradeAdvancedEligiblity;
+				// $grade_eligiblity = new GradeAdvancedEligiblity;
 				$grade->created_by = Auth::user()->id;
 				$grade->created_at = Carbon::now();
 				$grade->updated_at = NULL;
 
 			} else {
 				$grade = Entity::withTrashed()->find($request->id);
+				$grade_details = GradeAdvancedEligiblity::first(['grade_id' => $request->id]);
+				// $grade_eligiblity = GradeAdvancedEligiblity::find($request->id);
 				$grade->expenseTypes()->sync([]);
 				$grade->tripPurposes()->sync([]);
 				$grade->travelModes()->sync([]);
@@ -216,17 +220,25 @@ class GradeController extends Controller {
 			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
 			$activity_log = ActivityLog::saveLog($activity);
 
-			if ($request->grade_advanced == 'Yes') {
-				$request->grade_advanced = 1;
-			} else {
-				$request->grade_advanced = 0;
-			}
+			// if ($request->grade_advanced == 'Yes') {
+			// 	$request->grade_advanced = 1;
+			// } else {
+			// 	$request->grade_advanced = 0;
+			// }
 
 			//Update Grade Details
-			$grade_details = GradeAdvancedEligiblity::firstOrNew(['grade_id' => $grade_id]);
-			// $grade_details->advanced_eligibility = ;
-			// $grade_details->stay_type_disc = ;
-			// $grade_details->deviation_eligiblity = ;
+			$grade_details->grade_id = $grade->id;
+			if ($request->grade_advanced == 'Yes') {
+				$grade_details->advanced_eligibility = 1;
+			} else {
+				$grade_details->advanced_eligibility = 0;
+			}
+			$grade_details->stay_type_disc = $request->discount_percentage;
+			if ($request->deviation_eligiblity == 'Yes') {
+				$grade_details->deviation_eligiblity = 1;
+			} else {
+				$grade_details->deviation_eligiblity = 2;
+			}
 			$grade_details->save();
 
 			// $grade->gradeEligibility()->sync($request->grade_advanced);
