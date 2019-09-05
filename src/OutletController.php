@@ -95,7 +95,8 @@ class OutletController extends Controller {
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
-			$this->data['amount_eligiblity'] = 'No';
+			$this->data['amount_eligible'] = 'No';
+			$this->data['amount_approver'] = 'Cashier';
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -116,6 +117,11 @@ class OutletController extends Controller {
 				$this->data['amount_eligiblity'] = 'Yes';
 			} else {
 				$this->data['amount_eligiblity'] = 'No';
+			}
+			if ($outlet->claim_req_approver == 1) {
+				$this->data['amount_approver'] = 'Cashier';
+			} else {
+				$this->data['amount_approver'] = 'Financier';
 			}
 			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
@@ -246,6 +252,11 @@ class OutletController extends Controller {
 			} else {
 				$outlet->amount_eligible = 1;
 			}
+			if ($request->amount_approver == 'Cashier') {
+				$outlet->claim_req_approver = 1;
+			} else {
+				$outlet->claim_req_approver = 0;
+			}
 			$outlet->name = $request->outlet_name;
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());
@@ -262,20 +273,21 @@ class OutletController extends Controller {
 			$address->name = 'Primary';
 			$address->fill($request->all());
 			$address->save();
-			//dd($address);
+
 			//SAVING OUTLET BUDGET
-			$sbu_ids = array_column($request->sbus, 'sbu_id');
-			// dd($sbu_ids);
-			if (count($request->sbus) > 0) {
-				foreach ($request->sbus as $sbu) {
-					if (!isset($sbu['sbu_id'])) {
-						continue;
-					}
-					$outlet->outletBudgets()->attach($sbu['sbu_id'], [
-						'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
-					]);
-				}
-			}
+			// $sbu_ids = array_column($request->sbus, 'sbu_id');
+
+			// if (count($request->sbus) > 0) {
+			// 	foreach ($request->sbus as $sbu) {
+			// 		if (!isset($sbu['sbu_id'])) {
+			// 			continue;
+			// 		}
+			// 		$outlet->outletBudgets()->attach($sbu['sbu_id'], [
+			// 			'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
+			// 		]);
+			// 	}
+			// }
+
 			DB::commit();
 			$request->session()->flash('success', 'outlet saved successfully!');
 			if (empty($request->id)) {

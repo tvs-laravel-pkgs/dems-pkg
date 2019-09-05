@@ -1,63 +1,69 @@
 app.component('eyatraPettyCashList', {
     templateUrl: eyatra_pettycash_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
-        if ($routeParams.type_id == 1 || $routeParams.type_id == 2) {} else {
-            $location.path('/page-not-found')
-            return;
-        }
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#petty_cash_list').DataTable({
-            stateSave: true,
-            "dom": dom_structure_separate,
-            "language": {
-                "search": "",
-                "searchPlaceholder": "Search",
-                "lengthMenu": "Rows Per Page _MENU_",
-                "paginate": {
-                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
-                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
-                },
-            },
-            pageLength: 10,
-            processing: true,
-            serverSide: true,
-            paging: true,
-            ordering: false,
-            ajax: {
-                url: laravel_routes['listPettyCashRequest'],
-                type: "GET",
-                dataType: "json",
-                data: function(d) {
-                    d.type_id = $routeParams.type_id;
-                }
-            },
-
-            columns: [
-                { data: 'action', searchable: false, class: 'action' },
-                { data: 'ename', name: 'employees.code', searchable: true },
-                { data: 'ecode', name: 'employees.code', searchable: true },
-                { data: 'oname', name: 'outlets.name', searchable: true },
-                { data: 'ocode', name: 'outlets.code', searchable: true },
-                { data: 'date', name: 'date', searchable: false },
-                { data: 'total', name: 'total', searchable: true },
-                { data: 'status', name: 'configs.name', searchable: false },
-            ],
-            rowCallback: function(row, data) {
-                $(row).addClass('highlight-row');
-            }
-        });
-        $('.dataTables_length select').select2();
         if ($routeParams.type_id == 1) {
-            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Local Conveyance Expense Voucher Claim</h3>');
+            $list_data_url = eyatra_pettycash_get_list + '/' + 1;
         } else {
-            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
+            $list_data_url = eyatra_pettycash_get_list + '/' + 2;
         }
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-            'Add New' +
-            '</a>'
-        );
+        $http.get(
+            $list_data_url
+        ).then(function(response) {
+            var dataTable = $('#petty_cash_list').DataTable({
+                stateSave: true,
+                "dom": dom_structure_separate,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search",
+                    "lengthMenu": "Rows Per Page _MENU_",
+                    "paginate": {
+                        "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                        "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                    },
+                },
+                pageLength: 10,
+                processing: true,
+                serverSide: true,
+                paging: true,
+                ordering: false,
+                ajax: {
+                    url: laravel_routes['listPettyCashRequest'],
+                    type: "GET",
+                    dataType: "json",
+                    data: function(d) {
+                        d.type_id = $routeParams.type_id;
+                    }
+                },
+
+                columns: [
+                    { data: 'action', searchable: false, class: 'action' },
+                    { data: 'ename', name: 'employees.code', searchable: true },
+                    { data: 'ecode', name: 'employees.code', searchable: true },
+                    { data: 'oname', name: 'outlets.name', searchable: true },
+                    { data: 'ocode', name: 'outlets.code', searchable: true },
+                    { data: 'date', name: 'date', searchable: false },
+                    { data: 'total', name: 'total', searchable: true },
+                    { data: 'status', name: 'configs.name', searchable: false },
+                ],
+                rowCallback: function(row, data) {
+                    $(row).addClass('highlight-row');
+                }
+            });
+            $('.dataTables_length select').select2();
+            if ($routeParams.type_id == 1) {
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Local Conveyance Expense Voucher Claim</h3>');
+            } else {
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
+            }
+            $('.add_new_button').html(
+                '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+                'Add New' +
+                '</a>'
+            );
+        });
+
         $scope.deletePettycash = function(id) {
             $('#deletepettycash_id').val(id);
         }
@@ -197,10 +203,12 @@ app.component('eyatraPettyCashForm', {
                 var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
                 var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
                 localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
-                console.log(' == localconveyance_from_km ==' + localconveyance_from_km + ' == localconveyance_to_km ==' + localconveyance_to_km + ' == localConveyance_from_to_diff ==' + localConveyance_from_to_diff + ' === localConveyance_amount ==' + localConveyance_amount);
+                // console.log(' == localconveyance_from_km ==' + localconveyance_from_km + ' == localconveyance_to_km ==' + localconveyance_to_km + ' == localConveyance_from_to_diff ==' + localConveyance_from_to_diff + ' === localConveyance_amount ==' + localConveyance_amount);
                 $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
+                self.localConveyanceCal();
             } else {
                 $(this).closest('tr').find('.localConveyance_amount').val('');
+                self.localConveyanceCal();
             }
 
         });
