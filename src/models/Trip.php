@@ -288,7 +288,7 @@ class Trip extends Model {
 		} else {
 			$data['advance_eligibility'] = '';
 		}
-		//dd(Auth::user()->entity->outlet->address);
+		dd(Auth::user()->entity->outlet);
 
 		$data['extras'] = [
 			// 'purpose_list' => Entity::uiPurposeList(),

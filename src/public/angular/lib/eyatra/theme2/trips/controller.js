@@ -148,6 +148,7 @@ app.component('eyatraTripForm', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
+        var arr_ind;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         $http.get(
@@ -175,13 +176,27 @@ app.component('eyatraTripForm', {
                 $("#advance").show().prop('disabled', false);
             }
             self.trip = response.data.trip;
+
             self.extras = response.data.extras;
             self.action = response.data.action;
             if (self.action == 'New') {
-                self.trip.visits[0].booking_method = 'Self';
-                self.trip.visits.push({
-                    booking_method: 'Self'
-                });
+                self.booking_method = "self";
+                self.trip.visits = [];
+                arr_ind = 1;
+
+                /*self.trip.visits[0].booking_method = 'Self';
+self.trip.visits.push({
+    booking_method: 'Self'
+});*/
+                $scope.single_trip = true;
+                self.checked = true;
+                $scope.round_trip = false;
+                $scope.multi_trip = false;
+                //self.visits = [];
+
+            } else {
+                visit = self.trip.visits;
+                arr_ind = visit.length;
             }
 
             $rootScope.loading = false;
@@ -191,6 +206,9 @@ app.component('eyatraTripForm', {
 
 
         });
+
+
+
         $("#advance").hide().prop('disabled', true);
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
@@ -217,20 +235,26 @@ app.component('eyatraTripForm', {
             }
         }
 
-        self.addVisit = function() {
+        $scope.addVisit = function() {
+            alert(arr_ind);
             self.trip.visits.push({
                 visit_date: '',
                 booking_method: 'Self',
                 preferred_travel_modes: '',
             });
-            $('.add_multi_trip').show();
+            add_block = $('.or_block').html();
+            alert(add_block);
+            add_block = add_block.replace('/XXX', arr_ind);
+            arr_ind++;
+            $('.extra_block').append(add_block);
+            //$('.add_multi_trip').show();
 
         }
         // $('.visits-wrp').hide();
 
         // $(".add_visit").on('click', function() {
- //     $('.add_multi_trip').hide();
- // });
+        //     $('.add_multi_trip').hide();
+        // });
 
         $scope.trip_mode = function(id) {
             if (id == 1) {

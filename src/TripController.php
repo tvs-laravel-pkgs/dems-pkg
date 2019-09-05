@@ -105,6 +105,7 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
+		dd($request->all());
 		return Trip::saveTrip($request);
 	}
 
