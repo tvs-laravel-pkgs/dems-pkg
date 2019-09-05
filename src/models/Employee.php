@@ -20,6 +20,7 @@ class Employee extends Model {
 		'date_of_joining',
 		'aadhar_no',
 		'pan_no',
+		'self_approve',
 		'gender',
 		'date_of_birth',
 		'created_by',

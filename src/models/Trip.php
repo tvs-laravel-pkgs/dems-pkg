@@ -141,16 +141,33 @@ class Trip extends Model {
 				$activity['activity'] = "edit";
 
 			}
+			$employee=Employee::where('id',Auth::user()->entity->id)->first();
+
 			if ($request->advance_received) {
-				$trip->advance_received = $request->advance_received;
-				$trip->advance_request_approval_status_id = 3260;
+			 $trip->advance_received = $request->advance_received;
+				if($employee->self_approve==1)
+				{
+					$trip->advance_request_approval_status_id = 3261;
+				}
+				else
+				{
+					$trip->advance_request_approval_status_id = 3260;
+				}
 			}
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
+			
+			if($employee->self_approve==1)
+			{
+				$trip->status_id = 3028; //Manager Approved
+			}else
+			{
+				$trip->status_id = 3021; //Manager Approval Pending
+			}
 			// dd(Auth::user(), );
 			$trip->manager_id = Auth::user()->entity->reporting_to_id;
-			$trip->status_id = 3021; //NEW
+			
 			$trip->save();
 
 			$trip->number = 'TRP' . $trip->id;

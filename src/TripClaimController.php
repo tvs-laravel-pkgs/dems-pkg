@@ -101,9 +101,18 @@ class TripClaimController extends Controller {
 			if (empty($request->trip_id)) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
+			$employee=Employee::where('id',Auth::user()->entity->id)->first();
+
 			//UPDATE TRIP STATUS
 			$trip = Trip::find($request->trip_id);
-			$trip->status_id = 3023; //claimed
+			if($employee->self_approve==1)
+			{
+				$trip->status_id = 3025; // Payment Pending
+			}
+			else
+			{
+				$trip->status_id = 3023;//claimed
+			}
 			$trip->claim_amount = $request->claim_total_amount; //claimed
 			$trip->save();
 
@@ -112,6 +121,14 @@ class TripClaimController extends Controller {
 			$employee_claim->fill($request->all());
 			$employee_claim->trip_id = $trip->id;
 			$employee_claim->total_amount = $request->claim_total_amount;
+				if($employee->self_approve==1)
+			{
+				$employee_claim->status_id = 3223; // Payment Pending
+			}
+			else
+			{
+				$employee_claim->status_id = 3222; // Claimed Requested
+			}
 			$employee_claim->status_id = 3222;
 			$employee_claim->created_by = Auth::user()->id;
 			$employee_claim->save();
