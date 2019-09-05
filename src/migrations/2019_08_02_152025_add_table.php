@@ -11,7 +11,7 @@ class AddTable extends Migration {
 	 * @return void
 	 */
 	public function up() {
-		Schema::create('country', function (Blueprint $table) {
+		Schema::create('countries', function (Blueprint $table) {
 			$table->increments('id');
 			$table->string('code', 2)->unique();
 			$table->string('name', 191)->unique();

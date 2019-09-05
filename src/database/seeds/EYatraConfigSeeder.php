@@ -37,8 +37,9 @@ class EYatraConfigSeeder extends Seeder {
 			520 => 'Activity Log Activities - EYatra',
 			521 => 'Lodging Stay',
 			522 => 'Agent Payment Mode - EYatra',
-			524 => 'Import Type - EYatra',
-			523 => 'Import Status - EYatra',
+			523 => 'Import Type - EYatra',
+			524 => 'Import Status - EYatra',
+			525 => 'Trave Mode Category Types - EYatra',
 		];
 
 		$configs = [
@@ -532,6 +533,24 @@ class EYatraConfigSeeder extends Seeder {
 			3381 => [
 				'name' => 'Outlet',
 				'config_type_id' => 523,
+			],
+
+			//TRAVEL MODE CATEGORY TYPE
+			3400 => [
+				'name' => 'Own Two Wheeler',
+				'config_type_id' => 525,
+			],
+			3401 => [
+				'name' => 'Own Four Wheeler',
+				'config_type_id' => 525,
+			],
+			3402 => [
+				'name' => 'Vehicle No Claim',
+				'config_type_id' => 525,
+			],
+			3403 => [
+				'name' => 'Claim',
+				'config_type_id' => 525,
 			],
 		];
 
