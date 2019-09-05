@@ -175,14 +175,13 @@ app.component('eyatraOutletForm', {
                 $scope.$apply()
                 return;
             }
+            console.log(response);
             self.outlet = response.data.outlet;
-
             self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
             self.amount_eligible = response.data.amount_eligible;
             self.amount_approver = response.data.amount_approver;
             console.log(response.data.outlet.amount_limit);
             // self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
-            self.amount_eligiblity = response.data.amount_eligiblity;
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
