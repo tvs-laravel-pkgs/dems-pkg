@@ -95,6 +95,7 @@ class OutletController extends Controller {
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
+			$this->data['amount_eligible'] = 'No';
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -112,9 +113,9 @@ class OutletController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 			if ($outlet->amount_eligible == 1) {
-				$outlet->amount_eligible = 1;
+				$this->data['amount_eligible'] = 'Yes';
 			} else {
-				$outlet->amount_eligible = 0;
+				$this->data['amount_eligible'] = 'No';
 			}
 			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
