@@ -49,6 +49,10 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
 	}
 
+	public static function bookingModeList() {
+		return Entity::where('entity_type_id', 518)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
 	public static function localTravelModeList() {
 		return Entity::where('entity_type_id', 503)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
 	}

@@ -214,6 +214,7 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->type_id = $r->type_id;
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
 					$visit_bookings->reference_number = $value['reference_number'];
+					$visit_bookings->booking_type_id = $value['booking_mode_id'];
 					$visit_bookings->amount = $amount;
 					$visit_bookings->tax = $tax;
 					$visit_bookings->service_charge = $service_charge;

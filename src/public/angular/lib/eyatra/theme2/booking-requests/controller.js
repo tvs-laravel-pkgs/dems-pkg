@@ -140,12 +140,14 @@ app.component('eyatraTripBookingRequestsView', {
                 $scope.$apply()
                 return;
             }
+            console.log(response);
             self.trip = response.data.trip;
             self.age = response.data.age;
             self.total_amount = response.data.total_amount;
             self.ticket_amount = response.data.ticket_amount;
             self.service_charge = response.data.service_charge;
             self.trip_status = response.data.trip_status;
+            self.booking_mode_list = response.data.booking_mode_list;
             self.travel_mode_list = response.data.travel_mode_list;
             self.action = response.data.action;
             $rootScope.loading = false;

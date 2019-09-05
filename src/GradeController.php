@@ -191,7 +191,7 @@ class GradeController extends Controller {
 
 			} else {
 				$grade = Entity::withTrashed()->find($request->id);
-				$grade_details = GradeAdvancedEligiblity::first(['grade_id' => $request->id]);
+				$grade_details = GradeAdvancedEligiblity::firstOrNew(['grade_id' => $request->id]);
 				// $grade_eligiblity = GradeAdvancedEligiblity::find($request->id);
 				$grade->expenseTypes()->sync([]);
 				$grade->tripPurposes()->sync([]);
