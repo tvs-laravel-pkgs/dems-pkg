@@ -161,12 +161,21 @@ class TripController extends Controller {
 
 	public function cancelTrip($trip_id) {
 
-		$trip = Trip::where('id', $trip_id)->update(['status_id' => 3062]);
+		/*$trip = Trip::where('id', $trip_id)->update(['status_id' => 3062]);
+			if (!$trip) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		*/
+
+		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		//dd($trip);
+
+		$trip->status_id = 3062;
+		$trip->save();
+
 		$activity['entity_id'] = $trip_id;
+
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = 'Trip is Cancelled';
 		$activity['activity'] = "cancel";

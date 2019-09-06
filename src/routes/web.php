@@ -22,6 +22,7 @@ Route::group(['middleware' => ['api']], function () {
 		//TRIP CLAIM
 		Route::post('trip/claim/view/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimViewData');
 		Route::post('trip/claim/get-form-data/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
+		Route::get('trip/claim/get-eligible-amount', 'Uitoux\EYatra\Api\TripClaimController@getEligibleAmtBasedonCitycategoryGrade');
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
 
 	});
@@ -133,6 +134,12 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
 		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
 		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
+
+		//EMPLOYEES IMPORT
+		Route::get('import-employee/list', 'Uitoux\EYatra\EmployeeController@getImportEmployeesList')->name('getImportEmployeesList');
+		Route::post('/import-employee/update-emloyee-status', 'Uitoux\EYatra\EmployeeController@update_import_employee_status')->name('updateEmployeeImportStatus');
+		Route::post('/import-employee/save', 'Uitoux\EYatra\EmployeeController@saveImportEmployee')->name('saveImportEmployee');
+		//END
 
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');

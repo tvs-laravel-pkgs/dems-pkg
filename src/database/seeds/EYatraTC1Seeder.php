@@ -181,12 +181,16 @@ class EYatraTC1Seeder extends Seeder {
 				'Bus',
 				'Train',
 				'Air',
+				'Two Wheeler',
+				'Four Wheeler',
+				'Office Vehicle',
 			],
 			503 => [
 				'A/C Taxi',
 				'Non A/C Taxi',
 				'Auto Ricksaw',
 				'Bus',
+				'Toll Fee',
 			],
 			504 => [
 				'Normal',
