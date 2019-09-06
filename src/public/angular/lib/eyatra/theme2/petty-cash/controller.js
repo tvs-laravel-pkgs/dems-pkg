@@ -39,7 +39,7 @@ app.component('eyatraPettyCashList', {
 
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
-                    { data: 'ename', name: 'employees.code', searchable: true },
+                    { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
                     { data: 'ocode', name: 'outlets.code', searchable: true },
@@ -70,7 +70,7 @@ app.component('eyatraPettyCashList', {
         $scope.confirmDeletePettycash = function() {
             var id = $('#deletepettycash_id').val();
             $http.get(
-                petty_cash_delete_url + '/' + id,
+                petty_cash_delete_url + '/' + $routeParams.type_id + '/' + id,
             ).then(function(res) {
                 if (!res.data.success) {
                     var errors = '';
@@ -100,11 +100,19 @@ app.component('eyatraPettyCashList', {
                     setTimeout(function() {
                         $noty.close();
                     }, 1000);
-                    dataTable.ajax.reload(function(json) {});
+                    if ($routeParams.type_id == 1) {
+                        $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
+                        $location.path('eyatra/petty-cash/1');
+                        $scope.$apply();
+                    } else {
+                        $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
+                        $location.path('eyatra/petty-cash/2');
+                        $scope.$apply();
+                    }
                 }
             });
         }
-        $rootScope.loading = false;
+        // $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -291,7 +299,6 @@ app.component('eyatraPettyCashForm', {
         }
 
         self.removepettyCash = function(index, petty_cash_id) {
-
             if (petty_cash_id) {
                 self.petty_cash_removal_id.push(petty_cash_id);
                 $('#petty_cash_removal_id').val(JSON.stringify(self.petty_cash_removal_id));
@@ -303,7 +310,6 @@ app.component('eyatraPettyCashForm', {
         }
 
         self.removeotherexpence = function(index, petty_cash_other_id) {
-
             if (petty_cash_other_id) {
                 self.petty_cash_other_removal_id.push(petty_cash_other_id);
                 $('#petty_cash_other_removal_id').val(JSON.stringify(self.petty_cash_other_removal_id));
@@ -385,10 +391,11 @@ app.component('eyatraPettyCashView', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            petty_cash_view_url + '/' + $routeParams.pettycash_id
+            petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
-            // console.log(response);
+            console.log(response);
             self.petty_cash = response.data.petty_cash;
+            self.type_id = $routeParams.type_id;
             self.petty_cash_other = response.data.petty_cash_other;
             self.employee = response.data.employee;
             var local_total = 0;
