@@ -12,6 +12,7 @@ app.component('eyatraTrips', {
             self.trip_status_list = response.data.trip_status_list;
             $rootScope.loading = false;
         });
+
         var dataTable = $('#eyatra_trip_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -92,7 +93,7 @@ app.component('eyatraTrips', {
             $('#status_id').val(-1);
             dataTable.draw();
         }
-
+        $scope.reset_filter();
         $scope.deleteTrip = function(id) {
             $('#del').val(id);
         }
@@ -384,7 +385,7 @@ self.trip.visits.push({
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Trip saves successfully',
+                                text: 'Trip saved successfully',
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },

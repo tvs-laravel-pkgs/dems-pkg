@@ -561,11 +561,13 @@ class Trip extends Model {
 			// $boarding_to_date = '';
 			if (!empty($trip->visits)) {
 				foreach ($trip->visits as $visit_key => $visit) {
-					$city_category_id = NCity::where('id', $visit->to_city_id)->first();
+					$city_category_id = NCity::where('id', $visit->to_city_id)->where('company_id', Auth::user()->company_id)->first();
 					$grade_id = $trip->employee ? $trip->employee->grade_id : '';
-					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
-					$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
-					$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+					if ($city_category_id) {
+						$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
+						$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+						$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+					}
 					$loadge_eligible_amount = $lodging_expense_type ? IND_money_format($lodging_expense_type->eligible_amount) : '0.00';
 					$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
 					$local_travel_eligible_amount = $local_travel_expense_type ? IND_money_format($local_travel_expense_type->eligible_amount) : '0.00';
@@ -629,7 +631,7 @@ class Trip extends Model {
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 		// }
 		if (!empty($to_cities)) {
-			$city_list = collect(NCity::select('id', 'name')->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
+			$city_list = collect(NCity::select('id', 'name')->where('company_id', Auth::user()->company_id)->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
 		} else {
 			$city_list = [];
 		}
