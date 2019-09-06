@@ -33,7 +33,7 @@ class EntityController extends Controller {
 				//'entities.updated_at',
 				DB::raw('IF(entities.updated_at IS NULL,"---",entities.updated_at) as updated_at1'),
 				DB::raw('IF(entities.deleted_at IS NULL,"---",entities.deleted_at) as deleted_at'),
-				DB::raw('IF(entities.deleted_at IS NULL,"ACTIVE","INACTIVE") as status')
+				DB::raw('IF(entities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 
 			->join('users', 'users.id', '=', 'entities.created_by')

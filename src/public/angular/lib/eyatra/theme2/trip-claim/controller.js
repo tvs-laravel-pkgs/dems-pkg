@@ -239,7 +239,10 @@ app.component('eyatraTripClaimForm', {
                 //     });
                 // });
             } else {
-                $timeout(function() { $scope.stayDaysEach(); }, 1000);
+                $timeout(function() {
+                    $scope.stayDaysEach();
+                    $scope.boardDaysEach();
+                }, 1000);
                 self.is_deviation = self.trip.employee.trip_employee_claim.is_deviation;
             }
             self.lodgings_removal_id = [];
@@ -321,6 +324,7 @@ app.component('eyatraTripClaimForm', {
         //TAB PREVIOUS BTN 
         $(document).on('click', ".expense_previous_tab", function() {
             var expensetype = $(this).attr('data-expensetype');
+            // console.log(' == expensetype ==' + expensetype);
             $('.tab_li').removeClass('active');
             $('.tab_' + expensetype).addClass('active');
             $('.tab-pane').removeClass('in active');
@@ -1161,13 +1165,12 @@ app.component('eyatraTripClaimForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-
-                            // $location.path('/eyatra/trip/claim/list')
-                            // $scope.$apply()
+                            $location.path('/eyatra/trip/claim/list')
+                            $scope.$apply()
                         }
                     })
                     .fail(function(xhr) {
-                        $('#submit').button('reset');
+                        $('#local_travel_submit').button('reset');
                         custom_noty('error', 'Something went wrong at server');
                     });
 

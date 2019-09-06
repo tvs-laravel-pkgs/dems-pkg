@@ -37,7 +37,7 @@ class AgentController extends Controller {
 	}
 
 	public function listEYatraAgent(Request $r) {
-		//dd('sas');
+
 		if (!empty($r->agent)) {
 			$agent = $r->agent;
 		} else {
@@ -49,11 +49,12 @@ class AgentController extends Controller {
 		} else {
 			$tm = null;
 		}
-		if (!empty($r->status)) {
-			$status = $r->status;
+		if (!empty($r->status_id)) {
+			$status = $r->status_id;
 		} else {
 			$status = null;
 		}
+		// dd($status);
 
 		$agent_list = Agent::withTrashed()->select(
 			'agents.id',
@@ -291,7 +292,15 @@ class AgentController extends Controller {
 				$bank_detail->account_type_id = 3243;
 				$bank_detail->save();
 			}
-
+			//CHEQUE DETAIL SAVE
+			if ($request->bank_name) {
+				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $employee->id]);
+				$cheque_detail->fill($request->all());
+				$cheque_detail->detail_of_id = 3243;
+				$cheque_detail->entity_id = $employee->id;
+				$cheque_detail->account_type_id = 3243;
+				$cheque_detail->save();
+			}
 			//WALLET SAVE
 			if ($request->type_id) {
 				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent->id]);
@@ -319,7 +328,7 @@ class AgentController extends Controller {
 		$this->data['agent'] = $agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
 		$this->data['address'] = $address = Address::join('ncities', 'ncities.id', 'ey_addresses.city_id')
 			->join('nstates', 'nstates.id', 'ncities.state_id')
-			->join('country as c', 'c.id', 'nstates.country_id')
+			->join('countries as c', 'c.id', 'nstates.country_id')
 			->where('entity_id', $agent_id)->where('address_of_id', 3161)
 			->select('ey_addresses.*', 'ncities.name as city_name', 'nstates.name as state_name', 'c.name as country_name')
 			->first();

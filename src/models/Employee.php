@@ -59,7 +59,9 @@ class Employee extends Model {
 	public function bankDetail() {
 		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
 	}
-
+	public function chequeDetail() {
+		return $this->hasOne('Uitoux\EYatra\ChequeDetail', 'entity_id');
+	}
 	public function walletDetail() {
 		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id');
 	}
@@ -99,6 +101,7 @@ class Employee extends Model {
 		$employee->designation_id = $company->designations()->inRandomOrder()->first()->id;
 		$employee->aadhar_no = $faker->creditCardNumber;
 		$employee->pan_no = $faker->swiftBicNumber;
+		$employee->gender = $faker->randomElement(['Male', 'Female']);
 		$employee->reporting_to_id = $manager_id;
 		$employee->payment_mode_id = Config::where('config_type_id', 514)->inRandomOrder()->first()->id;
 		$employee->created_by = $admin->id;
@@ -131,7 +134,6 @@ class Employee extends Model {
 		return date('d-m-Y', strtotime($value));
 	}
 
-
 	public function setDateOfBirthAttribute($value) {
 		return $this->attributes['date_of_birth'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
 	}
@@ -139,7 +141,5 @@ class Employee extends Model {
 	public function getDateOfBirthAttribute($value) {
 		return date('d-m-Y', strtotime($value));
 	}
-
-
 
 }

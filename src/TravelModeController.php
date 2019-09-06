@@ -26,7 +26,7 @@ class TravelModeController extends Controller {
 				//'entities.updated_at',
 				DB::raw('IF(entities.updated_at IS NULL,"---",entities.updated_at) as updated_at1'),
 				DB::raw('IF(entities.deleted_at IS NULL,"---",entities.deleted_at) as deleted_at'),
-				DB::raw('IF(entities.deleted_at IS NULL,"ACTIVE","INACTIVE") as status')
+				DB::raw('IF(entities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 
 			->join('users', 'users.id', '=', 'entities.created_by')
@@ -75,6 +75,7 @@ class TravelModeController extends Controller {
 
 		} else {
 			$entity = Entity::withTrashed()->find($travel_mode_id);
+			$entity->category_id = DB::table('travel_mode_category_type')->where('travel_mode_id', $entity->id)->pluck('category_id')->first();
 			if (!$entity) {
 				return response()->json(['success' => false, 'error' => 'Travel Mode not found']);
 			}
