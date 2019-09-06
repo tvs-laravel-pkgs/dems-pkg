@@ -18,7 +18,7 @@ class NCountry extends Model {
 		$data = [];
 		$option = new NCountry;
 		$option->name = 'Select Country';
-		$option->id = null;
+		$option->id = -1;
 		$countries_list = NCountry::select('name', 'id')->get();
 		$data = $countries_list->prepend($option);
 		return $data;
