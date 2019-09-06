@@ -60,22 +60,23 @@ app.component('eyatraAlternateApproveList', {
             $http.get(
                 alternate_approve_cash_delete_url + '/' + id,
             ).then(function(res) {
+                console.log(res.data.errors);
                 if (!res.data.success) {
                     var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                    for (var i in res.data.errors) {
+                        errors += '<li>' + res.data.errors[i] + '</li>';
                     }
                     $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: errors,
                         animation: {
-                            speed: 500 // unavailable - no need
+                            speed: 1000 // unavailable - no need
                         },
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 3000);
                 } else {
                     $noty = new Noty({
                         type: 'success',
@@ -87,7 +88,7 @@ app.component('eyatraAlternateApproveList', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 3000);
                     dataTable.ajax.reload(function(json) {});
                 }
             });
@@ -120,12 +121,13 @@ app.component('eyatraAlternateApproveForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 3000);
                 $location.path('/eyatra/alternate-approve');
                 return;
             }
 
             self.alternate_approve = response.data.alternate_approve;
+            console.log(self.alternate_approve);
             /*self.selectedItem = self.alternate_approve.emp_name;
             self.selectedItem1 = self.alternate_approve.alt_emp_name;
             $(".employee_id").val(self.alternate_approve.employee_id);
