@@ -35,7 +35,9 @@ class Agent extends Model {
 	public function bankDetail() {
 		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
 	}
-
+	public function chequeDetail() {
+		return $this->hasOne('Uitoux\EYatra\ChequeDetail', 'entity_id');
+	}
 	public function walletDetail() {
 		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id');
 	}
