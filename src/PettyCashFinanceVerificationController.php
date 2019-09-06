@@ -212,6 +212,8 @@ class PettyCashFinanceVerificationController extends Controller {
 		}
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['payment_mode_list'] = $payment_mode_list;
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$this->data['wallet_mode_list'] = $wallet_mode_list;
 		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
 		$emp_details = [];
 		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
@@ -343,7 +345,7 @@ class PettyCashFinanceVerificationController extends Controller {
 	}
 
 	public function pettycashFinanceVerificationSave(Request $request) {
-		dd($request->all());
+		// dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
@@ -357,6 +359,7 @@ class PettyCashFinanceVerificationController extends Controller {
 					$bank_detail->account_type_id = 3243;
 					$bank_detail->save();
 				}
+				// dd($bank_detail->id);
 
 				//WALLET SAVE
 				if ($request->type_id) {
@@ -370,29 +373,12 @@ class PettyCashFinanceVerificationController extends Controller {
 				return response()->json(['success' => true]);
 			} else {
 				$petty_cash_finance_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3284, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
-				//BANK DETAIL SAVE
-				if ($request->bank_name) {
-					$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
-					$bank_detail->fill($request->all());
-					$bank_detail->detail_of_id = 3243;
-					$bank_detail->entity_id = $employee->id;
-					$bank_detail->account_type_id = 3243;
-					$bank_detail->save();
-				}
-
-				//WALLET SAVE
-				if ($request->type_id) {
-					$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $request->reject]);
-					$wallet_detail->fill($request->all());
-					$wallet_detail->wallet_of_id = 3243;
-					$wallet_detail->entity_id = $request->reject;
-					$wallet_detail->save();
-				}
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
-			$request->session()->flash('success', 'Petty Cash Finance Verification successfully!');
-			return response()->json(['success' => true]);
+			// }
+			// $request->session()->flash('success', 'Petty Cash Finance Verification successfully!');
+			// return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
