@@ -237,15 +237,16 @@ self.trip.visits.push({
 
         $scope.addVisit = function() {
             alert(arr_ind);
-            self.trip.visits.push({
-                visit_date: '',
-                booking_method: 'Self',
-                preferred_travel_modes: '',
-            });
+            /*self.trip.visits.push({
+    visit_date: '',
+    booking_method: 'Self',
+    preferred_travel_modes: '',
+});*/
             add_block = $('.or_block').html();
+            add_block = add_block.replace(/XXX/g, arr_ind);
             alert(add_block);
-            add_block = add_block.replace('/XXX', arr_ind);
-            arr_ind++;
+
+            arr_ind = arr_ind + 1;
             $('.extra_block').append(add_block);
             //$('.add_multi_trip').show();
 
@@ -276,6 +277,9 @@ self.trip.visits.push({
         }
 
         self.removeLodging = function(index, lodging_id) {
+            alert('remove');
+            alert(index);
+            alert(lodging_id);
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
