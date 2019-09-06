@@ -26,12 +26,12 @@ class NCity extends Model {
 		$option->name = 'Select City';
 		$option->id = NULL;
 		if (!$state_id) {
-			$city_list = NCity::select('id', 'name')->get();
+			$city_list = NCity::select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 			$data = $city_list->prepend($option);
 			return $data;
 			// return NCity::select('id', 'name')->get();
 		} else {
-			$city_list = NCity::select('id', 'name')->where('state_id', $state_id)->get();
+			$city_list = NCity::select('id', 'name')->where('company_id', Auth::user()->company_id)->where('state_id', $state_id)->get();
 			$data = $city_list->prepend($option);
 			return $data;
 		}
