@@ -135,15 +135,40 @@ class Entity extends Model {
 
 	public static function create($sample_entities, $admin, $company) {
 		foreach ($sample_entities as $entity_type_id => $entities) {
-			foreach ($entities as $entity_name) {
-				$record = Entity::firstOrNew([
-					'entity_type_id' => $entity_type_id,
-					'company_id' => $company->id,
-					'name' => $entity_name,
-				]);
-				$record->created_by = $admin->id;
-				$record->save();
+			if ($entity_type_id == 502) {
+				foreach ($entities as $entity_name) {
+
+					$record = Entity::firstOrNew([
+						'entity_type_id' => $entity_type_id,
+						'company_id' => $company->id,
+						'name' => $entity_name,
+					]);
+					$record->created_by = $admin->id;
+					$record->save();
+
+					if ($entity_name == 'Two Wheeler') {
+						$record->categories()->sync(3400);
+					} elseif ($entity_name == 'Four Wheeler') {
+						$record->categories()->sync(3401);
+					} elseif ($entity_name == 'Office Vehicle') {
+						$record->categories()->sync(3402);
+					} else {
+						$record->categories()->sync(3403);
+					}
+				}
+
+			} else {
+				foreach ($entities as $entity_name) {
+					$record = Entity::firstOrNew([
+						'entity_type_id' => $entity_type_id,
+						'company_id' => $company->id,
+						'name' => $entity_name,
+					]);
+					$record->created_by = $admin->id;
+					$record->save();
+				}
 			}
+
 		}
 
 	}
