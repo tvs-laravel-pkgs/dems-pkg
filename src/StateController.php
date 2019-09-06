@@ -42,7 +42,7 @@ class StateController extends Controller {
 			$status = null;
 		}
 		$states = NState::withTrashed()->from('nstates')
-			->join('country as c', 'c.id', 'nstates.country_id')
+			->join('countries as c', 'c.id', 'nstates.country_id')
 			->select(
 				'nstates.id',
 				'nstates.code',

@@ -22,7 +22,7 @@ class OutletController extends Controller {
 			->join('ncities as city', 'city.id', 'a.city_id')
 			->join('nstates as s', 's.id', 'city.state_id')
 			->leftjoin('regions as r', 'r.state_id', 's.id')
-			->join('country as c', 'c.id', 's.country_id')
+			->join('countries as c', 'c.id', 's.country_id')
 			->select(
 				'outlets.id',
 				'outlets.code',

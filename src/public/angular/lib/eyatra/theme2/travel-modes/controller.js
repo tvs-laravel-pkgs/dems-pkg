@@ -130,7 +130,7 @@ app.component('eyatraTravelModeForm', {
 
             self.extras = response.data.extras;
             self.entity = response.data.entity;
-            self.entity.category_id = response.data.category;
+            // self.entity.category_id = response.data.category;
             self.action = response.data.action;
             $rootScope.loading = false;
 
@@ -152,6 +152,10 @@ app.component('eyatraTravelModeForm', {
                     required: true,
                     minlength: 1,
                     maxlength: 191,
+                },
+                'category_id': {
+                    required: true,
+
                 },
 
             },
