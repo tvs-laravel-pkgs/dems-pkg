@@ -573,6 +573,8 @@ class Trip extends Model {
 					$next++;
 					// $lodgings[$visit_key]['city'] = $visit['to_city'];
 					// $lodgings[$visit_key]['checkin_enable'] = $visit['arrival_date'];
+
+					//GET LODGE CITIES AND THEIR ELIGIBLE AMOUNT
 					if (isset($trip->visits[$next])) {
 						// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
 						$next_departure_date = $trip->visits[$next]->departure_date;
@@ -602,6 +604,7 @@ class Trip extends Model {
 				$lodge_cities = array();
 			}
 		}
+
 		$data['travelled_cities_with_dates'] = $travelled_cities_with_dates;
 		$data['lodge_cities'] = $lodge_cities;
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
