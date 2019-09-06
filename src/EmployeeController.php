@@ -7,12 +7,16 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Uitoux\EYatra\BankDetail;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\ImportJob;
 use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\WalletDetail;
@@ -88,7 +92,8 @@ class EmployeeController extends Controller {
 		// ->orWhere('mngr.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 			->orderBy('e.code', 'asc')
-			->groupBy('e.id');
+			->groupBy('e.id')
+		;
 
 		return Datatables::of($employees)
 			->addColumn('action', function ($employee) {
@@ -283,7 +288,14 @@ class EmployeeController extends Controller {
 				$wallet_detail->save();
 			}
 			DB::commit();
-			return response()->json(['success' => true]);
+			// return response()->json(['success' => true]);
+			if (empty($request->id)) {
+
+				return response()->json(['success' => true, 'message' => ['Employee Added Successfully']]);
+			} else {
+
+				return response()->json(['success' => true, 'message' => ['Employee Updated Successfully']]);
+			}
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
@@ -373,6 +385,130 @@ class EmployeeController extends Controller {
 			$sbu_list = [];
 		}
 		return response()->json(['sbu_list' => $sbu_list]);
+	}
+
+	public function getImportEmployeesList(Request $request) {
+		// dd($request->all());
+		if (!empty($request->from_date)) {
+			$start_date = str_replace('/', '-', $request->from_date);
+			$start_date = date('Y-m-d', strtotime($start_date));
+		} else {
+			$start_date = null;
+		}
+		if (!empty($request->to_date)) {
+			$end_date = str_replace('/', '-', $request->to_date);
+			$end_date = date('Y-m-d', strtotime($end_date));
+		} else {
+			$end_date = null;
+		}
+		$import_data = ImportJob::select(
+			'import_jobs.*',
+			DB::raw('DATE_FORMAT(import_jobs.created_at,"%d-%m-%Y") as import_date'),
+			'users.name as user_name',
+			'status.name as job_status',
+			'type.name as type'
+		)
+			->join('users', 'users.id', 'import_jobs.created_by')
+			->join('configs as type', 'type.id', 'import_jobs.type_id')
+			->join('configs as status', 'status.id', 'import_jobs.status_id')
+			->where(function ($query) use ($request, $start_date, $end_date) {
+				if (!empty($start_date) && !empty($end_date)) {
+					$query->whereDate('import_jobs.created_at', '>=', $start_date)
+						->whereDate('import_jobs.created_at', '<=', $end_date);
+				}
+			})
+			->where('import_jobs.created_by', '=', Auth::user()->id)
+			->orderBy('import_jobs.created_at', 'desc')
+			->get();
+
+		return Datatables::of($import_data)
+			->addColumn('job_status', function ($import_data) {
+				return $import_data->job_status;
+			})
+			->addColumn('import_status', function ($import_data) {
+				return 'Processed : ' . $import_data->processed . ', Remaining : ' . $import_data->remaining;
+			})
+			->addColumn('processed_status', function ($import_data) {
+				return 'Imported : ' . $import_data->new . ', Error : ' . $import_data->error;
+			})
+			->addColumn('server_status', function ($import_data) {
+				if ($import_data->server_status == '') {
+					return '-';
+				} else {
+					return $import_data->server_status;
+				}
+			})
+			->addColumn('action', function ($import_data) {
+				return '
+				<a class="btn btn-sm" href="' . URL::to($import_data->export_file) . '">
+					Download Error Reports
+				</a>
+				<br><br>
+                <a class="btn btn-sm" href="' . URL::to($import_data->src_file) . '">
+                	Download Source File
+                </a>
+				<br><br>
+                <a class="btn btn-sm" id="update_employee_import_status" class="restart-import-job update_employee_import_status" data-id="' . $import_data->id . '">
+                	Restart
+                </a>
+                ';
+
+			})
+			->make(true);
+
+	}
+
+	public function saveImportEmployee(Request $request) {
+		// dd($request->all());
+		DB::beginTransaction();
+		try {
+			$validator = Validator::make($request->all(), [
+				'file' => 'required',
+			]);
+
+			$attachment = 'file';
+			if (!$request->hasFile('file')) {
+				return response()->json(['success' => false, 'errors' => ['Please Upload FIle']]);
+			}
+
+			$extension = $request->file($attachment)->getClientOriginalExtension();
+			if ($extension != "xlsx" && $extension != "xls") {
+				return response()->json(['success' => false, 'errors' => ['Cannot Read File, Please Import Excel Format File']]);
+			}
+
+			$destination = config('custom.employee_import_path');
+			$store_path = storage_path('app/public/employee/import');
+
+			$time_stamp = date('Y_m_d_h_i_s');
+			$file_name = $time_stamp . '_import' . '.' . $extension;
+			Storage::makeDirectory($destination, 0777);
+			$request->file($attachment)->storeAs($destination, $file_name);
+			$file_path = $store_path . '/' . $file_name;
+
+			$src_file = 'storage/app/public/employee/import/' . $file_name;
+
+			$import = new ImportJob;
+			$import->type_id = 3380;
+			$import->company_id = Auth::user()->company_id;
+			$import->status_id = 3361;
+			$import->src_file = $src_file;
+			$import->created_by = Auth::id();
+			$import->save();
+
+			DB::commit();
+			return response()->json(['success' => true, 'message' => 'Uploading in Progress']);
+
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		}
+	}
+
+	public function update_import_employee_status(Request $request) {
+		$id = $request->id;
+		$update_status = ImportJob::where('id', $id)->update(['total_records' => 0, 'processed' => 0, 'remaining' => 0, 'new' => 0, 'updated' => 0, 'error' => 0, 'status_id' => 3361, 'export_file' => null, 'server_status' => null]);
+
+		return response()->json(['success' => true]);
 	}
 
 }

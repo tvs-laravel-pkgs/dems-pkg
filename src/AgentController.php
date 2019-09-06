@@ -37,7 +37,7 @@ class AgentController extends Controller {
 	}
 
 	public function listEYatraAgent(Request $r) {
-		//dd('sas');
+
 		if (!empty($r->agent)) {
 			$agent = $r->agent;
 		} else {
@@ -49,11 +49,12 @@ class AgentController extends Controller {
 		} else {
 			$tm = null;
 		}
-		if (!empty($r->status)) {
-			$status = $r->status;
+		if (!empty($r->status_id)) {
+			$status = $r->status_id;
 		} else {
 			$status = null;
 		}
+		// dd($status);
 
 		$agent_list = Agent::withTrashed()->select(
 			'agents.id',
