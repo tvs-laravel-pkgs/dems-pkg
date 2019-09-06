@@ -236,8 +236,8 @@ app.component('eyatraCoaCodeForm', {
             invalidHandler: function(event, validator) {
                 new Noty({
                     type: 'error',
-                    layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    layout: 'topRight', 
+                    text: 'You have errors, Please check'
                 }).show();
             },
             submitHandler: function(form) {

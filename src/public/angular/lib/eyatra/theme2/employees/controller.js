@@ -53,8 +53,7 @@ app.component('eyatraEmployees', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-        $('#eyatra_employee_table_filter').find('input').addClass("on_focus");
-        $('.on_focus').focus();
+
         //Filter
         $http.get(
             employee_filter_url
@@ -133,7 +132,7 @@ app.component('eyatraEmployeeForm', {
         $scope.showBank = false;
         $scope.showCheque = false;
         $scope.showWallet = false;
-        $('#on_focus').focus();
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -266,8 +265,22 @@ app.component('eyatraEmployeeForm', {
                     text: 'Kindly check in each tab to fix errors'
                 }).show();
             },
-            errorPlacement: function(error, element) {
+            /*errorPlacement: function(error, element) {
                 error.insertAfter(element)
+            },*/
+            errorPlacement: function(error, element) {
+                if (element.hasClass("joining")) {
+                    error.appendTo($('.joining_error'));
+                } 
+                // else if (element.hasClass("pan_no")) {
+                //     error.appendTo($('.folder_name_error'));
+                // } 
+                // else if (element.hasClass("company_code")) {
+                //     error.appendTo($('.company_code_error'));
+                // } 
+                else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             rules: {
@@ -304,17 +317,36 @@ app.component('eyatraEmployeeForm', {
                     minlength: 8,
                 },
                 'bank_name': {
-                    required: true,
+                   
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 100,
                     minlength: 3,
                 },
                 'branch_name': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 50,
                     minlength: 3,
                 },
                 'account_number': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 20,
                     minlength: 3,
                     min: 1,
@@ -322,8 +354,45 @@ app.component('eyatraEmployeeForm', {
                     // positiveNumber: true,
                 },
                 'ifsc_code': {
-                    required: true,
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 10,
+                    minlength: 3,
+                },
+                'check_favour': {
+                    required: function(element) {
+                        if ($("#cheque").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    maxlength: 100,
+                    minlength: 3,
+                },
+                'type_id': {
+                    required: function(element) {
+                        if ($("#wallet").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                },
+                'value': {
+                    required: function(element) {
+                        if ($("#wallet").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    maxlength: 20,
                     minlength: 3,
                 },
                 'mobile_number': {
@@ -388,7 +457,7 @@ app.component('eyatraEmployeeForm', {
                             new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Employee updated successfully',
+                                text: res.message,
                             }).show();
                             $location.path('/eyatra/employees')
                             $scope.$apply()
@@ -468,6 +537,172 @@ app.component('eyatraEmployeeView', {
     }
 });
 
+//Employees import 
+app.component('eyatraEmployeesImportList', {
+    templateUrl: import_employees_list_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
 
+        var dataTable = $('#eyatra_employee_import_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate_2,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            ajax: {
+                url: get_import_employees_list_url,
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.from_date = $('.from').val();
+                    d.to_date = $('.to').val();
+                    
+                }
+            },
+
+            columns: [
+            
+                { data: 'action', name: 'action', class: 'action' },
+                { data: 'import_date', searchable: false },
+                { data: 'type', name: 'type.name', searchable: true },
+                { data: 'user_name', name: 'users.name', searchable: true },
+                { data: 'total_records', searchable: false },
+                { data: 'import_status', name: 'import_status.status', searchable: true },
+                { data: 'processed_status', name: 'import_status.status', searchable: true },
+                { data: 'job_status', name: 'import_status.status', searchable: true },
+                { data: 'server_status', name: 'import_status.status', searchable: true },
+               
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+        $('.dataTables_length select').select2();
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_employee_import_table');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+       
+        var dataTableFilter = $('#eyatra_employee_import_table').dataTable();
+       
+        $('.from,.to').on('change', function() {
+            
+            dataTableFilter.fnFilter();
+        });
+        $scope.resetForm = function() {
+            $('.from').val(null);
+            $('.to').val(null);
+            dataTableFilter.fnFilter();
+        }
+        $scope.resetForm();
+        $(document).on('click', '#update_employee_import_status', function(e) {
+            var id = $(this).attr('data-id');
+            var data = 'id=' + id;
+            $http.post(
+                update_import_employee_url, { id: id }
+            ).then(function(response) {
+                dataTable.fnDraw();
+            });
+
+        });
+        $rootScope.loading = false;
+
+    }
+});
+
+app.component('importEmployees', {
+    templateUrl: import_employee_template_url,
+    controller: function($http, $location, HelperService, $scope, $routeParams, $rootScope) {
+        var self = this;
+        /*$http.get(
+            get_import_form_data_url
+        ).then(function(response) {
+            // $('.page-header-content .title').html('Import Status');
+            self.business = response.data.business_list;
+            console.log(response.data.import_type_list);
+            self.import_type = response.data.import_type_list;
+            self.business_id_selected = '';
+            self.import_type_selected = '';
+            console.log(response.data.business_list);
+        });*/
+       
+        $('#submit_employee_import').click(function() {
+            var form_id = form_ids = '#employee-import-form';
+            var v = jQuery(form_ids).validate({
+                ignore: '',
+                rules: {
+                    'file': {
+                        required: true,
+                    },
+                },
+                submitHandler: function(form) {
+                    let formData = new FormData($(form_id)[0]);
+                    $.ajax({
+                            url: save_import_employee_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+
+                            if (!res.success) {
+                                $('#submit').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                // custom_noty('error', errors);
+
+                                new Noty({
+                                    type: 'error',
+                                    layout: 'topRight',
+                                    text: res.errors,
+                                }).show();
+
+                            } else {
+                                new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Upload in Progress',
+                                }).show();
+                                $location.path('/eyatra/employees/import/list')
+                                $scope.$apply()
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            new Noty({
+                                type: 'error',
+                                layout: 'topRight',
+                                text: 'Something went wrong at server',
+                            }).show();
+
+                        });
+                },
+            });
+        });
+
+
+
+    }
+});
+
+
+//End
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
