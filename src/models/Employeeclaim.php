@@ -15,6 +15,6 @@ class EmployeeClaim extends Model {
 		'total_amount',
 		'status_id',
 		'payment_id',
-		'is_deviation',
+		// 'is_deviation',
 	];
 }

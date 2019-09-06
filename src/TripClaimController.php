@@ -8,6 +8,7 @@ use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\Boarding;
+use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\NCity;
@@ -100,17 +101,6 @@ class TripClaimController extends Controller {
 			if (empty($request->trip_id)) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
-			$employee = Employee::where('id', Auth::user()->entity->id)->first();
-
-			//UPDATE TRIP STATUS
-			$trip = Trip::find($request->trip_id);
-			if ($employee->self_approve == 1) {
-				$trip->status_id = 3025; // Payment Pending
-			} else {
-				$trip->status_id = 3023; //claimed
-			}
-			$trip->claim_amount = $request->claim_total_amount; //claimed
-			$trip->save();
 
 			//SAVING VISITS
 			if ($request->visits) {
@@ -263,15 +253,41 @@ class TripClaimController extends Controller {
 				return response()->json(['success' => true]);
 			}
 
-			//SAVING LOCAL TRAVELS
+			//FINAL SAVE LOCAL TRAVELS
 			if ($request->local_travels) {
+
+				//GET EMPLOYEE DETAILS
+				$employee = Employee::where('id', $request->employee_id)->first();
+
+				//UPDATE TRIP STATUS
+				$trip = Trip::find($request->trip_id);
+				//CHECK IF EMPLOYEE SELF APPROVE
+				if ($employee->self_approve == 1) {
+					$trip->status_id = 3025; // Payment Pending
+				} else {
+					$trip->status_id = 3023; //claimed
+				}
+				$trip->claim_amount = $request->claim_total_amount; //claimed
+				$trip->save();
 
 				//SAVE EMPLOYEE CLAIMS
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->fill($request->all());
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
-				$employee_claim->status_id = 3222;
+				//CHECK IF EMPLOYEE SELF APPROVE
+				if ($employee->self_approve == 1) {
+					$employee_claim->status_id = 3223; //PAYMENT PENDING
+				} else {
+					$employee_claim->status_id = 3222; //CLAIM REQUESTED
+				}
+				//CHECK EMPLOYEE GRADE HAS DEVIATION ELIGIBILITY ==> IF DEVIATION ELIGIBILITY IS 2-NO MEANS THERE IS NO DEVIATION, 1-YES MEANS NEED TO CHECK IN REQUEST
+				$grade_advance_eligibility = GradeAdvancedEligiblity::where('grade_id', $request->grade_id)->first();
+				if ($grade_advance_eligibility && $grade_advance_eligibility->deviation_eligiblity == 2) {
+					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+				} else {
+					$employee_claim->is_deviation = $request->is_deviation;
+				}
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->save();
 				$activity['entity_id'] = $trip->id;
