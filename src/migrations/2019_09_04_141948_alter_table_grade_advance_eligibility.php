@@ -14,7 +14,7 @@ class AlterTableGradeAdvanceEligibility extends Migration {
 		Schema::table('grade_advanced_eligibility', function (Blueprint $table) {
 			$table->increments('id')->first();
 			$table->unsignedDecimal('stay_type_disc', 10, 2)->nullable()->after('advanced_eligibility');
-			$table->boolean('deviation_eligiblity')->default(2)->comment('1-Yes, 2-No')->after('stay_type_disc');
+			$table->boolean('deviation_eligiblity')->default(1)->comment('1-Yes, 2-No')->after('stay_type_disc');
 		});
 	}
 
