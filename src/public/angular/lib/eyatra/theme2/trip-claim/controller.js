@@ -1170,7 +1170,7 @@ app.component('eyatraTripClaimForm', {
                         }
                     })
                     .fail(function(xhr) {
-                        $('#submit').button('reset');
+                        $('#local_travel_submit').button('reset');
                         custom_noty('error', 'Something went wrong at server');
                     });
 
