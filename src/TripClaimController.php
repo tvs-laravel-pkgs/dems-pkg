@@ -357,11 +357,16 @@ class TripClaimController extends Controller {
 
 	public function getEligibleAmtBasedonCitycategoryGrade(Request $request) {
 		if (!empty($request->city_id) && !empty($request->grade_id) && !empty($request->expense_type_id)) {
-			$city_category_id = NCity::where('id', $request->city_id)->first();
-			$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
-			if (!$grade_expense_type) {
+			$city_category_id = NCity::where('id', $request->city_id)->where('company_id', Auth::user()->company_id)->first();
+			if ($city_category_id) {
+				$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
+				if (!$grade_expense_type) {
+					$grade_expense_type = '';
+				}
+			} else {
 				$grade_expense_type = '';
 			}
+
 		} else {
 			$grade_expense_type = '';
 		}
@@ -370,16 +375,20 @@ class TripClaimController extends Controller {
 
 	public function getEligibleAmtBasedonCitycategoryGradeStaytype(Request $request) {
 		if (!empty($request->city_id) && !empty($request->grade_id) && !empty($request->expense_type_id) && !empty($request->stay_type_id)) {
-			$city_category_id = NCity::where('id', $request->city_id)->first();
-			$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
-			if ($grade_expense_type) {
-				if ($request->stay_type_id == 3341) {
-					//STAY TYPE HOME
-					$percentage = 25;
-					$totalWidth = $grade_expense_type->eligible_amount;
-					$eligible_amount = ($percentage / 100) * $totalWidth;
+			$city_category_id = NCity::where('id', $request->city_id)->where('company_id', Auth::user()->company_id)->first();
+			if ($city_category_id) {
+				$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
+				if ($grade_expense_type) {
+					if ($request->stay_type_id == 3341) {
+						//STAY TYPE HOME
+						$percentage = 25;
+						$totalWidth = $grade_expense_type->eligible_amount;
+						$eligible_amount = ($percentage / 100) * $totalWidth;
+					} else {
+						$eligible_amount = $grade_expense_type->eligible_amount;
+					}
 				} else {
-					$eligible_amount = $grade_expense_type->eligible_amount;
+					$eligible_amount = '0.00';
 				}
 			} else {
 				$eligible_amount = '0.00';
@@ -417,10 +426,12 @@ class TripClaimController extends Controller {
 		// $boarding_to_date = '';
 		if (!empty($request->visits)) {
 			foreach ($request->visits as $visit_key => $visit) {
-				$city_category_id = NCity::where('id', $visit['to_city_id'])->first();
-				$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
-				$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
-				$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+				$city_category_id = NCity::where('id', $visit['to_city_id'])->where('company_id', Auth::user()->company_id)->first();
+				if ($city_category_id) {
+					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
+					$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+					$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+				}
 				$loadge_eligible_amount = $lodging_expense_type ? $lodging_expense_type->eligible_amount : '0.00';
 				$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
 				$local_travel_eligible_amount = $local_travel_expense_type ? $local_travel_expense_type->eligible_amount : '0.00';
