@@ -379,6 +379,7 @@ class Trip extends Model {
 	}
 
 	public static function getVerficationPendingList($r) {
+		//dd($r->all());
 		/*if(isset($r->period))
 			{
 				$date = explode(' to ', $r->period);
@@ -439,7 +440,25 @@ class Trip extends Model {
 			})*/
 		;
 		if (!Entrust::can('verify-all-trips')) {
-			$trips->where('trips.manager_id', Auth::user()->entity_id);
+			$now=date('Y-m-d');
+			$sub_employee_id=AlternateApprove::select('employee_id')
+			->where('from','<=', $now)
+			->where('to','>=', $now)
+			->where('alternate_employee_id',Auth::user()->entity_id)
+			->get()
+			->toArray();
+			//dd($sub_employee_id);
+			$ids=array_column($sub_employee_id, 'employee_id');
+			array_push($ids,Auth::user()->entity_id);
+			if(count($sub_employee_id)>0)
+			{
+				$trips->whereIn('trips.manager_id', $ids); //Alternate MANAGER
+			}else
+			{
+				$trips->where('trips.manager_id', Auth::user()->entity_id);//MANAGER
+			}
+
+		//$trips->where('trips.manager_id', Auth::user()->entity_id);
 		}
 
 		return $trips;

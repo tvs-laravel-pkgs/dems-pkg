@@ -223,6 +223,18 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Employee',
     }).
 
+    //EMPLOYEES IMPORT
+    when('/eyatra/employees/import/list', {
+        template: '<eyatra-employees-import-list></eyatra-employees-import-list>',
+        title: 'Import List',
+    }).
+    when('/eyatra/import/employee', {
+        template: '<import-employees></import-employees>',
+        title: 'Import Employees',
+    }).
+    
+    //END
+
     //TRIP
     when('/eyatra/trips', {
         template: '<eyatra-trips></eyatra-trips>',
