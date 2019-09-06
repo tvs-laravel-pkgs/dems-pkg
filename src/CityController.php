@@ -42,7 +42,7 @@ class CityController extends Controller {
 				'entities.name',
 				DB::raw('IF(ncities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
-
+			->where('countries.company_id', Auth::user()->company_id)
 			->orderBy('ncities.id', 'asc')
 			->where(function ($query) use ($r, $country) {
 				if (!empty($country)) {
@@ -110,6 +110,7 @@ class CityController extends Controller {
 				'ncities.name',
 				's.name as state_name'
 			)
+			->where('company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
 				$q->where('ncities.name', 'like', '%' . $key . '%')
 				;
@@ -168,7 +169,7 @@ class CityController extends Controller {
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
 		$this->data['state_list'] = NState::getList();
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
@@ -235,6 +236,7 @@ class CityController extends Controller {
 
 			$city->fill($request->all());
 			$city->save();
+			$city->company_id = Auth::user()->company_id;
 			$activity['entity_id'] = $city->id;
 			$activity['entity_type'] = "City";
 			$activity['details'] = empty($request->id) ? "City is added" : "City is updated";

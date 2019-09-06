@@ -13,10 +13,10 @@ class AlternateApproveController extends Controller {
 	public function listAlternateApproveRequest() {
 		$employees = Employee::select('reporting_to_id')
 			->distinct()
-			->whereNotNull('reporting_to_id')->get()->toArray();
-		//dd($employees);
+			->whereNotNull('reporting_to_id')
+			->where('employees.company_id',Auth::user()->company_id)
+			->get()->toArray();
 		$employee_ids = array_column($employees, 'reporting_to_id');
-		//dd($employee_ids);
 
 		$alternate_approve = Employee::select(
 			'employees.id',
@@ -31,15 +31,20 @@ class AlternateApproveController extends Controller {
 		)
 			->leftJoin('alternative_approvers', 'employees.id', 'alternative_approvers.employee_id')
 			->leftjoin('employees as alternateemp', 'alternateemp.id', 'alternative_approvers.alternate_employee_id')
-			->leftJoin('users as emp_user', 'emp_user.entity_id', 'alternative_approvers.employee_id')
-			->leftJoin('users as alter_user', 'alter_user.entity_id', 'alternative_approvers.alternate_employee_id')
+			->leftjoin('users as emp_user', function ($join) {
+				$join->on('emp_user.entity_id', '=', 'employees.id')
+				->where('emp_user.user_type_id',3121);
+			})
+			->leftjoin('users as alter_user', function ($join) {
+				$join->on('alter_user.entity_id', '=', 'alternative_approvers.alternate_employee_id')
+				->where('alter_user.user_type_id',3121);
+			})
 			->whereIn('employees.id', $employee_ids)
+			->where('employees.company_id',Auth::user()->company_id)
 			->orderBy('alternative_approvers.id', 'desc')
 			->groupBy('employees.id')
-		// ->where(function ($query){
-		// 			$query->where('emp_user.user_type_id', 3121)->orWhere('alter_user.user_type_id', 3121);
-		// 	})
 		;
+		//dd($alternate_approve);
 
 		/*$alternate_approve = AlternateApprove::select(
 				'alternative_approvers.id',
@@ -84,9 +89,12 @@ class AlternateApproveController extends Controller {
 
 			})
 			->addColumn('status', function ($alternate_approve) {
-				if ($alternate_approve->status < 0) {
+				if ($alternate_approve->status < 0 ) {
 					return '<span style="color:#ea4335;">Expired</span>';
-				} else {
+				}elseif (is_null($alternate_approve->status)) {
+					return '<span style="color:#337DFF;">N/A</span>';
+				} 
+				else {
 					return '<span style="color:#63ce63;">Valid</span>';
 				}
 			})
@@ -232,7 +240,9 @@ class AlternateApproveController extends Controller {
 	}
 
 	public function alternateapproveDelete($alternate_id) {
-		$alternate_approve = AlternateApprove::where('id', $alternate_id)->forceDelete();
+
+		$alternate_approve = AlternateApprove::where('employee_id', $alternate_id)->forceDelete();
+		//dd($alternate_approve);
 		if (!$alternate_approve) {
 			return response()->json(['success' => false, 'errors' => ['Alternate Approve not found']]);
 		}

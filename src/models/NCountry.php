@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 
 class NCountry extends Model {
@@ -19,7 +20,7 @@ class NCountry extends Model {
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
-		$countries_list = NCountry::select('name', 'id')->get();
+		$countries_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get();
 		$data = $countries_list->prepend($option);
 		return $data;
 		// return NCountry::select('id', 'name')->get();
@@ -59,6 +60,7 @@ class NCountry extends Model {
 					$city = NCity::firstOrNew([
 						'state_id' => $state->id,
 						'name' => $city_name,
+						'company_id' => $company->id,
 					]);
 					$city->created_by = $admin->id;
 					$city->save();
