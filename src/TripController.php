@@ -34,7 +34,7 @@ class TripController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('FORMAT(trips.advance_received,"2","en_IN") as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
@@ -71,7 +71,9 @@ class TripController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-
+<a href="#!/eyatra/trip/edit/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>
 				<a href="#!/eyatra/trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
@@ -105,6 +107,10 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
+		// dd($request->all());
+		if ($request->departure_date) {
+
+		}
 		return Trip::saveTrip($request);
 	}
 
@@ -135,7 +141,7 @@ class TripController extends Controller {
 
 		//$trip = Trip::where('id', $trip_id)->forceDelete();
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = NULL;
+		$activity['details'] = 'Trip is Deleted';
 		$activity['activity'] = "delete";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
@@ -157,12 +163,14 @@ class TripController extends Controller {
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+
 		$trip->status_id = 3062;
 		$trip->save();
 
-		$activity['entity_id'] = $trip->id;
+		$activity['entity_id'] = $trip_id;
+
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = NULL;
+		$activity['details'] = 'Trip is Cancelled';
 		$activity['activity'] = "cancel";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
@@ -195,7 +203,7 @@ class TripController extends Controller {
 			$visit->save();
 			/*$activity['entity_id'] = $visit->id;
 				$activity['entity_type'] = 'visit';
-				$activity['details'] = NULL;
+				$activity['details'] = 'Visit Booking is Cancelled';
 				$activity['activity'] = "cancel";
 				//dd($activity);
 			*/
@@ -257,9 +265,11 @@ class TripController extends Controller {
 		$this->data['trip'] = $visit->trip;
 		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$this->data['bookings'] = $visit->bookings;
+			//dd($this->data['bookings'][0]->total, IND_money_format($this->data['bookings'][0]->total));
 		} else {
 			$this->data['bookings'] = [];
 		}
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
@@ -274,7 +284,7 @@ class TripController extends Controller {
 
 		/*$activity['entity_id'] = $visit->id;
 			$activity['entity_type'] = 'visit';
-			$activity['details'] = NULL;
+			$activity['details'] = 'Visit Booking cancel request';
 			$activity['activity'] = "cancel";
 			//dd($activity);
 		*/

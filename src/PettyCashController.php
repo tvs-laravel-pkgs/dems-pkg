@@ -244,7 +244,7 @@ class PettyCashController extends Controller {
 							$name = $attachement->getClientOriginalName();
 							$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $name);
 							$attachement_petty_cash = new Attachment;
-							$attachement_petty_cash->attachment_of_id = 3268;
+							$attachement_petty_cash->attachment_of_id = 3253;
 							$attachement_petty_cash->attachment_type_id = 3200;
 							$attachement_petty_cash->entity_id = $petty_cash->id;
 							$attachement_petty_cash->name = $name;
@@ -276,7 +276,7 @@ class PettyCashController extends Controller {
 							$name = $attachement->getClientOriginalName();
 							$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $name);
 							$attachement_petty_other = new Attachment;
-							$attachement_petty_other->attachment_of_id = 3269;
+							$attachement_petty_other->attachment_of_id = 3253;
 							$attachement_petty_other->attachment_type_id = 3200;
 							$attachement_petty_other->entity_id = $petty_cash_other->id;
 							$attachement_petty_other->name = $name;

@@ -141,23 +141,33 @@ class Trip extends Model {
 				$activity['activity'] = "edit";
 
 			}
+			$employee = Employee::where('id', Auth::user()->entity->id)->first();
+
 			if ($request->advance_received) {
 				$trip->advance_received = $request->advance_received;
-				$trip->advance_request_approval_status_id = 3260;
+				if ($employee->self_approve == 1) {
+					$trip->advance_request_approval_status_id = 3261;
+				} else {
+					$trip->advance_request_approval_status_id = 3260;
+				}
 			}
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
 			// dd(Auth::user(), );
 			$trip->manager_id = Auth::user()->entity->reporting_to_id;
-			$trip->status_id = 3021; //NEW
+			if ($employee->self_approve == 1) {
+				$trip->status_id = 3028; //Manager Approved
+			} else {
+				$trip->status_id = 3021; //Manager Approval Pending
+			}
 			$trip->save();
 
 			$trip->number = 'TRP' . $trip->id;
 			$trip->save();
 			$activity['entity_id'] = $trip->id;
 			$activity['entity_type'] = 'trip';
-			$activity['details'] = NULL;
+			$activity['details'] = 'Trip is Added';
 			//SAVING VISITS
 			if ($request->visits) {
 				$visit_count = count($request->visits);
@@ -281,12 +291,14 @@ class Trip extends Model {
 			}
 		}
 		$grade = Auth::user()->entity;
+		//dd('ss', Auth::user()->id, Auth::user()->entity->outlet, Auth::user()->entity->outlet->address);
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
 		} else {
 			$data['advance_eligibility'] = '';
 		}
+		//dd(Auth::user()->entity->outlet->address);
 
 		$data['extras'] = [
 			// 'purpose_list' => Entity::uiPurposeList(),
@@ -376,7 +388,7 @@ class Trip extends Model {
 				$from_date = date('Y-m-d', strtotime($from_date));
 				$to_date = date('Y-m-d', strtotime($to_date));
 		*/
-
+		//dd('d');
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -393,7 +405,7 @@ class Trip extends Model {
 				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'trips.created_at',
 				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
 				'status.name as status'
@@ -459,7 +471,7 @@ class Trip extends Model {
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = 'sdd';
+		$activity['details'] = 'Trip is Approved by Manager';
 		$activity['activity'] = "approve";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
@@ -479,7 +491,7 @@ class Trip extends Model {
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['activity'] = "reject";
-		$activity['details'] = $r->remarks;
+		$activity['details'] = 'Trip is Rejected by Manager';
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
 
@@ -489,9 +501,9 @@ class Trip extends Model {
 
 	public static function getClaimFormData($trip_id) {
 		// if (!$trip_id) {
-		// 	$data['success'] = false;
-		// 	$data['message'] = 'Trip not found';
-		// 	$data['employee'] = [];
+		//  $data['success'] = false;
+		//  $data['message'] = 'Trip not found';
+		//  $data['employee'] = [];
 		// } else {
 		$data = [];
 		$trip = Trip::with(
@@ -530,20 +542,18 @@ class Trip extends Model {
 				'selfVisits.agent',
 				'selfVisits.status',
 				'selfVisits.attachments',
-
 			])->find($trip_id);
 		// dd($trip);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
 		}
-		if (count($trip->lodgings) > 0) {
+		if (count($trip->localTravels) > 0) {
 			$data['action'] = 'Edit';
 			$travelled_cities_with_dates = array();
 			$lodge_cities = array();
 		} else {
 			$data['action'] = 'Add';
-
 			//EXPENSE DATAS CITY AND DATE WISE
 			// $lodgings = array();
 			$travelled_cities_with_dates = array();
@@ -551,31 +561,35 @@ class Trip extends Model {
 			// $boarding_to_date = '';
 			if (!empty($trip->visits)) {
 				foreach ($trip->visits as $visit_key => $visit) {
-					$city_category_id = NCity::where('id', $visit->to_city_id)->first();
+					$city_category_id = NCity::where('id', $visit->to_city_id)->where('company_id', Auth::user()->company_id)->first();
 					$grade_id = $trip->employee ? $trip->employee->grade_id : '';
-					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
-					$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
-					$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
-					$loadge_eligible_amount = $lodging_expense_type ? $lodging_expense_type->eligible_amount : '0.00';
+					if ($city_category_id) {
+						$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
+						$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+						$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+					}
+					$loadge_eligible_amount = $lodging_expense_type ? IND_money_format($lodging_expense_type->eligible_amount) : '0.00';
 					$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
-					$local_travel_eligible_amount = $local_travel_expense_type ? $local_travel_expense_type->eligible_amount : '0.00';
-
-					$lodge_cities[$visit_key]['city'] = $visit->toCity ? $visit->toCity->name : '';
-					$lodge_cities[$visit_key]['city_id'] = $visit->to_city_id;
-					$lodge_cities[$visit_key]['loadge_eligible_amount'] = $loadge_eligible_amount;
-
+					$local_travel_eligible_amount = $local_travel_expense_type ? IND_money_format($local_travel_expense_type->eligible_amount) : '0.00';
 					$next = $visit_key;
 					$next++;
 					// $lodgings[$visit_key]['city'] = $visit['to_city'];
 					// $lodgings[$visit_key]['checkin_enable'] = $visit['arrival_date'];
+
+					//GET LODGE CITIES AND THEIR ELIGIBLE AMOUNT
 					if (isset($trip->visits[$next])) {
 						// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
 						$next_departure_date = $trip->visits[$next]->departure_date;
+						$next_arrival_date = $trip->visits[$next]->arrival_date;
+						$lodge_cities[$visit_key]['city'] = $visit->toCity ? $visit->toCity->name : '';
+						$lodge_cities[$visit_key]['city_id'] = $visit->to_city_id;
+						$lodge_cities[$visit_key]['loadge_eligible_amount'] = $loadge_eligible_amount;
 					} else {
 						// $lodgings[$visit_key]['checkout_disable'] = $visit['arrival_date'];
 						$next_departure_date = $visit->departure_date;
+						$next_arrival_date = $visit->arrival_date;
 					}
-
+					//TRAVELLED CITIES WITH DATES NOT USED FOR NOW
 					$range = Trip::getDatesFromRange($visit->departure_date, $next_departure_date);
 					if (!empty($range)) {
 						foreach ($range as $range_key => $range_val) {
@@ -592,46 +606,45 @@ class Trip extends Model {
 				$lodge_cities = array();
 			}
 		}
+
 		$data['travelled_cities_with_dates'] = $travelled_cities_with_dates;
 		$data['lodge_cities'] = $lodge_cities;
-
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
-
 		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
 			->leftjoin('entities', 'entities.id', 'employees.grade_id')
 			->where('employees.id', $trip->employee_id)
 			->where('users.user_type_id', 3121)->first();
-
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
-
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
 		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days;
-
 		//DONT REVERT - ABDUL
 		$trip->cities = $data['cities'] = count($travel_cities) > 0 ? trim(implode(', ', $travel_cities)) : '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 		// }
-
 		if (!empty($to_cities)) {
-			$city_list = collect(NCity::select('id', 'name')->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
+			$city_list = collect(NCity::select('id', 'name')->where('company_id', Auth::user()->company_id)->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
 		} else {
 			$city_list = [];
 		}
+		$travel_cities_list = collect(Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
+				->where('visits.trip_id', $trip->id)
+				->select('cities.id', 'cities.name')
+				->orderBy('visits.id', 'asc')
+				->get()->prepend(['id' => '', 'name' => 'Select City']));
 		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
-		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => -1, 'name' => 'Select Purpose']));
-		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => -1, 'name' => 'Select Travel Mode']));
-		$local_travel_mode_list = collect(Entity::uiLocaTravelModeList()->prepend(['id' => -1, 'name' => 'Select Local Travel Mode']));
-		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => -1, 'name' => 'Select Stay Type']));
-
+		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
+		$travel_mode_list = collect(Entity::uiTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
+		$local_travel_mode_list = collect(Entity::uiLocaTravelModeList()->prepend(['id' => '', 'name' => 'Select Local Travel Mode']));
+		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
@@ -639,9 +652,9 @@ class Trip extends Model {
 			'city_list' => $city_list,
 			'stay_type_list' => $stay_type_list,
 			'booking_type_list' => $booking_type_list,
+			'travel_cities_list' => $travel_cities_list,
 		];
 		$data['trip'] = $trip;
-
 		return response()->json($data);
 	}
 
@@ -903,6 +916,183 @@ class Trip extends Model {
 			}
 		} catch (Exception $e) {
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
+	}
+
+	public function saveEYatraTripClaim(Request $request) {
+		// dd(Auth::user()->id);
+		dd($request->all());
+		//validation
+		try {
+			// $validator = Validator::make($request->all(), [
+			// 	'purpose_id' => [
+			// 		'required',
+			// 	],
+			// ]);
+			// if ($validator->fails()) {
+			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			// }
+
+			DB::beginTransaction();
+
+			if (empty($request->trip_id)) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			}
+			//UPDATE TRIP STATUS
+			$trip = Trip::find($request->trip_id);
+			$trip->status_id = 3023; //claimed
+			$trip->claim_amount = $request->claim_total_amount; //claimed
+			$trip->save();
+
+			//SAVE EMPLOYEE CLAIMS
+			$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+			$employee_claim->fill($request->all());
+			$employee_claim->trip_id = $trip->id;
+			$employee_claim->total_amount = $request->claim_total_amount;
+			$employee_claim->status_id = 3222;
+			$employee_claim->created_by = Auth::user()->id;
+			$employee_claim->save();
+			$activity['entity_id'] = $trip->id;
+			$activity['entity_type'] = "Trip";
+			$activity['details'] = "Trip is Claimed";
+			$activity['activity'] = "claim";
+			$activity_log = ActivityLog::saveLog($activity);
+			//SAVING VISITS
+			if ($request->visits) {
+				foreach ($request->visits as $visit_data) {
+					if (!empty($visit_data['id'])) {
+						$visit = Visit::find($visit_data['id']);
+						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
+						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
+						$visit->save();
+						// dd($visit_data['id']);
+						//UPDATE VISIT BOOKING STATUS
+						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
+						$visit_booking->visit_id = $visit_data['id'];
+						$visit_booking->type_id = 3100;
+						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
+						$visit_booking->reference_number = $visit_data['reference_number'];
+						$visit_booking->remarks = $visit_data['remarks'];
+						$visit_booking->amount = $visit_data['amount'];
+						$visit_booking->tax = $visit_data['tax'];
+						$visit_booking->service_charge = '0.00';
+						$visit_booking->total = $visit_data['total'];
+						$visit_booking->paid_amount = $visit_data['total'];
+						$visit_booking->created_by = Auth::user()->id;
+						$visit_booking->status_id = 3241; //Claimed
+						$visit_booking->save();
+					}
+				}
+			}
+
+			//SAVING LODGINGS
+			if ($request->lodgings) {
+				if (!empty($request->lodgings_removal_id)) {
+					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
+					Lodging::whereIn('id', $lodgings_removal_id)->delete();
+				}
+				foreach ($request->lodgings as $lodging_data) {
+					$lodging = Lodging::firstOrNew([
+						'id' => $lodging_data['id'],
+					]);
+					$lodging->fill($lodging_data);
+					$lodging->trip_id = $request->trip_id;
+					$lodging->check_in_date = date('Y-m-d H:i:s', strtotime($lodging_data['check_in_date']));
+					$lodging->checkout_date = date('Y-m-d H:i:s', strtotime($lodging_data['checkout_date']));
+					$lodging->created_by = Auth::user()->id;
+					$lodging->save();
+
+					//STORE ATTACHMENT
+					$item_images = storage_path('app/public/trip/lodgings/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($lodging_data['attachments'])) {
+						foreach ($lodging_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
+							$attachement_lodge = new Attachment;
+							$attachement_lodge->attachment_of_id = 3181;
+							$attachement_lodge->attachment_type_id = 3200;
+							$attachement_lodge->entity_id = $lodging->id;
+							$attachement_lodge->name = $name;
+							$attachement_lodge->save();
+						}
+					}
+				}
+			}
+			//SAVING BOARDINGS
+			if ($request->boardings) {
+				if (!empty($request->boardings_removal_id)) {
+					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
+					Boarding::whereIn('id', $boardings_removal_id)->delete();
+				}
+				foreach ($request->boardings as $boarding_data) {
+					$boarding = Boarding::firstOrNew([
+						'id' => $boarding_data['id'],
+					]);
+					$boarding->fill($boarding_data);
+					$boarding->trip_id = $request->trip_id;
+					$boarding->date = date('Y-m-d', strtotime($boarding_data['date']));
+					$boarding->created_by = Auth::user()->id;
+					$boarding->save();
+
+					//STORE ATTACHMENT
+					$item_images = storage_path('app/public/trip/boarding/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($boarding_data['attachments'])) {
+						foreach ($boarding_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
+							$attachement_board = new Attachment;
+							$attachement_board->attachment_of_id = 3182;
+							$attachement_board->attachment_type_id = 3200;
+							$attachement_board->entity_id = $boarding->id;
+							$attachement_board->name = $name;
+							$attachement_board->save();
+						}
+					}
+				}
+			}
+
+			//SAVING LOCAL TRAVELS
+			if ($request->local_travels) {
+				if (!empty($request->local_travels_removal_id)) {
+					$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
+					LocalTravel::whereIn('id', $local_travels_removal_id)->delete();
+				}
+				foreach ($request->local_travels as $local_travel_data) {
+					$local_travel = LocalTravel::firstOrNew([
+						'id' => $local_travel_data['id'],
+					]);
+					$local_travel->fill($local_travel_data);
+					$local_travel->trip_id = $request->trip_id;
+					$local_travel->date = date('Y-m-d', strtotime($local_travel_data['date']));
+					$local_travel->created_by = Auth::user()->id;
+					$local_travel->save();
+
+					//STORE ATTACHMENT
+					$item_images = storage_path('app/public/trip/local_travels/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($local_travel_data['attachments'])) {
+						foreach ($local_travel_data['attachments'] as $key => $attachement) {
+							$name = $attachement->getClientOriginalName();
+							$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
+							$attachement_local_travel = new Attachment;
+							$attachement_local_travel->attachment_of_id = 3183;
+							$attachement_local_travel->attachment_type_id = 3200;
+							$attachement_local_travel->entity_id = $local_travel->id;
+							$attachement_local_travel->name = $name;
+							$attachement_local_travel->save();
+						}
+					}
+				}
+			}
+
+			DB::commit();
+			$request->session()->flash('success', 'Trip saved successfully!');
+			return response()->json(['success' => true]);
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
 

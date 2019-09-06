@@ -107,17 +107,29 @@ app.component('eyatraTrips', {
                     for (var i in response.data.errors) {
                         errors += '<li>' + response.data.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trips Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#delete_emp').modal('hide');
                     dataTable.ajax.reload(function(json) {});
                 }
@@ -137,17 +149,24 @@ app.component('eyatraTripForm', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
+        var arr_ind;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         $http.get(
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/trips')
                 //$scope.$apply()
                 return;
@@ -158,20 +177,39 @@ app.component('eyatraTripForm', {
                 $("#advance").show().prop('disabled', false);
             }
             self.trip = response.data.trip;
+
             self.extras = response.data.extras;
             self.action = response.data.action;
             if (self.action == 'New') {
-                self.trip.visits[0].booking_method = 'Self';
-                self.trip.visits.push({
-                    booking_method: 'Self'
-                });
+                self.booking_method = "self";
+                self.trip.visits = [];
+                arr_ind = 1;
+
+                /*self.trip.visits[0].booking_method = 'Self';
+self.trip.visits.push({
+    booking_method: 'Self'
+});*/
+                $scope.single_trip = true;
+                self.checked = true;
+                $scope.round_trip = false;
+                $scope.multi_trip = false;
+                //self.visits = [];
+
+            } else {
+                visit = self.trip.visits;
+                arr_ind = visit.length;
             }
+
             $rootScope.loading = false;
             $scope.showBank = false;
             $scope.showCheque = false;
             $scope.showWallet = false;
 
+
         });
+
+
+
         $("#advance").hide().prop('disabled', true);
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
@@ -198,13 +236,27 @@ app.component('eyatraTripForm', {
             }
         }
 
-        self.addVisit = function() {
-            self.trip.visits.push({
-                visit_date: '',
-                booking_method: 'Self',
-                preferred_travel_modes: '',
-            });
+        $scope.addVisit = function() {
+            alert(arr_ind);
+            /*self.trip.visits.push({
+    visit_date: '',
+    booking_method: 'Self',
+    preferred_travel_modes: '',
+});*/
+            add_block = $('.or_block').html();
+            add_block = add_block.replace(/XXX/g, arr_ind);
+            alert(add_block);
+
+            arr_ind = arr_ind + 1;
+            $('.extra_block').append(add_block);
+            //$('.add_multi_trip').show();
+
         }
+        // $('.visits-wrp').hide();
+
+        // $(".add_visit").on('click', function() {
+        //     $('.add_multi_trip').hide();
+        // });
 
         $scope.trip_mode = function(id) {
             if (id == 1) {
@@ -212,6 +264,7 @@ app.component('eyatraTripForm', {
                 $scope.round_trip = false;
                 $scope.multi_trip = false;
             } else if (id == 2) {
+
                 $scope.single_trip = false;
                 $scope.round_trip = true;
                 $scope.multi_trip = false;
@@ -219,10 +272,15 @@ app.component('eyatraTripForm', {
                 $scope.round_trip = false;
                 $scope.single_trip = false;
                 $scope.multi_trip = true;
+
+                $('.add_multi_trip').hide();
             }
         }
 
         self.removeLodging = function(index, lodging_id) {
+            alert('remove');
+            alert(index);
+            alert(lodging_id);
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
@@ -275,7 +333,7 @@ app.component('eyatraTripForm', {
                 },
                 'trip_mode[]': {
                     required: true,
-                },  
+                },
             },
             messages: {
                 'description': {
@@ -291,11 +349,17 @@ app.component('eyatraTripForm', {
                 },
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             submitHandler: function(form) {
 
@@ -318,11 +382,17 @@ app.component('eyatraTripForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Trip saved successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/trips')
                             $scope.$apply()
                         }
@@ -371,11 +441,17 @@ app.component('eyatraTripView', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Booking cancelled successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $route.reload();
                         }
                     })
@@ -406,11 +482,17 @@ app.component('eyatraTripView', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Booking cancelled successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $('#request_cancel_trip').modal('hide');
                             $route.reload();
                         }
@@ -435,17 +517,29 @@ app.component('eyatraTripView', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trips Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $location.path('/eyatra/trips')
                     $scope.$apply()
                 }
@@ -468,11 +562,17 @@ app.component('eyatraTripView', {
                         }
                         custom_noty('error', errors);
                     } else {
-                        new Noty({
+                        $noty = new Noty({
                             type: 'success',
                             layout: 'topRight',
                             text: 'Trip successfully sent for verification',
+                            animation: {
+                                speed: 500 // unavailable - no need
+                            },
                         }).show();
+                        setTimeout(function() {
+                            $noty.close();
+                        }, 1000);
                         $location.path('/eyatra/trips')
                         $scope.$apply()
                     }
@@ -495,18 +595,30 @@ app.component('eyatraTripView', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
                     $('#cancel_trip').modal('hide');
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trip Cancelled Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     setTimeout(function() {
                         $location.path('/eyatra/trips')
                         $scope.$apply()
@@ -537,11 +649,17 @@ app.component('eyatraTripVisitView', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/trips')
                 $scope.$apply()
                 return;

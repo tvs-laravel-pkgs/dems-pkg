@@ -15,6 +15,7 @@ use Yajra\Datatables\Datatables;
 
 class TripClaimVerificationTwoController extends Controller {
 	public function listEYatraTripClaimVerificationTwoList(Request $r) {
+		//dd(Auth::user()->entity_id);
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -51,8 +52,31 @@ class TripClaimVerificationTwoController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
+			->where(function ($query){
+				if(Auth::user()->entity_id)
+				{
+					//dd(Auth::user()->entity_id);
+					$now=date('Y-m-d');
+					$sub_employee_id=AlternateApprove::select('employee_id')
+					->where('from','<=', $now)
+                    ->where('to','>=', $now)
+                    ->where('alternate_employee_id',Auth::user()->entity_id)
+                    ->get()
+                    ->toArray();
+                    //dd($sub_employee_id);
+                    $ids=array_column($sub_employee_id, 'employee_id');
+                    array_push($ids,Auth::user()->entity_id);
+                    if(count($sub_employee_id)>0)
+                    {
+                    	$query->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
+                    }else
+                    {
+                    	$query->where('e.reporting_to_id', Auth::user()->entity_id);//MANAGER
+                    }
+
+				}
+			})
 			->where('ey_employee_claims.status_id', 3224) //SENIOR MANAGER APPROVAL PENDING
-			->where('e.reporting_to_id', Auth::user()->entity_id) //MANAGER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -188,9 +212,15 @@ class TripClaimVerificationTwoController extends Controller {
 	public function approveTripClaimVerificationTwo($trip_id) {
 
 		$trip = Trip::find($trip_id);
+
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V2 Approved";
+		$activity['activity'] = "approve";
+		$activity_log = ActivityLog::saveLog($activity);
 		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -219,7 +249,11 @@ class TripClaimVerificationTwoController extends Controller {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024; //Claim Rejected
 		$trip->save();
-
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V2 Rejected";
+		$activity['activity'] = "reject";
+		$activity_log = ActivityLog::saveLog($activity);
 		return response()->json(['success' => true]);
 	}
 

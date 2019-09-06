@@ -154,7 +154,11 @@ class RegionController extends Controller {
 			$region->company_id = Auth::user()->company_id;
 			$region->fill($request->all());
 			$region->save();
-
+			$activity['entity_id'] = $region->id;
+			$activity['entity_type'] = "Regions";
+			$activity['details'] = empty($request->id) ? "Region is added" : "Region is updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			// return response()->json(['success' => true]);
 			if (empty($request->id)) {
@@ -199,7 +203,13 @@ class RegionController extends Controller {
 	}
 
 	public function deleteEYatraRegion($region_id) {
-		$region = Region::withTrashed()->where('id', $region_id)->forcedelete();
+		$region = Region::withTrashed()->where('id', $region_id)->first();
+		$activity['entity_id'] = $region->id;
+		$activity['entity_type'] = "Regions";
+		$activity['details'] = "Regions is deleted";
+		$activity['activity'] = "delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$region->forceDelete();
 		if (!$region) {
 			return response()->json(['success' => false, 'errors' => ['Region not found']]);
 		}

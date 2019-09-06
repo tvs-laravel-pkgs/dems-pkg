@@ -22,7 +22,7 @@ class OutletController extends Controller {
 			->join('ncities as city', 'city.id', 'a.city_id')
 			->join('nstates as s', 's.id', 'city.state_id')
 			->leftjoin('regions as r', 'r.state_id', 's.id')
-			->join('country as c', 'c.id', 's.country_id')
+			->join('countries as c', 'c.id', 's.country_id')
 			->select(
 				'outlets.id',
 				'outlets.code',
@@ -95,6 +95,8 @@ class OutletController extends Controller {
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
+			$this->data['amount_eligible'] = 'No';
+			$this->data['amount_approver'] = 'Cashier';
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
@@ -112,9 +114,14 @@ class OutletController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 			if ($outlet->amount_eligible == 1) {
-				$outlet->amount_eligible = 1;
+				$this->data['amount_eligiblity'] = 'Yes';
 			} else {
-				$outlet->amount_eligible = 0;
+				$this->data['amount_eligiblity'] = 'No';
+			}
+			if ($outlet->claim_req_approver == 1) {
+				$this->data['amount_approver'] = 'Cashier';
+			} else {
+				$this->data['amount_approver'] = 'Financier';
 			}
 			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
@@ -146,7 +153,6 @@ class OutletController extends Controller {
 			'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
-		// $this->data['lob_outlet'] = $lob_outlet = Lob::select('name', 'id')->get();
 		$this->data['sbu_outlet'] = [];
 		// foreach ($lob_outlet->sbus as $lob_sbu) {
 		// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;
@@ -154,6 +160,7 @@ class OutletController extends Controller {
 		$this->data['outlet'] = $outlet;
 		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
+		//dd($outlet);
 		return response()->json($this->data);
 	}
 	public function eyatraOutletFilterData() {
@@ -170,33 +177,36 @@ class OutletController extends Controller {
 	public function searchCashier(Request $r) {
 		$key = $r->key;
 		$cashier_list = Employee::select(
+
 			'name',
 			'code',
-			'id'
+			'employees.id'
 		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
-				$q->where('name', 'like', '%' . $key . '%')
-					->orWhere('code', 'like', '%' . $key . '%')
+				$q->where('code', 'like', '%' . $key . '%')
+				// ->where('name', 'like', '%' . $key . '%')
 				;
 			})
+
 			->get();
 		return response()->json($cashier_list);
 	}
 	public function saveEYatraOutlet(Request $request) {
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
 				'code.required' => 'Outlet Code is Required',
 				'outlet_name.required' => 'Outlet Name is Required',
 				'line_1.required' => 'Address Line1 is Required',
-				// 'country_id.required' => 'Country is Required',
-				// 'state_id.required' => 'State is Required',
 				'city_id.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
 				'cashier_id.required' => "Cashier Name is Required",
-				// 'amount_eligible.required' => "Amount Eligible is Required",
 			];
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
@@ -236,37 +246,48 @@ class OutletController extends Controller {
 				$outlet->deleted_at = date('Y-m-d H:i:s');
 				$outlet->deleted_by = Auth::user()->id;
 			}
-			if ($request->amount_eligible == 1) {
-				$outlet->amount_eligible = 1;
-				$outlet->amount_limit = $request->amount_limit;
-			} else {
+			if ($request->amount_eligiblity == 'No') {
 				$outlet->amount_eligible = 0;
 				$outlet->amount_limit = NULL;
+			} else {
+				$outlet->amount_eligible = 1;
+			}
+			if ($request->amount_approver == 'Cashier') {
+				$outlet->claim_req_approver = 1;
+			} else {
+				$outlet->claim_req_approver = 0;
 			}
 			$outlet->name = $request->outlet_name;
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());
 			$outlet->save();
+			//dd('s');
+			$activity['entity_id'] = $outlet->id;
+			$activity['entity_type'] = "Outlet";
+			$activity['details'] = empty($request->id) ? "Outlet is  Added" : "Outlet is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING ADDRESS
 			$address->address_of_id = 3160;
 			$address->entity_id = $outlet->id;
 			$address->name = 'Primary';
 			$address->fill($request->all());
 			$address->save();
-			// dd($address);
+
 			//SAVING OUTLET BUDGET
-			$sbu_ids = array_column($request->sbus, 'sbu_id');
-			// dd($sbu_ids);
-			if (count($request->sbus) > 0) {
-				foreach ($request->sbus as $sbu) {
-					if (!isset($sbu['sbu_id'])) {
-						continue;
-					}
-					$outlet->outletBudgets()->attach($sbu['sbu_id'], [
-						'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
-					]);
-				}
-			}
+			// $sbu_ids = array_column($request->sbus, 'sbu_id');
+
+			// if (count($request->sbus) > 0) {
+			// 	foreach ($request->sbus as $sbu) {
+			// 		if (!isset($sbu['sbu_id'])) {
+			// 			continue;
+			// 		}
+			// 		$outlet->outletBudgets()->attach($sbu['sbu_id'], [
+			// 			'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
+			// 		]);
+			// 	}
+			// }
+
 			DB::commit();
 			$request->session()->flash('success', 'outlet saved successfully!');
 			if (empty($request->id)) {
@@ -289,10 +310,12 @@ class OutletController extends Controller {
 			'Sbu',
 			'Sbu.lob',
 			'employee',
-		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
+
+			'employee.user',
+		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
-		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', 'amount')->where('outlet_id', $outlet_id)
+		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(amount,2,"en_IN") as amount'))->where('outlet_budget.outlet_id', $outlet_id)
 
 			->leftJoin('sbus', 'sbus.id', 'outlet_budget.sbu_id')
 			->leftJoin('lobs', 'lobs.id', 'sbus.lob_id')
@@ -309,10 +332,18 @@ class OutletController extends Controller {
 		$this->data['action'] = 'View';
 		$this->data['outlet'] = $outlet;
 		$this->data['success'] = true;
+		//dd($this->data);
+
 		return response()->json($this->data);
 	}
 	public function deleteEYatraOutlet($outlet_id) {
-		$outlet = Outlet::where('id', $outlet_id)->forceDelete();
+		$outlet = Outlet::where('id', $outlet_id)->first();
+		$activity['entity_id'] = $outlet->id;
+		$activity['entity_type'] = "outlet";
+		$activity['details'] = "Outlet is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$outlet->forceDelete();
 		if (!$outlet) {
 			return response()->json(['success' => false, 'errors' => ['Outlet not found']]);
 		}

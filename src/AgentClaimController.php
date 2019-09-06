@@ -97,7 +97,9 @@ class AgentClaimController extends Controller {
 
 			$this->data['attachment'] = [];
 
-			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
+			$this->data['booking_list'] = $booking_list = VisitBooking::select(
+				DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.paid_amount) as total_amount'),
+				'trips.id as trip_id', 'visits.id as visit_id', 'employees.code as employee_code',
 				'users.name as employee_name', 'configs.name as status')
 				->join('visits', 'visits.id', 'visit_bookings.visit_id')
 				->join('trips', 'trips.id', 'visits.trip_id')
@@ -112,6 +114,7 @@ class AgentClaimController extends Controller {
 			$date = date('d-m-Y');
 		}
 
+		// dd($booking_list);
 		// $this->data['booking_list'] = $booking_list = VisitBooking::select(
 		// 	'visit_bookings.id',
 		// 	'type.name as type_id',
@@ -449,7 +452,7 @@ class AgentClaimController extends Controller {
 		$payment->save();
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
-		$activity['details'] = NULL;
+		$activity['details'] = "Claim is paid by Cashier";
 		$activity['activity'] = "paid";
 		$activity_log = ActivityLog::saveLog($activity);
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
@@ -467,7 +470,7 @@ class AgentClaimController extends Controller {
 		$agent_claim->save();
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
-		$activity['details'] = NULL;
+		$activity['details'] = "Agent claim is rejected by Cashier";
 		$activity['activity'] = "reject";
 		$activity_log = ActivityLog::saveLog($activity);
 

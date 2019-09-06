@@ -68,11 +68,18 @@ app.component('eyatraOutletReimbursement', {
                 console.log(response.data);
                 if (response.data.success) {
 
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Entity Detail Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+
                 }
                 dataTable.ajax.reload(function(json) {});
 
@@ -97,11 +104,17 @@ app.component('eyatraEntityForm1', {
         ).then(function(response) {
             //console.log(response.data);
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
@@ -169,12 +182,15 @@ app.component('eyatraEntityForm1', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Entity Details Added Successfully',
                                 text: res.message,
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }

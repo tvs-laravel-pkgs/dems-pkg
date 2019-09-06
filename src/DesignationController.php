@@ -128,7 +128,11 @@ class DesignationController extends Controller {
 			$designation->company_id = Auth::user()->company_id;
 			$designation->fill($request->all());
 			$designation->save();
-
+			$activity['entity_id'] = $designation->id;
+			$activity['entity_type'] = "Employee Designations";
+			$activity['details'] = empty($request->id) ? "Employee Designation is  Added" : "Employee Designation is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			$request->session()->flash('success', 'Designation saved successfully!');
 			if (empty($request->id)) {
@@ -145,6 +149,12 @@ class DesignationController extends Controller {
 
 	public function deleteEYatraDesignation($designation_id) {
 		$designation = Designation::withTrashed()->where('id', $designation_id)->first();
+		$activity['entity_id'] = $designation->id;
+		$activity['entity_type'] = "Employee Designations";
+		$activity['details'] = "Employee Designation is  deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		//$entity->forceDelete();
 		$designation->forceDelete();
 		if (!$designation) {
 			return response()->json(['success' => false, 'errors' => ['Designation not found']]);

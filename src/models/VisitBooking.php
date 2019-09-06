@@ -13,6 +13,7 @@ class VisitBooking extends Model {
 		'type_id',
 		'travel_mode_id',
 		'reference_number',
+		'booking_type_id',
 		'amount',
 		'tax',
 		'service_charge',
@@ -25,7 +26,25 @@ class VisitBooking extends Model {
 		'updated_by',
 		'deleted_by',
 	];
-
+	// public function getAmountAttribute($value) {
+	// 	return '₹ ' . IND_money_format($value);
+	// }
+	// public function getTaxAttribute($value) {
+	// 	return '₹ ' . IND_money_format($value);
+	// }
+	public function getServiceChargeAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getTotalAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getPaidAmountAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	/*public function setAmountAttribute($value) {
+		$this->attributes['amount'] = IND_money_format($value);
+		dd();
+	}*/
 	public function visit() {
 		return $this->belongsTo('Uitoux\EYatra\Visit');
 	}
@@ -36,6 +55,10 @@ class VisitBooking extends Model {
 
 	public function travelMode() {
 		return $this->belongsTo('Uitoux\EYatra\Entity', 'travel_mode_id');
+	}
+
+	public function bookingMode() {
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'booking_type_id');
 	}
 
 	public function paymentStatus() {

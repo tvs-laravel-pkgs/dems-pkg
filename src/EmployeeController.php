@@ -230,7 +230,11 @@ class EmployeeController extends Controller {
 				$employee->deleted_at = NULL;
 			}
 			$employee->save();
-
+			$activity['entity_id'] = $employee->id;
+			$activity['entity_type'] = "Employee";
+			$activity['details'] = empty($request->id) ? "Employee is  Added" : "Employee is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//USER ACCOUNT
 			$user = User::withTrashed()->firstOrNew([
 				'id' => $request->user_id,
@@ -328,7 +332,15 @@ class EmployeeController extends Controller {
 	}
 
 	public function deleteEYatraEmployee($employee_id) {
-		$user = User::withTrashed()->where('entity_id', $employee_id)->forcedelete();
+		$user = User::withTrashed()->where('entity_id', $employee_id)->first();
+
+		$e_name = DB::table('entity_types')->where('id', $user->entity_type_id)->first();
+		$activity['entity_id'] = $user->id;
+		$activity['entity_type'] = "Employee";
+		$activity['details'] = "Employee is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$user->forceDelete();
 		if (!$user) {
 			return response()->json(['success' => false, 'errors' => ['User not found']]);
 		}

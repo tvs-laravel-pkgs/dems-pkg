@@ -12,7 +12,7 @@ class OutletSbuPettyColumnChanges extends Migration {
 	 */
 	public function up() {
 		Schema::table('outlets', function (Blueprint $table) {
-			$table->integer('sbu_id')->nullable()->after('name');
+			$table->unsignedInteger('sbu_id')->nullable()->after('name');
 			$table->string('cashier_name', 191)->nullable()->after('sbu_id');
 			$table->tinyInteger('amount_eligible')->nullable()->after('cashier_name');
 			$table->unsignedDecimal('amount_limit')->nullable()->after('amount_eligible');

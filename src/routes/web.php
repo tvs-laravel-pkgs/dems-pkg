@@ -47,6 +47,12 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('entity/save/ng', 'Uitoux\EYatra\RejectionController@saveEYatraEntityNg')->name('saveEYatraEntityNg');
 		Route::get('entity/delete/ng/{entity_id}', 'Uitoux\EYatra\RejectionController@deleteEYatraEntityNg')->name('deleteEYatraEntityNg');
 		//END
+		//TRAVEL MODE
+		Route::get('eyatra/travel-mode/get-list', 'Uitoux\EYatra\TravelModeController@listEYatraTravelMode')->name('listEYatraTravelMode');
+		Route::get('eyatra/travel-mode/get-form-data/{travel_mode_id?}', 'Uitoux\EYatra\TravelModeController@eyatraTravelModeFormData')->name('eyatraTravelModeFormData');
+		Route::post('eyatra/travel-mode/save', 'Uitoux\EYatra\TravelModeController@saveEYatraTravelMode')->name('saveEYatraTravelMode');
+		Route::get('eyatra/travel-mode/view/{entity_id}', 'Uitoux\EYatra\TravelModeController@viewEYatraTravelMode')->name('viewEYatraTravelMode');
+		Route::get('eyatra/travel-mode/delete/{travel_mode_id}', 'Uitoux\EYatra\TravelModeController@deleteEYatraTravelMode')->name('deleteEYatraTravelMode');
 
 		//COA NG
 		Route::get('coa/get-form-data-ng/{entity_id?}', 'Uitoux\EYatra\CoaController@eyatraCoaFormDataNg')->name('eyatraCoaFormDataNg');
@@ -255,7 +261,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/city/get', 'Uitoux\EYatra\CityController@getCityList')->name('getCityList');
 
 		//PETTY CASH
-		Route::get('eyatra/petty-cash/request/get-list', 'Uitoux\EYatra\PettyCashController@listPettyCashRequest')->name('listPettyCashRequest');
+		Route::get('eyatra/petty-cash/request/get-list/{type_id}', 'Uitoux\EYatra\PettyCashController@listPettyCashRequest')->name('listPettyCashRequest');
 		Route::get('eyatra/petty-cash/request/get-form-data/{type_id?}/{pettycash_id?}', 'Uitoux\EYatra\PettyCashController@pettycashFormData')->name('pettycashFormData');
 		Route::post('eyatra/petty-cash/request/save', 'Uitoux\EYatra\PettyCashController@pettycashSave')->name('pettycashSave');
 		Route::get('eyatra/petty-cash/employee/{searchText}', 'Uitoux\EYatra\PettyCashController@getemployee')->name('getemployee');

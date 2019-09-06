@@ -110,11 +110,17 @@ app.component('eyatraTripClaimVerificationThreeView', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/trip/claim/verification3/list')
                 $scope.$apply()
                 return;
@@ -260,11 +266,17 @@ app.component('eyatraTripClaimVerificationThreeView', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Trip Claim Approved successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/trip/claim/verification3/list')
                             $scope.$apply()
                         }
@@ -304,11 +316,17 @@ app.component('eyatraTripClaimVerificationThreeView', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                new Noty({
+                                $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
                                     text: 'Trips Claim Rejected successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
                                 }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
                                 $('#trip-claim-modal-reject-three').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/eyatra/trip/claim/verification3/list')

@@ -12,7 +12,7 @@ class EmployeeSbuUpdateTable extends Migration {
 	 */
 	public function up() {
 		Schema::table('employees', function (Blueprint $table) {
-			$table->integer('sbu_id')->nullable()->after('payment_mode_id');
+			$table->unsignedInteger('sbu_id')->nullable()->after('payment_mode_id');
 			$table->foreign('sbu_id')->references('id')->on('sbus')->onDelete('cascade')->onUpdate('cascade');
 		});
 	}

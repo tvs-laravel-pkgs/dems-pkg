@@ -37,7 +37,7 @@ class AgentController extends Controller {
 	}
 
 	public function listEYatraAgent(Request $r) {
-// dd($r->all());
+
 		if (!empty($r->agent)) {
 			$agent = $r->agent;
 		} else {
@@ -242,7 +242,12 @@ class AgentController extends Controller {
 				$agent->deleted_at = Carbon::now();
 			}
 			$agent->save();
-
+			//$e_name = EntityType::where('id', $request->type_id)->first();
+			$activity['entity_id'] = $agent->id;
+			$activity['entity_type'] = "Agent";
+			$activity['details'] = empty($request->id) ? "Agent is  Added" : "Agent is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//ADD ADDRESS
 			$address->address_of_id = 3161;
 			$address->entity_id = $agent->id;
@@ -329,7 +334,14 @@ class AgentController extends Controller {
 	}
 
 	public function deleteEYatraAgent($agent_id) {
-		$agent = Agent::where('id', $agent_id)->forceDelete();
+
+		$agent = Agent::where('id', $agent_id)->first();
+		$activity['entity_id'] = $agent->id;
+		$activity['entity_type'] = "Agent";
+		$activity['details'] = "Agent is Deleted";
+		$activity['activity'] = "delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$agent->forceDelete();
 		if (!$agent) {
 			return response()->json(['success' => false, 'errors' => ['Agent not found']]);
 		}

@@ -27,6 +27,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveClaim(Request $r) {
-		return Trip::saveTripVerification($r);
+		dd($r->all());
+		return Trip::saveEYatraTripClaim($r);
 	}
 }

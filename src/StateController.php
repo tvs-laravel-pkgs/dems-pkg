@@ -20,7 +20,9 @@ class StateController extends Controller {
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
+
+		dd($country_list);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),
@@ -42,7 +44,7 @@ class StateController extends Controller {
 			$status = null;
 		}
 		$states = NState::withTrashed()->from('nstates')
-			->join('country as c', 'c.id', 'nstates.country_id')
+			->join('countries as c', 'c.id', 'nstates.country_id')
 			->select(
 				'nstates.id',
 				'nstates.code',
@@ -122,7 +124,7 @@ class StateController extends Controller {
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
 		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
 		$option = new Agent;
 		$option->name = 'Select Agent';
@@ -199,7 +201,11 @@ class StateController extends Controller {
 
 			$state->fill($request->all());
 			$state->save();
-
+			$activity['entity_id'] = $state->id;
+			$activity['entity_type'] = "State";
+			$activity['details'] = empty($request->id) ? "State is added" : "State is updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING state_agent_travel_mode
 			if (count($request->travel_modes) > 0) {
 				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
@@ -274,6 +280,11 @@ class StateController extends Controller {
 	// }
 	public function deleteEYatraState($state_id) {
 		$state = Nstate::withTrashed()->where('id', $state_id)->first();
+		$activity['entity_id'] = $state->id;
+		$activity['entity_type'] = "State";
+		$activity['details'] = empty($request->id) ? "State is added" : "State is updated";
+		$activity['activity'] = empty($request->id) ? "add" : "edit";
+		$activity_log = ActivityLog::saveLog($activity);
 		$state->forceDelete();
 		if (!$state) {
 			return response()->json(['success' => false, 'errors' => ['State not found']]);

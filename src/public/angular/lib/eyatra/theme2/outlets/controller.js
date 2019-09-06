@@ -111,19 +111,31 @@ app.component('eyatraOutlets', {
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Outlet Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Outlet not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -148,26 +160,38 @@ app.component('eyatraOutletForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/outlets')
                 $scope.$apply()
                 return;
             }
+            console.log(response);
             self.outlet = response.data.outlet;
+            self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
+            self.amount_eligible = response.data.amount_eligible;
+            self.amount_approver = response.data.amount_approver;
+            console.log(response.data.outlet.amount_limit);
+            // self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
             self.lob_outlet = response.data.lob_outlet;
-            self.sbu_outlet = response.data.sbu_outlet;
+            self.sbu = response.data.sbu;
             self.action = response.data.action;
 
             if (self.action == 'Edit') {
                 $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
-                $scope.AmountEligible(self.outlet.amount_eligible);
+                $scope.AmountEligible(self.amount_eligible);
             }
 
             $rootScope.loading = false;
@@ -200,27 +224,7 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getSbus = function() {
-            var lob_ids = [];
-            $.each($(".lobcheckbox:checked"), function() {
-                lob_ids.push($(this).val())
-            });
-            $.ajax({
-                    url: get_sbu_by_lob_outlet,
-                    method: "GET",
-                    data: { lob_ids: lob_ids },
-                })
-                .done(function(res) {
-                    self.extras.sbu_list = [];
-                    self.extras.sbu_list = res.sbus;
 
-                    console.log(self.extras.sbu_list);
-                    $scope.$apply()
-                })
-                .fail(function(xhr) {
-                    console.log(xhr);
-                });
-        }
 
 
 
@@ -283,41 +287,63 @@ app.component('eyatraOutletForm', {
             }
         }
 
-        $scope.getDataBasedonLob = function() {
-            if (event.target.checked == true) {
-                $http.get(
-                    lob_sbu_url + '/' + id
-                ).then(function(response) {
-                    // alert(response.data.sbu_outlet)
-                    response.data.sbu_outlet.forEach(function(v) {
+        $scope.getSbus = function() {
+            var lob_ids = [];
+            $.each($(".lobcheckbox:checked"), function() {
+                lob_ids.push($(this).val())
+            });
+            $.ajax({
+                    url: get_sbu_by_lob_outlet,
+                    method: "GET",
+                    data: { lob_ids: lob_ids },
+                })
+                .done(function(res) {
+                    self.sbu_list = [];
+                    self.extras.sbu_list = res.sbus;
 
-                        self.sbu_outlet.push({
-                            "name": v.name,
-                            "id": v.id
-                        });
-                    });
+                    console.log(self.extras.sbu_list);
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
                 });
-            } else {
-                if ($('.lobcheckbox:checked').length > 0) {
-                    self.sbu_outlet = [];
-                    $.each($(".lobcheckbox:checked"), function() {
-                        $scope.test($(this).val())
-                    });
-
-                } else {
-                    $('#lob').prop('checked', false);
-                    $('#sbu tbody tr').html('');
-                }
-            }
         }
+        // $scope.getDataBasedonLob = function() {
+        //     if (event.target.checked == true) {
+        //         $http.get(
+        //             lob_sbu_url + '/' + id
+        //         ).then(function(response) {
+        //             // alert(response.data.sbu_outlet)
+        //             response.data.sbu.forEach(function(v) {
+
+        //                 self.sbu.push({
+        //                     "name": v.name,
+        //                     "id": v.id
+        //                 });
+        //             });
+        //         });
+        //     } else {
+        if ($('.lobcheckbox:checked').length > 0) {
+            self.sbu_list = [];
+            $.each($(".lobcheckbox:checked"), function() {
+                $scope.test($(this).val())
+            });
+
+        } else {
+            // $('#lob').prop('checked', false);
+            // $('#sbu tbody tr').addClass('ng-hide');
+
+        }
+        // }
+        // }
         $scope.test = function(id) {
             $http.get(
                 lob_sbu_url + '/' + id
             ).then(function(response) {
-                response.data.sbu_outlet.forEach(function(v) {
+                response.data.sbu.forEach(function(v) {
                     // alert(v.lob_id)
                     if (id) {
-                        self.sbu_outlet.push({
+                        self.sbu.push({
                             "name": v.name,
                             "id": v.id
                         });
@@ -329,7 +355,6 @@ app.component('eyatraOutletForm', {
         $('.select_all_sbu').on('click', function() {
             if (event.target.checked == true) {
                 $('.sbucheckbox').prop('checked', true);
-                // $('#budget_table').css('display', 'block');
                 $.each($('.sbucheckbox:checked'), function() {
                     $scope.getamountonSbu($(this).val());
                     $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
@@ -338,48 +363,42 @@ app.component('eyatraOutletForm', {
                 $('.sbucheckbox').prop('checked', false);
                 $.each($('.sbucheckbox'), function() {
                     $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide');
+                    $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('error');
+                    $('.sbu_table tbody tr #amount' + $(this).val()).closest('.form-group').find('label.error').remove();
                 });
             }
         });
         $scope.getamountonSbu = function(id) {
+            // alert(id);
             if (event.target.checked == true) {
                 $("#amount" + id).removeClass('ng-hide');
+                $("#amount" + id).addClass('required');
+                $("#amount" + id).addClass('error');
             } else {
                 $("#amount" + id).addClass('ng-hide');
-                // $("#dms_" + id).val('');
+                $("#amount" + id).removeClass('required');
+                $("#amount" + id).removeClass('error');
+                $("#amount" + id).closest('.form-group').find('label.error').remove();
+                // $('.sbu_table tbody tr  #amount' + $(this).val()).remove(
+                // 'label');
             }
         }
 
 
-        // $('#select_all_sbu').prop('disabled', 'disabled');
         $('#select_all_lob').on('click', function() {
             if (event.target.checked == true) {
-                $('#sbu tbody tr').html('');
                 $('.lobcheckbox').prop('checked', true);
-                $('#select_all_sbu').prop('checked', true);
-                $('.sbucheckbox').prop('checked', true);
                 $.each($(".lobcheckbox:checked"), function() {
-                    // $('.sbucheckbox').prop('checked', true);
-                    $scope.getDataBasedonLob($(this).val())
+                    $scope.getSbus($(this).val())
                 });
             } else {
-                $('.lobcheckbox').prop('checked', false);
-                $('.sbucheckbox').prop('checked', false);
-                $('#select_all_sbu').prop('checked', false);
+                var unselectall = $('.lobcheckbox').prop('checked', false)
+                if (unselectall) {
+                    $scope.getSbus()
+                }
                 $('#sbu tbody tr').html('');
             }
         });
-
-        // $('#select_all_sbu').on('click', function() {
-        //     if (event.target.checked == true) {
-        //         $('.sbucheckbox').prop('checked', true);
-        //     } else {
-        //         $('.sbucheckbox').prop('checked', false);
-        //     }
-        // });
-
-
-
 
         var form_id = '#outlet-form';
         var v = jQuery(form_id).validate({
@@ -408,11 +427,17 @@ app.component('eyatraOutletForm', {
                 }
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             ignore: '',
             rules: {
@@ -464,10 +489,10 @@ app.component('eyatraOutletForm', {
                     minlength: 6,
                     maxlength: 6,
                     min: 1,
-                },
-                'sbus[]': {
-                    required: true,
                 }
+                // 'sbus[]': {
+                //     required: true,
+                // }
             },
             /* messages: {
                  'code': {
@@ -542,12 +567,18 @@ app.component('eyatraOutletForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Outlet saved successfully',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/outlets')
                             $scope.$apply()
                         }
@@ -571,10 +602,16 @@ app.component('eyatraOutletView', {
             outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
             self.outlet = response.data.outlet;
+            console.log(self.outlet);
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
             self.amount = response.data.amount;
             self.action = response.data.action;
+            if (self.outlet.claim_req_approver == 0) {
+                self.claim_req_approver = 'Financier';
+            } else {
+                self.claim_req_approver = 'Cashier';
+            }
         });
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");

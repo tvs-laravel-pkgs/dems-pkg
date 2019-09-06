@@ -33,7 +33,7 @@ class EntityController extends Controller {
 				//'entities.updated_at',
 				DB::raw('IF(entities.updated_at IS NULL,"---",entities.updated_at) as updated_at1'),
 				DB::raw('IF(entities.deleted_at IS NULL,"---",entities.deleted_at) as deleted_at'),
-				DB::raw('IF(entities.deleted_at IS NULL,"ACTIVE","INACTIVE") as status')
+				DB::raw('IF(entities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 
 			->join('users', 'users.id', '=', 'entities.created_by')
@@ -135,7 +135,14 @@ class EntityController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
-
+			//dd('ss');
+			$e_name = EntityType::where('id', $request->type_id)->first();
+			//dd($e_name);
+			$activity['entity_id'] = $entity->id;
+			$activity['entity_type'] = $e_name->name;
+			$activity['details'] = empty($request->id) ? $e_name->name . " is Added" : $e_name->name . " is updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Entity added successfully']);
@@ -149,7 +156,14 @@ class EntityController extends Controller {
 	}
 
 	public function deleteEYatraEntity($entity_id) {
-		$entity = Entity::withTrashed()->where('id', $entity_id)->forceDelete();
+		$entity = Entity::withTrashed()->where('id', $entity_id)->first();
+		$e_name = EntityType::where('id', $entity->entity_type_id)->first();
+		$activity['entity_id'] = $entity->id;
+		$activity['entity_type'] = $e_name->name;
+		$activity['details'] = $e_name->name . " is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$entity->forceDelete();
 
 		if (!$entity) {
 			return response()->json(['success' => false, 'errors' => ['Entity not found']]);
