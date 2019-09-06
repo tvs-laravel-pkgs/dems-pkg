@@ -20,7 +20,9 @@ class StateController extends Controller {
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
+
+		dd($country_list);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),
@@ -122,7 +124,7 @@ class StateController extends Controller {
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
 		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
 		$option = new Agent;
 		$option->name = 'Select Agent';
