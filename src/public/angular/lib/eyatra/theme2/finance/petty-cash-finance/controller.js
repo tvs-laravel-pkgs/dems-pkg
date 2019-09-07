@@ -322,9 +322,13 @@ app.component('eyatraPettyCashFinanceView', {
         ).then(function(response) {
             console.log(response);
             self.type_id = $routeParams.type_id;
+            self.bank_detail = response.data.bank_detail;
+            self.cheque_detail = response.data.cheque_detail;
+            self.wallet_detail = response.data.wallet_detail;
             self.petty_cash = response.data.petty_cash;
             self.petty_cash_other = response.data.petty_cash_other;
             self.payment_mode_list = response.data.payment_mode_list;
+            self.wallet_mode_list = response.data.wallet_mode_list;
             self.rejection_list = response.data.rejection_list;
             self.employee = response.data.employee;
             var local_total = 0;

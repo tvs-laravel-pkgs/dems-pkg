@@ -13,6 +13,7 @@ class ActivityLog extends Model {
 		$activities_config_type = DB::table('config_types')->where(DB::raw('name'), 'Activity Log Activities - EYatra')->first();
 		$entities_config_type = DB::table('config_types')->where(DB::raw('name'), 'Activity Log Entity Types - EYatra')->first();
 		$entity_type_data = Config::where('config_type_id', $entities_config_type->id)->where(DB::raw('LOWER(name)'), $data['entity_type'])->first();
+
 		$activity_data = Config::where('config_type_id', $activities_config_type->id)->where(DB::raw('LOWER(name)'), strtolower($data['activity']))->first();
 		//dd($data, $activities_config_type, $entities_config_type, $entity_type_data, $activity_data, strtolower($data['entity_type']));
 
