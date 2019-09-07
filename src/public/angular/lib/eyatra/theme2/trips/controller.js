@@ -181,6 +181,7 @@ app.component('eyatraTripForm', {
             self.extras = response.data.extras;
             self.action = response.data.action;
             if (self.action == 'New') {
+                self.trip.trip_type = 'Self';
                 self.booking_method = "self";
                 self.trip.visits = [];
                 arr_ind = 1;
@@ -244,6 +245,7 @@ self.trip.visits.push({
             var arr_length = trip_array.length;
             arr_vol = arr_length - 1;
             alert(trip_array[arr_vol]);
+
             self.trip.visits.push({
                 start_city: trip_array[arr_vol].start_city,
                 booking_method: 'Self',
@@ -277,17 +279,7 @@ $('.extra_block').append(add_block);*/
                 $scope.round_trip = true;
                 $scope.multi_trip = false;
             } else if (id == 3) {
-                if (self.action == 'New') {
 
-                    self.trip_multi.visits.push({
-                        start_city: self.extras.employee_city.id,
-                        to_main_city: '',
-                        date: '',
-                        booking_method: 'Self',
-                        preferred_travel_modes: '',
-                        to_main_city: '',
-                    });
-                }
                 $scope.round_trip = false;
                 $scope.single_trip = false;
                 $scope.multi_trip = true;
