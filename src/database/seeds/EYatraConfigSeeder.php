@@ -425,12 +425,18 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Rejection Reasons',
 				'config_type_id' => 519,
 			],
-			3314 => [
+
+			3315 => [
+				'name' => 'Travel Purposes',
+				'config_type_id' => 519,
+			],
+			3316 => [
 				'name' => 'COA Sub Groups',
 				'config_type_id' => 519,
 			],
-			3315 => [
-				'name' => 'Travel Purposes',
+
+			3317 => [
+				'name' => 'Petty Cash',
 				'config_type_id' => 519,
 			],
 
