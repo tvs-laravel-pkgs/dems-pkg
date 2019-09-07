@@ -95,7 +95,7 @@ class OutletController extends Controller {
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
-			$this->data['amount_eligible'] = 'No';
+			$this->data['amount_eligiblity'] = 'No';
 			$this->data['amount_approver'] = 'Cashier';
 			$this->data['success'] = true;
 		} else {
