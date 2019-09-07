@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Entity;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -139,7 +140,8 @@ class EntityController extends Controller {
 			$e_name = EntityType::where('id', $request->type_id)->first();
 			// dd($e_name);
 			$activity['entity_id'] = $entity->id;
-			$activity['entity_type'] = "Travel Purposes";
+			$activity['entity_type'] = $e_name->name;
+			// dd();
 			$activity['details'] = empty($request->id) ? $e_name->name . " is Added" : $e_name->name . " is updated";
 			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
 			$activity_log = ActivityLog::saveLog($activity);
