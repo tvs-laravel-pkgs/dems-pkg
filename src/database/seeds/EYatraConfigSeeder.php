@@ -40,6 +40,7 @@ class EYatraConfigSeeder extends Seeder {
 			523 => 'Import Type - EYatra',
 			524 => 'Import Status - EYatra',
 			525 => 'Trave Mode Category Types - EYatra',
+			526 => 'Account Type',
 		];
 
 		$configs = [
@@ -336,10 +337,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Reimbursement Claim',
 				'config_type_id' => 517,
 			],
-			// 3271 => [
-			// 	'name' => 'Cash Topup',
-			// 	'config_type_id' => 517,
-			// ],
+			3271 => [
+				'name' => 'Cash Topup',
+				'config_type_id' => 517,
+			],
 
 			//PETTY CASH
 			3280 => [
@@ -551,6 +552,16 @@ class EYatraConfigSeeder extends Seeder {
 			3403 => [
 				'name' => 'Claim',
 				'config_type_id' => 525,
+			],
+
+			//ACCOUNT TYPE
+			3420 => [
+				'name' => 'Savings',
+				'config_type_id' => 526,
+			],
+			3421 => [
+				'name' => 'Current',
+				'config_type_id' => 526,
 			],
 		];
 
