@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Uitoux\EYatra\BankDetail;
+use Uitoux\EYatra\ChequeDetail;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Employee;
@@ -138,7 +139,7 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::withTrashed()->with('sbu', 'bankDetail', 'reportingTo', 'walletDetail', 'user')->find($employee_id);
+			$employee = Employee::withTrashed()->with('sbu', 'bankDetail', 'reportingTo', 'walletDetail', 'user', 'chequeDetail')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
@@ -181,6 +182,7 @@ class EmployeeController extends Controller {
 				'mobile_number.required' => "Mobile Number is Required",
 				'username.required' => "Username is Required",
 				'mobile_number.unique' => "Mobile Number is already taken",
+				'email.unique' => "Email is already taken",
 			];
 
 			$validator = Validator::make($request->all(), [
@@ -197,6 +199,13 @@ class EmployeeController extends Controller {
 				],
 				'username' => [
 					'required:true',
+					'unique:users,username,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+
+				],
+				'email' => [
+					'required:true',
+					'unique:users,email,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+
 				],
 			], $error_messages);
 			if ($validator->fails()) {
@@ -273,17 +282,26 @@ class EmployeeController extends Controller {
 			if ($request->bank_name) {
 				$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
 				$bank_detail->fill($request->all());
-				$bank_detail->detail_of_id = 3243;
+				$bank_detail->detail_of_id = 3121;
 				$bank_detail->entity_id = $employee->id;
 				$bank_detail->account_type_id = 3243;
 				$bank_detail->save();
+			}
+			//CHEQUE DETAIL SAVE
+			if ($request->cheque_favour) {
+				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $employee->id]);
+				$cheque_detail->fill($request->all());
+				$cheque_detail->detail_of_id = 3121;
+				$cheque_detail->entity_id = $employee->id;
+				$cheque_detail->account_type_id = 3243;
+				$cheque_detail->save();
 			}
 
 			//WALLET SAVE
 			if ($request->type_id) {
 				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $employee->id]);
 				$wallet_detail->fill($request->all());
-				$wallet_detail->wallet_of_id = 3243;
+				$wallet_detail->wallet_of_id = 3121;
 				$wallet_detail->entity_id = $employee->id;
 				$wallet_detail->save();
 			}
@@ -311,9 +329,11 @@ class EmployeeController extends Controller {
 			'outlet',
 			'grade',
 			'bankDetail',
+			'chequeDetail',
 			'walletDetail',
 			'walletDetail.type',
 			'user',
+			'reportingTo.user',
 			'paymentMode',
 		])
 			->find($employee_id);

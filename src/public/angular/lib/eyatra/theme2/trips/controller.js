@@ -237,7 +237,7 @@ self.trip.visits.push({
         }
 
         $scope.addVisit = function() {
-            alert(arr_ind);
+            // alert(arr_ind);
             /*self.trip.visits.push({
     visit_date: '',
     booking_method: 'Self',
@@ -245,10 +245,26 @@ self.trip.visits.push({
 });*/
             add_block = $('.or_block').html();
             add_block = add_block.replace(/XXX/g, arr_ind);
-            alert(add_block);
+            // alert(add_block);
+            console.log(self.trip.visits);
+            var trip_array = self.trip.visits;
+            console.log(trip_array)
+            var arr_length = trip_array.length;
+            arr_vol = arr_length - 1;
+            // alert(trip_array[arr_vol]);
+            self.trip.visits.push({
+                start_city: trip_array[arr_vol].start_city,
+                booking_method: 'Self',
+                preferred_travel_modes: '',
+                to_main_city: '',
+            });
+            /*add_block = $('.or_block').html();
+add_block = add_block.replace(/XXX/g, arr_ind);
+alert(add_block);
+self.trip.visits[arr_ind].to_main_city = self.extras.employee_city.id;
 
-            arr_ind = arr_ind + 1;
-            $('.extra_block').append(add_block);
+arr_ind = arr_ind + 1;
+$('.extra_block').append(add_block);*/
             //$('.add_multi_trip').show();
 
         }
@@ -269,6 +285,17 @@ self.trip.visits.push({
                 $scope.round_trip = true;
                 $scope.multi_trip = false;
             } else if (id == 3) {
+                if (self.action == 'New') {
+
+                    self.trip_multi.visits.push({
+                        start_city: self.extras.employee_city.id,
+                        to_main_city: '',
+                        date: '',
+                        booking_method: 'Self',
+                        preferred_travel_modes: '',
+                        to_main_city: '',
+                    });
+                }
                 $scope.round_trip = false;
                 $scope.single_trip = false;
                 $scope.multi_trip = true;
@@ -278,9 +305,9 @@ self.trip.visits.push({
         }
 
         self.removeLodging = function(index, lodging_id) {
-            alert('remove');
-            alert(index);
-            alert(lodging_id);
+            // alert('remove');
+            // alert(index);
+            // alert(lodging_id);
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
@@ -376,11 +403,11 @@ self.trip.visits.push({
                         console.log(res.success);
                         if (!res.success) {
                             $('#btn-submit').button('reset');
-                            var errors = '';
+                            /*var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
+                            }*/
+                            custom_noty('error', res.errors);
                         } else {
                             $noty = new Noty({
                                 type: 'success',

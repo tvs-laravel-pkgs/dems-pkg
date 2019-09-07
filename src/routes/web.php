@@ -22,6 +22,7 @@ Route::group(['middleware' => ['api']], function () {
 		//TRIP CLAIM
 		Route::post('trip/claim/view/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimViewData');
 		Route::post('trip/claim/get-form-data/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
+		Route::get('trip/claim/get-eligible-amount', 'Uitoux\EYatra\Api\TripClaimController@getEligibleAmtBasedonCitycategoryGrade');
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
 
 	});
@@ -266,20 +267,20 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/petty-cash/request/get-form-data/{type_id?}/{pettycash_id?}', 'Uitoux\EYatra\PettyCashController@pettycashFormData')->name('pettycashFormData');
 		Route::post('eyatra/petty-cash/request/save', 'Uitoux\EYatra\PettyCashController@pettycashSave')->name('pettycashSave');
 		Route::get('eyatra/petty-cash/employee/{searchText}', 'Uitoux\EYatra\PettyCashController@getemployee')->name('getemployee');
-		Route::get('eyatra/petty-cash/request/delete/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashDelete')->name('pettycashDelete');
-		Route::get('eyatra/petty-cash/request/view/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashView')->name('pettycashView');
+		Route::get('eyatra/petty-cash/request/delete/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashDelete')->name('pettycashDelete');
+		Route::get('eyatra/petty-cash/request/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashView')->name('pettycashView');
 
 		//PETTY CASH VERIFICATION VIEW FOR MANAGER
-		Route::get('eyatra/petty-cash/manager/get-list', 'Uitoux\EYatra\PettyCashManagerVerificationController@listPettyCashVerificationManager')->name('listPettyCashVerificationManager');
+		Route::get('eyatra/petty-cash/manager/get-list/{type_id}', 'Uitoux\EYatra\PettyCashManagerVerificationController@listPettyCashVerificationManager')->name('listPettyCashVerificationManager');
 		Route::post('eyatra/petty-cash/manager/save', 'Uitoux\EYatra\PettyCashManagerVerificationController@pettycashManagerVerificationSave')->name('pettycashManagerVerificationSave');
-		Route::get('eyatra/petty-cash/manager/view/{pettycash_id}', 'Uitoux\EYatra\PettyCashManagerVerificationController@pettycashManagerVerificationView')->name('pettycashManagerVerificationView');
+		Route::get('eyatra/petty-cash/manager/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashManagerVerificationController@pettycashManagerVerificationView')->name('pettycashManagerVerificationView');
 
 		//PETTY CASH VERIFICATION VIEW FOR Finance
-		Route::get('eyatra/petty-cash/finance/get-list', 'Uitoux\EYatra\PettyCashFinanceVerificationController@listPettyCashVerificationFinance')->name('listPettyCashVerificationFinance');
-		Route::get('eyatra/petty-cash/finance/get-form-data/{pettycash_id?}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashfinanceFormData')->name('pettycashfinanceFormData');
+		Route::get('eyatra/petty-cash/finance/get-list/{type_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@listPettyCashVerificationFinance')->name('listPettyCashVerificationFinance');
+		Route::get('eyatra/petty-cash/finance/get-form-data/{type_id?}/{pettycash_id?}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashfinanceFormData')->name('pettycashfinanceFormData');
 		Route::post('eyatra/petty-cash/finance/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationSave')->name('pettycashFinanceVerificationSave');
 		Route::post('eyatra/petty-cash/finance/form/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceSave')->name('pettycashFinanceSave');
-		Route::get('eyatra/petty-cash/finance/view/{pettycash_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationView')->name('pettycashFinanceVerificationView');
+		Route::get('eyatra/petty-cash/finance/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationView')->name('pettycashFinanceVerificationView');
 		Route::get('eyatra/petty-cash/finance/employee_details/get/{emp_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationgetEmployee')->name('pettycashFinanceVerificationgetEmployee');
 
 		//ALTERNATE APPROVE LIST
