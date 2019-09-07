@@ -43,6 +43,7 @@ class CityController extends Controller {
 				DB::raw('IF(ncities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 			->where('countries.company_id', Auth::user()->company_id)
+			->where('ncities.company_id', Auth::user()->company_id)
 			->orderBy('ncities.id', 'asc')
 			->where(function ($query) use ($r, $country) {
 				if (!empty($country)) {

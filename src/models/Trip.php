@@ -307,6 +307,7 @@ class Trip extends Model {
 			'travel_mode_list' => DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get(),
 			'city_list' => NCity::getList(),
 			'employee_city' => Auth::user()->entity->outlet->address->city,
+			'frequently_travelled' => Visit::join('ncities', 'ncities.id', 'visits.to_city_id')->where('ncities.company_id', Auth::user()->company_id)->select('ncities.id', 'ncities.name')->distinct()->limit(10)->get(),
 		];
 		$data['trip'] = $trip;
 
@@ -440,25 +441,23 @@ class Trip extends Model {
 			})*/
 		;
 		if (!Entrust::can('verify-all-trips')) {
-			$now=date('Y-m-d');
-			$sub_employee_id=AlternateApprove::select('employee_id')
-			->where('from','<=', $now)
-			->where('to','>=', $now)
-			->where('alternate_employee_id',Auth::user()->entity_id)
-			->get()
-			->toArray();
+			$now = date('Y-m-d');
+			$sub_employee_id = AlternateApprove::select('employee_id')
+				->where('from', '<=', $now)
+				->where('to', '>=', $now)
+				->where('alternate_employee_id', Auth::user()->entity_id)
+				->get()
+				->toArray();
 			//dd($sub_employee_id);
-			$ids=array_column($sub_employee_id, 'employee_id');
-			array_push($ids,Auth::user()->entity_id);
-			if(count($sub_employee_id)>0)
-			{
+			$ids = array_column($sub_employee_id, 'employee_id');
+			array_push($ids, Auth::user()->entity_id);
+			if (count($sub_employee_id) > 0) {
 				$trips->whereIn('trips.manager_id', $ids); //Alternate MANAGER
-			}else
-			{
-				$trips->where('trips.manager_id', Auth::user()->entity_id);//MANAGER
+			} else {
+				$trips->where('trips.manager_id', Auth::user()->entity_id); //MANAGER
 			}
 
-		//$trips->where('trips.manager_id', Auth::user()->entity_id);
+			//$trips->where('trips.manager_id', Auth::user()->entity_id);
 		}
 
 		return $trips;
