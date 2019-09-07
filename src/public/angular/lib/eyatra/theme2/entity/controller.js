@@ -94,7 +94,7 @@ app.component('eyatraEntityList', {
                         }).show();
                         setTimeout(function() {
                             $noty.close();
-                        }, 1000);
+                        }, 5000);
                     }
                     dataTable.ajax.reload(function(json) {});
 
@@ -130,7 +130,7 @@ app.component('eyatraEntityForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
@@ -219,7 +219,7 @@ app.component('eyatraEntityForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
