@@ -1,53 +1,69 @@
 app.component('eyatraPettyCashFinanceList', {
     templateUrl: eyatra_pettycash_finance_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http) {
+    controller: function(HelperService, $rootScope, $scope, $http, $routeParams) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable = $('#petty_cash_finance_list').DataTable({
-            stateSave: true,
-            "dom": dom_structure_separate,
-            "language": {
-                "search": "",
-                "searchPlaceholder": "Search",
-                "lengthMenu": "Rows Per Page _MENU_",
-                "paginate": {
-                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
-                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+        if ($routeParams.type_id == 1) {
+            $list_data_url = eyatra_pettycash_finance_list_url + '/' + 1;
+        } else {
+            $list_data_url = eyatra_pettycash_finance_list_url + '/' + 2;
+        }
+        $http.get(
+            $list_data_url
+        ).then(function(response) {
+            var dataTable = $('#petty_cash_finance_list').DataTable({
+                stateSave: true,
+                "dom": dom_structure_separate,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search",
+                    "lengthMenu": "Rows Per Page _MENU_",
+                    "paginate": {
+                        "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                        "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                    },
                 },
-            },
-            pageLength: 10,
-            processing: true,
-            serverSide: true,
-            paging: true,
-            ordering: false,
-            ajax: {
-                url: laravel_routes['listPettyCashVerificationFinance'],
-                type: "GET",
-                dataType: "json",
-                data: function(d) {}
-            },
+                pageLength: 10,
+                processing: true,
+                serverSide: true,
+                paging: true,
+                ordering: false,
+                ajax: {
+                    url: laravel_routes['listPettyCashVerificationFinance'],
+                    type: "GET",
+                    dataType: "json",
+                    data: function(d) {
+                        d.type_id = $routeParams.type_id;
+                    }
+                },
 
-            columns: [
-                { data: 'action', searchable: false, class: 'action' },
-                { data: 'ename', name: 'employees.name', searchable: true },
-                { data: 'ecode', name: 'employees.code', searchable: true },
-                { data: 'oname', name: 'outlets.name', searchable: true },
-                { data: 'ocode', name: 'outlets.code', searchable: true },
-                { data: 'date', name: 'date', searchable: false },
-                { data: 'total', name: 'total', searchable: true },
-                { data: 'status', name: 'configs.name', searchable: false },
-            ],
-            rowCallback: function(row, data) {
-                $(row).addClass('highlight-row');
+                columns: [
+                    { data: 'action', searchable: false, class: 'action' },
+                    { data: 'ename', name: 'users.name', searchable: true },
+                    { data: 'ecode', name: 'employees.code', searchable: true },
+                    { data: 'oname', name: 'outlets.name', searchable: true },
+                    { data: 'ocode', name: 'outlets.code', searchable: true },
+                    { data: 'date', name: 'date', searchable: false },
+                    { data: 'total', name: 'total', searchable: true },
+                    { data: 'status', name: 'configs.name', searchable: false },
+                ],
+                rowCallback: function(row, data) {
+                    $(row).addClass('highlight-row');
+                }
+            });
+            $('.dataTables_length select').select2();
+            // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Expense Voucher Claim</h3>');
+            if ($routeParams.type_id == 1) {
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Local Conveyance Expense Voucher Claim</h3>');
+            } else {
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
+            $('.add_new_button').html(
+                '<a href="#!/eyatra/petty-cash/verification2/add/' + $routeParams.type_id + '" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers-verification2\')">' +
+                'Add New' +
+                '</a>'
+            );
         });
-        $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Expense Voucher Claim</h3>');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/petty-cash/verification2/add" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers-verification2\')">' +
-            'Add New' +
-            '</a>'
-        );
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +71,10 @@ app.component('eyatraPettyCashFinanceList', {
 app.component('eyatraPettyCashFinanceForm', {
     templateUrl: pettycash_finance_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        if ($routeParams.type_id == 1 || $routeParams.type_id == 2) {} else {
+            $location.path('/page-not-found')
+            return;
+        }
         $form_data_url = typeof($routeParams.pettycash_id) == 'undefined' ? pettycash_finance_form_data_url : pettycash_finance_form_data_url + '/' + $routeParams.pettycash_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -70,12 +90,12 @@ app.component('eyatraPettyCashFinanceForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 3000);
 
-                $location.path('/eyatra/petty-cash')
+                $location.path('/eyatra/petty-cash/')
                 return;
             }
-            // console.log(response);
+            console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -294,15 +314,17 @@ app.component('eyatraPettyCashFinanceForm', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraPettyCashFinanceView', {
     templateUrl: pettycash_finance_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            petty_cash_finance_view_url + '/' + $routeParams.pettycash_id
+            petty_cash_finance_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
             console.log(response);
+            self.type_id = $routeParams.type_id;
             self.petty_cash = response.data.petty_cash;
             self.petty_cash_other = response.data.petty_cash_other;
+            self.payment_mode_list = response.data.payment_mode_list;
             self.rejection_list = response.data.rejection_list;
             self.employee = response.data.employee;
             var local_total = 0;
@@ -325,9 +347,65 @@ app.component('eyatraPettyCashFinanceView', {
             }, 500);
         });
 
-        var form_id = '#approve';
+        $(".bottom-expand-btn").on('click', function() {
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                $(".separate-bottom-fixed-layer").removeClass("in");
+            } else {
+                $(".separate-bottom-fixed-layer").addClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'none' });
+            }
+        });
+        $(".approve-close").on('click', function() {
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                $(".separate-bottom-fixed-layer").removeClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'inline-block' });
+            } else {
+                $(".separate-bottom-fixed-layer").addClass("in");
+            }
+        });
+
+        $.validator.addMethod('positiveNumber',
+            function(value) {
+                return Number(value) > 0;
+            }, 'Enter a positive number.');
+
+        var form_id = '#petty-cash-form';
         var v = jQuery(form_id).validate({
+            errorPlacement: function(error, element) {
+                error.insertAfter(element)
+            },
             ignore: '',
+            rules: {
+                'amount': {
+                    min: 1,
+                    number: true,
+                    required: true,
+                },
+                'date': {
+                    required: true,
+                },
+                'bank_name': {
+                    required: true,
+                    maxlength: 100,
+                    minlength: 3,
+                },
+                'branch_name': {
+                    required: true,
+                    maxlength: 50,
+                    minlength: 3,
+                },
+                'account_number': {
+                    required: true,
+                    maxlength: 20,
+                    minlength: 3,
+                    positiveNumber: true,
+                },
+                'ifsc_code': {
+                    required: true,
+                    maxlength: 10,
+                    minlength: 3,
+                },
+            },
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
@@ -357,10 +435,10 @@ app.component('eyatraPettyCashFinanceView', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 3000);
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification2')
+                                $location.path('/eyatra/petty-cash/verification2/' + $routeParams.type_id)
                             }, 500);
                         }
                     })
@@ -420,11 +498,11 @@ app.component('eyatraPettyCashFinanceView', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 3000);
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification2')
+                                $location.path('/eyatra/petty-cash/verification2/' + $routeParams.type_id)
                             }, 500);
                         }
                     })

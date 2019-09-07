@@ -177,11 +177,10 @@ app.component('eyatraOutletForm', {
             }
             console.log(response);
             self.outlet = response.data.outlet;
-            self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
-            self.amount_eligible = response.data.amount_eligible;
-            self.amount_approver = response.data.amount_approver;
-            console.log(response.data.outlet.amount_limit);
             // self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
+            self.amount_eligiblity = response.data.amount_eligiblity;
+            self.amount_approver = response.data.amount_approver;
+            // console.log(response.data.outlet.amount_limit);
             self.status = response.data.status;
             self.address = response.data.address;
             self.extras = response.data.extras;
@@ -191,7 +190,7 @@ app.component('eyatraOutletForm', {
 
             if (self.action == 'Edit') {
                 $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
-                $scope.AmountEligible(self.amount_eligible);
+                $scope.AmountEligible(self.amount_eligiblity);
             }
 
             $rootScope.loading = false;
