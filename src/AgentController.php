@@ -294,10 +294,10 @@ class AgentController extends Controller {
 			}
 			//CHEQUE DETAIL SAVE
 			if ($request->bank_name) {
-				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $employee->id]);
+				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $agent->id]);
 				$cheque_detail->fill($request->all());
 				$cheque_detail->detail_of_id = 3122;
-				$cheque_detail->entity_id = $employee->id;
+				$cheque_detail->entity_id = $agent->id;
 				$cheque_detail->account_type_id = 3243;
 				$cheque_detail->save();
 			}
