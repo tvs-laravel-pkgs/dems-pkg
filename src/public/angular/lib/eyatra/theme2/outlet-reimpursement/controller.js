@@ -1,6 +1,6 @@
 app.component('eyatraOutletReimbursement', {
     templateUrl: eyatra_outlet_reimpursement_list_template_url,
-    controller: function(HelperService, $http, $rootScope, $scope, $routeParams) {
+    controller: function(HelperService, $http, $rootScope, $scope, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#outlet_reimpursement_table').DataTable({
@@ -85,6 +85,71 @@ app.component('eyatraOutletReimbursement', {
 
             });
         }
+
+        $scope.outletCashTopup = function(id, code, cashier, amount) {
+            $('#outlet_id').val(id);
+            $('#outlet').val(code);
+            $('#cashier').val(cashier);
+            $('#outlet_balance').val(amount);
+        }
+        $scope.confirmOutletCashTopup = function() {
+            var cash_form_id = '#cash_topup';
+            let formData1 = new FormData($(cash_form_id)[0]);
+            var id = $('#outlet_id').val();
+            var topup_amount = $('#topup_amount').val();
+            var transaction_date = $('#transaction_date').val();
+            //alert(transaction_date);
+            var v = jQuery(cash_form_id).validate({
+                ignore: '',
+                rules: {
+                    'transaction_date': {
+                        required: true,
+                    },
+                    'topup_amount': {
+                        required: true,
+                    },
+                },
+            });
+            if ($("#cash_topup").valid()) {
+                $http.post(
+                    eyatra_outlet_reimpursement_cash_topup_url, {
+                        id: id,
+                        topup_amount: topup_amount,
+                        transaction_date: transaction_date
+                    }
+                ).then(function(response) {
+                    console.log(response.data.success);
+                    if (response.data.success) {
+                        $('#outlet_reimpursement_modal').modal('hide');
+                        //$('#outlet_reimpursement_modal').attr("data-dismiss", 'modal');
+                        $noty = new Noty({
+                            type: 'success',
+                            layout: 'topRight',
+                            text: 'Outlet Cash TopUp Sucessfully Completed!!!',
+                        }).show();
+                        dataTable.ajax.reload(function(json) {});
+                        //$location.path('/eyatra/outlet-reimbursement');
+                        //$scope.$apply();
+                        /*setTimeout(function() {
+                            $noty.close();
+                            // $location.path('/eyatra/outlet-reimbursement')
+                            //$scope.$apply()
+                        }, 3000);*/
+
+                    } else {
+                        $noty = new Noty({
+                            type: 'error',
+                            layout: 'topRight',
+                            text: response.data.error,
+                        }).show();
+                        setTimeout(function() {
+                            $noty.close();
+                        }, 3000);
+                    }
+                });
+            }
+        }
+
         $rootScope.loading = false;
     }
 });

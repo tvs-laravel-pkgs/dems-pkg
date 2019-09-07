@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCountry;
-use Uitoux\EYatra\ReimbursementTranscations;
+use Uitoux\EYatra\ReimbursementTranscation;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
 use Validator;
@@ -18,12 +18,13 @@ use Yajra\Datatables\Datatables;
 class OutletReimpursementController extends Controller {
 	public function listOutletReimpursement(Request $r) {
 		$outlets = Outlet::withTrashed()->join('employees', 'employees.id', 'outlets.cashier_id')
+		->join('users', 'employees.id', 'users.entity_id')
 			->select(
 				'outlets.id as outlet_id',
 				'outlets.code as outlet_code',
 				'outlets.name as outlet_name',
 				'outlets.reimbursement_amount as amount',
-				'employees.name as cashier_name',
+				'users.name as cashier_name',
 				'employees.code as cashier_code'
 			)
 			->orderBy('outlets.name', 'asc');
@@ -37,10 +38,17 @@ class OutletReimpursementController extends Controller {
 				$img2_active = asset('public/img/content/table/eye-active.svg');
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$outlet_code_name=$outlets->outlet_code." / ".$outlets->outlet_name;
+				$outlet_cashier_name=$outlets->cashier_code;
+				$outlet_amount=$outlets->amount;
 				return '
 				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
-				</a>';
+				</a>
+				<a href="javascript:;" data-toggle="modal" data-target="#outlet_reimpursement_modal"
+                onclick="angular.element(this).scope().outletCashTopup(' . $outlets->outlet_id . ',' ."'".$outlet_code_name ."'".',' ."'".$outlet_cashier_name ."'".',' ."'".$outlet_amount ."'".')" dusk = "delete-btn" title="cash_topup">
+                <img src="./public/img/content/yatra/table/ico-rupee.svg"  alt="cash_topup" class="img-responsive" onmouseover=this.src="./public/img/content/yatra/table/ico-rupee-hover.svg" onmouseout=this.src="./public/img/content/yatra/table/ico-rupee.svg" >
+                </a>';
 
 			})
 			->make(true);
@@ -206,6 +214,32 @@ class OutletReimpursementController extends Controller {
 		$state->forceDelete();
 		if (!$state) {
 			return response()->json(['success' => false, 'errors' => ['State not found']]);
+		}
+		return response()->json(['success' => true]);
+	}
+	public function cashTopUp(Request $request) {
+		//dd($request->all());
+		DB::beginTransaction();
+		if(isset($request->id))
+		{
+			$outlet=Outlet::Where('id',$request->id)->first();
+			$reimbursement_amount=$outlet->reimbursement_amount;
+			$outlet->reimbursement_amount=$reimbursement_amount+$request->topup_amount;
+			$outlet->save();
+			$reimbursement_transaction=new ReimbursementTranscation;
+			$reimbursement_transaction->outlet_id=$outlet->id;
+			$reimbursement_transaction->transcation_id=3271;
+			$reimbursement_transaction->transaction_date=date('Y-m-d',strtotime($request->transaction_date));
+			$reimbursement_transaction->transcation_type=3271;
+			$reimbursement_transaction->amount=$request->topup_amount;
+			$reimbursement_transaction->balance_amount=$reimbursement_amount+$request->topup_amount;
+			$reimbursement_transaction->save();
+
+		}
+		DB::commit();
+
+		if (!$request->id) {
+			return response()->json(['success' => false, 'error' => ['Outlet not found']]);
 		}
 		return response()->json(['success' => true]);
 	}
