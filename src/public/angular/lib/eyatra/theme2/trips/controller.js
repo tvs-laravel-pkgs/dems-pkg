@@ -251,7 +251,7 @@ self.trip.visits.push({
             console.log(trip_array)
             var arr_length = trip_array.length;
             arr_vol = arr_length - 1;
-            alert(trip_array[arr_vol]);
+            // alert(trip_array[arr_vol]);
             self.trip.visits.push({
                 start_city: trip_array[arr_vol].start_city,
                 booking_method: 'Self',
