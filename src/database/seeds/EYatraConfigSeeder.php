@@ -429,6 +429,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'COA Sub Groups',
 				'config_type_id' => 519,
 			],
+			3315 => [
+				'name' => 'Travel Purposes',
+				'config_type_id' => 519,
+			],
 
 			//ACTIVITIES
 			3320 => [
