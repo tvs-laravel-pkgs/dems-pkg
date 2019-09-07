@@ -287,17 +287,17 @@ class AgentController extends Controller {
 			if ($request->bank_name) {
 				$bank_detail = BankDetail::firstOrNew(['entity_id' => $agent->id]);
 				$bank_detail->fill($request->all());
-				$bank_detail->detail_of_id = 3243;
+				$bank_detail->detail_of_id = 3122;
 				$bank_detail->entity_id = $agent->id;
 				$bank_detail->account_type_id = 3243;
 				$bank_detail->save();
 			}
 			//CHEQUE DETAIL SAVE
 			if ($request->bank_name) {
-				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $employee->id]);
+				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $agent->id]);
 				$cheque_detail->fill($request->all());
-				$cheque_detail->detail_of_id = 3243;
-				$cheque_detail->entity_id = $employee->id;
+				$cheque_detail->detail_of_id = 3122;
+				$cheque_detail->entity_id = $agent->id;
 				$cheque_detail->account_type_id = 3243;
 				$cheque_detail->save();
 			}
@@ -305,7 +305,7 @@ class AgentController extends Controller {
 			if ($request->type_id) {
 				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent->id]);
 				$wallet_detail->fill($request->all());
-				$wallet_detail->wallet_of_id = 3243;
+				$wallet_detail->wallet_of_id = 3122;
 				$wallet_detail->save();
 			}
 

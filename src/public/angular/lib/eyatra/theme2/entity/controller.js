@@ -40,10 +40,10 @@ app.component('eyatraEntityList', {
                 },
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
-                    { data: 'name', name: 'entities.name' },
-                    { data: 'created_by', name: 'users.username' },
-                    { data: 'updated_by', name: 'updater.username' },
-                    { data: 'deleted_by', name: 'deactivator.username' },
+                    { data: 'name', name: 'entities.name', searchable: true },
+                    { data: 'created_by', name: 'users.username', searchable: false },
+                    { data: 'updated_by', name: 'updater.username', searchable: false },
+                    { data: 'deleted_by', name: 'deactivator.username', searchable: false },
                     { data: 'created_at', name: 'entities.created_at', searchable: false },
                     { data: 'updated_at1', name: 'entities.updated_at', searchable: false },
                     { data: 'deleted_at', name: 'entities.deleted_at', searchable: false },
@@ -94,7 +94,7 @@ app.component('eyatraEntityList', {
                         }).show();
                         setTimeout(function() {
                             $noty.close();
-                        }, 1000);
+                        }, 5000);
                     }
                     dataTable.ajax.reload(function(json) {});
 
@@ -130,7 +130,7 @@ app.component('eyatraEntityForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
@@ -219,7 +219,7 @@ app.component('eyatraEntityForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
