@@ -108,8 +108,14 @@ class TripController extends Controller {
 
 	public function saveTrip(Request $request) {
 		//dd($request->all());
+
 		for ($i = 0; $i < sizeof($request->visits); $i++) {
 			//dd($visit);
+			if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {
+				return response()->json(['success' => false, 'errors' => "Departure Date Should Be with in Start Date and End Date"]);
+
+			}
+
 			$next_key = $i + 1;
 			if (!($next_key >= sizeof($request->visits))) {
 				if ($request->visits[$next_key]['date'] < $request->visits[$i]['date']) {

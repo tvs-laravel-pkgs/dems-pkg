@@ -31,9 +31,22 @@ class Trip extends Model {
 		'claimed_date',
 		'paid_amount',
 		'payment_date',
+		'start_date',
+		'end_date',
 		'created_by',
 	];
-
+	public function getStartDateAttribute($date) {
+		return empty($date) ? '' : date('d-m-Y', strtotime($date));
+	}
+	public function getEndDateAttribute($date) {
+		return empty($date) ? '' : date('d-m-Y', strtotime($date));
+	}
+	public function setEndDateAttribute($date) {
+		return empty($date) ? '' : date('Y-m-d', strtotime($date));
+	}
+	public function setStartDateAttribute($date) {
+		return empty($date) ? '' : date('Y-m-d', strtotime($date));
+	}
 	public function getCreatedAtAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
 	}
@@ -440,25 +453,23 @@ class Trip extends Model {
 			})*/
 		;
 		if (!Entrust::can('verify-all-trips')) {
-			$now=date('Y-m-d');
-			$sub_employee_id=AlternateApprove::select('employee_id')
-			->where('from','<=', $now)
-			->where('to','>=', $now)
-			->where('alternate_employee_id',Auth::user()->entity_id)
-			->get()
-			->toArray();
+			$now = date('Y-m-d');
+			$sub_employee_id = AlternateApprove::select('employee_id')
+				->where('from', '<=', $now)
+				->where('to', '>=', $now)
+				->where('alternate_employee_id', Auth::user()->entity_id)
+				->get()
+				->toArray();
 			//dd($sub_employee_id);
-			$ids=array_column($sub_employee_id, 'employee_id');
-			array_push($ids,Auth::user()->entity_id);
-			if(count($sub_employee_id)>0)
-			{
+			$ids = array_column($sub_employee_id, 'employee_id');
+			array_push($ids, Auth::user()->entity_id);
+			if (count($sub_employee_id) > 0) {
 				$trips->whereIn('trips.manager_id', $ids); //Alternate MANAGER
-			}else
-			{
-				$trips->where('trips.manager_id', Auth::user()->entity_id);//MANAGER
+			} else {
+				$trips->where('trips.manager_id', Auth::user()->entity_id); //MANAGER
 			}
 
-		//$trips->where('trips.manager_id', Auth::user()->entity_id);
+			//$trips->where('trips.manager_id', Auth::user()->entity_id);
 		}
 
 		return $trips;
