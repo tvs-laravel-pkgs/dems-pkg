@@ -79,7 +79,10 @@ class CoaController extends Controller {
 			$this->data['action'] = 'Edit';
 		}
 		$entity_type_ids = [513, 514, 515, 516, 517];
-		$this->data['reject_type_list'] = DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get();
+		
+
+		$this->data['reject_type_list'] = collect(DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get()->prepend(['id' => '', 'name' => 'Select Sub Master Type']));
+
 
 		$this->data['entity'] = $entity;
 		$this->data['success'] = true;
