@@ -9,7 +9,9 @@ use Entrust;
 use Illuminate\Http\Request;
 use Storage;
 use Uitoux\EYatra\BankDetail;
+use Uitoux\EYatra\ChequeDetail;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
 use Uitoux\EYatra\WalletDetail;
@@ -173,9 +175,13 @@ class PettyCashFinanceVerificationController extends Controller {
 				->orWhere('employees.id', $petty_cash[0]->employee_id)
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
+
+			$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash[0]->employee_id)->where('wallet_of_id', 3121)->first();
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
-			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status', 'payment.name as payment_info')
+			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status', 'payment.name as payment_info', 'employees.payment_mode_id')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
@@ -209,11 +215,15 @@ class PettyCashFinanceVerificationController extends Controller {
 				->where('employees.id', $petty_cash_other[0]->employee_id)
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
+			$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('wallet_of_id', 3121)->first();
 		}
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['payment_mode_list'] = $payment_mode_list;
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$this->data['wallet_mode_list'] = $wallet_mode_list;
+
 		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
 		$emp_details = [];
 		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
@@ -348,26 +358,35 @@ class PettyCashFinanceVerificationController extends Controller {
 		// dd($request->all());
 		try {
 			DB::beginTransaction();
-			if ($request->approve) {
-				$petty_cash_finance_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
-				//BANK DETAIL SAVE
-				if ($request->bank_name) {
-					$bank_detail = BankDetail::firstOrNew(['entity_id' => $request->approve]);
-					$bank_detail->fill($request->all());
-					$bank_detail->detail_of_id = 3243;
-					$bank_detail->entity_id = $request->approve;
-					$bank_detail->account_type_id = 3243;
-					$bank_detail->save();
-				}
-				// dd($bank_detail->id);
-
-				//WALLET SAVE
-				if ($request->type_id) {
-					$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $request->approve]);
-					$wallet_detail->fill($request->all());
-					$wallet_detail->wallet_of_id = 3243;
-					$wallet_detail->entity_id = $request->approve;
-					$wallet_detail->save();
+			if ($request->petty_cash_id) {
+				$petty_cash_finance_approve = PettyCash::where('id', $request->petty_cash_id)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				//PAYMENT SAVE
+				if ($request->type_id == 1) {
+					$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3253, 'payment_mode_id' => $request->payment_mode_id]);
+					$payment->fill($request->all());
+					$payment->date = date('Y-m-d', strtotime($request->date));
+					$payment->payment_of_id = 3253;
+					// $payment->payment_mode_id = $agent_claim->id;
+					$payment->created_by = Auth::user()->id;
+					$payment->save();
+					$activity['entity_id'] = $request->petty_cash_id;
+					$activity['entity_type'] = 'Local Conveyance';
+					$activity['details'] = "Claim is paid by Cashier";
+					$activity['activity'] = "paid";
+					$activity_log = ActivityLog::saveLog($activity);
+				} elseif ($request->type_id == 2) {
+					$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
+					$payment->fill($request->all());
+					$payment->date = date('Y-m-d', strtotime($request->date));
+					$payment->payment_of_id = 3254;
+					// $payment->payment_mode_id = $agent_claim->id;
+					$payment->created_by = Auth::user()->id;
+					$payment->save();
+					$activity['entity_id'] = $request->petty_cash_id;
+					$activity['entity_type'] = 'Other Expenses';
+					$activity['details'] = "Claim is paid by Cashier";
+					$activity['activity'] = "paid";
+					$activity_log = ActivityLog::saveLog($activity);
 				}
 				DB::commit();
 				return response()->json(['success' => true]);
