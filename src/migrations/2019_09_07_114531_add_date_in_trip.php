@@ -12,8 +12,8 @@ class AddDateInTrip extends Migration {
 	 */
 	public function up() {
 		Schema::table('trips', function (Blueprint $table) {
-			$table->date('start_date');
-			$table->date('end_date');
+			$table->date('start_date')->after('trip_type');
+			$table->date('end_date')->after('start_date');
 		});
 	}
 
