@@ -23,10 +23,13 @@ class PettyCashManagerVerificationController extends Controller {
 			'outlets.name as oname',
 			'employees.code as ecode',
 			'outlets.code as ocode',
-			'configs.name as status'
+			'configs.name as status',
+			'petty_cash_type.name as petty_cash_type',
+			'petty_cash_type.id as petty_cash_type_id'
 		)
 			->leftJoin('configs', 'configs.id', 'petty_cash.status_id')
-			->leftjoin('petty_cash_employee_details', 'petty_cash_employee_details.petty_cash_id', 'petty_cash.id')
+		// ->leftjoin('petty_cash_employee_details', 'petty_cash_employee_details.petty_cash_id', 'petty_cash.id')
+			->leftJoin('configs as petty_cash_type', 'petty_cash_type.id', 'petty_cash.petty_cash_type_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
@@ -34,7 +37,7 @@ class PettyCashManagerVerificationController extends Controller {
 			->where('users.user_type_id', 3121)
 			->where('employees.reporting_to_id', Auth::user()->entity_id)
 			->where('employees.company_id', Auth::user()->company_id)
-			->where('petty_cash_employee_details.petty_cash_type', $type_id)
+		// ->where('petty_cash_employee_details.petty_cash_type', $type_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
 		;

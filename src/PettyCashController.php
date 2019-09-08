@@ -5,17 +5,17 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
 use Storage;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
+use Uitoux\EYatra\ReimbursementTranscation;
 use Yajra\Datatables\Datatables;
 
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
-		$type_id = $r->type_id;
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
@@ -24,23 +24,27 @@ class PettyCashController extends Controller {
 			'outlets.name as oname',
 			'employees.code as ecode',
 			'outlets.code as ocode',
-			'configs.name as status'
+			'configs.name as status',
+			'petty_cash_type.name as petty_cash_type',
+			'petty_cash_type.id as petty_cash_type_id'
 		)
 			->leftJoin('configs', 'configs.id', 'petty_cash.status_id')
+			->leftJoin('configs as petty_cash_type', 'petty_cash_type.id', 'petty_cash.petty_cash_type_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
-			->leftjoin('petty_cash_employee_details', 'petty_cash_employee_details.petty_cash_id', 'petty_cash.id')
+		// ->leftjoin('petty_cash_employee_details', 'petty_cash_employee_details.petty_cash_id', 'petty_cash.id')
 			->where('petty_cash.employee_id', Auth::user()->entity_id)
 			->where('users.user_type_id', 3121)
-			->where('petty_cash_employee_details.petty_cash_type', $type_id)
+		// ->where('petty_cash_employee_details.petty_cash_type', $type_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
 		;
 
 		return Datatables::of($petty_cash)
-			->addColumn('action', function ($petty_cash) use ($type_id) {
+			->addColumn('action', function ($petty_cash) {
 
+				$type_id = $petty_cash->petty_cash_type_id == '3440' ? 1 : 2;
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
@@ -92,10 +96,7 @@ class PettyCashController extends Controller {
 			}
 
 			$this->data['success'] = true;
-			$this->data['employee_list'] = Employee::select('users.name', 'employees.id', 'employees.code')
-				->leftjoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->get();
+
 			if ($type_id == 2) {
 				//OTHER
 				$petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
@@ -108,12 +109,7 @@ class PettyCashController extends Controller {
 					->where('users.user_type_id', 3121)
 					->where('petty_cash.id', $pettycash_id)
 					->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
-				$this->data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
-					->leftjoin('users', 'users.entity_id', 'employees.id')
-					->leftjoin('designations', 'designations.id', 'employees.designation_id')
-					->leftjoin('entities', 'entities.id', 'employees.grade_id')
-					->where('users.user_type_id', 3121)
-					->where('employees.id', $petty_cash_other[0]->employee_id)->first();
+
 			} else {
 				$petty_cash_other = [];
 			}
@@ -127,22 +123,36 @@ class PettyCashController extends Controller {
 		$this->data['petty_cash'] = $petty_cash;
 		$this->data['petty_cash_other'] = $petty_cash_other;
 		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
-		$emp_details = [];
-		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
-			$user_role = 'Cashier';
 
-			// } else(Entrust::can('eyatra-employees')) {
+		$user_role = 'Employee';
 
-		} else {
-			$user_role = 'Employee';
-			$emp_details = Employee::select('entities.name as empgrade', 'users.name', 'employees.code', 'employees.id as employee_id', 'configs.name as designation')
-				->join('entities', 'entities.id', 'employees.grade_id')
-				->join('users', 'users.entity_id', 'employees.id')
-				->join('configs', 'configs.id', 'users.user_type_id')
-				->where('users.user_type_id', 3121)
-				->where('users.company_id', Auth::user()->company_id)
-				->first();
-		}
+		$emp_details = Employee::select(
+			'users.name as name',
+			'employees.code as code',
+			'designations.name as designation',
+			'entities.name as grade',
+			'users.mobile_number',
+			'outlets.name as outlet_name',
+			'sbus.name as sbus_name',
+			'lobs.name as lobs_name',
+			'emp_manager.name as emp_manager', 'petty_cash.employee_id')
+			->leftjoin('designations', 'designations.id', 'employees.designation_id')
+			->leftjoin('entities', 'entities.id', 'employees.grade_id')
+			->leftjoin('users', function ($join) {
+				$join->on('users.entity_id', '=', 'employees.id')
+					->where('users.user_type_id', 3121);
+			})
+			->leftjoin('users as emp_manager', function ($join) {
+				$join->on('emp_manager.entity_id', '=', 'employees.reporting_to_id')
+					->where('emp_manager.user_type_id', 3121);
+			})
+			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftjoin('lobs', 'lobs.id', 'sbus.lob_id')
+			->leftjoin('petty_cash', 'petty_cash.employee_id', 'employees.id')
+			->where('petty_cash.id', $pettycash_id)
+			->where('users.company_id', Auth::user()->company_id)
+			->first();
 		$this->data['user_role'] = $user_role;
 		$this->data['emp_details'] = $emp_details;
 		return response()->json($this->data);
@@ -275,6 +285,7 @@ class PettyCashController extends Controller {
 			}
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
 			$petty_cash_employee_edit->status_id = 3280;
+			$petty_cash_employee_edit->petty_cash_type_id = $request->petty_cash_type_id;
 			$petty_cash_employee_edit->date = Carbon::now();
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
 			$petty_cash_employee_edit->updated_at = NULL;
@@ -345,6 +356,33 @@ class PettyCashController extends Controller {
 					}
 				}
 			}
+
+			//Reimbursement Transaction
+
+			$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->limit(1)->pluck('balance_amount')->first();
+			// dd($previous_balance_amount);
+			if ($previous_balance_amount) {
+				$balance_amount = $previous_balance_amount - $request->claim_total_amount;
+				$reimbursementtranscation = new ReimbursementTranscation;
+				$reimbursementtranscation->outlet_id = Auth::user()->entity->outlet_id;
+				$reimbursementtranscation->company_id = Auth::user()->company_id;
+				if ($request->petty_cash_type_id == 1) {
+					$reimbursementtranscation->transcation_id = 3270;
+				} else {
+					$reimbursementtranscation->transcation_id = 3272;
+				}
+				$reimbursementtranscation->transaction_date = Carbon::now();
+				$reimbursementtranscation->transcation_type = 3272;
+				$reimbursementtranscation->amount = $request->claim_total_amount;
+				$reimbursementtranscation->balance_amount = $balance_amount;
+				$reimbursementtranscation->save();
+
+				//Outlet
+				$outlet = Outlet::where('id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
+			} else {
+				// error
+			}
+
 			DB::commit();
 			$request->session()->flash('success', 'Petty Cash saved successfully!');
 			return response()->json(['success' => true]);

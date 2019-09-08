@@ -32,7 +32,7 @@ class EYatraConfigSeeder extends Seeder {
 			515 => 'Payment of - EYatra',
 			516 => 'Advance Request Approval Statuses - EYatra',
 			517 => 'Reimbursement status - EYatra',
-			518 => 'Petty Cash - EYatra',
+			518 => 'Petty Cash Status - EYatra',
 			519 => 'Activity Log Entity Types - EYatra',
 			520 => 'Activity Log Activities - EYatra',
 			521 => 'Lodging Stay',
@@ -41,6 +41,7 @@ class EYatraConfigSeeder extends Seeder {
 			524 => 'Import Status - EYatra',
 			525 => 'Trave Mode Category Types - EYatra',
 			526 => 'Account Type',
+			527 => 'Petty Cash Type',
 		];
 
 		$configs = [
@@ -314,7 +315,11 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 515,
 			],
 			3253 => [
-				'name' => 'Employee Petty Cash Claim',
+				'name' => 'Employee Petty Cash Local Conveyance Claim',
+				'config_type_id' => 515,
+			],
+			3254 => [
+				'name' => 'Employee Petty Cash Other Expense Claim',
 				'config_type_id' => 515,
 			],
 
@@ -334,11 +339,15 @@ class EYatraConfigSeeder extends Seeder {
 
 			//REIMBURSEMENT HISTORY STATUS
 			3270 => [
-				'name' => 'Reimbursement Claim',
+				'name' => 'Local Conveyance Claim',
 				'config_type_id' => 517,
 			],
 			3271 => [
 				'name' => 'Cash Topup',
+				'config_type_id' => 517,
+			],
+			3272 => [
+				'name' => 'Other Expense Claim',
 				'config_type_id' => 517,
 			],
 
@@ -427,7 +436,7 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3315 => [
-				'name' => 'Travel Purposes',
+				'name' => 'Trip Purposes',
 				'config_type_id' => 519,
 			],
 			3316 => [
@@ -436,7 +445,12 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3317 => [
-				'name' => 'Petty Cash',
+				'name' => 'Local Conveyance',
+				'config_type_id' => 519,
+			],
+
+			3318 => [
+				'name' => 'Other Expenses',
 				'config_type_id' => 519,
 			],
 
@@ -572,6 +586,16 @@ class EYatraConfigSeeder extends Seeder {
 			3421 => [
 				'name' => 'Current',
 				'config_type_id' => 526,
+			],
+
+			//PETTY CASH TYPE
+			3440 => [
+				'name' => 'Local Conveyance',
+				'config_type_id' => 527,
+			],
+			3441 => [
+				'name' => 'Other Expense',
+				'config_type_id' => 527,
 			],
 		];
 

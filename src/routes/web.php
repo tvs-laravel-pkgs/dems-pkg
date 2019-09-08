@@ -255,6 +255,7 @@ Route::group(['middleware' => ['web']], function () {
 		//OUTLET REIMPURSEMENT
 		Route::get('eyatra/outlet-reimpursement/get-list', 'Uitoux\EYatra\OutletReimpursementController@listOutletReimpursement')->name('listOutletReimpursement');
 		Route::get('eyatra/outlet-reimpursement/view/{outlet_id}', 'Uitoux\EYatra\OutletReimpursementController@viewEYatraOutletReimpursement')->name('viewEYatraOutletReimpursement');
+		Route::post('eyatra/outlet-reimpursement/cash/topup', 'Uitoux\EYatra\OutletReimpursementController@cashTopUp')->name('cashTopUp');
 
 		//HELPERS
 		Route::post('eyatra/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
@@ -262,7 +263,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/city/get', 'Uitoux\EYatra\CityController@getCityList')->name('getCityList');
 
 		//PETTY CASH
-		Route::get('eyatra/petty-cash/request/get-list/{type_id}', 'Uitoux\EYatra\PettyCashController@listPettyCashRequest')->name('listPettyCashRequest');
+		Route::get('eyatra/petty-cash/request/get-list', 'Uitoux\EYatra\PettyCashController@listPettyCashRequest')->name('listPettyCashRequest');
 		Route::get('eyatra/petty-cash/request/get-form-data/{type_id?}/{pettycash_id?}', 'Uitoux\EYatra\PettyCashController@pettycashFormData')->name('pettycashFormData');
 		Route::post('eyatra/petty-cash/request/save', 'Uitoux\EYatra\PettyCashController@pettycashSave')->name('pettycashSave');
 		Route::get('eyatra/petty-cash/employee/{searchText}', 'Uitoux\EYatra\PettyCashController@getemployee')->name('getemployee');
