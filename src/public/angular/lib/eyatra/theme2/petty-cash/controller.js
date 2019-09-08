@@ -3,11 +3,9 @@ app.component('eyatraPettyCashList', {
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        if ($routeParams.type_id == 1) {
-            $list_data_url = eyatra_pettycash_get_list + '/' + 1;
-        } else {
-            $list_data_url = eyatra_pettycash_get_list + '/' + 2;
-        }
+
+        $list_data_url = eyatra_pettycash_get_list;
+
         $http.get(
             $list_data_url
         ).then(function(response) {
@@ -39,6 +37,7 @@ app.component('eyatraPettyCashList', {
 
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
+                    { data: 'petty_cash_type', searchable: false },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
@@ -52,11 +51,8 @@ app.component('eyatraPettyCashList', {
                 }
             });
             $('.dataTables_length select').select2();
-            if ($routeParams.type_id == 1) {
-                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Local Conveyance Expense Voucher Claim</h3>');
-            } else {
-                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
-            }
+            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher list</p><h3 class="title">Expense Voucher</h3>');
+
             $('.add_new_button').html(
                 '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
                 'Add New' +
@@ -371,7 +367,7 @@ app.component('eyatraPettyCashForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
+                            $location.path('/eyatra/petty-cash')
                             $scope.$apply()
                         }
                     })

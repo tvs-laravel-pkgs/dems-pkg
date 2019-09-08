@@ -232,7 +232,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<import-employees></import-employees>',
         title: 'Import Employees',
     }).
-    
+
     //END
 
     //TRIP
@@ -380,6 +380,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-booking-updates-form></eyatra-trip-booking-updates-form>',
         title: 'Employee Booking Update Form',
     }).
+
     //EMPLOYEE - FINANCE TEAM
     when('/eyatra/finance-emp-claim', {
         template: '<eyatra-finance-emp-list></eyatra-finance-emp-list>',
@@ -389,8 +390,9 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-finance-emp-form></eyatra-finance-emp-form>',
         title: 'Finance Employee Claims Add',
     }).
+
     //PETTY CASH
-    when('/eyatra/petty-cash/:type_id', {
+    when('/eyatra/petty-cash', {
         template: '<eyatra-petty-cash-list></eyatra-petty-cash-list>',
         title: 'Petty Cash',
     }).
@@ -406,6 +408,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-petty-cash-view></eyatra-petty-cash-view>',
         title: 'View Petty Cash',
     }).
+
     //PETTY CASH VIEW AND LIST FOR MANAGER
     when('/eyatra/petty-cash/verification1/:type_id', {
         template: '<eyatra-petty-cash-manager-list></eyatra-petty-cash-manager-list>',
