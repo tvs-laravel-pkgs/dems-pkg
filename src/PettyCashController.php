@@ -8,8 +8,10 @@ use DB;
 use Illuminate\Http\Request;
 use Storage;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
+use Uitoux\EYatra\ReimbursementTranscation;
 use Yajra\Datatables\Datatables;
 
 class PettyCashController extends Controller {
@@ -354,6 +356,33 @@ class PettyCashController extends Controller {
 					}
 				}
 			}
+
+			//Reimbursement Transaction
+
+			$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->limit(1)->pluck('balance_amount')->first();
+			// dd($previous_balance_amount);
+			if ($previous_balance_amount) {
+				$balance_amount = $previous_balance_amount - $request->claim_total_amount;
+				$reimbursementtranscation = new ReimbursementTranscation;
+				$reimbursementtranscation->outlet_id = Auth::user()->entity->outlet_id;
+				$reimbursementtranscation->company_id = Auth::user()->company_id;
+				if ($request->petty_cash_type_id == 1) {
+					$reimbursementtranscation->transcation_id = 3270;
+				} else {
+					$reimbursementtranscation->transcation_id = 3272;
+				}
+				$reimbursementtranscation->transaction_date = Carbon::now();
+				$reimbursementtranscation->transcation_type = 3272;
+				$reimbursementtranscation->amount = $request->claim_total_amount;
+				$reimbursementtranscation->balance_amount = $balance_amount;
+				$reimbursementtranscation->save();
+
+				//Outlet
+				$outlet = Outlet::where('id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
+			} else {
+				// error
+			}
+
 			DB::commit();
 			$request->session()->flash('success', 'Petty Cash saved successfully!');
 			return response()->json(['success' => true]);

@@ -9,16 +9,16 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCountry;
-use Uitoux\EYatra\ReimbursementTranscation;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
+use Uitoux\EYatra\ReimbursementTranscation;
 use Validator;
 use Yajra\Datatables\Datatables;
 
 class OutletReimpursementController extends Controller {
 	public function listOutletReimpursement(Request $r) {
 		$outlets = Outlet::withTrashed()->join('employees', 'employees.id', 'outlets.cashier_id')
-		->join('users', 'employees.id', 'users.entity_id')
+			->join('users', 'employees.id', 'users.entity_id')
 			->select(
 				'outlets.id as outlet_id',
 				'outlets.code as outlet_code',
@@ -38,15 +38,15 @@ class OutletReimpursementController extends Controller {
 				$img2_active = asset('public/img/content/table/eye-active.svg');
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
-				$outlet_code_name=$outlets->outlet_code." / ".$outlets->outlet_name;
-				$outlet_cashier_name=$outlets->cashier_code;
-				$outlet_amount=$outlets->amount;
+				$outlet_code_name = $outlets->outlet_code . " / " . $outlets->outlet_name;
+				$outlet_cashier_name = $outlets->cashier_code;
+				$outlet_amount = $outlets->amount;
 				return '
 				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#outlet_reimpursement_modal"
-                onclick="angular.element(this).scope().outletCashTopup(' . $outlets->outlet_id . ',' ."'".$outlet_code_name ."'".',' ."'".$outlet_cashier_name ."'".',' ."'".$outlet_amount ."'".')" dusk = "delete-btn" title="cash_topup">
+                onclick="angular.element(this).scope().outletCashTopup(' . $outlets->outlet_id . ',' . "'" . $outlet_code_name . "'" . ',' . "'" . $outlet_cashier_name . "'" . ',' . "'" . $outlet_amount . "'" . ')" dusk = "delete-btn" title="cash_topup">
                 <img src="./public/img/content/yatra/table/ico-rupee.svg"  alt="cash_topup" class="img-responsive" onmouseover=this.src="./public/img/content/yatra/table/ico-rupee-hover.svg" onmouseout=this.src="./public/img/content/yatra/table/ico-rupee.svg" >
                 </a>';
 
@@ -182,32 +182,35 @@ class OutletReimpursementController extends Controller {
 		}
 	}
 
-		public function viewEYatraOutletReimpursement($outlet_id) {
-			//dd($outlet_id);
-			$reimpurseimpurse_transactions=ReimbursementTranscations::select(
+	public function viewEYatraOutletReimpursement($outlet_id) {
+		//dd($outlet_id);
+		$reimpurseimpurse_transactions = ReimbursementTranscations::select(
 			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
 			'amount',
 			'balance_amount',
 			'configs.name as description'
-			)
-			->join('configs','configs.id','reimbursement_transcations.transcation_id')
-			->where('outlet_id',$outlet_id)
+		)
+			->join('configs', 'configs.id', 'reimbursement_transcations.transcation_id')
+			->where('outlet_id', $outlet_id)
 			->get();
-			//dd($reimpurseimpurse_transactions);
-			$reimpurseimpurse_outlet_data=Outlet::select(
+		//dd($reimpurseimpurse_transactions);
+		$reimpurseimpurse_outlet_data = Outlet::select(
 			'outlets.name as outlet_name',
 			'outlets.code as outlet_code',
-			'employees.name as cashier_name',
+			'users.name as cashier_name',
 			'outlets.reimbursement_amount as reimbursement_amount'
-			)
-			->join('employees','employees.id','outlets.cashier_id')
-			->where('outlets.id',$outlet_id)
+		)
+			->join('employees', 'employees.id', 'outlets.cashier_id')
+			->join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('outlets.id', $outlet_id)
 			->first();
-			$this->data['reimpurseimpurse_transactions'] = $reimpurseimpurse_transactions;
-			$this->data['reimpurseimpurse_outlet_data'] = $reimpurseimpurse_outlet_data;
-			$this->data['success'] = true;
-			return response()->json($this->data);
-		}
+		// dd($reimpurseimpurse_outlet_data);
+		$this->data['reimpurseimpurse_transactions'] = $reimpurseimpurse_transactions;
+		$this->data['reimpurseimpurse_outlet_data'] = $reimpurseimpurse_outlet_data;
+		$this->data['success'] = true;
+		return response()->json($this->data);
+	}
 
 	public function deleteEYatraState($state_id) {
 		$state = Nstate::withTrashed()->where('id', $state_id)->first();
@@ -220,19 +223,18 @@ class OutletReimpursementController extends Controller {
 	public function cashTopUp(Request $request) {
 		//dd($request->all());
 		DB::beginTransaction();
-		if(isset($request->id))
-		{
-			$outlet=Outlet::Where('id',$request->id)->first();
-			$reimbursement_amount=$outlet->reimbursement_amount;
-			$outlet->reimbursement_amount=$reimbursement_amount+$request->topup_amount;
+		if (isset($request->id)) {
+			$outlet = Outlet::Where('id', $request->id)->first();
+			$reimbursement_amount = $outlet->reimbursement_amount;
+			$outlet->reimbursement_amount = $reimbursement_amount + $request->topup_amount;
 			$outlet->save();
-			$reimbursement_transaction=new ReimbursementTranscation;
-			$reimbursement_transaction->outlet_id=$outlet->id;
-			$reimbursement_transaction->transcation_id=3271;
-			$reimbursement_transaction->transaction_date=date('Y-m-d',strtotime($request->transaction_date));
-			$reimbursement_transaction->transcation_type=3271;
-			$reimbursement_transaction->amount=$request->topup_amount;
-			$reimbursement_transaction->balance_amount=$reimbursement_amount+$request->topup_amount;
+			$reimbursement_transaction = new ReimbursementTranscation;
+			$reimbursement_transaction->outlet_id = $outlet->id;
+			$reimbursement_transaction->transcation_id = 3271;
+			$reimbursement_transaction->transaction_date = date('Y-m-d', strtotime($request->transaction_date));
+			$reimbursement_transaction->transcation_type = 3271;
+			$reimbursement_transaction->amount = $request->topup_amount;
+			$reimbursement_transaction->balance_amount = $reimbursement_amount + $request->topup_amount;
 			$reimbursement_transaction->save();
 
 		}
