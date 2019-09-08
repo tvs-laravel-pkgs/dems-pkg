@@ -33,19 +33,23 @@ class Trip extends Model {
 		'payment_date',
 		'start_date',
 		'end_date',
+		'trip_type',
 		'created_by',
 	];
+
 	public function getStartDateAttribute($date) {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
 	public function getEndDateAttribute($date) {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
-	public function setEndDateAttribute($date) {
-		return empty($date) ? '' : date('Y-m-d', strtotime($date));
-	}
+
 	public function setStartDateAttribute($date) {
-		return empty($date) ? '' : date('Y-m-d', strtotime($date));
+		return $this->attributes['start_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
+	}
+	public function setEndDateAttribute($date) {
+		return $this->attributes['end_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
+
 	}
 	public function getCreatedAtAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
@@ -56,7 +60,7 @@ class Trip extends Model {
 	}
 
 	public function visits() {
-		return $this->hasMany('Uitoux\EYatra\Visit');
+		return $this->hasMany('Uitoux\EYatra\Visit')->orderBy('id');
 	}
 
 	public function selfVisits() {
@@ -149,8 +153,7 @@ class Trip extends Model {
 
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
-
-				$trip->visits()->sync([]);
+				$trip->visits()->delete();
 				$activity['activity'] = "edit";
 
 			}
@@ -294,10 +297,20 @@ class Trip extends Model {
 			//Changed for API. dont revert. - Abdul
 			$visit->booking_method = new Config(['name' => 'Self']);
 			$trip->visits = [$visit];
+			$trip->trip_type = '';
 			$data['success'] = true;
 		} else {
 			$data['action'] = 'Edit';
+			$data['success'] = true;
+
 			$trip = Trip::find($trip_id);
+			$trip->visits = $t_visits = $trip->visits;
+			//dd($trip->visits->get);
+			foreach ($t_visits as $key => $t_visit) {
+				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
+				$trip->visits[$key]->booking_method_name = $b_name->name;
+			}
+
 			if (!$trip) {
 				$data['success'] = false;
 				$data['message'] = 'Trip not found';

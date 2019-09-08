@@ -107,7 +107,7 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
-		dd($request->all());
+		//dd($request->all());
 		$size = sizeof($request->visits) - 1;
 		for ($i = 0; $i < $size; $i++) {
 			//dd($visit);
