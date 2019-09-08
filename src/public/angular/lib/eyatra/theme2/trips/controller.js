@@ -237,21 +237,35 @@ self.trip.visits.push({
             }
         }
 
-        $scope.addVisit = function() {
-            alert(arr_ind);
-            console.log(self.trip.visits);
+        $scope.addVisit = function(visit_array) {
+            // alert(arr_ind);
+            /*self.trip.visits.push({
+    visit_date: '',
+    booking_method: 'Self',
+    preferred_travel_modes: '',
+});*/
+            /*add_block = $('.or_block').html();
+add_block = add_block.replace(/XXX/g, arr_ind);*/
+            // alert(add_block);
+            // console.log(self.trip.visits);
+
+            var trip_array = visit_array;
+
+            console.log(trip_array[0]);
             var trip_array = self.trip.visits;
+            console.log('ss');
             console.log(trip_array)
             var arr_length = trip_array.length;
             arr_vol = arr_length - 1;
-            alert(trip_array[arr_vol]);
-
-            self.trip.visits.push({
-                start_city: trip_array[arr_vol].start_city,
+            console.log(arr_length, arr_vol);
+            self.multi_trip.visits.push({
+                start_city: trip_array[arr_length].end_city,
+                end_city: trip_array.start_city,
                 booking_method: 'Self',
                 preferred_travel_modes: '',
-                to_main_city: '',
             });
+            console.log(trip_array[arr_vol]);
+
             /*add_block = $('.or_block').html();
 add_block = add_block.replace(/XXX/g, arr_ind);
 alert(add_block);
@@ -289,9 +303,9 @@ $('.extra_block').append(add_block);*/
         }
 
         self.removeLodging = function(index, lodging_id) {
-            alert('remove');
-            alert(index);
-            alert(lodging_id);
+            // alert('remove');
+            // alert(index);
+            // alert(lodging_id);
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));

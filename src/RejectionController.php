@@ -81,7 +81,10 @@ class RejectionController extends Controller {
 			$this->data['action'] = 'Edit';
 		}
 		$entity_type_ids = [507, 508, 509, 510, 511];
-		$this->data['reject_type_list'] = DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get();
+		// $this->data['reject_type_list'] = DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get();
+		
+		$this->data['reject_type_list'] = collect(DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get()->prepend(['id' => '', 'name' => 'Select a Reject Type']));
+
 
 		$this->data['entity'] = $entity;
 		$this->data['success'] = true;

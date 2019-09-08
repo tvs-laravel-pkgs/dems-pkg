@@ -640,6 +640,11 @@ app.component('eyatraEmployeesImportList', {
             dataTableFilter.fnFilter();
         }
         $scope.resetForm();
+        setInterval(function(){ 
+          dataTableFilter.DataTable().ajax.reload();
+
+         }, 5000);
+
         $(document).on('click', '#update_employee_import_status', function(e) {
             var id = $(this).attr('data-id');
             var data = 'id=' + id;
