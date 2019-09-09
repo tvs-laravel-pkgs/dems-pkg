@@ -170,7 +170,6 @@ app.component('eyatraTripForm', {
                     $noty.close();
                 }, 1000);
                 $location.path('/eyatra/trips')
-                //$scope.$apply()
                 return;
             }
             self.advance_eligibility = response.data.advance_eligibility;
@@ -186,29 +185,20 @@ app.component('eyatraTripForm', {
                 self.booking_method_name = 'self';
                 self.trip.visits = [];
                 arr_ind = 1;
-                console.log(response.data.extras.employee_city.id);
-                /*self.trip.visits[0].booking_method = 'Self';*/
                 self.trip.visits.push({
                     from_city_id: response.data.extras.employee_city.id,
                     to_city_id: '',
                     booking_method_name: 'Self',
                     preferred_travel_modes: '',
                 });
-                //$scope.single_trip = true;
                 self.checked = true;
                 $scope.round_trip = false;
                 $scope.multi_trip = false;
-                //self.visits = [];
-
             }
-
-
             $rootScope.loading = false;
             $scope.showBank = false;
             $scope.showCheque = false;
             $scope.showWallet = false;
-
-
         });
 
 
@@ -238,56 +228,35 @@ app.component('eyatraTripForm', {
             }
         }
         $scope.cityChanging = function(i, id) {
-            alert(id);
             index = i + 1;
-            if (index < self.trip.visits.length) {
-
+            if (index <= self.trip.visits.length) {
                 self.trip.visits[index].from_city_id = id;
             }
-
         }
         $scope.addVisit = function(visit_array) {
-            // alert(arr_ind);
-            /*self.trip.visits.push({
-    visit_date: '',
-    booking_method: 'Self',
-    preferred_travel_modes: '',
-});*/
-            /*add_block = $('.or_block').html();
-add_block = add_block.replace(/XXX/g, arr_ind);*/
-            // alert(add_block);
-            // console.log(self.trip.visits);
-
             var trip_array = self.trip.visits;
-            console.log('ss');
-            console.log(trip_array)
             var arr_length = trip_array.length;
             arr_vol = arr_length - 1;
-            console.log(arr_length, arr_vol);
-            console.log(trip_array[arr_vol]);
+            if (!(trip_array[arr_vol].to_city_details) || !(trip_array[arr_vol].to_city_details.id)) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Please Select To City in Last Visit',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 10000);
+            }
             self.trip.visits.push({
-                from_city_id: trip_array[arr_vol].to_city_id,
+                from_city_id: trip_array[arr_vol].to_city_details.id,
                 to_city_id: trip_array[arr_vol].from_city_id,
                 booking_method_name: 'Self',
                 preferred_travel_modes: '',
             });
-
-            /*add_block = $('.or_block').html();
-add_block = add_block.replace(/XXX/g, arr_ind);
-alert(add_block);
-self.trip.visits[arr_ind].to_main_city = self.extras.employee_city.id;
-
-arr_ind = arr_ind + 1;
-$('.extra_block').append(add_block);*/
-            //$('.add_multi_trip').show();
-
         }
-        // $('.visits-wrp').hide();
-
-        // $(".add_visit").on('click', function() {
-        //     $('.add_multi_trip').hide();
-        // });
-
         $scope.trip_mode = function(id) {
             var trip_array = self.trip.visits;
 
