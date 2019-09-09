@@ -60,7 +60,7 @@ app.component('eyatraPettyCashFinanceList', {
                 $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
             // $('.add_new_button').html(
-            //     '<a href="#!/eyatra/petty-cash/verification2/add/' + $routeParams.type_id + '" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers-verification2\')">' +
+            //     '<a href="#!/eyatra/petty-cash/verification3/add/' + $routeParams.type_id + '" type="button" class="btn btn-grey" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers-verification3\')">' +
             //     'Add New' +
             //     '</a>'
             // );
@@ -95,8 +95,8 @@ app.component('eyatraPettyCashFinanceForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
-                $location.path('/eyatra/petty-cash/verification2')
+                }, 5000);
+                $location.path('/eyatra/petty-cash/verification3')
                 return;
             }
             console.log(response);
@@ -288,7 +288,7 @@ app.component('eyatraPettyCashFinanceForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
             },
             submitHandler: function(form) {
 
@@ -321,8 +321,8 @@ app.component('eyatraPettyCashFinanceForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
-                            $location.path('/eyatra/petty-cash/verification2')
+                            }, 5000);
+                            $location.path('/eyatra/petty-cash/verification3')
                             $scope.$apply()
                         }
                     })
@@ -467,10 +467,10 @@ app.component('eyatraPettyCashFinanceView', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 3000);
+                            }, 5000);
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification2/')
+                                $location.path('/eyatra/petty-cash/verification3/')
                             }, 500);
                         }
                     })
@@ -530,11 +530,11 @@ app.component('eyatraPettyCashFinanceView', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 3000);
+                            }, 5000);
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification2/')
+                                $location.path('/eyatra/petty-cash/verification3/')
                             }, 500);
                         }
                     })

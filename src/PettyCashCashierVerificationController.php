@@ -17,8 +17,8 @@ use Uitoux\EYatra\PettyCashEmployeeDetails;
 use Uitoux\EYatra\WalletDetail;
 use Yajra\Datatables\Datatables;
 
-class PettyCashFinanceVerificationController extends Controller {
-	public function listPettyCashVerificationFinance(Request $r) {
+class PettyCashCashierVerificationController extends Controller {
+	public function listPettyCashVerificationCashier(Request $r) {
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
@@ -40,9 +40,9 @@ class PettyCashFinanceVerificationController extends Controller {
 			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
 			->where('petty_cash.status_id', 3281)
 			->where('users.user_type_id', 3121)
-		// ->where('outlets.amount_eligible', 0)
-		// ->where('petty_cash.total', '>=', 'outlets.amount_limit')
 			->where('cashier.id', Auth::user()->entity_id)
+		// ->where('outlets.amount_eligible', 1)
+		// ->where('petty_cash.total', '<=', 'outlets.amount_limit')
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
@@ -64,7 +64,7 @@ class PettyCashFinanceVerificationController extends Controller {
 			})
 			->make(true);
 	}
-	public function pettycashfinanceFormData($type_id = NULL, $pettycash_id = NULL) {
+	public function pettycashcashierFormData($type_id = NULL, $pettycash_id = NULL) {
 		// dd($type_id, $pettycash_id);
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
 		if (!$pettycash_id) {
@@ -138,7 +138,7 @@ class PettyCashFinanceVerificationController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function pettycashFinanceVerificationView($type_id, $pettycash_id) {
+	public function pettycashCashierVerificationView($type_id, $pettycash_id) {
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
 		if ($type_id == 1) {
 			$this->data['petty_cash'] = $petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type', 'configs.name as status', 'petty_cash.employee_id', 'petty_cash.total', 'employees.payment_mode_id')
@@ -239,7 +239,7 @@ class PettyCashFinanceVerificationController extends Controller {
 
 		return response()->json($this->data);
 	}
-	public function pettycashFinanceVerificationgetEmployee($emp_id) {
+	public function pettycashCashierVerificationgetEmployee($emp_id) {
 		$this->data['emp_details'] = $emp_details = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('entities', 'entities.id', 'employees.grade_id')
@@ -247,7 +247,7 @@ class PettyCashFinanceVerificationController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function pettycashFinanceSave(Request $request) {
+	public function pettycashCashierSave(Request $request) {
 		// dd($request->all());
 		try {
 			DB::beginTransaction();
@@ -337,12 +337,12 @@ class PettyCashFinanceVerificationController extends Controller {
 		}
 	}
 
-	public function pettycashFinanceVerificationSave(Request $request) {
+	public function pettycashCashierVerificationSave(Request $request) {
 		// dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->petty_cash_id) {
-				$petty_cash_finance_approve = PettyCash::where('id', $request->petty_cash_id)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				$petty_cash_cashier_approve = PettyCash::where('id', $request->petty_cash_id)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				//PAYMENT SAVE
 				if ($request->type_id == 1) {
 					$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3253, 'payment_mode_id' => $request->payment_mode_id]);
@@ -374,12 +374,12 @@ class PettyCashFinanceVerificationController extends Controller {
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
-				$petty_cash_finance_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3284, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				$petty_cash_cashier_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3284, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
 			// }
-			// $request->session()->flash('success', 'Petty Cash Finance Verification successfully!');
+			// $request->session()->flash('success', 'Petty Cash Cashier Verification successfully!');
 			// return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();

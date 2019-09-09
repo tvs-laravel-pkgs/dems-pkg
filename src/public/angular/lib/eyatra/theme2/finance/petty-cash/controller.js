@@ -91,7 +91,7 @@ app.component('eyatraPettyCashManagerForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/petty-cash/verification1')
                 return;
             }
@@ -284,7 +284,7 @@ app.component('eyatraPettyCashManagerForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
             },
             submitHandler: function(form) {
 
@@ -317,7 +317,7 @@ app.component('eyatraPettyCashManagerForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/petty-cash/verification1')
                             $scope.$apply()
                         }
@@ -398,7 +398,7 @@ app.component('eyatraPettyCashManagerView', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 3000);
+                            }, 5000);
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
                                 $location.path('/eyatra/petty-cash/verification1/')
@@ -455,7 +455,7 @@ app.component('eyatraPettyCashManagerView', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 3000);
+                            }, 5000);
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {

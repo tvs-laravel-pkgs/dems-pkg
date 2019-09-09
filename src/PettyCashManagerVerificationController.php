@@ -347,6 +347,7 @@ class PettyCashManagerVerificationController extends Controller {
 	}
 
 	public function pettycashManagerVerificationSave(Request $request) {
+		dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
