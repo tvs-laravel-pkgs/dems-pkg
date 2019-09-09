@@ -130,7 +130,7 @@ app.component('eyatraCity', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
@@ -144,7 +144,7 @@ app.component('eyatraCity', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
             });
         }
@@ -176,7 +176,7 @@ app.component('eyatraCityForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/cities')
                 $scope.$apply()
                 return;
@@ -215,10 +215,12 @@ app.component('eyatraCityForm', {
         });
 
         $scope.loadState = function(country_id) {
+            // alert(country_id)
             $.ajax({
                     url: get_state_by_country,
                     method: "POST",
                     data: { country_id: country_id },
+
                 })
                 .done(function(res) {
                     self.extras.state_list = [];
@@ -305,7 +307,7 @@ app.component('eyatraCityForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
             },
             submitHandler: function(form) {
 
@@ -339,7 +341,7 @@ app.component('eyatraCityForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/cities')
                             $scope.$apply()
                         }

@@ -87,7 +87,7 @@ app.component('coaDataList', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
                 dataTable.ajax.reload(function(json) {});
 
@@ -121,7 +121,7 @@ app.component('coaDataForm', {
 
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/coa-sub-master/list')
                 $scope.$apply()
                 return;
@@ -188,7 +188,7 @@ app.component('coaDataForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/coa-sub-master/list')
                             $scope.$apply()
                         }

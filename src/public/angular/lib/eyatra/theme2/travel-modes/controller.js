@@ -60,7 +60,7 @@ app.component('eyatraTravelModeList', {
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('travel_mode_table');
-            // x.left = x.left + 15;
+            x.left = x.left + 15;
             d.style.left = x.left + 'px';
 
         }, 500);
@@ -88,7 +88,7 @@ app.component('eyatraTravelModeList', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
 
                 }
                 dataTable.ajax.reload(function(json) {});
@@ -122,7 +122,7 @@ app.component('eyatraTravelModeForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/travel-mode/list')
                 $scope.$apply()
                 return;
@@ -195,7 +195,7 @@ app.component('eyatraTravelModeForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/travel-mode/list')
                             $scope.$apply()
                         }
