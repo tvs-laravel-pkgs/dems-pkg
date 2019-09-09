@@ -131,33 +131,34 @@ class TripClaimController extends Controller {
 				}
 
 				//CHECK NEXT VISIT EXIST
-				//ONLY SELF VISITS WILL COME IN POST NOT AGENT BOOKED
-				$lodge_checkin_out_date_range_list = array();
-				$trip = Trip::with(
-					['visits' => function ($q) {
-						$q->orderBy('id', 'asc');
-					},
-					])->find($request->trip_id);
-				foreach ($trip->visits as $visit_data_key => $visit_data_val) {
-					$next_visit = $visit_data_key;
-					$next_visit++;
-					//LODGE CHECK IN & OUT DATE LIST
-					if (isset($trip->visits[$next_visit])) {
-						$date_range = Trip::getDatesFromRange($visit_data_val['departure_date'], $trip->visits[$next_visit]['departure_date']);
-						if (!empty($date_range)) {
-							$lodge_checkin_out_date_range_list[$visit_data_key][0]['id'] = '';
-							$lodge_checkin_out_date_range_list[$visit_data_key][0]['name'] = 'Select Date';
-							foreach ($date_range as $range_key => $range_val) {
-								$range_key++;
-								$lodge_checkin_out_date_range_list[$visit_data_key][$range_key]['id'] = $range_val;
-								$lodge_checkin_out_date_range_list[$visit_data_key][$range_key]['name'] = $range_val;
-							}
-						}
-					}
-				}
+				//ONLY SELF VISITS WILL COME IN POST NOT AGENT BOOKED ==> NOT BEEN USED NOW
+
+				// $lodge_checkin_out_date_range_list = array();
+				// $trip = Trip::with(
+				// 	['visits' => function ($q) {
+				// 		$q->orderBy('id', 'asc');
+				// 	},
+				// 	])->find($request->trip_id);
+				// foreach ($trip->visits as $visit_data_key => $visit_data_val) {
+				// 	$next_visit = $visit_data_key;
+				// 	$next_visit++;
+				// 	//LODGE CHECK IN & OUT DATE LIST
+				// 	if (isset($trip->visits[$next_visit])) {
+				// 		$date_range = Trip::getDatesFromRange($visit_data_val['departure_date'], $trip->visits[$next_visit]['departure_date']);
+				// 		if (!empty($date_range)) {
+				// 			$lodge_checkin_out_date_range_list[$visit_data_key][0]['id'] = '';
+				// 			$lodge_checkin_out_date_range_list[$visit_data_key][0]['name'] = 'Select Date';
+				// 			foreach ($date_range as $range_key => $range_val) {
+				// 				$range_key++;
+				// 				$lodge_checkin_out_date_range_list[$visit_data_key][$range_key]['id'] = $range_val;
+				// 				$lodge_checkin_out_date_range_list[$visit_data_key][$range_key]['name'] = $range_val;
+				// 			}
+				// 		}
+				// 	}
+				// }
 
 				DB::commit();
-				return response()->json(['success' => true, 'lodge_checkin_out_date_range_list' => $lodge_checkin_out_date_range_list]);
+				return response()->json(['success' => true]);
 			}
 
 			//SAVING LODGINGS
@@ -194,27 +195,28 @@ class TripClaimController extends Controller {
 					}
 				}
 
-				//BOARDING CITIES LIST
-				$boarding_dates_list = array();
-				$travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d-%m-%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d-%m-%Y")) as min_date'))->where('visits.trip_id', $request->trip_id)->first();
+				//BOARDING CITIES LIST ==> NOT BEEN USED NOW
 
-				if ($travel_dates) {
-					$boarding_date_range = Trip::getDatesFromRange($travel_dates->min_date, $travel_dates->max_date);
-					if (!empty($boarding_date_range)) {
-						$boarding_dates_list[0]['id'] = '';
-						$boarding_dates_list[0]['name'] = 'Select Date';
-						foreach ($boarding_date_range as $boarding_date_range_key => $boarding_date_range_val) {
-							$boarding_date_range_key++;
-							$boarding_dates_list[$boarding_date_range_key]['id'] = $boarding_date_range_val;
-							$boarding_dates_list[$boarding_date_range_key]['name'] = $boarding_date_range_val;
-						}
-					}
-				} else {
-					$boarding_dates_list = array();
-				}
+				// $boarding_dates_list = array();
+				// $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d-%m-%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d-%m-%Y")) as min_date'))->where('visits.trip_id', $request->trip_id)->first();
+
+				// if ($travel_dates) {
+				// 	$boarding_date_range = Trip::getDatesFromRange($travel_dates->min_date, $travel_dates->max_date);
+				// 	if (!empty($boarding_date_range)) {
+				// 		$boarding_dates_list[0]['id'] = '';
+				// 		$boarding_dates_list[0]['name'] = 'Select Date';
+				// 		foreach ($boarding_date_range as $boarding_date_range_key => $boarding_date_range_val) {
+				// 			$boarding_date_range_key++;
+				// 			$boarding_dates_list[$boarding_date_range_key]['id'] = $boarding_date_range_val;
+				// 			$boarding_dates_list[$boarding_date_range_key]['name'] = $boarding_date_range_val;
+				// 		}
+				// 	}
+				// } else {
+				// 	$boarding_dates_list = array();
+				// }
 
 				DB::commit();
-				return response()->json(['success' => true, 'boarding_dates_list' => $boarding_dates_list]);
+				return response()->json(['success' => true]);
 			}
 			//SAVING BOARDINGS
 			if ($request->boardings) {
@@ -255,7 +257,7 @@ class TripClaimController extends Controller {
 
 			//FINAL SAVE LOCAL TRAVELS
 			if ($request->local_travels) {
-
+				// dd($request->local_travels);
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 
