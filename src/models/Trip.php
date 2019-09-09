@@ -2,7 +2,7 @@
 
 namespace Uitoux\EYatra;
 
-// use App\Mail\TripNotificationMail;
+//use App\Mail\TripNotificationMail;
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -227,7 +227,7 @@ class Trip extends Model {
 				}
 			}
 			if (!$request->id) {
-				// self::sendTripNotificationMail($trip);
+				self::sendTripNotificationMail($trip);
 			}
 			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
