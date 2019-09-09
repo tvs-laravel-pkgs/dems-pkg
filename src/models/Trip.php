@@ -343,6 +343,7 @@ class Trip extends Model {
 	}
 
 	public static function getEmployeeList($request) {
+		// dd(Auth::user()->company_id);
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
