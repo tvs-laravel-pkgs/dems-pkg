@@ -261,13 +261,11 @@ app.component('eyatraTripForm', {
             var trip_array = self.trip.visits;
 
             if (id == 1) {
-                if (!(self.action == 'New')) {
-                    var arr_length = self.trip.visits.length;
-                    while (arr_length > 1) {
-                        index = arr_length - 1;
-                        self.trip.visits.splice(index, 1);
-                        arr_length = self.trip.visits.length;
-                    }
+                var arr_length = self.trip.visits.length;
+                while (arr_length > 1) {
+                    index = arr_length - 1;
+                    self.trip.visits.splice(index, 1);
+                    arr_length = self.trip.visits.length;
                 }
             } else if (id == 2) {
                 var arr_length = self.trip.visits.length;
