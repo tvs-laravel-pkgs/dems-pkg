@@ -106,7 +106,7 @@ app.component('eyatraRegions', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 } else {
                     $noty = new Noty({
                         type: 'success',
@@ -118,7 +118,7 @@ app.component('eyatraRegions', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     $('#delete_region').modal('hide');
                     dataTable.ajax.reload(function(json) {});
                 }
@@ -155,7 +155,7 @@ app.component('eyatraRegionForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/regions')
                 $scope.$apply()
                 return;
@@ -173,6 +173,7 @@ app.component('eyatraRegionForm', {
         });
         $('#on_focus').focus();
         $scope.getStateByCountry = function(country_id) {
+            // alert(country_id);
             if (country_id) {
                 $.ajax({
                         url: region_get_state_by_country,

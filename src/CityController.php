@@ -149,15 +149,15 @@ class CityController extends Controller {
 		// $option = new NState;
 		// $option->name = 'Select State';
 		// $option->id = null;
-		// $this->data['state_list'] = $state_list = NState::select('name', 'id')->get()->prepend($option);
+		$this->data['category_list'] = $category_list = collect(Entity::cityCategoryList())->prepend(['id' => '', 'name' => 'Select Category']);
 
 		$this->data['extras'] = [
 			'country_list' => NCountry::getList(),
-			'category_list' => Entity::cityCategoryList(),
+			'category_list' => $category_list,
 			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($city->state->country_id),
 			// 'city_list' => NCity::getList(),
 		];
-
+		// dd($city->state->country_id);
 		// dd($this->data['extras']);
 		$this->data['city'] = $city;
 		$this->data['success'] = true;
