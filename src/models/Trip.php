@@ -512,6 +512,16 @@ class Trip extends Model {
 	// 	return response()->json(['success' => true]);
 	// }
 
+	public static function getDashboardData() {
+		$total_trips = Trip::where('employee_id', Auth::user()->entity_id)
+			->count();
+
+		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3028)->where('end_date', '<', date('Y-m-d'))->count();
+
+		$dashboard_details['total_trips'] = $total_trips;
+		$dashboard_details['total_claims_pending'] = $total_claims_pending;
+		return response()->json(['success' => true, 'dashboard_details' => $dashboard_details]);
+	}
 	public static function approveTrip($r) {
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {

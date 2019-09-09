@@ -29,6 +29,9 @@ Route::group(['middleware' => ['api']], function () {
 		//TRIP REJECTION REASON
 		Route::get('trip/rejection/reasons', 'Uitoux\EYatra\Api\TripVerificationController@getRejectionData');
 
+		//DASHBOARD
+		Route::get('eyatra/dashboard', 'Uitoux\EYatra\Api\TripController@getDashboard');
+
 	});
 });
 
