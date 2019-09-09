@@ -298,6 +298,8 @@ class Trip extends Model {
 			$visit->booking_method = new Config(['name' => 'Self']);
 			$trip->visits = [$visit];
 			$trip->trip_type = '';
+			$trip->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', Auth::user()->entity->outlet->address->city_id)->first();
+
 			$data['success'] = true;
 		} else {
 			$data['action'] = 'Edit';
@@ -309,6 +311,9 @@ class Trip extends Model {
 			foreach ($t_visits as $key => $t_visit) {
 				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
 				$trip->visits[$key]->booking_method_name = $b_name->name;
+
+				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
+				$trip->visits[$key]->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', $trip->visits[0]->from_city_id)->first();
 			}
 
 			if (!$trip) {
@@ -341,6 +346,7 @@ class Trip extends Model {
 	}
 
 	public static function getEmployeeList($request) {
+		// dd(Auth::user()->company_id);
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -506,6 +512,16 @@ class Trip extends Model {
 	// 	return response()->json(['success' => true]);
 	// }
 
+	public static function getDashboardData() {
+		$total_trips = Trip::where('employee_id', Auth::user()->entity_id)
+			->count();
+
+		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3028)->where('end_date', '<', date('Y-m-d'))->count();
+
+		$dashboard_details['total_trips'] = $total_trips;
+		$dashboard_details['total_claims_pending'] = $total_claims_pending;
+		return response()->json(['success' => true, 'dashboard_details' => $dashboard_details]);
+	}
 	public static function approveTrip($r) {
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {

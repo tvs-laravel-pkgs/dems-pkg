@@ -17,8 +17,7 @@ use Yajra\Datatables\Datatables;
 
 class OutletReimpursementController extends Controller {
 	public function listOutletReimpursement(Request $r) {
-		$outlets = Outlet::withTrashed()->join('employees', 'employees.id', 'outlets.cashier_id')
-			->join('users', 'employees.id', 'users.entity_id')
+		$outlets = Outlet::withTrashed()
 			->select(
 				'outlets.id as outlet_id',
 				'outlets.code as outlet_code',
@@ -27,6 +26,12 @@ class OutletReimpursementController extends Controller {
 				'users.name as cashier_name',
 				'employees.code as cashier_code'
 			)
+			->join('employees', 'employees.id', 'outlets.cashier_id')
+			->leftjoin('users', function ($join) {
+				$join->on('users.entity_id', '=', 'employees.id')
+				->where('users.user_type_id',3121);
+			})
+			->where('outlets.company_id',Auth::user()->company_id)
 			->orderBy('outlets.name', 'asc');
 
 		return Datatables::of($outlets)
@@ -188,7 +193,9 @@ class OutletReimpursementController extends Controller {
 			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
 			'amount',
 			'balance_amount',
-			'configs.name as description'
+			'configs.name as description',
+			'transcation_id',
+			DB::raw('IF(petty_cash_id IS NULL,"NULL",petty_cash_id) as petty_cash_id')
 		)
 			->join('configs', 'configs.id', 'reimbursement_transcations.transcation_id')
 			->where('outlet_id', $outlet_id)
@@ -198,6 +205,7 @@ class OutletReimpursementController extends Controller {
 			'outlets.name as outlet_name',
 			'outlets.code as outlet_code',
 			'users.name as cashier_name',
+			'employees.code as cashier_code',
 			'outlets.reimbursement_amount as reimbursement_amount'
 		)
 			->join('employees', 'employees.id', 'outlets.cashier_id')
@@ -208,6 +216,8 @@ class OutletReimpursementController extends Controller {
 		// dd($reimpurseimpurse_outlet_data);
 		$this->data['reimpurseimpurse_transactions'] = $reimpurseimpurse_transactions;
 		$this->data['reimpurseimpurse_outlet_data'] = $reimpurseimpurse_outlet_data;
+		$this->data['reimbursement_amount'] = '₹ '.IND_money_format($reimpurseimpurse_outlet_data->reimbursement_amount);
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

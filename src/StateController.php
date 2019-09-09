@@ -22,7 +22,7 @@ class StateController extends Controller {
 		$option->id = null;
 		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
 
-		dd($country_list);
+		// dd($country_list);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),
@@ -125,7 +125,13 @@ class StateController extends Controller {
 		$option->name = 'Select Country';
 		$option->id = null;
 		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
-		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
+		$this->data['travel_mode_list'] = $travel_modes = Entity::select('entities.name', 'entities.id')
+			->join('travel_mode_category_type as tm', 'tm.travel_mode_id', '=', 'entities.id')
+			->leftjoin('configs as c', 'c.id', '=', 'tm.category_id')
+			->where('entities.entity_type_id', 502)
+			->where('c.config_type_id', 525)
+			->where('entities.company_id', Auth::user()->company_id)->get();
+		// dd($travel_modes);
 		$option = new Agent;
 		$option->name = 'Select Agent';
 		$option->id = null;
@@ -216,6 +222,7 @@ class StateController extends Controller {
 						continue;
 					}
 					$state->travelModes()->attach($travel_mode, $pivot_data);
+					//  dd($state->travelModes()->attach($travel_mode, $pivot_data));
 				}
 			}
 

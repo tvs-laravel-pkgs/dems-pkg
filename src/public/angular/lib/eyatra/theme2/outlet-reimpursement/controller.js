@@ -31,7 +31,7 @@ app.component('eyatraOutletReimbursement', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'outlet_name', name: 'outlets.name', searchable: true },
                 { data: 'outlet_code', name: 'outlets.code', searchable: true },
-                { data: 'cashier_name', name: 'employees.name', searchable: true },
+                { data: 'cashier_name', name: 'users.name', searchable: true },
                 { data: 'cashier_code', name: 'employees.code', searchable: true },
                 { data: 'amount', searchable: false },
             ],
@@ -101,6 +101,14 @@ app.component('eyatraOutletReimbursement', {
             //alert(transaction_date);
             var v = jQuery(cash_form_id).validate({
                 ignore: '',
+                errorPlacement: function(error, element) {
+                    if (element.attr('name') == 'transaction_date') {
+                        error.appendTo($('.transaction_date_error'));
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+
                 rules: {
                     'transaction_date': {
                         required: true,
@@ -109,6 +117,15 @@ app.component('eyatraOutletReimbursement', {
                         required: true,
                     },
                 },
+                messages: {
+
+                    'transaction_date': {
+                        required: 'Date is required',
+                    },
+                    'topup_amount': {
+                        required: 'Amount is required',
+                    },
+                }
             });
             if ($("#cash_topup").valid()) {
                 $http.post(
@@ -280,6 +297,7 @@ app.component('eyatraOutletReimbursementView', {
         ).then(function(response) {
             console.log(response.data);
             self.reimpurseimpurse_outlet_data = response.data.reimpurseimpurse_outlet_data;
+            self.reimbursement_amount = response.data.reimbursement_amount;
             self.reimpurseimpurse_transactions = response.data.reimpurseimpurse_transactions;
         });
     }

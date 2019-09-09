@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Trip;
 
 class TripVerificationController extends Controller {
@@ -14,5 +15,10 @@ class TripVerificationController extends Controller {
 
 	public function rejectTrip($trip_id, Request $r) {
 		return Trip::rejectTrip($r);
+	}
+
+	public function getRejectionData() {
+		$reasons = Entity::trip_request_rejection();
+		return response()->json(['success' => true, 'reasons' => $reasons]);
 	}
 }

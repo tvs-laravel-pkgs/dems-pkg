@@ -19,21 +19,22 @@ class NState extends Model {
 	}
 
 	public static function getList($country_id = NULL) {
+		// dd($country_id);
 		$data = [];
 		$option = new NState;
 		$option->name = 'Select State';
-		$option->id = -1;
-		if (!$country_id) {
-			$state_list = NState::select('id', 'name')->get();
-			$data = $state_list->prepend($option);
-			return $data;
-			// return NState::select('id', 'name')->get();
-		} else {
-			$state_list = NState::select('id', 'name')->where('country_id', $country_id)->get();
-			$data = $state_list->prepend($option);
-			return $data;
-			// return NState::select('id', 'name')->where('country_id', $country_id)->get();
-		}
+		$option->id = null;
+		// if (!$country_id) {
+		// $state_list = NState::select('id', 'name')->get();
+		// $data = $state_list->prepend($option);
+		// return $data;
+		// 	// return NState::select('id', 'name')->get();
+		// } else {
+		$state_list = NState::select('id', 'name')->where('country_id', $country_id)->get();
+		$data = $state_list->prepend($option);
+		return $data;
+		// return NState::select('id', 'name')->where('country_id', $country_id)->get();
+		// }
 	}
 
 	public function cities() {

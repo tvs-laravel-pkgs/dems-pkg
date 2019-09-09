@@ -461,7 +461,7 @@ app.config(['$routeProvider', function($routeProvider) {
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
         template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
-        title: 'Regions',
+        title: 'Reimbursements',
     }).
     when('/eyatra/outlet-reimbursement/add', {
         template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
@@ -469,11 +469,11 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/outlet-reimbursement/edit/:outlet_id', {
         template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
-        title: 'Edit Region',
+        title: 'Edit Reimbursement',
     }).
     when('/eyatra/outlet-reimbursement/view/:outlet_id', {
         template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
-        title: 'View Region',
+        title: 'View Reimbursement',
     }).
 
     //FINANCIER - AGENT CLAIM

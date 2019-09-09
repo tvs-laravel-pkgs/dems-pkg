@@ -54,6 +54,7 @@ app.component('eyatraStates', {
         $http.get(
             state_filter_url
         ).then(function(response) {
+          
             self.country_list = response.data.country_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -323,7 +324,10 @@ app.component('eyatraStateForm', {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                            speed: 500 // unavailable - no need
+                        },
                 }).show();
             },
             ignore: '',
