@@ -298,6 +298,8 @@ class Trip extends Model {
 			$visit->booking_method = new Config(['name' => 'Self']);
 			$trip->visits = [$visit];
 			$trip->trip_type = '';
+			$trip->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', Auth::user()->entity->outlet->address->city_id)->first();
+
 			$data['success'] = true;
 		} else {
 			$data['action'] = 'Edit';
@@ -311,6 +313,7 @@ class Trip extends Model {
 				$trip->visits[$key]->booking_method_name = $b_name->name;
 
 				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
+				$trip->visits[$key]->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', $trip->visits[0]->from_city_id)->first();
 			}
 
 			if (!$trip) {
