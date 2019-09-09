@@ -188,7 +188,9 @@ class OutletReimpursementController extends Controller {
 			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
 			'amount',
 			'balance_amount',
-			'configs.name as description'
+			'configs.name as description',
+			'transcation_id',
+			DB::raw('IF(petty_cash_id IS NULL,"NULL",petty_cash_id) as petty_cash_id')
 		)
 			->join('configs', 'configs.id', 'reimbursement_transcations.transcation_id')
 			->where('outlet_id', $outlet_id)

@@ -101,6 +101,14 @@ app.component('eyatraOutletReimbursement', {
             //alert(transaction_date);
             var v = jQuery(cash_form_id).validate({
                 ignore: '',
+                errorPlacement: function(error, element) {
+                    if (element.attr('name') == 'transaction_date') {
+                        error.appendTo($('.transaction_date_error'));
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+
                 rules: {
                     'transaction_date': {
                         required: true,
@@ -109,6 +117,15 @@ app.component('eyatraOutletReimbursement', {
                         required: true,
                     },
                 },
+                messages: {
+
+                    'transaction_date': {
+                        required: 'Date is required',
+                    },
+                    'topup_amount': {
+                        required: 'Amount is required',
+                    },
+                }
             });
             if ($("#cash_topup").valid()) {
                 $http.post(
