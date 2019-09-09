@@ -410,16 +410,24 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
     //PETTY CASH VIEW AND LIST FOR MANAGER
-    when('/eyatra/petty-cash/verification1/:type_id', {
+    when('/eyatra/petty-cash/verification1/', {
         template: '<eyatra-petty-cash-manager-list></eyatra-petty-cash-manager-list>',
         title: 'Petty Cash Manager Verification',
+    }).
+    when('/eyatra/petty-cash/verification1/add/:type_id', {
+        template: '<eyatra-petty-cash-manager-form></eyatra-petty-cash-manager-form>',
+        title: 'Add Petty Cash',
+    }).
+    when('/eyatra/petty-cash/verification1/edit/:type_id/:pettycash_id', {
+        template: '<eyatra-petty-cash-manager-form></eyatra-petty-cash-manager-form>',
+        title: 'Edit Petty Cash',
     }).
     when('/eyatra/petty-cash/verification1/view/:type_id/:pettycash_id', {
         template: '<eyatra-petty-cash-manager-view></eyatra-petty-cash-manager-view>',
         title: 'View Petty Cash Manager Verification',
     }).
     //PETTY CASH VIEW AND LIST FOR FINANCE
-    when('/eyatra/petty-cash/verification2/:type_id', {
+    when('/eyatra/petty-cash/verification2/', {
         template: '<eyatra-petty-cash-finance-list></eyatra-petty-cash-finance-list>',
         title: 'Petty Cash Finance Verification',
     }).
