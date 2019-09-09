@@ -309,6 +309,7 @@ class Trip extends Model {
 			foreach ($t_visits as $key => $t_visit) {
 				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
 				$trip->visits[$key]->booking_method_name = $b_name->name;
+				$trip->visits[$key]->to_city_details = DB::table('ncities')->find($trip->visits[$key]->to_city_id);
 			}
 
 			if (!$trip) {

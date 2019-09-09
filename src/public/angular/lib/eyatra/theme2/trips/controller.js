@@ -237,8 +237,13 @@ app.component('eyatraTripForm', {
                 return [];
             }
         }
-        self.changeTo = function(i, id) {
+        $scope.cityChanging = function(i, id) {
             alert(id);
+            index = i + 1;
+            if (index < self.trip.visits.length) {
+
+                self.trip.visits[index].from_city_id = id;
+            }
 
         }
         $scope.addVisit = function(visit_array) {
@@ -259,13 +264,13 @@ add_block = add_block.replace(/XXX/g, arr_ind);*/
             var arr_length = trip_array.length;
             arr_vol = arr_length - 1;
             console.log(arr_length, arr_vol);
+            console.log(trip_array[arr_vol]);
             self.trip.visits.push({
                 from_city_id: trip_array[arr_vol].to_city_id,
                 to_city_id: trip_array[arr_vol].from_city_id,
                 booking_method_name: 'Self',
                 preferred_travel_modes: '',
             });
-            console.log(trip_array[arr_vol]);
 
             /*add_block = $('.or_block').html();
 add_block = add_block.replace(/XXX/g, arr_ind);
