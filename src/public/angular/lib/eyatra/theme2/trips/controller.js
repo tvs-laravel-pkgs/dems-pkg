@@ -155,6 +155,8 @@ app.component('eyatraTripForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
+            console.log(response.data);
+
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -171,7 +173,6 @@ app.component('eyatraTripForm', {
                 //$scope.$apply()
                 return;
             }
-            console.log(response.data);
             self.advance_eligibility = response.data.advance_eligibility;
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
@@ -181,24 +182,26 @@ app.component('eyatraTripForm', {
             self.extras = response.data.extras;
             self.action = response.data.action;
             if (self.action == 'New') {
-                self.booking_method = "self";
+                self.trip.trip_type = 'single';
+                self.booking_method_name = 'self';
                 self.trip.visits = [];
                 arr_ind = 1;
-
-                /*self.trip.visits[0].booking_method = 'Self';
-self.trip.visits.push({
-    booking_method: 'Self'
-});*/
-                $scope.single_trip = true;
+                console.log(response.data.extras.employee_city.id);
+                /*self.trip.visits[0].booking_method = 'Self';*/
+                self.trip.visits.push({
+                    from_city_id: response.data.extras.employee_city.id,
+                    to_city_id: '',
+                    booking_method_name: 'Self',
+                    preferred_travel_modes: '',
+                });
+                //$scope.single_trip = true;
                 self.checked = true;
                 $scope.round_trip = false;
                 $scope.multi_trip = false;
                 //self.visits = [];
 
-            } else {
-                visit = self.trip.visits;
-                arr_ind = visit.length;
             }
+
 
             $rootScope.loading = false;
             $scope.showBank = false;
@@ -207,7 +210,6 @@ self.trip.visits.push({
 
 
         });
-
 
 
         $("#advance").hide().prop('disabled', true);
@@ -235,29 +237,36 @@ self.trip.visits.push({
                 return [];
             }
         }
+        self.changeTo = function(i, id) {
+            alert(id);
 
-        $scope.addVisit = function() {
+        }
+        $scope.addVisit = function(visit_array) {
             // alert(arr_ind);
             /*self.trip.visits.push({
     visit_date: '',
     booking_method: 'Self',
     preferred_travel_modes: '',
 });*/
-            add_block = $('.or_block').html();
-            add_block = add_block.replace(/XXX/g, arr_ind);
+            /*add_block = $('.or_block').html();
+add_block = add_block.replace(/XXX/g, arr_ind);*/
             // alert(add_block);
-            console.log(self.trip.visits);
+            // console.log(self.trip.visits);
+
             var trip_array = self.trip.visits;
+            console.log('ss');
             console.log(trip_array)
             var arr_length = trip_array.length;
             arr_vol = arr_length - 1;
-            // alert(trip_array[arr_vol]);
+            console.log(arr_length, arr_vol);
             self.trip.visits.push({
-                start_city: trip_array[arr_vol].start_city,
-                booking_method: 'Self',
+                from_city_id: trip_array[arr_vol].to_city_id,
+                to_city_id: trip_array[arr_vol].from_city_id,
+                booking_method_name: 'Self',
                 preferred_travel_modes: '',
-                to_main_city: '',
             });
+            console.log(trip_array[arr_vol]);
+
             /*add_block = $('.or_block').html();
 add_block = add_block.replace(/XXX/g, arr_ind);
 alert(add_block);
@@ -275,27 +284,37 @@ $('.extra_block').append(add_block);*/
         // });
 
         $scope.trip_mode = function(id) {
+            var trip_array = self.trip.visits;
+
             if (id == 1) {
-                $scope.single_trip = true;
-                $scope.round_trip = false;
-                $scope.multi_trip = false;
-            } else if (id == 2) {
-
-                $scope.single_trip = false;
-                $scope.round_trip = true;
-                $scope.multi_trip = false;
-            } else if (id == 3) {
-                if (self.action == 'New') {
-
-                    self.trip_multi.visits.push({
-                        start_city: self.extras.employee_city.id,
-                        to_main_city: '',
-                        date: '',
-                        booking_method: 'Self',
-                        preferred_travel_modes: '',
-                        to_main_city: '',
-                    });
+                if (!(self.action == 'New')) {
+                    var arr_length = self.trip.visits.length;
+                    while (arr_length > 1) {
+                        index = arr_length - 1;
+                        self.trip.visits.splice(index, 1);
+                        arr_length = self.trip.visits.length;
+                    }
                 }
+            } else if (id == 2) {
+                var arr_length = self.trip.visits.length;
+                if (arr_length < 2) {
+                    console.log(self.extras.employee_city.id);
+                    self.trip.visits.push({
+                        from_city_id: '',
+                        to_city_id: self.extras.employee_city.id,
+                        booking_method_name: 'Self',
+                        preferred_travel_modes: '',
+                    });
+                } else {
+
+                    while (arr_length > 2) {
+                        index = arr_length - 1;
+                        self.trip.visits.splice(index, 1);
+                        arr_length = self.trip.visits.length;
+                    }
+                }
+            } else if (id == 3) {
+
                 $scope.round_trip = false;
                 $scope.single_trip = false;
                 $scope.multi_trip = true;
@@ -307,7 +326,7 @@ $('.extra_block').append(add_block);*/
         self.removeLodging = function(index, lodging_id) {
             // alert('remove');
             // alert(index);
-            // alert(lodging_id);
+            alert(lodging_id);
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
