@@ -13,7 +13,7 @@ class TripVerificationController extends Controller {
 		return Trip::approveTrip($r);
 	}
 
-	public function rejectTrip($trip_id, Request $r) {
+	public function rejectTrip(Request $r) {
 		return Trip::rejectTrip($r);
 	}
 

@@ -95,7 +95,7 @@ app.component('eyatraStates', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
@@ -109,7 +109,7 @@ app.component('eyatraStates', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
             });
         }
@@ -143,7 +143,7 @@ app.component('eyatraStateForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/states')
                 $scope.$apply()
                 return;
@@ -405,7 +405,7 @@ app.component('eyatraStateForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/states')
                             $scope.$apply()
                         }

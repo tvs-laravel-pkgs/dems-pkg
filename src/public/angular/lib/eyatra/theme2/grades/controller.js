@@ -107,7 +107,7 @@ app.component('eyatraGrades', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 } else {
                     $noty = new Noty({
                         type: 'error',
@@ -119,7 +119,7 @@ app.component('eyatraGrades', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
                 $('#delete_grade').modal('hide');
                 dataTable.ajax.reload(function(json) {});
@@ -155,7 +155,7 @@ app.component('eyatraGradeForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/grades')
                 // $scope.$apply()
                 return;
@@ -269,7 +269,7 @@ app.component('eyatraGradeForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
             },
             ignore: '',
             rules: {
@@ -316,7 +316,7 @@ app.component('eyatraGradeForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/grades')
                             $scope.$apply()
                         }
