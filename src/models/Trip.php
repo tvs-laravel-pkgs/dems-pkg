@@ -309,7 +309,8 @@ class Trip extends Model {
 			foreach ($t_visits as $key => $t_visit) {
 				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
 				$trip->visits[$key]->booking_method_name = $b_name->name;
-				$trip->visits[$key]->to_city_details = DB::table('ncities')->find($trip->visits[$key]->to_city_id);
+
+				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
 			}
 
 			if (!$trip) {
