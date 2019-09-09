@@ -52,12 +52,12 @@ app.component('eyatraPettyCashList', {
             });
             $('.dataTables_length select').select2();
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher list</p><h3 class="title">Expense Voucher</h3>');
-
-            $('.add_new_button').html(
-                '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-                'Add New' +
-                '</a>'
-            );
+            if ($location.url() == '/eyatra/petty-cash')
+                $('.add_new_button').html(
+                    '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+                    'Add New' +
+                    '</a>'
+                );
         });
 
         $scope.deletePettycash = function(id) {
@@ -389,7 +389,7 @@ app.component('eyatraPettyCashView', {
         $http.get(
             petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.petty_cash = response.data.petty_cash;
             self.type_id = $routeParams.type_id;
             self.petty_cash_other = response.data.petty_cash_other;
