@@ -190,6 +190,8 @@ app.component('eyatraTripForm', {
                     to_city_id: '',
                     booking_method_name: 'Self',
                     preferred_travel_modes: '',
+                    from_city_details: self.trip.from_city_details,
+
                 });
                 self.checked = true;
                 $scope.round_trip = false;
@@ -255,29 +257,29 @@ app.component('eyatraTripForm', {
                 to_city_id: trip_array[arr_vol].from_city_id,
                 booking_method_name: 'Self',
                 preferred_travel_modes: '',
+                from_city_details: self.trip.from_city_details,
             });
         }
         $scope.trip_mode = function(id) {
             var trip_array = self.trip.visits;
 
             if (id == 1) {
-                if (!(self.action == 'New')) {
-                    var arr_length = self.trip.visits.length;
-                    while (arr_length > 1) {
-                        index = arr_length - 1;
-                        self.trip.visits.splice(index, 1);
-                        arr_length = self.trip.visits.length;
-                    }
+                var arr_length = self.trip.visits.length;
+                while (arr_length > 1) {
+                    index = arr_length - 1;
+                    self.trip.visits.splice(index, 1);
+                    arr_length = self.trip.visits.length;
                 }
             } else if (id == 2) {
                 var arr_length = self.trip.visits.length;
                 if (arr_length < 2) {
-                    console.log(self.extras.employee_city.id);
+                    console.log(self.trip.visits[0].from_city_details);
                     self.trip.visits.push({
-                        from_city_id: '',
-                        to_city_id: self.extras.employee_city.id,
+                        from_city_id: self.trip.visits[0].to_city_id,
+                        to_city_id: self.trip.visits[0].from_city_details,
                         booking_method_name: 'Self',
                         preferred_travel_modes: '',
+                        to_city_details: self.trip.visits[0].from_city_details,
                     });
                 } else {
 
@@ -287,6 +289,7 @@ app.component('eyatraTripForm', {
                         arr_length = self.trip.visits.length;
                     }
                 }
+                self.trip.visits[1].to_city_details = self.trip.visits[0].from_city_details;
             } else if (id == 3) {
 
                 $scope.round_trip = false;
