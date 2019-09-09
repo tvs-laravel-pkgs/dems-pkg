@@ -17,7 +17,7 @@ Route::group(['middleware' => ['api']], function () {
 
 		//TRIP VERIFICATION
 		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
-		Route::post('trip/verification/reject/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
+		Route::post('trip/verification/reject', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
 
 		//TRIP CLAIM
 		Route::get('trip/cliam/list', 'Uitoux\EYatra\Api\TripVerificationController@listClaimList');
