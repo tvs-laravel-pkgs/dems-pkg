@@ -22,7 +22,7 @@ class StateController extends Controller {
 		$option->id = null;
 		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
 
-		dd($country_list);
+		// dd($country_list);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),

@@ -54,7 +54,8 @@ app.component('eyatraCity', {
         }, 500);
 
         $scope.loadState = function(country_id) {
-            $.ajax({
+            if(country_id != null){
+                $.ajax({
                     url: get_state_by_country,
                     method: "POST",
                     data: { country_id: country_id },
@@ -70,14 +71,18 @@ app.component('eyatraCity', {
                 })
                 .fail(function(xhr) {
                     console.log(xhr);
-                });
+                }); 
+            }else{  
+                 self.state_list = [];
+            }
+           
         }
         $http.get(
             city_filter_data_url
         ).then(function(response) {
             console.log(response.data);
             self.country_list = response.data.country_list;
-            self.state_list = response.data.state_list;
+            // self.state_list = response.data.state_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
         });
@@ -215,6 +220,9 @@ app.component('eyatraCityForm', {
         });
 
         $scope.loadState = function(country_id) {
+
+            if(country_id != null)
+            {
             $.ajax({
                     url: get_state_by_country,
                     method: "POST",
@@ -232,6 +240,10 @@ app.component('eyatraCityForm', {
                 .fail(function(xhr) {
                     console.log(xhr);
                 });
+            }else{
+               
+                self.extras.state_list = [];
+            }
         }
 
         $('.btn-nxt').on("click", function() {
@@ -298,7 +310,7 @@ app.component('eyatraCityForm', {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs',
+                    text: 'You have errors,Please check',
                     animation: {
                         speed: 500 // unavailable - no need
                     },
