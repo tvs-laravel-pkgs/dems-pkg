@@ -129,13 +129,15 @@ class PettyCashController extends Controller {
 		$emp_details = Employee::select(
 			'users.name as name',
 			'employees.code as code',
+			'employees.id as emp_id',
 			'designations.name as designation',
 			'entities.name as grade',
 			'users.mobile_number',
 			'outlets.name as outlet_name',
 			'sbus.name as sbus_name',
 			'lobs.name as lobs_name',
-			'emp_manager.name as emp_manager', 'petty_cash.employee_id')
+			'emp_manager.name as emp_manager',
+			'petty_cash.employee_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('entities', 'entities.id', 'employees.grade_id')
 			->leftjoin('users', function ($join) {
@@ -150,7 +152,7 @@ class PettyCashController extends Controller {
 			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 			->leftjoin('lobs', 'lobs.id', 'sbus.lob_id')
 			->leftjoin('petty_cash', 'petty_cash.employee_id', 'employees.id')
-			->where('petty_cash.id', $pettycash_id)
+			->where('employees.id', Auth::user()->entity_id)
 			->where('users.company_id', Auth::user()->company_id)
 			->first();
 		$this->data['user_role'] = $user_role;
@@ -278,11 +280,12 @@ class PettyCashController extends Controller {
 			DB::beginTransaction();
 
 			$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
-			if ($request->employee_id) {
-				$petty_cash_employee_edit->employee_id = $request->employee_id;
-			} else {
-				$petty_cash_employee_edit->employee_id = Auth::user()->entity_id;
-			}
+			// if ($request->employee_id) {
+
+			// } else {
+			// 	$petty_cash_employee_edit->employee_id = Auth::user()->entity_id;
+			// }
+			$petty_cash_employee_edit->employee_id = $request->employee_id;
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
 			$petty_cash_employee_edit->status_id = 3280;
 			$petty_cash_employee_edit->petty_cash_type_id = $request->petty_cash_type_id;
