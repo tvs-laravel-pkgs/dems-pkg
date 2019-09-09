@@ -70,7 +70,7 @@ app.component('eyatraDesignation', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
@@ -84,7 +84,7 @@ app.component('eyatraDesignation', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
             });
         }
@@ -117,7 +117,7 @@ app.component('eyatraDesignationForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/designations')
                 $scope.$apply()
                 return;
@@ -188,7 +188,7 @@ app.component('eyatraDesignationForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/designations')
                             $scope.$apply()
                         }

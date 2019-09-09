@@ -25,8 +25,20 @@ class AuthController extends Controller {
 		}
 
 		if (Auth::attempt(['mobile_number' => request('username'), 'password' => request('password')])) {
-			$user = Auth::user();
 
+			// dd(Auth::user()->id);
+
+			$user = User::with([
+				'employee_details',
+				'employee_details.grade',
+				'employee_details.designation',
+			])
+				->find(Auth::user()->id);
+			// $user = Auth::user();
+
+			// $user->employee_details;
+
+			// dd($user);
 			// if (!$user->imei) {
 			// 	$user->otp = generateOtp($user->mobile);
 			// 	$user->imei = request('imei');

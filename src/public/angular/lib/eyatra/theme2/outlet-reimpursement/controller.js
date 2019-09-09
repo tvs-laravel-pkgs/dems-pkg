@@ -31,7 +31,7 @@ app.component('eyatraOutletReimbursement', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'outlet_name', name: 'outlets.name', searchable: true },
                 { data: 'outlet_code', name: 'outlets.code', searchable: true },
-                { data: 'cashier_name', name: 'employees.name', searchable: true },
+                { data: 'cashier_name', name: 'users.name', searchable: true },
                 { data: 'cashier_code', name: 'employees.code', searchable: true },
                 { data: 'amount', searchable: false },
             ],
@@ -297,6 +297,7 @@ app.component('eyatraOutletReimbursementView', {
         ).then(function(response) {
             console.log(response.data);
             self.reimpurseimpurse_outlet_data = response.data.reimpurseimpurse_outlet_data;
+            self.reimbursement_amount = response.data.reimbursement_amount;
             self.reimpurseimpurse_transactions = response.data.reimpurseimpurse_transactions;
         });
     }

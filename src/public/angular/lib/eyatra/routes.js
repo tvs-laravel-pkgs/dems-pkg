@@ -410,16 +410,24 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
     //PETTY CASH VIEW AND LIST FOR MANAGER
-    when('/eyatra/petty-cash/verification1/:type_id', {
+    when('/eyatra/petty-cash/verification1/', {
         template: '<eyatra-petty-cash-manager-list></eyatra-petty-cash-manager-list>',
         title: 'Petty Cash Manager Verification',
+    }).
+    when('/eyatra/petty-cash/verification1/add/:type_id', {
+        template: '<eyatra-petty-cash-manager-form></eyatra-petty-cash-manager-form>',
+        title: 'Add Petty Cash',
+    }).
+    when('/eyatra/petty-cash/verification1/edit/:type_id/:pettycash_id', {
+        template: '<eyatra-petty-cash-manager-form></eyatra-petty-cash-manager-form>',
+        title: 'Edit Petty Cash',
     }).
     when('/eyatra/petty-cash/verification1/view/:type_id/:pettycash_id', {
         template: '<eyatra-petty-cash-manager-view></eyatra-petty-cash-manager-view>',
         title: 'View Petty Cash Manager Verification',
     }).
     //PETTY CASH VIEW AND LIST FOR FINANCE
-    when('/eyatra/petty-cash/verification2/:type_id', {
+    when('/eyatra/petty-cash/verification2/', {
         template: '<eyatra-petty-cash-finance-list></eyatra-petty-cash-finance-list>',
         title: 'Petty Cash Finance Verification',
     }).
@@ -453,7 +461,7 @@ app.config(['$routeProvider', function($routeProvider) {
     //OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
         template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
-        title: 'Regions',
+        title: 'Reimbursements',
     }).
     when('/eyatra/outlet-reimbursement/add', {
         template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
@@ -461,11 +469,11 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/outlet-reimbursement/edit/:outlet_id', {
         template: '<eyatra-outlet-reimbursement-form></eyatra-outlet-reimbursement-form>',
-        title: 'Edit Region',
+        title: 'Edit Reimbursement',
     }).
     when('/eyatra/outlet-reimbursement/view/:outlet_id', {
         template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
-        title: 'View Region',
+        title: 'View Reimbursement',
     }).
 
     //FINANCIER - AGENT CLAIM

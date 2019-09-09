@@ -106,7 +106,7 @@ app.component('eyatraAgents', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     $('#agent_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agents');
                     // $scope.$apply();
@@ -121,7 +121,7 @@ app.component('eyatraAgents', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
             });
         }
@@ -153,7 +153,7 @@ app.component('eyatraAgentForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/agents');
                 $scope.$apply();
                 return;
@@ -518,7 +518,7 @@ app.component('eyatraAgentForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
             },
             submitHandler: function(form) {
 
@@ -551,7 +551,7 @@ app.component('eyatraAgentForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/agents');
                             $scope.$apply();
                         }
