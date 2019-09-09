@@ -121,7 +121,7 @@ app.component('eyatraOutlets', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
@@ -135,7 +135,7 @@ app.component('eyatraOutlets', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
             });
         }
@@ -170,7 +170,7 @@ app.component('eyatraOutletForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/outlets')
                 $scope.$apply()
                 return;
@@ -436,7 +436,7 @@ app.component('eyatraOutletForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
             },
             ignore: '',
             rules: {
@@ -577,7 +577,7 @@ app.component('eyatraOutletForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/outlets')
                             $scope.$apply()
                         }
