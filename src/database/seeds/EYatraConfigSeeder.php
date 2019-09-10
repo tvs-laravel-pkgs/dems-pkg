@@ -457,6 +457,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Other Expenses',
 				'config_type_id' => 519,
 			],
+			3319 => [
+				'name' => 'Visit',
+				'config_type_id' => 519,
+			],
 
 			//ACTIVITIES
 			3320 => [

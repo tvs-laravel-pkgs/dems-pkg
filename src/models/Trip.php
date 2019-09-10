@@ -565,6 +565,26 @@ class Trip extends Model {
 		return response()->json(['success' => true]);
 	}
 
+	public static function deleteVisit($visit_id) {
+		if ($visit_id) {
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			if ($agent_visits_booked) {
+				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
+			}
+			$visit = Visit::where('id', $visit_id)->first();
+			$activity['entity_id'] = $visit_id;
+			$visit = $visit->forceDelete();
+			$activity['entity_type'] = 'visit';
+			$activity['details'] = 'Visit is Deleted';
+			$activity['activity'] = "delete";
+
+			$activity_log = ActivityLog::saveLog($activity);
+			return response()->json(['success' => true]);
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
+		}
+	}
+
 	public static function requestCancelVisitBooking($visit_id) {
 
 		$visit = Visit::where('id', $visit_id)->update(['status_id' => 3221]);
