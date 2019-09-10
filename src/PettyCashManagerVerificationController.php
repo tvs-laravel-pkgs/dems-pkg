@@ -167,6 +167,7 @@ class PettyCashManagerVerificationController extends Controller {
 				->where('petty_cash.id', $pettycash_id)
 				->where('petty_cash_employee_details.expence_type', $localconveyance_id->id)->get();
 			$this->data['employee'] = $employee = Employee::select(
+				'employees.id as employee_id',
 				'users.name as name',
 				'employees.code as code',
 				'designations.name as designation',
@@ -202,6 +203,7 @@ class PettyCashManagerVerificationController extends Controller {
 				->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
 			$this->data['employee'] = $employee = Employee::select(
 				'users.name as name',
+				'employees.id as employee_id',
 				'employees.code as code',
 				'designations.name as designation',
 				'entities.name as grade',
@@ -347,11 +349,25 @@ class PettyCashManagerVerificationController extends Controller {
 	}
 
 	public function pettycashManagerVerificationSave(Request $request) {
-		dd($request->all());
+		// dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
-				$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				$employee_petty_cash_check = Employee::select(
+					'outlets.amount_eligible',
+					'outlets.amount_limit'
+				)
+					->join('outlets', 'outlets.id', 'employees.outlet_id')
+					->where('employees.id', $request->employee_id)->first();
+				if ($employee_petty_cash_check->amount_eligible != 0) {
+					if ($employee_petty_cash_check->amount_limit >= $request->amount) {
+						$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					} else {
+						$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					}
+				} else {
+					$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				}
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
