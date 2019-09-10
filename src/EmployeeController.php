@@ -468,7 +468,7 @@ class EmployeeController extends Controller {
                 	Download Source File
                 </a>
 				<br><br>
-                <a class="btn btn-sm" id="update_employee_import_status" class="restart-import-job update_employee_import_status" data-id="' . $import_data->id . '">
+                <a class="btn btn-sm" id="update_job_import_status" class="restart-import-job update_job_import_status" data-id="' . $import_data->id . '">
                 	Restart
                 </a>
                 ';
