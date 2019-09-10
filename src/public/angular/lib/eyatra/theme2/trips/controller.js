@@ -117,7 +117,7 @@ app.component('eyatraTrips', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 } else {
                     $noty = new Noty({
                         type: 'success',
@@ -129,7 +129,7 @@ app.component('eyatraTrips', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     $('#delete_emp').modal('hide');
                     dataTable.ajax.reload(function(json) {});
                 }
@@ -550,7 +550,7 @@ app.component('eyatraTripView', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 } else {
                     $noty = new Noty({
                         type: 'success',
@@ -562,7 +562,7 @@ app.component('eyatraTripView', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     $location.path('/eyatra/trips')
                     $scope.$apply()
                 }
@@ -628,7 +628,7 @@ app.component('eyatraTripView', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 } else {
                     $('#cancel_trip').modal('hide');
                     $noty = new Noty({
@@ -641,7 +641,7 @@ app.component('eyatraTripView', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     setTimeout(function() {
                         $location.path('/eyatra/trips')
                         $scope.$apply()
