@@ -2,7 +2,7 @@
 
 namespace Uitoux\EYatra;
 
-// use App\Mail\TripNotificationMail;
+//use App\Mail\TripNotificationMail;
 use App\User;
 use Auth;
 use Carbon\Carbon;
@@ -227,7 +227,7 @@ class Trip extends Model {
 				}
 			}
 			if (!$request->id) {
-				// self::sendTripNotificationMail($trip);
+				self::sendTripNotificationMail($trip);
 			}
 			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
@@ -610,65 +610,29 @@ class Trip extends Model {
 		}
 		if (count($trip->localTravels) > 0) {
 			$data['action'] = 'Edit';
-			$travelled_cities_with_dates = array();
-			$lodge_cities = array();
 		} else {
 			$data['action'] = 'Add';
-			//EXPENSE DATAS CITY AND DATE WISE
-			// $lodgings = array();
-			$travelled_cities_with_dates = array();
-			$lodge_cities = array();
-			// $boarding_to_date = '';
-			if (!empty($trip->visits)) {
-				foreach ($trip->visits as $visit_key => $visit) {
-					$city_category_id = NCity::where('id', $visit->to_city_id)->where('company_id', Auth::user()->company_id)->first();
-					$grade_id = $trip->employee ? $trip->employee->grade_id : '';
-					if ($city_category_id) {
-						$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
-						$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
-						$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $grade_id)->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
-					}
-					$loadge_eligible_amount = $lodging_expense_type ? IND_money_format($lodging_expense_type->eligible_amount) : '0.00';
-					$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
-					$local_travel_eligible_amount = $local_travel_expense_type ? IND_money_format($local_travel_expense_type->eligible_amount) : '0.00';
-					$next = $visit_key;
-					$next++;
-					// $lodgings[$visit_key]['city'] = $visit['to_city'];
-					// $lodgings[$visit_key]['checkin_enable'] = $visit['arrival_date'];
+		}
+		$travelled_cities_with_dates = array();
+		$lodge_cities = array();
 
-					//GET LODGE CITIES AND THEIR ELIGIBLE AMOUNT
-					if (isset($trip->visits[$next])) {
-						// $lodgings[$visit_key]['checkout_disable'] = $request->visits[$next]['departure_date'];
-						$next_departure_date = $trip->visits[$next]->departure_date;
-						$next_arrival_date = $trip->visits[$next]->arrival_date;
-						$lodge_cities[$visit_key]['city'] = $visit->toCity ? $visit->toCity->name : '';
-						$lodge_cities[$visit_key]['city_id'] = $visit->to_city_id;
-						$lodge_cities[$visit_key]['loadge_eligible_amount'] = $loadge_eligible_amount;
-					} else {
-						// $lodgings[$visit_key]['checkout_disable'] = $visit['arrival_date'];
-						$next_departure_date = $visit->departure_date;
-						$next_arrival_date = $visit->arrival_date;
-					}
-					//TRAVELLED CITIES WITH DATES NOT USED FOR NOW
-					$range = Trip::getDatesFromRange($visit->departure_date, $next_departure_date);
-					if (!empty($range)) {
-						foreach ($range as $range_key => $range_val) {
-							$travelled_cities_with_dates[$visit_key][$range_key]['city'] = $visit->toCity ? $visit->toCity->name : '';
-							$travelled_cities_with_dates[$visit_key][$range_key]['city_id'] = $visit->to_city_id;
-							$travelled_cities_with_dates[$visit_key][$range_key]['date'] = $range_val;
-							$travelled_cities_with_dates[$visit_key][$range_key]['board_eligible_amount'] = $board_eligible_amount;
-							$travelled_cities_with_dates[$visit_key][$range_key]['local_travel_eligible_amount'] = $local_travel_eligible_amount;
-						}
-					}
-				}
-			} else {
-				$travelled_cities_with_dates = array();
-				$lodge_cities = array();
+		//GET TRAVEL DATE LIST FROM TRIP START AND END DATE
+		$travel_dates_list = array();
+		$date_range = Trip::getDatesFromRange($trip->start_date, $trip->end_date);
+		if (!empty($date_range)) {
+			$travel_dates_list[0]['id'] = '';
+			$travel_dates_list[0]['name'] = 'Select Date';
+			foreach ($date_range as $range_key => $range_val) {
+				$range_key++;
+				$travel_dates_list[$range_key]['id'] = $range_val;
+				$travel_dates_list[$range_key]['name'] = $range_val;
 			}
 		}
 
 		$data['travelled_cities_with_dates'] = $travelled_cities_with_dates;
 		$data['lodge_cities'] = $lodge_cities;
+		$data['travel_dates_list'] = $travel_dates_list;
+
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
 		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
@@ -680,18 +644,21 @@ class Trip extends Model {
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $end_date->end_date;
-		$trip->days = $days->days;
+		// $start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		// $end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		// $days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
+
+		//DAYS CALC BTW START & END DATE
+		$datediff = strtotime($trip->end_date) - strtotime($trip->start_date);
+		$no_of_days = ($datediff / (60 * 60 * 24)) + 1;
+		$trip->days = $no_of_days ? $no_of_days : 0;
+
 		//DONT REVERT - ABDUL
 		$trip->cities = $data['cities'] = count($travel_cities) > 0 ? trim(implode(', ', $travel_cities)) : '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 		// }
 		if (!empty($to_cities)) {
-			$city_list = collect(NCity::select('id', 'name')->where('company_id', Auth::user()->company_id)->whereIn('id', $to_cities)->get()->prepend(['id' => '', 'name' => 'Select City']));
+			$city_list = collect(NCity::select('id', 'name')->where('company_id', Auth::user()->company_id)->whereIn('id', $to_cities)->groupby('id')->get()->prepend(['id' => '', 'name' => 'Select City']));
 		} else {
 			$city_list = [];
 		}

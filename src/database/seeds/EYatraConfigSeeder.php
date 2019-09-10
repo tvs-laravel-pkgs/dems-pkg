@@ -357,7 +357,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 518,
 			],
 			3281 => [
-				'name' => 'Manager Approved',
+				'name' => 'Manager Approved', // PETTY CASH CLAIM GOES TO CASHIER
 				'config_type_id' => 518,
 			],
 			3282 => [
@@ -370,6 +370,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3284 => [
 				'name' => 'Claim Rejected',
+				'config_type_id' => 518,
+			],
+			3285 => [
+				'name' => 'Manager  Approved', // PETTY CASH CLAIM GOES TO FINANCIER
 				'config_type_id' => 518,
 			],
 
@@ -595,6 +599,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3441 => [
 				'name' => 'Other Expense',
+				'config_type_id' => 527,
+			],
+			3442 => [
+				'name' => 'Advance Expense',
 				'config_type_id' => 527,
 			],
 		];

@@ -28,15 +28,18 @@ namespace Uitoux\EYatra;
 		 * @return $this
 		 */
 		public function build() {
-				$this->data['visit_agent'] = $this->arr['visit_agent'];
+				$view = 'mail/trip_booking_preview';
+				$this->data['visits'] = $this->arr['visits'];
+				$this->data['type'] = $this->arr['type'];
+				//dd($this->data['visits']);
 				$this->data['body'] = $this->arr['body'];
 				if (($this->arr['to_email'] != "")) {
 					return $this->to($this->arr['to_email'])
 						->from($this->arr['from_mail'], $this->arr['from_name'])
 						//->cc($this->arr['cc_email'])
 						->subject($this->arr['subject'])
-						->body($this->arr['body'])
-						//->view('work_logs/preview')
+						//->body($this->arr['body'])
+						->view($view)
 						->with($this->data);
 				} 
 			
