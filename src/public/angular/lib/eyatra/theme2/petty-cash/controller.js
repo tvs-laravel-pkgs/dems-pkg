@@ -108,15 +108,9 @@ app.component('eyatraPettyCashList', {
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
-                    if ($routeParams.type_id == 1) {
-                        $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                        $location.path('eyatra/petty-cash/1');
-                        $scope.$apply();
-                    } else {
-                        $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                        $location.path('eyatra/petty-cash/2');
-                        $scope.$apply();
-                    }
+                    $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
+                    $location.path('eyatra/petty-cash/');
+                    $scope.$apply();
                 }
             });
         }
