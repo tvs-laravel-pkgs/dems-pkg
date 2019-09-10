@@ -38,7 +38,7 @@ class PettyCashFinanceVerificationController extends Controller {
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
-			->where('petty_cash.status_id', 3281)
+			->where('petty_cash.status_id', 3285)
 			->where('users.user_type_id', 3121)
 		// ->where('outlets.amount_eligible', 0)
 		// ->where('petty_cash.total', '>=', 'outlets.amount_limit')

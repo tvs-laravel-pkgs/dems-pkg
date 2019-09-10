@@ -355,10 +355,15 @@ app.component('eyatraPettyCashCashierView', {
             self.wallet_mode_list = response.data.wallet_mode_list;
             self.rejection_list = response.data.rejection_list;
             self.employee = response.data.employee;
+            if ($routeParams.type_id == 1) {
+                $('.separate-page-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Localconveyance Expense Voucher Claim</h3>');
+            } else {
+                $('.separate-page-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
+            }
             var d = new Date();
             var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
             $("#cuttent_date").val(val);
-            console.log(val);
+            // console.log(val);
             var local_total = 0;
             $.each(self.petty_cash, function(key, value) {
                 local_total += parseFloat(value.amount);

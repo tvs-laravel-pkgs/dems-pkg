@@ -54,10 +54,22 @@ app.component('eyatraPettyCashList', {
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher list</p><h3 class="title">Expense Voucher</h3>');
             if ($location.url() == '/eyatra/petty-cash')
                 $('.add_new_button').html(
-                    '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-                    'Add New' +
-                    '</a>'
+                    '<button class="btn btn-default separate-btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >Add New</button>' +
+                    '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">' +
+                    '<li>' +
+                    '<a href="#!/eyatra/petty-cash/add/1" type="button" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+                    'LocalConveyance' +
+                    '</a></li>' +
+                    '<li ><a href="#!/eyatra/petty-cash/add/2" type="button" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+                    'Other Expenses' +
+                    '</a>' +
+                    '</li></ul>'
                 );
+            // $('.add_new_button').html(
+            //         '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+            //         'Add New' +
+            //         '</a>'
+            //     );
         });
 
         $scope.deletePettycash = function(id) {

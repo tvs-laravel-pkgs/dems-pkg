@@ -340,12 +340,18 @@ app.component('eyatraPettyCashManagerView', {
         $http.get(
             petty_cash_manager_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.petty_cash = response.data.petty_cash;
             self.type_id = $routeParams.type_id;
             self.petty_cash_other = response.data.petty_cash_other;
             self.rejection_list = response.data.rejection_list;
             self.employee = response.data.employee;
+            if ($routeParams.type_id == 1) {
+                $('.separate-page-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Localconveyance Expense Voucher Claim</h3>');
+            } else {
+                $('.separate-page-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
+            }
+
             var local_total = 0;
             $.each(self.petty_cash, function(key, value) {
                 local_total += parseFloat(value.amount);
@@ -364,6 +370,8 @@ app.component('eyatraPettyCashManagerView', {
                 $(".other_expences").html('₹ ' + other_total.toFixed(2));
                 $(".Total_amount").html('₹ ' + total_amount.toFixed(2));
             }, 500);
+
+
         });
 
         var form_id = '#approve';

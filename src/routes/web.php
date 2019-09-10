@@ -238,6 +238,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/claim/delete/{trip_id}', 'Uitoux\EYatra\TripClaimController@deleteEYatraTripClaim')->name('deleteEYatraTripClaim');
 		Route::get('eyatra/trip/claim/get-eligible-amount', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGrade')->name('getEligibleAmtBasedonCitycategoryGrade');
 		Route::get('eyatra/trip/claim/get-eligible-amount/by-staytype', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGradeStaytype')->name('getEligibleAmtBasedonCitycategoryGradeStaytype');
+		Route::get('eyatra/trip/claim/get-visit-transport-mode-claim-status', 'Uitoux\EYatra\TripClaimController@getVisitTrnasportModeClaimStatus')->name('getVisitTrnasportModeClaimStatus');
 		Route::get('eyatra/trip/claim/get-filter-data', 'Uitoux\EYatra\TripClaimController@eyatraTripClaimFilterData')->name('eyatraTripClaimFilterData');
 
 		//TRIP CLAIM VERIFICATION ONE
