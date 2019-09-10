@@ -414,14 +414,6 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-petty-cash-manager-list></eyatra-petty-cash-manager-list>',
         title: 'Petty Cash Manager Verification',
     }).
-    when('/eyatra/petty-cash/verification1/add/:type_id', {
-        template: '<eyatra-petty-cash-manager-form></eyatra-petty-cash-manager-form>',
-        title: 'Add Petty Cash',
-    }).
-    when('/eyatra/petty-cash/verification1/edit/:type_id/:pettycash_id', {
-        template: '<eyatra-petty-cash-manager-form></eyatra-petty-cash-manager-form>',
-        title: 'Edit Petty Cash',
-    }).
     when('/eyatra/petty-cash/verification1/view/:type_id/:pettycash_id', {
         template: '<eyatra-petty-cash-manager-view></eyatra-petty-cash-manager-view>',
         title: 'View Petty Cash Manager Verification',
@@ -432,14 +424,6 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-petty-cash-cashier-list></eyatra-petty-cash-cashier-list>',
         title: 'Petty Cash Cashier Verification',
     }).
-    when('/eyatra/petty-cash/verification2/add/:type_id', {
-        template: '<eyatra-petty-cash-cashier-form></eyatra-petty-cash-cashier-form>',
-        title: 'Add Petty Cash Cashier Verification',
-    }).
-    when('/eyatra/petty-cash/verification2/edit/:type_id/:pettycash_id', {
-        template: '<eyatra-petty-cash-cashier-form></eyatra-petty-cash-cashier-form>',
-        title: 'Edit Petty Cash Cashier Verification',
-    }).
     when('/eyatra/petty-cash/verification2/view/:type_id/:pettycash_id', {
         template: '<eyatra-petty-cash-cashier-view></eyatra-petty-cash-cashier-view>',
         title: 'View Petty Cash Cashier Verification',
@@ -449,14 +433,6 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/eyatra/petty-cash/verification3/', {
         template: '<eyatra-petty-cash-finance-list></eyatra-petty-cash-finance-list>',
         title: 'Petty Cash Finance Verification',
-    }).
-    when('/eyatra/petty-cash/verification3/add/:type_id', {
-        template: '<eyatra-petty-cash-finance-form></eyatra-petty-cash-finance-form>',
-        title: 'Add Petty Cash Finance Verification',
-    }).
-    when('/eyatra/petty-cash/verification3/edit/:type_id/:pettycash_id', {
-        template: '<eyatra-petty-cash-finance-form></eyatra-petty-cash-finance-form>',
-        title: 'Edit Petty Cash Finance Verification',
     }).
     when('/eyatra/petty-cash/verification3/view/:type_id/:pettycash_id', {
         template: '<eyatra-petty-cash-finance-view></eyatra-petty-cash-finance-view>',
