@@ -110,11 +110,11 @@ app.component('eyatraPettyCashList', {
                     }, 5000);
                     if ($routeParams.type_id == 1) {
                         $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                        $location.path('eyatra/petty-cash/1');
+                        $location.path('eyatra/petty-cash');
                         $scope.$apply();
                     } else {
                         $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                        $location.path('eyatra/petty-cash/2');
+                        $location.path('eyatra/petty-cash');
                         $scope.$apply();
                     }
                 }
