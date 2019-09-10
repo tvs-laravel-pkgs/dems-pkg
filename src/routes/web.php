@@ -14,6 +14,10 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/get-form-data', 'Uitoux\EYatra\Api\TripController@getTripFormData');
 		Route::post('trip/add', 'Uitoux\EYatra\Api\TripController@addTrip');
 		Route::post('trip/view/{trip_id}', 'Uitoux\EYatra\Api\TripController@viewTrip');
+		Route::get('trip/delete/{trip_id}', 'Uitoux\EYatra\Api\TripController@deleteTrip');
+		Route::get('trip/cancel/{trip_id}', 'Uitoux\EYatra\Api\TripController@cancelTrip');
+		Route::get('trip/visit/request-booking-cancel/{visit_id}', 'Uitoux\EYatra\Api\TripController@requestCancelVisitBooking');
+		Route::get('trip/visit/booking-cancel/{visit_id}', 'Uitoux\EYatra\Api\TripController@cancelTripVisitBooking');
 
 		//TRIP VERIFICATION
 		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
