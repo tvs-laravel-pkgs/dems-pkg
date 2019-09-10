@@ -652,6 +652,49 @@ app.component('eyatraTripView', {
             });
         }
 
+        //DELETE VISIT BOOKING
+        $scope.deleteVisitBookingPopup = function(visit_id) {
+            $('#delete_booking_visit_id').val(visit_id);
+        }
+
+        $scope.deleteBooking = function() {
+            var delete_booking_visit_id = $('#delete_booking_visit_id').val();
+            if (delete_booking_visit_id) {
+                $.ajax({
+                        url: trip_visit_delete_booking_url + '/' + delete_booking_visit_id,
+                        method: "GET",
+                    })
+                    .done(function(res) {
+                        console.log(res);
+                        if (!res.success) {
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            $noty = new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Visit Deleted successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
+                            }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $('#request_cancel_trip').modal('hide');
+                            $route.reload();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
+
+
     }
 });
 

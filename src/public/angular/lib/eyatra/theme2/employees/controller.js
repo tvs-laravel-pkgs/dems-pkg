@@ -569,8 +569,8 @@ app.component('eyatraEmployeeView', {
 });
 
 //Employees import 
-app.component('eyatraEmployeesImportList', {
-    templateUrl: import_employees_list_template_url,
+app.component('eyatraJobsImportList', {
+    templateUrl: import_jobs_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -593,7 +593,7 @@ app.component('eyatraEmployeesImportList', {
             paging: true,
             ordering: false,
             ajax: {
-                url: get_import_employees_list_url,
+                url: get_import_jobs_list_url,
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
@@ -623,7 +623,7 @@ app.component('eyatraEmployeesImportList', {
         $('.dataTables_length select').select2();
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_employee_import_table');
+            var d = document.getElementById('eyatra_employee_import_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
@@ -639,17 +639,15 @@ app.component('eyatraEmployeesImportList', {
             $('.to').val(null);
             dataTableFilter.fnFilter();
         }
-        $scope.resetForm();
+        $scope.resetForm();        
         setInterval(function() {
-            dataTableFilter.DataTable().ajax.reload();
-
-        }, 5000);
-
-        $(document).on('click', '#update_employee_import_status', function(e) {
+            dataTableFilter.fnDraw();
+        }, 6000);
+        $(document).on('click', '#update_job_import_status', function(e) {
             var id = $(this).attr('data-id');
             var data = 'id=' + id;
             $http.post(
-                update_import_employee_url, { id: id }
+                update_import_jobs_url, { id: id }
             ).then(function(response) {
                 dataTable.fnDraw();
             });
@@ -660,21 +658,17 @@ app.component('eyatraEmployeesImportList', {
     }
 });
 
-app.component('importEmployees', {
-    templateUrl: import_employee_template_url,
+app.component('importJobs', {
+    templateUrl: import_jobs_template_url,
     controller: function($http, $location, HelperService, $scope, $routeParams, $rootScope) {
         var self = this;
-        /*$http.get(
-            get_import_form_data_url
+        $http.get(
+            get_import_jobs_form_data_url
         ).then(function(response) {
-            // $('.page-header-content .title').html('Import Status');
-            self.business = response.data.business_list;
-            console.log(response.data.import_type_list);
-            self.import_type = response.data.import_type_list;
-            self.business_id_selected = '';
-            self.import_type_selected = '';
-            console.log(response.data.business_list);
-        });*/
+            
+            self.import_type_list = response.data.import_type_list;
+            
+        });
 
         $('#submit_employee_import').click(function() {
             var form_id = form_ids = '#employee-import-form';
@@ -684,11 +678,14 @@ app.component('importEmployees', {
                     'file': {
                         required: true,
                     },
+                    'import_type_id': {
+                        required: true, 
+                    },
                 },
                 submitHandler: function(form) {
                     let formData = new FormData($(form_id)[0]);
                     $.ajax({
-                            url: save_import_employee_url,
+                            url: save_import_jobs_url,
                             method: "POST",
                             data: formData,
                             processData: false,
@@ -698,6 +695,7 @@ app.component('importEmployees', {
 
                             if (!res.success) {
                                 $('#submit').button('reset');
+                                $('#submit').prop('disabled',true);
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
@@ -711,12 +709,18 @@ app.component('importEmployees', {
                                 }).show();
 
                             } else {
-                                new Noty({
+                                $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
                                     text: 'Upload in Progress',
+                                    animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                                 }).show();
-                                $location.path('/eyatra/employees/import/list')
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 5000);
+                                $location.path('/eyatra/import/job/list')
                                 $scope.$apply()
                             }
                         })
