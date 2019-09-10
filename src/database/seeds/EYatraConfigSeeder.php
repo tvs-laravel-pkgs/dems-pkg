@@ -42,6 +42,7 @@ class EYatraConfigSeeder extends Seeder {
 			525 => 'Trave Mode Category Types - EYatra',
 			526 => 'Account Type',
 			527 => 'Petty Cash Type',
+			528 => 'Advance Expense Voucher',
 		];
 
 		$configs = [
@@ -608,6 +609,20 @@ class EYatraConfigSeeder extends Seeder {
 			3442 => [
 				'name' => 'Advance Expense',
 				'config_type_id' => 527,
+			],
+
+			//ADVANCE EXPENSE VOUCHER
+			3460 => [
+				'name' => 'New',
+				'config_type_id' => 528,
+			],
+			3461 => [
+				'name' => 'Claim Approved',
+				'config_type_id' => 528,
+			],
+			3462 => [
+				'name' => 'Claim Rejected',
+				'config_type_id' => 528,
 			],
 		];
 
