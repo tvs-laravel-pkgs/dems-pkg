@@ -643,11 +643,11 @@ app.component('eyatraJobsImportList', {
         setInterval(function() {
             dataTableFilter.fnDraw();
         }, 6000);
-        $(document).on('click', '#update_employee_import_status', function(e) {
+        $(document).on('click', '#update_job_import_status', function(e) {
             var id = $(this).attr('data-id');
             var data = 'id=' + id;
             $http.post(
-                update_import_employee_url, { id: id }
+                update_import_jobs_url, { id: id }
             ).then(function(response) {
                 dataTable.fnDraw();
             });
@@ -695,6 +695,7 @@ app.component('importJobs', {
 
                             if (!res.success) {
                                 $('#submit').button('reset');
+                                $('#submit').prop('disabled',true);
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';

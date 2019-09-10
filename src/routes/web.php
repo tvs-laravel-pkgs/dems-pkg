@@ -148,7 +148,7 @@ Route::group(['middleware' => ['web']], function () {
 
 		//EMPLOYEES IMPORT
 		Route::get('import-employee/list', 'Uitoux\EYatra\EmployeeController@getImportJobsList')->name('getImportJobsList');
-		Route::post('/import-employee/update-emloyee-status', 'Uitoux\EYatra\EmployeeController@update_import_jobs_status')->name('updateImportJobsStatus');
+		Route::post('/import-job/update-job-status', 'Uitoux\EYatra\EmployeeController@update_import_jobs_status')->name('updateImportJobsStatus');
 		Route::post('/import-employee/save', 'Uitoux\EYatra\EmployeeController@saveImportJobs')->name('saveImportJobs');
 		Route::get('eyatra/import/type/get', 'Uitoux\EYatra\EmployeeController@getImportFormData')->name('getImportFormData');
 
