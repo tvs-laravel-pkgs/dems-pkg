@@ -7,7 +7,6 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
@@ -138,60 +137,14 @@ class TripController extends Controller {
 	}
 
 	public function deleteTrip($trip_id) {
-		//CHECK IF AGENT BOOKED TRIP VISITS
-		//dump($trip_id);
-		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
-		if ($agent_visits_booked) {
-			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
-		}
-		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
-		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022])->first();
-		if (!$status_exist) {
-			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
-		}
-		$trip = Trip::where('id', $trip_id)->first();
 
-		$activity['entity_id'] = $trip->id;
-		$trip = $trip->forceDelete();
+		return Trip::deleteTrip($trip_id);
 
-		//$trip = Trip::where('id', $trip_id)->forceDelete();
-		$activity['entity_type'] = 'trip';
-		$activity['details'] = 'Trip is Deleted';
-		$activity['activity'] = "delete";
-		//dd($activity);
-		$activity_log = ActivityLog::saveLog($activity);
-
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		return response()->json(['success' => true]);
 	}
 
 	public function cancelTrip($trip_id) {
 
-		/*$trip = Trip::where('id', $trip_id)->update(['status_id' => 3062]);
-			if (!$trip) {
-				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		*/
-
-		$trip = Trip::find($trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-
-		$trip->status_id = 3062;
-		$trip->save();
-
-		$activity['entity_id'] = $trip_id;
-
-		$activity['entity_type'] = 'trip';
-		$activity['details'] = 'Trip is Cancelled';
-		$activity['activity'] = "cancel";
-		//dd($activity);
-		$activity_log = ActivityLog::saveLog($activity);
-		$visit = Visit::where('trip_id', $trip_id)->update(['status_id' => 3221]);
-
-		return response()->json(['success' => true]);
+		return Trip::cancelTrip($trip_id);
 	}
 
 	public function tripVerificationRequest($trip_id) {
@@ -207,25 +160,7 @@ class TripController extends Controller {
 	}
 
 	public function cancelTripVisitBooking($visit_id) {
-		if ($visit_id) {
-			//CHECK IF AGENT BOOKED VISIT
-			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
-			if ($agent_visits_booked) {
-				return response()->json(['success' => false, 'errors' => ['Visit cannot be deleted']]);
-			}
-			$visit = Visit::where('id', $visit_id)->first();
-			$visit->booking_status_id = 3062; // Booking cancelled
-			$visit->save();
-			/*$activity['entity_id'] = $visit->id;
-				$activity['entity_type'] = 'visit';
-				$activity['details'] = 'Visit Booking is Cancelled';
-				$activity['activity'] = "cancel";
-				//dd($activity);
-			*/
-			return response()->json(['success' => true]);
-		} else {
-			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
-		}
+		return Trip::cancelTripVisitBooking($visit_id);
 	}
 
 	public function visitFormData($visit_id) {
@@ -290,21 +225,10 @@ class TripController extends Controller {
 	}
 
 	public function requestCancelVisitBooking($visit_id) {
-
-		$visit = Visit::where('id', $visit_id)->update(['status_id' => 3221]);
-
-		if (!$visit) {
-			return response()->json(['success' => false, 'errors' => ['Booking Details not Found']]);
-		}
-
-		/*$activity['entity_id'] = $visit->id;
-			$activity['entity_type'] = 'visit';
-			$activity['details'] = 'Visit Booking cancel request';
-			$activity['activity'] = "cancel";
-			//dd($activity);
-		*/
-
-		return response()->json(['success' => true]);
+		return Trip::requestCancelVisitBooking($visit_id);
+	}
+	public function deleteVisit($visit_id) {
+		return Trip::deleteVisit($visit_id);
 	}
 
 }

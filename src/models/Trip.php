@@ -512,6 +512,105 @@ class Trip extends Model {
 	// 	return response()->json(['success' => true]);
 	// }
 
+	public static function deleteTrip($trip_id) {
+
+		//CHECK IF AGENT BOOKED TRIP VISITS
+		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+		if ($agent_visits_booked) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
+		}
+		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
+		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022])->first();
+		if (!$status_exist) {
+			return response()->json(['success' => false, 'errors' => ['Manager Approved so this trip cannot be deleted']]);
+		}
+		$trip = Trip::where('id', $trip_id)->first();
+
+		$activity['entity_id'] = $trip->id;
+		$trip = $trip->forceDelete();
+
+		//$trip = Trip::where('id', $trip_id)->forceDelete();
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = 'Trip is Deleted';
+		$activity['activity'] = "delete";
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
+
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		return response()->json(['success' => true]);
+
+	}
+
+	public static function cancelTrip($trip_id) {
+
+		$trip = Trip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+
+		$trip->status_id = 3062;
+		$trip->save();
+
+		$activity['entity_id'] = $trip_id;
+
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = 'Trip is Cancelled';
+		$activity['activity'] = "cancel";
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
+		$visit = Visit::where('trip_id', $trip_id)->update(['status_id' => 3221]);
+
+		return response()->json(['success' => true]);
+	}
+
+	public static function deleteVisit($visit_id) {
+		if ($visit_id) {
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			if ($agent_visits_booked) {
+				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
+			}
+			$visit = Visit::where('id', $visit_id)->first();
+			$activity['entity_id'] = $visit_id;
+			$visit = $visit->forceDelete();
+			$activity['entity_type'] = 'visit';
+			$activity['details'] = 'Visit is Deleted';
+			$activity['activity'] = "delete";
+
+			$activity_log = ActivityLog::saveLog($activity);
+			return response()->json(['success' => true]);
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
+		}
+	}
+
+	public static function requestCancelVisitBooking($visit_id) {
+
+		$visit = Visit::where('id', $visit_id)->update(['status_id' => 3221]);
+
+		if (!$visit) {
+			return response()->json(['success' => false, 'errors' => ['Booking Details not Found']]);
+		}
+		return response()->json(['success' => true]);
+	}
+
+	public static function cancelTripVisitBooking($visit_id) {
+		if ($visit_id) {
+			//CHECK IF AGENT BOOKED VISIT
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			if ($agent_visits_booked) {
+				return response()->json(['success' => false, 'errors' => ['Visit cannot be deleted']]);
+			}
+			$visit = Visit::where('id', $visit_id)->first();
+			$visit->booking_status_id = 3062; // Booking cancelled
+			$visit->save();
+			return response()->json(['success' => true]);
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
+		}
+	}
+
 	public static function getDashboardData() {
 		$total_trips = Trip::where('employee_id', Auth::user()->entity_id)
 			->count();
