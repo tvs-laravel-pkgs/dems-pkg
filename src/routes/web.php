@@ -147,7 +147,11 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('/import-employee/update-emloyee-status', 'Uitoux\EYatra\EmployeeController@update_import_employee_status')->name('updateEmployeeImportStatus');
 		Route::post('/import-employee/save', 'Uitoux\EYatra\EmployeeController@saveImportEmployee')->name('saveImportEmployee');
 		//END
-
+		
+		//EXPENSE VOUCHER ADVANCE
+		Route::get('eyatra/expense/voucher-advance/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@listExpenseVoucherRequest')->name('listExpenseVoucherRequest');
+		Route::get('eyatra/expense/voucher-advance/get-form-data/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherFormData')->name('expenseVoucherFormData');
+		Route::post('eyatra/expense/voucher-advance/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherSave')->name('expenseVoucherSave');
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
 		Route::get('eyatra/designations/get-form-data/{designation_id?}', 'Uitoux\EYatra\DesignationController@eyatraDesignationFormData')->name('eyatraDesignationFormData');

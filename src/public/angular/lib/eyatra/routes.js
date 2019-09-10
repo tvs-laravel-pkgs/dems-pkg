@@ -232,8 +232,22 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<import-employees></import-employees>',
         title: 'Import Employees',
     }).
-
     //END
+
+    //EXPENSE VOUCHER ADVANCE
+    when('/eyatra/expense/voucher-advance/list', {
+        template: '<eyatra-expense-voucher-advance-list></eyatra-expense-voucher-advance-list>',
+        title: 'Expense Voucher Advance',
+    }).
+    when('/eyatra/expense/voucher-advance/add', {
+        template: '<eyatra-expense-voucher-advance-form></eyatra-expense-voucher-advance-form>',
+        title: 'Add Expense Voucher Advance',
+    }).
+    when('/eyatra/expense/voucher-advance/edit/:id', {
+        template: '<eyatra-expense-voucher-advance-form></eyatra-expense-voucher-advance-form>',
+        title: 'Add Expense Voucher Advance',
+    }).
+
 
     //TRIP
     when('/eyatra/trips', {
