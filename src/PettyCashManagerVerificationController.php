@@ -229,6 +229,7 @@ class PettyCashManagerVerificationController extends Controller {
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
 		}
+		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
 		return response()->json($this->data);
 	}
 	public function pettycashmanagerSave(Request $request) {

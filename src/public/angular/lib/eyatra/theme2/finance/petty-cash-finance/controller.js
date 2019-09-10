@@ -363,7 +363,7 @@ app.component('eyatraPettyCashFinanceView', {
             var d = new Date();
             var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
             $("#cuttent_date").val(val);
-            console.log(val);
+            // console.log(val);
             var local_total = 0;
             $.each(self.petty_cash, function(key, value) {
                 local_total += parseFloat(value.amount);

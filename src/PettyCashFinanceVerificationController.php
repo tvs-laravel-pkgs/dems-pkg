@@ -59,7 +59,7 @@ class PettyCashFinanceVerificationController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-					<a href="#!/eyatra/petty-cash/verification2/view/' . $type_id . '/' . $petty_cash->id . '">
+					<a href="#!/eyatra/petty-cash/verification3/view/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a>';
 			})
 			->make(true);
@@ -125,9 +125,9 @@ class PettyCashFinanceVerificationController extends Controller {
 		];
 		$this->data['petty_cash'] = $petty_cash;
 		$this->data['petty_cash_other'] = $petty_cash_other;
-		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
+		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification3'));
 		$emp_details = [];
-		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
+		if (Entrust::can('eyatra-indv-expense-vouchers-verification3')) {
 			$user_role = 'Cashier';
 		} else if (Entrust::can('eyatra-employees')) {
 			$user_role = 'Employee';
