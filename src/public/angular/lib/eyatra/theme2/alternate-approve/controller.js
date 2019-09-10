@@ -6,7 +6,7 @@ app.component('eyatraAlternateApproveList', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#alternate_approve_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",

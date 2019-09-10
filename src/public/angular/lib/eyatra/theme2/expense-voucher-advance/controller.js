@@ -8,7 +8,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
 
         var dataTable = $('#expense_advance_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -48,20 +48,25 @@ app.component('eyatraExpenseVoucherAdvanceList', {
         $('.dataTables_length select').select2();
         //$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher list</p><h3 class="title">Expense Voucher</h3>');
         // if ($location.url() == '/eyatra/petty-cash')
- //     $('.add_new_button').html(
- //         '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
- //         'Add New' +
- //         '</a>'
- //     );
+        //     $('.add_new_button').html(
+        //         '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+        //         'Add New' +
+        //         '</a>'
+        //     );
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('expense_advance_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
 
-
-        $scope.deletePettycash = function(id) {
-            $('#deletepettycash_id').val(id);
+        $scope.deleteExpenseVoucher = function(id) {
+            $('#delete_expense_voucher_id').val(id);
         }
-        $scope.confirmDeletePettycash = function() {
-            var id = $('#deletepettycash_id').val();
+        $scope.confirmDeleteExpenseVoucher = function() {
+            var id = $('#delete_expense_voucher_id').val();
             $http.get(
-                petty_cash_delete_url + '/' + $routeParams.type_id + '/' + id,
+                expense_voucher_advance_delete_url + '/' + id,
             ).then(function(res) {
                 if (!res.data.success) {
                     var errors = '';
@@ -83,7 +88,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                     $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'Petty Cash Deleted Successfully',
+                        text: 'Expense voucher request Deleted Successfully',
                         animation: {
                             speed: 500 // unavailable - no need
                         },
@@ -91,15 +96,9 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
-                    if ($routeParams.type_id == 1) {
-                        $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                        $location.path('eyatra/petty-cash/1');
-                        $scope.$apply();
-                    } else {
-                        $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                        $location.path('eyatra/petty-cash/2');
-                        $scope.$apply();
-                    }
+                    dataTable.ajax.reload(function(json) {});
+                    $location.path('/eyatra/expense/voucher-advance/list')
+                    $scope.$apply()
                 }
             });
         }
@@ -135,17 +134,18 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 // $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
                 // return;
             }
-            console.log(response);
+            console.log(response.data.expense_voucher_advance.employee.user);
+
+            self.action = response.data.action;
 
             self.expense_voucher_advance = response.data.expense_voucher_advance;
 
-
             if (self.action == 'Edit') {
-                self.expense_voucher_advance = response.data.expense_voucher_advance;
+                self.action = 'Edit';
+                self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee.user.name;
 
             } else {
-
-
+                self.action = 'Add';
             }
 
             var d = new Date();
@@ -155,7 +155,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
 
             //SEARCH  EMPLOYEE
             self.searchEmployee = function(query) {
-                //alert();
+                // alert();
                 if (query) {
                     return new Promise(function(resolve, reject) {
                         $http
@@ -256,52 +256,6 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                     });
             },
         });
-    }
-});
-//------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraPettyCashView', {
-    templateUrl: pettycash_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        $http.get(
-            petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
-        ).then(function(response) {
-            // console.log(response);
-            self.petty_cash = response.data.petty_cash;
-            self.type_id = $routeParams.type_id;
-            self.petty_cash_other = response.data.petty_cash_other;
-            self.employee = response.data.employee;
-            var local_total = 0;
-            $.each(self.petty_cash, function(key, value) {
-                local_total += parseFloat(value.amount);
-            });
-            var total_amount = 0;
-            var total_tax = 0;
-            $.each(self.petty_cash_other, function(key, value) {
-                total_amount += parseFloat(value.amount);
-                total_tax += parseFloat(value.tax);
-            });
-            var other_total = total_amount + total_tax;
-            var total_amount = local_total + other_total;
-            // console.log(total_amount);
-            setTimeout(function() {
-                $(".localconveyance").html('₹ ' + local_total.toFixed(2));
-                $(".other_expences").html('₹ ' + other_total.toFixed(2));
-                $(".Total_amount").html('₹ ' + total_amount.toFixed(2));
-            }, 500);
-
-        });
-
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-        });
-
-        $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------
