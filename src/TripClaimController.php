@@ -162,35 +162,49 @@ class TripClaimController extends Controller {
 			}
 
 			//SAVING LODGINGS
-			if ($request->lodgings) {
+			if ($request->is_lodging) {
+
+				//REMOVE LODGING
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
 					Lodging::whereIn('id', $lodgings_removal_id)->delete();
 				}
-				foreach ($request->lodgings as $lodging_data) {
-					$lodging = Lodging::firstOrNew([
-						'id' => $lodging_data['id'],
-					]);
-					$lodging->fill($lodging_data);
-					$lodging->trip_id = $request->trip_id;
-					$lodging->check_in_date = date('Y-m-d H:i:s', strtotime($lodging_data['check_in_date']));
-					$lodging->checkout_date = date('Y-m-d H:i:s', strtotime($lodging_data['checkout_date']));
-					$lodging->created_by = Auth::user()->id;
-					$lodging->save();
 
-					//STORE ATTACHMENT
-					$item_images = storage_path('app/public/trip/lodgings/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($lodging_data['attachments'])) {
-						foreach ($lodging_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
-							$attachement_lodge = new Attachment;
-							$attachement_lodge->attachment_of_id = 3181;
-							$attachement_lodge->attachment_type_id = 3200;
-							$attachement_lodge->entity_id = $lodging->id;
-							$attachement_lodge->name = $name;
-							$attachement_lodge->save();
+				//SAVE
+				if ($request->lodgings) {
+
+					// LODGE STAY DAYS SHOULD NOT EXCEED TOTAL TRIP DAYS
+					$lodge_stayed_days = (int) array_sum(array_column($request->lodgings, 'stayed_days'));
+					$trip_total_days = (int) $request->trip_total_days;
+					if ($lodge_stayed_days > $trip_total_days) {
+						return response()->json(['success' => false, 'errors' => ['Total lodging days should be less than total trip days']]);
+					}
+
+					foreach ($request->lodgings as $lodging_data) {
+						$lodging = Lodging::firstOrNew([
+							'id' => $lodging_data['id'],
+						]);
+						$lodging->fill($lodging_data);
+						$lodging->trip_id = $request->trip_id;
+						$lodging->check_in_date = date('Y-m-d H:i:s', strtotime($lodging_data['check_in_date']));
+						$lodging->checkout_date = date('Y-m-d H:i:s', strtotime($lodging_data['checkout_date']));
+						$lodging->created_by = Auth::user()->id;
+						$lodging->save();
+
+						//STORE ATTACHMENT
+						$item_images = storage_path('app/public/trip/lodgings/attachments/');
+						Storage::makeDirectory($item_images, 0777);
+						if (!empty($lodging_data['attachments'])) {
+							foreach ($lodging_data['attachments'] as $key => $attachement) {
+								$name = $attachement->getClientOriginalName();
+								$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
+								$attachement_lodge = new Attachment;
+								$attachement_lodge->attachment_of_id = 3181;
+								$attachement_lodge->attachment_type_id = 3200;
+								$attachement_lodge->entity_id = $lodging->id;
+								$attachement_lodge->name = $name;
+								$attachement_lodge->save();
+							}
 						}
 					}
 				}
@@ -219,38 +233,53 @@ class TripClaimController extends Controller {
 				return response()->json(['success' => true]);
 			}
 			//SAVING BOARDINGS
-			if ($request->boardings) {
+			if ($request->is_boarding) {
+
+				//REMOVE BOARDINGS
 				if (!empty($request->boardings_removal_id)) {
 					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
 					Boarding::whereIn('id', $boardings_removal_id)->delete();
 				}
-				foreach ($request->boardings as $boarding_data) {
-					$boarding = Boarding::firstOrNew([
-						'id' => $boarding_data['id'],
-					]);
-					$boarding->fill($boarding_data);
-					$boarding->trip_id = $request->trip_id;
-					$boarding->from_date = date('Y-m-d', strtotime($boarding_data['from_date']));
-					$boarding->to_date = date('Y-m-d', strtotime($boarding_data['to_date']));
-					$boarding->created_by = Auth::user()->id;
-					$boarding->save();
 
-					//STORE ATTACHMENT
-					$item_images = storage_path('app/public/trip/boarding/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($boarding_data['attachments'])) {
-						foreach ($boarding_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
-							$attachement_board = new Attachment;
-							$attachement_board->attachment_of_id = 3182;
-							$attachement_board->attachment_type_id = 3200;
-							$attachement_board->entity_id = $boarding->id;
-							$attachement_board->name = $name;
-							$attachement_board->save();
+				//SAVE
+				if ($request->boardings) {
+
+					//TOTAL BOARDING DAYS SHOULD NOT EXCEED TOTAL TRIP DAYS
+					$boarding_days = (int) array_sum(array_column($request->boardings, 'days'));
+					$trip_total_days = (int) $request->trip_total_days;
+					if ($boarding_days > $trip_total_days) {
+						return response()->json(['success' => false, 'errors' => ['Total boarding days should be less than total trip days']]);
+					}
+
+					foreach ($request->boardings as $boarding_data) {
+						$boarding = Boarding::firstOrNew([
+							'id' => $boarding_data['id'],
+						]);
+						$boarding->fill($boarding_data);
+						$boarding->trip_id = $request->trip_id;
+						$boarding->from_date = date('Y-m-d', strtotime($boarding_data['from_date']));
+						$boarding->to_date = date('Y-m-d', strtotime($boarding_data['to_date']));
+						$boarding->created_by = Auth::user()->id;
+						$boarding->save();
+
+						//STORE ATTACHMENT
+						$item_images = storage_path('app/public/trip/boarding/attachments/');
+						Storage::makeDirectory($item_images, 0777);
+						if (!empty($boarding_data['attachments'])) {
+							foreach ($boarding_data['attachments'] as $key => $attachement) {
+								$name = $attachement->getClientOriginalName();
+								$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
+								$attachement_board = new Attachment;
+								$attachement_board->attachment_of_id = 3182;
+								$attachement_board->attachment_type_id = 3200;
+								$attachement_board->entity_id = $boarding->id;
+								$attachement_board->name = $name;
+								$attachement_board->save();
+							}
 						}
 					}
 				}
+
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
@@ -401,6 +430,21 @@ class TripClaimController extends Controller {
 		}
 		$eligible_amount = number_format((float) $eligible_amount, 2, '.', '');
 		return response()->json(['eligible_amount' => $eligible_amount]);
+	}
+
+	//GET TRAVEL MODE CATEGORY STATUS TO CHECK IF IT IS NO VEHICLE CLAIM
+	public function getVisitTrnasportModeClaimStatus(Request $request) {
+		if (!empty($request->travel_mode_id)) {
+			$travel_mode_category_type = DB::table('travel_mode_category_type')->where('travel_mode_id', $request->travel_mode_id)->where('category_id', 3402)->first();
+			if ($travel_mode_category_type) {
+				$is_no_vehicl_claim = true;
+			} else {
+				$is_no_vehicl_claim = false;
+			}
+		} else {
+			$is_no_vehicl_claim = false;
+		}
+		return response()->json(['is_no_vehicl_claim' => $is_no_vehicl_claim]);
 	}
 
 	// Function to get all the dates in given range

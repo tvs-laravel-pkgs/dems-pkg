@@ -14,6 +14,7 @@ class Payment extends Model {
 		'reference_number',
 		'date',
 		'amount',
+		'remarks',
 		'payment_mode_id',
 		'created_by',
 	];
