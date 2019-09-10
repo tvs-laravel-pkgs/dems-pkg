@@ -142,10 +142,12 @@ class StateController extends Controller {
 				->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
 		// $state->travelModes()->withPivot('agent_id', 'service_charge')->get();
 		// dd($this->data['travel_mode_list']);
-
 		// foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
 		foreach ($state->travelModes as $travel_mode) {
 			// dump($travel_mode);
+			if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
+				continue;
+			}
 			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
 			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
 			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;

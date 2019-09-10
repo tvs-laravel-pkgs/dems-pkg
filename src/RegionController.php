@@ -191,7 +191,10 @@ class RegionController extends Controller {
 		return response()->json($this->data);
 	}
 	public function eyatraRegionFilterData() {
-		$this->data['state_list'] = NState::getList();
+		$option = new NState;
+		$option->name = 'Select State';
+		$option->id = null;
+		$this->data['state_list'] = $state_list = NState::select('name', 'id')->where('country_id', $country_id)->where('company_id', Auth::user()->company_id)->get()->prepend($option);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),
