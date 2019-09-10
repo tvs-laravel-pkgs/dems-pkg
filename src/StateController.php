@@ -130,7 +130,8 @@ class StateController extends Controller {
 			->leftjoin('configs as c', 'c.id', '=', 'tm.category_id')
 			->where('entities.entity_type_id', 502)
 			->where('c.config_type_id', 525)
-			->where('entities.company_id', Auth::user()->company_id)->get();
+			->where('tm.category_id', 3403)
+			->where('entities.company_id', Auth::user()->company_id)->get()->keyBy('id');
 		// dd($travel_modes);
 		$option = new Agent;
 		$option->name = 'Select Agent';
@@ -139,13 +140,16 @@ class StateController extends Controller {
 				->leftJoin('users', 'users.entity_id', 'agents.id')
 				->where('users.user_type_id', 3122)
 				->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
-		// dd($state->travelModes()->withPivot()->get());
-		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
+		// $state->travelModes()->withPivot('agent_id', 'service_charge')->get();
+		// dd($this->data['travel_mode_list']);
+
+		// foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
+		foreach ($state->travelModes as $travel_mode) {
+			// dump($travel_mode);
 			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
 			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
 			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
 		}
-
 		$this->data['state'] = $state;
 		$this->data['success'] = true;
 
@@ -213,16 +217,24 @@ class StateController extends Controller {
 			$activity['activity'] = empty($request->id) ? "add" : "edit";
 			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING state_agent_travel_mode
+			// $travel_mode_ids = array_column($request->travel_modes, 'id');
+			// dd($request->travel_modes);
 			if (count($request->travel_modes) > 0) {
 				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
 					if (!isset($pivot_data['agent_id'])) {
 						continue;
 					}
+
 					if (!isset($pivot_data['service_charge'])) {
 						continue;
 					}
+					// dd($pivot_data['service_charge']);
 					$state->travelModes()->attach($travel_mode, $pivot_data);
-					//  dd($state->travelModes()->attach($travel_mode, $pivot_data));
+					// $state->travelModes()->attach($pivot_data['agent_id'], [
+					// 	'service_charge' => $pivot_data['service_charge'],
+					// ]);
+					// dd($state->travelModes()->attach($travel_mode, $pivot_data));
+
 				}
 			}
 
