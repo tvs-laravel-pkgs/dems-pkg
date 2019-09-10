@@ -14,11 +14,19 @@ use Yajra\Datatables\Datatables;
 class CoaCodeController extends Controller {
 
 	public function eyatraCoaCodeFilter() {
+		$option = new Entity;
+		$option->name = 'Select Account Type';
+		$option->id = null;
+		$this->data['acc_type_list'] = $acc_type_list = Entity::where('entity_type_id', 513)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get()->prepend($option);
 
-		$this->data['acc_type_list'] = $acc_type_list = Entity::where('entity_type_id', 513)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
-
-		$this->data['group_list'] = $group_list = Entity::where('entity_type_id', 516)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
-		$this->data['sub_group_list'] = $sub_group_list = Entity::where('entity_type_id', 517)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
+		$option = new Entity;
+		$option->name = 'Select Group';
+		$option->id = null;
+		$this->data['group_list'] = $group_list = Entity::where('entity_type_id', 516)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get()->prepend($option);
+		$option = new Entity;
+		$option->name = 'Select Sub Group';
+		$option->id = null;
+		$this->data['sub_group_list'] = $sub_group_list = Entity::where('entity_type_id', 517)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get()->prepend($option);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),
