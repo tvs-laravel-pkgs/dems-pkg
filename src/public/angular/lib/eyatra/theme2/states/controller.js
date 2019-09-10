@@ -54,7 +54,7 @@ app.component('eyatraStates', {
         $http.get(
             state_filter_url
         ).then(function(response) {
-          
+
             self.country_list = response.data.country_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -95,7 +95,7 @@ app.component('eyatraStates', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
@@ -109,7 +109,7 @@ app.component('eyatraStates', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 }
             });
         }
@@ -143,7 +143,7 @@ app.component('eyatraStateForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/states')
                 $scope.$apply()
                 return;
@@ -326,9 +326,13 @@ app.component('eyatraStateForm', {
                     layout: 'topRight',
                     text: 'You have errors,Please check all tabs',
                     animation: {
-                            speed: 500 // unavailable - no need
-                        },
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+
             },
             ignore: '',
             rules: {
@@ -405,7 +409,7 @@ app.component('eyatraStateForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/states')
                             $scope.$apply()
                         }

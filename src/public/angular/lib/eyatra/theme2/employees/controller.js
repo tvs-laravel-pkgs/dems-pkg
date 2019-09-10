@@ -108,7 +108,7 @@ app.component('eyatraEmployees', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 } else {
                     $noty = new Noty({
                         type: 'success',
@@ -639,12 +639,10 @@ app.component('eyatraJobsImportList', {
             $('.to').val(null);
             dataTableFilter.fnFilter();
         }
-        $scope.resetForm();
-        
+        $scope.resetForm();        
         setInterval(function() {
             dataTableFilter.fnDraw();
         }, 6000);
-
         $(document).on('click', '#update_employee_import_status', function(e) {
             var id = $(this).attr('data-id');
             var data = 'id=' + id;

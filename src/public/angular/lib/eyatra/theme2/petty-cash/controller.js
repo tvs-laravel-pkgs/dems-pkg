@@ -52,12 +52,24 @@ app.component('eyatraPettyCashList', {
             });
             $('.dataTables_length select').select2();
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher list</p><h3 class="title">Expense Voucher</h3>');
-
-            $('.add_new_button').html(
-                '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-                'Add New' +
-                '</a>'
-            );
+            if ($location.url() == '/eyatra/petty-cash')
+                $('.add_new_button').html(
+                    '<button class="btn btn-default separate-btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" >Add New</button>' +
+                    '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">' +
+                    '<li>' +
+                    '<a href="#!/eyatra/petty-cash/add/1" type="button" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+                    'LocalConveyance' +
+                    '</a></li>' +
+                    '<li ><a href="#!/eyatra/petty-cash/add/2" type="button" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+                    'Other Expenses' +
+                    '</a>' +
+                    '</li></ul>'
+                );
+            // $('.add_new_button').html(
+            //         '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+            //         'Add New' +
+            //         '</a>'
+            //     );
         });
 
         $scope.deletePettycash = function(id) {
@@ -83,7 +95,7 @@ app.component('eyatraPettyCashList', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                 } else {
                     $noty = new Noty({
                         type: 'success',
@@ -95,7 +107,7 @@ app.component('eyatraPettyCashList', {
                     }).show();
                     setTimeout(function() {
                         $noty.close();
-                    }, 1000);
+                    }, 5000);
                     if ($routeParams.type_id == 1) {
                         $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
                         $location.path('eyatra/petty-cash/1');
@@ -140,7 +152,7 @@ app.component('eyatraPettyCashForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
                 return;
             }
@@ -333,7 +345,7 @@ app.component('eyatraPettyCashForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
             },
             submitHandler: function(form) {
 
@@ -366,7 +378,7 @@ app.component('eyatraPettyCashForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $location.path('/eyatra/petty-cash')
                             $scope.$apply()
                         }
@@ -389,7 +401,7 @@ app.component('eyatraPettyCashView', {
         $http.get(
             petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.petty_cash = response.data.petty_cash;
             self.type_id = $routeParams.type_id;
             self.petty_cash_other = response.data.petty_cash_other;

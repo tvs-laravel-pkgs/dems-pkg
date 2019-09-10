@@ -10,7 +10,6 @@ class TripController extends Controller {
 
 	public function listTrip(Request $r) {
 		$trips = Trip::getEmployeeList($r);
-
 		$trips = $trips->get()
 		;
 		return response()->json(['success' => true, 'trips' => $trips]);
@@ -30,4 +29,25 @@ class TripController extends Controller {
 		return Trip::getViewData($trip_id);
 
 	}
+
+	public function getDashboard() {
+		return Trip::getDashboardData();
+
+	}
+
+	public function deleteTrip($trip_id) {
+		return Trip::deleteTrip($trip_id);
+	}
+
+	public function cancelTrip($trip_id) {
+
+		return Trip::cancelTrip($trip_id);
+	}
+	public function requestCancelVisitBooking($visit_id) {
+		return Trip::requestCancelVisitBooking($visit_id);
+	}
+	public function cancelTripVisitBooking($visit_id) {
+		return Trip::cancelTripVisitBooking($visit_id);
+	}
+
 }
