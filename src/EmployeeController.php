@@ -407,7 +407,7 @@ class EmployeeController extends Controller {
 		return response()->json(['sbu_list' => $sbu_list]);
 	}
 
-	public function getImportEmployeesList(Request $request) {
+	public function getImportJobsList(Request $request) {
 		// dd($request->all());
 		if (!empty($request->from_date)) {
 			$start_date = str_replace('/', '-', $request->from_date);
@@ -477,8 +477,18 @@ class EmployeeController extends Controller {
 			->make(true);
 
 	}
+	public function getImportFormData() {
 
-	public function saveImportEmployee(Request $request) {
+		$this->data['import_type_list'] = collect(Config::select(
+			'id',
+			'name'
+		)
+				->where('config_type_id', 523)
+				->get())->prepend(['id' => '', 'name' => 'Select Import Type']);
+
+		return response()->json($this->data);
+	}
+	public function saveImportJobs(Request $request) {
 		// dd($request->all());
 		DB::beginTransaction();
 		try {
@@ -508,7 +518,7 @@ class EmployeeController extends Controller {
 			$src_file = 'storage/app/public/employee/import/' . $file_name;
 
 			$import = new ImportJob;
-			$import->type_id = 3380;
+			$import->type_id = $request->import_type_id;
 			$import->company_id = Auth::user()->company_id;
 			$import->status_id = 3361;
 			$import->src_file = $src_file;
@@ -524,7 +534,7 @@ class EmployeeController extends Controller {
 		}
 	}
 
-	public function update_import_employee_status(Request $request) {
+	public function update_import_jobs_status(Request $request) {
 		$id = $request->id;
 		$update_status = ImportJob::where('id', $id)->update(['total_records' => 0, 'processed' => 0, 'remaining' => 0, 'new' => 0, 'updated' => 0, 'error' => 0, 'status_id' => 3361, 'export_file' => null, 'server_status' => null]);
 
