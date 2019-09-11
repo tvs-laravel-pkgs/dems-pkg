@@ -8,7 +8,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
 
         var dataTable = $('#expense_advance_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate_2,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -46,19 +46,19 @@ app.component('eyatraExpenseVoucherAdvanceList', {
             }
         });
         $('.dataTables_length select').select2();
-        //$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher list</p><h3 class="title">Expense Voucher</h3>');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
         // if ($location.url() == '/eyatra/petty-cash')
-        //     $('.add_new_button').html(
-        //         '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-        //         'Add New' +
-        //         '</a>'
-        //     );
-        setTimeout(function() {
-            var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('expense_advance_list_filter');
-            x.left = x.left + 15;
-            d.style.left = x.left + 'px';
-        }, 500);
+        $('.add_new_button').html(
+            '<a href="#!/eyatra/expense/voucher-advance/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
+            'Add New' +
+            '</a>'
+        );
+        // setTimeout(function() {
+        //     var x = $('.separate-page-header-inner.search .custom-filter').position();
+        //     var d = document.getElementById('expense_advance_list_filter');
+        //     x.left = x.left + 15;
+        //     d.style.left = x.left + 'px';
+        // }, 500);
 
         $scope.deleteExpenseVoucher = function(id) {
             $('#delete_expense_voucher_id').val(id);
