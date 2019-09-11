@@ -245,7 +245,21 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/expense/voucher-advance/edit/:id', {
         template: '<eyatra-expense-voucher-advance-form></eyatra-expense-voucher-advance-form>',
-        title: 'Add Expense Voucher Advance',
+        title: 'Edit Expense Voucher Advance',
+    }).
+    when('/eyatra/expense/voucher-advance/view/:id', {
+        template: '<eyatra-expense-voucher-advance-view></eyatra-expense-voucher-advance-view>',
+        title: 'view Expense Voucher Advance',
+    }).
+
+    //EXPENSE VOUCHER ADVANCE VERIFICATION
+    when('/eyatra/expense/voucher-advance/verification/list', {
+        template: '<eyatra-expense-voucher-advance-verification-list></eyatra-expense-voucher-advance-verification-list>',
+        title: 'Expense Voucher Advance',
+    }).
+    when('/eyatra/expense/voucher-advance/verification/view/:id', {
+        template: '<eyatra-expense-voucher-advance-verification-view></eyatra-expense-voucher-advance-verification-view>',
+        title: 'view Expense Voucher Advance',
     }).
 
 
