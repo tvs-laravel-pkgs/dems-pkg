@@ -43,6 +43,7 @@ class EYatraConfigSeeder extends Seeder {
 			526 => 'Account Type',
 			527 => 'Petty Cash Type',
 			528 => 'Advance Expense Voucher',
+			529 => 'Alternate Approver Type',
 		];
 
 		$configs = [
@@ -623,6 +624,16 @@ class EYatraConfigSeeder extends Seeder {
 			3462 => [
 				'name' => 'Claim Rejected',
 				'config_type_id' => 528,
+			],
+
+			//ALTERNATE APPROVER TYPE
+			3460 => [
+				'name' => 'Temporary',
+				'config_type_id' => 529,
+			],
+			3461 => [
+				'name' => 'Permanent',
+				'config_type_id' => 529,
 			],
 		];
 
