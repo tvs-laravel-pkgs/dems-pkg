@@ -308,6 +308,7 @@ class TripClaimController extends Controller {
 					$trip->status_id = 3023; //claimed
 				}
 				$trip->claim_amount = $request->claim_total_amount; //claimed
+				$trip->claimed_date = date('Y-m-d H:i:s');
 				$trip->save();
 
 				//SAVE EMPLOYEE CLAIMS
