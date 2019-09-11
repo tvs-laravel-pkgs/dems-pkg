@@ -256,6 +256,7 @@ class Trip extends Model {
 			'employee',
 			'employee.user',
 			'employee.designation',
+			'employee.grade',
 			'purpose',
 			'status',
 		])
@@ -276,9 +277,7 @@ class Trip extends Model {
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $end_date->end_date;
+		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
 		$trip->days = $days->days;
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
@@ -734,7 +733,7 @@ class Trip extends Model {
 
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
-		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
+		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
 			->leftjoin('entities', 'entities.id', 'employees.grade_id')
@@ -827,6 +826,9 @@ class Trip extends Model {
 			'advanceRequestStatus',
 			'employee',
 			'employee.user',
+			'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
+				$q->where('trip_id', $trip_id);
+			},
 			'employee.grade',
 			'employee.designation',
 			'employee.reportingTo',

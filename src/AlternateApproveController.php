@@ -14,7 +14,7 @@ class AlternateApproveController extends Controller {
 		$employees = Employee::select('reporting_to_id')
 			->distinct()
 			->whereNotNull('reporting_to_id')
-			->where('employees.company_id',Auth::user()->company_id)
+			->where('employees.company_id', Auth::user()->company_id)
 			->get()->toArray();
 		$employee_ids = array_column($employees, 'reporting_to_id');
 
@@ -24,23 +24,24 @@ class AlternateApproveController extends Controller {
 			DB::raw('IF(employees.code IS NULL,"--",employees.code) as empcode'),
 			DB::raw('IF(alter_user.name IS NULL,"--",alter_user.name) as altempname'),
 			DB::raw('IF(alternateemp.code IS NULL,"--",alternateemp.code) as altempcode'),
-			'alternative_approvers.type',
+			'configs.name as type',
 			DB::raw('DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") as fromdate'),
 			DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
 			DB::raw('DATEDIFF(alternative_approvers.to , NOW()) as status')
 		)
 			->leftJoin('alternative_approvers', 'employees.id', 'alternative_approvers.employee_id')
+			->leftJoin('configs', 'configs.id', 'alternative_approvers.type')
 			->leftjoin('employees as alternateemp', 'alternateemp.id', 'alternative_approvers.alternate_employee_id')
 			->leftjoin('users as emp_user', function ($join) {
 				$join->on('emp_user.entity_id', '=', 'employees.id')
-				->where('emp_user.user_type_id',3121);
+					->where('emp_user.user_type_id', 3121);
 			})
 			->leftjoin('users as alter_user', function ($join) {
 				$join->on('alter_user.entity_id', '=', 'alternative_approvers.alternate_employee_id')
-				->where('alter_user.user_type_id',3121);
+					->where('alter_user.user_type_id', 3121);
 			})
 			->whereIn('employees.id', $employee_ids)
-			->where('employees.company_id',Auth::user()->company_id)
+			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('alternative_approvers.id', 'desc')
 			->groupBy('employees.id')
 		;
@@ -81,20 +82,20 @@ class AlternateApproveController extends Controller {
 				return '
 				<a href="#!/eyatra/alternate-approve/edit/' . $alternate_approve->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#alternate_approve_id"
-				onclick="angular.element(this).scope().deleteAlternateapprove(' . $alternate_approve->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-                </a>';
+				</a>'
+				;
+				// '<a href="javascript:;" data-toggle="modal" data-target="#alternate_approve_id"
+				// onclick="angular.element(this).scope().deleteAlternateapprove(' . $alternate_approve->id . ')" dusk = "delete-btn" title="Delete">
+				//             <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
+				//             </a>'
 
 			})
 			->addColumn('status', function ($alternate_approve) {
-				if ($alternate_approve->status < 0 ) {
+				if ($alternate_approve->status < 0) {
 					return '<span style="color:#ea4335;">Expired</span>';
-				}elseif (is_null($alternate_approve->status)) {
+				} elseif (is_null($alternate_approve->status)) {
 					return '<span style="color:#337DFF;">N/A</span>';
-				} 
-				else {
+				} else {
 					return '<span style="color:#63ce63;">Valid</span>';
 				}
 			})
@@ -103,15 +104,14 @@ class AlternateApproveController extends Controller {
 
 	public function alternateapproveFormData($alternate_id = NULL) {
 		if (!$alternate_id) {
+			$this->data['action'] = 'Add';
 			$alternate_approve = new AlternateApprove;
 			$this->data['success'] = true;
 			$this->data['message'] = 'Alternate Approve not found';
 			$this->data['employee_list'] = [];
 			$this->data['employee'] = '';
 		} else {
-
 			$this->data['action'] = 'Edit';
-
 			$alternate_approve = AlternateApprove::with([
 				'employee',
 				'employee.user',
@@ -121,6 +121,7 @@ class AlternateApproveController extends Controller {
 				->where('employee_id', $alternate_id)->first();
 			//dd($alternate_approve);
 			if (!$alternate_approve) {
+				$this->data['action'] = 'Add';
 				$alternate_approve = new AlternateApprove;
 				$alternate_approve['employee'] = $employee = Employee::find($alternate_id);
 				$this->data['success'] = true;
@@ -147,11 +148,7 @@ class AlternateApproveController extends Controller {
 		}
 
 		$this->data['extras'] = [
-			'type' => collect([
-				['id' => '', 'name' => 'Select Type'],
-				['id' => 120, 'name' => 'Permanent'],
-				['id' => 121, 'name' => 'Temporary'],
-			]),
+			'type' => collect(Config::managerType()->prepend(['id' => '', 'name' => 'Select Type'])),
 		];
 		// dd($this->data['extras']);
 		$this->data['alternate_approve'] = $alternate_approve;
@@ -186,7 +183,7 @@ class AlternateApproveController extends Controller {
 	}
 
 	public function alternateapproveSave(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			// $validator = Validator::make($request->all(), [
 			// 	'purpose_id' => [

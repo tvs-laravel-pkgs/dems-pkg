@@ -57,6 +57,12 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-cashier',
 				'display_name' => 'Cashier',
 			],
+			5015 => [
+				'display_order' => 101,
+				'parent_id' => 5010,
+				'name' => 'eyatra-financier',
+				'display_name' => 'Cashier',
+			],
 
 			//MASTERS
 			5080 => [
@@ -819,23 +825,58 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Delete',
 			],
 
-			5580 => [
+			//PETTY CASH / EXPENSE VOUCHER
+
+			5721 => [
 				'display_order' => 7,
 				'parent_id' => 5001,
 				'name' => 'eyatra-indv-expense-vouchers',
 				'display_name' => 'Expense Vouchers',
 			],
-			5581 => [
+
+			5722 => [
 				'display_order' => 8,
 				'parent_id' => 5001,
 				'name' => 'eyatra-indv-expense-vouchers-verification1',
-				'display_name' => 'Expense Vouchers Verfication1',
+				'display_name' => 'Expense Vouchers Manager Verfication',
 			],
-			5582 => [
+			5723 => [
 				'display_order' => 8,
 				'parent_id' => 5001,
 				'name' => 'eyatra-indv-expense-vouchers-verification2',
-				'display_name' => 'Expense Vouchers Verfication2',
+				'display_name' => 'Expense Vouchers Cashier Verfication',
+			],
+			5724 => [
+				'display_order' => 8,
+				'parent_id' => 5001,
+				'name' => 'eyatra-indv-expense-vouchers-verification3',
+				'display_name' => 'Expense Vouchers Financier Verfication',
+			],
+
+			//MASTERS > ALTERNATE APPROVERS
+			5740 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-coa-codes',
+				'display_name' => 'COA Codes',
+			],
+			5741 => [
+				'display_order' => 1,
+				'parent_id' => 5740,
+				'name' => 'eyatra-coa-codes-add',
+				'display_name' => 'Add',
+			],
+			5742 => [
+				'display_order' => 2,
+				'parent_id' => 5740,
+				'name' => 'eyatra-coa-codes-edit',
+				'display_name' => 'Edit',
+			],
+			5743 => [
+				'display_order' => 3,
+				'parent_id' => 5740,
+				'name' => 'eyatra-coa-codes-delete',
+				'display_name' => 'Delete',
 			],
 
 			//ROLES
@@ -856,6 +897,22 @@ class EYatraPermissionSeeder extends Seeder {
 				'parent_id' => 5010,
 				'name' => 'eyatra-role-delete',
 				'display_name' => 'Delete',
+			],
+
+			//MASTERS > IMPORT JOBS
+			5760 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-import-jobs',
+				'display_name' => 'Import Jobs',
+			],
+
+			//MASTERS > IMPORT JOBS
+			5761 => [
+				'display_order' => 1,
+				'parent_id' => 5080,
+				'name' => 'eyatra-outlet-reimbursement',
+				'display_name' => 'Outlet Reimbursement',
 			],
 
 		];

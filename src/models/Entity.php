@@ -90,7 +90,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 505)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 	public static function cityCategoryList() {
-		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->orderBy('id', 'asc')->get();
 	}
 
 	public static function accountTypeList() {
@@ -149,7 +149,7 @@ class Entity extends Model {
 					if ($entity_name == 'Two Wheeler') {
 						$record->categories()->sync(3400);
 					} elseif ($entity_name == 'Four Wheeler') {
-						$record->categories()->sync(3401);
+						$record->categories()->sync(3400);
 					} elseif ($entity_name == 'Office Vehicle') {
 						$record->categories()->sync(3402);
 					} else {
