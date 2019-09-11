@@ -389,7 +389,7 @@ app.component('eyatraEmployeeForm', {
                     maxlength: 10,
                     minlength: 3,
                 },
-                'check_favour': {
+                'cheque_favour': {
                     required: function(element) {
                         if ($("#cheque").is(':checked')) {
                             return true;
