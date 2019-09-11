@@ -160,12 +160,12 @@ app.component('eyatraAgentForm', {
             }
             self.agent = response.data.agent;
             self.address = response.data.address;
+            
             self.user = response.data.user;
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-            console.log(response.data.agent);
-            //console.log(response.data.agent.code);
+           
             if (response.data.agent.payment_mode_id == null || !response.data.agent.payment_mode_id) {
                 self.agent.payment_mode_id = 3244;
             }
@@ -177,13 +177,18 @@ app.component('eyatraAgentForm', {
                 } else {
                     self.switch_value = 'Inactive';
                 }
-                if (self.user.force_password_change == 1) {
+                    
+                self.switch_password = 'No';
+                $("#hide_password").hide();
+
+                /*if (self.user.force_password_change == 1) {
                     self.switch_password = 'Yes';
                     $("#hide_password").show();
                     $("#password").prop('disabled', false);
                 } else {
                     self.switch_password = 'No';
-                }
+                    $("#hide_password").hide();
+                }*/
 
                 //$scope.selectPaymentMode(self.agent.payment_mode_id);
 
@@ -409,6 +414,7 @@ app.component('eyatraAgentForm', {
                     maxlength: 50,
                     minlength: 3,
                 },
+              
                 'account_number': {
                     required: function(element) {
                         if ($("#bank").is(':checked')) {
@@ -419,8 +425,11 @@ app.component('eyatraAgentForm', {
                     },
                     maxlength: 20,
                     minlength: 3,
-                    positiveNumber: true,
+                    min: 1,
+                    number: true,
+                    // positiveNumber: true,
                 },
+
                 'ifsc_code': {
                     required: function(element) {
                         if ($("#bank").is(':checked')) {
