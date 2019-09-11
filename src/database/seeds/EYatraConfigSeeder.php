@@ -572,19 +572,19 @@ class EYatraConfigSeeder extends Seeder {
 
 			//TRAVEL MODE CATEGORY TYPE
 			3400 => [
-				'name' => 'Own Two Wheeler',
+				'name' => 'Own Vehicle',
 				'config_type_id' => 525,
 			],
-			3401 => [
-				'name' => 'Own Four Wheeler',
-				'config_type_id' => 525,
-			],
+			// 3401 => [
+			// 	'name' => 'Own Vehicle',
+			// 	'config_type_id' => 525,
+			// ],
 			3402 => [
-				'name' => 'Vehicle No Claim',
+				'name' => 'Not Claimable',
 				'config_type_id' => 525,
 			],
 			3403 => [
-				'name' => 'Claim',
+				'name' => 'Claimable',
 				'config_type_id' => 525,
 			],
 

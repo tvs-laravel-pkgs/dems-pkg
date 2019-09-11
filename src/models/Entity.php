@@ -149,7 +149,7 @@ class Entity extends Model {
 					if ($entity_name == 'Two Wheeler') {
 						$record->categories()->sync(3400);
 					} elseif ($entity_name == 'Four Wheeler') {
-						$record->categories()->sync(3401);
+						$record->categories()->sync(3400);
 					} elseif ($entity_name == 'Office Vehicle') {
 						$record->categories()->sync(3402);
 					} else {
