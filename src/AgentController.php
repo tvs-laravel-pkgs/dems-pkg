@@ -9,6 +9,7 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Address;
 use Uitoux\EYatra\Agent;
+use Uitoux\EYatra\ChequeDetail;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\NCountry;
@@ -133,7 +134,7 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state', 'user')->find($agent_id);
+			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state', 'user', 'chequeDetail')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			// dd($user);
@@ -293,13 +294,15 @@ class AgentController extends Controller {
 				$bank_detail->save();
 			}
 			//CHEQUE DETAIL SAVE
-			if ($request->bank_name) {
+			if ($request->check_favour) {
 				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $agent->id]);
-				$cheque_detail->fill($request->all());
+				// $cheque_detail->fill($request->all());
 				$cheque_detail->detail_of_id = 3122;
 				$cheque_detail->entity_id = $agent->id;
 				$cheque_detail->account_type_id = 3243;
+				$cheque_detail->cheque_favour = $request->check_favour;
 				$cheque_detail->save();
+				// dd($cheque_detail);
 			}
 			//WALLET SAVE
 			if ($request->type_id) {
