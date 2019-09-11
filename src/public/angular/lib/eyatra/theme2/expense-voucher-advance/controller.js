@@ -134,7 +134,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 // $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
                 // return;
             }
-            console.log(response.data.expense_voucher_advance.employee.user);
+            // console.log(response.data.expense_voucher_advance.employee.user);
 
             self.action = response.data.action;
 
@@ -143,7 +143,6 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             if (self.action == 'Edit') {
                 self.action = 'Edit';
                 self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee.user.name;
-
             } else {
                 self.action = 'Add';
             }
@@ -151,7 +150,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             var d = new Date();
             var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
             $("#date").val(val);
-            console.log(val);
+            // console.log(val);
 
             //SEARCH  EMPLOYEE
             self.searchEmployee = function(query) {

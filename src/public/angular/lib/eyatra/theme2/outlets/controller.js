@@ -7,10 +7,10 @@ app.component('eyatraOutlets', {
         $http.get(
             outlet_filter_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.region_list = response.data.region_list;
-            self.city_list = response.data.city_list;
-            self.state_list = response.data.state_list;
+            // self.city_list = response.data.city_list;
+            // self.state_list = response.data.state_list;
             self.country_list = response.data.country_list;
             $rootScope.loading = false;
         });
@@ -109,7 +109,7 @@ app.component('eyatraOutlets', {
             $http.get(
                 outlet_delete_url + '/' + $outlet_id,
             ).then(function(response) {
-                console.log(response.data);
+                // console.log(response.data);
                 if (response.data.success) {
                     $noty = new Noty({
                         type: 'success',
@@ -139,6 +139,26 @@ app.component('eyatraOutlets', {
                 }
             });
         }
+
+        $scope.get_state_base_country = function(id) {
+            $http.get(
+                outlet_get_state_filter_list + '/' + id
+            ).then(function(response) {
+                self.state_list = response.data.state_list;
+               
+            });
+        }
+
+        $scope.get_city_base_state = function(id) {
+            $http.get(
+                outlet_get_city_filter_list + '/' + id
+            ).then(function(response) {
+                self.city_list = response.data.city_list;
+             
+            });
+        }
+        
+
         $rootScope.loading = false;
 
     }
@@ -175,7 +195,7 @@ app.component('eyatraOutletForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response);
+            // console.log(response);
             self.outlet = response.data.outlet;
             // self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
             self.amount_eligiblity = response.data.amount_eligiblity;
@@ -276,7 +296,7 @@ app.component('eyatraOutletForm', {
                             }
                         )
                         .then(function(response) {
-                            console.log(response.data);
+                            // console.log(response.data);
                             resolve(response.data);
                         });
                     //reject(response);
@@ -300,7 +320,7 @@ app.component('eyatraOutletForm', {
                     self.sbu_list = [];
                     self.extras.sbu_list = res.sbus;
 
-                    console.log(self.extras.sbu_list);
+                    // console.log(self.extras.sbu_list);
                     $scope.$apply()
                 })
                 .fail(function(xhr) {
@@ -557,7 +577,7 @@ app.component('eyatraOutletForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -601,7 +621,7 @@ app.component('eyatraOutletView', {
             outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
             self.outlet = response.data.outlet;
-            console.log(self.outlet);
+            // console.log(self.outlet);
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
             self.amount = response.data.amount;

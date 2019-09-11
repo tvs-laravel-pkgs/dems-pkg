@@ -6,7 +6,7 @@ app.component('eyatraAlternateApproveList', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#alternate_approve_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate_2,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -30,11 +30,11 @@ app.component('eyatraAlternateApproveList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'empname', name: 'employees.name', searchable: true },
+                { data: 'empname', name: 'emp_user.name', searchable: true },
                 { data: 'empcode', name: 'employees.code', searchable: true },
-                { data: 'altempname', name: 'alternateemp.name', searchable: true },
+                { data: 'altempname', name: 'alter_user.name', searchable: true },
                 { data: 'altempcode', name: 'alternateemp.code', searchable: true },
-                { data: 'type', name: 'alternative_approvers.type', searchable: true },
+                { data: 'type', name: 'configs.name', searchable: true },
                 { data: 'fromdate', name: 'alternative_approvers.from', searchable: false },
                 { data: 'todate', name: 'alternative_approvers.to', searchable: true },
                 { data: 'status', name: 'status', searchable: false },
@@ -110,21 +110,21 @@ app.component('eyatraAlternateApproveForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 3000);
-                $location.path('/eyatra/alternate-approve');
-                return;
-            }
+            // if (!response.data.success) {
+            //     $noty = new Noty({
+            //         type: 'error',
+            //         layout: 'topRight',
+            //         text: response.data.error,
+            //         animation: {
+            //             speed: 500 // unavailable - no need
+            //         },
+            //     }).show();
+            //     setTimeout(function() {
+            //         $noty.close();
+            //     }, 3000);
+            //     $location.path('/eyatra/alternate-approve');
+            //     return;
+            // }
 
             self.alternate_approve = response.data.alternate_approve;
             console.log(self.alternate_approve);

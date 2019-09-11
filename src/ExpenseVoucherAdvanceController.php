@@ -3,17 +3,12 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
-use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Storage;
 use Uitoux\EYatra\Employee;
-use Uitoux\EYatra\Outlet;
-use Uitoux\EYatra\PettyCash;
-use Uitoux\EYatra\PettyCashEmployeeDetails;
-use Uitoux\EYatra\ReimbursementTranscation;
-use Yajra\Datatables\Datatables;
+use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Validator;
+use Yajra\Datatables\Datatables;
 
 class ExpenseVoucherAdvanceController extends Controller {
 	public function listExpenseVoucherRequest(Request $r) {
@@ -23,7 +18,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			'employees.code as ecode',
 			DB::raw('DATE_FORMAT(expense_voucher_advance_requests.date,"%d-%m-%Y") as date'),
 			'expense_voucher_advance_requests.advance_amount as advance_amount',
-			'expense_voucher_advance_requests.balance_amount as balance_amount',
+			DB::raw('IF(expense_voucher_advance_requests.balance_amount IS NULL,"--",expense_voucher_advance_requests.balance_amount) as balance_amount'),
 			'expense_voucher_advance_requests.status_id as status_id',
 			'configs.name as status'
 		)
@@ -43,20 +38,18 @@ class ExpenseVoucherAdvanceController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				if($expense_voucher_requests->status_id == 3460 ||$expense_voucher_requests->status_id == 3462 )
-				{
-				return '
-				<a href="#!/eyatra/expense/voucher-advance/edit/'.$expense_voucher_requests->id . '">
+				if ($expense_voucher_requests->status_id == 3460 || $expense_voucher_requests->status_id == 3462) {
+					return '
+				<a href="#!/eyatra/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#expense_voucher_confirm_box"
 				onclick="angular.element(this).scope().deleteExpenseVoucher(' . $expense_voucher_requests->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
-            	}else
-            	{
-            		return '';
-            	}
+				} else {
+					return '';
+				}
 
 			})
 			->make(true);
@@ -66,6 +59,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 		//dd('test');
 		if (!$id) {
 			//dd('sss');
+			$this->data['action'] = 'Add';
 			$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 			$this->data['success'] = true;
 			$this->data['message'] = 'Alternate Approve not found';
@@ -82,7 +76,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				->where('id', $id)->first();
 			$this->data['success'] = true;
 		}
-		$this->data['expense_voucher_advance']=$expense_voucher_advance;
+		$this->data['expense_voucher_advance'] = $expense_voucher_advance;
 		return response()->json($this->data);
 	}
 
@@ -92,7 +86,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 	}
 
 	public function expenseVoucherSave(Request $request) {
-		 //dd($request->all());
+		//dd($request->all());
 		try {
 			$validator = Validator::make($request->all(), [
 				'employee_id' => [
@@ -112,21 +106,18 @@ class ExpenseVoucherAdvanceController extends Controller {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 			DB::beginTransaction();
-			if($request->id)
-			{
-				$expense_voucher_advance =ExpenseVoucherAdvanceRequest::findOrFail($request->id);
+			if ($request->id) {
+				$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
 				$expense_voucher_advance->updated_by = Auth::user()->id;
 				$expense_voucher_advance->status_id = 3460;
-			}else
-			{
+			} else {
 				$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 				$expense_voucher_advance->created_by = Auth::user()->id;
 				$expense_voucher_advance->status_id = 3460;
 			}
 			$expense_voucher_advance->fill($request->all());
-			if(isset($request->description))
-			{
-				$expense_voucher_advance->description=$request->description;
+			if (isset($request->description)) {
+				$expense_voucher_advance->description = $request->description;
 			}
 			$expense_voucher_advance->save();
 

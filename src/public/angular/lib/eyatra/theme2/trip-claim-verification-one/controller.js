@@ -126,8 +126,8 @@ app.component('eyatraTripClaimVerificationOneView', {
                 $scope.$apply()
                 return;
             }
-            console.log(response.data.trip.lodgings.city);
             self.trip = response.data.trip;
+            self.gender = (response.data.trip.employee.gender).toLowerCase();
             self.travel_cities = response.data.travel_cities;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.travel_dates = response.data.travel_dates;
@@ -137,18 +137,18 @@ app.component('eyatraTripClaimVerificationOneView', {
             self.local_travels_total_amount = response.data.local_travels_total_amount;
             self.total_amount = response.data.total_amount;
             if (self.trip.advance_received) {
-                if (self.total_amount > self.trip.advance_received) {
-                    self.pay_to_employee = (self.total_amount - self.trip.advance_received);
+                if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {
+                    self.pay_to_employee = (parseInt(self.total_amount) - parseInt(self.trip.advance_received)).toFixed(2);
                     self.pay_to_company = '0.00';
-                } else if (self.total_amount < self.trip.advance_received) {
+                } else if (parseInt(self.total_amount) < parseInt(self.trip.advance_received)) {
                     self.pay_to_employee = '0.00';
-                    self.pay_to_company = (self.total_amount - self.trip.advance_received);
+                    self.pay_to_company = (parseInt(self.trip.advance_received) - parseInt(self.total_amount)).toFixed(2);
                 } else {
                     self.pay_to_employee = '0.00';
                     self.pay_to_company = '0.00';
                 }
             } else {
-                self.pay_to_employee = self.total_amount;
+                self.pay_to_employee = parseInt(self.total_amount).toFixed(2);
                 self.pay_to_company = '0.00';
             }
             $rootScope.loading = false;
