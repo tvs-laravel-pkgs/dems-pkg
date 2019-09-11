@@ -104,15 +104,14 @@ class AlternateApproveController extends Controller {
 
 	public function alternateapproveFormData($alternate_id = NULL) {
 		if (!$alternate_id) {
+			$this->data['action'] = 'Add';
 			$alternate_approve = new AlternateApprove;
 			$this->data['success'] = true;
 			$this->data['message'] = 'Alternate Approve not found';
 			$this->data['employee_list'] = [];
 			$this->data['employee'] = '';
 		} else {
-
 			$this->data['action'] = 'Edit';
-
 			$alternate_approve = AlternateApprove::with([
 				'employee',
 				'employee.user',
@@ -122,6 +121,7 @@ class AlternateApproveController extends Controller {
 				->where('employee_id', $alternate_id)->first();
 			//dd($alternate_approve);
 			if (!$alternate_approve) {
+				$this->data['action'] = 'Add';
 				$alternate_approve = new AlternateApprove;
 				$alternate_approve['employee'] = $employee = Employee::find($alternate_id);
 				$this->data['success'] = true;
@@ -183,7 +183,7 @@ class AlternateApproveController extends Controller {
 	}
 
 	public function alternateapproveSave(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			// $validator = Validator::make($request->all(), [
 			// 	'purpose_id' => [
