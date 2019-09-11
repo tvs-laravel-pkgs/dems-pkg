@@ -31,6 +31,8 @@ class EYatraTC1Seeder extends Seeder {
 	 * @return void
 	 */
 	public function run() {
+		$this->call(EYatraConfigSeeder::class);
+
 		$faker = Faker::create();
 
 		$company_id = $this->command->ask("Enter company id", '4');

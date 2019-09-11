@@ -31,7 +31,7 @@ class Address extends Model {
 		]);
 		$address->name = 'Primary';
 		$address->line_1 = $faker->streetAddress;
-		$country = NCountry::find(5);
+		$country = NCountry::find(1);
 		$state = $country->states()->inRandomOrder()->first();
 		$city = $state->cities()->inRandomOrder()->first();
 		$address->city_id = $city->id;
