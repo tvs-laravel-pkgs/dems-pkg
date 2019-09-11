@@ -294,7 +294,7 @@ class TripClaimController extends Controller {
 			}
 
 			//FINAL SAVE LOCAL TRAVELS
-			if ($request->local_travels) {
+			if ($request->is_local_travel) {
 				// dd($request->local_travels);
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
@@ -340,32 +340,35 @@ class TripClaimController extends Controller {
 					$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
 					LocalTravel::whereIn('id', $local_travels_removal_id)->delete();
 				}
-				foreach ($request->local_travels as $local_travel_data) {
-					$local_travel = LocalTravel::firstOrNew([
-						'id' => $local_travel_data['id'],
-					]);
-					$local_travel->fill($local_travel_data);
-					$local_travel->trip_id = $request->trip_id;
-					$local_travel->date = date('Y-m-d', strtotime($local_travel_data['date']));
-					$local_travel->created_by = Auth::user()->id;
-					$local_travel->save();
+				if ($request->local_travels) {
+					foreach ($request->local_travels as $local_travel_data) {
+						$local_travel = LocalTravel::firstOrNew([
+							'id' => $local_travel_data['id'],
+						]);
+						$local_travel->fill($local_travel_data);
+						$local_travel->trip_id = $request->trip_id;
+						$local_travel->date = date('Y-m-d', strtotime($local_travel_data['date']));
+						$local_travel->created_by = Auth::user()->id;
+						$local_travel->save();
 
-					//STORE ATTACHMENT
-					$item_images = storage_path('app/public/trip/local_travels/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($local_travel_data['attachments'])) {
-						foreach ($local_travel_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
-							$attachement_local_travel = new Attachment;
-							$attachement_local_travel->attachment_of_id = 3183;
-							$attachement_local_travel->attachment_type_id = 3200;
-							$attachement_local_travel->entity_id = $local_travel->id;
-							$attachement_local_travel->name = $name;
-							$attachement_local_travel->save();
+						//STORE ATTACHMENT
+						$item_images = storage_path('app/public/trip/local_travels/attachments/');
+						Storage::makeDirectory($item_images, 0777);
+						if (!empty($local_travel_data['attachments'])) {
+							foreach ($local_travel_data['attachments'] as $key => $attachement) {
+								$name = $attachement->getClientOriginalName();
+								$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
+								$attachement_local_travel = new Attachment;
+								$attachement_local_travel->attachment_of_id = 3183;
+								$attachement_local_travel->attachment_type_id = 3200;
+								$attachement_local_travel->entity_id = $local_travel->id;
+								$attachement_local_travel->name = $name;
+								$attachement_local_travel->save();
+							}
 						}
 					}
 				}
+
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
