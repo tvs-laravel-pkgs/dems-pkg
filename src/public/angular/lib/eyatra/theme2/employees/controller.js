@@ -174,6 +174,10 @@ app.component('eyatraEmployeeForm', {
                 self.employee.payment_mode_id = 3244;
             }
 
+            if (self.action == 'Add') {
+                $('#visit-single').prop('checked',true);
+            }
+
             if (self.action == 'Edit') {
                 self.switch_password = 'No';
                 $("#hide_password").hide();
@@ -202,7 +206,7 @@ app.component('eyatraEmployeeForm', {
 
 
         $scope.getSbuBasedonLob = function(lob_id) {
-            if (lob_id) {
+            
                 //alert(lob_id);
                 $.ajax({
                         url: get_sbu_by_lob,
@@ -217,12 +221,11 @@ app.component('eyatraEmployeeForm', {
                     .fail(function(xhr) {
                         console.log(xhr);
                     });
-            }
+            
         }
 
         $scope.getDesignation = function(grade_id) {
-            // alert(grade_id);
-            if (grade_id) {
+            
                 $.ajax({
                         url: get_designation_by_grade,
                         method: "POST",
@@ -237,7 +240,7 @@ app.component('eyatraEmployeeForm', {
                     .fail(function(xhr) {
                         console.log(xhr);
                     });
-            }
+            
         }
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
@@ -274,6 +277,19 @@ app.component('eyatraEmployeeForm', {
             function(value) {
                 return Number(value) > 0;
             }, 'Enter a positive number.');
+
+        $.validator.addMethod("pwcheck", function(value) {
+            if (value == '') return true;
+            return /^[A-Za-z0-9\d=!\-@._*]*$/.test(value) // consists of only these
+                &&
+                /[a-z]/.test(value) // has a lowercase letter
+                &&
+                /[A-Z]/.test(value) // has a uppercase letter
+                &&
+                /[=!\-@._*]/.test(value) // has a uppercase letter
+                &&
+                /\d/.test(value) // has a digit
+        }, 'Use strong password with atleast one uppercase and digit and special symbol');
 
         var form_id = '#employee_form';
         var v = jQuery(form_id).validate({
@@ -446,6 +462,7 @@ app.component('eyatraEmployeeForm', {
                             return false;
                         }
                     },
+                    'pwcheck': true,
                     minlength: 5,
                     maxlength: 16,
                 },
