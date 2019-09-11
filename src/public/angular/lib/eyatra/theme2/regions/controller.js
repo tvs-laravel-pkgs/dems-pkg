@@ -172,9 +172,7 @@ app.component('eyatraRegionForm', {
 
         });
         $('#on_focus').focus();
-        $scope.getStateByCountry = function(country_id) {
-            // alert(country_id);
-            if (country_id) {
+        $scope.getStateByCountry = function(country_id) { 
                 $.ajax({
                         url: region_get_state_by_country,
                         method: "POST",
@@ -188,7 +186,7 @@ app.component('eyatraRegionForm', {
                     .fail(function(xhr) {
                         console.log(xhr);
                     });
-            }
+           
         }
 
 
