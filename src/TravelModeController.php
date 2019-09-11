@@ -33,10 +33,13 @@ class TravelModeController extends Controller {
 			->leftjoin('users as updater', 'updater.id', '=', 'entities.updated_by')
 			->leftjoin('users as deactivator', 'deactivator.id', '=', 'entities.deleted_by')
 			->leftjoin('travel_mode_category_type as tm', 'tm.travel_mode_id', '=', 'entities.id')
-			->leftjoin('configs as c', 'c.id', '=', 'tm.category_id')
+			->leftjoin('configs as c', function ($join) {
+				$join->on('c.id', '=', 'tm.category_id')
+					->where('c.config_type_id', 525);
+			})
 			->where('entities.company_id', Auth::user()->company_id)
 			->where('entities.entity_type_id', 502)
-			->where('c.config_type_id', 525)
+		// ->where('c.config_type_id', 525)
 			->orderBy('entities.id', 'desc');
 
 		// dd($entities->get());
@@ -104,13 +107,18 @@ class TravelModeController extends Controller {
 			];
 
 			$validator = Validator::make($request->all(), [
-				'name' => [
-					'required',
-					'unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,' . 502,
-					'max:191',
-				],
-
+				'name' => 'required|unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,502',
 			], $error_messages);
+
+			// $validator = Validator::make($request->all(), [
+			// 	'name' => [
+			// 		'required',
+
+			// 		'unique:entities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',entity_type_id,' . 502,
+			// 		'max:191',
+			// 	],
+
+			// ], $error_messages);
 
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
