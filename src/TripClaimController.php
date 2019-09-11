@@ -104,11 +104,13 @@ class TripClaimController extends Controller {
 
 			//SAVING VISITS
 			if ($request->visits) {
+				// dd($request->visits);
 				foreach ($request->visits as $visit_data) {
 					if (!empty($visit_data['id'])) {
 						$visit = Visit::find($visit_data['id']);
 						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
 						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
+						$visit->travel_mode_id = $visit_data['travel_mode_id'];
 						$visit->save();
 						// dd($visit_data['id']);
 						//UPDATE VISIT BOOKING STATUS
@@ -172,7 +174,7 @@ class TripClaimController extends Controller {
 
 				//SAVE
 				if ($request->lodgings) {
-
+					// dd($request->lodgings);
 					// LODGE STAY DAYS SHOULD NOT EXCEED TOTAL TRIP DAYS
 					$lodge_stayed_days = (int) array_sum(array_column($request->lodgings, 'stayed_days'));
 					$trip_total_days = (int) $request->trip_total_days;
@@ -181,13 +183,20 @@ class TripClaimController extends Controller {
 					}
 
 					foreach ($request->lodgings as $lodging_data) {
+
 						$lodging = Lodging::firstOrNew([
 							'id' => $lodging_data['id'],
 						]);
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
-						$lodging->check_in_date = date('Y-m-d H:i:s', strtotime($lodging_data['check_in_date']));
-						$lodging->checkout_date = date('Y-m-d H:i:s', strtotime($lodging_data['checkout_date']));
+
+						//CONCATENATE DATE & TIME
+						$check_in_date = $lodging_data['check_in_date'];
+						$check_in_time = $lodging_data['check_in_time'];
+						$checkout_date = $lodging_data['checkout_date'];
+						$checkout_time = $lodging_data['checkout_time'];
+						$lodging->check_in_date = date('Y-m-d H:i:s', strtotime("$check_in_date $check_in_time"));
+						$lodging->checkout_date = date('Y-m-d H:i:s', strtotime("$checkout_date $checkout_time"));
 						$lodging->created_by = Auth::user()->id;
 						$lodging->save();
 

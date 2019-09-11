@@ -223,14 +223,14 @@ app.component('eyatraStateForm', {
                 $("#sc_" + id).removeClass("ng-hide");
                 $("#sc_" + id).prop('required', true);
                 $("#sc_" + id).prop('min', 1);
-                $(".agent_select").removeClass("ng-hide");
-                $(".agent_select").prop('required', true);
+                $(".agent_").removeClass("ng-hide");
+                $(".agent_").prop('required', true);
                 //alert('fsdghgf');
             } else {
                 $("#sc_" + id).addClass("ng-hide");
                 $("#sc_" + id).prop('required', false);
-                $(".agent_select").addClass("ng-hide");
-                $(".agent_select").prop('required', false);
+                $(".agent_").addClass("ng-hide");
+                $(".agent_").prop('required', false);
             }
 
         }
@@ -241,7 +241,7 @@ app.component('eyatraStateForm', {
                 $(".sc_" + id).prop('required', true);
                 $(".sc_" + id).prop('number', true);
                 $(".sc_" + id).prop('min', 1);
-                $(".agent_select_" + id).prop('required', true);
+                $(".agent_" + id).prop('required', true);
             } else {
                 // $(".error").css("display", "none");
                 $(".sc_" + id).prop('required', false);

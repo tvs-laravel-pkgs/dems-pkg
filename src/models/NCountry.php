@@ -34,9 +34,10 @@ class NCountry extends Model {
 
 		foreach ($countries as $country_id => $country_data) {
 			$country = NCountry::firstOrNew([
-				'id' => $country_id,
+				// 'id' => $country_id,
 				'company_id' => $company->id,
 			]);
+			// dd($country);
 			$country->fill($country_data['data']);
 			$country->save();
 			foreach ($country_data['states'] as $state_code => $state_data) {

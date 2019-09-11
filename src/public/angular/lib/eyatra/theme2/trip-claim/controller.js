@@ -638,27 +638,45 @@ app.component('eyatraTripClaimForm', {
 
         //GET LODGE CHECKIN AND CHECKOUT DATE TO FIND STAY DAYS AND AMOUNT CALC
         $scope.lodgecheckOutInDate = function() {
+            console.log(' == lodgecheckOutInDate ==');
             $timeout(function() {
                 $('.lodging_checkin_out_date').each(function() {
                     var checkin_date = $(this).closest('tr').find('.lodging_checkin_date').val();
                     var checkout_date = $(this).closest('tr').find('.lodging_check_out_date').val();
+                    var checkin_time = $(this).closest('tr').find('.lodging_checkin_time').val();
+                    var checkout_time = $(this).closest('tr').find('.lodging_check_out_time').val();
                     var base_eligible_amount = $(this).closest('tr').find('.base_eligible_amount').val();
-
                     var date_1 = checkin_date.split("-");
                     var date_2 = checkout_date.split("-");
                     var checkin_date_format = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
                     var checkout_date_format = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
-                    if (checkin_date_format && checkout_date_format) {
-                        var timeDiff = (new Date(checkout_date_format)) - (new Date(checkin_date_format));
-                        var days = (timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                    console.log(checkin_date_format, checkin_time, checkout_date_format, checkout_time);
+
+                    if (checkin_date_format && checkout_date_format && checkin_time && checkout_time) {
+                        var timeDiff = (new Date(checkout_date_format + ' ' + checkout_time)) - (new Date(checkin_date_format + ' ' + checkin_time));
+                        // var days = (timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                        var hours = Math.abs(timeDiff / 3600000);
+                        if (hours > 24) {
+                            var days = Math.trunc(hours / 24);
+                            var days_reminder = Math.round(hours % 24);
+                            var days_aft_calc;
+                            if (days_reminder > 2) {
+                                days_aft_calc = days + 1;
+                            } else {
+                                days_aft_calc = days;
+                            }
+                        } else {
+                            days_aft_calc = 1;
+                        }
+
                         var eligible_amount_with_days = 0;
                         var days_c = '';
-                        if (!$.isNumeric(days)) {
+                        if (!$.isNumeric(days_aft_calc)) {
                             days_c = '';
                             eligible_amount_with_days = base_eligible_amount;
                         } else {
-                            days_c = days;
-                            eligible_amount_with_days = days * base_eligible_amount;
+                            days_c = days_aft_calc;
+                            eligible_amount_with_days = days_aft_calc * base_eligible_amount;
                         }
                         eligible_amount_with_days = parseFloat(Math.round(eligible_amount_with_days * 100) / 100).toFixed(2);
                         $(this).closest('tr').find('.stayed_days').val(days_c);
@@ -1003,6 +1021,8 @@ app.component('eyatraTripClaimForm', {
             var selected_tab_type = $(this).attr('data-nav_tab');
             if (active_tab_type) { //EXCEPT LOCAL TRAVEL NAV
                 $('#claim_' + active_tab_type + '_expense_form').submit();
+            } else {
+                self.enable_switch_tab = true;
             }
             // console.log(' == self.enable_switch_tab ==');
             // console.log(self.enable_switch_tab);
@@ -1039,6 +1059,10 @@ app.component('eyatraTripClaimForm', {
         var v = jQuery(form_transport_id).validate({
             ignore: "",
             rules: {},
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
             submitHandler: function(form) {
                 //console.log(self.item);
                 let formData = new FormData($(form_transport_id)[0]);
@@ -1103,6 +1127,10 @@ app.component('eyatraTripClaimForm', {
         var form_lodge_id = '#claim_lodge_expense_form';
         var v = jQuery(form_lodge_id).validate({
             ignore: "",
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
             rules: {},
             submitHandler: function(form) {
                 //console.log(self.item);
@@ -1182,6 +1210,10 @@ app.component('eyatraTripClaimForm', {
         var v = jQuery(form_board_id).validate({
             ignore: "",
             rules: {},
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
             submitHandler: function(form) {
                 //console.log(self.item);
                 let formData = new FormData($(form_board_id)[0]);
@@ -1276,6 +1308,10 @@ app.component('eyatraTripClaimForm', {
             // },
             ignore: "",
             rules: {},
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
             submitHandler: function(form) {
                 //console.log(self.item);
                 let formData = new FormData($(form_id)[0]);
