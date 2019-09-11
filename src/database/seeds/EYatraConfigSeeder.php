@@ -155,7 +155,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//VISIT BOOKING TYPE
 			3100 => [
-				'name' => 'Fresh Booking',
+				'name' => 'Booking',
 				'config_type_id' => 505,
 			],
 			3101 => [
@@ -627,11 +627,11 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			//ALTERNATE APPROVER TYPE
-			3460 => [
+			3480 => [
 				'name' => 'Temporary',
 				'config_type_id' => 529,
 			],
-			3461 => [
+			3481 => [
 				'name' => 'Permanent',
 				'config_type_id' => 529,
 			],
