@@ -135,6 +135,10 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/lob/get-sbus', 'Uitoux\EYatra\LobController@getLobSbus')->name('getLobSbus');
 		Route::get('eyatra/outlet/get-filter-data', 'Uitoux\EYatra\OutletController@eyatraOutletFilterData')->name('eyatraOutletFilterData');
 
+		Route::get('/eyatra/outlet/filter/state-list/{id?}', 'Uitoux\EYatra\OutletController@stateFilterList')->name('outletGetStateFilterList');
+		Route::get('/eyatra/outlet/filter/city-list/{id?}', 'Uitoux\EYatra\OutletController@cityFilterList')->name('outletGetCityFilterList');
+
+
 		//EMPLOYEES
 		Route::get('eyatra/employee/get-list', 'Uitoux\EYatra\EmployeeController@listEYatraEmployee')->name('listEYatraEmployee');
 		Route::get('eyatra/employee/get-form-data/{employee_id?}', 'Uitoux\EYatra\EmployeeController@eyatraEmployeeFormData')->name('eyatraEmployeeFormData');
