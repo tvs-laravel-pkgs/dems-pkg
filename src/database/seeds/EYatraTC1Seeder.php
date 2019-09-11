@@ -31,6 +31,8 @@ class EYatraTC1Seeder extends Seeder {
 	 * @return void
 	 */
 	public function run() {
+		$this->call(EYatraConfigSeeder::class);
+
 		$faker = Faker::create();
 
 		$company_id = $this->command->ask("Enter company id", '4');
@@ -295,7 +297,7 @@ class EYatraTC1Seeder extends Seeder {
 
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
-			$address = Address::create($address_of_id, $outlet, $faker);
+			$address = Address::create($address_of_id, $outlet, $faker, $company->id);
 			dump($outlet, $address);
 
 			$this->command->info('------------------');
@@ -377,7 +379,7 @@ class EYatraTC1Seeder extends Seeder {
 
 			//AGENT ADDRESS
 			$address_of_id = 3161;
-			$address = Address::create($address_of_id, $agent, $faker);
+			$address = Address::create($address_of_id, $agent, $faker, $company->id);
 
 			$travel_modes = [];
 			if ($i <= 10) {
