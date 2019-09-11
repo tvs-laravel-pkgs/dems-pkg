@@ -218,6 +218,14 @@ class TripClaimController extends Controller {
 					}
 				}
 
+				//GET SAVED LODGINGS
+				$saved_lodgings = Trip::with([
+					'lodgings',
+					'lodgings.city',
+					'lodgings.stateType',
+					'lodgings.attachments',
+				])->find($request->trip_id);
+
 				//BOARDING CITIES LIST ==> NOT BEEN USED NOW
 
 				// $boarding_dates_list = array();
@@ -239,7 +247,7 @@ class TripClaimController extends Controller {
 				// }
 
 				DB::commit();
-				return response()->json(['success' => true]);
+				return response()->json(['success' => true, 'saved_lodgings' => $saved_lodgings]);
 			}
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
@@ -289,18 +297,25 @@ class TripClaimController extends Controller {
 					}
 				}
 
+				//GET SAVED BOARDINGS
+				$saved_boardings = Trip::with([
+					'boardings',
+					'boardings.city',
+					'boardings.attachments',
+				])->find($request->trip_id);
+
 				DB::commit();
-				return response()->json(['success' => true]);
+				return response()->json(['success' => true, 'saved_boardings' => $saved_boardings]);
 			}
 
 			//FINAL SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
-				// dd($request->local_travels);
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 
 				//UPDATE TRIP STATUS
 				$trip = Trip::find($request->trip_id);
+
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
 					$trip->status_id = 3025; // Payment Pending
@@ -316,6 +331,7 @@ class TripClaimController extends Controller {
 				$employee_claim->fill($request->all());
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
 					$employee_claim->status_id = 3223; //PAYMENT PENDING
