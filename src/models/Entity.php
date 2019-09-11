@@ -90,7 +90,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 505)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 	public static function cityCategoryList() {
-		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->orderBy('id', 'asc')->get();
 	}
 
 	public static function accountTypeList() {
