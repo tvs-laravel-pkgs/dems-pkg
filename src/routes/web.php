@@ -138,7 +138,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('/eyatra/outlet/filter/state-list/{id?}', 'Uitoux\EYatra\OutletController@stateFilterList')->name('outletGetStateFilterList');
 		Route::get('/eyatra/outlet/filter/city-list/{id?}', 'Uitoux\EYatra\OutletController@cityFilterList')->name('outletGetCityFilterList');
 
-
 		//EMPLOYEES
 		Route::get('eyatra/employee/get-list', 'Uitoux\EYatra\EmployeeController@listEYatraEmployee')->name('listEYatraEmployee');
 		Route::get('eyatra/employee/get-form-data/{employee_id?}', 'Uitoux\EYatra\EmployeeController@eyatraEmployeeFormData')->name('eyatraEmployeeFormData');
@@ -157,12 +156,19 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/import/type/get', 'Uitoux\EYatra\EmployeeController@getImportFormData')->name('getImportFormData');
 
 		//END
-		
+
 		//EXPENSE VOUCHER ADVANCE
 		Route::get('eyatra/expense/voucher-advance/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@listExpenseVoucherRequest')->name('listExpenseVoucherRequest');
 		Route::get('eyatra/expense/voucher-advance/get-form-data/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherFormData')->name('expenseVoucherFormData');
 		Route::post('eyatra/expense/voucher-advance/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherSave')->name('expenseVoucherSave');
+		Route::get('eyatra/expense/voucher-advance/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherView')->name('expenseVoucherView');
 		Route::get('eyatra/expense/voucher-advance/delete/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherDelete')->name('expenseVoucherDelete');
+
+		//EXPENSE VOUCHER ADVANCE VERIFICATION
+		Route::get('eyatra/expense/voucher-advance/verification/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@listExpenseVoucherverificationRequest')->name('listExpenseVoucherverificationRequest');
+		Route::post('eyatra/expense/voucher-advance/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationSave')->name('expenseVoucherVerificationSave');
+		Route::get('eyatra/expense/voucher-advance/verification/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationView')->name('expenseVoucherVerificationView');
+
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
 		Route::get('eyatra/designations/get-form-data/{designation_id?}', 'Uitoux\EYatra\DesignationController@eyatraDesignationFormData')->name('eyatraDesignationFormData');
