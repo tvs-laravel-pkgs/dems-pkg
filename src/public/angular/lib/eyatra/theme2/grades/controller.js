@@ -160,7 +160,6 @@ app.component('eyatraGradeForm', {
                 // $scope.$apply()
                 return;
             }
-            console.log(response.data.extras.expense_type_list);
             self.entity = response.data.grade;
             self.extras = response.data.extras;
             self.action = response.data.action;

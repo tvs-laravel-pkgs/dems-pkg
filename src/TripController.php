@@ -107,7 +107,7 @@ class TripController extends Controller {
 
 	public function saveTrip(Request $request) {
 		//dd($request->all());
-		$size = sizeof($request->visits) - 1;
+		$size = sizeof($request->visits);
 		for ($i = 0; $i < $size; $i++) {
 			//dd($visit);
 			if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {

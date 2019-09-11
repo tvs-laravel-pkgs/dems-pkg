@@ -109,7 +109,6 @@ app.component('eyatraTripBookingUpdatesForm', {
                     number: true,
                 },
                 'tax': {
-                    required: true,
                     maxlength: 10,
                     number: true,
                 },

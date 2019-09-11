@@ -81,6 +81,9 @@ class TripClaimVerificationThreeController extends Controller {
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
+				'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
+					$q->where('trip_id', $trip_id);
+				},
 				'employee.grade',
 				'employee.bankDetail',
 				'employee.walletDetail',

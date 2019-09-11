@@ -5,9 +5,9 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\EmployeeClaim;
-use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\Trip;
@@ -54,32 +54,29 @@ class TripClaimVerificationOneController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->where(function ($query){
+			->where(function ($query) {
 
-				if(Auth::user()->entity_id)
-				{
-					$now=date('Y-m-d');
-					$sub_employee_id=AlternateApprove::select('employee_id')
-					->where('from','<=', $now)
-                    ->where('to','>=', $now)
-                    ->where('alternate_employee_id',Auth::user()->entity_id)
-                    ->get()
-                    ->toArray();
-                    //dd($sub_employee_id);
-                    $ids=array_column($sub_employee_id, 'employee_id');
-                    array_push($ids,Auth::user()->entity_id);
-                    if(count($sub_employee_id)>0)
-                    {
-                    	$query->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
-                    }else
-                    {
-                    	$query->where('e.reporting_to_id', Auth::user()->entity_id);//MANAGER
-                    }
+				if (Auth::user()->entity_id) {
+					$now = date('Y-m-d');
+					$sub_employee_id = AlternateApprove::select('employee_id')
+						->where('from', '<=', $now)
+						->where('to', '>=', $now)
+						->where('alternate_employee_id', Auth::user()->entity_id)
+						->get()
+						->toArray();
+					//dd($sub_employee_id);
+					$ids = array_column($sub_employee_id, 'employee_id');
+					array_push($ids, Auth::user()->entity_id);
+					if (count($sub_employee_id) > 0) {
+						$query->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
+					} else {
+						$query->where('e.reporting_to_id', Auth::user()->entity_id); //MANAGER
+					}
 
 				}
 			})
 			->where('ey_employee_claims.status_id', 3222) //CLAIM REQUESTED
-			//->where('e.reporting_to_id', Auth::user()->entity_id) //MANAGER
+		//->where('e.reporting_to_id', Auth::user()->entity_id) //MANAGER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -108,6 +105,9 @@ class TripClaimVerificationOneController extends Controller {
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
+				'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
+					$q->where('trip_id', $trip_id);
+				},
 				'employee.grade',
 				'employee.designation',
 				'employee.reportingTo',
