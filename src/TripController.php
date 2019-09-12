@@ -31,7 +31,7 @@ class TripController extends Controller {
 				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d/%m/%Y"), " to ", DATE_FORMAT(trips.end_date,"%d/%m/%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(trips.advance_received,"2","en_IN") as advance_received'),
 				'status.name as status'
@@ -106,15 +106,13 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
-		//dd($request->all());
 		$size = sizeof($request->visits);
 		for ($i = 0; $i < $size; $i++) {
-			//dd($visit);
 			if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {
-				return response()->json(['success' => false, 'errors' => "Departure Date Should Be with in Start Date and End Date"]);
+				return response()->json(['success' => false, 'errors' => "Departure date should be within Trip Period"]);
 
 			}
-			//dump(sizeof($request->visits));
+
 			$next_key = $i + 1;
 			if (!($next_key >= $size)) {
 				//dump($next_key);
