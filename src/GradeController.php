@@ -31,8 +31,8 @@ class GradeController extends Controller {
 		return response()->json($this->data);
 	}
 	public function listEYatraGrade(Request $r) {
-		if (!empty($r->advanced_eligibility)) {
-			// dd($r->advanced_eligibility);
+
+		if (isset($r->advanced_eligibility)) {
 
 			$advanced_eligibility = $r->advanced_eligibility;
 		} else {

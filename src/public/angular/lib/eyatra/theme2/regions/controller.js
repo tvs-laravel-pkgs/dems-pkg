@@ -7,7 +7,7 @@ app.component('eyatraRegions', {
         $http.get(
             region_filter_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.state_list = response.data.state_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -172,21 +172,21 @@ app.component('eyatraRegionForm', {
 
         });
         $('#on_focus').focus();
-        $scope.getStateByCountry = function(country_id) { 
-                $.ajax({
-                        url: region_get_state_by_country,
-                        method: "POST",
-                        data: { country_id: country_id },
-                    })
-                    .done(function(res) {
-                        self.extras.state_list = [];
-                        self.extras.state_list = res.state_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-           
+        $scope.getStateByCountry = function(country_id) {
+            $.ajax({
+                    url: region_get_state_by_country,
+                    method: "POST",
+                    data: { country_id: country_id },
+                })
+                .done(function(res) {
+                    self.extras.state_list = [];
+                    self.extras.state_list = res.state_list;
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+
         }
 
 
@@ -235,7 +235,7 @@ app.component('eyatraRegionForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';

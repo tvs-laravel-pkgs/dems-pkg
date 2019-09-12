@@ -173,7 +173,7 @@ class AdvanceClaimRequestController extends Controller {
 	}
 
 	public function eyatraAdvanceClaimFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 			->leftJoin('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)->get();

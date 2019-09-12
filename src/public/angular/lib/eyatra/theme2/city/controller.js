@@ -54,33 +54,33 @@ app.component('eyatraCity', {
         }, 500);
 
         $scope.loadState = function(country_id) {
-            if(country_id != null){
+            if (country_id != null) {
                 $.ajax({
-                    url: get_state_by_country,
-                    method: "POST",
-                    data: { country_id: country_id },
-                })
-                .done(function(res) {
-                    self.state_list = [];
-                    $(res).each(function(i, v) {
-                        self.state_list.push({
-                            id: v['id'],
-                            name: v['name'],
+                        url: get_state_by_country,
+                        method: "POST",
+                        data: { country_id: country_id },
+                    })
+                    .done(function(res) {
+                        self.state_list = [];
+                        $(res).each(function(i, v) {
+                            self.state_list.push({
+                                id: v['id'],
+                                name: v['name'],
+                            });
                         });
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
                     });
-                })
-                .fail(function(xhr) {
-                    console.log(xhr);
-                }); 
-            }else{  
-                 self.state_list = [];
+            } else {
+                self.state_list = [];
             }
-           
+
         }
         $http.get(
             city_filter_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.country_list = response.data.country_list;
             // self.state_list = response.data.state_list;
             self.status_list = response.data.status_list;
@@ -123,7 +123,7 @@ app.component('eyatraCity', {
             $http.get(
                 city_delete_url + '/' + $city_id,
             ).then(function(response) {
-                console.log(response.data);
+                // console.log(response.data);
                 if (response.data.success) {
                     $noty = new Noty({
                         type: 'success',
@@ -221,29 +221,28 @@ app.component('eyatraCityForm', {
 
         $scope.loadState = function(country_id) {
 
-            if(country_id != null)
-            {
+            if (country_id != null) {
 
-            $.ajax({
-                    url: get_state_by_country,
-                    method: "POST",
-                    data: { country_id: country_id },
+                $.ajax({
+                        url: get_state_by_country,
+                        method: "POST",
+                        data: { country_id: country_id },
 
-                })
-                .done(function(res) {
-                    self.extras.state_list = [];
-                    $(res).each(function(i, v) {
-                        self.extras.state_list.push({
-                            id: v['id'],
-                            name: v['name'],
+                    })
+                    .done(function(res) {
+                        self.extras.state_list = [];
+                        $(res).each(function(i, v) {
+                            self.extras.state_list.push({
+                                id: v['id'],
+                                name: v['name'],
+                            });
                         });
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
                     });
-                })
-                .fail(function(xhr) {
-                    console.log(xhr);
-                });
-            }else{
-               
+            } else {
+
                 self.extras.state_list = [];
             }
         }
@@ -333,7 +332,7 @@ app.component('eyatraCityForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
