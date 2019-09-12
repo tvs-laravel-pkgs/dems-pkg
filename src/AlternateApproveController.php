@@ -150,7 +150,7 @@ class AlternateApproveController extends Controller {
 		$this->data['extras'] = [
 			'type' => collect(Config::managerType()->prepend(['id' => '', 'name' => 'Select Type'])),
 		];
-		// dd($this->data['extras']);
+		// dd($alternate_approve);
 		$this->data['alternate_approve'] = $alternate_approve;
 		//$this->data['employee'] = $employee;
 

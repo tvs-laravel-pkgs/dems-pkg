@@ -125,7 +125,7 @@ app.component('eyatraAlternateApproveForm', {
             //     $location.path('/eyatra/alternate-approve');
             //     return;
             // }
-
+            console.log(response);
             self.alternate_approve = response.data.alternate_approve;
             self.action = response.data.action;
             // console.log(response.data.alternate_approve);
