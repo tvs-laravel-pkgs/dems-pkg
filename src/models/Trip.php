@@ -40,6 +40,9 @@ class Trip extends Model {
 	public function getStartDateAttribute($date) {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
+	public function getClaimedDateAttribute($date) {
+		return empty($date) ? '' : date('d-m-Y', strtotime($date));
+	}
 	public function getEndDateAttribute($date) {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
@@ -1064,7 +1067,7 @@ class Trip extends Model {
 
 	public function saveEYatraTripClaim(Request $request) {
 		// dd(Auth::user()->id);
-		dd($request->all());
+		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
