@@ -102,6 +102,12 @@ class EYatraRoleSeeder extends Seeder {
 					//MASTERS > REJECTION REASONS > VOUCHER CLAIM REJECT
 					5460, 5461, 5462, 5463,
 
+					//MASTERS > OUTLET REIMBURSEMENT
+					5761,
+
+					//MASTERS > IMPORT JOBS
+					5760,
+
 					// //EMPLOYEE CLAIM VERIFICATION 1
 					// 5500,
 
@@ -154,7 +160,7 @@ class EYatraRoleSeeder extends Seeder {
 					9000, 9001, 9002, 9003, 9004, 9005,
 
 					//EXPENSE VOUCHERS
-					5580,
+					5721,
 
 				],
 			],
@@ -169,7 +175,7 @@ class EYatraRoleSeeder extends Seeder {
 				'permissions' => [
 
 					//TRIPS
-					5001, 5002, 5003, 5004, 5482,
+					5001, 5002, 5003, 5004, 5480, 5481, 5482,
 
 					//TRIPS VERIFICATION
 					5060,
@@ -180,11 +186,11 @@ class EYatraRoleSeeder extends Seeder {
 					//CLAIM VERIFICATION 2
 					5520,
 
-					//PETTY CASH
-					5580,
+					//EXPENSE VOUCHERS
+					5721,
 
-					//PETTY CASH VERIFICATION
-					5581,
+					//EXPENSE VOUCHERS VERIFICATION
+					5722,
 				],
 			],
 
@@ -215,23 +221,50 @@ class EYatraRoleSeeder extends Seeder {
 				'created_by' => 1,
 				'permissions' => [
 
+					//TRIPS
+					5001, 5002, 5003, 5004, 5480, 5481,
+
 					//AGENT ROLE
 					5014,
 
-					//EMPLOYEE CLAIM VERIFICATION 2
+					//PETTY CASH
+					5721,
+
+					//PETTY CASH VERIFICATION
+					5723,
+
+				],
+			],
+
+			//EYATRA FINANCIER
+			505 => [
+				//'company_id' => 1,
+				'display_order' => 1,
+				'display_name' => 'eYatra Financier',
+				'fixed_roles' => 0,
+				'created_by' => 1,
+				'permissions' => [
+
+					//TRIPS
+					5001, 5002, 5003, 5004, 5480, 5481,
+
+					//AGENT ROLE
+					5014,
+
+					//EMPLOYEE CLAIM VERIFICATION AND PAYMENT
 					5521,
 
-					//AGENT CLAIM VERIFICATION 1
+					//AGENT CLAIM VERIFICATION AND PAYMENT
 					5540,
 
 					//ADVANCE REQUESTS
 					5560,
 
 					//PETTY CASH
-					5580,
+					5721,
 
 					//PETTY CASH VERIFICATION
-					5582,
+					5724,
 
 				],
 			],

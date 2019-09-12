@@ -30,11 +30,11 @@ app.component('eyatraAlternateApproveList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'empname', name: 'employees.name', searchable: true },
                 { data: 'empcode', name: 'employees.code', searchable: true },
-                { data: 'altempname', name: 'alternateemp.name', searchable: true },
+                { data: 'empname', name: 'emp_user.name', searchable: true },
                 { data: 'altempcode', name: 'alternateemp.code', searchable: true },
-                { data: 'type', name: 'alternative_approvers.type', searchable: true },
+                { data: 'altempname', name: 'alter_user.name', searchable: true },
+                { data: 'type', name: 'configs.name', searchable: true },
                 { data: 'fromdate', name: 'alternative_approvers.from', searchable: false },
                 { data: 'todate', name: 'alternative_approvers.to', searchable: true },
                 { data: 'status', name: 'status', searchable: false },
@@ -125,14 +125,22 @@ app.component('eyatraAlternateApproveForm', {
                 $location.path('/eyatra/alternate-approve');
                 return;
             }
-
+            // console.log(response);
             self.alternate_approve = response.data.alternate_approve;
-            console.log(self.alternate_approve);
-            /*self.selectedItem = self.alternate_approve.emp_name;
-            self.selectedItem1 = self.alternate_approve.alt_emp_name;
-            $(".employee_id").val(self.alternate_approve.employee_id);
-            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);*/
+            self.action = response.data.action;
+            // console.log(response.data.alternate_approve);
+            // self.selectedItem = self.alternate_approve.emp_name;
+            // self.selectedItem1 = self.alternate_approve.alt_emp_name;
+            // $(".employee_id").val(self.alternate_approve.employee_id);
+            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);
             self.extras = response.data.extras;
+            if (self.action == 'Edit') {
+                self.action = 'Edit';
+                self.alternate_approve.alt_employee = response.data.alternate_approve.alt_employee.user.name;
+            } else {
+                self.action = 'Add';
+                // self.alternate_approve.alt_employee = "";
+            }
             if (response.data.alternate_approve.from != undefined) {
                 self.date = self.alternate_approve.from + ' to ' + self.alternate_approve.to;
                 $('.daterange').daterangepicker({

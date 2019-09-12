@@ -43,6 +43,7 @@ class EYatraConfigSeeder extends Seeder {
 			526 => 'Account Type',
 			527 => 'Petty Cash Type',
 			528 => 'Advance Expense Voucher',
+			529 => 'Alternate Approver Type',
 		];
 
 		$configs = [
@@ -78,7 +79,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 501,
 			],
 			3023 => [
-				'name' => 'Claimed',
+				'name' => 'Claim Requested',
 				'config_type_id' => 501,
 			],
 			3024 => [
@@ -154,7 +155,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//VISIT BOOKING TYPE
 			3100 => [
-				'name' => 'Fresh Booking',
+				'name' => 'Booking',
 				'config_type_id' => 505,
 			],
 			3101 => [
@@ -571,19 +572,19 @@ class EYatraConfigSeeder extends Seeder {
 
 			//TRAVEL MODE CATEGORY TYPE
 			3400 => [
-				'name' => 'Own Two Wheeler',
+				'name' => 'Own Vehicle',
 				'config_type_id' => 525,
 			],
-			3401 => [
-				'name' => 'Own Four Wheeler',
-				'config_type_id' => 525,
-			],
+			// 3401 => [
+			// 	'name' => 'Own Vehicle',
+			// 	'config_type_id' => 525,
+			// ],
 			3402 => [
-				'name' => 'Vehicle No Claim',
+				'name' => 'Not Claimable',
 				'config_type_id' => 525,
 			],
 			3403 => [
-				'name' => 'Claim',
+				'name' => 'Claimable',
 				'config_type_id' => 525,
 			],
 
@@ -623,6 +624,16 @@ class EYatraConfigSeeder extends Seeder {
 			3462 => [
 				'name' => 'Claim Rejected',
 				'config_type_id' => 528,
+			],
+
+			//ALTERNATE APPROVER TYPE
+			3480 => [
+				'name' => 'Temporary',
+				'config_type_id' => 529,
+			],
+			3481 => [
+				'name' => 'Permanent',
+				'config_type_id' => 529,
 			],
 		];
 

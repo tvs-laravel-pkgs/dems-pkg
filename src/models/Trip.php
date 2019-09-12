@@ -40,6 +40,9 @@ class Trip extends Model {
 	public function getStartDateAttribute($date) {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
+	public function getClaimedDateAttribute($date) {
+		return empty($date) ? '' : date('d-m-Y', strtotime($date));
+	}
 	public function getEndDateAttribute($date) {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
@@ -256,6 +259,7 @@ class Trip extends Model {
 			'employee',
 			'employee.user',
 			'employee.designation',
+			'employee.grade',
 			'purpose',
 			'status',
 		])
@@ -276,9 +280,7 @@ class Trip extends Model {
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $end_date->end_date;
+		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
 		$trip->days = $days->days;
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
@@ -412,7 +414,7 @@ class Trip extends Model {
 	}
 
 	public static function getVerficationPendingList($r) {
-		//dd($r->all());
+		// dd($r->all());
 		/*if(isset($r->period))
 			{
 				$date = explode(' to ', $r->period);
@@ -435,9 +437,9 @@ class Trip extends Model {
 				'trips.number',
 				'e.code as ecode',
 				'users.name as ename',
+				'trips.start_date',
+				'trips.end_date',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'trips.created_at',
@@ -674,6 +676,8 @@ class Trip extends Model {
 				'visits.travelMode',
 				'visits.bookingMethod',
 				'visits.bookingStatus',
+				'visits.selfBooking',
+				'visits.attachments',
 				'visits.agent',
 				'visits.status',
 				'visits.managerVerificationStatus',
@@ -734,7 +738,7 @@ class Trip extends Model {
 
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
-		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id')
+		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
 			->leftjoin('entities', 'entities.id', 'employees.grade_id')
@@ -824,9 +828,25 @@ class Trip extends Model {
 		}
 
 		$trip = Trip::with([
+			'visits' => function ($q) {
+				$q->orderBy('id', 'asc');
+			},
+			'visits.fromCity',
+			'visits.toCity',
+			'visits.travelMode',
+			'visits.bookingMethod',
+			'visits.bookingStatus',
+			'visits.selfBooking',
+			'visits.attachments',
+			'visits.agent',
+			'visits.status',
+			'visits.managerVerificationStatus',
 			'advanceRequestStatus',
 			'employee',
 			'employee.user',
+			'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
+				$q->where('trip_id', $trip_id);
+			},
 			'employee.grade',
 			'employee.designation',
 			'employee.reportingTo',
@@ -1047,7 +1067,7 @@ class Trip extends Model {
 
 	public function saveEYatraTripClaim(Request $request) {
 		// dd(Auth::user()->id);
-		dd($request->all());
+		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [

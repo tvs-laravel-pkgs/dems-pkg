@@ -200,11 +200,11 @@ class CityController extends Controller {
 				// 	'unique:nstates,code,' . $request->id . ',id,country_id,' . $request->country_id,
 				// 	'max:2',
 				// ],
-				'name' => [
-					'required',
-					'unique:ncities,name,' . $request->id . ',id,state_id,' . $request->state_id,
-					'max:191',
-				],
+				// 'name' => [
+				// 	'required',
+				// 	'unique:ncities,name,' . $request->id . ',id,state_id,' . $request->state_id,
+				// 	'max:191',
+				// ],
 
 			], $error_messages);
 			if ($validator->fails()) {
@@ -212,14 +212,19 @@ class CityController extends Controller {
 			}
 
 			DB::beginTransaction();
+
+			$city = NCity::firstOrNew([
+				'company_id' => Auth::user()->company_id,
+				'name' => $request->name,
+				'state_id' => $request->state_id,
+			]);
+
 			if (!$request->id) {
-				$city = new NCity;
 				$city->created_by = Auth::user()->id;
 				$city->created_at = Carbon::now();
 				$city->updated_at = NULL;
 
 			} else {
-				$city = NCity::withTrashed()->where('id', $request->id)->first();
 
 				$city->updated_by = Auth::user()->id;
 				$city->updated_at = Carbon::now();
@@ -234,10 +239,11 @@ class CityController extends Controller {
 				$city->deleted_by = Auth::user()->id;
 
 			}
+			$city->category_id = $request->category_id;
 
-			$city->fill($request->all());
+			// $city->fill($request->all());
 			$city->save();
-			$city->company_id = Auth::user()->company_id;
+			// $city->company_id = Auth::user()->company_id;
 			$activity['entity_id'] = $city->id;
 			$activity['entity_type'] = "City";
 			$activity['details'] = empty($request->id) ? "City is added" : "City is updated";

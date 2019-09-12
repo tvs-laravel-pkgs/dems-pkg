@@ -6,6 +6,7 @@ use App\Role;
 use App\User;
 use Auth;
 use Carbon\Carbon;
+use DateTime;
 use DB;
 use File;
 use Illuminate\Http\Request;
@@ -135,6 +136,7 @@ class EmployeeController extends Controller {
 			$this->data['action'] = 'Add';
 			$employee = new Employee;
 			$employee['date_of_birth'] = date('Y-m-d');
+			$employee['date_of_joining'] = date('Y-m-d');
 			//dd($employee);
 			$this->data['success'] = true;
 		} else {
@@ -218,6 +220,10 @@ class EmployeeController extends Controller {
 				return response()->json(['success' => false, 'errors' => ['Role is required']]);
 			}
 
+			if ($request->date_of_joining < $request->date_of_birth) {
+				return response()->json(['success' => false, 'errors' => ['Date of joining should be greater than date of birth']]);
+			}
+
 			DB::beginTransaction();
 			if (!$request->id) {
 				$employee = new Employee;
@@ -254,6 +260,7 @@ class EmployeeController extends Controller {
 			$user->company_id = Auth::user()->company_id;
 			$user->entity_id = $employee->id;
 			$user->fill($request->all());
+			$user->email = $request->email;
 			//dd($request->password_change);
 			if ($request->password_change == 'Yes') {
 				// if (!empty($request->user['password'])) {
@@ -337,9 +344,11 @@ class EmployeeController extends Controller {
 			'paymentMode',
 		])
 			->find($employee_id);
-		$dob = $employee['date_of_birth'];
-		$diff = (date('Y') - date('Y', strtotime($dob)));
-		$employee['age'] = $diff;
+
+		$dob = new DateTime($employee['date_of_birth']);
+		$today_date = new DateTime('today');
+		$employee['age'] = $dob->diff($today_date)->y;
+
 		if (!$employee) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Employee not found'];
@@ -372,19 +381,32 @@ class EmployeeController extends Controller {
 	}
 
 	public function searchManager(Request $r) {
+		/*$key = $r->key;
+			$manager_list = Employee::select(
+				'name',
+				'code',
+				'employees.id'
+			)
+				->join('users as u', 'u.entity_id', 'employees.id')
+				->where('u.user_type_id', 3121)
+				->where(function ($q) use ($key) {
+					$q->where('code', 'like', '%' . $key . '%')
+					// ->where('name', 'like', '%' . $key . '%')
+					;
+				})
+		*/
 		$key = $r->key;
-		$manager_list = Employee::select(
-			'name',
-			'code',
+		$manager_list = Employee::leftJoin('users as emp_user', 'emp_user.entity_id', 'employees.id')->select(
+			'emp_user.name',
+			'employees.code',
 			'employees.id'
 		)
-			->join('users as u', 'u.entity_id', 'employees.id')
-			->where('u.user_type_id', 3121)
 			->where(function ($q) use ($key) {
-				$q->where('code', 'like', '%' . $key . '%')
-				// ->where('name', 'like', '%' . $key . '%')
+				$q->where('employees.code', 'like', '%' . $key . '%')
+					->orWhere('emp_user.name', 'like', '%' . $key . '%')
 				;
-			})
+			})->where('emp_user.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)
 			->get();
 		return response()->json($manager_list);
 	}

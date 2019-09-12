@@ -25,6 +25,7 @@ class PettyCashController extends Controller {
 			'employees.code as ecode',
 			'outlets.code as ocode',
 			'configs.name as status',
+			'petty_cash.status_id as status_id',
 			'petty_cash_type.name as petty_cash_type',
 			'petty_cash_type.id as petty_cash_type_id'
 		)
@@ -33,10 +34,8 @@ class PettyCashController extends Controller {
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
-		// ->leftjoin('petty_cash_employee_details', 'petty_cash_employee_details.petty_cash_id', 'petty_cash.id')
 			->where('petty_cash.employee_id', Auth::user()->entity_id)
 			->where('users.user_type_id', 3121)
-		// ->where('petty_cash_employee_details.petty_cash_type', $type_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
 		;
@@ -51,7 +50,8 @@ class PettyCashController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
+				if ($petty_cash->status_id == 3280 || $petty_cash->status_id == 3282) {
+					return '
 				<a href="#!/eyatra/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a>
@@ -62,6 +62,11 @@ class PettyCashController extends Controller {
 				onclick="angular.element(this).scope().deletePettycash(' . $petty_cash->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
+				} else {
+					return '<a href="#!/eyatra/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
+				}
 
 			})
 			->make(true);
@@ -118,7 +123,7 @@ class PettyCashController extends Controller {
 		$this->data['extras'] = [
 			'purpose_list' => Entity::uiPurposeList(),
 			'expence_type' => Entity::uiExpenceTypeListBasedPettyCash(),
-			'travel_mode_list' => Entity::uiTravelModeList(),
+			'travel_mode_list' => Entity::PettyCashTravelModeList(),
 		];
 		$this->data['petty_cash'] = $petty_cash;
 		$this->data['petty_cash_other'] = $petty_cash_other;

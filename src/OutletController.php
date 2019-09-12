@@ -177,6 +177,28 @@ class OutletController extends Controller {
 		return response()->json($this->data);
 	}
 
+	public function stateFilterList($id = NULL) {
+
+		$option = new NState;
+		$option->name = 'Select State';
+		$option->id = null;
+		$state_list = NState::select('name', 'id')->where('country_id', $id)->get();
+		$this->data['state_list'] = $state_list->prepend($option);
+		return response()->json($this->data);
+
+	}
+
+	public function cityFilterList($id = NULL) {
+
+		$option = new NCity;
+		$option->name = 'Select City';
+		$option->id = null;
+		$city_list = NCity::select('name', 'id')->where('state_id', $id)->get();
+		$this->data['city_list'] = $city_list->prepend($option);
+		return response()->json($this->data);
+
+	}
+
 //SEARCH CASHIER
 	public function searchCashier(Request $r) {
 		$key = $r->key;

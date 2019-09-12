@@ -194,9 +194,12 @@ class RegionController extends Controller {
 		$option = new NState;
 		$option->name = 'Select State';
 		$option->id = null;
-		$this->data['state_list'] = $state_list = NState::select('name', 'id')
-			->get()->prepend($option);
-		// dd($state_list);
+		/*$this->data['state_list'] = $state_list = NState::select('name', 'id')
+				->get()->prepend($option);
+			// dd($state_list);
+		*/
+
+		$this->data['state_list'] = $state_list = collect(NState::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select State']);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),

@@ -18,7 +18,7 @@ class TripClaimVerificationThreeController extends Controller {
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('outlets', 'outlets.id', 'e.outlet_id')
+		// ->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
@@ -52,7 +52,7 @@ class TripClaimVerificationThreeController extends Controller {
 				}
 			})
 			->where('ey_employee_claims.status_id', 3223) //PAYMENT PENDING
-			->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
+		// ->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -78,9 +78,25 @@ class TripClaimVerificationThreeController extends Controller {
 			$this->data['message'] = 'Trip not found';
 		} else {
 			$trip = Trip::with([
+				'visits' => function ($q) {
+					$q->orderBy('id', 'asc');
+				},
+				'visits.fromCity',
+				'visits.toCity',
+				'visits.travelMode',
+				'visits.bookingMethod',
+				'visits.bookingStatus',
+				'visits.selfBooking',
+				'visits.attachments',
+				'visits.agent',
+				'visits.status',
+				'visits.managerVerificationStatus',
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
+				'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
+					$q->where('trip_id', $trip_id);
+				},
 				'employee.grade',
 				'employee.bankDetail',
 				'employee.walletDetail',

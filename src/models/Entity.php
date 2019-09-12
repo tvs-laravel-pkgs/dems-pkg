@@ -53,6 +53,13 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
 	}
 
+	public static function agentTravelModeList() {
+		return Entity::where('entity_type_id', 502)
+			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
+			->where('travel_mode_category_type.category_id', 3403)
+			->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
 	public static function bookingModeList() {
 		return Entity::where('entity_type_id', 518)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
@@ -69,6 +76,13 @@ class Entity extends Model {
 	}
 	public static function uiExpenceTypeListBasedPettyCash() {
 		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->where('name', 'NOT LIKE', '%Local Conveyance%')->get();
+	}
+
+	public static function PettyCashTravelModeList() {
+		return Entity::where('entity_type_id', 502)
+			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
+			->where('travel_mode_category_type.category_id', 3400)
+			->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function uiTravelModeList() {
@@ -90,7 +104,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 505)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 	public static function cityCategoryList() {
-		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->orderBy('id', 'asc')->get();
 	}
 
 	public static function accountTypeList() {
@@ -149,7 +163,7 @@ class Entity extends Model {
 					if ($entity_name == 'Two Wheeler') {
 						$record->categories()->sync(3400);
 					} elseif ($entity_name == 'Four Wheeler') {
-						$record->categories()->sync(3401);
+						$record->categories()->sync(3400);
 					} elseif ($entity_name == 'Office Vehicle') {
 						$record->categories()->sync(3402);
 					} else {

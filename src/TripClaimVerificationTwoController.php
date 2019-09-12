@@ -52,27 +52,24 @@ class TripClaimVerificationTwoController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->where(function ($query){
-				if(Auth::user()->entity_id)
-				{
+			->where(function ($query) {
+				if (Auth::user()->entity_id) {
 					//dd(Auth::user()->entity_id);
-					$now=date('Y-m-d');
-					$sub_employee_id=AlternateApprove::select('employee_id')
-					->where('from','<=', $now)
-                    ->where('to','>=', $now)
-                    ->where('alternate_employee_id',Auth::user()->entity_id)
-                    ->get()
-                    ->toArray();
-                    //dd($sub_employee_id);
-                    $ids=array_column($sub_employee_id, 'employee_id');
-                    array_push($ids,Auth::user()->entity_id);
-                    if(count($sub_employee_id)>0)
-                    {
-                    	$query->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
-                    }else
-                    {
-                    	$query->where('e.reporting_to_id', Auth::user()->entity_id);//MANAGER
-                    }
+					$now = date('Y-m-d');
+					$sub_employee_id = AlternateApprove::select('employee_id')
+						->where('from', '<=', $now)
+						->where('to', '>=', $now)
+						->where('alternate_employee_id', Auth::user()->entity_id)
+						->get()
+						->toArray();
+					//dd($sub_employee_id);
+					$ids = array_column($sub_employee_id, 'employee_id');
+					array_push($ids, Auth::user()->entity_id);
+					if (count($sub_employee_id) > 0) {
+						$query->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
+					} else {
+						$query->where('e.reporting_to_id', Auth::user()->entity_id); //MANAGER
+					}
 
 				}
 			})
@@ -102,9 +99,25 @@ class TripClaimVerificationTwoController extends Controller {
 			$this->data['message'] = 'Trip not found';
 		} else {
 			$trip = Trip::with([
+				'visits' => function ($q) {
+					$q->orderBy('id', 'asc');
+				},
+				'visits.fromCity',
+				'visits.toCity',
+				'visits.travelMode',
+				'visits.bookingMethod',
+				'visits.bookingStatus',
+				'visits.selfBooking',
+				'visits.attachments',
+				'visits.agent',
+				'visits.status',
+				'visits.managerVerificationStatus',
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
+				'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
+					$q->where('trip_id', $trip_id);
+				},
 				'employee.grade',
 				'employee.designation',
 				'employee.reportingTo',

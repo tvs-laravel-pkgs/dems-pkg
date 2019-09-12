@@ -22,6 +22,23 @@ class TripController extends Controller {
 
 	public function addTrip(Request $request) {
 		// dd($request->all());
+		$size = sizeof($request->visits);
+		for ($i = 0; $i < $size; $i++) {
+			//dd($visit);
+			if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {
+				return response()->json(['success' => false, 'errors' => "Departure Date Should Be with in Start Date and End Date"]);
+
+			}
+			//dump(sizeof($request->visits));
+			$next_key = $i + 1;
+			if (!($next_key >= $size)) {
+				//dump($next_key);
+				if ($request->visits[$next_key]['date'] < $request->visits[$i]['date']) {
+					return response()->json(['success' => false, 'errors' => "Return Date Should Be Greater Than Or Equal To Departure Date"]);
+				}
+			}
+
+		}
 		return Trip::saveTrip($request);
 	}
 

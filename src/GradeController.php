@@ -31,8 +31,8 @@ class GradeController extends Controller {
 		return response()->json($this->data);
 	}
 	public function listEYatraGrade(Request $r) {
-		if (!empty($r->advanced_eligibility)) {
-			// dd($r->advanced_eligibility);
+
+		if (isset($r->advanced_eligibility)) {
 
 			$advanced_eligibility = $r->advanced_eligibility;
 		} else {
@@ -247,7 +247,7 @@ class GradeController extends Controller {
 			if (count($request->expense_types) > 0) {
 				foreach ($request->expense_types as $expense_type_id => $pivot_data) {
 					unset($pivot_data['id']);
-
+					// dd($pivot_data);
 					foreach ($pivot_data as $city_id => $eligible_amount) {
 						if (!empty($eligible_amount['eligible_amount'])) {
 							$data = [$expense_type_id => ['eligible_amount' => $eligible_amount['eligible_amount'], 'city_category_id' => $city_id]];

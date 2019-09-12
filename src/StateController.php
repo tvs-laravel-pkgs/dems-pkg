@@ -52,6 +52,7 @@ class StateController extends Controller {
 				'c.name as country',
 				DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status')
 			)
+			->where('company_id', Auth::user()->company_id)
 			->where(function ($query) use ($r, $country) {
 				if (!empty($country)) {
 					$query->where('c.id', $country);
