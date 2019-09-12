@@ -139,7 +139,7 @@ app.component('eyatraAlternateApproveForm', {
                 self.alternate_approve.alt_employee = response.data.alternate_approve.alt_employee.user.name;
             } else {
                 self.action = 'Add';
-                self.alternate_approve.alt_employee = "";
+                // self.alternate_approve.alt_employee = "";
             }
             if (response.data.alternate_approve.from != undefined) {
                 self.date = self.alternate_approve.from + ' to ' + self.alternate_approve.to;
