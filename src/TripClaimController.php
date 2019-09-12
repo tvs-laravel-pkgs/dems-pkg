@@ -119,26 +119,40 @@ class TripClaimController extends Controller {
 				foreach ($request->visits as $visit_data) {
 					if (!empty($visit_data['id'])) {
 						$visit = Visit::find($visit_data['id']);
-						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
-						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
-						$visit->travel_mode_id = $visit_data['travel_mode_id'];
+
+						//CONCATENATE DATE & TIME
+						$depart_date = $visit_data['departure_date'];
+						$depart_time = $visit_data['departure_time'];
+						$arrival_date = $visit_data['arrival_date'];
+						$arrival_time = $visit_data['arrival_time'];
+						$visit->departure_date = date('Y-m-d H:i:s', strtotime("$depart_date $depart_time"));
+						$visit->arrival_date = date('Y-m-d H:i:s', strtotime("$arrival_date $arrival_time"));
+
+						//GET BOOKING TYPE
+						$booked_by = strtolower($visit_data['booked_by']);
+						if ($booked_by == 'self') {
+							$visit->travel_mode_id = $visit_data['travel_mode_id'];
+						}
 						$visit->save();
 						// dd($visit_data['id']);
-						//UPDATE VISIT BOOKING STATUS
-						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
-						$visit_booking->visit_id = $visit_data['id'];
-						$visit_booking->type_id = 3100;
-						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
-						$visit_booking->reference_number = $visit_data['reference_number'];
-						$visit_booking->remarks = $visit_data['remarks'];
-						$visit_booking->amount = $visit_data['amount'];
-						$visit_booking->tax = $visit_data['tax'];
-						$visit_booking->service_charge = '0.00';
-						$visit_booking->total = $visit_data['total'];
-						$visit_booking->paid_amount = $visit_data['total'];
-						$visit_booking->created_by = Auth::user()->id;
-						$visit_booking->status_id = 3241; //Claimed
-						$visit_booking->save();
+
+						//UPDATE VISIT BOOKING STATUS ONLY FOR SELF
+						if ($booked_by == 'self') {
+							$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
+							$visit_booking->visit_id = $visit_data['id'];
+							$visit_booking->type_id = 3100;
+							$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
+							$visit_booking->reference_number = $visit_data['reference_number'];
+							$visit_booking->remarks = $visit_data['remarks'];
+							$visit_booking->amount = $visit_data['amount'];
+							$visit_booking->tax = $visit_data['tax'];
+							$visit_booking->service_charge = '0.00';
+							$visit_booking->total = $visit_data['total'];
+							$visit_booking->paid_amount = $visit_data['total'];
+							$visit_booking->created_by = Auth::user()->id;
+							$visit_booking->status_id = 3241; //Claimed
+							$visit_booking->save();
+						}
 
 					}
 				}

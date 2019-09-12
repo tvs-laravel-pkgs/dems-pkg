@@ -647,15 +647,18 @@ app.component('eyatraTripClaimForm', {
             console.log(' == visitDepartureArrivalDate ==');
             $timeout(function() {
                 var last_visit_index = self.trip.visits.length - 1;
-
-                if (self.trip.visits[0].departure_time != '') {
+                var days_aft_calc = 0;
+                console.log(self.trip.visits[0].departure_date, self.trip.visits[0].departure_time, self.trip.visits[last_visit_index].arrival_date, self.trip.visits[last_visit_index].arrival_time);
+                console.log(' == cond ==');
+                if (self.trip.visits[0].departure_time != '' && typeof self.trip.visits[0].departure_time !== "undefined") {
                     if (self.trip.visits[last_visit_index].arrival_date != '') {
-                        if (self.trip.visits[last_visit_index].arrival_time != '') {
-                            console.log(self.trip.visits[0], self.trip.visits[last_visit_index]);
+                        if (self.trip.visits[last_visit_index].arrival_time != '' && typeof self.trip.visits[last_visit_index].arrival_time !== "undefined") {
                             var date_1 = self.trip.visits[0].departure_date.split("-");
                             var date_2 = self.trip.visits[last_visit_index].arrival_date.split("-");
                             var visit_departure_date_format = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
                             var visit_arrival_date_format = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
+
+                            console.log(self.trip.visits[0].departure_date, self.trip.visits[0].departure_time, self.trip.visits[last_visit_index].arrival_date, self.trip.visits[last_visit_index].arrival_time);
 
                             var visit_departure_time = self.trip.visits[0].departure_time;
                             var visit_arrival_time = self.trip.visits[last_visit_index].arrival_time;
@@ -667,20 +670,24 @@ app.component('eyatraTripClaimForm', {
 
                             if (hours > 24) {
                                 var days = Math.round(hours / 24);
-                                // var days_reminder = Math.round(hours % 24);
-                                // var days_aft_calc;
-                                // if (days_reminder > 2) {
-                                //     days_aft_calc = days + 1;
-                                // } else {
-                                //     days_aft_calc = days;
-                                // }
                                 days_aft_calc = days;
                             } else {
                                 days_aft_calc = 1;
                             }
                             console.log(' == days ==' + days_aft_calc);
+                            $('.trip_no_of_days').html(days_aft_calc);
+                            $('.trip_total_days').val(days_aft_calc);
+                        } else {
+                            $('.trip_no_of_days').html('--');
+                            $('.trip_total_days').val(0);
                         }
+                    } else {
+                        $('.trip_no_of_days').html('--');
+                        $('.trip_total_days').val(0);
                     }
+                } else {
+                    $('.trip_no_of_days').html('--');
+                    $('.trip_total_days').val(0);
                 }
 
             }, 100);
