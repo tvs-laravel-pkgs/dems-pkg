@@ -173,12 +173,24 @@ class AdvanceClaimRequestController extends Controller {
 	}
 
 	public function eyatraAdvanceClaimFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->where('users.user_type_id', 3121)
-			->where('employees.company_id', Auth::user()->company_id)->get();
-		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
-		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		/*
+			$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)->get();
+			$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
+			$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		*/
+
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Purpose']);
+
+		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '', 'name' => 'Select Status']);
+
+		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Employee Code/Name']);
+
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
