@@ -7,7 +7,7 @@ app.component('eyatraRegions', {
         $http.get(
             region_filter_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.state_list = response.data.state_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -235,7 +235,7 @@ app.component('eyatraRegionForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
