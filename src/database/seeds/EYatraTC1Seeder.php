@@ -273,7 +273,7 @@ class EYatraTC1Seeder extends Seeder {
 			$designation->save();
 		}
 
-		foreach (NCity::get() as $city) {
+		foreach (NCity::where('company_id', $company->id)->get() as $city) {
 			$city->category_id = $company->cityCategories()->inRandomOrder()->first()->id;
 			$city->save();
 		}
