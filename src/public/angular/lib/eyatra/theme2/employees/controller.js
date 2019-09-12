@@ -683,9 +683,23 @@ app.component('importJobs', {
             get_import_jobs_form_data_url
         ).then(function(response) {
             
-            self.import_type_list = response.data.import_type_list;
-            
+            self.import_type_list = response.data.import_type_list; 
         });
+
+        $scope.onSelectedImportType = function(type) {
+            if (type == 3380) {
+                $('#employee_import').show();
+                $('#outlet_import').hide();
+
+            } else if (type == 3381) {
+                $('#employee_import').hide();
+                $('#outlet_import').show();
+            } else {
+                $('#employee_import').hide();
+                $('#outlet_import').hide();
+
+            }
+            }
 
         $('#submit_employee_import').click(function() {
             var form_id = form_ids = '#employee-import-form';

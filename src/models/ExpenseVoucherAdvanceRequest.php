@@ -11,6 +11,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		'employee_id',
 		'date',
 		'advance_amount',
+		'expense_amount',
 		'status_id',
 	];
 	public function employee() {
