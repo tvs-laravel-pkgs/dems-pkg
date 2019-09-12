@@ -30,10 +30,10 @@ app.component('eyatraAlternateApproveList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'empname', name: 'emp_user.name', searchable: true },
                 { data: 'empcode', name: 'employees.code', searchable: true },
-                { data: 'altempname', name: 'alter_user.name', searchable: true },
+                { data: 'empname', name: 'emp_user.name', searchable: true },
                 { data: 'altempcode', name: 'alternateemp.code', searchable: true },
+                { data: 'altempname', name: 'alter_user.name', searchable: true },
                 { data: 'type', name: 'configs.name', searchable: true },
                 { data: 'fromdate', name: 'alternative_approvers.from', searchable: false },
                 { data: 'todate', name: 'alternative_approvers.to', searchable: true },

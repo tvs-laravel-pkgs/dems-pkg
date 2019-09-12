@@ -160,6 +160,7 @@ app.component('eyatraGradeForm', {
                 // $scope.$apply()
                 return;
             }
+            
             self.entity = response.data.grade;
             self.extras = response.data.extras;
             self.action = response.data.action;
@@ -209,7 +210,72 @@ app.component('eyatraGradeForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
+        $(document).on('click', '.expense_cb', function() {
+          var cheked_count = 0;
+            $.each($('.expense_cb'), function() {
+                 cheked_count = $('.expense_cb:checked').length;
+            });
+            if(cheked_count > 0){
+                $('#select_all_expense').prop('checked', true);
+            }else{
+                $('#select_all_expense').prop('checked', false);
+            }
+            
+        });
 
+        $(document).on('click', '.purpose_type', function() {
+          var cheked_count = 0;
+            $.each($('.purpose_type'), function() {
+                 cheked_count = $('.purpose_type:checked').length;
+            });
+            if(cheked_count > 0){
+                $('#select_all_purpose_type').prop('checked', true);
+            }else{
+                $('#select_all_purpose_type').prop('checked', false);
+            }
+            
+        });
+
+        $(document).on('click', '.travel_type', function() {
+          var cheked_count = 0;
+            $.each($('.travel_type'), function() {
+                 cheked_count = $('.travel_type:checked').length;
+            });
+            if(cheked_count > 0){
+                $('#select_all_travel_type').prop('checked', true);
+            }else{
+                $('#select_all_travel_type').prop('checked', false);
+            }
+            
+        });
+
+
+        $(document).on('click', '.local_travel_type', function() {
+          var cheked_count = 0;
+            $.each($('.local_travel_type'), function() {
+                 cheked_count = $('.local_travel_type:checked').length;
+            });
+            if(cheked_count > 0){
+                $('#select_all_local_travel_type').prop('checked', true);
+            }else{
+                $('#select_all_local_travel_type').prop('checked', false);
+            }
+            
+        });
+
+        $(document).on('keypress', '.validate_decimal', function(e) {
+            var character = String.fromCharCode(e.keyCode)
+            var newValue = this.value + character;
+            if (isNaN(newValue) || hasDecimalPlace(newValue, 3)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        function hasDecimalPlace(value, x) {
+            var pointIndex = value.indexOf('.');
+            return  pointIndex >= 0 && pointIndex < value.length - x;
+        }
 
         $('.toggle_cb').on('click', function() {
             var class_name = $(this).data('class');
@@ -278,6 +344,7 @@ app.component('eyatraGradeForm', {
                     minlength: 2,
                     maxlength: 191,
                 },
+                
                 'discount_percentage': {
                     required: true,
                     min: 1,
