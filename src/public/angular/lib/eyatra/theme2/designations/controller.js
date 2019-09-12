@@ -150,7 +150,7 @@ app.component('eyatraDesignationForm', {
             messages: {
 
                 'name': {
-                    required: 'Designation name is required',
+                    // required: 'Designation name is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },

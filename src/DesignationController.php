@@ -76,7 +76,10 @@ class DesignationController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-		$this->data['grade_list'] = $grade_list = Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get();
+		// $this->data['grade_list'] = $grade_list = Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get();
+
+		$this->data['grade_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Grade']);
+
 		$this->data['success'] = true;
 		$this->data['designation'] = $designation;
 

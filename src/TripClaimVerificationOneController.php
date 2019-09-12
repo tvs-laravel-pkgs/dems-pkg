@@ -102,6 +102,19 @@ class TripClaimVerificationOneController extends Controller {
 			$this->data['message'] = 'Trip not found';
 		} else {
 			$trip = Trip::with([
+				'visits' => function ($q) {
+					$q->orderBy('id', 'asc');
+				},
+				'visits.fromCity',
+				'visits.toCity',
+				'visits.travelMode',
+				'visits.bookingMethod',
+				'visits.bookingStatus',
+				'visits.selfBooking',
+				'visits.attachments',
+				'visits.agent',
+				'visits.status',
+				'visits.managerVerificationStatus',
 				'advanceRequestStatus',
 				'employee',
 				'employee.user',
