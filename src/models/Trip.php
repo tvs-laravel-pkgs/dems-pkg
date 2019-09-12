@@ -673,6 +673,8 @@ class Trip extends Model {
 				'visits.travelMode',
 				'visits.bookingMethod',
 				'visits.bookingStatus',
+				'visits.selfBooking',
+				'visits.attachments',
 				'visits.agent',
 				'visits.status',
 				'visits.managerVerificationStatus',
