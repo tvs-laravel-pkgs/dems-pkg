@@ -32,8 +32,10 @@ class TripClaimController extends Controller {
 				'e.code as ecode',
 				'trips.status_id',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				'trips.start_date',
+				'trips.end_date',
+				// DB::raw('DATE_FORMAT(trips.start_date,"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(trips.end_date,"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'status.name as status'
@@ -466,9 +468,21 @@ class TripClaimController extends Controller {
 				if ($grade_expense_type) {
 					if ($request->stay_type_id == 3341) {
 						//STAY TYPE HOME
-						$percentage = 25;
-						$totalWidth = $grade_expense_type->eligible_amount;
-						$eligible_amount = ($percentage / 100) * $totalWidth;
+
+						//GET GRADE STAY TYPE
+						$grade_stay_type = DB::table('grade_advanced_eligibility')->where('grade_id', $request->grade_id)->first();
+						if ($grade_stay_type) {
+							if ($grade_stay_type->stay_type_disc) {
+								$percentage = (int) $grade_stay_type->stay_type_disc;
+								$totalWidth = $grade_expense_type->eligible_amount;
+								$eligible_amount = ($percentage / 100) * $totalWidth;
+							} else {
+								$eligible_amount = $grade_expense_type->eligible_amount;
+							}
+						} else {
+							$eligible_amount = $grade_expense_type->eligible_amount;
+						}
+
 					} else {
 						$eligible_amount = $grade_expense_type->eligible_amount;
 					}

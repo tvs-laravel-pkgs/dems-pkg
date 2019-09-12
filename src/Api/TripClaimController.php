@@ -382,6 +382,46 @@ class TripClaimController extends Controller {
 		return response()->json(['grade_expense_type' => $grade_expense_type]);
 	}
 
+	public function getEligibleAmtBasedonCitycategoryGradeStaytype(Request $request) {
+		if (!empty($request->city_id) && !empty($request->grade_id) && !empty($request->expense_type_id) && !empty($request->stay_type_id)) {
+			$city_category_id = NCity::where('id', $request->city_id)->where('company_id', Auth::user()->company_id)->first();
+			if ($city_category_id) {
+				$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
+				if ($grade_expense_type) {
+					if ($request->stay_type_id == 3341) {
+						//STAY TYPE HOME
+
+						//GET GRADE STAY TYPE
+						$grade_stay_type = DB::table('grade_advanced_eligibility')->where('grade_id', $request->grade_id)->first();
+						if ($grade_stay_type) {
+							if ($grade_stay_type->stay_type_disc) {
+								$percentage = (int) $grade_stay_type->stay_type_disc;
+								$totalWidth = $grade_expense_type->eligible_amount;
+								$eligible_amount = ($percentage / 100) * $totalWidth;
+							} else {
+								$eligible_amount = $grade_expense_type->eligible_amount;
+							}
+						} else {
+							$eligible_amount = $grade_expense_type->eligible_amount;
+						}
+
+					} else {
+						$eligible_amount = $grade_expense_type->eligible_amount;
+					}
+				} else {
+					$eligible_amount = '0.00';
+				}
+			} else {
+				$eligible_amount = '0.00';
+			}
+
+		} else {
+			$eligible_amount = '0.00';
+		}
+		$eligible_amount = number_format((float) $eligible_amount, 2, '.', '');
+		return response()->json(['eligible_amount' => $eligible_amount]);
+	}
+
 	public function approveTripClaimVerificationOne($trip_id) {
 
 		$trip = Trip::find($trip_id);

@@ -30,8 +30,8 @@ class TripClaimVerificationThreeController extends Controller {
 				'e.code as ecode',
 				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(trips.start_date,"%d-%m-%Y") as start_date'),
+				DB::raw('DATE_FORMAT(trips.end_date,"%d-%m-%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'status.name as status'
