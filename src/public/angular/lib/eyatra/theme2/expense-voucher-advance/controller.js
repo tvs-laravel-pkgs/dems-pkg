@@ -141,6 +141,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             self.action = response.data.action;
 
             self.expense_voucher_advance = response.data.expense_voucher_advance;
+            console.log(response.data.expense_voucher_advance.employee);
 
             if (self.action == 'Edit') {
                 self.action = 'Edit';
@@ -148,6 +149,8 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 $("#employee_id").val(response.data.expense_voucher_advance.employee_id);
             } else {
                 self.action = 'Add';
+                self.employee_id = response.data.employee_details.id;
+                console.log(self.employee_id);
                 $("#employee_id").val('');
             }
 

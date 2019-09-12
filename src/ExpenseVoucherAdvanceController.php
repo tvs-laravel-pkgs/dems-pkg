@@ -66,7 +66,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			$this->data['action'] = 'Add';
 			$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 			$this->data['success'] = true;
-			$this->data['message'] = 'Alternate Approve not found';
+			$this->data['message'] = 'Expense Voucher not found';
 			$this->data['employee_list'] = [];
 			$this->data['employee'] = '';
 		} else {
@@ -80,6 +80,13 @@ class ExpenseVoucherAdvanceController extends Controller {
 				->where('id', $id)->first();
 			$this->data['success'] = true;
 		}
+
+		$employee_details = Employee::join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('users.company_id', Auth::user()->company_id)
+			->where('employees.id', Auth::user()->entity_id)
+			->select('employees.id')->first();
+		$this->data['employee_details'] = $employee_details;
 		$this->data['expense_voucher_advance'] = $expense_voucher_advance;
 		return response()->json($this->data);
 	}

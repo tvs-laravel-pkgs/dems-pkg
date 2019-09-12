@@ -98,7 +98,7 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.$apply()
             return;
         }
-        $form_data_url = financier_request_form_data_url + '/' + $routeParams.trip_id;
+        $form_data_url = agent_request_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -428,7 +428,7 @@ app.component('eyatraTripBookingRequestsView', {
                     label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
                 input.trigger('fileselect', [numFiles, label]);
             });
-    
+
             // We can watch for our custom `fileselect` event like this
             $(':file').on('fileselect', function(event, numFiles, label) {
                 var input = $(this).parents('.input-group').find(':text'),
