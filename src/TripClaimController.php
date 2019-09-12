@@ -7,6 +7,7 @@ use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Uitoux\EYatra\LocalTravel;
