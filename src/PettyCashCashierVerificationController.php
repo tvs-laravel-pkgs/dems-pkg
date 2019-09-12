@@ -42,7 +42,7 @@ class PettyCashCashierVerificationController extends Controller {
 			->where('cashier.id', Auth::user()->entity_id)
 		// ->where('outlets.amount_eligible', 1)
 		// ->where('petty_cash.total', '<=', 'outlets.amount_limit')
-			->where('cashier.id', Auth::user()->entity_id)
+		// ->where('cashier.id', Auth::user()->entity_id)
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
