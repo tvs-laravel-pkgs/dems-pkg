@@ -170,8 +170,8 @@ class OutletController extends Controller {
 		$option = new NState;
 		$option->name = 'Select State';
 		$option->id = null;
-		$this->data['state_list'] = $state_list = NState::select('name', 'id')
-			->get()->prepend($option);
+		$this->data['state_list'] = $state_list = collect(NState::select('name', 'id')
+				->get())->prepend($option);
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);

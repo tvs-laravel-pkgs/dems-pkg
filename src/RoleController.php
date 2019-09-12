@@ -19,8 +19,8 @@ class RoleController extends Controller {
 		return Datatables::of($roles)
 			->addColumn('action', function ($roles) {
 				if ($roles->fixed_roles == 0) {
-					$img1 = asset('public/img/content/table/edit-yellow.svg');
-					$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
+					$img1 = asset('public/img/content/yatra/table/edit.svg');
+					$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 
 					return '<a href="#!/eyatra/master/roles/edit/' . $roles->id . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
 					// return '<a href="' . route('editRolesAngular', ['role_id' => $roles->id]) . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
