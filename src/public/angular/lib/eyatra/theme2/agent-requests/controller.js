@@ -3,7 +3,7 @@
 app.component('eyatraAgentRequestForm', {
     templateUrl: agent_request_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
-        alert();
+        //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/agent/requests')
             $scope.$apply()

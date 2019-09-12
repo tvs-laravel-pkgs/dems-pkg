@@ -170,7 +170,7 @@ class TripBookingUpdateController extends Controller {
 						$attachement = new Attachment;
 						$attachement->attachment_of_id = 3180; // Visit Booking Attachment
 						$attachement->attachment_type_id = 3200; //Multi Attachment
-						$attachement->entity_id = $r->visit_id;
+						$attachement->entity_id = $visit_bookings->id;
 						$attachement->name = $name;
 						$attachement->save();
 					}
