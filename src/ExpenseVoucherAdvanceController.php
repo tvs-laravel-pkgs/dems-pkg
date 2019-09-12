@@ -26,6 +26,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
+			->where('employees.id', Auth::user()->entity_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 			->groupBy('expense_voucher_advance_requests.id')
 		;

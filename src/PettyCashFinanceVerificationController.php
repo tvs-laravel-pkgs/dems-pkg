@@ -184,7 +184,7 @@ class PettyCashFinanceVerificationController extends Controller {
 					$payment->save();
 					$activity['entity_id'] = $request->petty_cash_id;
 					$activity['entity_type'] = 'Local Conveyance';
-					$activity['details'] = "Claim is paid by Cashier";
+					$activity['details'] = "Claim is paid by Financier";
 					$activity['activity'] = "paid";
 					$activity_log = ActivityLog::saveLog($activity);
 				} elseif ($request->type_id == 2) {
@@ -197,7 +197,7 @@ class PettyCashFinanceVerificationController extends Controller {
 					$payment->save();
 					$activity['entity_id'] = $request->petty_cash_id;
 					$activity['entity_type'] = 'Other Expenses';
-					$activity['details'] = "Claim is paid by Cashier";
+					$activity['details'] = "Claim is paid by Financier";
 					$activity['activity'] = "paid";
 					$activity_log = ActivityLog::saveLog($activity);
 				}
