@@ -50,6 +50,7 @@ class TripVerificationController extends Controller {
 			'employee',
 			'employee.user',
 			'employee.designation',
+			'employee.grade',
 			'purpose',
 			'status',
 		])
@@ -63,8 +64,8 @@ class TripVerificationController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		}
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$start_date = $trip->visits()->select(DB::raw('MIN(visits.departure_date) as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('MAX(visits.departure_date) as end_date'))->first();
 		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;

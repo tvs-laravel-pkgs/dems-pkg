@@ -108,7 +108,7 @@ class AlternateApproveController extends Controller {
 			$alternate_approve = new AlternateApprove;
 			$this->data['success'] = true;
 			$this->data['message'] = 'Alternate Approve not found';
-			$this->data['employee_list'] = [];
+			// $this->data['employee_list'] = [];
 			$this->data['employee'] = '';
 		} else {
 			$this->data['action'] = 'Edit';
@@ -124,6 +124,7 @@ class AlternateApproveController extends Controller {
 				$this->data['action'] = 'Add';
 				$alternate_approve = new AlternateApprove;
 				$alternate_approve['employee'] = $employee = Employee::find($alternate_id);
+				$alternate_approve['employee']['user'] = $employee->user;
 				$this->data['success'] = true;
 			}
 
@@ -150,7 +151,7 @@ class AlternateApproveController extends Controller {
 		$this->data['extras'] = [
 			'type' => collect(Config::managerType()->prepend(['id' => '', 'name' => 'Select Type'])),
 		];
-		// dd($this->data['extras']);
+		// dd($alternate_approve);
 		$this->data['alternate_approve'] = $alternate_approve;
 		//$this->data['employee'] = $employee;
 

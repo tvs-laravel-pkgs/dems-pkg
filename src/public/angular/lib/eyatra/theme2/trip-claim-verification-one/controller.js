@@ -198,8 +198,11 @@ app.component('eyatraTripClaimVerificationOneView', {
                         $noty.close();
                     }, 1000);
                     $('#trip-claim-modal-approve-one').modal('hide');
-                    $location.path('/eyatra/trip/claim/verification1/list')
-                    $scope.$apply()
+                    setTimeout(function() {
+                        $location.path('/eyatra/trip/claim/verification1/list')
+                        $scope.$apply()
+                    }, 500);
+
                 }
 
             });
@@ -249,7 +252,6 @@ app.component('eyatraTripClaimVerificationOneView', {
                                     $location.path('/eyatra/trip/claim/verification1/list')
                                     $scope.$apply()
                                 }, 500);
-
                             }
                         })
                         .fail(function(xhr) {
