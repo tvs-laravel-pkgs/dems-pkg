@@ -101,7 +101,9 @@ class OutletController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$outlet = Outlet::with('sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
-			$outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
+			$outlet->cashier = $outlet->employee->user;
+			// $outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
+			// dd($outlet->cashier);
 			// $this->data['cashier'] = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
 			// dd($outlet->employee->id);
 			if (!$outlet) {

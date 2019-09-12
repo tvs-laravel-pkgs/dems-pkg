@@ -662,15 +662,16 @@ app.component('eyatraTripClaimForm', {
                         var timeDiff = (new Date(checkout_date_format + ' ' + checkout_time)) - (new Date(checkin_date_format + ' ' + checkin_time));
                         // var days = (timeDiff / (1000 * 60 * 60 * 24)) + 1;
                         var hours = Math.abs(timeDiff / 3600000);
+                        console.log(' == hours ==' + hours);
                         if (hours > 24) {
-                            var days = Math.trunc(hours / 24);
-                            var days_reminder = Math.round(hours % 24);
-                            var days_aft_calc;
-                            if (days_reminder > 2) {
-                                days_aft_calc = days + 1;
-                            } else {
-                                days_aft_calc = days;
-                            }
+                            var days = Math.round(hours / 24);
+                            // var days_reminder = Math.round(hours % 24);
+                            // var days_aft_calc;
+                            // if (days_reminder > 2) {
+                            //     days_aft_calc = days + 1;
+                            // } else {
+                            days_aft_calc = days;
+                            // }
                         } else {
                             days_aft_calc = 1;
                         }
