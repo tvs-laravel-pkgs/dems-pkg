@@ -18,6 +18,8 @@ class Visit extends Model {
 		'booking_status_id',
 		'agent_id',
 		'notes_to_agent',
+		// 'departure_date',
+		// 'arrival_date',
 		'status_id',
 		'manager_verification_status_id',
 	];
@@ -25,6 +27,9 @@ class Visit extends Model {
 	protected $dates = [
 		// 'date',
 	];
+	// protected $attributes = ['departure_time', 'arrival_time'];
+
+	protected $appends = ['departure_time', 'arrival_time'];
 
 	// public function setDateAttribute($v) {
 	// 	$this->attributes['date'] = $v ? date('Y-m-d', strtotime($v)) : NULL;
@@ -40,6 +45,15 @@ class Visit extends Model {
 
 	public function getArrivalDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
+	public function getDepartureTimeAttribute() {
+
+		return isset($this->attributes['departure_date']) ? date('g:i A', strtotime($this->attributes['departure_date'])) : '';
+	}
+
+	public function getArrivalTimeAttribute() {
+		return isset($this->attributes['arrival_date']) ? date('g:i A', strtotime($this->attributes['arrival_date'])) : '';
 	}
 
 	public function fromCity() {

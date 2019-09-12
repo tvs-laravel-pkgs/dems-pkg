@@ -250,6 +250,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/agent/request/get-form-data/{trip_id?}', 'Uitoux\EYatra\AgentRequestController@agentRequestFormData')->name('agentRequestFormData');
 		Route::post('eyatra/agent/request/save', 'Uitoux\EYatra\AgentRequestController@saveAgentRequest')->name('saveAgentRequest');
 
+		Route::get('eyatra/financier/request/get-form-data/{trip_id?}', 'Uitoux\EYatra\AgentRequestController@financierRequestFormData')->name('financierRequestFormData');
+
 		//TRIPS BOOKING REQUESTS
 		Route::get('eyatra/trips/booking-requests/get-list', 'Uitoux\EYatra\TripBookingRequestController@listTripBookingRequests')->name('listTripBookingRequests');
 		Route::get('eyatra/trips/booking-requests/get-view-data/{visit_id?}', 'Uitoux\EYatra\TripBookingRequestController@tripBookingRequestsViewData')->name('tripBookingUpdatesFormData');
