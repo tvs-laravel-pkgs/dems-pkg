@@ -179,7 +179,7 @@ app.component('eyatraRegionForm', {
                         data: { country_id: country_id },
                     })
                     .done(function(res) {
-                        self.extras.state_list = [];
+                        self.state_list = [];
                         self.extras.state_list = res.state_list;
                         $scope.$apply()
                     })

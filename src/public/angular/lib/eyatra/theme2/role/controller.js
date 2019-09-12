@@ -219,7 +219,7 @@ app.component('eyatraRoleList', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#list_table').DataTable({
-            "dom": dom_structure,
+            "dom": dom_structure_separate,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -239,22 +239,24 @@ app.component('eyatraRoleList', {
                 data: function(d) {}
             },
             columns: [
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'role', name: 'roles.display_name', searchable: true },
                 { data: 'description', searchable: false },
                 { data: 'status', name: 'status', searchable: false },
-                { data: 'action', searchable: false, class: 'action' },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
+        $('.on_focus').focus();
         $('.dataTables_length select').select2();
-        $('.page-header-content .display-inline-block .data-table-title').html('Role');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Roles</p><h3 class="title">Roles</h3>');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/master/roles/add" type="button" class="btn btn-secondary" dusk="add-btn">' +
-            'Add Role' +
+            '<a href="#!/eyatra/master/roles/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-role\')">' +
+            'Add New' +
             '</a>'
         );
+
 
     }
 });
@@ -280,7 +282,7 @@ app.component('eyatraRoleForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 5000);
                 $location.path('/eyatra/roles/list/')
                 $scope.$apply()
                 return;
@@ -359,7 +361,7 @@ app.component('eyatraRoleForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
 
                         } else {
                             $location.path('/eyatra/roles/list/')
@@ -373,7 +375,7 @@ app.component('eyatraRoleForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
+                            }, 5000);
                             $scope.$apply()
                             location.reload();
                         }
@@ -390,7 +392,7 @@ app.component('eyatraRoleForm', {
                         }).show();
                         setTimeout(function() {
                             $noty.close();
-                        }, 1000);
+                        }, 5000);
                     });
             },
         });
