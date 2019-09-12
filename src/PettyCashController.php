@@ -123,7 +123,7 @@ class PettyCashController extends Controller {
 		$this->data['extras'] = [
 			'purpose_list' => Entity::uiPurposeList(),
 			'expence_type' => Entity::uiExpenceTypeListBasedPettyCash(),
-			'travel_mode_list' => Entity::uiTravelModeList(),
+			'travel_mode_list' => Entity::PettyCashTravelModeList(),
 		];
 		$this->data['petty_cash'] = $petty_cash;
 		$this->data['petty_cash_other'] = $petty_cash_other;

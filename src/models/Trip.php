@@ -411,7 +411,7 @@ class Trip extends Model {
 	}
 
 	public static function getVerficationPendingList($r) {
-		//dd($r->all());
+		// dd($r->all());
 		/*if(isset($r->period))
 			{
 				$date = explode(' to ', $r->period);
@@ -435,8 +435,8 @@ class Trip extends Model {
 				'e.code as ecode',
 				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(trips.start_date,"%d/%m/%Y") as start_date'),
+				DB::raw('DATE_FORMAT(trips.start_date,"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'trips.created_at',

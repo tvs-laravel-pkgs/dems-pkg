@@ -53,6 +53,13 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
 	}
 
+	public static function agentTravelModeList() {
+		return Entity::where('entity_type_id', 502)
+			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
+			->where('travel_mode_category_type.category_id', 3403)
+			->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
 	public static function bookingModeList() {
 		return Entity::where('entity_type_id', 518)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
@@ -69,6 +76,13 @@ class Entity extends Model {
 	}
 	public static function uiExpenceTypeListBasedPettyCash() {
 		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->where('name', 'NOT LIKE', '%Local Conveyance%')->get();
+	}
+
+	public static function PettyCashTravelModeList() {
+		return Entity::where('entity_type_id', 502)
+			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
+			->where('travel_mode_category_type.category_id', 3400)
+			->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function uiTravelModeList() {
