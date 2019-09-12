@@ -7,6 +7,7 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\EmployeeClaim;
+use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\Trip;

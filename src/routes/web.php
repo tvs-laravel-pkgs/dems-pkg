@@ -30,6 +30,10 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/claim/get-eligible-amount', 'Uitoux\EYatra\Api\TripClaimController@getEligibleAmtBasedonCitycategoryGrade');
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
 
+		//TRIP CLAIM VERIFICATION LEVEL
+		Route::get('trip/claim/verification/one/get-list', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@listTripClaimVerificationOneList');
+		Route::get('trip/claim/verification/view/{trip_id?}', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@getClaimVerificationViewData');
+
 		//TRIP REJECTION REASON
 		Route::get('trip/rejection/reasons', 'Uitoux\EYatra\Api\TripVerificationController@getRejectionData');
 

@@ -1,25 +1,27 @@
 <?php
 
-namespace Uitoux\EYatra;
+namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\Boarding;
+use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use Yajra\Datatables\Datatables;
 
-class TripClaimVerificationThreeController extends Controller {
-	public function listEYatraTripClaimVerificationThreeList(Request $r) {
+class TripClaimVerificationLevelController extends Controller {
+	public $successStatus = 200;
+
+	public function listTripClaimVerificationOneList(Request $r) {
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
-		// ->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
@@ -33,9 +35,11 @@ class TripClaimVerificationThreeController extends Controller {
 				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
+
 				'status.name as status'
 			)
+
 			->where('e.company_id', Auth::user()->company_id)
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
@@ -52,28 +56,35 @@ class TripClaimVerificationThreeController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->where('ey_employee_claims.status_id', 3223) //PAYMENT PENDING
-		// ->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
-			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+			->where(function ($query) {
 
-		return Datatables::of($trips)
-			->addColumn('action', function ($trip) {
+				if (Auth::user()->entity_id) {
+					$now = date('Y-m-d');
+					$sub_employee_id = AlternateApprove::select('employee_id')
+						->where('from', '<=', $now)
+						->where('to', '>=', $now)
+						->where('alternate_employee_id', Auth::user()->entity_id)
+						->get()
+						->toArray();
+					//dd($sub_employee_id);
+					$ids = array_column($sub_employee_id, 'employee_id');
+					array_push($ids, Auth::user()->entity_id);
+					if (count($sub_employee_id) > 0) {
+						$query->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
+					} else {
+						$query->where('e.reporting_to_id', Auth::user()->entity_id); //MANAGER
+					}
 
-				$img2 = asset('public/img/content/yatra/table/view.svg');
-				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
-
-				return '
-				<a href="#!/eyatra/trip/claim/verification3/view/' . $trip->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
-
+				}
 			})
-			->make(true);
+			->where('ey_employee_claims.status_id', 3222) //CLAIM REQUESTED
+		//->where('e.reporting_to_id', Auth::user()->entity_id) //MANAGER
+			->groupBy('trips.id')
+			->orderBy('trips.created_at', 'desc')->get();
+		return response()->json(['success' => true, 'trips' => $trips]);
 	}
 
-	public function viewEYatraTripClaimVerificationThree($trip_id) {
-
+	public function getClaimVerificationViewData($trip_id) {
 		if (!$trip_id) {
 			$this->data['success'] = false;
 			$this->data['message'] = 'Trip not found';
@@ -99,8 +110,6 @@ class TripClaimVerificationThreeController extends Controller {
 					$q->where('trip_id', $trip_id);
 				},
 				'employee.grade',
-				'employee.bankDetail',
-				'employee.walletDetail',
 				'employee.designation',
 				'employee.reportingTo',
 				'employee.reportingTo.user',
@@ -193,14 +202,8 @@ class TripClaimVerificationThreeController extends Controller {
 
 			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
 			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
-
 			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
-			$this->data['date'] = date('d-m-Y');
-			$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
-			$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
-			$this->data['payment_mode_list'] = $payment_mode_list;
-			$this->data['wallet_mode_list'] = $wallet_mode_list;
 
 			$this->data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
 
@@ -210,80 +213,4 @@ class TripClaimVerificationThreeController extends Controller {
 
 		return response()->json($this->data);
 	}
-
-	public function approveTripClaimVerificationThree(Request $r) {
-		// dd($r->all());
-		try {
-			DB::beginTransaction();
-			$trip = Trip::find($r->trip_id);
-			if (!$trip) {
-				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-			}
-			$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
-			if (!$employee_claim) {
-				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-			}
-			$employee_claim->status_id = 3225; //PAID
-			$employee_claim->save();
-
-			$trip->status_id = 3026; //PAID
-			$trip->save();
-
-			//PAYMENT SAVE
-			$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
-			$payment->fill($r->all());
-			$payment->date = date('Y-m-d', strtotime($r->date));
-			$payment->payment_of_id = 3252;
-			$payment->entity_id = $trip->id;
-			$payment->created_by = Auth::user()->id;
-			$payment->save();
-
-			//BANK DETAIL SAVE
-			if ($r->bank_name) {
-				$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
-				$bank_detail->fill($r->all());
-				$bank_detail->detail_of_id = 3243;
-				$bank_detail->entity_id = $trip->id;
-				$bank_detail->account_type_id = 3252;
-				$bank_detail->save();
-			}
-
-			//WALLET SAVE
-			if ($r->type_id) {
-				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
-				$wallet_detail->fill($r->all());
-				$wallet_detail->wallet_of_id = 3252;
-				$wallet_detail->entity_id = $trip->id;
-				$wallet_detail->save();
-			}
-
-			DB::commit();
-			return response()->json(['success' => true]);
-		} catch (Exception $e) {
-			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
-		}
-	}
-
-	public function rejectTripClaimVerificationThree(Request $r) {
-
-		$trip = Trip::find($r->trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
-		if (!$employee_claim) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$employee_claim->status_id = 3226; //Claim Rejected
-		$employee_claim->save();
-
-		$trip->rejection_id = $r->reject_id;
-		$trip->rejection_remarks = $r->remarks;
-		$trip->status_id = 3024; //Claim Rejected
-		$trip->save();
-
-		return response()->json(['success' => true]);
-	}
-
 }

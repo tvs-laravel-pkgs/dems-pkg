@@ -2,6 +2,8 @@
 
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
+use Auth;
+use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
