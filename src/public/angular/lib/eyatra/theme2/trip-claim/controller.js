@@ -642,6 +642,51 @@ app.component('eyatraTripClaimForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
+        //GET VISIT DEPARTURE DATE TO FIND DAYS CALC
+        $scope.visitDepartureArrivalDate = function() {
+            console.log(' == visitDepartureArrivalDate ==');
+            $timeout(function() {
+                var last_visit_index = self.trip.visits.length - 1;
+
+                if (self.trip.visits[0].departure_time != '') {
+                    if (self.trip.visits[last_visit_index].arrival_date != '') {
+                        if (self.trip.visits[last_visit_index].arrival_time != '') {
+                            console.log(self.trip.visits[0], self.trip.visits[last_visit_index]);
+                            var date_1 = self.trip.visits[0].departure_date.split("-");
+                            var date_2 = self.trip.visits[last_visit_index].arrival_date.split("-");
+                            var visit_departure_date_format = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
+                            var visit_arrival_date_format = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
+
+                            var visit_departure_time = self.trip.visits[0].departure_time;
+                            var visit_arrival_time = self.trip.visits[last_visit_index].arrival_time;
+
+                            var timeDiff = (new Date(visit_arrival_date_format + ' ' + visit_arrival_time)) - (new Date(visit_departure_date_format + ' ' + visit_departure_time));
+                            // var days = (timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                            var hours = Math.abs(timeDiff / 3600000);
+                            console.log(' == hours ==' + hours);
+
+                            if (hours > 24) {
+                                var days = Math.round(hours / 24);
+                                // var days_reminder = Math.round(hours % 24);
+                                // var days_aft_calc;
+                                // if (days_reminder > 2) {
+                                //     days_aft_calc = days + 1;
+                                // } else {
+                                //     days_aft_calc = days;
+                                // }
+                                days_aft_calc = days;
+                            } else {
+                                days_aft_calc = 1;
+                            }
+                            console.log(' == days ==' + days_aft_calc);
+                        }
+                    }
+                }
+
+            }, 100);
+        }
+
+
         //GET LODGE CHECKIN AND CHECKOUT DATE TO FIND STAY DAYS AND AMOUNT CALC
         $scope.lodgecheckOutInDate = function() {
             // console.log(' == lodgecheckOutInDate ==');

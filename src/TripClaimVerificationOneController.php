@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\EmployeeClaim;
