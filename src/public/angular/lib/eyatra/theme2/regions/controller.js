@@ -172,21 +172,21 @@ app.component('eyatraRegionForm', {
 
         });
         $('#on_focus').focus();
-        $scope.getStateByCountry = function(country_id) { 
-                $.ajax({
-                        url: region_get_state_by_country,
-                        method: "POST",
-                        data: { country_id: country_id },
-                    })
-                    .done(function(res) {
-                        self.state_list = [];
-                        self.extras.state_list = res.state_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-           
+        $scope.getStateByCountry = function(country_id) {
+            $.ajax({
+                    url: region_get_state_by_country,
+                    method: "POST",
+                    data: { country_id: country_id },
+                })
+                .done(function(res) {
+                    self.extras.state_list = [];
+                    self.extras.state_list = res.state_list;
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+
         }
 
 
