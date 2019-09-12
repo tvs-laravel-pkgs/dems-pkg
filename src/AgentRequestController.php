@@ -61,6 +61,7 @@ class AgentRequestController extends Controller {
 	}
 
 	public function agentRequestFormData($trip_id) {
+		//dd($trip_id);
 		$trip = Trip::with([
 			'agentVisits',
 			'agentVisits.fromCity',
@@ -69,6 +70,7 @@ class AgentRequestController extends Controller {
 			'agentVisits.bookingMethod',
 			'agentVisits.bookingStatus',
 			'agentVisits.bookings',
+			'agentVisits.bookings.attachments',
 			'agentVisits.bookings.travelMode',
 			'agentVisits.bookings.bookingMode',
 			'agentVisits.agent',
@@ -93,6 +95,19 @@ class AgentRequestController extends Controller {
 			$age = date('Y') - date('Y', strtotime($trip->employee->date_of_birth));
 		}
 		$visits = $trip->visits;
+		// $bookings = $trip->agentVisits;
+		// foreach ($bookings as $key => $booking) {
+		// 	foreach ($booking->bookings as $key => $visit_booking) {
+		// 		//dd($book);
+		// 		$file_name = Attachment::select('name')
+		// 			->where('entity_id', $visit_booking->id)
+		// 			->where('attachment_of_id', 3180)
+		// 			->first();
+		// 		$visit_booking->file_name = url('app/public/visit/booking-updates/attachments/' . $file_name->name);
+
+		// 	}
+		// }
+		//dd($visit_booking);
 		$trip_status = 'not_booked';
 		$ticket_amount = 0;
 		$service_charge = 0;
@@ -125,14 +140,18 @@ class AgentRequestController extends Controller {
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days;
+		//$trip->attachments = $attachments;
 		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::agentTravelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
 		$this->data['booking_mode_list'] = $booking_mode_list = collect(Entity::bookingModeList())->prepend(['id' => '', 'name' => 'Select Booking Method']);
 		$this->data['trip'] = $trip;
+		//$this->data['trip']['visit_booking'] = $visit_booking;
+
 		$this->data['age'] = $age;
 		$this->data['trip_status'] = $trip_status;
 		$this->data['total_amount'] = $total_amount;
 		$this->data['ticket_amount'] = $ticket_amount;
 		$this->data['service_charge'] = $service_charge;
+		$this->data['attach_path'] = url('app/public/visit/booking-updates/attachments/');
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
