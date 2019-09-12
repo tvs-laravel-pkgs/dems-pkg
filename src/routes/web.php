@@ -247,6 +247,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/agent/claim/delete/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@deleteEYatraAgentClaim')->name('deleteEYatraAgentClaim');
 		Route::get('eyatra/agent/claim/filter_datas', 'Uitoux\EYatra\AgentClaimController@filter_data')->name('AgentClaim_filter_data');
 
+		Route::get('eyatra/booking/view/get-form-data/{trip_id?}', 'Uitoux\EYatra\AgentClaimController@bookingViewFormData')->name('bookingViewFormData');
+
 		//TRIP CLAIM
 		Route::get('eyatra/trip/claim/get-list', 'Uitoux\EYatra\TripClaimController@listEYatraTripClaimList')->name('listEYatraTripClaimList');
 		Route::get('eyatra/trip/claim/get-form-data/{trip_id?}', 'Uitoux\EYatra\TripClaimController@eyatraTripClaimFormData')->name('eyatraTripClaimFormData');

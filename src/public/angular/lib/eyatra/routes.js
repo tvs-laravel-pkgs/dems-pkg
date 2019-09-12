@@ -399,6 +399,12 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Agent Claim',
     }).
 
+    when('/eyatra/trips/booking/view/:trip_id', {
+        template: '<eyatra-trip-booking-view></eyatra-trip-booking-view>',
+        title: 'Trip Booking View',
+    }).
+
+
     //EMPLOYEE - BOOKING UPDATES
     when('/eyatra/trips/booking-updates', {
         template: '<eyatra-trip-booking-updates></eyatra-trip-booking-updates>',
