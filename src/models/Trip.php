@@ -411,7 +411,7 @@ class Trip extends Model {
 	}
 
 	public static function getVerficationPendingList($r) {
-		//dd($r->all());
+		// dd($r->all());
 		/*if(isset($r->period))
 			{
 				$date = explode(' to ', $r->period);
@@ -434,9 +434,9 @@ class Trip extends Model {
 				'trips.number',
 				'e.code as ecode',
 				'users.name as ename',
+				'trips.start_date',
+				'trips.end_date',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'trips.created_at',
@@ -673,6 +673,8 @@ class Trip extends Model {
 				'visits.travelMode',
 				'visits.bookingMethod',
 				'visits.bookingStatus',
+				'visits.selfBooking',
+				'visits.attachments',
 				'visits.agent',
 				'visits.status',
 				'visits.managerVerificationStatus',
@@ -823,6 +825,19 @@ class Trip extends Model {
 		}
 
 		$trip = Trip::with([
+			'visits' => function ($q) {
+				$q->orderBy('id', 'asc');
+			},
+			'visits.fromCity',
+			'visits.toCity',
+			'visits.travelMode',
+			'visits.bookingMethod',
+			'visits.bookingStatus',
+			'visits.selfBooking',
+			'visits.attachments',
+			'visits.agent',
+			'visits.status',
+			'visits.managerVerificationStatus',
 			'advanceRequestStatus',
 			'employee',
 			'employee.user',

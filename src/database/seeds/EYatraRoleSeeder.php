@@ -237,7 +237,7 @@ class EYatraRoleSeeder extends Seeder {
 			],
 
 			//EYATRA FINANCIER
-			504 => [
+			505 => [
 				//'company_id' => 1,
 				'display_order' => 1,
 				'display_name' => 'eYatra Financier',

@@ -1,114 +1,55 @@
-app.component('eyatraExpenseVoucherAdvanceList', {
-    templateUrl: expense_voucher_advance_list_template_url,
+app.component('eyatraExpenseVoucherAdvanceVerificationList', {
+    templateUrl: expense_voucher_advance_verification_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
 
         $list_data_url = expense_voucher_advance_list_data_url;
 
-        //
-
-        //$list_data_url = eyatra_pettycash_get_list;
-
-        $http.get(
-            $list_data_url
-        ).then(function(response) {
-            var dataTable = $('#expense_advance_list').DataTable({
-                stateSave: true,
-                "dom": dom_structure_separate,
-                "language": {
-                    "search": "",
-                    "searchPlaceholder": "Search",
-                    "lengthMenu": "Rows Per Page _MENU_",
-                    "paginate": {
-                        "next": '<i class="icon ion-ios-arrow-forward"></i>',
-                        "previous": '<i class="icon ion-ios-arrow-back"></i>'
-                    },
+        var dataTable = $('#expense_advance_verification_list').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
                 },
-                pageLength: 10,
-                processing: true,
-                serverSide: true,
-                paging: true,
-                ordering: false,
-                ajax: {
-                    url: $list_data_url,
-                    type: "GET",
-                    dataType: "json",
-                    data: function(d) {
-                        //d.type_id = $routeParams.type_id;
-                    }
-                },
-                columns: [
-                    { data: 'action', searchable: false, class: 'action' },
-                    { data: 'ename', name: 'users.name', searchable: true },
-                    { data: 'ecode', name: 'employees.code', searchable: true },
-                    { data: 'date', name: 'date', searchable: false },
-                    { data: 'advance_amount', name: 'expense_voucher_advance_requests.advance_amount', searchable: false },
-                    { data: 'balance_amount', name: 'expense_voucher_advance_requests.balance_amount', searchable: false },
-                    { data: 'status', name: 'configs.name', searchable: false },
-                ],
-                rowCallback: function(row, data) {
-                    $(row).addClass('highlight-row');
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            retrieve: true,
+            ajax: {
+                url: $list_data_url,
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    //d.type_id = $routeParams.type_id;
                 }
-            });
-            //
-            $('.dataTables_length select').select2();
-            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
-            // if ($location.url() == '/eyatra/petty-cash')
-            $('.add_new_button').html(
-                '<a href="#!/eyatra/expense/voucher-advance/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-                'Add New' +
-                '</a>'
-            );
-            // setTimeout(function() {
-            //     var x = $('.separate-page-header-inner.search .custom-filter').position();
-            //     var d = document.getElementById('expense_advance_list_filter');
-            //     x.left = x.left + 15;
-            //     d.style.left = x.left + 'px';
-            // }, 500);
+            },
+
+            columns: [
+                { data: 'action', searchable: false, class: 'action' },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'ecode', name: 'employees.code', searchable: true },
+                { data: 'date', name: 'date', searchable: false },
+                { data: 'advance_amount', name: 'expense_voucher_advance_requests.advance_amount', searchable: false },
+                { data: 'balance_amount', name: 'expense_voucher_advance_requests.balance_amount', searchable: false },
+                { data: 'status', name: 'configs.name', searchable: false },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
         });
-        $scope.deleteExpenseVoucher = function(id) {
-            $('#delete_expense_voucher_id').val(id);
-        }
-        $scope.confirmDeleteExpenseVoucher = function() {
-            var id = $('#delete_expense_voucher_id').val();
-            $http.get(
-                expense_voucher_advance_delete_url + '/' + id,
-            ).then(function(res) {
-                if (!res.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Expense voucher request Deleted Successfully',
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                    dataTable.ajax.reload(function(json) {});
-                    $location.path('/eyatra/expense/voucher-advance/list')
-                    $scope.$apply()
-                }
-            });
-        }
+        $('.dataTables_length select').select2();
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
+
+
         // $rootScope.loading = false;
     }
 });
@@ -232,7 +173,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
-                        url: laravel_routes['expenseVoucherSave'],
+                        url: laravel_routes['expenseVoucherVerificationSave'],
                         method: "POST",
                         data: formData,
                         processData: false,
@@ -273,8 +214,8 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
 });
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraExpenseVoucherAdvanceView', {
-    templateUrl: expense_voucher_advance_view_template_url,
+app.component('eyatraExpenseVoucherAdvanceVerificationView', {
+    templateUrl: expense_voucher_advance_verification_view_template_url,
     controller: function($http, $location, $routeParams, HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;

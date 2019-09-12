@@ -18,7 +18,7 @@ class TripClaimVerificationThreeController extends Controller {
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('outlets', 'outlets.id', 'e.outlet_id')
+		// ->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
@@ -52,7 +52,7 @@ class TripClaimVerificationThreeController extends Controller {
 				}
 			})
 			->where('ey_employee_claims.status_id', 3223) //PAYMENT PENDING
-			->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
+		// ->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 

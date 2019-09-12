@@ -79,7 +79,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 501,
 			],
 			3023 => [
-				'name' => 'Claimed',
+				'name' => 'Claim Requested',
 				'config_type_id' => 501,
 			],
 			3024 => [

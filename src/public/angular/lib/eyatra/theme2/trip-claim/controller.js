@@ -389,12 +389,12 @@ app.component('eyatraTripClaimForm', {
             var remarks_text = $('#' + expense_type + '_remarks').val();
 
             if (expense_type == 'visit') {
-                if (!self.trip.self_visits[remarks_index].self_booking) {
-                    self.trip.self_visits[remarks_index].self_booking = {
+                if (!self.trip.visits[remarks_index].self_booking) {
+                    self.trip.visits[remarks_index].self_booking = {
                         remarks: remarks_text
                     };
                 } else {
-                    self.trip.self_visits[remarks_index].self_booking.remarks = remarks_text;
+                    self.trip.visits[remarks_index].self_booking.remarks = remarks_text;
                 }
             } else if (expense_type == 'lodge') {
                 self.trip.lodgings[remarks_index].remarks = remarks_text;
@@ -430,7 +430,7 @@ app.component('eyatraTripClaimForm', {
                         var eligible_amount = res.grade_expense_type ? res.grade_expense_type.eligible_amount : '0.00';
                         // console.log(' == eligible_amount ==' + eligible_amount);
                         if (expense_type_id == 3000) { //TRANSPORT EXPENSES
-                            self.trip.self_visits[key].eligible_amount = eligible_amount;
+                            self.trip.visits[key].eligible_amount = eligible_amount;
                         } else if (expense_type_id == 3001) { // LODGING EXPENSE
                             self.trip.lodgings[key].eligible_amount = eligible_amount;
                         } else if (expense_type_id == 3002) { // BOARDING EXPENSE
@@ -477,28 +477,28 @@ app.component('eyatraTripClaimForm', {
                         var is_no_vehicl_claim = res.is_no_vehicl_claim;
                         //IF TRANSPORT HAS NO VEHICLE CLAIM
                         if (is_no_vehicl_claim) {
-                            if (!self.trip.self_visits[key].self_booking) {
-                                self.trip.self_visits[key].self_booking = {
+                            if (!self.trip.visits[key].self_booking) {
+                                self.trip.visits[key].self_booking = {
                                     amount: '0.00',
                                     tax: '0.00',
                                     reference_number: '--'
                                 };
                             } else {
-                                self.trip.self_visits[key].self_booking.amount = '0.00';
-                                self.trip.self_visits[key].self_booking.tax = '0.00';
-                                self.trip.self_visits[key].self_booking.reference_number = '--';
+                                self.trip.visits[key].self_booking.amount = '0.00';
+                                self.trip.visits[key].self_booking.tax = '0.00';
+                                self.trip.visits[key].self_booking.reference_number = '--';
                             }
                         } else {
-                            if (!self.trip.self_visits[key].self_booking) {
-                                self.trip.self_visits[key].self_booking = {
+                            if (!self.trip.visits[key].self_booking) {
+                                self.trip.visits[key].self_booking = {
                                     amount: '',
                                     tax: '',
                                     reference_number: ''
                                 };
                             } else {
-                                self.trip.self_visits[key].self_booking.amount = '';
-                                self.trip.self_visits[key].self_booking.tax = '';
-                                self.trip.self_visits[key].self_booking.reference_number = '';
+                                self.trip.visits[key].self_booking.amount = '';
+                                self.trip.visits[key].self_booking.tax = '';
+                                self.trip.visits[key].self_booking.reference_number = '';
                             }
                         }
 

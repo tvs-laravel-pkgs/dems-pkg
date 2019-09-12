@@ -42,6 +42,7 @@ class PettyCashCashierVerificationController extends Controller {
 			->where('cashier.id', Auth::user()->entity_id)
 		// ->where('outlets.amount_eligible', 1)
 		// ->where('petty_cash.total', '<=', 'outlets.amount_limit')
+			->where('cashier.id', Auth::user()->entity_id)
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
@@ -156,7 +157,12 @@ class PettyCashCashierVerificationController extends Controller {
 			$user_role = 'Cashier';
 		} else {
 			$user_role = 'Employee';
-			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id')->join('entities', 'entities.id', 'employees.grade_id')->where('employees.id', Auth::user()->entity_id)->first();
+			$emp_details = Employee::select('entities.name as empgrade', 'users.name', 'employees.code', 'employees.id as employee_id')
+				->join('entities', 'entities.id', 'employees.grade_id')
+				->join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.id', Auth::user()->entity_id)
+				->first();
 		}
 		$this->data['user_role'] = $user_role;
 		$this->data['emp_details'] = $emp_details;

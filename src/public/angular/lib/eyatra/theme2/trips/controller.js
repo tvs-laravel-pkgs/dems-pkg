@@ -320,7 +320,7 @@ app.component('eyatraTripForm', {
         self.removeLodging = function(index, lodging_id) {
             // alert('remove');
             // alert(index);
-            alert(lodging_id);
+            // alert(lodging_id);
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
