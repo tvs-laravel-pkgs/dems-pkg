@@ -213,4 +213,57 @@ class TripClaimVerificationLevelController extends Controller {
 
 		return response()->json($this->data);
 	}
+
+	public function approveTripClaimVerificationOne($trip_id) {
+
+		$trip = Trip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		if ($employee_claim->is_deviation == 0) {
+			$employee_claim->status_id = 3223; //Payment Pending
+			$trip->status_id = 3025; //Payment Pending
+		} else {
+			$employee_claim->status_id = 3224; //Senior Manager Approval Pending
+			$trip->status_id = 3029; //Senior Manager Approval Pending
+		}
+		$employee_claim->save();
+		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V1 Approved";
+		$activity['activity'] = "approve";
+		$activity_log = ActivityLog::saveLog($activity);
+		return response()->json(['success' => true]);
+	}
+
+	public function rejectTripClaimVerificationOne(Request $r) {
+
+		$trip = Trip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+
+		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim->status_id = 3226; //Claim Rejected
+		$employee_claim->save();
+
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
+		$trip->status_id = 3024; //Claim Rejected
+		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = "Employee Claims V1 Rejected";
+		$activity['activity'] = "reject";
+		$activity_log = ActivityLog::saveLog($activity);
+		return response()->json(['success' => true]);
+	}
 }
