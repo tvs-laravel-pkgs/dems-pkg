@@ -98,7 +98,7 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.$apply()
             return;
         }
-        $form_data_url = agent_request_form_data_url + '/' + $routeParams.trip_id;
+        $form_data_url = financier_request_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
