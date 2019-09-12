@@ -172,7 +172,7 @@ Route::group(['middleware' => ['web']], function () {
 
 		//EXPENSE VOUCHER ADVANCE VERIFICATION
 		Route::get('eyatra/expense/voucher-advance/verification/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@listExpenseVoucherverificationRequest')->name('listExpenseVoucherverificationRequest');
-		Route::post('eyatra/expense/voucher-advance/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationSave')->name('expenseVoucherVerificationSave');
+		Route::post('eyatra/expense/voucher-advance/verification/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationSave')->name('expenseVoucherVerificationSave');
 		Route::get('eyatra/expense/voucher-advance/verification/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationView')->name('expenseVoucherVerificationView');
 
 		//DESIGNATIONS

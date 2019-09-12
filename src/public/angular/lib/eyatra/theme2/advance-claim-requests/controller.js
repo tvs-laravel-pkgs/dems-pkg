@@ -46,12 +46,12 @@ app.component('eyatraAdvanceClaimRequests', {
             },
 
             columns: [
-                { data: 'checkbox', searchable: false, class: 'action' },
-                { data: 'action', searchable: false, class: 'action' },
+                { data: 'checkbox', searchable: false },
+                { data: 'action', searchable: false },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
+                { data: 'start_date', name: 'trips.start_date', searchable: true },
+                { data: 'end_date', name: 'triops.end_date', searchable: true },
                 { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },

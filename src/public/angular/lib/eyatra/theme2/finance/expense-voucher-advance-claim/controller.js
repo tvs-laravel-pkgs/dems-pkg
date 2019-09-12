@@ -55,7 +55,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-app.component('eyatraExpenseVoucherAdvanceForm', {
+app.component('eyatraExpenseVoucherAdvanceVerificationForm', {
     templateUrl: expense_voucher_advance_from_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.id) == 'undefined' ? expense_voucher_advance_form_data_url : expense_voucher_advance_form_data_url + '/' + $routeParams.id;

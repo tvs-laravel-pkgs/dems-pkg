@@ -29,6 +29,7 @@ class TripClaimController extends Controller {
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'trips.status_id',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
@@ -37,7 +38,7 @@ class TripClaimController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->where('trips.status_id', 3023)
+			->whereIn('trips.status_id', [3023, 3025, 3026])
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -63,13 +64,22 @@ class TripClaimController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
+				if ($trip->status_id == 3023) {
+
+					return '
 				<a href="#!/eyatra/trip/claim/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
 				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
+				} else {
+					return '
+
+				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
+				}
 
 			})
 			->make(true);

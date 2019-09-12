@@ -122,6 +122,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
         self.type_id = $routeParams.type_id;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        // alert($form_data_url);
         $http.get(
             $form_data_url
         ).then(function(response) {
