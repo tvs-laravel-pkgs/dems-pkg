@@ -194,7 +194,9 @@ class RegionController extends Controller {
 		$option = new NState;
 		$option->name = 'Select State';
 		$option->id = null;
-		$this->data['state_list'] = $state_list = NState::select('name', 'id')->where('country_id', $country_id)->where('company_id', Auth::user()->company_id)->get()->prepend($option);
+		$this->data['state_list'] = $state_list = NState::select('name', 'id')
+			->get()->prepend($option);
+		// dd($state_list);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),

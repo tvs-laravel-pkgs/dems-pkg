@@ -166,8 +166,12 @@ class OutletController extends Controller {
 	public function eyatraOutletFilterData() {
 		$this->data['region_list'] = Region::getList();
 		$this->data['city_list'] = NCity::getList();
-		$this->data['state_list'] = NState::getList();
-		$this->data['country_list'] = NCountry::getList();
+		$this->data['country_list'] = $country = NCountry::getList();
+		$option = new NState;
+		$option->name = 'Select State';
+		$option->id = null;
+		$this->data['state_list'] = $state_list = NState::select('name', 'id')
+			->get()->prepend($option);
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
