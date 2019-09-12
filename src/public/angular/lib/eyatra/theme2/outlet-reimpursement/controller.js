@@ -137,6 +137,9 @@ app.component('eyatraOutletReimbursement', {
                 ).then(function(response) {
                     console.log(response.data.success);
                     if (response.data.success) {
+
+                        $('#transaction_date').val('');
+                        $('#topup_amount').val('');
                         $('#outlet_reimpursement_modal').modal('hide');
                         //$('#outlet_reimpursement_modal').attr("data-dismiss", 'modal');
                         $noty = new Noty({
