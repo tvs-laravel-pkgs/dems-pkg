@@ -64,7 +64,7 @@ app.component('eyatraGrades', {
         $http.get(
             grade_filter_url
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.advanced_eligibility_list = response.data.advanced_eligibility_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -94,7 +94,7 @@ app.component('eyatraGrades', {
             $http.get(
                 grade_delete_url + '/' + $id,
             ).then(function(response) {
-                console.log(response.data);
+                // console.log(response.data);
                 if (response.data.success) {
 
                     $noty = new Noty({
@@ -297,7 +297,7 @@ app.component('eyatraGradeForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';

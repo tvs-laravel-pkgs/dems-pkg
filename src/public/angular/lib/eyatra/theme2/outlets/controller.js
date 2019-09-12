@@ -145,7 +145,7 @@ app.component('eyatraOutlets', {
                 outlet_get_state_filter_list + '/' + id
             ).then(function(response) {
                 self.state_list = response.data.state_list;
-               
+
             });
         }
 
@@ -154,10 +154,10 @@ app.component('eyatraOutlets', {
                 outlet_get_city_filter_list + '/' + id
             ).then(function(response) {
                 self.city_list = response.data.city_list;
-             
+
             });
         }
-        
+
 
         $rootScope.loading = false;
 
