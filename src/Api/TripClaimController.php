@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 
 class TripClaimController extends Controller {
