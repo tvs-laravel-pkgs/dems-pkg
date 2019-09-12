@@ -146,12 +146,29 @@ app.component('eyatraTrips', {
 
 app.component('eyatraTripForm', {
     templateUrl: trip_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var arr_ind;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+
+        $scope.options = {
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+            // singleDatePicker:true
+        };
+
+        $scope.onChange = function() {
+            self.trip.start_date = moment($scope.startDate).format('DD-MM-YYYY');
+            self.trip.end_date = moment($scope.endDate).format('DD-MM-YYYY');
+        }
+
         $http.get(
             $form_data_url
         ).then(function(response) {
