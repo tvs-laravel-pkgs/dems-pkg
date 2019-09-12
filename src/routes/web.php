@@ -33,6 +33,8 @@ Route::group(['middleware' => ['api']], function () {
 		//TRIP CLAIM VERIFICATION LEVEL
 		Route::get('trip/claim/verification/one/get-list', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@listTripClaimVerificationOneList');
 		Route::get('trip/claim/verification/view/{trip_id?}', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@getClaimVerificationViewData');
+		Route::post('trip/claim/verification/one/reject', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@rejectTripClaimVerificationOne');
+		Route::get('trip/claim/verification/one/approve/{trip_id}', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@approveTripClaimVerificationOne');
 
 		//TRIP REJECTION REASON
 		Route::get('trip/rejection/reasons', 'Uitoux\EYatra\Api\TripVerificationController@getRejectionData');
