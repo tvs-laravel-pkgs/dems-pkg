@@ -110,29 +110,29 @@ app.component('eyatraAlternateApproveForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            // if (!response.data.success) {
-            //     $noty = new Noty({
-            //         type: 'error',
-            //         layout: 'topRight',
-            //         text: response.data.error,
-            //         animation: {
-            //             speed: 500 // unavailable - no need
-            //         },
-            //     }).show();
-            //     setTimeout(function() {
-            //         $noty.close();
-            //     }, 3000);
-            //     $location.path('/eyatra/alternate-approve');
-            //     return;
-            // }
-            console.log(response);
+            if (!response.data.success) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 3000);
+                $location.path('/eyatra/alternate-approve');
+                return;
+            }
+            // console.log(response);
             self.alternate_approve = response.data.alternate_approve;
             self.action = response.data.action;
             // console.log(response.data.alternate_approve);
-            /*self.selectedItem = self.alternate_approve.emp_name;
-            self.selectedItem1 = self.alternate_approve.alt_emp_name;
-            $(".employee_id").val(self.alternate_approve.employee_id);
-            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);*/
+            // self.selectedItem = self.alternate_approve.emp_name;
+            // self.selectedItem1 = self.alternate_approve.alt_emp_name;
+            // $(".employee_id").val(self.alternate_approve.employee_id);
+            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);
             self.extras = response.data.extras;
             if (self.action == 'Edit') {
                 self.action = 'Edit';
