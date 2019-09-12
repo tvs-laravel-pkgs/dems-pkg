@@ -140,18 +140,18 @@ app.component('eyatraOutlets', {
             });
         }
 
-        $scope.get_state_base_country = function(id) {
+        $scope.get_state_base_country = function(country_id) {
             $http.get(
-                outlet_get_state_filter_list + '/' + id
+                outlet_get_state_filter_list + '/' + country_id
             ).then(function(response) {
                 self.state_list = response.data.state_list;
 
             });
         }
 
-        $scope.get_city_base_state = function(id) {
+        $scope.get_city_base_state = function(state_id) {
             $http.get(
-                outlet_get_city_filter_list + '/' + id
+                outlet_get_city_filter_list + '/' + state_id
             ).then(function(response) {
                 self.city_list = response.data.city_list;
 
