@@ -252,13 +252,33 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'view Expense Voucher Advance',
     }).
 
-    //EXPENSE VOUCHER ADVANCE VERIFICATION
-    when('/eyatra/expense/voucher-advance/verification/list', {
+    //EXPENSE VOUCHER ADVANCE VERIFICATION MANAGER
+    when('/eyatra/expense/voucher-advance/verification1', {
         template: '<eyatra-expense-voucher-advance-verification-list></eyatra-expense-voucher-advance-verification-list>',
         title: 'Expense Voucher Advance',
     }).
-    when('/eyatra/expense/voucher-advance/verification/view/:id', {
+    when('/eyatra/expense/voucher-advance/verification1/view/:id', {
         template: '<eyatra-expense-voucher-advance-verification-view></eyatra-expense-voucher-advance-verification-view>',
+        title: 'view Expense Voucher Advance',
+    }).
+
+    //EXPENSE VOUCHER ADVANCE VERIFICATION CASHIER
+    when('/eyatra/expense/voucher-advance/verification2', {
+        template: '<eyatra-expense-voucher-advance-verification2-list></eyatra-expense-voucher-advance-verification2-list>',
+        title: 'Expense Voucher Advance',
+    }).
+    when('/eyatra/expense/voucher-advance/verification2/view/:id', {
+        template: '<eyatra-expense-voucher-advance-verification2-view></eyatra-expense-voucher-advance-verification2-view>',
+        title: 'view Expense Voucher Advance',
+    }).
+
+    //EXPENSE VOUCHER ADVANCE VERIFICATION FINANCIER
+    when('/eyatra/expense/voucher-advance/verification3', {
+        template: '<eyatra-expense-voucher-advance-verification3-list></eyatra-expense-voucher-advance-verification3-list>',
+        title: 'Expense Voucher Advance',
+    }).
+    when('/eyatra/expense/voucher-advance/verification3/view/:id', {
+        template: '<eyatra-expense-voucher-advance-verification3-view></eyatra-expense-voucher-advance-verification3-view>',
         title: 'view Expense Voucher Advance',
     }).
 

@@ -332,7 +332,7 @@ app.component('eyatraPettyCashForm', {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Check all tabs for errors',
+                    text: 'You have errors please check',
                     animation: {
                         speed: 500 // unavailable - no need
                     },

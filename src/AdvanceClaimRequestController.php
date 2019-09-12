@@ -21,9 +21,11 @@ class AdvanceClaimRequestController extends Controller {
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'trips.start_date as start_date',
+				'trips.end_date as end_date',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'trips.created_at',
@@ -108,9 +110,9 @@ class AdvanceClaimRequestController extends Controller {
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $end_date->end_date;
+		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
+		// $trip->start_date = $start_date->start_date;
+		// $trip->end_date = $end_date->end_date;
 		$trip->days = $days->days + 1;
 		$this->data['payment_mode_list'] = $payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['wallet_mode_list'] = $wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);

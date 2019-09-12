@@ -6,10 +6,6 @@ app.component('eyatraExpenseVoucherAdvanceList', {
 
         $list_data_url = expense_voucher_advance_list_data_url;
 
-        //
-
-        //$list_data_url = eyatra_pettycash_get_list;
-
         $http.get(
             $list_data_url
         ).then(function(response) {
@@ -122,7 +118,6 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
         self.type_id = $routeParams.type_id;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-        // alert($form_data_url);
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -146,6 +141,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             self.action = response.data.action;
 
             self.expense_voucher_advance = response.data.expense_voucher_advance;
+            console.log(response.data.expense_voucher_advance.employee);
 
             if (self.action == 'Edit') {
                 self.action = 'Edit';
@@ -153,6 +149,8 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 $("#employee_id").val(response.data.expense_voucher_advance.employee_id);
             } else {
                 self.action = 'Add';
+                self.employee_id = response.data.employee_details.id;
+                console.log(self.employee_id);
                 $("#employee_id").val('');
             }
 
