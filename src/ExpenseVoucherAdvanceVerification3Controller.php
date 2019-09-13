@@ -5,14 +5,12 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Yajra\Datatables\Datatables;
 
-class ExpenseVoucherAdvanceVerificationController extends Controller {
-	public function listExpenseVoucherverificationRequest(Request $r) {
+class ExpenseVoucherAdvanceVerification3Controller extends Controller {
+	public function listExpenseVoucherverification3Request(Request $r) {
 		$expense_voucher_requests = ExpenseVoucherAdvanceRequest::select(
 			'expense_voucher_advance_requests.id',
 			'expense_voucher_advance_requests.employee_id',
@@ -24,28 +22,16 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			'expense_voucher_advance_requests.status_id as status_id',
 			'configs.name as status'
 		)
-			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
+			->join('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
 			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
-			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->join('users', 'users.entity_id', 'employees.id')
+			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
+			->where('expense_voucher_advance_requests.status_id', 3285)
 			->where('users.user_type_id', 3121)
-			->where('employees.reporting_to_id', Auth::user()->entity_id)
-			->where('expense_voucher_advance_requests.status_id', 3460)
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 		;
-		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
-			$expense_voucher_requests->join('outlets', 'outlets.id', 'employees.outlet_id')
-				->where('expense_voucher_advance_requests.employee_id', Auth::user()->entity_id)->where('expense_voucher_advance_requests.status_id', 3481)
-			// ->get()
-			;
-		}
-		if (Entrust::can('eyatra-indv-expense-vouchers-verification3')) {
-			$expense_voucher_requests->join('outlets', 'outlets.id', 'employees.outlet_id')
-				->where('expense_voucher_advance_requests.employee_id', Auth::user()->entity_id)->where('expense_voucher_advance_requests.status_id', 3485)
-			// ->get()
-			;
-		}
 		// dd($expense_voucher_requests->get());
 		return Datatables::of($expense_voucher_requests)
 			->addColumn('action', function ($expense_voucher_requests) {
@@ -57,14 +43,14 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 
 				return '
-				<a href="#!/eyatra/expense/voucher-advance/verification1/view/' . $expense_voucher_requests->id . '">
+				<a href="#!/eyatra/expense/voucher-advance/verification3/view/' . $expense_voucher_requests->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
 			})
 			->make(true);
 	}
 
-	public function expenseVoucherVerificationView($id) {
+	public function expenseVoucherVerification3View($id) {
 		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
 			'employees.code',
 			'users.name',
@@ -75,7 +61,8 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			'expense_voucher_advance_requests.expense_amount',
 			'expense_voucher_advance_requests.balance_amount',
 			'expense_voucher_advance_requests.description',
-			'configs.name as status'
+			'configs.name as status',
+			'employees.payment_mode_id'
 		)
 			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
 			->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -87,33 +74,31 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function expenseVoucherVerificationSave(Request $request) {
+	public function expenseVoucherVerification3Save(Request $request) {
 		// dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
-				$employee_cash_check = Employee::select(
-					'outlets.amount_eligible',
-					'outlets.amount_limit'
-				)
-					->join('outlets', 'outlets.id', 'employees.outlet_id')
-					->where('employees.id', $request->employee_id)->first();
-				if ($employee_cash_check->amount_eligible != 0) {
-					if ($employee_cash_check->amount_limit >= $request->expense_amount) {
-						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
-					} else {
-						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
-					}
-				} else {
-					$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
-				}
-				DB::commit();
-				return response()->json(['success' => true]);
+				$expence_voucher_finance_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3461, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				//PAYMENT SAVE
+				// $payment = Payment::firstOrNew(['entity_id' => $request->approve, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
+				// $payment->fill($request->all());
+				// $payment->date = date('Y-m-d', strtotime($request->date));
+				// $payment->payment_of_id = 3254;
+				// // $payment->payment_mode_id = $agent_claim->id;
+				// $payment->created_by = Auth::user()->id;
+				// $payment->save();
+				// $activity['entity_id'] = $request->approve;
+				// $activity['entity_type'] = 'Expense Voucher';
+				// $activity['details'] = "Claim is paid by Financier";
+				// $activity['activity'] = "paid";
+				// $activity_log = ActivityLog::saveLog($activity);
 			} else {
-				$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3282, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
-				DB::commit();
-				return response()->json(['success' => true]);
+				$expence_voucher_finance_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3462, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+
 			}
+			DB::commit();
+			return response()->json(['success' => true]);
 			$request->session()->flash('success', 'Expense Voucher Advance Manager Verification successfully!');
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {

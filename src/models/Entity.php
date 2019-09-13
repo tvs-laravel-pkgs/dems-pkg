@@ -75,7 +75,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 	public static function uiExpenceTypeListBasedPettyCash() {
-		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->where('name', 'NOT LIKE', '%Local Conveyance%')->get();
+		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->where('name', 'NOT LIKE', '%Local Conveyance%')->get()->prepend(['id' => '', 'name' => 'Select Expense Type']);
 	}
 
 	public static function PettyCashTravelModeList() {

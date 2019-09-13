@@ -26,6 +26,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
+			->where('employees.id', Auth::user()->entity_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 			->groupBy('expense_voucher_advance_requests.id')
 		;
@@ -51,7 +52,9 @@ class ExpenseVoucherAdvanceController extends Controller {
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 				} else {
-					return '';
+					return '<a href="#!/eyatra/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
 				}
 
 			})
@@ -65,7 +68,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			$this->data['action'] = 'Add';
 			$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 			$this->data['success'] = true;
-			$this->data['message'] = 'Alternate Approve not found';
+			$this->data['message'] = 'Expense Voucher not found';
 			$this->data['employee_list'] = [];
 			$this->data['employee'] = '';
 		} else {
@@ -79,6 +82,13 @@ class ExpenseVoucherAdvanceController extends Controller {
 				->where('id', $id)->first();
 			$this->data['success'] = true;
 		}
+
+		$employee_details = Employee::join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('users.company_id', Auth::user()->company_id)
+			->where('employees.id', Auth::user()->entity_id)
+			->select('employees.id')->first();
+		$this->data['employee_details'] = $employee_details;
 		$this->data['expense_voucher_advance'] = $expense_voucher_advance;
 		return response()->json($this->data);
 	}

@@ -7,6 +7,7 @@ use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Uitoux\EYatra\LocalTravel;
@@ -29,15 +30,18 @@ class TripClaimController extends Controller {
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'trips.status_id',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				'trips.start_date',
+				'trips.end_date',
+				// DB::raw('DATE_FORMAT(trips.start_date,"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(trips.end_date,"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->where('trips.status_id', 3023)
+			->whereIn('trips.status_id', [3023, 3025, 3026])
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -63,13 +67,22 @@ class TripClaimController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
+				if ($trip->status_id == 3023) {
+
+					return '
 				<a href="#!/eyatra/trip/claim/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
 				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
+				} else {
+					return '
+
+				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
+				}
 
 			})
 			->make(true);
@@ -108,26 +121,40 @@ class TripClaimController extends Controller {
 				foreach ($request->visits as $visit_data) {
 					if (!empty($visit_data['id'])) {
 						$visit = Visit::find($visit_data['id']);
-						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
-						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
-						$visit->travel_mode_id = $visit_data['travel_mode_id'];
+
+						//CONCATENATE DATE & TIME
+						$depart_date = $visit_data['departure_date'];
+						$depart_time = $visit_data['departure_time'];
+						$arrival_date = $visit_data['arrival_date'];
+						$arrival_time = $visit_data['arrival_time'];
+						$visit->departure_date = date('Y-m-d H:i:s', strtotime("$depart_date $depart_time"));
+						$visit->arrival_date = date('Y-m-d H:i:s', strtotime("$arrival_date $arrival_time"));
+
+						//GET BOOKING TYPE
+						$booked_by = strtolower($visit_data['booked_by']);
+						if ($booked_by == 'self') {
+							$visit->travel_mode_id = $visit_data['travel_mode_id'];
+						}
 						$visit->save();
 						// dd($visit_data['id']);
-						//UPDATE VISIT BOOKING STATUS
-						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
-						$visit_booking->visit_id = $visit_data['id'];
-						$visit_booking->type_id = 3100;
-						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
-						$visit_booking->reference_number = $visit_data['reference_number'];
-						$visit_booking->remarks = $visit_data['remarks'];
-						$visit_booking->amount = $visit_data['amount'];
-						$visit_booking->tax = $visit_data['tax'];
-						$visit_booking->service_charge = '0.00';
-						$visit_booking->total = $visit_data['total'];
-						$visit_booking->paid_amount = $visit_data['total'];
-						$visit_booking->created_by = Auth::user()->id;
-						$visit_booking->status_id = 3241; //Claimed
-						$visit_booking->save();
+
+						//UPDATE VISIT BOOKING STATUS ONLY FOR SELF
+						if ($booked_by == 'self') {
+							$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
+							$visit_booking->visit_id = $visit_data['id'];
+							$visit_booking->type_id = 3100;
+							$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
+							$visit_booking->reference_number = $visit_data['reference_number'];
+							$visit_booking->remarks = $visit_data['remarks'];
+							$visit_booking->amount = $visit_data['amount'];
+							$visit_booking->tax = $visit_data['tax'];
+							$visit_booking->service_charge = '0.00';
+							$visit_booking->total = $visit_data['total'];
+							$visit_booking->paid_amount = $visit_data['total'];
+							$visit_booking->created_by = Auth::user()->id;
+							$visit_booking->status_id = 3241; //Claimed
+							$visit_booking->save();
+						}
 
 					}
 				}
@@ -441,9 +468,21 @@ class TripClaimController extends Controller {
 				if ($grade_expense_type) {
 					if ($request->stay_type_id == 3341) {
 						//STAY TYPE HOME
-						$percentage = 25;
-						$totalWidth = $grade_expense_type->eligible_amount;
-						$eligible_amount = ($percentage / 100) * $totalWidth;
+
+						//GET GRADE STAY TYPE
+						$grade_stay_type = DB::table('grade_advanced_eligibility')->where('grade_id', $request->grade_id)->first();
+						if ($grade_stay_type) {
+							if ($grade_stay_type->stay_type_disc) {
+								$percentage = (int) $grade_stay_type->stay_type_disc;
+								$totalWidth = $grade_expense_type->eligible_amount;
+								$eligible_amount = ($percentage / 100) * $totalWidth;
+							} else {
+								$eligible_amount = $grade_expense_type->eligible_amount;
+							}
+						} else {
+							$eligible_amount = $grade_expense_type->eligible_amount;
+						}
+
 					} else {
 						$eligible_amount = $grade_expense_type->eligible_amount;
 					}

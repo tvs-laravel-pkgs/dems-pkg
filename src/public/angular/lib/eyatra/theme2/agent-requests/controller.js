@@ -3,6 +3,7 @@
 app.component('eyatraAgentRequestForm', {
     templateUrl: agent_request_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
+        //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/agent/requests')
             $scope.$apply()
@@ -15,6 +16,7 @@ app.component('eyatraAgentRequestForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
+
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -47,8 +49,11 @@ app.component('eyatraAgentRequestForm', {
                 $scope.$apply()
                 return;
             }
+            // console.log(response.data.trip);
             self.trip = response.data.trip;
             self.travel_mode_list = response.data.travel_mode_list;
+            self.attachments = response.data.attachments;
+            //console.log(response.data.attachments);
             self.action = response.data.action;
             $rootScope.loading = false;
 
@@ -209,7 +214,7 @@ app.component('eyatraAgentRequestForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';

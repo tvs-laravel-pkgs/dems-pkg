@@ -1,6 +1,7 @@
 app.component('eyatraTripBookingRequests', {
     templateUrl: eyatra_booking_requests_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
+
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_booking_requests_table').DataTable({
@@ -93,6 +94,7 @@ app.component('eyatraTripBookingRequests', {
 app.component('eyatraTripBookingRequestsView', {
     templateUrl: agent_request_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
+        //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/agent/requests')
             $scope.$apply()
@@ -140,7 +142,7 @@ app.component('eyatraTripBookingRequestsView', {
                 $scope.$apply()
                 return;
             }
-            console.log(response);
+            console.log(response.data);
             self.trip = response.data.trip;
             self.age = response.data.age;
             self.total_amount = response.data.total_amount;
@@ -149,6 +151,7 @@ app.component('eyatraTripBookingRequestsView', {
             self.trip_status = response.data.trip_status;
             self.booking_mode_list = response.data.booking_mode_list;
             self.travel_mode_list = response.data.travel_mode_list;
+            self.attachment_path = response.data.attach_path;
             self.action = response.data.action;
             $rootScope.loading = false;
 
@@ -428,7 +431,7 @@ app.component('eyatraTripBookingRequestsView', {
                     label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
                 input.trigger('fileselect', [numFiles, label]);
             });
-    
+
             // We can watch for our custom `fileselect` event like this
             $(':file').on('fileselect', function(event, numFiles, label) {
                 var input = $(this).parents('.input-group').find(':text'),

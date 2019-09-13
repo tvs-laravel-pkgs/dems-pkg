@@ -507,7 +507,7 @@ class AgentClaimController extends Controller {
 				->join('visits', 'trips.id', 'visits.trip_id')
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.booking_method_id', 3042)
-				->where('visit_bookings.created_by', Auth::user()->id)
+			// ->where('visit_bookings.created_by', Auth::user()->id)
 				->where('visits.trip_id', $trip_id)
 				->groupBy('visits.trip_id')
 				->first();

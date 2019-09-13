@@ -1,7 +1,7 @@
 app.component('eyatraEmployees', {
     templateUrl: eyatra_employee_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
-        console.log('s');
+        // console.log('s');
         var self = this;
         self.hasPermission = HelperService.hasPermission;
 
@@ -59,7 +59,7 @@ app.component('eyatraEmployees', {
         $http.get(
             employee_filter_url
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.grade_list = response.data.grade_list;
             self.outlet_list = response.data.outlet_list;
             self.role_list = response.data.role_list;
@@ -165,6 +165,7 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
+            console.log(response);
             self.employee = response.data.employee;
             self.extras = response.data.extras;
 
@@ -175,7 +176,7 @@ app.component('eyatraEmployeeForm', {
             }
 
             if (self.action == 'Add') {
-                $('#visit-single').prop('checked',true);
+                $('#visit-single').prop('checked', true);
             }
 
             if (self.action == 'Edit') {
@@ -206,41 +207,41 @@ app.component('eyatraEmployeeForm', {
 
 
         $scope.getSbuBasedonLob = function(lob_id) {
-            
-                //alert(lob_id);
-                $.ajax({
-                        url: get_sbu_by_lob,
-                        method: "POST",
-                        data: { lob_id: lob_id },
-                    })
-                    .done(function(res) {
-                        self.extras.sbu_list = [];
-                        self.extras.sbu_list = res.sbu_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            
+
+            //alert(lob_id);
+            $.ajax({
+                    url: get_sbu_by_lob,
+                    method: "POST",
+                    data: { lob_id: lob_id },
+                })
+                .done(function(res) {
+                    self.extras.sbu_list = [];
+                    self.extras.sbu_list = res.sbu_list;
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+
         }
 
         $scope.getDesignation = function(grade_id) {
-            
-                $.ajax({
-                        url: get_designation_by_grade,
-                        method: "POST",
-                        data: { grade_id: grade_id },
-                    })
-                    .done(function(res) {
 
-                        self.extras.designation_list = [];
-                        self.extras.designation_list = res.designation_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            
+            $.ajax({
+                    url: get_designation_by_grade,
+                    method: "POST",
+                    data: { grade_id: grade_id },
+                })
+                .done(function(res) {
+
+                    self.extras.designation_list = [];
+                    self.extras.designation_list = res.designation_list;
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+
         }
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {
@@ -336,9 +337,6 @@ app.component('eyatraEmployeeForm', {
                     minlength: 3,
                 },
                 'outlet_id': {
-                    required: true,
-                },
-                'reporting_to_id': {
                     required: true,
                 },
                 'grade_id': {
@@ -656,7 +654,7 @@ app.component('eyatraJobsImportList', {
             $('.to').val(null);
             dataTableFilter.fnFilter();
         }
-        $scope.resetForm();        
+        $scope.resetForm();
         setInterval(function() {
             dataTableFilter.fnDraw();
         }, 6000);
@@ -682,8 +680,8 @@ app.component('importJobs', {
         $http.get(
             get_import_jobs_form_data_url
         ).then(function(response) {
-            
-            self.import_type_list = response.data.import_type_list; 
+
+            self.import_type_list = response.data.import_type_list;
         });
 
         $scope.onSelectedImportType = function(type) {
@@ -699,7 +697,7 @@ app.component('importJobs', {
                 $('#outlet_import').hide();
 
             }
-            }
+        }
 
         $('#submit_employee_import').click(function() {
             var form_id = form_ids = '#employee-import-form';
@@ -710,7 +708,7 @@ app.component('importJobs', {
                         required: true,
                     },
                     'import_type_id': {
-                        required: true, 
+                        required: true,
                     },
                 },
                 submitHandler: function(form) {
@@ -726,7 +724,7 @@ app.component('importJobs', {
 
                             if (!res.success) {
                                 $('#submit').button('reset');
-                                $('#submit').prop('disabled',true);
+                                $('#submit').prop('disabled', true);
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
@@ -745,8 +743,8 @@ app.component('importJobs', {
                                     layout: 'topRight',
                                     text: 'Upload in Progress',
                                     animation: {
-                                    speed: 500 // unavailable - no need
-                                },
+                                        speed: 500 // unavailable - no need
+                                    },
                                 }).show();
                                 setTimeout(function() {
                                     $noty.close();

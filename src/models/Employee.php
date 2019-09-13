@@ -89,6 +89,34 @@ class Employee extends Model {
 			->get();
 	}
 
+	public static function create2($company, $outlet, $admin, $faker, $manager_id = null) {
+		$emp_code = Employee::withTrashed()->select('id')->orderBy('id', 'desc')->limit(1)->first();
+		if ($emp_code) {
+			$employee_code = $emp_code->id + 1;
+			$code = "EMP" . $employee_code;
+		} else {
+			$code = 'EMP1';
+		}
+		$employee = Employee::firstOrNew([
+			'company_id' => $company->id,
+			'code' => $code,
+		]);
+		$employee->outlet_id = $outlet->id;
+		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
+		$lob = $company->lobs()->inRandomOrder()->first();
+		$employee->sbu_id = $lob->sbus()->inRandomOrder()->first()->id;
+		$employee->designation_id = $company->designations()->inRandomOrder()->first()->id;
+		$employee->aadhar_no = $faker->creditCardNumber;
+		$employee->pan_no = $faker->swiftBicNumber;
+		$employee->gender = $faker->randomElement(['Male', 'Female']);
+		$employee->reporting_to_id = $manager_id;
+		$employee->payment_mode_id = Config::where('config_type_id', 514)->inRandomOrder()->first()->id;
+		$employee->created_by = $admin->id;
+		$employee->save();
+
+		return $employee;
+	}
+
 	public static function create($company, $code, $outlet, $admin, $faker, $manager_id = null) {
 		$employee = Employee::firstOrNew([
 			'company_id' => $company->id,

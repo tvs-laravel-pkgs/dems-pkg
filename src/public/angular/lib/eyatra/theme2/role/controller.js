@@ -322,9 +322,13 @@ app.component('eyatraRoleForm', {
                     minlength: 3,
                     maxlength: 191,
                 },
-                'permission_id': {
+                'permission_ids[]': {
                     required: true,
                 },
+            },
+            messages: {
+                'permission_ids[]': "Select atleast one permission",
+               
             },
             errorPlacement: function(error, element) {
                 if (element.hasClass("parent_check")) {

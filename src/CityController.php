@@ -108,7 +108,7 @@ class CityController extends Controller {
 			->join('nstates as s', 's.id', 'ncities.state_id')
 			->select(
 				'ncities.id',
-				DB::raw('CONCAT(ncities.name,"/",s.name) as name'),
+				DB::raw('CONCAT(ncities.name," - ",s.name) as name'),
 				's.name as state_name'
 			)
 			->where('company_id', Auth::user()->company_id)
