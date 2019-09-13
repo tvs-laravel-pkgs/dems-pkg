@@ -339,9 +339,6 @@ app.component('eyatraEmployeeForm', {
                 'outlet_id': {
                     required: true,
                 },
-                'reporting_to_id': {
-                    required: true,
-                },
                 'grade_id': {
                     required: true,
                 },

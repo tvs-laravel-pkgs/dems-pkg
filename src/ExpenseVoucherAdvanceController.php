@@ -52,7 +52,9 @@ class ExpenseVoucherAdvanceController extends Controller {
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 				} else {
-					return '';
+					return '<a href="#!/eyatra/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
 				}
 
 			})
