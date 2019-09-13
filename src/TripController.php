@@ -63,7 +63,7 @@ class TripController extends Controller {
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
-				$img1_active = asset('public/img/content/table/edit-yellow.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
