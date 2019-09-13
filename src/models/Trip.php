@@ -363,8 +363,10 @@ class Trip extends Model {
 				'trips.number',
 				DB::raw('CONCAT(u.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				'trips.start_date',
+				'trips.end_date',
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				DB::raw('FORMAT(claim.total_amount,2) as claim_amount'),
 				//Changed to purpose_name. do not revert - Abdul
 				'purpose.name as purpose_name',
@@ -765,6 +767,49 @@ class Trip extends Model {
 		} else {
 			$city_list = [];
 		}
+
+		$cities_with_expenses = NCity::select('id', 'name')->where('company_id', Auth::user()->company_id)->whereIn('id', $to_cities)->groupby('id')->get()->keyBy('id')->toArray();
+		foreach ($cities_with_expenses as $key => $cities_with_expenses_value) {
+			$city_category_id = NCity::where('id', $key)->where('company_id', Auth::user()->company_id)->first();
+			if ($city_category_id) {
+				$transport_expense_type = DB::table('grade_expense_type')->where('grade_id', $trip->employee->grade_id)->where('expense_type_id', 3000)->where('city_category_id', $city_category_id->category_id)->first();
+				if (!$transport_expense_type) {
+					$cities_with_expenses[$key]['transport']['id'] = 3000;
+					$cities_with_expenses[$key]['transport']['grade_id'] = $trip->employee->grade_id;
+					$cities_with_expenses[$key]['transport']['eligible_amount'] = '0.00';
+				} else {
+					$cities_with_expenses[$key]['transport']['id'] = 3000;
+					$cities_with_expenses[$key]['transport']['grade_id'] = $trip->employee->grade_id;
+					$cities_with_expenses[$key]['transport']['eligible_amount'] = $transport_expense_type->eligible_amount;
+				}
+				$lodge_expense_type = DB::table('grade_expense_type')->where('grade_id', $trip->employee->grade_id)->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
+				if (!$lodge_expense_type) {
+					$cities_with_expenses[$key]['lodge']['id'] = 3001;
+					$cities_with_expenses[$key]['lodge']['grade_id'] = $trip->employee->grade_id;
+					$cities_with_expenses[$key]['lodge']['eligible_amount'] = '0.00';
+				} else {
+					$cities_with_expenses[$key]['lodge']['id'] = 3001;
+					$cities_with_expenses[$key]['lodge']['grade_id'] = $trip->employee->grade_id;
+					$cities_with_expenses[$key]['lodge']['eligible_amount'] = $lodge_expense_type->eligible_amount;
+				}
+				$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $trip->employee->grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+				if (!$board_expense_type) {
+					$cities_with_expenses[$key]['board']['id'] = 3002;
+					$cities_with_expenses[$key]['board']['grade_id'] = $trip->employee->grade_id;
+					$cities_with_expenses[$key]['board']['eligible_amount'] = '0.00';
+				} else {
+					$cities_with_expenses[$key]['board']['id'] = 3002;
+					$cities_with_expenses[$key]['board']['grade_id'] = $trip->employee->grade_id;
+					$cities_with_expenses[$key]['board']['eligible_amount'] = $board_expense_type->eligible_amount;
+				}
+			} else {
+				$cities_with_expenses[$key]['transport'] = [];
+				$cities_with_expenses[$key]['lodge'] = [];
+				$cities_with_expenses[$key]['board'] = [];
+			}
+
+		}
+		$data['cities_with_expenses'] = $cities_with_expenses;
 		$travel_cities_list = collect(Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 				->where('visits.trip_id', $trip->id)
 				->select('cities.id', 'cities.name')
