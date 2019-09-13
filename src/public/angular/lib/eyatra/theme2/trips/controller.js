@@ -35,7 +35,6 @@ app.component('eyatraTrips', {
             paging: true,
             ordering: false,
             fixedColumns: {
-                // rightColumns: 1,
                 leftColumns: 1,
             },
             ajax: {
