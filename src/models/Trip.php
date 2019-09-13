@@ -363,8 +363,10 @@ class Trip extends Model {
 				'trips.number',
 				DB::raw('CONCAT(u.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				'trips.start_date',
+				'trips.end_date',
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				DB::raw('FORMAT(claim.total_amount,2) as claim_amount'),
 				//Changed to purpose_name. do not revert - Abdul
 				'purpose.name as purpose_name',
