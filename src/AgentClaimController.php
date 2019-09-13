@@ -371,7 +371,7 @@ class AgentClaimController extends Controller {
 			->make(true);
 	}
 
-	public function filter_data() {
+	public function filterData() {
 
 		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'users.name', 'agents.id')
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
@@ -469,6 +469,7 @@ class AgentClaimController extends Controller {
 			'agentVisits.bookingMethod',
 			'agentVisits.bookingStatus',
 			'agentVisits.bookings',
+			'agentVisits.bookings.attachments',
 			'agentVisits.bookings.travelMode',
 			'agentVisits.bookings.bookingMode',
 			'agentVisits.agent',
@@ -533,6 +534,7 @@ class AgentClaimController extends Controller {
 		$this->data['total_amount'] = $total_amount;
 		$this->data['ticket_amount'] = $ticket_amount;
 		$this->data['service_charge'] = $service_charge;
+		$this->data['attach_path'] = url('storage/app/public/visit/booking-updates/attachments/');
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

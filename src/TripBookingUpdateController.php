@@ -160,7 +160,7 @@ class TripBookingUpdateController extends Controller {
 				$visit_bookings->total = $total_amount;
 				$visit_bookings->created_by = Auth::user()->id;
 				$visit_bookings->save();
-
+				//dd($visit_bookings);
 				$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
 				Storage::makeDirectory($booking_updates_images, 0777);
 				if ($r->hasfile('attachments')) {
@@ -176,7 +176,7 @@ class TripBookingUpdateController extends Controller {
 					}
 				}
 			} else {
-
+				// dd($r->ticket_booking);
 				foreach ($r->ticket_booking as $key => $value) {
 					$visit = Visit::find($value['visit_id']);
 					$visit->booking_status_id = $booking_status_id;
@@ -223,20 +223,29 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->status_id = $r->status_id;
 					$visit_bookings->created_by = Auth::user()->id;
 					$visit_bookings->save();
-
+					//dd($visit_bookings);
+					// dump($value);
 					$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
 					Storage::makeDirectory($booking_updates_images, 0777);
-					if ($r->hasfile('attachments')) {
-						foreach ($r->file('attachments') as $image) {
-							$name = $image->getClientOriginalName();
-							$image->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
-							$attachement = new Attachment;
-							$attachement->attachment_of_id = 3180; // Visit Booking Attachment
-							$attachement->attachment_type_id = 3200; //Multi Attachment
-							$attachement->entity_id = $visit_bookings->id;
-							$attachement->name = $name;
-							$attachement->save();
-						}
+					// if ($value->hasfile('attachments')) {
+					if (isset($value['attachments'])) {
+						$image = $value['attachments'];
+
+						// dd($image);
+						// foreach ($r->file('attachments') as $image) {
+						$name = $image->getClientOriginalName();
+						//dump($name);
+						$des_path = storage_path('app/public/visit/booking-updates/attachments/');
+						// dd($des_path);
+						$image->move($des_path, $name);
+						$attachement = new Attachment;
+						$attachement->attachment_of_id = 3180; // Visit Booking Attachment
+						$attachement->attachment_type_id = 3200; //Multi Attachment
+						$attachement->entity_id = $visit_bookings->id;
+						$attachement->name = $name;
+						$attachement->save();
+						// }
+						//dd('end');
 					}
 
 				}
