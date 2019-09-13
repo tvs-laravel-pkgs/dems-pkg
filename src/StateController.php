@@ -101,27 +101,6 @@ class StateController extends Controller {
 	}
 
 	public function eyatraStateFormData($state_id = NULL) {
-		if (!$state_id) {
-			$this->data['action'] = 'Add';
-			$state = new NState;
-			$this->data['status'] = 'Active';
-
-			$this->data['success'] = true;
-		} else {
-			$this->data['action'] = 'Edit';
-			$state = NState::withTrashed()->find($state_id);
-
-			if (!$state) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'State not found';
-			}
-
-			if ($state->deleted_at == NULL) {
-				$this->data['status'] = 'Active';
-			} else {
-				$this->data['status'] = 'Inactive';
-			}
-		}
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
@@ -137,22 +116,58 @@ class StateController extends Controller {
 		$option = new Agent;
 		$option->name = 'Select Agent';
 		$option->id = null;
-		$this->data['agents_list'] = $agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
-				->leftJoin('users', 'users.entity_id', 'agents.id')
-				->where('users.user_type_id', 3122)
-				->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
-		// $state->travelModes()->withPivot('agent_id', 'service_charge')->get();
-		// dd($this->data['travel_mode_list']);
-		// foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
-		foreach ($state->travelModes as $travel_mode) {
-			// dump($travel_mode);
-			if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
-				continue;
+
+		if (!$state_id) {
+			$this->data['action'] = 'Add';
+			$state = new NState;
+			$this->data['status'] = 'Active';
+
+			$this->data['success'] = true;
+			foreach ($travel_modes as $travel_mode) {
+				if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
+					continue;
+				}
+				$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
+				$this->data['travel_mode_list'][$travel_mode->id]->agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
+						->leftJoin('users', 'users.entity_id', 'agents.id')
+						->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
+						->where('users.user_type_id', 3122)
+						->where('agent_travel_mode.travel_mode_id', $travel_mode->id)
+						->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
+				// dd($this->data['travel_mode_list']);
 			}
-			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
-			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
-			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
+		} else {
+			$this->data['action'] = 'Edit';
+			$state = NState::withTrashed()->find($state_id);
+
+			if (!$state) {
+				$this->data['success'] = false;
+				$this->data['message'] = 'State not found';
+			}
+
+			if ($state->deleted_at == NULL) {
+				$this->data['status'] = 'Active';
+			} else {
+				$this->data['status'] = 'Inactive';
+			}
+			foreach ($state->travelModes as $travel_mode) {
+				if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
+					continue;
+				}
+				$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
+				$this->data['travel_mode_list'][$travel_mode->id]->agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
+						->leftJoin('users', 'users.entity_id', 'agents.id')
+						->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
+						->where('users.user_type_id', 3122)
+						->where('agent_travel_mode.travel_mode_id', $travel_mode->id)
+						->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
+				// dd($this->data['travel_mode_list']);
+				$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
+				$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
+			}
 		}
+
+		// dd($this->data['travel_mode_list']);
 		$this->data['state'] = $state;
 		$this->data['success'] = true;
 
