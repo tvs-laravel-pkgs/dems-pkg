@@ -419,14 +419,38 @@ app.component('eyatraTripClaimForm', {
         })
 
         //ASSIGN ELIGIBLE AMOUNT BASED ON CITY & EXPENSE & GRADE
-        $scope.assignEligibleAmount = function(city_id, type_id, index) {
+        $scope.assignEligibleAmount = function(city_id, type_id, index, stay_type_id) {
             if (city_id) {
                 if (type_id == 3000) { //TRANSPORT EXPENSES
                     self.trip.visits[index].eligible_amount = self.cities_with_expenses[city_id].transport.eligible_amount;
                 } else if (type_id == 3001) { // LODGING EXPENSE
-                    self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.eligible_amount;
+                    if (stay_type_id == 3341) {
+                        self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.home.eligible_amount;
+                    } else if (stay_type_id == 3340) {
+                        self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.normal.eligible_amount;
+                    } else {
+                        self.trip.lodgings[index].eligible_amount = '0.00';
+                    }
+                    $timeout(function() {
+                        $scope.stayDaysEach();
+                    }, 100);
                 } else if (type_id == 3002) { // BOARDING EXPENSE
                     self.trip.boardings[index].eligible_amount = self.cities_with_expenses[city_id].board.eligible_amount;
+                    $timeout(function() {
+                        $scope.boardDaysEach();
+                    }, 100);
+                } else if (type_id == 3003) { // LOCAL TRAVEL EXPENSE
+                }
+            } else {
+                if (type_id == 3000) { //TRANSPORT EXPENSES
+                    self.trip.visits[index].eligible_amount = '0.00';
+                } else if (type_id == 3001) { // LODGING EXPENSE
+                    self.trip.lodgings[index].eligible_amount = '0.00';
+                    $timeout(function() {
+                        $scope.stayDaysEach();
+                    }, 100);
+                } else if (type_id == 3002) { // BOARDING EXPENSE
+                    self.trip.boardings[index].eligible_amount = '0.00';
                     $timeout(function() {
                         $scope.boardDaysEach();
                     }, 100);

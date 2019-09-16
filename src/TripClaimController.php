@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Boarding;
+use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
