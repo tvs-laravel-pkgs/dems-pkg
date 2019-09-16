@@ -220,7 +220,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                     required: 'Advance Amount is required',
                 },
                 'description': {
-                    required: 'Description is required',
+                    required: 'Expense Details is required',
                 },
                 'expense_amount': {
                     required: 'Expense Amount is required',
