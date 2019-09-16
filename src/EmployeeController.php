@@ -519,7 +519,7 @@ class EmployeeController extends Controller {
 			]);
 
 			$attachment = 'file';
-			if (!$request->hasFile('file')) {
+			if (empty($request->file)) {
 				return response()->json(['success' => false, 'errors' => ['Please Upload FIle']]);
 			}
 
