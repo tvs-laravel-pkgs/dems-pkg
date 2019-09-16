@@ -786,11 +786,32 @@ class Trip extends Model {
 				if (!$lodge_expense_type) {
 					$cities_with_expenses[$key]['lodge']['id'] = 3001;
 					$cities_with_expenses[$key]['lodge']['grade_id'] = $trip->employee->grade_id;
-					$cities_with_expenses[$key]['lodge']['eligible_amount'] = '0.00';
+					$cities_with_expenses[$key]['lodge']['home']['eligible_amount'] = '0.00';
+					$cities_with_expenses[$key]['lodge']['home']['perc'] = 0;
+					$cities_with_expenses[$key]['lodge']['normal']['eligible_amount'] = '0.00';
 				} else {
+
+					//STAY TYPE HOME
+					//GET GRADE STAY TYPE
+					$grade_stay_type = DB::table('grade_advanced_eligibility')->where('grade_id', $trip->employee->grade_id)->first();
+					if ($grade_stay_type) {
+						if ($grade_stay_type->stay_type_disc) {
+							$percentage = (int) $grade_stay_type->stay_type_disc;
+							$totalWidth = $lodge_expense_type->eligible_amount;
+							$home_eligible_amount = ($percentage / 100) * $totalWidth;
+						} else {
+							$percentage = 0;
+							$home_eligible_amount = $lodge_expense_type->eligible_amount;
+						}
+					} else {
+						$percentage = 0;
+						$home_eligible_amount = $lodge_expense_type->eligible_amount;
+					}
 					$cities_with_expenses[$key]['lodge']['id'] = 3001;
 					$cities_with_expenses[$key]['lodge']['grade_id'] = $trip->employee->grade_id;
-					$cities_with_expenses[$key]['lodge']['eligible_amount'] = $lodge_expense_type->eligible_amount;
+					$cities_with_expenses[$key]['lodge']['home']['eligible_amount'] = $home_eligible_amount;
+					$cities_with_expenses[$key]['lodge']['home']['perc'] = $percentage;
+					$cities_with_expenses[$key]['lodge']['normal']['eligible_amount'] = $lodge_expense_type->eligible_amount;
 				}
 				$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $trip->employee->grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
 				if (!$board_expense_type) {
