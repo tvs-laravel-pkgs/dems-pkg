@@ -170,9 +170,30 @@ app.component('eyatraTripForm', {
             // singleDatePicker:true
         };
 
+        var startdate;
+        var enddate;
+        var id;
         $scope.onChange = function() {
             self.trip.start_date = moment($scope.startDate).format('DD-MM-YYYY');
             self.trip.end_date = moment($scope.endDate).format('DD-MM-YYYY');
+            startdate = self.trip.start_date;
+            enddate = self.trip.end_date;
+            $('.datepicker_' + id).datepicker('destroy');
+            id = 0;
+            datecall(startdate, enddate, id);
+        }
+
+        $('body').on('click', "#datepicker", function() {
+            var id = $(this).data('picker');
+            datecall(startdate, enddate, id);
+        });
+
+        function datecall(startdate, enddate, id) {
+            $(".datepicker_" + id).datepicker({
+                autoclose: true,
+                startDate: startdate,
+                endDate: enddate,
+            });
         }
 
         $http.get(
@@ -293,6 +314,7 @@ app.component('eyatraTripForm', {
                     self.trip.visits.splice(index, 1);
                     arr_length = self.trip.visits.length;
                 }
+                datecall(startdate, enddate, id);
             } else if (id == 2) {
                 var arr_length = self.trip.visits.length;
                 if (arr_length < 2) {
@@ -313,6 +335,7 @@ app.component('eyatraTripForm', {
                     }
                 }
                 self.trip.visits[1].to_city_details = self.trip.visits[0].from_city_details;
+                datecall(startdate, enddate, id);
             } else if (id == 3) {
 
                 $scope.round_trip = false;
@@ -320,6 +343,7 @@ app.component('eyatraTripForm', {
                 $scope.multi_trip = true;
 
                 $('.add_multi_trip').hide();
+                datecall(startdate, enddate, id);
             }
         }
 
