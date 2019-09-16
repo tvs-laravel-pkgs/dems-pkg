@@ -8,7 +8,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
 
         var dataTable = $('#expense_advance_verification_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -47,9 +47,45 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
+        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
+        $('.dataTables_length select').select2();
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('expense_advance_verification_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
 
-        // $rootScope.loading = false;
+        //Filter
+        $http.get(
+            employee_filter_url
+        ).then(function(response) {
+            // console.log(response);
+            self.grade_list = response.data.grade_list;
+            self.outlet_list = response.data.outlet_list;
+            self.role_list = response.data.role_list;
+            $rootScope.loading = false;
+        });
+        var dataTableFilter = $('#expense_advance_verification_list').dataTable();
+        $scope.onselectOutlet = function(id) {
+            $('#outlet_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectRole = function(id) {
+            $('#role_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectGrade = function(id) {
+            $('#grade_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.resetForm = function() {
+            $('#outlet_id').val(null);
+            $('#role_id').val(null);
+            $('#grade_id').val(null);
+            dataTableFilter.fnFilter();
+        }
+        // $rootScope.loading = false; 
     }
 });
 //------------------------------------------------------------------------------------------------------------------------

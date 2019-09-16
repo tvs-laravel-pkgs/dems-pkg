@@ -331,6 +331,36 @@ app.component('eyatraTripClaimForm', {
         // });
 
 
+        //ENABLE DISABLE DATE 
+        $scope.dateEnableDisable = function(index, type, value) {
+            if (type && value) {
+                var first_dep_date = self.trip.visits[index].departure_date;
+                var next_index = index;
+                next_index++;
+                if (self.trip.visits[next_index]) {
+                    var sec_dep_date = self.trip.visits[next_index].departure_date;
+                } else {
+                    var sec_dep_date = self.trip.end_date;
+                }
+
+                //CHECK DATE ARE BETWEEN VALIDATED DATE
+                var d1 = first_dep_date.split("-");
+                var d2 = sec_dep_date.split("-");
+                var c = value.split("-");
+
+                var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
+                var to = new Date(d2[2], parseInt(d2[1]) - 1, d2[0]);
+                var check = new Date(c[2], parseInt(c[1]) - 1, c[0]);
+
+                if (check >= from && check <= to) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+        }
+
         //TOOLTIP MOUSEOVER
         $(document).on('mouseover', ".separate-btn-default", function() {
             var $this = $(this);
@@ -419,14 +449,38 @@ app.component('eyatraTripClaimForm', {
         })
 
         //ASSIGN ELIGIBLE AMOUNT BASED ON CITY & EXPENSE & GRADE
-        $scope.assignEligibleAmount = function(city_id, type_id, index) {
+        $scope.assignEligibleAmount = function(city_id, type_id, index, stay_type_id) {
             if (city_id) {
                 if (type_id == 3000) { //TRANSPORT EXPENSES
                     self.trip.visits[index].eligible_amount = self.cities_with_expenses[city_id].transport.eligible_amount;
                 } else if (type_id == 3001) { // LODGING EXPENSE
-                    self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.eligible_amount;
+                    if (stay_type_id == 3341) {
+                        self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.home.eligible_amount;
+                    } else if (stay_type_id == 3340) {
+                        self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.normal.eligible_amount;
+                    } else {
+                        self.trip.lodgings[index].eligible_amount = '0.00';
+                    }
+                    $timeout(function() {
+                        $scope.stayDaysEach();
+                    }, 100);
                 } else if (type_id == 3002) { // BOARDING EXPENSE
                     self.trip.boardings[index].eligible_amount = self.cities_with_expenses[city_id].board.eligible_amount;
+                    $timeout(function() {
+                        $scope.boardDaysEach();
+                    }, 100);
+                } else if (type_id == 3003) { // LOCAL TRAVEL EXPENSE
+                }
+            } else {
+                if (type_id == 3000) { //TRANSPORT EXPENSES
+                    self.trip.visits[index].eligible_amount = '0.00';
+                } else if (type_id == 3001) { // LODGING EXPENSE
+                    self.trip.lodgings[index].eligible_amount = '0.00';
+                    $timeout(function() {
+                        $scope.stayDaysEach();
+                    }, 100);
+                } else if (type_id == 3002) { // BOARDING EXPENSE
+                    self.trip.boardings[index].eligible_amount = '0.00';
                     $timeout(function() {
                         $scope.boardDaysEach();
                     }, 100);

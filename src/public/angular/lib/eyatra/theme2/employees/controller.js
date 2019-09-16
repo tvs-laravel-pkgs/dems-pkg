@@ -699,18 +699,44 @@ app.component('importJobs', {
             }
         }
 
+
+        /* File Upload Function */
+        /* Main Function */
+        var img_close = $('#img-close').html();
+        var img_file = $('#img-file').html();
+        var del_arr = [];
+        $(".form-group").on('change','.input-file',function(){
+            var html = [];
+            del_arr = [];
+            $(".insert-file").empty();
+            $(this.files).each(function(i,v){
+                html.push("<div class='file-return-parent'>"+img_file+"<p class='file-return'>"+v.name+"</p><button type='button' onclick='angular.element(this).scope().deletefiles(this)' class='remove-hn btn' >"+img_close+"</button></div>");
+                del_arr.push(v.name);
+            });
+            $(".insert-file").append(html);
+        });
+        /* Remove Function */
+        $scope.deletefiles=function (this_parents) {
+            var del_name = $(this_parents).siblings().text();
+            var del_index = del_arr.indexOf(del_name);
+            if (del_index >= 0) {
+                del_arr.splice(del_index, 1);
+            }
+            $(this_parents).parent().remove();
+            $(".file_check").val('');
+        }
+
         $('#submit_employee_import').click(function() {
             var form_id = form_ids = '#employee-import-form';
             var v = jQuery(form_ids).validate({
                 ignore: '',
                 rules: {
-                    'file': {
-                        required: true,
-                    },
+                   
                     'import_type_id': {
                         required: true,
                     },
                 },
+               
                 submitHandler: function(form) {
                     let formData = new FormData($(form_id)[0]);
                     $.ajax({

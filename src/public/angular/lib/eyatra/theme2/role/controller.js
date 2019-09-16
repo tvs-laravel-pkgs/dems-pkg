@@ -437,174 +437,158 @@ app.component('eyatraRoleForm', {
             return value;
         }
 
+        //try 
+        // Sub child on click event check its parent
 
-        $(document).on("click", ".parent_checkbox", function() {
-            var id = $(this).data('id');
-            var c = $(this).attr('checked');
-            parent_id = id.split('_');
-            if ($(this).prop("checked") == true) {
-                $('.sub_childs_' + parent_id[1]).prop('checked', 'checked');
-                $('.sub_childs_test_' + parent_id[1]).prop('checked', 'checked');
-
-            } else if ($(this).prop("checked") == false) {
-                $('.sub_childs_' + parent_id[1]).prop('checked', '');
-                $('.sub_childs_test_' + parent_id[1]).prop('checked', '');
-
-            }
-        });
-
-        $(document).on("click", ".sub_parent", function() {
-            var id = $(this).data('id');
-            var c = $(this).attr('checked');
-            if ($(this).prop("checked") == true) {
-                $('.sub_parent_childs_' + id).prop('checked', 'checked');
-                $('.sub_parent_childs2_' + id).prop('checked', 'checked');
-            } else if ($(this).prop("checked") == false) {
-                $('.sub_parent_childs_' + id).prop('checked', '');
-                $('.sub_parent_childs2_' + id).prop('checked', '');
-            }
-        });
-
-
-        $(document).on("click", ".check_its_child", function() {
-            var id = $(this).data('item');
-            var c = $(this).attr('checked');
-            if ($(this).prop("checked") == true) {
-                $('.childs2_' + id).prop('checked', 'checked');
-            } else if ($(this).prop("checked") == false) {
-                $('.childs2_' + id).prop('checked', '');
-            }
-        });
-
-        $(document).on("change", ".permission_check_class", function() {
-            var parent_count = 0;
-            $(this).parents('li').find('.permission_check_class').each(function() {
-                if ($(this).is(":checked")) {
-                    // console.log(' == parent count checked ===');
-                    parent_count = 1;
-                }
-            });
-
-            if (parent_count == 0) {
-                // console.log(' == parent count 0 ===');
-                $(this).parents('li').find('.parent_check').prop('checked', false);
-            } else {
-                $(this).parents('li').find('.parent_check').prop('checked', true);
-            }
-        });
-
-        $(document).on("change", ".sub_child", function() {
+        $(document).on('change', '.sub_child', function() {
 
             ids = $(this).data("id");
-            id = ids.split("_");
-            var sub_parent_count = 0;
+            id = ids.split("_");    
+       
+            var its_value = $(this).val();
             if ($(this).is(":checked")) {
+                $(this).parents('li').find('.childs2_' + its_value).prop('checked', true);
+            } 
+            else{
+                $(this).parents('li').find('.childs2_' + its_value).prop('checked', false);
+            }
 
-                $('.pc_' + id[1]).prop('checked', true);
-                $('.sc_' + id[0]).prop('checked', true);
-                $('.childs2_' + id[2]).prop('checked', true);
-            } else {
-                var countCheckedCheckboxes = 0;
+            var sub_cheked_count = 0;
                 $(this).parents('li').find('.sub_child').each(function() {
-                    countCheckedCheckboxes = $(this).parents('li').find('.sub_parent_childs_' + id[0]).filter(':checked').length;
+                     sub_cheked_count = 
+                      $('.sub_parent_childs_' + id[0]).filter(':checked').length;
                 });
 
-                if (countCheckedCheckboxes == 0) {
+            if(sub_cheked_count > 0){
+                $(this).parents('li').find('.sc_' + id[0]).prop('checked', true);
+                $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
+                
+            }else{
+               
+                $(this).parents('li').find('.sc_' + id[0]).prop('checked', false);
+                 var cross_check_parent = 0;
+                
+                 $('.main_parent_' + id[1]).each(function() {
+                    cross_check_parent = 
+                      $('.main_parent_' + id[1]).filter(':checked').length;
 
-                    var subCheckedCheckboxes = 0;
-                    $('.sc_' + id[0]).prop('checked', false);
-                    $('.childs2_' + id[2]).prop('checked', false);
-                    $(this).parents('li').find('.permission_check_class').each(function() {
+                });
 
-                        subCheckedCheckboxes = $(this).parents('li').find('.sub_test_' + id[1]).filter(':checked').length;
-                        subCheckedcount = $(this).parents('li').find('.sc_' + id[0]).filter(':checked').length;
-
-                    });
-
-
-                }
-
+                 if(cross_check_parent > 0){
+                    $(this).parents('li').find('.pc_' + id[0]).prop('checked', true);
+                 }else{
+                    $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
+                 }
             }
-
-
+            
         });
 
-        $(document).on("change", ".super_sub_child", function() {
+        //on click parent check its child 
 
+        $(document).on('change', '.permission_check_class', function() {
+            var parent_value = $(this).val();
+            var cross_check_parent = 0;
             ids = $(this).data("id");
-            id = ids.split("_");
-            // console.log(ids);
-            if ($(this).is(":checked")) {
+            id =  ids.split("_");   
+            
+            if ($(this).prop("checked") == true) {
+                
+                $('.sub_parent_childs_' +  id[0]).prop('checked', true);
+                $('.sub_parent_childs2_' +  id[0]).prop('checked', true);
                 $('.pc_' + id[1]).prop('checked', true);
-                $('.sc_' + id[0]).prop('checked', true);
-                $('.child_' + id[2]).prop('checked', true);
-            } else {
-                var countCheckedCheckboxes1 = 0;
-                $(this).parents('li').find('.super_sub_child').each(function() {
-                    countCheckedCheckboxes1 = $(this).parents('li').find('.childs2_' + id[2]).filter(':checked').length;
+            } else if ($(this).prop("checked") == false) {
+              
+                $('.sub_parent_childs_' +  id[0]).prop('checked', false);
+                $('.sub_parent_childs2_' +  id[0]).prop('checked', false);
+                
+                $('.main_parent_' + id[1]).each(function() {
+                    cross_check_parent = 
+                      $('.main_parent_' + id[1]).filter(':checked').length;
+
                 });
-                if (countCheckedCheckboxes1 == 0) {
-                    $('.child_' + id[2]).prop('checked', false);
-                }
-
-                var countCheckedCheckboxes2 = 0;
-                $(this).parents('li').find('.check_its_child').each(function() {
-                    countCheckedCheckboxes2 = $(this).parents('li').find('.sub_parent_childs_' + id[0]).filter(':checked').length;
-                });
-                if (countCheckedCheckboxes2 == 0) {
-                    $('.sc_' + id[0]).prop('checked', false);
-                }
-
-                var countCheckedCheckboxes3 = 0;
-
-
-
-                //  $(this).parents('li').find('.permission_check_class').each(function() {
-                //      countCheckedCheckboxes3 = $(this).parents('li').find('.sc_' + id[0]).filter(':checked').length;
-                // });
-                //  if(countCheckedCheckboxes3 == 0)
-                //  {
-                //     $('.pc_' + id[1]).prop('checked', false);
-                //  }
-
-
-                // console.log(countCheckedCheckboxes2);
-
-
-                // var countCheckedCheckboxes1 = 0;
-                // $(this).parents('li').find('.super_sub_child').each(function() {
-                //      countCheckedCheckboxes1 = $(this).parents('li').find('.childs2_' + id[2]).filter(':checked').length;
-                // });
-
-                // if (countCheckedCheckboxes1 == 0) {
-
-                //     var subCheckedCheckboxes1 = 0;
-
-                //     $('.child_' + id[2]).prop('checked', false);
-
-                //     $(this).parents('li').find('.check_its_child').each(function() {
-
-
-                //     subCheckedCheckboxes1 = $(this).parents('li').find('.sub_childs_test_' + id[1]).filter(':checked').length;
-                //     // if(subCheckedCheckboxes1){
-                //     //     subCheckedCheckboxes1 = subCheckedCheckboxes1;
-                //     // }else{
-                //     //     subCheckedCheckboxes1 =1;
-                //     // }
-                // });
-                //      console.log("super_sub"+subCheckedCheckboxes1);
-                //   // console.log("super_sub"+subCheckedCheckboxes1);
-                //     if(subCheckedCheckboxes1 == 0){
-                //         // alert("suppp");
-
-                //         // $('.pc_' + id[1]).prop('checked', false);
-                //         $('.sc_' + id[0]).prop('checked', false);
-                //     }
-
-                // } 
+                 if(cross_check_parent > 0){
+                    $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
+                 }else{
+                    $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
+                 }
             }
-
+            
         });
+
+
+        //On click super sub child check its parents
+        
+        $(document).on('change', '.super_sub_child', function() {
+                ids = $(this).attr("data-id");
+                id = ids.split("_"); 
+            if ($(this).is(":checked")) {
+                $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
+                $(this).parents('li').find('.sc_' + id[0]).prop('checked', true);
+                $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
+            } else 
+            {
+                var super_sub_child_count = 0;
+                $(this).parents('li').find('.super_sub_child').each(function() {
+                     super_sub_child_count = 
+                      $('.childs2_' + id[2]).filter(':checked').length;
+                });
+                
+                if(super_sub_child_count > 0){
+                   
+                 $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
+                }else{
+                    
+                 $(this).parents('li').find('.child_' + id[2]).prop('checked', false);
+                }
+
+                var total_sub_child_count = 0;
+                $(this).parents('li').find('.sub_parent_childs_' + id[0]).each(function() {
+                     total_sub_child_count = 
+                      $('.sub_parent_childs_' + id[0]).filter(':checked').length;
+                });
+
+                if(total_sub_child_count > 0){
+                 $(this).parents('li').find('.sc' + id[0]).prop('checked', true);
+                }else{
+                 $(this).parents('li').find('.sc_' + id[0]).prop('checked', false);
+                }
+
+                var total_child_count = 0;
+                $(this).parents('li').find('.main_parent_' + id[1]).each(function() {
+                     total_child_count = 
+                      $('.main_parent_' + id[1]).filter(':checked').length;
+                });
+            
+                if(total_child_count > 0){
+                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
+                }else{
+                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
+                }
+
+            }
+        });
+
+
+
+
+        // On click main parent check its child,sub child, super sub child
+
+        $(document).on("change", ".parent_check", function() {
+            var parent_id = $(this).val();  
+           
+            if ($(this).prop("checked") == true) {
+                $('.main_parent_' + parent_id).prop('checked', true);
+                $('.sub_test_' + parent_id).prop('checked', true);
+                $('.sub_childs_test_' + parent_id).prop('checked', true);
+            } else {
+                $('.main_parent_' + parent_id).prop('checked', false);
+                $('.sub_test_' + parent_id).prop('checked', false);
+                $('.sub_childs_test_' + parent_id).prop('checked', false);
+            }
+        });
+
+        //End
+
 
         $scope.selectChilds = function(id) {
 
