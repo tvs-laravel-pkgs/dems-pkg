@@ -16,6 +16,7 @@ use Yajra\Datatables\Datatables;
 
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
+		//dd($r->all());
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
@@ -38,6 +39,11 @@ class PettyCashController extends Controller {
 			->where('users.user_type_id', 3121)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
+			->where(function ($query) use ($r) {
+				if (!empty($r->status_id)) {
+					$query->where('configs.id', $r->status_id);
+				}
+			})
 		;
 
 		return Datatables::of($petty_cash)
@@ -399,7 +405,10 @@ class PettyCashController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
-
+	public function pettycashFilterData() {
+		$this->data['status_list'] = $status_list = collect(Config::pettycashStatus())->prepend(['id' => '', 'name' => 'Select Status']);
+		return response()->json($this->data);
+	}
 	public function pettyCashDelete($type_id, $pettycash_id) {
 		// dd($type_id, $pettycash_id);
 		$petty_cash_emp_details_id = PettyCash::where('id', $pettycash_id)->forceDelete();

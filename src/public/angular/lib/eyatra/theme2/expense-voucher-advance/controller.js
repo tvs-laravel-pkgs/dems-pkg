@@ -5,13 +5,15 @@ app.component('eyatraExpenseVoucherAdvanceList', {
         self.hasPermission = HelperService.hasPermission;
 
         $list_data_url = expense_voucher_advance_list_data_url;
-
+        self.add_permission = self.hasPermission('eyatra-indv-expense-vouchers');
+        //alert(self.add_permission);
+        var dataTable = '';
         $http.get(
             $list_data_url
         ).then(function(response) {
             var dataTable = $('#expense_advance_list').DataTable({
                 stateSave: true,
-                "dom": dom_structure_separate,
+                "dom": dom_structure_separate_2,
                 "language": {
                     "search": "",
                     "searchPlaceholder": "Search",
@@ -31,7 +33,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                     type: "GET",
                     dataType: "json",
                     data: function(d) {
-                        //d.type_id = $routeParams.type_id;
+                        d.status_id = $('#status').val();
                     }
                 },
                 columns: [
@@ -49,20 +51,32 @@ app.component('eyatraExpenseVoucherAdvanceList', {
             });
             //
             $('.dataTables_length select').select2();
-            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
-            // if ($location.url() == '/eyatra/petty-cash')
-            $('.add_new_button').html(
-                '<a href="#!/eyatra/expense/voucher-advance/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-                'Add New' +
-                '</a>'
-            );
-            // setTimeout(function() {
-            //     var x = $('.separate-page-header-inner.search .custom-filter').position();
-            //     var d = document.getElementById('expense_advance_list_filter');
-            //     x.left = x.left + 15;
-            //     d.style.left = x.left + 'px';
-            // }, 500);
+
+            setTimeout(function() {
+                var x = $('.separate-page-header-inner.search .custom-filter').position();
+                var d = document.getElementById('expense_advance_list_filter');
+                x.left = x.left + 15;
+                d.style.left = x.left + 'px';
+            }, 500);
+
+            $scope.onselectStatus = function(id) {
+                //alert();
+                $('#status').val(id);
+                dataTable.draw();
+            }
+
+            $scope.reset_filter = function() {
+                $('#status').val('');
+                dataTable.draw();
+            }
         });
+        $http.get(
+            expense_voucher_advance_filter_url
+        ).then(function(response) {
+            self.status_list = response.data.status_list;
+        });
+        // var dataTable = $('#expense_advance_list').DataTable();
+
         $scope.deleteExpenseVoucher = function(id) {
             $('#delete_expense_voucher_id').val(id);
         }

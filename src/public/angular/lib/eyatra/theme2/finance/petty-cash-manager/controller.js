@@ -1,6 +1,7 @@
 app.component('eyatraPettyCashManagerList', {
     templateUrl: eyatra_pettycash_manager_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams) {
+        //alert('this');
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         // alert($routeParams.type_id);
@@ -14,7 +15,7 @@ app.component('eyatraPettyCashManagerList', {
         ).then(function(response) {
             var dataTable = $('#petty_cash_manager_list').DataTable({
                 stateSave: true,
-                "dom": dom_structure_separate,
+                "dom": dom_structure_separate_2,
                 "language": {
                     "search": "",
                     "searchPlaceholder": "Search",
