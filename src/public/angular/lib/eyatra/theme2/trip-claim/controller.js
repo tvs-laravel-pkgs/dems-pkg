@@ -331,6 +331,36 @@ app.component('eyatraTripClaimForm', {
         // });
 
 
+        //ENABLE DISABLE DATE 
+        $scope.dateEnableDisable = function(index, type, value) {
+            if (type && value) {
+                var first_dep_date = self.trip.visits[index].departure_date;
+                var next_index = index;
+                next_index++;
+                if (self.trip.visits[next_index]) {
+                    var sec_dep_date = self.trip.visits[next_index].departure_date;
+                } else {
+                    var sec_dep_date = self.trip.end_date;
+                }
+
+                //CHECK DATE ARE BETWEEN VALIDATED DATE
+                var d1 = first_dep_date.split("-");
+                var d2 = sec_dep_date.split("-");
+                var c = value.split("-");
+
+                var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
+                var to = new Date(d2[2], parseInt(d2[1]) - 1, d2[0]);
+                var check = new Date(c[2], parseInt(c[1]) - 1, c[0]);
+
+                if (check >= from && check <= to) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+        }
+
         //TOOLTIP MOUSEOVER
         $(document).on('mouseover', ".separate-btn-default", function() {
             var $this = $(this);

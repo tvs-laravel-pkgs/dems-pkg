@@ -222,7 +222,19 @@ app.component('eyatraAgentForm', {
                 $('.travelcheckbox').prop('checked', false);
             }
         });
-
+        
+        $(document).on('click', '.travelcheckbox', function() {
+          var cheked_count = 0;
+            $.each($('.travelcheckbox'), function() {
+                 cheked_count = $('.travelcheckbox:checked').length;
+            });
+            if(cheked_count > 0){
+                $('#travel_mode').prop('checked', true);
+            }else{
+                $('#travel_mode').prop('checked', false);
+            }
+            
+        });
         //SELECT PAYMENT MODE
         // $scope.selectPaymentMode = function(payment_id) {
         //     if (payment_id == 3244) { //BANK
