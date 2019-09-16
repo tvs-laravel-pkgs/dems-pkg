@@ -132,23 +132,23 @@ app.component('eyatraStateForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 5000);
-                $location.path('/eyatra/states')
-                $scope.$apply()
-                return;
-            }
-
+            // if (!response.data.success) {
+    //     $noty = new Noty({
+    //         type: 'error',
+    //         layout: 'topRight',
+    //         text: response.data.error,
+    //         animation: {
+    //             speed: 500 // unavailable - no need
+    //         },
+    //     }).show();
+    //     setTimeout(function() {
+    //         $noty.close();
+    //     }, 5000);
+    //     $location.path('/eyatra/states')
+    //     $scope.$apply()
+    //     return;
+    // }
+            console.log(response);
             self.state = response.data.state;
             self.country_list = response.data.country_list;
             self.status = response.data.status;

@@ -14,7 +14,7 @@ app.component('eyatraTrips', {
         });
 
         var dataTable = $('#eyatra_trip_table').DataTable({
-            stateSave: true,
+            // stateSave: true,
             "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
@@ -29,8 +29,14 @@ app.component('eyatraTrips', {
             processing: true,
             serverSide: true,
             "bProcessing": true,
+            fixedColumns: true,
+            scrollX: true,
+            scrollCollapse: true,
             paging: true,
             ordering: false,
+            fixedColumns: {
+                leftColumns: 1,
+            },
             ajax: {
                 url: laravel_routes['listTrip'],
                 type: "GET",
