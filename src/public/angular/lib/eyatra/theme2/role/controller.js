@@ -517,51 +517,59 @@ app.component('eyatraRoleForm', {
 
 
         //On click super sub child check its parents
+        
         $(document).on('change', '.super_sub_child', function() {
-                var cross_check_parent = 0;
-                ids = $(this).data("id");
+                ids = $(this).attr("data-id");
                 id = ids.split("_"); 
-                
+            if ($(this).is(":checked")) {
+                $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
+                $(this).parents('li').find('.sc_' + id[0]).prop('checked', true);
+                $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
+            } else 
+            {
                 var super_sub_child_count = 0;
                 $(this).parents('li').find('.super_sub_child').each(function() {
                      super_sub_child_count = 
                       $('.childs2_' + id[2]).filter(':checked').length;
                 });
+                
+                if(super_sub_child_count > 0){
+                   
+                 $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
+                }else{
+                    
+                 $(this).parents('li').find('.child_' + id[2]).prop('checked', false);
+                }
 
-            if(super_sub_child_count > 0){
-                $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
-                $(this).parents('li').find('.sc_' + id[0]).prop('checked', true);
-                $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
-               
-            }else{
-              
-                $(this).parents('li').find('.child_' + id[2]).prop('checked', false);
-                // alert(id)
-                $('.main_parent_' + id[1]).each(function() {
-                    cross_check_parent = 
+                var total_sub_child_count = 0;
+                $(this).parents('li').find('.sub_parent_childs_' + id[0]).each(function() {
+                     total_sub_child_count = 
+                      $('.sub_parent_childs_' + id[0]).filter(':checked').length;
+                });
+
+                if(total_sub_child_count > 0){
+                 $(this).parents('li').find('.sc' + id[0]).prop('checked', true);
+                }else{
+                 $(this).parents('li').find('.sc_' + id[0]).prop('checked', false);
+                }
+
+                var total_child_count = 0;
+                $(this).parents('li').find('.main_parent_' + id[1]).each(function() {
+                     total_child_count = 
                       $('.main_parent_' + id[1]).filter(':checked').length;
                 });
-        
-                 if(cross_check_parent > 0){
-                    $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
-                 }else{
-                    $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
-                 }
+            
+                if(total_child_count > 0){
+                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
+                }else{
+                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
+                }
 
-                 var cross_check = 0;
-               
-                 $('.sub_parent_childs_' + id[0]).each(function() {
-                    cross_check = $('.sub_parent_childs_' + id[0]).filter(':checked').length;
-                });
-                 if(cross_check > 0){
-                   
-                    $(this).parents('li').find('.sc_' + id[0]).prop('checked', true);
-                 }else{
-                   
-                    $(this).parents('li').find('.sc_' + id[0]).prop('checked', false);
-                 }
             }
         });
+
+
+
 
         // On click main parent check its child,sub child, super sub child
 
