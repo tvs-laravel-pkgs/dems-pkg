@@ -398,13 +398,15 @@ class Trip extends Model {
 			$trips->where('v.departure_date', '<=', $to_date);
 		}
 
-		if ($request->status_ids && count($request->status_ids) > 0) {
-			$trips->whereIn('trips.status_id', $request->status_ids);
+		if ($request->status_ids && $request->status_ids[0]) {
+			$status_ids = explode(',', $request->status_ids[0]);
+			$trips->whereIn('trips.status_id', $status_ids);
 		} else {
 			$trips->whereNotIn('trips.status_id', [3026]);
 		}
-		if ($request->purpose_ids && count($request->purpose_ids) > 0) {
-			$trips->whereIn('trips.purpose_id', $request->purpose_ids);
+		if ($request->purpose_ids && $request->purpose_ids[0]) {
+			$purpose_ids = explode(',', $request->purpose_ids[0]);
+			$trips->whereIn('trips.purpose_id', $purpose_ids);
 		}
 		if ($request->from_city_id) {
 			$trips->whereIn('v.from_city_id', $request->from_city_id);
