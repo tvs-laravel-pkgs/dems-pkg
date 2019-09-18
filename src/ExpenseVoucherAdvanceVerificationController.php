@@ -13,6 +13,11 @@ use Yajra\Datatables\Datatables;
 class ExpenseVoucherAdvanceVerificationController extends Controller {
 
 	public function listExpenseVoucherverificationRequest(Request $r) {
+		if (!empty($r->employee_id)) {
+			$employee_id = $r->employee_id;
+		} else {
+			$employee_id = null;
+		}
 		if (!empty($r->status)) {
 			$status = $r->status;
 		} else {
@@ -38,11 +43,16 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			->where('employees.reporting_to_id', Auth::user()->entity_id)
 			->where('expense_voucher_advance_requests.status_id', 3460)
 			->where('employees.company_id', Auth::user()->company_id)
-		// ->where(function ($query) use ($r, $status) {
-		// 	if (!empty($status)) {
-		// 		$query->where('branches.branch_type_id', '=', $status);
-		// 	}
-		// })
+			->where(function ($query) use ($r, $employee_id) {
+				if (!empty($employee_id)) {
+					$query->where('employees.id', $employee_id);
+				}
+			})
+			->where(function ($query) use ($r, $status) {
+				if (!empty($status)) {
+					$query->where('configs.id', $status);
+				}
+			})
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 		;
 		// dd($expense_voucher_requests->get());
