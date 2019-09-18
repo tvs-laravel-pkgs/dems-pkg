@@ -31,6 +31,11 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
+			->where(function ($query) use ($r) {
+				if (!empty($r->employee_id)) {
+					$query->where('employees.id', $r->employee_id);
+				}
+			})
 		;
 		// dd($expense_voucher_requests->get());
 		return Datatables::of($expense_voucher_requests)

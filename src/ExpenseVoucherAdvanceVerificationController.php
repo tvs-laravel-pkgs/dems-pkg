@@ -50,7 +50,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			})
 			->where(function ($query) use ($r, $status) {
 				if (!empty($status)) {
-					$query->where('configs.id', $r->status);
+					$query->where('configs.id', $status);
 				}
 			})
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
