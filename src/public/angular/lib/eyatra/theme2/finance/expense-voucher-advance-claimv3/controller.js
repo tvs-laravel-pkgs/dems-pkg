@@ -30,7 +30,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
                 dataType: "json",
                 data: function(d) {
                     d.employee_id = $('#employee_id').val();
-                    d.status = $('#status').val();
+                    d.outlet = $('#outlet').val();
                 }
             },
 
@@ -38,6 +38,8 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
+                { data: 'oname', name: 'outlets.name', searchable: true },
+                { data: 'ocode', name: 'outlets.code', searchable: true },
                 { data: 'date', name: 'date', searchable: false },
                 { data: 'advance_amount', name: 'expense_voucher_advance_requests.advance_amount', searchable: false },
                 { data: 'balance_amount', name: 'expense_voucher_advance_requests.balance_amount', searchable: false },
@@ -59,6 +61,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
             expense_voucher_advance_filter_url
         ).then(function(response) {
             self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
             self.status_list = response.data.status_list;
         });
         $scope.onselectEmployee = function(id) {
@@ -68,13 +71,13 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
         }
         $scope.onselectStatus = function(id) {
             //alert();
-            $('#status').val(id);
+            $('#outlet').val(id);
             dataTable.draw();
         }
 
         $scope.reset_filter = function() {
             $('#employee_id').val('');
-            $('#status').val('');
+            $('#outlet').val('');
             dataTable.draw();
         }
         // $rootScope.loading = false;

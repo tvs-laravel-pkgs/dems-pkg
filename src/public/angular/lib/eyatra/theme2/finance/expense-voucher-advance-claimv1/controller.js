@@ -30,7 +30,6 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
                 dataType: "json",
                 data: function(d) {
                     d.employee_id = $('#employee_id').val();
-                    d.status = $('#status').val();
                 }
             },
 
@@ -69,15 +68,8 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
             $('#employee_id').val(id);
             dataTable.draw();
         }
-        $scope.onselectStatus = function(id) {
-            //alert();
-            $('#status').val(id);
-            dataTable.draw();
-        }
-
         $scope.reset_filter = function() {
             $('#employee_id').val('');
-            $('#status').val('');
             dataTable.draw();
         }
         // $rootScope.loading = false; 
