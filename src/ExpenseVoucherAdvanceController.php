@@ -103,6 +103,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 		$list_of_status = array_merge(Config::ExpenseVoucherAdvanceStatus(), Config::ExpenseVoucherAdvanceStatusList());
 		$this->data['status_list'] = $status_list = collect($list_of_status)->prepend(['id' => '', 'name' => 'Select Status']);
 		$this->data['employee_list'] = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
+		$this->data['outlet_list'] = collect(Outlet::getOutletList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 
 		return response()->json($this->data);
 	}
