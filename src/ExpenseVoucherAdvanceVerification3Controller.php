@@ -16,6 +16,8 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 			'expense_voucher_advance_requests.employee_id',
 			'users.name as ename',
 			'employees.code as ecode',
+			'outlets.code as ocode',
+			'outlets.name as oname',
 			DB::raw('DATE_FORMAT(expense_voucher_advance_requests.date,"%d-%m-%Y") as date'),
 			'expense_voucher_advance_requests.advance_amount as advance_amount',
 			DB::raw('IF(expense_voucher_advance_requests.balance_amount IS NULL,"--",expense_voucher_advance_requests.balance_amount) as balance_amount'),
@@ -31,6 +33,16 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
+			->where(function ($query) use ($r) {
+				if (!empty($r->employee_id)) {
+					$query->where('employees.id', $r->employee_id);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->outlet)) {
+					$query->where('outlets.id', $r->outlet);
+				}
+			})
 		;
 		// dd($expense_voucher_requests->get());
 		return Datatables::of($expense_voucher_requests)

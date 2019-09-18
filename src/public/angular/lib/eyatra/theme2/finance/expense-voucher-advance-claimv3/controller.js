@@ -8,7 +8,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
 
         var dataTable = $('#expense_advance_verification3_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -29,7 +29,8 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    //d.type_id = $routeParams.type_id;
+                    d.employee_id = $('#employee_id').val();
+                    d.outlet = $('#outlet').val();
                 }
             },
 
@@ -37,6 +38,8 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
+                { data: 'oname', name: 'outlets.name', searchable: true },
+                { data: 'ocode', name: 'outlets.code', searchable: true },
                 { data: 'date', name: 'date', searchable: false },
                 { data: 'advance_amount', name: 'expense_voucher_advance_requests.advance_amount', searchable: false },
                 { data: 'balance_amount', name: 'expense_voucher_advance_requests.balance_amount', searchable: false },
@@ -47,8 +50,36 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
+        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('expense_advance_verification3_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+        $http.get(
+            expense_voucher_advance_filter_url
+        ).then(function(response) {
+            self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
+            self.status_list = response.data.status_list;
+        });
+        $scope.onselectEmployee = function(id) {
+            //alert();
+            $('#employee_id').val(id);
+            dataTable.draw();
+        }
+        $scope.onselectStatus = function(id) {
+            //alert();
+            $('#outlet').val(id);
+            dataTable.draw();
+        }
 
+        $scope.reset_filter = function() {
+            $('#employee_id').val('');
+            $('#outlet').val('');
+            dataTable.draw();
+        }
         // $rootScope.loading = false;
     }
 });

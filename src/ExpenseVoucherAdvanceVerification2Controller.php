@@ -27,6 +27,11 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
+			->where(function ($query) use ($r) {
+				if (!empty($r->employee_id)) {
+					$query->where('employees.id', $r->employee_id);
+				}
+			})
 			->where('users.user_type_id', 3121)
 			->where('cashier.id', Auth::user()->entity_id)
 			->where('expense_voucher_advance_requests.status_id', 3281)

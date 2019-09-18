@@ -8,7 +8,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification2List', {
 
         var dataTable = $('#expense_advance_verification2_list').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -29,7 +29,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification2List', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    //d.type_id = $routeParams.type_id;
+                    d.employee_id = $('#employee_id').val();
                 }
             },
 
@@ -47,8 +47,29 @@ app.component('eyatraExpenseVoucherAdvanceVerification2List', {
             }
         });
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
-
+        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher Advances list</p><h3 class="title">Expense Voucher Advances</h3>');
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('expense_advance_verification2_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+        //Filter
+        $http.get(
+            expense_voucher_advance_filter_url
+        ).then(function(response) {
+            self.employee_list = response.data.employee_list;
+            self.status_list = response.data.status_list;
+        });
+        $scope.onselectEmployee = function(id) {
+            //alert();
+            $('#employee_id').val(id);
+            dataTable.draw();
+        }
+        $scope.reset_filter = function() {
+            $('#employee_id').val('');
+            dataTable.draw();
+        }
         // $rootScope.loading = false;
     }
 });
