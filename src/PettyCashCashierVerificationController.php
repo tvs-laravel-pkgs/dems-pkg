@@ -46,6 +46,21 @@ class PettyCashCashierVerificationController extends Controller {
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('petty_cash.id', 'desc')
 			->groupBy('petty_cash.id')
+			->where(function ($query) use ($r) {
+				if (!empty($r->status_id)) {
+					$query->where('configs.id', $r->status_id);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->outlet_id)) {
+					$query->where('outlets.id', $r->outlet_id);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->employee_id)) {
+					$query->where('employees.id', $r->employee_id);
+				}
+			})
 		;
 
 		return Datatables::of($petty_cash)

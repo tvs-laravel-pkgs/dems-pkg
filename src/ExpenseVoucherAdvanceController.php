@@ -12,6 +12,7 @@ use Yajra\Datatables\Datatables;
 
 class ExpenseVoucherAdvanceController extends Controller {
 	public function listExpenseVoucherRequest(Request $r) {
+		//dd($r->all());
 		$expense_voucher_requests = ExpenseVoucherAdvanceRequest::select(
 			'expense_voucher_advance_requests.id',
 			'users.name as ename',
@@ -29,6 +30,11 @@ class ExpenseVoucherAdvanceController extends Controller {
 			->where('employees.id', Auth::user()->entity_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 			->groupBy('expense_voucher_advance_requests.id')
+			->where(function ($query) use ($r) {
+				if (!empty($r->status_id)) {
+					$query->where('configs.id', $r->status_id);
+				}
+			})
 		;
 
 		return Datatables::of($expense_voucher_requests)
@@ -93,6 +99,13 @@ class ExpenseVoucherAdvanceController extends Controller {
 		return response()->json($this->data);
 	}
 
+	public function ExpenseVoucherAdvanceFilterData() {
+		$list_of_status = array_merge(Config::ExpenseVoucherAdvanceStatus(), Config::ExpenseVoucherAdvanceStatusList());
+		$this->data['status_list'] = $status_list = collect($list_of_status)->prepend(['id' => '', 'name' => 'Select Status']);
+		$this->data['employee_list'] = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
+
+		return response()->json($this->data);
+	}
 	public function getemployee($searchText) {
 		$employee_list = Employee::select('name', 'id', 'code')->where('employees.company_id', Auth::user()->company_id)->where('name', 'LIKE', '%' . $searchText . '%')->orWhere('code', 'LIKE', '%' . $searchText . '%')->get();
 		return response()->json(['employee_list' => $employee_list]);

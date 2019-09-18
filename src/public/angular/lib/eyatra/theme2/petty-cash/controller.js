@@ -3,15 +3,16 @@ app.component('eyatraPettyCashList', {
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-
+        self.add_permission = self.hasPermission('eyatra-indv-expense-vouchers');
+        //alert(self.add_permission);
+        var dataTable = '';
         $list_data_url = eyatra_pettycash_get_list;
-
         $http.get(
             $list_data_url
         ).then(function(response) {
-            var dataTable = $('#petty_cash_list').DataTable({
+            dataTable = $('#petty_cash_list').DataTable({
                 stateSave: true,
-                "dom": dom_structure_separate,
+                "dom": dom_structure_separate_2,
                 "language": {
                     "search": "",
                     "searchPlaceholder": "Search",
@@ -31,7 +32,7 @@ app.component('eyatraPettyCashList', {
                     type: "GET",
                     dataType: "json",
                     data: function(d) {
-                        d.type_id = $routeParams.type_id;
+                        d.status_id = $('#status').val();
                     }
                 },
 
@@ -51,27 +52,34 @@ app.component('eyatraPettyCashList', {
                 }
             });
             $('.dataTables_length select').select2();
-            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Expense Voucher / Expense Voucher list</p><h3 class="title">Expense Voucher</h3>');
-            if ($location.url() == '/eyatra/petty-cash')
-                $('.add_new_button').html(
-                    '<button class="btn btn-secondary" type="button" id="dropdownMenu1" data-toggle="dropdown" >Add New</button>' +
-                    '<ul class="dropdown-menu dropdown-menu-right separate-dropdown-menu-wrap" aria-labelledby="dropdownMenu1">' +
-                    '<li class="separate-dropdown-menu-wrap-list">' +
-                    '<a href="#!/eyatra/petty-cash/add/1" type="button" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-                    'LocalConveyance' +
-                    '</a></li>' +
-                    '<li class="separate-dropdown-menu-wrap-list"><a href="#!/eyatra/petty-cash/add/2" type="button" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-                    'Other Expenses' +
-                    '</a>' +
-                    '</li></ul>'
-                );
-            // $('.add_new_button').html(
-            //         '<a href="#!/eyatra/petty-cash/add/' + $routeParams.type_id + '" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\'eyatra-indv-expense-vouchers\')">' +
-            //         'Add New' +
-            //         '</a>'
-            //     );
-        });
+            setTimeout(function() {
+                var x = $('.separate-page-header-inner.search .custom-filter').position();
+                var d = document.getElementById('petty_cash_list_filter');
+                x.left = x.left + 15;
+                d.style.left = x.left + 'px';
+            }, 500);
 
+
+            $http.get(
+                expense_voucher_filter_url
+            ).then(function(response) {
+                // console.log(response.data);
+                self.agent_list = response.data.agent_list;
+                self.tm_list = response.data.tm_list;
+                self.status_list = response.data.status_list;
+                // $rootScope.loading = false;
+            });
+
+        });
+        $scope.onselectStatus = function(id) {
+            $('#status').val(id);
+            dataTable.draw();
+        }
+
+        $scope.reset_filter = function() {
+            $('#status').val('');
+            dataTable.draw();
+        }
         $scope.deletePettycash = function(id) {
             $('#deletepettycash_id').val(id);
         }

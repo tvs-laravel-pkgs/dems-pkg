@@ -41,4 +41,13 @@ class Config extends Model {
 	public static function managerType() {
 		return Config::where('config_type_id', 529)->select('id', 'name')->get();
 	}
+	public static function pettycashStatus() {
+		return Config::where('config_type_id', 518)->select('id', 'name')->get();
+	}
+	public static function ExpenseVoucherAdvanceStatus() {
+		return Config::where('config_type_id', 528)->select('id', 'name')->get()->toArray();
+	}
+	public static function ExpenseVoucherAdvanceStatusList() {
+		return Config::whereIn('id', [3281, 3282])->select('id', 'name')->get()->toArray();
+	}
 }
