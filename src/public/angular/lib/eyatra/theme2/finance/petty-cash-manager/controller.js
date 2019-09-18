@@ -35,7 +35,9 @@ app.component('eyatraPettyCashManagerList', {
                     type: "GET",
                     dataType: "json",
                     data: function(d) {
-                        // d.expense_type = $routeParams.expense_type;
+                        d.status_id = $('#status').val();
+                        d.outlet_id = $('#outlet').val();
+                        d.employee_id = $('#employee').val();
                     }
                 },
 
@@ -55,7 +57,39 @@ app.component('eyatraPettyCashManagerList', {
                 }
             });
             $('.dataTables_length select').select2();
-            $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Expense Voucher Claim</h3>');
+            setTimeout(function() {
+                var x = $('.separate-page-header-inner.search .custom-filter').position();
+                var d = document.getElementById('petty_cash_manager_list_filter');
+                x.left = x.left + 15;
+                d.style.left = x.left + 'px';
+            }, 500);
+            $http.get(
+                expense_voucher_filter_url
+            ).then(function(response) {
+
+                self.status_list = response.data.status_list;
+                self.outlet_list = response.data.outlet_list;
+                self.employee_list = response.data.employee_list;
+
+            });
+            $scope.onselectStatus = function(id) {
+                $('#status').val(id);
+                dataTable.draw();
+            }
+            $scope.onselectOutlet = function(id) {
+                $('#outlet').val(id);
+                dataTable.draw();
+            }
+            $scope.onselectEmployee = function(id) {
+                $('#employee').val(id);
+                dataTable.draw();
+            }
+            $scope.reset_filter = function() {
+                $('#status').val('');
+                $('#outlet').val('');
+                $('#employee').val('');
+                dataTable.draw();
+            }
         });
     }
 });
