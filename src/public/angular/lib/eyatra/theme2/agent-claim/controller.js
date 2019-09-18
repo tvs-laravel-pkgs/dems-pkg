@@ -414,7 +414,7 @@ app.component('eyatraAgentClaimView', {
 });
 
 //Booking View 
-    app.component('eyatraTripBookingView', {
+app.component('eyatraTripBookingView', {
     templateUrl: trip_booking_view_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
         if (typeof($routeParams.trip_id) == 'undefined') {
@@ -473,6 +473,7 @@ app.component('eyatraAgentClaimView', {
             self.trip_status = response.data.trip_status;
             self.booking_mode_list = response.data.booking_mode_list;
             self.travel_mode_list = response.data.travel_mode_list;
+            self.attachment_path = response.data.attach_path;
             self.action = response.data.action;
             $rootScope.loading = false;
 
@@ -752,7 +753,7 @@ app.component('eyatraAgentClaimView', {
                     label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
                 input.trigger('fileselect', [numFiles, label]);
             });
-    
+
             // We can watch for our custom `fileselect` event like this
             $(':file').on('fileselect', function(event, numFiles, label) {
                 var input = $(this).parents('.input-group').find(':text'),

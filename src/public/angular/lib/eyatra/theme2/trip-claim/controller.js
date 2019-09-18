@@ -405,7 +405,7 @@ app.component('eyatraTripClaimForm', {
                 $('#' + expense_type + '_remarks').val(remarks);
             }
 
-            $(".separate-page-divider-wrap").toggle();
+            /* $(".separate-page-divider-wrap").toggle(); */
             if ($('.separate-page-divider-wrap').hasClass('in')) {
                 $(".separate-page-divider-wrap").removeClass("in");
             } else {
