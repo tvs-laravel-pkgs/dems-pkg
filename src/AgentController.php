@@ -194,7 +194,7 @@ class AgentController extends Controller {
 					'unique:agents,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				],
 				'gstin' => [
-					'unique:agents,gstin,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+					'unique:agents,gstin,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',code,' . $request->agent_code,
 				],
 				'mobile_number' => [
 					'required:true',
