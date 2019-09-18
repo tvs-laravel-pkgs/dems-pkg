@@ -22,6 +22,8 @@ class TripClaimVerificationTwoController extends Controller {
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
+			->join('employees as trip_manager_employee', 'trip_manager_employee.id', 'trips.manager_id')
+			->join('employees as se_manager_employee', 'se_manager_employee.id', 'trip_manager_employee.reporting_to_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
@@ -56,6 +58,8 @@ class TripClaimVerificationTwoController extends Controller {
 			})
 			->where(function ($query) {
 				if (Auth::user()->entity_id) {
+					//$query->where('se_manager_employee.id', Auth::user()->entity_id);
+					//$trip_manager = Trip::select('manager_id')->where('id', $trips->id)->first();
 					//dd(Auth::user()->entity_id);
 					$now = date('Y-m-d');
 					$sub_employee_id = AlternateApprove::select('employee_id')
@@ -66,11 +70,13 @@ class TripClaimVerificationTwoController extends Controller {
 						->toArray();
 					//dd($sub_employee_id);
 					$ids = array_column($sub_employee_id, 'employee_id');
+					//dd($ids);
 					array_push($ids, Auth::user()->entity_id);
+					//dd($ids);
 					if (count($sub_employee_id) > 0) {
-						$query->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
+						$query->whereIn('se_manager_employee.id', $ids); //Alternate MANAGER
 					} else {
-						$query->where('e.reporting_to_id', Auth::user()->entity_id); //MANAGER
+						$query->where('se_manager_employee.id', Auth::user()->entity_id); //MANAGER
 					}
 
 				}
