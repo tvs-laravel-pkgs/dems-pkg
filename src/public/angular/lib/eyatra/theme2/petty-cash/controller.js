@@ -140,6 +140,8 @@ app.component('eyatraPettyCashForm', {
         self.type_id = $routeParams.type_id;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.search_permission = self.hasPermission('eyatra-indv-expense-vouchers-verification2');
+        // alert(self.search_permission);
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -171,7 +173,6 @@ app.component('eyatraPettyCashForm', {
             self.petty_cash_removal_id = [];
             self.petty_cash_other_removal_id = [];
 
-
             if (self.action == 'Edit') {
                 // if (self.type_id == 2) {
                 //     self.selectedItem = response.data.petty_cash_other[0].ename;
@@ -200,6 +201,32 @@ app.component('eyatraPettyCashForm', {
             /* Datepicker With Current Date */
 
         });
+
+        $scope.employeeChange = function() {
+            $scope.searchText = '';
+            $scope.selectedItem = undefined;
+        }
+
+        //SEARCH EMPLOYEE
+        self.searchEmployee = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            search_employee_url, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            // console.log(response.data);
+                            resolve(response.data);
+                        });
+                    //reject(response);
+                });
+            } else {
+                return [];
+            }
+        }
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
         });
