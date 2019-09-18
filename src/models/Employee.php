@@ -2,6 +2,8 @@
 
 namespace Uitoux\EYatra;
 use App\User;
+use Auth;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -86,6 +88,15 @@ class Employee extends Model {
 		return Employee::select('users.name', 'employees.id')
 			->leftJoin('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
+			->get();
+	}
+	public static function getEmployeeListBasedCompany() {
+		return Employee::select(
+			DB::raw('CONCAT(users.name," / ",employees.code) as name')
+			, 'employees.id')
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('users.company_id', Auth::user()->company_id)
 			->get();
 	}
 

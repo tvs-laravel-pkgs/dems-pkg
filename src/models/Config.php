@@ -45,6 +45,9 @@ class Config extends Model {
 		return Config::where('config_type_id', 518)->select('id', 'name')->get();
 	}
 	public static function ExpenseVoucherAdvanceStatus() {
-		return Config::where('config_type_id', 528)->select('id', 'name')->get();
+		return Config::where('config_type_id', 528)->select('id', 'name')->get()->toArray();
+	}
+	public static function ExpenseVoucherAdvanceStatusList() {
+		return Config::whereIn('id', [3281, 3282])->select('id', 'name')->get()->toArray();
 	}
 }
