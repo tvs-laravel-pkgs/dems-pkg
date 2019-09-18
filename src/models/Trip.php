@@ -420,14 +420,14 @@ class Trip extends Model {
 	public static function getVerficationPendingList($r) {
 		// dd($r->all());
 		/*if(isset($r->period))
-			{
-				$date = explode(' to ', $r->period);
-				$from_date = $date[0];
-				$to_date = $date[1];
-				dd($from_date,$to_date);
-				$from_date = date('Y-m-d', strtotime($from_date));
-				$to_date = date('Y-m-d', strtotime($to_date));
-		*/
+		{
+		$date = explode(' to ', $r->period);
+		$from_date = $date[0];
+		$to_date = $date[1];
+		dd($from_date,$to_date);
+		$from_date = date('Y-m-d', strtotime($from_date));
+		$to_date = date('Y-m-d', strtotime($to_date));
+		 */
 		//dd('d');
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
@@ -472,11 +472,11 @@ class Trip extends Model {
 				}
 			})
 		/*->where(function ($query) use ($r) {
-				if ($r->get('period')) {
-					$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
+		if ($r->get('period')) {
+		$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
 
-				}
-			})*/
+		}
+		})*/
 		;
 		if (!Entrust::can('verify-all-trips')) {
 			$now = date('Y-m-d');
@@ -1085,7 +1085,7 @@ class Trip extends Model {
 				if ($visit_manager) {
 					$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Manager';
-					$arr['to_email'] = 'parthiban@uitoux.in';
+					$arr['to_email'] = 'saravanan@uitoux.in';
 					$arr['to_name'] = 'parthiban';
 					//dd($user_details_cc['email']);
 					$arr['subject'] = 'Trip Approval Request';
