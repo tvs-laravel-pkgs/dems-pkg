@@ -100,7 +100,10 @@ class ExpenseVoucherAdvanceController extends Controller {
 	}
 
 	public function ExpenseVoucherAdvanceFilterData() {
-		$this->data['status_list'] = $status_list = collect(Config::ExpenseVoucherAdvanceStatus())->prepend(['id' => '', 'name' => 'Select Status']);
+		$list_of_status = array_merge(Config::ExpenseVoucherAdvanceStatus(), Config::ExpenseVoucherAdvanceStatusList());
+		$this->data['status_list'] = $status_list = collect($list_of_status)->prepend(['id' => '', 'name' => 'Select Status']);
+		$this->data['employee_list'] = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
+
 		return response()->json($this->data);
 	}
 	public function getemployee($searchText) {

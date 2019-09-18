@@ -58,32 +58,26 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
 
         //Filter
         $http.get(
-            employee_filter_url
+            expense_voucher_advance_filter_url
         ).then(function(response) {
-            // console.log(response);
-            self.grade_list = response.data.grade_list;
-            self.outlet_list = response.data.outlet_list;
-            self.role_list = response.data.role_list;
-            $rootScope.loading = false;
+            self.employee_list = response.data.employee_list;
+            self.status_list = response.data.status_list;
         });
-        var dataTableFilter = $('#expense_advance_verification_list').dataTable();
-        $scope.onselectOutlet = function(id) {
-            $('#outlet_id').val(id);
-            dataTableFilter.fnFilter();
+        $scope.onselectEmployee = function(id) {
+            //alert();
+            $('#employee_id').val(id);
+            dataTable.draw();
         }
-        $scope.onselectRole = function(id) {
-            $('#role_id').val(id);
-            dataTableFilter.fnFilter();
+        $scope.onselectStatus = function(id) {
+            //alert();
+            $('#status').val(id);
+            dataTable.draw();
         }
-        $scope.onselectGrade = function(id) {
-            $('#grade_id').val(id);
-            dataTableFilter.fnFilter();
-        }
-        $scope.resetForm = function() {
-            $('#outlet_id').val(null);
-            $('#role_id').val(null);
-            $('#grade_id').val(null);
-            dataTableFilter.fnFilter();
+
+        $scope.reset_filter = function() {
+            $('#employee_id').val('');
+            $('#status').val('');
+            dataTable.draw();
         }
         // $rootScope.loading = false; 
     }
