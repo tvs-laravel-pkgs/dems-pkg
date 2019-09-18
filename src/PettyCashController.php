@@ -407,6 +407,9 @@ class PettyCashController extends Controller {
 	}
 	public function pettycashFilterData() {
 		$this->data['status_list'] = $status_list = collect(Config::pettycashStatus())->prepend(['id' => '', 'name' => 'Select Status']);
+		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getOutletList())->prepend(['id' => '', 'name' => 'Select Outlet']);
+		//dd($this->data['outlet_list']);
+		$this->data['employee_list'] = $employee_list = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
 		return response()->json($this->data);
 	}
 	public function pettyCashDelete($type_id, $pettycash_id) {
