@@ -371,6 +371,7 @@ class Trip extends Model {
 				//Changed to purpose_name. do not revert - Abdul
 				'purpose.name as purpose_name',
 				'trips.advance_received',
+				'trips.status_id as status_id',
 				'status.name as status_name',
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
 			)
