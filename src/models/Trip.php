@@ -696,6 +696,7 @@ class Trip extends Model {
 					$q->orderBy('id', 'asc');
 				},
 				'lodgings',
+				'lodgings.stateType',
 				'lodgings.city',
 				'boardings',
 				'boardings.city',
