@@ -29,7 +29,8 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    //d.type_id = $routeParams.type_id;
+                    d.employee_id = $('#employee_id').val();
+                    d.status = $('#status').val();
                 }
             },
 
