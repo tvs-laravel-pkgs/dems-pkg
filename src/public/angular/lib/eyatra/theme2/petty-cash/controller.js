@@ -173,6 +173,13 @@ app.component('eyatraPettyCashForm', {
             self.petty_cash_removal_id = [];
             self.petty_cash_other_removal_id = [];
 
+            $("#employee_id").val(self.emp_details.emp_id);
+            // $("#emp_code").html(self.emp_details.code);
+            // $("#emp_designation").html(self.emp_details.designation);
+            // $("#emp_grade").html(self.emp_details.grade);
+            // self.emp_details = self.emp_details.name;
+
+
             if (self.action == 'Edit') {
                 // if (self.type_id == 2) {
                 //     self.selectedItem = response.data.petty_cash_other[0].ename;
@@ -202,9 +209,21 @@ app.component('eyatraPettyCashForm', {
 
         });
 
-        $scope.employeeChange = function() {
-            $scope.searchText = '';
-            $scope.selectedItem = undefined;
+        $(".ng-scope").on('change', function() {
+            self.emp_details = [];
+            self.emp_details1 = [];
+            $("#employee_id").val('');
+        });
+
+        $scope.getEmployee = function() {
+            if ($("#employee_id").val() != '') {
+                var id = $("#employee_id").val();
+                $http.get(
+                    get_employee_details + '/' + id
+                ).then(function(response) {
+                    self.emp_details1 = response.data.emp_details;
+                });
+            }
         }
 
         //SEARCH EMPLOYEE
@@ -218,7 +237,6 @@ app.component('eyatraPettyCashForm', {
                             }
                         )
                         .then(function(response) {
-                            // console.log(response.data);
                             resolve(response.data);
                         });
                     //reject(response);
@@ -236,6 +254,7 @@ app.component('eyatraPettyCashForm', {
         setTimeout(function() {
             $('div[data-provide="datepicker"]').datepicker({
                 todayHighlight: true,
+                autoclose: true,
             });
         }, 1500);
 
