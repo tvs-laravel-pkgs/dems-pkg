@@ -503,6 +503,7 @@ app.component('eyatraTripView', {
             trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
+            self.claim_status = response.data.claim_status;
         });
 
 

@@ -950,6 +950,7 @@ app.component('eyatraTripClaimForm', {
                 stayed_days: '',
                 amount: '',
                 tax: '',
+                gstin: '',
                 reference_number: '',
                 lodge_name: '',
                 remarks: '',
@@ -1188,6 +1189,11 @@ app.component('eyatraTripClaimForm', {
 
         //TRANSPORT FORM SUBMIT
         var form_transport_id = '#claim_transport_expense_form';
+        $.validator.addClassRules({
+            maxlength_gstin: {
+                maxlength: 15,
+            }
+        });
         var v = jQuery(form_transport_id).validate({
             ignore: "",
             rules: {},
@@ -1257,6 +1263,11 @@ app.component('eyatraTripClaimForm', {
 
         //LODGE FORM SUBMIT
         var form_lodge_id = '#claim_lodge_expense_form';
+        $.validator.addClassRules({
+            maxlength_gstin: {
+                maxlength: 15,
+            }
+        });
         var v = jQuery(form_lodge_id).validate({
             ignore: "",
             errorElement: "div", // default is 'label'
@@ -1412,24 +1423,24 @@ app.component('eyatraTripClaimForm', {
 
 
         var form_id = '#claim_local_travel_expense_form';
-        // $.validator.addClassRules({
-        //     // maxlength_name: {
-        //     //     maxlength: 191,
-        //     //     required: true,
-        //     // },
-        //     // num_amount: {
-        //     //     maxlength: 12,
-        //     //     number: true,
-        //     //     required: true,
-        //     // },
-        //     // boarding_expense: {
-        //     //     maxlength: 255,
-        //     //     required: true,
-        //     // }
-        //     attachments: {
-        //         // extension: "xlsx,xls",
-        //     }
-        // });
+        $.validator.addClassRules({
+            // maxlength_name: {
+            //     maxlength: 191,
+            //     required: true,
+            // },
+            // num_amount: {
+            //     maxlength: 12,
+            //     number: true,
+            //     required: true,
+            // },
+            // boarding_expense: {
+            //     maxlength: 255,
+            //     required: true,
+            // }
+            // attachments: {
+            //     // extension: "xlsx,xls",
+            // }
+        });
 
         var v = jQuery(form_id).validate({
             // invalidHandler: function(event, validator) {
@@ -1466,7 +1477,7 @@ app.component('eyatraTripClaimForm', {
                     .done(function(res) {
                         //console.log(res.success);
                         if (!res.success) {
-                            $('#local_travel_submit').html('Save & Next');
+                            $('#local_travel_submit').html('Submit');
                             $("#local_travel_submit").attr("disabled", false);
                             var errors = '';
                             for (var i in res.errors) {
@@ -1482,15 +1493,16 @@ app.component('eyatraTripClaimForm', {
                                     speed: 500 // unavailable - no need
                                 },
                             }).show();
+                            $('#trip-claim-modal-justify-one').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
-                            $location.path('/eyatra/trip/claim/list')
-                            $scope.$apply()
+                                $location.path('/eyatra/trip/claim/list')
+                                $scope.$apply()
+                            }, 500);
                         }
                     })
                     .fail(function(xhr) {
-                        $('#local_travel_submit').html('Save & Next');
+                        $('#local_travel_submit').html('Submit');
                         $("#local_travel_submit").attr("disabled", false);
                         custom_noty('error', 'Something went wrong at server');
                     });
