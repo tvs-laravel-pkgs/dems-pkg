@@ -260,10 +260,12 @@ class Trip extends Model {
 			'employee.user',
 			'employee.designation',
 			'employee.grade',
+			'employee.grade_details',
 			'purpose',
 			'status',
 		])
 			->find($trip_id);
+		// dd($trip->employee->grade_details->claim_active_days);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -284,6 +286,18 @@ class Trip extends Model {
 		$trip->days = $days->days;
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
+		$current_date = date('d-m-Y');
+		$claim_date = $trip->employee->grade_details->claim_active_days ? $trip->employee->grade_details->claim_active_days : 5;
+		$claim_last_date = date('d-m-Y', strtotime("+" . $claim_date . " day", strtotime($trip->end_date)));
+		// dump($trip->end_date);
+		// dump($claim_last_date);
+		// dump($current_date);
+		if ($current_date > $claim_last_date) {
+			$data['claim_status'] = 0;
+		} else {
+			$data['claim_status'] = 1;
+		}
+		// dd($current_date);
 		$data['trip'] = $trip;
 		$data['success'] = true;
 		return response()->json($data);

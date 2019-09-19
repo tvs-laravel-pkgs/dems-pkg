@@ -322,6 +322,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/petty-cash/request/delete/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashDelete')->name('pettycashDelete');
 		Route::get('eyatra/petty-cash/request/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashController@pettycashView')->name('pettycashView');
 		Route::get('eyatra/petty-cash/request/filter-data', 'Uitoux\EYatra\PettyCashController@pettycashFilterData')->name('pettycashFilterData');
+		Route::post('eyatra/petty-cash/searchEmployee', 'Uitoux\EYatra\PettyCashController@searchEmployee')->name('searchEmployee');
+		Route::get('eyatra/petty-cash/fillemployee/{id}', 'Uitoux\EYatra\PettyCashController@fillEmployee')->name('fillEmployee');
 
 		//PETTY CASH VERIFICATION VIEW FOR MANAGER
 		Route::get('eyatra/petty-cash/manager/get-list/', 'Uitoux\EYatra\PettyCashManagerVerificationController@listPettyCashVerificationManager')->name('listPettyCashVerificationManager');
@@ -337,7 +339,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/petty-cash/cashier/get-list/', 'Uitoux\EYatra\PettyCashCashierVerificationController@listPettyCashVerificationCashier')->name('listPettyCashVerificationCashier');
 		Route::post('eyatra/petty-cash/cashier/save', 'Uitoux\EYatra\PettyCashCashierVerificationController@pettycashCashierVerificationSave')->name('pettycashCashierVerificationSave');
 		Route::get('eyatra/petty-cash/cashier/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashCashierVerificationController@pettycashCashierVerificationView')->name('pettycashCashierVerificationView');
-		Route::post('/eyatra/petty-cash/cashier/employee/', 'Uitoux\EYatra\PettyCashCashierVerificationController@searchemployee')->name('searchemployee');
 
 		//ALTERNATE APPROVE LIST
 		Route::get('eyatra/alternate-approve/request/get-list', 'Uitoux\EYatra\AlternateApproveController@listAlternateApproveRequest')->name('listAlternateApproveRequest');

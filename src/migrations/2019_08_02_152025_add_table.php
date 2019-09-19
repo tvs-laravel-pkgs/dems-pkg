@@ -58,7 +58,7 @@ class AddTable extends Migration {
 			$table->string('name', 255)->nullable();
 			$table->string('mobile_number', 10)->nullable();
 			$table->string('password', 255);
-			$table->string('email', 15)->nullable();
+			$table->string('email', 40)->nullable();
 			$table->boolean('force_password_change')->nullable();
 			$table->string('imei', 15)->nullable();
 			$table->string('otp', 6)->nullable();

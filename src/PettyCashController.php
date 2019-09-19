@@ -171,9 +171,47 @@ class PettyCashController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function getemployee($searchText) {
-		$employee_list = Employee::select('name', 'id', 'code')->where('employees.company_id', Auth::user()->company_id)->where('name', 'LIKE', '%' . $searchText . '%')->orWhere('code', 'LIKE', '%' . $searchText . '%')->get();
-		return response()->json(['employee_list' => $employee_list]);
+	public function fillEmployee($id) {
+		$this->data['emp_details'] = $emp_details = Employee::select(
+			'entities.name as grade',
+			'users.name',
+			'employees.code',
+			'employees.id as emp_id',
+			'configs.name as designation'
+		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->join('entities', 'entities.id', 'employees.grade_id')
+			->join('configs', 'configs.id', 'users.user_type_id')
+			->where('employees.id', $id)
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)
+			->first();
+		// dd($emp_details);
+		return response()->json($this->data);
+	}
+
+	public function searchEmployee(Request $r) {
+		$key = $r->key;
+		$this->data['emp_details'] = $emp_details = Employee::select(
+			'entities.name as grade',
+			'users.name',
+			'employees.code',
+			'employees.id as emp_id',
+			'configs.name as designation'
+		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->join('entities', 'entities.id', 'employees.grade_id')
+			->join('configs', 'configs.id', 'users.user_type_id')
+			->where(function ($q) use ($key) {
+				$q->where('employees.code', 'like', '%' . $key . '%')
+					->orWhere('users.name', 'like', '%' . $key . '%')
+				;
+			})
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)
+			->get();
+		// dd($emp_details);
+		return response()->json($emp_details);
 	}
 
 	public function pettycashView($type_id, $pettycash_id) {
