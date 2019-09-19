@@ -17,6 +17,7 @@ class Outlet extends Model {
 		'sbu_id',
 		'cashier_id',
 		'amount_eligible',
+		'expense_voucher_limit',
 		'amount_limit',
 		'created_by',
 
