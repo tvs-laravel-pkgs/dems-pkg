@@ -473,11 +473,11 @@ class Trip extends Model {
 				}
 			})
 		/*->where(function ($query) use ($r) {
-		if ($r->get('period')) {
-		$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
+			if ($r->get('period')) {
+			$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
 
-		}
-		})*/
+			}
+		*/
 		;
 		if (!Entrust::can('verify-all-trips')) {
 			$now = date('Y-m-d');
@@ -686,6 +686,7 @@ class Trip extends Model {
 				'visits.agent',
 				'visits.status',
 				'visits.managerVerificationStatus',
+				'cliam',
 				'employee',
 				'employee.user',
 				'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {

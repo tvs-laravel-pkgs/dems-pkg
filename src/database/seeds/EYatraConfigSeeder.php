@@ -234,6 +234,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Agent Invoice Attachment',
 				'config_type_id' => 510,
 			],
+			3185 => [
+				'name' => 'Google Attachment',
+				'config_type_id' => 510,
+			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [
