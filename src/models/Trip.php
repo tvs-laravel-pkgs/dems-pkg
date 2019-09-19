@@ -700,6 +700,7 @@ class Trip extends Model {
 				'visits.agent',
 				'visits.status',
 				'visits.managerVerificationStatus',
+				'cliam',
 				'employee',
 				'employee.user',
 				'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {

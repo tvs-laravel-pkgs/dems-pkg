@@ -18,6 +18,7 @@ class Lodging extends Model {
 		'stay_type_id',
 		'amount',
 		'tax',
+		'gstin',
 		'total',
 		'reference_number',
 		'description',
