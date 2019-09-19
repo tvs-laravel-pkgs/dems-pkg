@@ -209,42 +209,50 @@ app.component('eyatraPettyCashForm', {
 
         });
 
-        $(".ng-scope").on('change', function() {
-            self.emp_details = [];
-            self.emp_details1 = [];
-            $("#employee_id").val('');
-        });
 
-        $scope.getEmployee = function() {
-            if ($("#employee_id").val() != '') {
-                var id = $("#employee_id").val();
-                $http.get(
-                    get_employee_details + '/' + id
-                ).then(function(response) {
-                    self.emp_details1 = response.data.emp_details;
-                });
+
+        if (self.search_permission == true) {
+            $(".removeDetails").on('click', function() {
+                self.emp_details = [];
+                self.emp_details1 = [];
+                $("#employee_id").val('');
+                setTimeout(function() {
+                    document.querySelector('#autoFocusId').focus();
+                }, 0);
+            });
+
+            $scope.getEmployee = function() {
+                if ($("#employee_id").val() != '') {
+                    var id = $("#employee_id").val();
+                    $http.get(
+                        get_employee_details + '/' + id
+                    ).then(function(response) {
+                        self.emp_details1 = response.data.emp_details;
+                    });
+                }
+            }
+
+            //SEARCH EMPLOYEE
+            self.searchEmployee = function(query) {
+                if (query) {
+                    return new Promise(function(resolve, reject) {
+                        $http
+                            .post(
+                                search_employee_url, {
+                                    key: query,
+                                }
+                            )
+                            .then(function(response) {
+                                resolve(response.data);
+                            });
+                        //reject(response);
+                    });
+                } else {
+                    return [];
+                }
             }
         }
 
-        //SEARCH EMPLOYEE
-        self.searchEmployee = function(query) {
-            if (query) {
-                return new Promise(function(resolve, reject) {
-                    $http
-                        .post(
-                            search_employee_url, {
-                                key: query,
-                            }
-                        )
-                        .then(function(response) {
-                            resolve(response.data);
-                        });
-                    //reject(response);
-                });
-            } else {
-                return [];
-            }
-        }
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
         });
@@ -379,7 +387,11 @@ app.component('eyatraPettyCashForm', {
         var form_id = '#petty-cash';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.attr('name') == 'employee_id') {
+                    error.appendTo($('.employee_error'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             invalidHandler: function(event, validator) {
