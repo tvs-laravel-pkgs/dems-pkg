@@ -228,7 +228,7 @@ class AgentRequestController extends Controller {
 		$this->data['total_amount'] = $total_amount;
 		$this->data['ticket_amount'] = $ticket_amount;
 		$this->data['service_charge'] = $service_charge;
-		$this->data['attach_path'] = url('app/public/visit/booking-updates/attachments/');
+		$this->data['attach_path'] = url('storage/app/public/visit/booking-updates/attachments/');
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

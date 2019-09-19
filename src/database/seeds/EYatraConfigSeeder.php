@@ -106,6 +106,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Senior Manager Claim Approval Pending',
 				'config_type_id' => 501,
 			],
+			3030 => [
+				'name' => 'Financier Payment Hold',
+				'config_type_id' => 501,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [
@@ -234,6 +238,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Agent Invoice Attachment',
 				'config_type_id' => 510,
 			],
+			3185 => [
+				'name' => 'Google Attachment',
+				'config_type_id' => 510,
+			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [
@@ -268,6 +276,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3226 => [
 				'name' => 'Claim Rejected',
+				'config_type_id' => 512,
+			],
+			3227 => [
+				'name' => 'Financier Payment Hold',
 				'config_type_id' => 512,
 			],
 

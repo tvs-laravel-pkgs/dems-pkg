@@ -50,6 +50,10 @@ class Employee extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Entity', 'grade_id');
 	}
 
+	public function grade_details() {
+		return $this->belongsTo('Uitoux\EYatra\GradeAdvancedEligiblity', 'grade_id');
+	}
+
 	public function designation() {
 		return $this->belongsTo('Uitoux\EYatra\Designation');
 	}

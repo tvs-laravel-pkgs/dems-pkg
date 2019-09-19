@@ -150,6 +150,7 @@ class TripClaimController extends Controller {
 							$visit_booking->remarks = $visit_data['remarks'];
 							$visit_booking->amount = $visit_data['amount'];
 							$visit_booking->tax = $visit_data['tax'];
+							$visit_booking->gstin = $visit_data['gstin'];
 							$visit_booking->service_charge = '0.00';
 							$visit_booking->total = $visit_data['total'];
 							$visit_booking->paid_amount = $visit_data['total'];
@@ -339,6 +340,7 @@ class TripClaimController extends Controller {
 
 			//FINAL SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
+				// dd($request->all());
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 
@@ -360,7 +362,14 @@ class TripClaimController extends Controller {
 				$employee_claim->fill($request->all());
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->remarks = $request->remarks;
 
+				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
+				if ($request->is_justify_my_trip) {
+					$employee_claim->is_justify_my_trip = 1;
+				} else {
+					$employee_claim->is_justify_my_trip = 0;
+				}
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
 					$employee_claim->status_id = 3223; //PAYMENT PENDING
@@ -376,6 +385,24 @@ class TripClaimController extends Controller {
 				}
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->save();
+
+				//STORE GOOGLE ATTACHMENT
+				$item_images = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
+				Storage::makeDirectory($item_images, 0777);
+				if ($request->hasfile('google_attachments')) {
+					foreach ($request->file('google_attachments') as $image) {
+						$name = $image->getClientOriginalName();
+						$image->move(storage_path('app/public/trip/ey_employee_claims/google_attachments/'), $name);
+						$attachement = new Attachment;
+						$attachement->attachment_of_id = 3185;
+						$attachement->attachment_type_id = 3200;
+						$attachement->entity_id = $employee_claim->id;
+						$attachement->name = $name;
+						$attachement->save();
+					}
+
+				}
+
 				$activity['entity_id'] = $trip->id;
 				$activity['entity_type'] = "Trip";
 				$activity['details'] = "Trip is Claimed";

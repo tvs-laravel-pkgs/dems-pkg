@@ -63,7 +63,7 @@ class TripController extends Controller {
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
-				$img1_active = asset('public/img/content/table/edit-yellow.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
@@ -106,6 +106,7 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
+		//dd($request->all());
 		$size = sizeof($request->visits);
 		for ($i = 0; $i < $size; $i++) {
 			if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {
