@@ -221,7 +221,6 @@ app.component('eyatraTripForm', {
                 $("#advance").show().prop('disabled', false);
             }
             self.trip = response.data.trip;
-
             self.extras = response.data.extras;
             self.action = response.data.action;
             if (self.action == 'New') {
@@ -487,6 +486,7 @@ app.component('eyatraTripView', {
             trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
+            self.claim_status = response.data.claim_status;
         });
 
 

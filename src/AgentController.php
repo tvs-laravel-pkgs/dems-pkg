@@ -151,7 +151,7 @@ class AgentController extends Controller {
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Type']);
 
 		$this->data['extras'] = [
-			'travel_mode_list' => Entity::travelModeList(),
+			'travel_mode_list' => Entity::travelModeListClaim(),
 			'country_list' => NCountry::getList(),
 
 			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($agent->address->city->state->country_id),
