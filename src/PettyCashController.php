@@ -172,20 +172,24 @@ class PettyCashController extends Controller {
 	}
 
 	public function fillEmployee($id) {
-		$this->data['emp_details'] = $emp_details = Employee::select(
-			'entities.name as grade',
-			'users.name',
-			'employees.code',
-			'employees.id as emp_id',
-			'configs.name as designation'
-		)
-			->join('users', 'users.entity_id', 'employees.id')
-			->join('entities', 'entities.id', 'employees.grade_id')
-			->join('configs', 'configs.id', 'users.user_type_id')
-			->where('employees.id', $id)
-			->where('users.user_type_id', 3121)
-			->where('employees.company_id', Auth::user()->company_id)
-			->first();
+		if (!empty($id)) {
+			$this->data['emp_details'] = $emp_details = Employee::select(
+				'entities.name as grade',
+				'users.name',
+				'employees.code',
+				'employees.id as emp_id',
+				'configs.name as designation'
+			)
+				->join('users', 'users.entity_id', 'employees.id')
+				->join('entities', 'entities.id', 'employees.grade_id')
+				->join('configs', 'configs.id', 'users.user_type_id')
+				->where('employees.id', $id)
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)
+				->first();
+		} else {
+			$this->data['emp_details'] = [];
+		}
 		// dd($emp_details);
 		return response()->json($this->data);
 	}

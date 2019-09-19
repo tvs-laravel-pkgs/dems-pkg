@@ -155,6 +155,9 @@ app.component('eyatraTripClaimForm', {
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
+        self.eyatra_trip_claim_lodging_attachment_url = eyatra_trip_claim_lodging_attachment_url;
+        self.eyatra_trip_claim_boarding_attachment_url = eyatra_trip_claim_boarding_attachment_url;
+        self.eyatra_trip_claim_local_travel_attachment_url = eyatra_trip_claim_local_travel_attachment_url;
         self.enable_switch_tab = true;
 
         $http.get(
@@ -251,7 +254,9 @@ app.component('eyatraTripClaimForm', {
                 self.is_deviation = self.trip.employee.trip_employee_claim.is_deviation;
             }
             self.lodgings_removal_id = [];
+            self.lodgings_attachment_removal_ids = [];
             self.boardings_removal_id = [];
+            self.boardings_attachment_removal_ids = [];
             self.local_travels_removal_id = [];
 
             if (self.trip.lodgings.length == 0) {
@@ -274,6 +279,16 @@ app.component('eyatraTripClaimForm', {
 
         });
 
+
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment_tooltip", function() {
+            var $this = $(this);
+            $this.tooltip({
+                title: $this.attr('data-title'),
+                placement: "top"
+            });
+            $this.tooltip('show');
+        });
 
         $scope.searchBookedBy;
         $scope.clearSearchBookedBy = function() {
@@ -956,6 +971,7 @@ app.component('eyatraTripClaimForm', {
                 remarks: '',
             });
         }
+        //REMOVE LODGING
         self.removeLodging = function(index, lodging_id) {
             if (lodging_id) {
                 self.lodgings_removal_id.push(lodging_id);
@@ -965,6 +981,16 @@ app.component('eyatraTripClaimForm', {
             setTimeout(function() {
                 self.lodgingCal();
             }, 500);
+        }
+
+        //REMOVE LODGING ATTACHMENT
+        self.removeLodgingAttachment = function(lodge_index, lodge_attachment_id, lodge_attachment_index, lodging_id) {
+            console.log(lodge_attachment_id, lodge_attachment_index, lodging_id);
+            if (lodge_attachment_id && lodging_id) {
+                self.lodgings_attachment_removal_ids.push(lodge_attachment_id);
+                $('#lodgings_attach_removal_ids').val(JSON.stringify(self.lodgings_attachment_removal_ids));
+            }
+            self.trip.lodgings[lodge_index].attachments.splice(lodge_attachment_index, 1);
         }
 
         // Boardings
@@ -984,6 +1010,7 @@ app.component('eyatraTripClaimForm', {
                 attachments: [],
             });
         }
+        //REMOVE BOARDING
         self.removeBoarding = function(index, boarding_id) {
             if (boarding_id) {
                 self.boardings_removal_id.push(boarding_id);
@@ -993,6 +1020,16 @@ app.component('eyatraTripClaimForm', {
             setTimeout(function() {
                 self.boardingCal();
             }, 500);
+        }
+
+        //REMOVE BOARDING ATTACHMENT
+        self.removeBoardingAttachment = function(board_index, board_attachment_id, board_attachment_index, boarding_id) {
+            console.log(board_attachment_id, board_attachment_index, boarding_id);
+            if (board_attachment_id && boarding_id) {
+                self.boardings_attachment_removal_ids.push(board_attachment_id);
+                $('#boardings_attach_removal_ids').val(JSON.stringify(self.boardings_attachment_removal_ids));
+            }
+            self.trip.boardings[board_index].attachments.splice(board_attachment_index, 1);
         }
 
         // LocalTralvels
@@ -1331,7 +1368,9 @@ app.component('eyatraTripClaimForm', {
 
                             //REFRESH LODGINGS
                             self.trip.lodgings = res.saved_lodgings.lodgings;
-
+                            self.lodgings_removal_id = [];
+                            self.lodgings_attachment_removal_ids = [];
+                            $('#lodgings_attach_removal_ids').val('');
                             self.enable_switch_tab = true;
                             $scope.$apply()
                             // $('.tab_li').removeClass('active');
@@ -1405,6 +1444,9 @@ app.component('eyatraTripClaimForm', {
 
                             //REFRESH BOARDINGS
                             self.trip.boardings = res.saved_boardings.boardings;
+                            self.boardings_removal_id = [];
+                            self.boardings_attachment_removal_ids = [];
+                            $('#boardings_attach_removal_ids').val('');
 
                             self.enable_switch_tab = true;
                             $scope.$apply()
@@ -1570,6 +1612,16 @@ app.component('eyatraTripClaimView', {
             }
             $rootScope.loading = false;
 
+        });
+
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment_tooltip", function() {
+            var $this = $(this);
+            $this.tooltip({
+                title: $this.attr('data-title'),
+                placement: "top"
+            });
+            $this.tooltip('show');
         });
 
         /* Pane Next Button */

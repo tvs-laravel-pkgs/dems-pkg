@@ -262,6 +262,9 @@ app.component('eyatraTripClaimVerificationOneView', {
             });
         });
 
+        /* Tooltip */
+        $('[data-toggle="tooltip"]').tooltip();
+
 
         /* Pane Next Button */
         $('.btn-nxt').on("click", function() {
