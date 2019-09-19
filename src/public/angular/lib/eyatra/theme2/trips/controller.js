@@ -179,7 +179,6 @@ app.component('eyatraTripForm', {
             startdate = self.trip.start_date;
             enddate = self.trip.end_date;
             var arr_length = self.trip.visits.length;
-            alert(arr_length);
             for (var i = 0; i < arr_length; i++) {
                 $('.datepicker_' + i).datepicker('destroy');
                 //id = 0;
@@ -227,13 +226,13 @@ app.component('eyatraTripForm', {
             self.trip = response.data.trip;
             self.extras = response.data.extras;
             self.action = response.data.action;
-            console.log(response.data.trip.start_date);
-            console.log(response.data.trip.end_date);
+            // console.log(response.data.trip.start_date);
+            // console.log(response.data.trip.end_date);
             self.trip_period = '';
             if (response.data.trip.start_date && response.data.trip.end_date) {
 
                 self.trip_period = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
-                console.log(self.trip_period);
+                //console.log(self.trip_period);
             }
             if (self.action == 'New') {
                 self.trip.trip_type = 'single';
@@ -318,7 +317,9 @@ app.component('eyatraTripForm', {
                 preferred_travel_modes: '',
                 from_city_details: self.trip.from_city_details,
             });
-            datecall(startdate, enddate, arr_vol);
+            $('.datepicker_' + arr_length).datepicker('destroy');
+            datecall(startdate, enddate, arr_length);
+
 
         }
         $scope.trip_mode = function(id) {
