@@ -1572,6 +1572,9 @@ app.component('eyatraTripClaimView', {
 
         });
 
+        /* Tooltip */
+        $('[data-toggle="tooltip"]').tooltip();
+
         /* Pane Next Button */
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
