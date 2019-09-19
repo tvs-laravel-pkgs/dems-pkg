@@ -1025,48 +1025,91 @@ class Trip extends Model {
 		try {
 
 			$trip_id = $trip->id;
+			$trip = Trip::findorFail($trip->id);
+
+			$from_mail = config('eyatra.common_from_email');
+			//dd($from_mail);
+			$employee_details = Employee::select(
+				'employees.code',
+				'users.name',
+				'designations.name as designation',
+				'entities.name as grade',
+				'employee_manager.name as manager_name'
+			)
+				->join('users', 'users.entity_id', 'employees.id')
+				->join('users as employee_manager', 'employee_manager.entity_id', 'employees.reporting_to_id')
+				->join('designations', 'designations.id', 'employees.designation_id')
+				->join('entities', 'entities.id', 'employees.grade_id')
+				->where('employees.id', Auth::User()->entity_id)
+				->first();
+			//dd($employee_details);
 			$trip_visits = $trip->visits;
+			//dd($trip_visits);
 			if ($trip_visits) {
 				//agent Booking Count checking
-				$visit_agents = Visit::select(
-					'visits.id',
-					'trips.id as trip_id',
-					'users.name as employee_name',
-					DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
-					'fromcity.name as fromcity_name',
-					'tocity.name as tocity_name',
-					'travel_modes.name as travel_mode_name',
-					'booking_modes.name as booking_method_name'
-				)
-					->join('trips', 'trips.id', 'visits.trip_id')
-					->leftjoin('users', 'trips.employee_id', 'users.id')
-					->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
-					->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-					->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
-					->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
-					->where('booking_method_id', 3042)->where('trip_id', $trip_id)
+
+				$agents_visit = Visit::select('agent_id')
+					->where('visits.trip_id', $trip_id)
+					->where('visits.booking_method_id', 3042)
+					->groupby('agent_id')
 					->get();
-				$visit_agent_count = $visit_agents->count();
-				//dd($visit_agent_count);
-				if ($visit_agent_count > 0) {
-					// Agent Mail Trigger
-					foreach ($visit_agents as $key => $visit_agent) {
+				//dd($agents_visit);
+				//dd($agents_visit);
+				foreach ($agents_visit as $key => $agent) {
+					$visit_agents = Visit::select(
+						'visits.id',
+						'trips.id as trip_id',
+						'users.name as employee_name',
+						DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
+						'fromcity.name as fromcity_name',
+						'tocity.name as tocity_name',
+						'travel_modes.name as travel_mode_name',
+						'booking_modes.name as booking_method_name'
+					)
+						->join('trips', 'trips.id', 'visits.trip_id')
+						->leftjoin('users', 'trips.employee_id', 'users.id')
+						->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+						->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+						->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
+						->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
+						->where('booking_method_id', 3042)
+						->where('trip_id', $trip_id)
+						->where('visits.agent_id', $agent->agent_id)
+						->get();
+					//dd($agent->agent_id);
+					$visit_agent_count = $visit_agents->count();
+					if (count($visit_agent_count) > 0) {
+						$arr['from_mail'] = $from_mail;
 						$arr['from_mail'] = 'saravanan@uitoux.in';
 						$arr['from_name'] = 'Agent';
-						$arr['to_email'] = 'parthiban@uitoux.in';
-						$arr['to_name'] = 'parthiban';
-						//dd($user_details_cc['email']);
-						$arr['subject'] = 'Ticket booking request';
-						$arr['body'] = 'Employee ticket booking notification';
-						$arr['visits'] = $visit_agent;
-						$arr['type'] = 1;
-						$MailInstance = new TripNotificationMail($arr);
-						$Mail = Mail::send($MailInstance);
+						$agent_user = User::select('name', 'email')
+							->where('entity_id', $agent->agent_id)
+							->where('user_type_id', 3122)
+							->where('company_id', Auth::user()->company_id)
+							->first();
+						if ($agent_user) {
+							if ($agent_user->email) {
+								$arr['to_email'] = $agent_user->email;
+								$arr['to_name'] = $agent_user->name;
+								$arr['to_email'] = 'saravanan@uitoux.in';
+								$arr['subject'] = 'Ticket booking request';
+								$arr['body'] = 'Employee ticket booking notification';
+								$arr['visits'] = $visit_agents;
+								$arr['employee_details'] = $employee_details;
+								$arr['trip'] = $trip;
+								$arr['type'] = 1;
+								$MailInstance = new TripNotificationMail($arr);
+								$Mail = Mail::send($MailInstance);
+
+							}
+						}
 					}
+
 				}
 				// Manager mail trigger
 				$visit_manager = Visit::select(
 					'visits.id',
+					'visits.notes_to_agent',
 					'trips.id as trip_id',
 					'users.name as employee_name',
 					DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
@@ -1083,23 +1126,35 @@ class Trip extends Model {
 					->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
 					->where('visits.trip_id', $trip_id)
 					->get();
-				//dd($visit_manager);
 				if ($visit_manager) {
+					$arr['from_mail'] = $from_mail;
 					$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Manager';
-					$arr['to_email'] = 'saravanan@uitoux.in';
-					$arr['to_name'] = 'parthiban';
-					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Trip Approval Request';
-					$arr['body'] = 'Employee ticket booking notification';
-					$arr['visits'] = $visit_manager;
-					$arr['type'] = 2;
-					$MailInstance = new TripNotificationMail($arr);
-					$Mail = Mail::send($MailInstance);
+					$to_employee = Employee::select('users.email as email', 'users.name as name')
+						->join('users', 'users.entity_id', 'employees.reporting_to_id')
+						->where('users.user_type_id', 3121)
+						->where('employees.id', Auth::user()->entity_id)
+						->first();
+					if ($to_employee->email) {
+						$arr['to_email'] = $to_employee->email;
+						//$arr['to_email'] = 'saravanan@uitoux.in';
+						//$arr['to_name'] = 'parthiban';
+						$arr['to_name'] = $to_employee->name;
+						$arr['subject'] = 'Trip Approval Request';
+						$arr['body'] = 'Employee ticket booking notification';
+						$arr['employee_details'] = $employee_details;
+						$arr['visits'] = $visit_manager;
+						$arr['trip'] = $trip;
+						$arr['type'] = 2;
+						$MailInstance = new TripNotificationMail($arr);
+						$Mail = Mail::send($MailInstance);
+					}
+
 				}
 				// Financier mail trigger
 				$visit_financier = Visit::select(
 					'visits.id',
+					'visits.notes_to_agent',
 					'trips.id as trip_id',
 					'trips.advance_received as advance_amount',
 					'users.name as employee_name',
@@ -1120,17 +1175,73 @@ class Trip extends Model {
 					->get();
 				$visit_financier_count = $visit_financier->count();
 				if ($visit_financier_count > 0) {
+					$arr['from_mail'] = $from_mail;
 					$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Financier';
-					$arr['to_email'] = 'parthiban@uitoux.in';
-					$arr['to_name'] = 'parthiban';
-					//dd($user_details_cc['email']);
-					$arr['subject'] = 'Trip Advance Request';
-					$arr['body'] = 'Employee ticket booking notification';
-					$arr['visits'] = $visit_financier;
-					$arr['type'] = 3;
-					$MailInstance = new TripNotificationMail($arr);
-					$Mail = Mail::send($MailInstance);
+					$financier = User::select('name', 'email')
+						->join('role_user', 'role_user.user_id', 'users.id')
+						->where('role_user.role_id', 505)
+						->where('users.company_id', Auth::user()->company_id)
+						->first();
+					if ($financier->email) {
+						$arr['to_email'] = $financier->email;
+						$arr['to_name'] = $financier->name;
+						//$arr['to_email'] = 'saravanan@uitoux.in';
+						//$arr['to_name'] = 'parthiban';
+						//dd($user_details_cc['email']);
+						$arr['subject'] = 'Trip Advance Request';
+						$arr['body'] = 'Employee ticket booking notification';
+						$arr['employee_details'] = $employee_details;
+						$arr['visits'] = $visit_financier;
+						$arr['trip'] = $trip;
+						$arr['type'] = 3;
+						$MailInstance = new TripNotificationMail($arr);
+						$Mail = Mail::send($MailInstance);
+					}
+				}
+
+				// Employee Mail trigger
+				$visit_employee = Visit::select(
+					'visits.id',
+					'visits.notes_to_agent',
+					'trips.id as trip_id',
+					'users.name as employee_name',
+					DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
+					'fromcity.name as fromcity_name',
+					'tocity.name as tocity_name',
+					'travel_modes.name as travel_mode_name',
+					'booking_modes.name as booking_method_name'
+				)
+					->join('trips', 'trips.id', 'visits.trip_id')
+					->leftjoin('users', 'trips.employee_id', 'users.id')
+					->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+					->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+					->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
+					->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
+					->where('visits.trip_id', $trip_id)
+					->get();
+				if ($visit_employee) {
+					$arr['from_mail'] = $from_mail;
+					$arr['from_mail'] = 'saravanan@uitoux.in';
+					$arr['from_name'] = 'Employee';
+					$to_employee = Employee::select('users.email as email', 'users.name as name')
+						->join('users', 'users.entity_id', 'employees.id')
+						->where('users.user_type_id', 3121)
+						->where('employees.id', Auth::user()->entity_id)
+						->first();
+					if ($to_employee->email) {
+						$arr['to_email'] = $to_employee->email;
+						$arr['to_name'] = $to_employee->name;
+						$arr['subject'] = 'Trip Approval Request';
+						$arr['body'] = 'Employee ticket booking notification';
+						$arr['employee_details'] = $employee_details;
+						$arr['visits'] = $visit_manager;
+						$arr['trip'] = $trip;
+						$arr['type'] = 4;
+						$MailInstance = new TripNotificationMail($arr);
+						$Mail = Mail::send($MailInstance);
+					}
+
 				}
 			}
 		} catch (Exception $e) {
