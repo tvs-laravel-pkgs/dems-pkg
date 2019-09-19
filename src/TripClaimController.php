@@ -195,11 +195,18 @@ class TripClaimController extends Controller {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
+				// dd($request->all());
+				//REMOVE LODGING ATTACHMENT
+				if (!empty($request->lodgings_attach_removal_ids)) {
+					$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
+					Attachment::whereIn('id', $lodgings_attach_removal_ids)->delete();
+				}
 
-				//REMOVE LODGING
+				//REMOVE LODGING AND THIER ATTACHMENTS
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
 					Lodging::whereIn('id', $lodgings_removal_id)->delete();
+					Attachment::whereIn('entity_id', $lodgings_removal_id)->delete();
 				}
 
 				//SAVE
@@ -282,10 +289,16 @@ class TripClaimController extends Controller {
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
 
+				//REMOVE BOARDINGS ATTACHMENT
+				if (!empty($request->boardings_attach_removal_ids)) {
+					$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
+					Attachment::whereIn('id', $boardings_attach_removal_ids)->delete();
+				}
 				//REMOVE BOARDINGS
 				if (!empty($request->boardings_removal_id)) {
 					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
 					Boarding::whereIn('id', $boardings_removal_id)->delete();
+					Attachment::whereIn('entity_id', $boardings_removal_id)->delete();
 				}
 
 				//SAVE
