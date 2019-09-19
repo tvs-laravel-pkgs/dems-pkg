@@ -29,6 +29,8 @@ class AlterTableGradeAdvance extends Migration {
 		Schema::table('grade_advanced_eligibility', function (Blueprint $table) {
 			$table->dropColumn('claim_active_days');
 			$table->dropColumn('travel_advance_limit');
+			$table->dropColumn('two_wheeler_limit');
+			$table->dropColumn('four_wheeler_limit');
 		});
 	}
 }
