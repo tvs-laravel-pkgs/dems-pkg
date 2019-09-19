@@ -342,6 +342,52 @@ app.component('eyatraTripClaimVerificationThreeView', {
             });
         });
 
+        //HOLD TRIP CLAIM
+        $scope.tripClaimHold = function(trip_id) {
+            if (trip_id) {
+                $('#Hold').button('loading');
+                $.ajax({
+                        url: laravel_routes['holdTripClaimVerificationThree'],
+                        method: "POST",
+                        data: { trip_id: trip_id },
+                    })
+                    .done(function(res) {
+                        console.log(res.success);
+                        if (!res.success) {
+                            $('#reject_btn').button('reset');
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            $noty = new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Trips Claim Holded successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
+                            }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            setTimeout(function() {
+                                $location.path('/eyatra/trip/claim/verification3/list')
+                                $scope.$apply()
+                            }, 500);
+
+                        }
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
+
+        /* Tooltip */
+        $('[data-toggle="tooltip"]').tooltip();
+
         /* Pane Next Button */
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");

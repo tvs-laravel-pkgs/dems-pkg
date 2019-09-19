@@ -52,7 +52,7 @@ class TripClaimVerificationThreeController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->where('ey_employee_claims.status_id', 3223) //PAYMENT PENDING
+			->whereIn('ey_employee_claims.status_id', [3223, 3227]) //PAYMENT PENDING & FINANCIER PAYMENT HOLD
 		// ->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
@@ -281,6 +281,24 @@ class TripClaimVerificationThreeController extends Controller {
 		$trip->rejection_id = $r->reject_id;
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024; //Claim Rejected
+		$trip->save();
+
+		return response()->json(['success' => true]);
+	}
+
+	public function holdTripClaimVerificationThree(Request $r) {
+		$trip = Trip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim->status_id = 3227; //Financier Payment Hold
+		$employee_claim->save();
+
+		$trip->status_id = 3030; //Financier Payment Hold
 		$trip->save();
 
 		return response()->json(['success' => true]);

@@ -187,25 +187,6 @@ class PettyCashCashierVerificationController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function searchemployee(Request $r) {
-		// dd($r->all());
-		$key = $r->key;
-		$employee_list = Employee::leftJoin('users as emp_user', 'emp_user.entity_id', 'employees.id')->select(
-			'emp_user.name',
-			'employees.code',
-			'employees.id'
-		)
-			->where(function ($q) use ($key) {
-				$q->where('employees.code', 'like', '%' . $key . '%')
-					->orWhere('emp_user.name', 'like', '%' . $key . '%')
-				;
-			})->where('emp_user.user_type_id', 3121)
-			->where('employees.company_id', Auth::user()->company_id)
-			->get();
-		// $employee_list = Employee::select('id', 'code')->where('name', 'LIKE', '%' . $r->key . '%')->get();
-		return response()->json($employee_list);
-	}
-
 	public function pettycashCashierVerificationSave(Request $request) {
 		// dd($request->all());
 		try {
