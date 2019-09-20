@@ -156,6 +156,16 @@ app.component('eyatraTripClaimVerificationTwoView', {
 
         });
 
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment_tooltip", function() {
+            var $this = $(this);
+            $this.tooltip({
+                title: $this.attr('data-title'),
+                placement: "top"
+            });
+            $this.tooltip('show');
+        });
+
         $scope.tripClaimApproveTwo = function(trip_id) {
             $('#modal_trip_id').val(trip_id);
         }

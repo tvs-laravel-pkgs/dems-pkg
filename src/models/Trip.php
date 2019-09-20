@@ -1271,7 +1271,8 @@ class Trip extends Model {
 		}
 	}
 
-	public function saveEYatraTripClaim(Request $request) {
+	public static function saveEYatraTripClaim($request) {
+		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
 			// 	'purpose_id' => [
@@ -1294,26 +1295,41 @@ class Trip extends Model {
 				foreach ($request->visits as $visit_data) {
 					if (!empty($visit_data['id'])) {
 						$visit = Visit::find($visit_data['id']);
-						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
-						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
-						$visit->travel_mode_id = $visit_data['travel_mode_id'];
+
+						//CONCATENATE DATE & TIME
+						$depart_date = $visit_data['departure_date'];
+						$depart_time = $visit_data['departure_time'];
+						$arrival_date = $visit_data['arrival_date'];
+						$arrival_time = $visit_data['arrival_time'];
+						$visit->departure_date = date('Y-m-d H:i:s', strtotime("$depart_date $depart_time"));
+						$visit->arrival_date = date('Y-m-d H:i:s', strtotime("$arrival_date $arrival_time"));
+
+						//GET BOOKING TYPE
+						$booked_by = strtolower($visit_data['booked_by']);
+						if ($booked_by == 'self') {
+							$visit->travel_mode_id = $visit_data['travel_mode_id'];
+						}
 						$visit->save();
 						// dd($visit_data['id']);
-						//UPDATE VISIT BOOKING STATUS
-						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
-						$visit_booking->visit_id = $visit_data['id'];
-						$visit_booking->type_id = 3100;
-						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
-						$visit_booking->reference_number = $visit_data['reference_number'];
-						$visit_booking->remarks = $visit_data['remarks'];
-						$visit_booking->amount = $visit_data['amount'];
-						$visit_booking->tax = $visit_data['tax'];
-						$visit_booking->service_charge = '0.00';
-						$visit_booking->total = $visit_data['total'];
-						$visit_booking->paid_amount = $visit_data['total'];
-						$visit_booking->created_by = Auth::user()->id;
-						$visit_booking->status_id = 3241; //Claimed
-						$visit_booking->save();
+
+						//UPDATE VISIT BOOKING STATUS ONLY FOR SELF
+						if ($booked_by == 'self') {
+							$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
+							$visit_booking->visit_id = $visit_data['id'];
+							$visit_booking->type_id = 3100;
+							$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
+							$visit_booking->reference_number = $visit_data['reference_number'];
+							$visit_booking->remarks = $visit_data['remarks'];
+							$visit_booking->amount = $visit_data['amount'];
+							$visit_booking->tax = $visit_data['tax'];
+							$visit_booking->gstin = $visit_data['gstin'];
+							$visit_booking->service_charge = '0.00';
+							$visit_booking->total = $visit_data['total'];
+							$visit_booking->paid_amount = $visit_data['total'];
+							$visit_booking->created_by = Auth::user()->id;
+							$visit_booking->status_id = 3241; //Claimed
+							$visit_booking->save();
+						}
 
 					}
 				}
@@ -1351,11 +1367,18 @@ class Trip extends Model {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
+				// dd($request->all());
+				//REMOVE LODGING ATTACHMENT
+				if (!empty($request->lodgings_attach_removal_ids)) {
+					$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
+					Attachment::whereIn('id', $lodgings_attach_removal_ids)->delete();
+				}
 
-				//REMOVE LODGING
+				//REMOVE LODGING AND THIER ATTACHMENTS
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
 					Lodging::whereIn('id', $lodgings_removal_id)->delete();
+					Attachment::whereIn('entity_id', $lodgings_removal_id)->delete();
 				}
 
 				//SAVE
@@ -1438,10 +1461,16 @@ class Trip extends Model {
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
 
+				//REMOVE BOARDINGS ATTACHMENT
+				if (!empty($request->boardings_attach_removal_ids)) {
+					$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
+					Attachment::whereIn('id', $boardings_attach_removal_ids)->delete();
+				}
 				//REMOVE BOARDINGS
 				if (!empty($request->boardings_removal_id)) {
 					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
 					Boarding::whereIn('id', $boardings_removal_id)->delete();
+					Attachment::whereIn('entity_id', $boardings_removal_id)->delete();
 				}
 
 				//SAVE
@@ -1496,6 +1525,7 @@ class Trip extends Model {
 
 			//FINAL SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
+				// dd($request->all());
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 
@@ -1517,7 +1547,14 @@ class Trip extends Model {
 				$employee_claim->fill($request->all());
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->remarks = $request->remarks;
 
+				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
+				if ($request->is_justify_my_trip) {
+					$employee_claim->is_justify_my_trip = 1;
+				} else {
+					$employee_claim->is_justify_my_trip = 0;
+				}
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
 					$employee_claim->status_id = 3223; //PAYMENT PENDING
@@ -1533,6 +1570,24 @@ class Trip extends Model {
 				}
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->save();
+
+				//STORE GOOGLE ATTACHMENT
+				$item_images = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
+				Storage::makeDirectory($item_images, 0777);
+				if ($request->hasfile('google_attachments')) {
+					foreach ($request->file('google_attachments') as $image) {
+						$name = $image->getClientOriginalName();
+						$image->move(storage_path('app/public/trip/ey_employee_claims/google_attachments/'), $name);
+						$attachement = new Attachment;
+						$attachement->attachment_of_id = 3185;
+						$attachement->attachment_type_id = 3200;
+						$attachement->entity_id = $employee_claim->id;
+						$attachement->name = $name;
+						$attachement->save();
+					}
+
+				}
+
 				$activity['entity_id'] = $trip->id;
 				$activity['entity_type'] = "Trip";
 				$activity['details'] = "Trip is Claimed";
@@ -1582,6 +1637,21 @@ class Trip extends Model {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
+	}
+
+	//GET TRAVEL MODE CATEGORY STATUS TO CHECK IF IT IS NO VEHICLE CLAIM
+	public static function getVisitTrnasportModeClaimStatus($request) {
+		if (!empty($request->travel_mode_id)) {
+			$travel_mode_category_type = DB::table('travel_mode_category_type')->where('travel_mode_id', $request->travel_mode_id)->where('category_id', 3402)->first();
+			if ($travel_mode_category_type) {
+				$is_no_vehicl_claim = true;
+			} else {
+				$is_no_vehicl_claim = false;
+			}
+		} else {
+			$is_no_vehicl_claim = false;
+		}
+		return response()->json(['is_no_vehicl_claim' => $is_no_vehicl_claim]);
 	}
 
 }

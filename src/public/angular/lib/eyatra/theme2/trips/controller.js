@@ -436,7 +436,11 @@ app.component('eyatraTripForm', {
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'trip_mode[]') {
                     error.appendTo($('.trip_mode'));
-                } else {
+                } 
+                else if (element.hasClass("advance_amount_check")) {
+                    error.appendTo($('.advance_amount_required'));
+                }
+                else {
                     error.insertAfter(element)
                 }
             },
