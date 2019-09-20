@@ -176,14 +176,14 @@ app.component('eyatraEntityForm', {
             rules: {
                 'name': {
                     required: true,
-                    minlength: 1,
+                    minlength: 3,
                     maxlength: 191,
                 },
 
             },
             messages: {
                 'name': {
-                    minlength: 'Please enter minimum of 1 characters',
+                    minlength: 'Please enter minimum of 3 characters',
                     maxlength: 'Please enter maximum of 191 characters',
                 },
             },

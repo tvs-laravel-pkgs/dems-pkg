@@ -307,7 +307,7 @@ app.component('eyatraCityForm', {
                 //     required: 'Travel mode required',
                 // }
             },
-            invalidHandler: function(event, validator) {
+            /*invalidHandler: function(event, validator) {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
@@ -319,7 +319,7 @@ app.component('eyatraCityForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-            },
+            },*/
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);

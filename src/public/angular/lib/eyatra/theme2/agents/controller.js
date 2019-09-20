@@ -329,7 +329,11 @@ app.component('eyatraAgentForm', {
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'travel_mode[]') {
                     error.appendTo($('.travel_mode_error'));
-                } else {
+                } 
+                else if(element.hasClass('agent_password_check')){
+                    error.appendTo($('.password_error'));
+                }
+                else {
                     error.insertAfter(element)
                 }
             },

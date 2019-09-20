@@ -194,7 +194,13 @@ app.component('eyatraGradeForm', {
                         $(".sub_class_" + id).addClass("required");
                         $(".sub_class_" + id).prop('required', true);
                     });
+                     // expenseCb();
+                     purposeType();
+                     travelType();
+                     localTravelType();
                 }, 500);
+
+               
 
             } else {
                 self.switch_value = 'Active';
@@ -210,21 +216,28 @@ app.component('eyatraGradeForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
-        $(document).on('click', '.expense_cb', function() {
-          var cheked_count = 0;
+        /*
+        function expenseCb(){
+            
+            var cheked_count = 0;
             $.each($('.expense_cb'), function() {
                  cheked_count = $('.expense_cb:checked').length;
             });
+        
             if(cheked_count > 0){
                 $('#select_all_expense').prop('checked', true);
             }else{
                 $('#select_all_expense').prop('checked', false);
-            }
-            
-        });
+            } 
+        }
 
-        $(document).on('click', '.purpose_type', function() {
-          var cheked_count = 0;
+        $(document).on('click', '.expense_cb', function() {
+            expenseCb();   
+        });
+        */
+
+        function purposeType(){
+            var cheked_count = 0;
             $.each($('.purpose_type'), function() {
                  cheked_count = $('.purpose_type:checked').length;
             });
@@ -233,11 +246,14 @@ app.component('eyatraGradeForm', {
             }else{
                 $('#select_all_purpose_type').prop('checked', false);
             }
-            
+        }
+
+        $(document).on('click', '.purpose_type', function() {
+            purposeType();
         });
 
-        $(document).on('click', '.travel_type', function() {
-          var cheked_count = 0;
+        function travelType(){
+            var cheked_count = 0;
             $.each($('.travel_type'), function() {
                  cheked_count = $('.travel_type:checked').length;
             });
@@ -246,12 +262,14 @@ app.component('eyatraGradeForm', {
             }else{
                 $('#select_all_travel_type').prop('checked', false);
             }
-            
+        }
+
+        $(document).on('click', '.travel_type', function() {
+            travelType();  
         });
 
-
-        $(document).on('click', '.local_travel_type', function() {
-          var cheked_count = 0;
+        function localTravelType(){
+            var cheked_count = 0;
             $.each($('.local_travel_type'), function() {
                  cheked_count = $('.local_travel_type:checked').length;
             });
@@ -260,7 +278,10 @@ app.component('eyatraGradeForm', {
             }else{
                 $('#select_all_local_travel_type').prop('checked', false);
             }
-            
+             
+        }
+        $(document).on('click', '.local_travel_type', function() {
+            localTravelType();
         });
 
         $(document).on('keypress', '.validate_decimal', function(e) {
@@ -281,6 +302,16 @@ app.component('eyatraGradeForm', {
             var class_name = $(this).data('class');
             if (event.target.checked == true) {
                 $('.' + class_name).prop('checked', true);
+            } else {
+                $('.' + class_name).prop('checked', false);
+            }
+        });
+
+        /*
+        $('.toggle_cb').on('click', function() {
+            var class_name = $(this).data('class');
+            if (event.target.checked == true) {
+                $('.' + class_name).prop('checked', true);
                 if (class_name == 'expense_cb') {
                     $.each($('.' + class_name + ':checked'), function() {
                         $scope.getexpense_type($(this).val());
@@ -297,7 +328,9 @@ app.component('eyatraGradeForm', {
                 }
             }
         });
+        */
 
+        /*
         $scope.getexpense_type = function(id) {
             if (event.target.checked == true) {
                 $(".sub_class_" + id).removeClass("ng-hide");
@@ -306,7 +339,7 @@ app.component('eyatraGradeForm', {
                 $(".sub_class_" + id).prop("disabled", false);
             } else {
                 $(".sub_class_" + id).addClass("ng-hide");
-                $(".sub_class_" + id).removeClass("required");
+                $(".sub_class_" + id).removeClass("required");  
                 $(".sub_class_" + id).prop('required', false);
                 $(".sub_class_" + id).prop("disabled", true);
                 $('.sub_class_' + id).removeClass('error');
@@ -317,11 +350,11 @@ app.component('eyatraGradeForm', {
         $(document).on('click', '.expense_cb', function() {
             var id = $(this).val();
             $scope.getexpense_type(id);
-        });
+        });*/
 
         var form_id = '#grade-form';
         var v = jQuery(form_id).validate({
-            errorPlacement: function(error, element) {
+            errorPlacement: function(error, element) {  
                 error.insertAfter(element)
             },
             invalidHandler: function(event, validator) {
@@ -376,7 +409,7 @@ app.component('eyatraGradeForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Grade Updated successfully',
+                                text: res.message,
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },

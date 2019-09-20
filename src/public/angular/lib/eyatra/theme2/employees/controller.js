@@ -314,9 +314,9 @@ app.component('eyatraEmployeeForm', {
                 if (element.hasClass("joining")) {
                     error.appendTo($('.joining_error'));
                 }
-                // else if (element.hasClass("pan_no")) {
-                //     error.appendTo($('.folder_name_error'));
-                // } 
+                else if (element.hasClass("employee_password_check")) {
+                    error.appendTo($('.password_error'));
+                } 
                 // else if (element.hasClass("company_code")) {
                 //     error.appendTo($('.company_code_error'));
                 // } 

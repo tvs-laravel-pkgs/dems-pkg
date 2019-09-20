@@ -178,9 +178,12 @@ app.component('eyatraTripForm', {
             self.trip.end_date = moment($scope.endDate).format('DD-MM-YYYY');
             startdate = self.trip.start_date;
             enddate = self.trip.end_date;
-            $('.datepicker_' + id).datepicker('destroy');
-            id = 0;
-            datecall(startdate, enddate, id);
+            var arr_length = self.trip.visits.length;
+            for (var i = 0; i < arr_length; i++) {
+                $('.datepicker_' + i).datepicker('destroy');
+                //id = 0;
+                datecall(startdate, enddate, i);
+            }
         }
 
         $('body').on('click', "#datepicker", function() {
@@ -196,6 +199,19 @@ app.component('eyatraTripForm', {
             });
         }
 
+        function sameFromTo() {
+            $noty = new Noty({
+                type: 'error',
+                layout: 'topRight',
+                text: 'From City and To City should not be same,please choose another To city',
+                animation: {
+                    speed: 50 // unavailable - no need
+                },
+            }).show();
+            setTimeout(function() {
+                $noty.close();
+            }, 100000);
+        }
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -216,13 +232,30 @@ app.component('eyatraTripForm', {
                 $location.path('/eyatra/trips')
                 return;
             }
+            self.trip = response.data.trip;
+            self.trip.trip_periods = '';
+            if (response.data.trip.start_date && response.data.trip.end_date) {
+                var start_date = response.data.trip.start_date;
+                var end_date = response.data.trip.end_date;
+
+                //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
+                /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
+     $('.daterange').val(picker.start_date.format('DD-MM-YYYY') + ' to ' + picker.end_date.format('DD-MM-YYYY'));
+ });*/
+                trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
+                $('#trip_periods').val(trip_periods);
+                $('#trip_periods').data('daterangepicker').setStartDate(start_date);
+                $('#trip_periods').data('daterangepicker').setEndDate(end_date);
+            }
+            console.log(self.trip.trip_periods);
             self.advance_eligibility = response.data.advance_eligibility;
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }
-            self.trip = response.data.trip;
             self.extras = response.data.extras;
             self.action = response.data.action;
+            console.log(self.trip);
+            // console.log(response.data.trip.end_date);
             if (self.action == 'New') {
                 self.trip.trip_type = 'single';
                 self.booking_method_name = 'self';
@@ -274,25 +307,22 @@ app.component('eyatraTripForm', {
         }
         $scope.cityChanging = function(i, id) {
             var index = i + 1;
-            if (index <= self.trip.visits.length) {
-                // alert(index);
-                //alert(self.trip.visits.length);
-                /*if (self.trip.visits.length == 1) {
-                    self.trip.visits.push({
-                        from_city_id: self.trip.visits[0].to_city_details.id,
-                        to_city_id: self.trip.visits[0].from_city_id,
-                        booking_method_name: '',
-                        preferred_travel_modes: '',
-                        from_city_details: self.trip.from_city_details,
-                    });
-                } else {*/
-
-                /*}*/
+            id = (!id) ? '' : id;
+            if (index <= self.trip.visits.length && self.trip.visits[index]) {
                 if (self.trip.visits.length > 1) {
-
                     self.trip.visits[index].from_city_id = id;
                 }
             }
+            var leng = self.trip.visits.length;
+            for (j = 0; j < leng; j++) {
+                if (self.trip.visits[j].to_city_details) {
+                    from_id = self.trip.visits[j].from_city_details ? self.trip.visits[j].from_city_details.id : self.trip.visits[j].from_city_id;
+                    if (self.trip.visits[j].to_city_details.id == from_id) {
+                        sameFromTo();
+                    }
+                }
+            }
+
         }
         $scope.addVisit = function(visit_array) {
             var trip_array = self.trip.visits;
@@ -318,6 +348,10 @@ app.component('eyatraTripForm', {
                 preferred_travel_modes: '',
                 from_city_details: self.trip.from_city_details,
             });
+            $('.datepicker_' + arr_length).datepicker('destroy');
+            datecall(startdate, enddate, arr_length);
+
+
         }
         $scope.trip_mode = function(id) {
             var trip_array = self.trip.visits;
@@ -334,17 +368,20 @@ app.component('eyatraTripForm', {
             } else if (id == 2) {
                 var arr_length = self.trip.visits.length;
                 if (arr_length < 2) {
-                    console.log('sss');
-                    console.log(self.trip.visits[0]);
-                    console.log(self.trip.visits[0].from_city_details);
-                    console.log(self.trip.visits[0].to_city_id);
+                    if (!(self.trip.visits[0].to_city_details)) {
+                        from_city_id_data = '';
+                    } else {
+                        from_city_id_data = self.trip.visits[0].to_city_details.id;
+                    }
                     self.trip.visits.push({
-                        from_city_id: self.trip.visits[0].to_city_details.id,
+                        from_city_id: from_city_id_data,
                         to_city_id: self.trip.visits[0].from_city_details,
                         booking_method_name: 'Self',
                         preferred_travel_modes: '',
                         to_city_details: self.trip.visits[0].from_city_details,
                     });
+                    date_id = arr_length - 1;
+                    datecall(startdate, enddate, date_id);
                 } else {
 
                     while (arr_length > 2) {
@@ -354,7 +391,6 @@ app.component('eyatraTripForm', {
                     }
                 }
                 self.trip.visits[1].to_city_details = self.trip.visits[0].from_city_details;
-                datecall(startdate, enddate, id);
             } else if (id == 3) {
 
 
@@ -400,7 +436,11 @@ app.component('eyatraTripForm', {
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'trip_mode[]') {
                     error.appendTo($('.trip_mode'));
-                } else {
+                } 
+                else if (element.hasClass("advance_amount_check")) {
+                    error.appendTo($('.advance_amount_required'));
+                }
+                else {
                     error.insertAfter(element)
                 }
             },
