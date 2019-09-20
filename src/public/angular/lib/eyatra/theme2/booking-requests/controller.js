@@ -587,7 +587,6 @@ app.component('eyatraTripTatkalBookingRequests', {
 app.component('eyatraTripTatkalBookingRequestsView', {
     templateUrl: eyatra_tatkal_booking_requests_view_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
-        //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/agent/requests')
             $scope.$apply()
@@ -598,6 +597,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
 
+        // alert();
         $scope.showBookingForm = true;
         $scope.showCancelForm = false;
         $http.get(
@@ -615,7 +615,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips/booking-requests')
+                $location.path('/eyatra/trips/tatkal/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -631,7 +631,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips/booking-requests')
+                $location.path('/eyatra/trips/tatkal/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -717,8 +717,8 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                                 }).show();
                                 setTimeout(function() {
                                     $noty.close();
-                                }, 1000);
-                                $route.reload();
+                                }, 5000);
+                                $location.path('/eyatra/trips/tatkal/booking-requests')
                                 $scope.$apply()
                             }
                         })

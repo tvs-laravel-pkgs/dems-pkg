@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Storage;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Validator;
@@ -193,6 +194,22 @@ class ExpenseVoucherAdvanceController extends Controller {
 				$expense_voucher_advance->created_by = Auth::user()->id;
 				$expense_voucher_advance->status_id = 3460;
 			}
+			//STORE ATTACHMENT
+			$item_images = storage_path('expense-voucher-advance/attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if (!empty($request->attachments)) {
+				foreach ($request->attachments as $key => $attachement) {
+					$name = $attachement->getClientOriginalName();
+					$attachement->move(storage_path('app/public/expense-voucher-advance/attachments/'), $name);
+					$attachement_expense_voucher_advance = new Attachment;
+					$attachement_expense_voucher_advance->attachment_of_id = 3253;
+					$attachement_expense_voucher_advance->attachment_type_id = 3200;
+					$attachement_expense_voucher_advance->entity_id = $expense_voucher_advance->id;
+					$attachement_expense_voucher_advance->name = $name;
+					$attachement_expense_voucher_advance->save();
+				}
+			}
+
 			$expense_voucher_advance->fill($request->all());
 			$balence_amount = $request->advance_amount - $request->expense_amount;
 			if ($balence_amount) {
