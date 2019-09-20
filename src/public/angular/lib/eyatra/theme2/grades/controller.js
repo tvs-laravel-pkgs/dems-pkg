@@ -307,6 +307,18 @@ app.component('eyatraGradeForm', {
             }
         });
 
+        jQuery.extend(jQuery.validator.messages, {
+            min: jQuery.validator.format("Amount should be greater than 100")
+        });
+        $(document).on('keydown keyup change', '.amount_check', function(e) {
+            var keys_ids = $(this).data("eligible");
+            key_id =  keys_ids.split("_");   
+            if ($(this).val() < 100) {
+                    $('#eligible_amount_data_' + key_id[0] +'_'+ key_id[1]).attr({"min" : 100
+            });
+            } 
+        });
+
         /*
         $('.toggle_cb').on('click', function() {
             var class_name = $(this).data('class');
