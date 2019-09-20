@@ -14,6 +14,7 @@ class NCity extends Model {
 		'state_id',
 		'name',
 		'category_id',
+		'company_id',
 		'created_by',
 		'updated_by',
 		'deleted_by',

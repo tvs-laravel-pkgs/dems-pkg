@@ -134,6 +134,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Cancelled',
 				'config_type_id' => 503,
 			],
+			3063 => [
+				'name' => 'Tatkal',
+				'config_type_id' => 503,
+			],
 
 			//MANAGER VERIFICATION STATUSES
 			3080 => [
@@ -635,6 +639,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3462 => [
 				'name' => 'Claim Rejected',
+				'config_type_id' => 528,
+			],
+			3463 => [
+				'name' => 'Manager Approval Pending',
 				'config_type_id' => 528,
 			],
 

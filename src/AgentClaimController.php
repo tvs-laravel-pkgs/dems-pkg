@@ -17,7 +17,7 @@ use Yajra\Datatables\Datatables;
 class AgentClaimController extends Controller {
 	public function listEYatraAgentClaimList(Request $r) {
 
-		$agent_claim_list = Agentclaim::select(
+		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
 			'ey_agent_claims.status_id as claim_status',
@@ -198,13 +198,13 @@ class AgentClaimController extends Controller {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$agentClaim = new Agentclaim;
+				$agentClaim = new AgentClaim;
 				$agentClaim->created_by = Auth::user()->id;
 				$agentClaim->created_at = Carbon::now();
 				$agentClaim->updated_at = NULL;
 
 			} else {
-				$agentClaim = Agentclaim::find($request->id);
+				$agentClaim = AgentClaim::find($request->id);
 				$agentClaim->updated_by = Auth::user()->id;
 				$agentClaim->updated_at = Carbon::now();
 			}
@@ -265,7 +265,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function viewEYatraAgentClaim($agent_claim_id) {
-		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
+		$this->data['agent_claim_view'] = $agent_claim_view = AgentClaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
@@ -302,7 +302,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function deleteEYatraAgentClaim($agent_claim_id) {
-		$agent_claim = Agentclaim::where('id', $agent_claim_id)->forceDelete();
+		$agent_claim = AgentClaim::where('id', $agent_claim_id)->forceDelete();
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim not found']]);
 		}
@@ -315,7 +315,7 @@ class AgentClaimController extends Controller {
 		$invoice_date_filter = date('Y-m-d', strtotime($r->invoice_date));
 		$Agent_name = $r->Agent_name;
 		$Agent_status = $r->Agent_status;
-		$agent_claim_list = Agentclaim::select(
+		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
 			'ey_agent_claims.invoice_date',
@@ -373,7 +373,7 @@ class AgentClaimController extends Controller {
 
 	public function filterData() {
 
-		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'users.name', 'agents.id')
+		$this->data['agent_claim_data'] = $agent_claim_data = AgentClaim::select('agents.code', 'users.name', 'agents.id')
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
 			->where('users.user_type_id', 3122)
@@ -387,7 +387,7 @@ class AgentClaimController extends Controller {
 		return response()->json($this->data);
 	}
 	public function viewEYatraFinanceAgentClaim($agent_claim_id) {
-		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')
+		$this->data['agent_claim_view'] = $agent_claim_view = AgentClaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->join('configs', 'configs.id', 'ey_agent_claims.status_id')->select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',

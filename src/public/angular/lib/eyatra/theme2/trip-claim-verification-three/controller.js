@@ -159,6 +159,16 @@ app.component('eyatraTripClaimVerificationThreeView', {
 
         });
 
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment_tooltip", function() {
+            var $this = $(this);
+            $this.tooltip({
+                title: $this.attr('data-title'),
+                placement: "top"
+            });
+            $this.tooltip('show');
+        });
+
         $(".bottom-expand-btn").on('click', function() {
             console.log(' click ==');
             if ($(".separate-bottom-fixed-layer").hasClass("in")) {

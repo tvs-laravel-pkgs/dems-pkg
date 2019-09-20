@@ -325,6 +325,11 @@ app.component('eyatraRoleForm', {
                 'permission_ids[]': {
                     required: true,
                 },
+                'description': {
+                    required: true,
+                    minlength: 3,
+                    maxlength: 191,
+                },  
             },
             messages: {
                 'permission_ids[]': "Select atleast one permission",
@@ -372,7 +377,7 @@ app.component('eyatraRoleForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Role saved Successfully',
+                                text: res.message,
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },

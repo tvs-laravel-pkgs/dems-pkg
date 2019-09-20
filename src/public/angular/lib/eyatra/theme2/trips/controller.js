@@ -128,7 +128,7 @@ app.component('eyatraTrips', {
                     $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'Trips Deleted Successfully',
+                        text: 'Trip Deleted Successfully',
                         animation: {
                             speed: 500 // unavailable - no need
                         },
@@ -199,6 +199,19 @@ app.component('eyatraTripForm', {
             });
         }
 
+        function sameFromTo() {
+            $noty = new Noty({
+                type: 'error',
+                layout: 'topRight',
+                text: 'From City and To City should not be same,please choose another To city',
+                animation: {
+                    speed: 50 // unavailable - no need
+                },
+            }).show();
+            setTimeout(function() {
+                $noty.close();
+            }, 100000);
+        }
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -219,21 +232,30 @@ app.component('eyatraTripForm', {
                 $location.path('/eyatra/trips')
                 return;
             }
+            self.trip = response.data.trip;
+            self.trip.trip_periods = '';
+            if (response.data.trip.start_date && response.data.trip.end_date) {
+                var start_date = response.data.trip.start_date;
+                var end_date = response.data.trip.end_date;
+
+                //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
+                /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
+     $('.daterange').val(picker.start_date.format('DD-MM-YYYY') + ' to ' + picker.end_date.format('DD-MM-YYYY'));
+ });*/
+                trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
+                $('#trip_periods').val(trip_periods);
+                $('#trip_periods').data('daterangepicker').setStartDate(start_date);
+                $('#trip_periods').data('daterangepicker').setEndDate(end_date);
+            }
+            console.log(self.trip.trip_periods);
             self.advance_eligibility = response.data.advance_eligibility;
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }
-            self.trip = response.data.trip;
             self.extras = response.data.extras;
             self.action = response.data.action;
-            // console.log(response.data.trip.start_date);
+            console.log(self.trip);
             // console.log(response.data.trip.end_date);
-            self.trip_period = '';
-            if (response.data.trip.start_date && response.data.trip.end_date) {
-
-                self.trip_period = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
-                //console.log(self.trip_period);
-            }
             if (self.action == 'New') {
                 self.trip.trip_type = 'single';
                 self.booking_method_name = 'self';
@@ -285,13 +307,22 @@ app.component('eyatraTripForm', {
         }
         $scope.cityChanging = function(i, id) {
             var index = i + 1;
-            if (index <= self.trip.visits.length) {
-
+            id = (!id) ? '' : id;
+            if (index <= self.trip.visits.length && self.trip.visits[index]) {
                 if (self.trip.visits.length > 1) {
-
                     self.trip.visits[index].from_city_id = id;
                 }
             }
+            var leng = self.trip.visits.length;
+            for (j = 0; j < leng; j++) {
+                if (self.trip.visits[j].to_city_details) {
+                    from_id = self.trip.visits[j].from_city_details ? self.trip.visits[j].from_city_details.id : self.trip.visits[j].from_city_id;
+                    if (self.trip.visits[j].to_city_details.id == from_id) {
+                        sameFromTo();
+                    }
+                }
+            }
+
         }
         $scope.addVisit = function(visit_array) {
             var trip_array = self.trip.visits;
@@ -628,7 +659,7 @@ app.component('eyatraTripView', {
                     $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'Trips Deleted Successfully',
+                        text: 'Trip Deleted Successfully',
                         animation: {
                             speed: 500 // unavailable - no need
                         },

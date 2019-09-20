@@ -63,6 +63,14 @@ class TripBookingUpdateController extends Controller {
 			->make(true);
 	}
 
+	public function changeBookingTatkal($visit_id) {
+		$visit = Visit::find($visit_id)->update(['booking_status_id' => 3063]);
+		if ($visit) {
+			return response()->json(['success' => true]);
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
+		}
+	}
 	public function tripBookingUpdatesFormData($visit_id) {
 
 		$visit = Visit::with([

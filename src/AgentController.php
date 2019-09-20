@@ -328,7 +328,7 @@ class AgentController extends Controller {
 	public function viewEYatraAgent($agent_id) {
 
 		// $this->data['agent'] = $agent = Agent::find($agent_id);
-		$this->data['agent'] = $agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
+		$this->data['agent'] = $agent = Agent::withTrashed()->with('chequeDetail', 'bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
 		$this->data['address'] = $address = Address::join('ncities', 'ncities.id', 'ey_addresses.city_id')
 			->join('nstates', 'nstates.id', 'ncities.state_id')
 			->join('countries as c', 'c.id', 'nstates.country_id')
