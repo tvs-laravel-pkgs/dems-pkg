@@ -401,6 +401,16 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Agent Booking Update Form',
     }).
 
+    //AGENT - TATKAL BOOKING REQUESTS
+    when('/eyatra/trips/tatkal/booking-requests', {
+        template: '<eyatra-trip-tatkal-booking-requests></eyatra-trip-booking-requests>',
+        title: 'Trips Booking Requests',
+    }).
+    when('/eyatra/trips/tatkal/booking-requests/view/:trip_id', {
+        template: '<eyatra-trip-tatkal-booking-requests-view></eyatra-booking-requests-view>',
+        title: 'Trip Booking Request View',
+    }).
+
     //AGENT CLAIM
     when('/eyatra/agent/claim/list', {
         template: '<eyatra-agent-claim-list></eyatra-agent-claim-list>',

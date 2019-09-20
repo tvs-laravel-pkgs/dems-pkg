@@ -192,4 +192,78 @@ class TripBookingRequestController extends Controller {
 		return response()->json($this->data);
 	}
 
+	public function listTripTatkalBookingRequests(Request $r) {
+
+		if (!empty($r->employee)) {
+			$employee = $r->employee;
+		} else {
+			$employee = null;
+		}
+		if (!empty($r->status)) {
+			$status = $r->status;
+		} else {
+			$status = null;
+		}
+
+		$visits = Trip::join('employees as e', 'e.id', 'trips.employee_id')
+			->join('visits as v', 'v.trip_id', 'trips.id')
+			->join('configs as bs', 'bs.id', 'v.booking_status_id')
+			->join('configs as status', 'status.id', 'v.status_id')
+			->join('users as cb', 'cb.id', 'trips.created_by')
+			->leftjoin('agents as a', 'a.id', 'v.agent_id')
+			->leftJoin('users', 'users.entity_id', 'e.id')
+			->where('users.user_type_id', 3121)
+			->where('v.booking_status_id', 3063)
+			->select('trips.id as trip_id',
+				'trips.number as trip_number',
+				'e.code as ecode', 'users.name as ename',
+				'status.name as status',
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on'),
+				DB::raw('COUNT(v.id) as tickets_count')
+
+			)
+			->where(function ($query) use ($r, $employee) {
+				if (!empty($employee)) {
+					$query->where('e.id', $employee);
+				}
+			})
+
+			->where(function ($query) use ($r, $status) {
+				if (!empty($status)) {
+					$query->where('status.id', $status);
+				}
+			})
+			->groupBy('v.trip_id')
+			->orderBy('trips.created_at', 'desc')
+			->where('cb.company_id', Auth::user()->company_id)
+		// ->get()
+		;
+		if (!Entrust::can('view-all-trip-booking-requests')) {
+			$visits->where('v.agent_id', Auth::user()->entity_id);
+		}
+
+		return Datatables::of($visits)
+			->addColumn('booking_status', function ($visit) {
+				$bookings = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_status_id', 3060)
+					->count();
+				return $bookings ? "Pending" : "Booked";
+			})
+			->addColumn('action', function ($visit) {
+
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
+				return '
+				<a href="#!/eyatra/trips/tatkal/booking-requests/view/' . $visit->trip_id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>
+				';
+
+			})
+			->make(true);
+	}
 }

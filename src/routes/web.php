@@ -304,6 +304,11 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trips/booking-updates/get-list', 'Uitoux\EYatra\TripBookingUpdateController@listTripBookingUpdates')->name('listTripBookingUpdates');
 		Route::get('eyatra/trips/booking-updates/get-form-data/{visit_id?}', 'Uitoux\EYatra\TripBookingUpdateController@tripBookingUpdatesFormData')->name('tripBookingUpdatesFormData');
 		Route::post('eyatra/trips/booking-updates/save', 'Uitoux\EYatra\TripBookingUpdateController@saveTripBookingUpdates')->name('saveTripBookingUpdates');
+		Route::get('/eyatra/trip/booking-updates/booking-tatkal-change/{visit_id}', 'Uitoux\EYatra\TripBookingUpdateController@changeBookingTatkal')->name('changeBookingTatkal');
+
+		//TRIPS TATKAL BOOKING
+		Route::get('eyatra/trips/tatkal/booking-requests/get-list', 'Uitoux\EYatra\TripBookingRequestController@listTripTatkalBookingRequests')->name('listTripTatkalBookingRequests');
+		Route::get('eyatra/trips/tatkal/booking-requests/get-view-data/{visit_id?}', 'Uitoux\EYatra\TripBookingRequestController@tripBookingRequestsViewData')->name('tripBookingUpdatesFormData');
 
 		//OUTLET REIMPURSEMENT
 		Route::get('eyatra/outlet-reimpursement/get-list', 'Uitoux\EYatra\OutletReimpursementController@listOutletReimpursement')->name('listOutletReimpursement');

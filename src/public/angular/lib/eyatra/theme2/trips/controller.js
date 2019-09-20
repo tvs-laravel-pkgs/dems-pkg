@@ -128,7 +128,7 @@ app.component('eyatraTrips', {
                     $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'Trips Deleted Successfully',
+                        text: 'Trip Deleted Successfully',
                         animation: {
                             speed: 500 // unavailable - no need
                         },
@@ -619,7 +619,7 @@ app.component('eyatraTripView', {
                     $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'Trips Deleted Successfully',
+                        text: 'Trip Deleted Successfully',
                         animation: {
                             speed: 500 // unavailable - no need
                         },
