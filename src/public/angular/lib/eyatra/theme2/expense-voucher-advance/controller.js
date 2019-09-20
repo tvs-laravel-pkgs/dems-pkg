@@ -228,7 +228,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 'description': {
                     required: true,
                 },
-                'expense_description_error': {
+                'expense_description': {
                     required: true,
                 },
                 'expense_amount': {
@@ -248,7 +248,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 'description': {
                     required: 'Advance Amount Details is required',
                 },
-                'expense_description_error': {
+                'expense_description': {
                     required: 'Expense Amount Details is required',
                 },
                 'expense_amount': {
