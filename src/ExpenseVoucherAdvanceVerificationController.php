@@ -30,7 +30,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			->join('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
 			->where('employees.reporting_to_id', Auth::user()->entity_id)
-			->where('expense_voucher_advance_requests.status_id', 3460)
+			->whereIn('expense_voucher_advance_requests.status_id', [3460, 3463])
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($query) use ($r) {
 				if (!empty($r->employee_id)) {
@@ -68,6 +68,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			'expense_voucher_advance_requests.expense_amount',
 			'expense_voucher_advance_requests.balance_amount',
 			'expense_voucher_advance_requests.description',
+			'expense_voucher_advance_requests.expense_description',
 			'configs.name as status'
 		)
 			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
@@ -92,7 +93,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 					->join('outlets', 'outlets.id', 'employees.outlet_id')
 					->where('employees.id', $request->employee_id)->first();
 				if ($employee_cash_check->amount_eligible != 0) {
-					if ($employee_cash_check->amount_limit >= $request->expense_amount) {
+					if ($employee_cash_check->amount_limit >= $request->advance_amount) {
 						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 					} else {
 						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);

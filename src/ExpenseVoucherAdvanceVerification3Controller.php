@@ -73,6 +73,7 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 			'expense_voucher_advance_requests.expense_amount',
 			'expense_voucher_advance_requests.balance_amount',
 			'expense_voucher_advance_requests.description',
+			'expense_voucher_advance_requests.expense_description',
 			'configs.name as status',
 			'employees.payment_mode_id'
 		)
@@ -91,7 +92,11 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
-				$expence_voucher_finance_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3461, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				if ($request->expense_amount) {
+					$expence_voucher_finance_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3461, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				} else {
+					$expence_voucher_finance_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3463, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				}
 				//PAYMENT SAVE
 				// $payment = Payment::firstOrNew(['entity_id' => $request->approve, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
 				// $payment->fill($request->all());
