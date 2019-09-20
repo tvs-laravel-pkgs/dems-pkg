@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
+// use Mail;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -72,12 +73,22 @@ class AuthController extends Controller {
 			return response()->json(['status' => 'false', 'msg' => 'Enter mobile number'], $this->successStatus);
 		}
 
-		$user = User::where('mobile_number', $request->input('mobile'))->first();
+		if ($request->emp_code == '') {
+			return response()->json(['status' => 'false', 'msg' => 'Enter Employee Code'], $this->successStatus);
+		}
+
+		$user = User::join('employees', 'employees.id', 'users.entity_id')->where('users.mobile_number', $request->input('mobile'))->where('users.user_type_id', 3121)->where('employees.code', $request->input('emp_code'))->first();
 
 		if ($user) {
 			$user->otp = generateOtp($user->contact_number);
 			$user->save();
-			$user['token'] = $user->createToken('eYatra')->accessToken;
+
+			//OTP MAIL SEND
+			// $arr = array();
+			// $arr['id'] = $user->id;
+			// $MailInstance = new ForgetPasswordOTPMail($arr);
+			// $Mail = Mail::send($MailInstance);
+			// $user['token'] = $user->createToken('eYatra')->accessToken;
 
 			return response()->json(['status' => 'true', 'data' => $user], $this->successStatus);
 		} else {
