@@ -60,6 +60,7 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 	public function expenseVoucherVerification2View($id) {
 		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
 			'employees.code',
+			'employees.id as employee_id',
 			'users.name',
 			'expense_voucher_advance_requests.employee_id',
 			'expense_voucher_advance_requests.date',
@@ -68,6 +69,7 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			'expense_voucher_advance_requests.expense_amount',
 			'expense_voucher_advance_requests.balance_amount',
 			'expense_voucher_advance_requests.description',
+			'expense_voucher_advance_requests.expense_description',
 			'configs.name as status',
 			'employees.payment_mode_id'
 		)
@@ -79,9 +81,9 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			->first();
 
 		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
-		$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
-		$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
-		$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash[0]->employee_id)->where('wallet_of_id', 3121)->first();
+		$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $expense_voucher_view->employee_id)->where('detail_of_id', 3121)->first();
+		$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $expense_voucher_view->employee_id)->where('detail_of_id', 3121)->first();
+		$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $expense_voucher_view->employee_id)->where('wallet_of_id', 3121)->first();
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['payment_mode_list'] = $payment_mode_list;
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
@@ -90,11 +92,16 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 	}
 
 	public function expenseVoucherVerification2Save(Request $request) {
-		dd($request->all());
+		// dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
-				$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3461, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				if ($request->expense_amount) {
+					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3461, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				} else {
+					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3463, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				}
+
 				// //PAYMENT SAVE
 				// $payment = Payment::firstOrNew(['entity_id' => $request->approve, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
 				// $payment->fill($request->all());

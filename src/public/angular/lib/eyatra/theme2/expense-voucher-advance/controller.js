@@ -150,21 +150,30 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 // $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
                 // return;
             }
-            console.log(response);
+            // console.log(response);
 
             self.action = response.data.action;
 
             self.expense_voucher_advance = response.data.expense_voucher_advance;
-            console.log(response.data.expense_voucher_advance.employee);
+            // console.log(response.data.expense_voucher_advance.employee);
 
             if (self.action == 'Edit') {
                 self.action = 'Edit';
-                self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee.user.name;
-                $("#employee_id").val(response.data.expense_voucher_advance.employee_id);
+                if (self.expense_voucher_advance.status_id == 3463) {
+                    $("#date").prop('readonly', true);
+                    $(".date").removeAttr('data-provide');
+                    $("#advance_amount").prop('readonly', true);
+                    $("#description").prop('readonly', true);
+                    self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee.user.name;
+                    $("#employee_id").val(response.data.expense_voucher_advance.employee_id);
+                } else {
+                    self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee.user.name;
+                    $("#employee_id").val(response.data.expense_voucher_advance.employee_id);
+                }
             } else {
                 self.action = 'Add';
                 self.employee_id = response.data.employee_details.id;
-                console.log(self.employee_id);
+                // console.log(self.employee_id);
                 $("#employee_id").val('');
             }
 
@@ -219,6 +228,9 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 'description': {
                     required: true,
                 },
+                'expense_description_error': {
+                    required: true,
+                },
                 'expense_amount': {
                     required: true,
                 },
@@ -234,7 +246,10 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                     required: 'Advance Amount is required',
                 },
                 'description': {
-                    required: 'Expense Details is required',
+                    required: 'Advance Amount Details is required',
+                },
+                'expense_description_error': {
+                    required: 'Expense Amount Details is required',
                 },
                 'expense_amount': {
                     required: 'Expense Amount is required',

@@ -115,7 +115,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Petty Cash Approved successfully',
+                                text: 'Expense Voucher Advance Approved successfully',
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },
@@ -172,7 +172,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Petty Cash Rejected successfully',
+                                text: 'Expense Voucher Advance Rejected successfully',
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },

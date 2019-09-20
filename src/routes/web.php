@@ -270,7 +270,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/agent/claim/save', 'Uitoux\EYatra\AgentClaimController@saveEYatraAgentClaim')->name('saveEYatraAgentClaim');
 		Route::get('eyatra/agent/claim/view/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@viewEYatraAgentClaim')->name('viewEYatraAgentClaim');
 		Route::get('eyatra/agent/claim/delete/{agent_claim_id}', 'Uitoux\EYatra\AgentClaimController@deleteEYatraAgentClaim')->name('deleteEYatraAgentClaim');
-		Route::get('eyatra/agent/claim/filter_datas', 'Uitoux\EYatra\AgentClaimController@filter_data')->name('AgentClaim_filter_data');
+		Route::get('eyatra/agent/claim/filter_datas', 'Uitoux\EYatra\AgentClaimController@filterData')->name('agentClaim_filter_data');
 
 		Route::get('eyatra/booking/view/get-form-data/{trip_id?}', 'Uitoux\EYatra\AgentClaimController@bookingViewFormData')->name('bookingViewFormData');
 
@@ -309,6 +309,11 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trips/booking-updates/get-list', 'Uitoux\EYatra\TripBookingUpdateController@listTripBookingUpdates')->name('listTripBookingUpdates');
 		Route::get('eyatra/trips/booking-updates/get-form-data/{visit_id?}', 'Uitoux\EYatra\TripBookingUpdateController@tripBookingUpdatesFormData')->name('tripBookingUpdatesFormData');
 		Route::post('eyatra/trips/booking-updates/save', 'Uitoux\EYatra\TripBookingUpdateController@saveTripBookingUpdates')->name('saveTripBookingUpdates');
+		Route::get('/eyatra/trip/booking-updates/booking-tatkal-change/{visit_id}', 'Uitoux\EYatra\TripBookingUpdateController@changeBookingTatkal')->name('changeBookingTatkal');
+
+		//TRIPS TATKAL BOOKING
+		Route::get('eyatra/trips/tatkal/booking-requests/get-list', 'Uitoux\EYatra\TripBookingRequestController@listTripTatkalBookingRequests')->name('listTripTatkalBookingRequests');
+		Route::get('eyatra/trips/tatkal/booking-requests/get-view-data/{visit_id?}', 'Uitoux\EYatra\TripBookingRequestController@tripBookingRequestsViewData')->name('tripBookingUpdatesFormData');
 
 		//OUTLET REIMPURSEMENT
 		Route::get('eyatra/outlet-reimpursement/get-list', 'Uitoux\EYatra\OutletReimpursementController@listOutletReimpursement')->name('listOutletReimpursement');

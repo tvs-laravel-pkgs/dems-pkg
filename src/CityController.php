@@ -184,53 +184,43 @@ class CityController extends Controller {
 
 	public function saveEYatraCity(Request $request) {
 		//validation
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			$error_messages = [
-				// 'code.required' => 'State Code is required',
-				// 'code.unique' => 'State Code has already been taken',
 				'name.required' => 'City Name is required',
-				'name.unique' => 'City Name has already been taken',
-
+				'name.unique' => ' City Name has already been taken',
 			];
-
 			$validator = Validator::make($request->all(), [
-				// 'code' => [
-				// 	'required',
-				// 	'unique:nstates,code,' . $request->id . ',id,country_id,' . $request->country_id,
-				// 	'max:2',
-				// ],
-				// 'name' => [
-				// 	'required',
-				// 	'unique:ncities,name,' . $request->id . ',id,state_id,' . $request->state_id,
-				// 	'max:191',
-				// ],
-
+				'name' => [
+					'required',
+					'unique:ncities,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',state_id,' . $request->state_id,
+					'max:191',
+				],
 			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
-
 			DB::beginTransaction();
 
 			$city = NCity::firstOrNew([
-				'company_id' => Auth::user()->company_id,
-				'name' => $request->name,
-				'state_id' => $request->state_id,
+				// 'company_id' => Auth::user()->company_id,
+				'id' => $request->id,
+				// 'name' => $request->name,
+				// 'state_id' => $request->state_id,
 			]);
 
 			if (!$request->id) {
+
 				$city->created_by = Auth::user()->id;
 				$city->created_at = Carbon::now();
 				$city->updated_at = NULL;
-
 			} else {
-
 				$city->updated_by = Auth::user()->id;
 				$city->updated_at = Carbon::now();
-
 				// $city->travelModes()->sync([]);
 			}
+			$city->company_id = Auth::user()->company_id;
+			$city->fill($request->all());
 			if ($request->status == 'Active') {
 				$city->deleted_at = NULL;
 				$city->deleted_by = NULL;
@@ -241,7 +231,6 @@ class CityController extends Controller {
 			}
 			$city->category_id = $request->category_id;
 
-			// $city->fill($request->all());
 			$city->save();
 			// $city->company_id = Auth::user()->company_id;
 			$activity['entity_id'] = $city->id;

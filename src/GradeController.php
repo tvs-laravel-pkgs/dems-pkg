@@ -273,7 +273,13 @@ class GradeController extends Controller {
 			}
 
 			DB::commit();
-			$request->session()->flash('success', 'Grade Updated successfully!');
+			// $request->session()->flash('success', 'Grade Updated successfully!');
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => ['Grade Added Successfully']]);
+			} else {
+				return response()->json(['success' => true, 'message' => ['Grade Updated Successfully']]);
+			}
+
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -312,7 +318,7 @@ class GradeController extends Controller {
 	}
 
 	public function deleteEYatraGrade($grade_id) {
-		$grade = Entity::where('id', $grade_id)->first();
+		$grade = Entity::withTrashed()->where('id', $grade_id)->first();
 		$activity['entity_id'] = $grade->id;
 		$activity['entity_type'] = "Employee Grade";
 		$activity['details'] = "Employee Grade is deleted";

@@ -201,6 +201,9 @@ class Trip extends Model {
 						$previous_value = $request->visits[$key - 1];
 						$from_city_id = $previous_value['to_city_id'];
 					}
+					if ($from_city_id == $visit_data['to_city_id']) {
+						return response()->json(['success' => false, 'errors' => "From City and To City should not be same,please choose another To city"]);
+					}
 					$visit = new Visit;
 					$visit->fill($visit_data);
 					// dump($visit_data['date']);
@@ -327,10 +330,12 @@ class Trip extends Model {
 			foreach ($t_visits as $key => $t_visit) {
 				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
 				$trip->visits[$key]->booking_method_name = $b_name->name;
-
-				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
-				$trip->visits[$key]->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', $trip->visits[0]->from_city_id)->first();
+				$key_val = ($key - 1 < 0) ? 0 : $key - 1;
+				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"-",nstates.name) as name'))->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
+				$trip->visits[$key]->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"-",nstates.name) as name'))->where('ncities.id', $trip->visits[$key_val]->from_city_id)->first();
 			}
+
+			//dd($t_visits, $trip->visits, $key_val);
 
 			if (!$trip) {
 				$data['success'] = false;

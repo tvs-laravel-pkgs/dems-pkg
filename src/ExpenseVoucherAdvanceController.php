@@ -17,6 +17,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			'expense_voucher_advance_requests.id',
 			'users.name as ename',
 			'employees.code as ecode',
+			'expense_voucher_advance_requests.expense_amount',
 			DB::raw('DATE_FORMAT(expense_voucher_advance_requests.date,"%d-%m-%Y") as date'),
 			'expense_voucher_advance_requests.advance_amount as advance_amount',
 			DB::raw('IF(expense_voucher_advance_requests.balance_amount IS NULL,"--",expense_voucher_advance_requests.balance_amount) as balance_amount'),
@@ -57,6 +58,14 @@ class ExpenseVoucherAdvanceController extends Controller {
 				onclick="angular.element(this).scope().deleteExpenseVoucher(' . $expense_voucher_requests->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
+				} elseif ($expense_voucher_requests->status_id == 3463) {
+					return '
+				<a href="#!/eyatra/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
+					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+				</a>
+				<a href="#!/eyatra/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
 				} else {
 					return '<a href="#!/eyatra/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
@@ -121,6 +130,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			'expense_voucher_advance_requests.expense_amount',
 			'expense_voucher_advance_requests.balance_amount',
 			'expense_voucher_advance_requests.description',
+			'expense_voucher_advance_requests.expense_description',
 			'configs.name as status'
 		)
 			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
@@ -151,7 +161,10 @@ class ExpenseVoucherAdvanceController extends Controller {
 					'required',
 				],
 				'expense_amount' => [
-					'required',
+					'nullable',
+				],
+				'expense_description' => [
+					'nullable',
 				],
 			]);
 			if ($validator->fails()) {
@@ -166,9 +179,15 @@ class ExpenseVoucherAdvanceController extends Controller {
 				->where('employees.id', $request->employee_id)->first();
 
 			if ($request->id) {
-				$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
-				$expense_voucher_advance->updated_by = Auth::user()->id;
-				$expense_voucher_advance->status_id = 3460;
+				if ($request->expense_amount) {
+					$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
+					$expense_voucher_advance->updated_by = Auth::user()->id;
+					$expense_voucher_advance->status_id = 3463;
+				} else {
+					$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
+					$expense_voucher_advance->updated_by = Auth::user()->id;
+					$expense_voucher_advance->status_id = 3460;
+				}
 			} else {
 				$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 				$expense_voucher_advance->created_by = Auth::user()->id;
@@ -183,6 +202,9 @@ class ExpenseVoucherAdvanceController extends Controller {
 			}
 			if (isset($request->description)) {
 				$expense_voucher_advance->description = $request->description;
+			}
+			if (isset($request->expense_description)) {
+				$expense_voucher_advance->expense_description = $request->expense_description;
 			}
 			$expense_voucher_advance->save();
 
