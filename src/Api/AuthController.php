@@ -67,4 +67,23 @@ class AuthController extends Controller {
 		}
 	}
 
+	public function forgotPassword(Request $request) {
+		if ($request->mobile == '') {
+			return response()->json(['status' => 'false', 'msg' => 'Enter mobile number'], $this->successStatus);
+		}
+
+		$user = User::where('mobile_number', $request->input('mobile'))->first();
+
+		if ($user) {
+			$user->otp = generateOtp($user->contact_number);
+			$user->save();
+			$user['token'] = $user->createToken('eYatra')->accessToken;
+
+			return response()->json(['status' => 'true', 'data' => $user], $this->successStatus);
+		} else {
+			return response()->json(['status' => 'false', 'error' => 'Incorrect mobile number'], $this->successStatus);
+		}
+
+	}
+
 }

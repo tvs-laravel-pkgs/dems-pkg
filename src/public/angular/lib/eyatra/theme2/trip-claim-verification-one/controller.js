@@ -155,6 +155,15 @@ app.component('eyatraTripClaimVerificationOneView', {
 
         });
 
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment_tooltip", function() {
+            var $this = $(this);
+            $this.tooltip({
+                title: $this.attr('data-title'),
+                placement: "top"
+            });
+            $this.tooltip('show');
+        });
 
         $scope.searchRejectedReason;
         $scope.clearSearchRejectedReason = function() {

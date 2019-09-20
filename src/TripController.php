@@ -106,7 +106,6 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
-		//dd($request->start_date);
 
 		$trip_start_date_data = Trip::where('start_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '<=', date("Y-m-d", strtotime($request->start_date)))->first();
 		$trip_end_date_data = Trip::where('start_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '<=', date("Y-m-d", strtotime($request->end_date)))->first();
