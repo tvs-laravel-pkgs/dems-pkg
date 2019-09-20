@@ -131,7 +131,12 @@ class RoleController extends Controller {
 			$roles->permissions()->attach($request->permission_ids);
 			//dd($request->permission_ids);
 			DB::commit();
-			$request->session()->flash('success', 'Roles is saved successfully');
+			// $request->session()->flash('success', 'Roles is saved successfully');
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => ['Role Added Successfully']]);
+			} else {
+				return response()->json(['success' => true, 'message' => ['Role Updated Successfully']]);
+			}
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
