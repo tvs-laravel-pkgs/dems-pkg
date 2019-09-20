@@ -56,7 +56,7 @@ class PettyCashController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				if ($petty_cash->status_id == 3280 || $petty_cash->status_id == 3282) {
+				if ($petty_cash->status_id == 3280 || $petty_cash->status_id == 3282 || $petty_cash->status_id == 3284) {
 					return '
 				<a href="#!/eyatra/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
