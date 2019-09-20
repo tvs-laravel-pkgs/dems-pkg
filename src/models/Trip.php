@@ -1098,9 +1098,9 @@ class Trip extends Model {
 						->where('trip_id', $trip_id)
 						->where('visits.agent_id', $agent->agent_id)
 						->get();
-					//dd($agent->agent_id);
-					$visit_agent_count = $visit_agents->count();
-					if (count($visit_agent_count) > 0) {
+					// dd($visit_agents);
+					// $visit_agent_count = $visit_agents->count();
+					if (count($visit_agents) > 0) {
 						$arr['from_mail'] = $from_mail;
 						$arr['from_mail'] = 'saravanan@uitoux.in';
 						$arr['from_name'] = 'Agent';
