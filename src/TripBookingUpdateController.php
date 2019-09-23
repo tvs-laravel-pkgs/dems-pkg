@@ -96,7 +96,7 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		// dd($r->all());
+		// dump($r->all());
 		DB::beginTransaction();
 		try {
 			// $validator = Validator::make($r->all(), [
@@ -160,13 +160,20 @@ class TripBookingUpdateController extends Controller {
 
 				$service_charge = 0;
 				//Total Amount of Booking Deails (include tax)
-				$total_amount = $r->amount + $r->tax + $service_charge;
+				$tax = $r->cgst + $r->sgst + $r->igst;
+				$tax_total = $tax ? $tax : 0;
+				$total_amount = $r->amount + $tax_total + $service_charge;
 
 				$visit_bookings = new VisitBooking;
 				$visit_bookings->fill($r->all());
 				$visit_bookings->service_charge = $service_charge;
 				$visit_bookings->total = $total_amount;
 				$visit_bookings->created_by = Auth::user()->id;
+				$visit_bookings->tax = $tax_total;
+				$visit_bookings->cgst = $r->cgst;
+				$visit_bookings->sgst = $r->sgst;
+				$visit_bookings->igst = $r->igst;
+
 				$visit_bookings->save();
 				//dd($visit_bookings);
 				$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
@@ -197,7 +204,8 @@ class TripBookingUpdateController extends Controller {
 
 					$service_charge = $service_charge ? $service_charge : 0;
 					$amount = $value['ticket_amount'] ? $value['ticket_amount'] : 0;
-					$tax = $value['tax'] ? $value['tax'] : 0;
+					$tax_total = $value['cgst'] + $value['sgst'] + $value['igst'];
+					$tax = $tax_total ? $tax_total : 0;
 
 					$total_amount = $amount + $tax + $service_charge;
 
@@ -225,6 +233,9 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->booking_type_id = $value['booking_mode_id'];
 					$visit_bookings->amount = $amount;
 					$visit_bookings->tax = $tax;
+					$visit_bookings->cgst = $value['cgst'];
+					$visit_bookings->sgst = $value['sgst'];
+					$visit_bookings->igst = $value['igst'];
 					$visit_bookings->service_charge = $service_charge;
 					$visit_bookings->total = $total_amount;
 					$visit_bookings->paid_amount = $claim_amount;

@@ -38,14 +38,14 @@ app.component('eyatraPettyCashList', {
 
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
-                    { data: 'petty_cash_type', searchable: false },
+                    { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
                     { data: 'ocode', name: 'outlets.code', searchable: true },
                     { data: 'date', name: 'date', searchable: false },
                     { data: 'total', name: 'total', searchable: true },
-                    { data: 'status', name: 'configs.name', searchable: false },
+                    { data: 'status', name: 'configs.name', searchable: true },
                 ],
                 rowCallback: function(row, data) {
                     $(row).addClass('highlight-row');
@@ -145,22 +145,22 @@ app.component('eyatraPettyCashForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 5000);
-                $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
-                return;
-            }
-            console.log(response);
+            // if (!response.data.success) {
+            //     $noty = new Noty({
+            //         type: 'error',
+            //         layout: 'topRight',
+            //         text: response.data.error,
+            //         animation: {
+            //             speed: 500 // unavailable - no need
+            //         },
+            //     }).show();
+            //     setTimeout(function() {
+            //         $noty.close();
+            //     }, 5000);
+            //     $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
+            //     return;
+            // }
+            // console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -174,20 +174,14 @@ app.component('eyatraPettyCashForm', {
             self.petty_cash_other_removal_id = [];
 
             $("#employee_id").val(self.emp_details.emp_id);
-            // $("#emp_code").html(self.emp_details.code);
-            // $("#emp_designation").html(self.emp_details.designation);
-            // $("#emp_grade").html(self.emp_details.grade);
-            // self.emp_details = self.emp_details.name;
-
 
             if (self.action == 'Edit') {
-                // if (self.type_id == 2) {
-                //     self.selectedItem = response.data.petty_cash_other[0].ename;
-                //     $('.employee').val(response.data.petty_cash_other[0].employee_id);
-                // } else {
-                //     self.selectedItem = response.data.employee_list;
-                //     $('.employee').val('');
-                // }
+                $.each(self.petty_cash_locals, function(index, value) {
+                    setTimeout(function() {
+                        $scope.getRatePerkm(value.travel_mode_id, index);
+                    }, 500);
+
+                });
             } else {
                 // self.selectedItem = response.data.employee_list;
                 // $('.employee').val('');
@@ -209,7 +203,15 @@ app.component('eyatraPettyCashForm', {
 
         });
 
-
+        $scope.getRatePerkm = function(id, index) {
+            if (id == 15) {
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.two_wheeler_limit);
+                $(".ratePerKMamount_" + index).val(self.emp_details.two_wheeler_limit);
+            } else if (id == 16) {
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.four_wheeler_limit);
+                $(".ratePerKMamount_" + index).val(self.emp_details.four_wheeler_limit);
+            }
+        }
 
         if (self.search_permission == true) {
             $(".removeDetails").on('click', function() {
