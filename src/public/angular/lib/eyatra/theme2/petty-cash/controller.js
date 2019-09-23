@@ -213,8 +213,6 @@ app.component('eyatraPettyCashForm', {
             }
         }
 
-
-
         if (self.search_permission == true) {
             $(".removeDetails").on('click', function() {
                 self.emp_details = [];
