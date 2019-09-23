@@ -205,6 +205,7 @@ class Trip extends Model {
 						return response()->json(['success' => false, 'errors' => "From City and To City should not be same,please choose another To city"]);
 					}
 					$visit = new Visit;
+					$visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
 					$visit->fill($visit_data);
 					// dump($visit_data['date']);
 					// dump(Carbon::createFromFormat('d/m/Y', $visit_data['date']));

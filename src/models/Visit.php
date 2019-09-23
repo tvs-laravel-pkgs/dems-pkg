@@ -21,6 +21,7 @@ class Visit extends Model {
 		// 'departure_date',
 		// 'arrival_date',
 		'status_id',
+		'prefered_departure_time',
 		'manager_verification_status_id',
 	];
 
@@ -37,6 +38,10 @@ class Visit extends Model {
 
 	public function getDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
+	public function getPreferedDepartureTimeAttribute($value) {
+		return empty($value) ? '' : date('h:i A', strtotime($value));
 	}
 
 	public function getDepartureDateAttribute($value) {
