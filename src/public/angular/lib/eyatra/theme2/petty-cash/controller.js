@@ -38,14 +38,14 @@ app.component('eyatraPettyCashList', {
 
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
-                    { data: 'petty_cash_type', searchable: false },
+                    { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
                     { data: 'ocode', name: 'outlets.code', searchable: true },
                     { data: 'date', name: 'date', searchable: false },
                     { data: 'total', name: 'total', searchable: true },
-                    { data: 'status', name: 'configs.name', searchable: false },
+                    { data: 'status', name: 'configs.name', searchable: true },
                 ],
                 rowCallback: function(row, data) {
                     $(row).addClass('highlight-row');
