@@ -334,86 +334,92 @@ class PettyCashController extends Controller {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
 			DB::beginTransaction();
+			$employee_petty_cash_check = Employee::select(
+				'outlets.amount_eligible',
+				'outlets.amount_limit',
+				'outlets.expense_voucher_limit'
+			)
+				->join('outlets', 'outlets.id', 'employees.outlet_id')
+				->where('employees.id', $request->employee_id)->first();
 
-			$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
-			// if ($request->employee_id) {
-
-			// } else {
-			// 	$petty_cash_employee_edit->employee_id = Auth::user()->entity_id;
-			// }
-			$petty_cash_employee_edit->employee_id = $request->employee_id;
-			$petty_cash_employee_edit->total = $request->claim_total_amount;
-			$petty_cash_employee_edit->status_id = 3280;
-			$petty_cash_employee_edit->petty_cash_type_id = $request->petty_cash_type_id;
-			$petty_cash_employee_edit->date = Carbon::now();
-			$petty_cash_employee_edit->created_by = Auth::user()->id;
-			$petty_cash_employee_edit->updated_at = NULL;
-			$petty_cash_employee_edit->save();
-			if ($request->petty_cash) {
-				if (!empty($request->petty_cash_removal_id)) {
-					$petty_cash_removal_id = json_decode($request->petty_cash_removal_id, true);
-					PettyCashEmployeeDetails::whereIn('id', $petty_cash_removal_id)->delete();
-				}
-				// dd($expence_type->id);
-				foreach ($request->petty_cash as $petty_cash_data) {
-					$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
-					$petty_cash->fill($petty_cash_data);
-					$petty_cash->petty_cash_id = $petty_cash_employee_edit->id;
-					$petty_cash->expence_type = $petty_cash_data['localconveyance'];
-					$date = date("Y-m-d", strtotime($petty_cash_data['date']));
-					$petty_cash->date = $date;
-					$petty_cash->created_by = Auth::user()->id;
-					$petty_cash->created_at = Carbon::now();
-					$petty_cash->save();
-					//STORE ATTACHMENT
-					$item_images = storage_path('petty-cash/localconveyance/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($petty_cash_data['attachments'])) {
-						foreach ($petty_cash_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $name);
-							$attachement_petty_cash = new Attachment;
-							$attachement_petty_cash->attachment_of_id = 3253;
-							$attachement_petty_cash->attachment_type_id = 3200;
-							$attachement_petty_cash->entity_id = $petty_cash->id;
-							$attachement_petty_cash->name = $name;
-							$attachement_petty_cash->save();
+			if ($employee_petty_cash_check->expense_voucher_limit >= $request->claim_total_amount) {
+				$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
+				$petty_cash_employee_edit->employee_id = $request->employee_id;
+				$petty_cash_employee_edit->total = $request->claim_total_amount;
+				$petty_cash_employee_edit->status_id = 3280;
+				$petty_cash_employee_edit->petty_cash_type_id = $request->petty_cash_type_id;
+				$petty_cash_employee_edit->date = Carbon::now();
+				$petty_cash_employee_edit->created_by = Auth::user()->id;
+				$petty_cash_employee_edit->updated_at = NULL;
+				$petty_cash_employee_edit->save();
+				if ($request->petty_cash) {
+					if (!empty($request->petty_cash_removal_id)) {
+						$petty_cash_removal_id = json_decode($request->petty_cash_removal_id, true);
+						PettyCashEmployeeDetails::whereIn('id', $petty_cash_removal_id)->delete();
+					}
+					// dd($expence_type->id);
+					foreach ($request->petty_cash as $petty_cash_data) {
+						$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
+						$petty_cash->fill($petty_cash_data);
+						$petty_cash->petty_cash_id = $petty_cash_employee_edit->id;
+						$petty_cash->expence_type = $petty_cash_data['localconveyance'];
+						$date = date("Y-m-d", strtotime($petty_cash_data['date']));
+						$petty_cash->date = $date;
+						$petty_cash->created_by = Auth::user()->id;
+						$petty_cash->created_at = Carbon::now();
+						$petty_cash->save();
+						//STORE ATTACHMENT
+						$item_images = storage_path('petty-cash/localconveyance/attachments/');
+						Storage::makeDirectory($item_images, 0777);
+						if (!empty($petty_cash_data['attachments'])) {
+							foreach ($petty_cash_data['attachments'] as $key => $attachement) {
+								$name = $attachement->getClientOriginalName();
+								$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $name);
+								$attachement_petty_cash = new Attachment;
+								$attachement_petty_cash->attachment_of_id = 3253;
+								$attachement_petty_cash->attachment_type_id = 3200;
+								$attachement_petty_cash->entity_id = $petty_cash->id;
+								$attachement_petty_cash->name = $name;
+								$attachement_petty_cash->save();
+							}
 						}
 					}
 				}
-			}
-			if ($request->petty_cash_other) {
-				if (!empty($request->petty_cash_other_removal_id)) {
-					$petty_cash_other_removal_id = json_decode($request->petty_cash_other_removal_id, true);
-					PettyCashEmployeeDetails::whereIn('id', $petty_cash_other_removal_id)->delete();
-				}
-				foreach ($request->petty_cash_other as $petty_cash_data_other) {
-					$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
-					$petty_cash_other->fill($petty_cash_data_other);
-					$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
-					$petty_cash_other->petty_cash_id = $petty_cash_employee_edit->id;
-					$date = date("Y-m-d", strtotime($petty_cash_data_other['date_other']));
-					$petty_cash_other->date = $date;
-					$petty_cash_other->created_by = Auth::user()->id;
-					$petty_cash_other->created_at = Carbon::now();
-					$petty_cash_other->save();
-					//STORE ATTACHMENT
-					$item_images = storage_path('petty-cash/other/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($petty_cash_data_other['attachments'])) {
-						foreach ($petty_cash_data_other['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $name);
-							$attachement_petty_other = new Attachment;
-							$attachement_petty_other->attachment_of_id = 3253;
-							$attachement_petty_other->attachment_type_id = 3200;
-							$attachement_petty_other->entity_id = $petty_cash_other->id;
-							$attachement_petty_other->name = $name;
-							$attachement_petty_other->save();
+				if ($request->petty_cash_other) {
+					if (!empty($request->petty_cash_other_removal_id)) {
+						$petty_cash_other_removal_id = json_decode($request->petty_cash_other_removal_id, true);
+						PettyCashEmployeeDetails::whereIn('id', $petty_cash_other_removal_id)->delete();
+					}
+					foreach ($request->petty_cash_other as $petty_cash_data_other) {
+						$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
+						$petty_cash_other->fill($petty_cash_data_other);
+						$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
+						$petty_cash_other->petty_cash_id = $petty_cash_employee_edit->id;
+						$date = date("Y-m-d", strtotime($petty_cash_data_other['date_other']));
+						$petty_cash_other->date = $date;
+						$petty_cash_other->created_by = Auth::user()->id;
+						$petty_cash_other->created_at = Carbon::now();
+						$petty_cash_other->save();
+						//STORE ATTACHMENT
+						$item_images = storage_path('petty-cash/other/attachments/');
+						Storage::makeDirectory($item_images, 0777);
+						if (!empty($petty_cash_data_other['attachments'])) {
+							foreach ($petty_cash_data_other['attachments'] as $key => $attachement) {
+								$name = $attachement->getClientOriginalName();
+								$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $name);
+								$attachement_petty_other = new Attachment;
+								$attachement_petty_other->attachment_of_id = 3253;
+								$attachement_petty_other->attachment_type_id = 3200;
+								$attachement_petty_other->entity_id = $petty_cash_other->id;
+								$attachement_petty_other->name = $name;
+								$attachement_petty_other->save();
 
+							}
 						}
 					}
 				}
+			} else {
+				return response()->json(['success' => false, 'errors' => ['your amount exceed the maximum limit so you can split the amount']]);
 			}
 
 			//Reimbursement Transaction
