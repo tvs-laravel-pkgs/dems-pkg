@@ -59,7 +59,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				onclick="angular.element(this).scope().deleteExpenseVoucher(' . $expense_voucher_requests->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
-				} elseif ($expense_voucher_requests->status_id == 3463) {
+				} elseif ($expense_voucher_requests->status_id == 3463 || $expense_voucher_requests->status_id == 3464) {
 					return '
 				<a href="#!/eyatra/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
@@ -197,16 +197,18 @@ class ExpenseVoucherAdvanceController extends Controller {
 			//STORE ATTACHMENT
 			$item_images = storage_path('expense-voucher-advance/attachments/');
 			Storage::makeDirectory($item_images, 0777);
-			if (!empty($request->attachments)) {
+			if (isset($request->attachments)) {
 				foreach ($request->attachments as $key => $attachement) {
-					$name = $attachement->getClientOriginalName();
-					$attachement->move(storage_path('app/public/expense-voucher-advance/attachments/'), $name);
-					$attachement_expense_voucher_advance = new Attachment;
-					$attachement_expense_voucher_advance->attachment_of_id = 3253;
-					$attachement_expense_voucher_advance->attachment_type_id = 3200;
-					$attachement_expense_voucher_advance->entity_id = $expense_voucher_advance->id;
-					$attachement_expense_voucher_advance->name = $name;
-					$attachement_expense_voucher_advance->save();
+					if (!empty($attachement)) {
+						$name = $attachement->getClientOriginalName();
+						$attachement->move(storage_path('app/public/expense-voucher-advance/attachments/'), $name);
+						$attachement_expense_voucher_advance = new Attachment;
+						$attachement_expense_voucher_advance->attachment_of_id = 3253;
+						$attachement_expense_voucher_advance->attachment_type_id = 3200;
+						$attachement_expense_voucher_advance->entity_id = $expense_voucher_advance->id;
+						$attachement_expense_voucher_advance->name = $name;
+						$attachement_expense_voucher_advance->save();
+					}
 				}
 			}
 

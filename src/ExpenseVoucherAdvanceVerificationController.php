@@ -104,7 +104,12 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
-				$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3282, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				if ($request->expense_amount) {
+					$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3464, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				} else {
+					$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3282, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+
+				}
 				DB::commit();
 				return response()->json(['success' => true]);
 			}

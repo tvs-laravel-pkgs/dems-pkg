@@ -13,6 +13,7 @@ class AlterTableOutlet extends Migration {
 	public function up() {
 		Schema::table('outlets', function (Blueprint $table) {
 			$table->unsignedDecimal('expense_voucher_limit', 10, 2)->nullable()->after('reimbursement_amount');
+			$table->unsignedDecimal('minimum_threshold_balance', 10, 2)->nullable()->after('expense_voucher_limit');
 
 		});
 	}
@@ -25,6 +26,7 @@ class AlterTableOutlet extends Migration {
 	public function down() {
 		Schema::table('outlets', function (Blueprint $table) {
 			$table->dropColumn('expense_voucher_limit');
+			$table->dropColumn('minimum_threshold_balance');
 		});
 	}
 }

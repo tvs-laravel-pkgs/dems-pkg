@@ -585,6 +585,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Outlet',
 				'config_type_id' => 523,
 			],
+			3382 => [
+				'name' => 'City',
+				'config_type_id' => 523,
+			],
 
 			//TRAVEL MODE CATEGORY TYPE
 			3400 => [
@@ -643,6 +647,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3463 => [
 				'name' => 'Manager Approval Pending',
+				'config_type_id' => 528,
+			],
+			3464 => [
+				'name' => 'Manager Rejected',
 				'config_type_id' => 528,
 			],
 

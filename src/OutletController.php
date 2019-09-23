@@ -286,6 +286,7 @@ class OutletController extends Controller {
 				$outlet->claim_req_approver = 0;
 			}
 			$outlet->name = $request->outlet_name;
+			$outlet->minimum_threshold_balance = $request->minimum_threshold_balance;
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());
 			$outlet->save();
