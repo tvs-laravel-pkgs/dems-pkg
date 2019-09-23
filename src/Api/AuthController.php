@@ -96,5 +96,18 @@ class AuthController extends Controller {
 		}
 
 	}
+	public function changePassword(Request $request) {
+
+		if ($request->emp_id) {
+			$user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->first();
+			if ($user) {
+				$user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->update(array('password' => $request->input('password')));
+				return response()->json(['status' => 'true', 'data' => $user], $this->successStatus);
+			} else {
+				return response()->json(['status' => 'false', 'error' => 'Invalid user name'], $this->successStatus);
+			}
+		}
+
+	}
 
 }

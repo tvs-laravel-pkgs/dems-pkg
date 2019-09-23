@@ -4,6 +4,7 @@ Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
 
 //FORGET PASSWORD
 Route::post('eyatra/api/forgotPassword', 'Uitoux\EYatra\Api\AuthController@forgotPassword');
+Route::post('eyatra/api/changePassword', 'Uitoux\EYatra\Api\AuthController@changePassword');
 
 Route::group(['middleware' => ['api']], function () {
 	Route::group(['middleware' => ['auth:api'], 'prefix' => 'eyatra/api'], function () {
