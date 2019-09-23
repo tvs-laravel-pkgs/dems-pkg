@@ -145,22 +145,22 @@ app.component('eyatraPettyCashForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 5000);
-                $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
-                return;
-            }
-            console.log(response);
+            // if (!response.data.success) {
+            //     $noty = new Noty({
+            //         type: 'error',
+            //         layout: 'topRight',
+            //         text: response.data.error,
+            //         animation: {
+            //             speed: 500 // unavailable - no need
+            //         },
+            //     }).show();
+            //     setTimeout(function() {
+            //         $noty.close();
+            //     }, 5000);
+            //     $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
+            //     return;
+            // }
+            // console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -174,20 +174,14 @@ app.component('eyatraPettyCashForm', {
             self.petty_cash_other_removal_id = [];
 
             $("#employee_id").val(self.emp_details.emp_id);
-            // $("#emp_code").html(self.emp_details.code);
-            // $("#emp_designation").html(self.emp_details.designation);
-            // $("#emp_grade").html(self.emp_details.grade);
-            // self.emp_details = self.emp_details.name;
-
 
             if (self.action == 'Edit') {
-                // if (self.type_id == 2) {
-                //     self.selectedItem = response.data.petty_cash_other[0].ename;
-                //     $('.employee').val(response.data.petty_cash_other[0].employee_id);
-                // } else {
-                //     self.selectedItem = response.data.employee_list;
-                //     $('.employee').val('');
-                // }
+                $.each(self.petty_cash_locals, function(index, value) {
+                    setTimeout(function() {
+                        $scope.getRatePerkm(value.travel_mode_id, index);
+                    }, 500);
+
+                });
             } else {
                 // self.selectedItem = response.data.employee_list;
                 // $('.employee').val('');
@@ -208,6 +202,16 @@ app.component('eyatraPettyCashForm', {
             /* Datepicker With Current Date */
 
         });
+
+        $scope.getRatePerkm = function(id, index) {
+            if (id == 15) {
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.two_wheeler_limit);
+                $(".ratePerKMamount_" + index).val(self.emp_details.two_wheeler_limit);
+            } else if (id == 16) {
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.four_wheeler_limit);
+                $(".ratePerKMamount_" + index).val(self.emp_details.four_wheeler_limit);
+            }
+        }
 
 
 

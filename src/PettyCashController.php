@@ -148,7 +148,10 @@ class PettyCashController extends Controller {
 			'sbus.name as sbus_name',
 			'lobs.name as lobs_name',
 			'emp_manager.name as emp_manager',
+			'gae.two_wheeler_limit',
+			'gae.four_wheeler_limit',
 			'petty_cash.employee_id')
+			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('entities', 'entities.id', 'employees.grade_id')
 			->leftjoin('users', function ($join) {
