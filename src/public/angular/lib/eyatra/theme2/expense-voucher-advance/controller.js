@@ -147,15 +147,17 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 // setTimeout(function() {
                 //     $noty.close();
                 // }, 5000);
-                // $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
+                // $location.path('/eyatra/expense/voucher-advance/')
                 // return;
             }
-            // console.log(response);
+            console.log(response);
 
             self.action = response.data.action;
 
             self.expense_voucher_advance = response.data.expense_voucher_advance;
-            // console.log(response.data.expense_voucher_advance.employee);
+            self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
+            self.expense_voucher_attach_removal_ids = [];
+            // console.log(self.expense_voucher_advance_attachment_url);
 
             if (self.action == 'Edit') {
                 self.action = 'Edit';
@@ -177,10 +179,27 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 $("#employee_id").val('');
             }
 
+            setTimeout(function() {
+                $('div[data-provide="datepicker"]').datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                });
+            }, 1000);
+
             var d = new Date();
             var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
             $("#date").val(val);
             // console.log(val);
+
+            //REMOVE EXPENCE VOUCHER ADVANCE ATTACHMENT
+            self.removeexpenseVoucherAttachment = function(expense_voucher_attachment_id, expense_voucher_attachment_index, expense_voucher_id) {
+                console.log(expense_voucher_attachment_id, expense_voucher_attachment_index, expense_voucher_id);
+                if (expense_voucher_attachment_id && expense_voucher_id) {
+                    self.expense_voucher_attach_removal_ids.push(expense_voucher_attachment_id);
+                    $('#expense_voucher_attach_removal_ids').val(JSON.stringify(self.expense_voucher_attach_removal_ids));
+                }
+                self.expense_voucher_advance.attachments.splice(expense_voucher_attachment_index, 1);
+            }
 
             //SEARCH  EMPLOYEE
             self.searchEmployee = function(query) {
@@ -309,8 +328,10 @@ app.component('eyatraExpenseVoucherAdvanceView', {
         $http.get(
             expense_voucher_advance_view_data_url + '/' + $routeParams.id
         ).then(function(response) {
-            // console.log(response);
+            console.log(response);
             self.expense_voucher_view = response.data.expense_voucher_view;
+            self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
+
         });
 
         $rootScope.loading = false;

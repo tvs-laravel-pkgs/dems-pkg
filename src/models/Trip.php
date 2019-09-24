@@ -13,6 +13,7 @@ use DB;
 use Entrust;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Mail;
 use Validator;
 

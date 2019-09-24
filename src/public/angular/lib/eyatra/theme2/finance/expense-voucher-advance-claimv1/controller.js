@@ -88,6 +88,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
             console.log(response);
             self.expense_voucher_view = response.data.expense_voucher_view;
             self.rejection_list = response.data.rejection_list;
+            self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
         });
 
         var form_id = '#approve';

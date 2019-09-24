@@ -106,6 +106,11 @@ class ExpenseVoucherAdvanceController extends Controller {
 			->select('employees.id')->first();
 		$this->data['employee_details'] = $employee_details;
 		$this->data['expense_voucher_advance'] = $expense_voucher_advance;
+		// dd($expense_voucher_advance);
+
+		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_advance->id)->select('name', 'id')->get();
+		$expense_voucher_advance->attachments = $expense_voucher_advance_attachment;
+
 		return response()->json($this->data);
 	}
 
@@ -126,6 +131,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
 			'employees.code',
 			'users.name',
+			'expense_voucher_advance_requests.id',
 			'expense_voucher_advance_requests.date',
 			'expense_voucher_advance_requests.advance_amount',
 			'expense_voucher_advance_requests.expense_amount',
@@ -140,6 +146,9 @@ class ExpenseVoucherAdvanceController extends Controller {
 			->where('users.user_type_id', 3121)
 			->where('expense_voucher_advance_requests.id', $id)
 			->first();
+
+		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id')->get();
+		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
 		// dd($expense_voucher_view);
 		return response()->json($this->data);
 
@@ -179,6 +188,11 @@ class ExpenseVoucherAdvanceController extends Controller {
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->where('employees.id', $request->employee_id)->first();
 
+			if (!empty($request->expense_voucher_attach_removal_ids)) {
+				$attachment_remove = json_decode($request->expense_voucher_attach_removal_ids, true);
+				Attachment::whereIn('id', $attachment_remove)->where('attachment_of_id', 3442)->delete();
+			}
+
 			if ($request->id) {
 				if ($request->expense_amount) {
 					$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
@@ -203,7 +217,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 						$name = $attachement->getClientOriginalName();
 						$attachement->move(storage_path('app/public/expense-voucher-advance/attachments/'), $name);
 						$attachement_expense_voucher_advance = new Attachment;
-						$attachement_expense_voucher_advance->attachment_of_id = 3253;
+						$attachement_expense_voucher_advance->attachment_of_id = 3442;
 						$attachement_expense_voucher_advance->attachment_type_id = 3200;
 						$attachement_expense_voucher_advance->entity_id = $expense_voucher_advance->id;
 						$attachement_expense_voucher_advance->name = $name;
@@ -214,8 +228,12 @@ class ExpenseVoucherAdvanceController extends Controller {
 
 			$expense_voucher_advance->fill($request->all());
 			$balence_amount = $request->advance_amount - $request->expense_amount;
-			if ($balence_amount) {
-				$expense_voucher_advance->balance_amount = $balence_amount;
+			if ($request->expense_amount) {
+				if ($balence_amount) {
+					$expense_voucher_advance->balance_amount = $balence_amount;
+				} else {
+					$expense_voucher_advance->balance_amount = NULL;
+				}
 			} else {
 				$expense_voucher_advance->balance_amount = NULL;
 			}

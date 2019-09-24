@@ -106,6 +106,13 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
+		if ($request->advance_received) {
+			$check_trip_amount_eligible = Employee::select('gae.travel_advance_limit')
+				->leftJoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')->first();
+			if ($check_trip_amount_eligible->travel_advance_limit < $request->advance_received) {
+				return response()->json(['success' => false, 'errors' => ['Maximum Eligibility Advance Amount is ' . $check_trip_amount_eligible->travel_advance_limit]]);
+			}
+		}
 
 		$trip_start_date_data = Trip::where('start_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->first();
 		$trip_end_date_data = Trip::where('start_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '<=', date("Y-m-d", strtotime($request->end_date)))->where('employee_id', Auth::user()->entity_id)->first();

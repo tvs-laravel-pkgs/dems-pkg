@@ -77,7 +77,7 @@ class AuthController extends Controller {
 			return response()->json(['status' => 'false', 'msg' => 'Enter Employee Code'], $this->successStatus);
 		}
 
-		$user = User::join('employees', 'employees.id', 'users.entity_id')->where('users.mobile_number', $request->input('mobile'))->where('users.user_type_id', 3121)->where('employees.code', $request->input('emp_code'))->first();
+		$user = User::join('employees', 'employees.id', 'users.entity_id')->where('users.mobile_number', $request->input('mobile'))->where('users.user_type_id', 3121)->where('employees.code', $request->input('emp_code'))->select('users.*')->first();
 
 		if ($user) {
 			$user->otp = generateOtp($user->contact_number);
@@ -97,11 +97,15 @@ class AuthController extends Controller {
 
 	}
 	public function changePassword(Request $request) {
-
-		if ($request->emp_id) {
-			$user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->first();
+		// dump($request->all());
+		if ($request->user_id) {
+			// $user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->first();
+			$user = User::find($request->user_id);
+			// dd($user);
 			if ($user) {
-				$user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->update(array('password' => $request->input('password')));
+				// $user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->update(array('password' => $request->input('password')));
+				$user->password = $request->password;
+				$user->save();
 				return response()->json(['status' => 'true', 'data' => $user], $this->successStatus);
 			} else {
 				return response()->json(['status' => 'false', 'error' => 'Invalid user name'], $this->successStatus);
