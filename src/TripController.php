@@ -109,7 +109,7 @@ class TripController extends Controller {
 		if ($request->advance_received) {
 			$check_trip_amount_eligible = Employee::select('gae.travel_advance_limit')
 				->leftJoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')->first();
-			if ($check_trip_amount_eligible->travel_advance_limit <= $request->advance_received) {
+			if ($check_trip_amount_eligible->travel_advance_limit < $request->advance_received) {
 				return response()->json(['success' => false, 'errors' => ['Maximum Eligibility Advance Amount is ' . $check_trip_amount_eligible->travel_advance_limit]]);
 			}
 		}
