@@ -78,6 +78,9 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			->where('expense_voucher_advance_requests.id', $id)
 			->first();
 		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
+		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id')->get();
+		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
+
 		return response()->json($this->data);
 	}
 

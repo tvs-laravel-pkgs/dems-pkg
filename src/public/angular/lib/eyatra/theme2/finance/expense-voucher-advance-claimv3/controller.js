@@ -101,6 +101,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             self.wallet_detail = response.data.wallet_detail;
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
+            self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
         });
 
         $(".bottom-expand-btn").on('click', function() {
