@@ -98,17 +98,12 @@ class PettyCashController extends Controller {
 					->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 					->where('petty_cash.id', $pettycash_id)
 					->where('petty_cash_employee_details.expence_type', $localconveyance_id->id)->get();
-				// if (empty($petty_cash)) {
-				// 	$this->data['success'] = false;
-				// 	$this->data['message'] = 'Petty Cash not found';
-				// }
-				// dd($petty_cash);
+
 				foreach ($petty_cash as $key => $value) {
-					$petty_cash_attachment = Attachment::where('attachment_of_id', 3253)->where('entity_id', $value->id)->select('name', 'id')->get();
+					$petty_cash_attachment = Attachment::where('attachment_of_id', 3440)->where('entity_id', $value->id)->select('name', 'id')->get();
 					$value->attachments = $petty_cash_attachment;
 				}
-				// $petty_cash1 = $petty_cash->localconveyance;
-				// dd($petty_cash1);
+
 			} else {
 				$petty_cash = [];
 			}
@@ -128,7 +123,7 @@ class PettyCashController extends Controller {
 					->where('petty_cash.id', $pettycash_id)
 					->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
 				foreach ($petty_cash_other as $key => $value) {
-					$petty_cash_attachment = Attachment::where('attachment_of_id', 3254)->where('entity_id', $value->id)->select('name', 'id')->get();
+					$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
 					$value->attachments = $petty_cash_attachment;
 				}
 
@@ -273,7 +268,7 @@ class PettyCashController extends Controller {
 				->first();
 
 			foreach ($petty_cash as $key => $value) {
-				$petty_cash_attachment = Attachment::where('attachment_of_id', 3253)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3440)->where('entity_id', $value->id)->select('name', 'id')->get();
 				$value->attachments = $petty_cash_attachment;
 			}
 		} elseif ($type_id == 2) {
@@ -312,7 +307,7 @@ class PettyCashController extends Controller {
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
 			foreach ($petty_cash_other as $key => $value) {
-				$petty_cash_attachment = Attachment::where('attachment_of_id', 3254)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
 				$value->attachments = $petty_cash_attachment;
 			}
 		}
@@ -359,7 +354,7 @@ class PettyCashController extends Controller {
 					PettyCashEmployeeDetails::whereIn('id', $petty_cash_removal_id)->delete();
 
 					$attachment_remove = json_decode($request->petty_cash_removal_id, true);
-					Attachment::where('entity_id', $attachment_remove)->where('attachment_of_id', 3253)->delete();
+					Attachment::where('entity_id', $attachment_remove)->where('attachment_of_id', 3440)->delete();
 				}
 				//REMOVE LOCAL CONVEYANCE ATTACHMENT
 				if (!empty($request->petty_cash_attach_removal_ids)) {
@@ -385,7 +380,7 @@ class PettyCashController extends Controller {
 							$name = $attachement->getClientOriginalName();
 							$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $name);
 							$attachement_petty_cash = new Attachment;
-							$attachement_petty_cash->attachment_of_id = 3253;
+							$attachement_petty_cash->attachment_of_id = 3440;
 							$attachement_petty_cash->attachment_type_id = 3200;
 							$attachement_petty_cash->entity_id = $petty_cash->id;
 							$attachement_petty_cash->name = $name;
@@ -405,7 +400,7 @@ class PettyCashController extends Controller {
 					PettyCashEmployeeDetails::whereIn('id', $petty_cash_other_removal_id)->delete();
 
 					$attachment_remove = json_decode($request->petty_cash_other_removal_id, true);
-					Attachment::where('entity_id', $attachment_remove)->where('attachment_of_id', 3254)->delete();
+					Attachment::where('entity_id', $attachment_remove)->where('attachment_of_id', 3441)->delete();
 				}
 				foreach ($request->petty_cash_other as $petty_cash_data_other) {
 					$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
@@ -425,7 +420,7 @@ class PettyCashController extends Controller {
 							$name = $attachement->getClientOriginalName();
 							$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $name);
 							$attachement_petty_other = new Attachment;
-							$attachement_petty_other->attachment_of_id = 3254;
+							$attachement_petty_other->attachment_of_id = 3441;
 							$attachement_petty_other->attachment_type_id = 3200;
 							$attachement_petty_other->entity_id = $petty_cash_other->id;
 							$attachement_petty_other->name = $name;
