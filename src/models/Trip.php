@@ -1051,7 +1051,8 @@ class Trip extends Model {
 			$trip_id = $trip->id;
 			$trip = Trip::findorFail($trip->id);
 
-			$from_mail = config('eyatra.common_from_email');
+			$from_mail = env('MAIL_FROM_ADDRESS');
+			$from_name = env('MAIL_USERNAME');
 			//dd($from_mail);
 			$employee_details = Employee::select(
 				'employees.code',
@@ -1104,7 +1105,7 @@ class Trip extends Model {
 					// $visit_agent_count = $visit_agents->count();
 					if (count($visit_agents) > 0) {
 						$arr['from_mail'] = $from_mail;
-						$arr['from_mail'] = 'saravanan@uitoux.in';
+						//$arr['from_mail'] = 'saravanan@uitoux.in';
 						$arr['from_name'] = 'Agent';
 						$agent_user = User::select('name', 'email')
 							->where('entity_id', $agent->agent_id)
@@ -1152,7 +1153,7 @@ class Trip extends Model {
 					->get();
 				if ($visit_manager) {
 					$arr['from_mail'] = $from_mail;
-					$arr['from_mail'] = 'saravanan@uitoux.in';
+					//$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Manager';
 					$to_employee = Employee::select('users.email as email', 'users.name as name')
 						->join('users', 'users.entity_id', 'employees.reporting_to_id')
@@ -1200,7 +1201,7 @@ class Trip extends Model {
 				$visit_financier_count = $visit_financier->count();
 				if ($visit_financier_count > 0) {
 					$arr['from_mail'] = $from_mail;
-					$arr['from_mail'] = 'saravanan@uitoux.in';
+					//$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Financier';
 					$financier = User::select('name', 'email')
 						->join('role_user', 'role_user.user_id', 'users.id')
@@ -1246,7 +1247,7 @@ class Trip extends Model {
 					->get();
 				if ($visit_employee) {
 					$arr['from_mail'] = $from_mail;
-					$arr['from_mail'] = 'saravanan@uitoux.in';
+					//$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Employee';
 					$to_employee = Employee::select('users.email as email', 'users.name as name')
 						->join('users', 'users.entity_id', 'employees.id')
