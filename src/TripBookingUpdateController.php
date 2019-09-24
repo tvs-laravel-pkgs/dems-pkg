@@ -5,7 +5,9 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Entrust;
+use Mail;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\Mail\TicketNotificationMail;
 use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\Entity;
@@ -98,7 +100,7 @@ class TripBookingUpdateController extends Controller {
 	public function saveTripBookingUpdates(Request $r) {
 		// dump($r->all());
 		DB::beginTransaction();
-		try {
+		try {	
 			// $validator = Validator::make($r->all(), [
 			// 	// 'travel_mode_id' => [
 			// 	// 	'required:true',
@@ -190,7 +192,9 @@ class TripBookingUpdateController extends Controller {
 						$attachement->save();
 					}
 				}
-			} else {
+			} 
+			//AGENT BOOKING TRIP
+			else {
 				// dd($r->ticket_booking);
 				foreach ($r->ticket_booking as $key => $value) {
 					$visit = Visit::find($value['visit_id']);
@@ -265,8 +269,13 @@ class TripBookingUpdateController extends Controller {
 						$attachement->save();
 						// }
 						//dd('end');
+						DB::commit();
 					}
 
+					//Ticket Employee Mail Trigger
+					if ($visit) {
+						$this->sendTicketNotificationMail($visit);
+					}
 				}
 			}
 			DB::commit();
@@ -276,6 +285,74 @@ class TripBookingUpdateController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 		return response()->json(['success' => true]);
+	}
+	public function sendTicketNotificationMail($visit)
+	{
+			$from_mail = env('MAIL_FROM_ADDRESS');
+			$from_name = env('MAIL_USERNAME');
+			$to_user = $visit->trip->employee->user;
+			$employee_details = $visit->trip->employee;
+			$visit_details = Visit::select(
+			'visits.id',
+			//'trips.id as trip_id',
+			//'users.name as employee_name',
+			DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
+			DB::raw('TIME_FORMAT(visits.prefered_departure_time,"h:i A") as prefered_departure_time'),
+			'fromcity.name as fromcity_name',
+			'tocity.name as tocity_name',
+			'travel_modes.name as travel_mode_name',
+			'booking_modes.name as booking_method_name',
+			'booking_status.name as booking_status'
+			)
+			//->join('trips', 'trips.id', 'visits.trip_id')
+			//->leftjoin('users', 'trips.employee_id', 'users.id')
+			->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+			->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
+			->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
+			->join('configs as booking_status', 'booking_status.id', 'visits.booking_status_id')
+			->where('booking_method_id', 3042)
+			->where('booking_status_id', 3061)
+			->where('visits.id', $visit->id)
+			->first();
+			//dd($visit->bookings);
+			$arr['visits_attachments']="";
+			foreach ($visit->bookings as $key => $booking) {
+					//dump($booking->attachments);
+					if(count($booking->attachments) > 0){
+						$arr['visits_attachments']=$booking->attachments;
+					}
+				}
+				//dd($arr['visits_attachments']);
+			if ($to_user->email) {
+				$arr['from_mail'] = $from_mail;
+				$arr['from_name'] = $from_name;
+				$arr['to_email'] = $to_user->email;
+				$arr['to_name'] = $to_user->name;
+				$arr['to_email'] = 'saravanan@uitoux.in';
+				//$arr['to_name'] = 'parthiban';
+				$arr['subject'] = 'Ticket Booking Mail';
+				$arr['body'] = 'Employee ticket booking notification';
+				$arr['employee_details'] = $employee_details;
+				$arr['visits'] = $visit_details;
+				if($arr['visits_attachments'])
+				{
+				$arr['attachment']=url('storage/app/public/visit/booking-updates/attachments/'.$arr['visits_attachments'][0]['name']);
+				}else
+				{
+					$arr['attachment']="";
+				}
+//dd($arr['attachment']);
+				//dump($visit->bookings);
+				/*$arr['visits_attachments'] = Attachment::where('entity_id',$visit->bookings)->where('attachment_of_id', 3180)->where('attachment_type_id', 3200)->get();
+				//dd($arr['visits_attachments']);
+				//$arr['trip'] = $trip;
+				//$arr['type'] = 2;*/
+				$MailInstance = new TicketNotificationMail($arr);
+				$Mail = Mail::send($MailInstance);
+			}
+			unset($arr['visits_attachments']);
+
 	}
 
 }
