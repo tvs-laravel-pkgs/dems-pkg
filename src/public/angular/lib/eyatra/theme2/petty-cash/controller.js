@@ -160,7 +160,7 @@ app.component('eyatraPettyCashForm', {
             //     $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
             //     return;
             // }
-            // console.log(response);
+            console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -171,7 +171,12 @@ app.component('eyatraPettyCashForm', {
             self.user_role = response.data.user_role;
             self.emp_details = response.data.emp_details;
             self.petty_cash_removal_id = [];
+            self.petty_cash_attach_removal_ids = [];
             self.petty_cash_other_removal_id = [];
+            self.petty_cash_other_attach_removal_ids = [];
+            self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
+            self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
+
 
             $("#employee_id").val(self.emp_details.emp_id);
 
@@ -375,6 +380,26 @@ app.component('eyatraPettyCashForm', {
             }, 500);
         }
 
+        //REMOVE LOCAL CONVEYANCE ATTACHMENT
+        self.removeLocalAttachment = function(petty_cash_index, petty_cash_attachment_id, petty_cash_attachment_index, petty_cash_id) {
+            console.log(petty_cash_attachment_id, petty_cash_attachment_index, petty_cash_id);
+            if (petty_cash_attachment_id && petty_cash_id) {
+                self.petty_cash_attach_removal_ids.push(petty_cash_attachment_id);
+                $('#petty_cash_attach_removal_ids').val(JSON.stringify(self.petty_cash_attach_removal_ids));
+            }
+            self.petty_cash_locals[petty_cash_index].attachments.splice(petty_cash_attachment_index, 1);
+        }
+
+        //REMOVE OTHER EXPENSE ATTACHMENT
+        self.removeOtherAttachment = function(petty_cash_index, petty_cash_attachment_id, petty_cash_attachment_index, petty_cash_id) {
+            console.log(petty_cash_attachment_id, petty_cash_attachment_index, petty_cash_id);
+            if (petty_cash_attachment_id && petty_cash_id) {
+                self.petty_cash_other_attach_removal_ids.push(petty_cash_attachment_id);
+                $('#petty_cash_other_attach_removal_ids').val(JSON.stringify(self.petty_cash_other_attach_removal_ids));
+            }
+            self.petty_cash_others[petty_cash_index].attachments.splice(petty_cash_attachment_index, 1);
+        }
+
         self.removeotherexpence = function(index, petty_cash_other_id) {
             if (petty_cash_other_id) {
                 self.petty_cash_other_removal_id.push(petty_cash_other_id);
@@ -407,7 +432,7 @@ app.component('eyatraPettyCashForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 5000);
+                }, 10000);
             },
             submitHandler: function(form) {
 
@@ -468,6 +493,9 @@ app.component('eyatraPettyCashView', {
             self.type_id = $routeParams.type_id;
             self.petty_cash_other = response.data.petty_cash_other;
             self.employee = response.data.employee;
+            self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
+            self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
+
             var local_total = 0;
             $.each(self.petty_cash, function(key, value) {
                 local_total += parseFloat(value.amount);
