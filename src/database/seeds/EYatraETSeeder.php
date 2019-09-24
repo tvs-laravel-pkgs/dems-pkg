@@ -16,7 +16,7 @@ class EYatraETSeeder extends Seeder {
 			500 => 'Employee Grades',
 			501 => 'Trip Purposes',
 			502 => 'Travel Modes',
-			503 => 'Other Expenses',
+			503 => 'Other Expense',
 			504 => 'Lodging Stay',
 			505 => 'Employee Wallet Mode',
 			506 => 'City Category',
