@@ -155,7 +155,8 @@ app.component('eyatraAgentClaimForm', {
             $rootScope.loading = false;
         });
         var total = 0;
-        $('#tax').on('change', function() {
+         $(document).on('change', '#tax', function() {
+        // $('#tax').on('change', function() {
             var net_amt = parseFloat($(".net_amount").val());
             var tax = parseFloat($("#tax").val());
             total = (net_amt + tax);

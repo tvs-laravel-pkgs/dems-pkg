@@ -528,8 +528,8 @@ class EmployeeController extends Controller {
 				return response()->json(['success' => false, 'errors' => ['Cannot Read File, Please Import Excel Format File']]);
 			}
 
-			$destination = config('custom.employee_import_path');
-			$store_path = storage_path('app/public/employee/import');
+			$destination = config('custom.jobs_import_path');
+			$store_path = storage_path('app/public/job/import');
 
 			$time_stamp = date('Y_m_d_h_i_s');
 			$file_name = $time_stamp . '_import' . '.' . $extension;
@@ -537,7 +537,7 @@ class EmployeeController extends Controller {
 			$request->file($attachment)->storeAs($destination, $file_name);
 			$file_path = $store_path . '/' . $file_name;
 
-			$src_file = 'storage/app/public/employee/import/' . $file_name;
+			$src_file = 'storage/app/public/job/import/' . $file_name;
 
 			$import = new ImportJob;
 			$import->type_id = $request->import_type_id;

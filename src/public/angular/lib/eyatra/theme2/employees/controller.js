@@ -692,9 +692,17 @@ app.component('importJobs', {
             } else if (type == 3381) {
                 $('#employee_import').hide();
                 $('#outlet_import').show();
-            } else {
+            } 
+            else if (type == 3382) {
                 $('#employee_import').hide();
                 $('#outlet_import').hide();
+                $('#city_import').show();
+            } 
+
+            else {
+                $('#employee_import').hide();
+                $('#outlet_import').hide();
+                $('#city_import').hide();
 
             }
         }
