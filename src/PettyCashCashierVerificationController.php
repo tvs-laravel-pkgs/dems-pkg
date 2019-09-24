@@ -119,6 +119,11 @@ class PettyCashCashierVerificationController extends Controller {
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
 
+			foreach ($petty_cash as $key => $value) {
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3440)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$value->attachments = $petty_cash_attachment;
+			}
+
 			$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
 			$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
 			$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash[0]->employee_id)->where('wallet_of_id', 3121)->first();
@@ -157,6 +162,11 @@ class PettyCashCashierVerificationController extends Controller {
 				->where('employees.id', $petty_cash_other[0]->employee_id)
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
+			foreach ($petty_cash_other as $key => $value) {
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$value->attachments = $petty_cash_attachment;
+			}
+
 			$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('detail_of_id', 3121)->first();
 			$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('detail_of_id', 3121)->first();
 			$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('wallet_of_id', 3121)->first();
