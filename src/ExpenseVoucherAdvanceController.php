@@ -246,8 +246,13 @@ class ExpenseVoucherAdvanceController extends Controller {
 			$expense_voucher_advance->save();
 
 			DB::commit();
-			$request->session()->flash('success', 'Expense voucher advance saved successfully!');
-			return response()->json(['success' => true]);
+			if ($request->id) {
+				return response()->json(['success' => true, 'message' => 'Expense voucher advance updated successfully']);
+			} else {
+				return response()->json(['success' => true, 'message' => 'Expense voucher advance saved successfully']);
+			}
+			// $request->session()->flash('success', 'Expense voucher advance saved successfully!');
+			// return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
