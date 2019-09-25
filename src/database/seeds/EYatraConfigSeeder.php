@@ -633,24 +633,46 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			//ADVANCE EXPENSE VOUCHER
+			//ADVANCE REQUEST
 			3460 => [
-				'name' => 'New',
+				'name' => 'Waiting for Manager Approval',
 				'config_type_id' => 528,
 			],
 			3461 => [
-				'name' => 'Claim Approved',
+				'name' => 'Manager Approved',
 				'config_type_id' => 528,
 			],
 			3462 => [
-				'name' => 'Claim Rejected',
+				'name' => 'Manager Rejected',
 				'config_type_id' => 528,
 			],
 			3463 => [
-				'name' => 'Manager Approval Pending',
+				'name' => 'Advance Amount Approved',
 				'config_type_id' => 528,
 			],
 			3464 => [
-				'name' => 'Manager Rejected',
+				'name' => 'Advance Amount Rejected',
+				'config_type_id' => 528,
+			],
+			//EXPENSE
+			3465 => [
+				'name' => 'Manager Approval Pending',
+				'config_type_id' => 528,
+			],
+			3466 => [
+				'name' => 'Expense Manager Approved',
+				'config_type_id' => 528,
+			],
+			3467 => [
+				'name' => 'Expense Manager Rejected',
+				'config_type_id' => 528,
+			],
+			3468 => [
+				'name' => 'Expense Claim Approved',
+				'config_type_id' => 528,
+			],
+			3469 => [
+				'name' => 'Expense Claim Rejected',
 				'config_type_id' => 528,
 			],
 
