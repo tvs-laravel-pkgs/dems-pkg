@@ -215,7 +215,7 @@ class OutletController extends Controller {
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
 				$q->where('code', 'like', '%' . $key . '%')
-				// ->where('name', 'like', '%' . $key . '%')
+					->orWhere('name', 'like', '%' . $key . '%')
 				;
 			})
 

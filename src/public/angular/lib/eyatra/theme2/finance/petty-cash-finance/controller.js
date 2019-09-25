@@ -117,9 +117,9 @@
              self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
 
              if ($routeParams.type_id == 1) {
-                 $('.separate-page-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Localconveyance Expense Voucher Claim</h3>');
+                 $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/eyatra/petty-cash/verification3">Expense Voucher list</a> / View</p><h3 class="title">Localconveyance Voucher Claim</h3>');
              } else {
-                 $('.separate-page-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Other Expense Voucher Claim</h3>');
+                 $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/eyatra/petty-cash/verification3">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
              }
              var d = new Date();
              var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();

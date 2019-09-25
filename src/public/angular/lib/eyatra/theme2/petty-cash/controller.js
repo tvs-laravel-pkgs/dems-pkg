@@ -205,7 +205,9 @@ app.component('eyatraPettyCashForm', {
             }, 500);
             $rootScope.loading = false;
             /* Datepicker With Current Date */
-
+            var d = new Date();
+            var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
+            $("#date").val(val);
         });
 
         $scope.getRatePerkm = function(id, index) {
@@ -421,22 +423,10 @@ app.component('eyatraPettyCashForm', {
                 }
             },
             ignore: '',
-            invalidHandler: function(event, validator) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: 'You have errors please check',
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 10000);
-            },
             submitHandler: function(form) {
-
                 let formData = new FormData($(form_id)[0]);
+                // console.log(formData);
+                // return false;
                 $('#submit').button('loading');
                 $.ajax({
                         url: laravel_routes['pettycashSave'],
@@ -458,7 +448,7 @@ app.component('eyatraPettyCashForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Petty Cash saves successfully',
+                                text: res.message,
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },
