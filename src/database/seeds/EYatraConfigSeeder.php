@@ -639,39 +639,47 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 528,
 			],
 			3461 => [
-				'name' => 'Manager Approved',
+				'name' => 'Manager Approved', //ADVANCE APPROVE ID GOES TO CASHIER
 				'config_type_id' => 528,
 			],
 			3462 => [
-				'name' => 'Manager Rejected',
+				'name' => 'Manager  Approved', //ADVANCE APPROVE ID GOES TO FINACIER
 				'config_type_id' => 528,
 			],
 			3463 => [
-				'name' => 'Advance Amount Approved',
+				'name' => 'Manager Rejected',
 				'config_type_id' => 528,
 			],
 			3464 => [
+				'name' => 'Advance Amount Approved',
+				'config_type_id' => 528,
+			],
+			3465 => [
 				'name' => 'Advance Amount Rejected',
 				'config_type_id' => 528,
 			],
 			//EXPENSE
-			3465 => [
+			3466 => [
 				'name' => 'Manager Approval Pending',
 				'config_type_id' => 528,
 			],
-			3466 => [
-				'name' => 'Expense Manager Approved',
-				'config_type_id' => 528,
-			],
 			3467 => [
-				'name' => 'Expense Manager Rejected',
+				'name' => 'Expense Manager Approved', //EXPENSE APPROVE ID GOES TO CASHIER
 				'config_type_id' => 528,
 			],
 			3468 => [
-				'name' => 'Expense Claim Approved',
+				'name' => 'Expense Manager  Approved', //EXPENSE APPROVE ID GOES TO FINANCIER
 				'config_type_id' => 528,
 			],
 			3469 => [
+				'name' => 'Expense Manager Rejected',
+				'config_type_id' => 528,
+			],
+			3470 => [
+				'name' => 'Expense Claim Approved',
+				'config_type_id' => 528,
+			],
+			3471 => [
 				'name' => 'Expense Claim Rejected',
 				'config_type_id' => 528,
 			],
