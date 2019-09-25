@@ -30,7 +30,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 			->join('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
 			->where('employees.reporting_to_id', Auth::user()->entity_id)
-			->whereIn('expense_voucher_advance_requests.status_id', [3460, 3463])
+			->whereIn('expense_voucher_advance_requests.status_id', [3460, 3466])
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($query) use ($r) {
 				if (!empty($r->employee_id)) {
@@ -95,22 +95,35 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 				)
 					->join('outlets', 'outlets.id', 'employees.outlet_id')
 					->where('employees.id', $request->employee_id)->first();
-				if ($employee_cash_check->amount_eligible != 0) {
-					if ($employee_cash_check->amount_limit >= $request->advance_amount) {
-						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				if ($request->expense_amount) {
+					if ($employee_cash_check->amount_eligible != 0) {
+						if ($employee_cash_check->amount_limit >= $request->advance_amount) {
+							$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3467, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+						} else {
+							$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3468, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+						}
 					} else {
-						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3468, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 					}
 				} else {
-					$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					if ($employee_cash_check->amount_eligible != 0) {
+						if ($employee_cash_check->amount_limit >= $request->advance_amount) {
+							$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3461, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+						} else {
+							$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3462, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+						}
+					} else {
+						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3462, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					}
 				}
+
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
 				if ($request->expense_amount) {
-					$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3464, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3469, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				} else {
-					$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3282, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3463, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 
 				}
 				DB::commit();
