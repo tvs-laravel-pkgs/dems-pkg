@@ -6,6 +6,7 @@ use Auth;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\ActivityLog;
+use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
@@ -160,18 +161,18 @@ class TripClaimController extends Controller {
 					$item_images = storage_path('app/public/trip/lodgings/attachments/');
 					Storage::makeDirectory($item_images, 0777);
 					if (!empty($request->attachments)) {
-						dd($request->attachments);
-
-						foreach ($lodging_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
+						//dd($request->attachments);
+							$attachement=$request->attachments;
+						//foreach ($lodging_data['attachments'] as $key => $attachement) {
+							$name = $request->attachments->getClientOriginalName();
 							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
 							$attachement_lodge = new Attachment;
 							$attachement_lodge->attachment_of_id = 3181;
 							$attachement_lodge->attachment_type_id = 3200;
-							$attachement_lodge->entity_id = $lodging->id;
+							$attachement_lodge->entity_id = $request->trip_id;
 							$attachement_lodge->name = $name;
 							$attachement_lodge->save();
-						}
+						//}
 					}
 				}
 				if($request->is_boarding==1)
@@ -179,17 +180,18 @@ class TripClaimController extends Controller {
 					$item_images = storage_path('app/public/trip/boarding/attachments/');
 					Storage::makeDirectory($item_images, 0777);
 					if (!empty($request->attachments)) {
-						dd($request->attachments);
-						foreach ($boarding_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
+						//dd($request->attachments);
+							$attachement=$request->attachments;
+						//foreach ($boarding_data['attachments'] as $key => $attachement) {
+							$name = $request->attachments->getClientOriginalName();
 							$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
 							$attachement_board = new Attachment;
 							$attachement_board->attachment_of_id = 3182;
 							$attachement_board->attachment_type_id = 3200;
-							$attachement_board->entity_id = $boarding->id;
+							$attachement_board->entity_id = $request->trip_id;
 							$attachement_board->name = $name;
 							$attachement_board->save();
-						}
+						//}
 					}
 				}
 				return response()->json(['success' => true]);
