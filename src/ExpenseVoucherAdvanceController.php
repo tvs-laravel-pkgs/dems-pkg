@@ -47,7 +47,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				if ($expense_voucher_requests->status_id == 3460 || $expense_voucher_requests->status_id == 3462) {
+				if ($expense_voucher_requests->status_id == 3460 || $expense_voucher_requests->status_id == 3463 || $expense_voucher_requests->status_id == 3465) {
 					return '
 				<a href="#!/eyatra/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
@@ -59,7 +59,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				onclick="angular.element(this).scope().deleteExpenseVoucher(' . $expense_voucher_requests->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
-				} elseif ($expense_voucher_requests->status_id == 3463 || $expense_voucher_requests->status_id == 3464) {
+				} elseif ($expense_voucher_requests->status_id == 3464 || $expense_voucher_requests->status_id == 3466 || $expense_voucher_requests->status_id == 3469 || $expense_voucher_requests->status_id == 3471) {
 					return '
 				<a href="#!/eyatra/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
@@ -197,7 +197,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				if ($request->expense_amount) {
 					$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
 					$expense_voucher_advance->updated_by = Auth::user()->id;
-					$expense_voucher_advance->status_id = 3463;
+					$expense_voucher_advance->status_id = 3466;
 				} else {
 					$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
 					$expense_voucher_advance->updated_by = Auth::user()->id;
