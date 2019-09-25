@@ -9,6 +9,7 @@ use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
+use Illuminate\Support\Facades\Storage;
 
 class TripClaimController extends Controller {
 	public $successStatus = 200;
@@ -151,6 +152,7 @@ class TripClaimController extends Controller {
 	}
 	public function getTripClaimAttachments(Request $request)
 	{
+		//dd($request->attachments);
 			if($request->trip_id)
 			{
 				if($request->is_lodging==1)
@@ -159,6 +161,7 @@ class TripClaimController extends Controller {
 					Storage::makeDirectory($item_images, 0777);
 					if (!empty($request->attachments)) {
 						dd($request->attachments);
+
 						foreach ($lodging_data['attachments'] as $key => $attachement) {
 							$name = $attachement->getClientOriginalName();
 							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
