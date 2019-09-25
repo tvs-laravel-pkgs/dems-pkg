@@ -313,20 +313,27 @@ app.component('eyatraTripForm', {
                     self.trip.visits[index].from_city_id = id;
                 }
             }
+            var error_details = 0;
             var leng = self.trip.visits.length;
             for (j = 0; j < leng; j++) {
                 if (self.trip.visits[j].to_city_details) {
                     from_id = self.trip.visits[j].from_city_details ? self.trip.visits[j].from_city_details.id : self.trip.visits[j].from_city_id;
-                    if (self.trip.visits[j].to_city_details.id == from_id) {
+                    if (self.trip.visits[j].to_city_details.id == self.trip.visits[j].from_city_details.id) {
+                        error_details = 1;
                         sameFromTo();
                     }
                 }
             }
-
+            if (error_details == 1) {
+                $('.btn-submit').prop('disabled', true);
+            } else {
+                $('.btn-submit').prop('disabled', false);
+            }
         }
         $scope.addVisit = function(visit_array) {
             var trip_array = self.trip.visits;
             var arr_length = trip_array.length;
+            // console.log(trip_array);
             arr_vol = arr_length - 1;
             if (!(trip_array[arr_vol].to_city_details) || !(trip_array[arr_vol].to_city_details.id)) {
                 $noty = new Noty({
@@ -346,7 +353,7 @@ app.component('eyatraTripForm', {
                 to_city_id: trip_array[arr_vol].from_city_id,
                 booking_method_name: 'Self',
                 preferred_travel_modes: '',
-                from_city_details: self.trip.from_city_details,
+                from_city_details: trip_array[arr_vol].to_city_details,
             });
             $('.datepicker_' + arr_length).datepicker('destroy');
             datecall(startdate, enddate, arr_length);
@@ -430,17 +437,25 @@ app.component('eyatraTripForm', {
         //         return [];
         //     }
         // }
+        // $('#trip-form').validate();
 
+        // var user = $('input[name^="visits"]');
+
+        // user.filter('input[name$="[to_city_id]"]').each(function() {
+        //     $(this).rules("add", {
+        //         messages: {
+        //             required: "Name is Mandatory"
+        //         }
+        //     });
+        // });
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'trip_mode[]') {
                     error.appendTo($('.trip_mode'));
-                } 
-                else if (element.hasClass("advance_amount_check")) {
+                } else if (element.hasClass("advance_amount_check")) {
                     error.appendTo($('.advance_amount_required'));
-                }
-                else {
+                } else {
                     error.insertAfter(element)
                 }
             },
