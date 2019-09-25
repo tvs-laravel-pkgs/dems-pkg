@@ -34,7 +34,7 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			})
 			->where('users.user_type_id', 3121)
 			->where('cashier.id', Auth::user()->entity_id)
-			->where('expense_voucher_advance_requests.status_id', 3281)
+			->whereIn('expense_voucher_advance_requests.status_id', [3461, 3467])
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 		;
@@ -79,6 +79,8 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			->where('users.user_type_id', 3121)
 			->where('expense_voucher_advance_requests.id', $id)
 			->first();
+		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id')->get();
+		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
 
 		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
 		$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $expense_voucher_view->employee_id)->where('detail_of_id', 3121)->first();
@@ -97,9 +99,9 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			DB::beginTransaction();
 			if ($request->approve) {
 				if ($request->expense_amount) {
-					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3461, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3470, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				} else {
-					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3463, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3464, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				}
 
 				// //PAYMENT SAVE
@@ -116,8 +118,11 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 				// $activity['activity'] = "paid";
 				// $activity_log = ActivityLog::saveLog($activity);
 			} else {
-				$expence_voucher_cashier_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3462, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
-
+				if ($request->expense_amount) {
+					$expence_voucher_cashier_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3471, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				} else {
+					$expence_voucher_cashier_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3465, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				}
 			}
 			DB::commit();
 			return response()->json(['success' => true]);

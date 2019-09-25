@@ -109,6 +109,9 @@ app.component('eyatraPettyCashManagerView', {
             self.petty_cash_other = response.data.petty_cash_other;
             self.rejection_list = response.data.rejection_list;
             self.employee = response.data.employee;
+            self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
+            self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
+
             if ($routeParams.type_id == 1) {
                 $('.separate-page-title').html('<p class="breadcrumb">Claim / Claim list</p><h3 class="title">Localconveyance Expense Voucher Claim</h3>');
             } else {

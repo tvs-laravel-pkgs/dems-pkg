@@ -237,6 +237,9 @@ app.component('eyatraTripBookingRequestsView', {
                     'advance_received': {
                         maxlength: 10,
                     },
+                    'ticket_booking[][attachments]': {
+                        required: true,
+                    },
                 },
                 messages: {
                     'description': {

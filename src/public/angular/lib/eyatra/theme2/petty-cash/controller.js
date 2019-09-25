@@ -145,22 +145,22 @@ app.component('eyatraPettyCashForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            // if (!response.data.success) {
-            //     $noty = new Noty({
-            //         type: 'error',
-            //         layout: 'topRight',
-            //         text: response.data.error,
-            //         animation: {
-            //             speed: 500 // unavailable - no need
-            //         },
-            //     }).show();
-            //     setTimeout(function() {
-            //         $noty.close();
-            //     }, 5000);
-            //     $location.path('/eyatra/petty-cash/' + $routeParams.type_id)
-            //     return;
-            // }
-            console.log(response);
+            if (!response.data.success) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/eyatra/petty-cash/')
+                return;
+            }
+            // console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -271,7 +271,7 @@ app.component('eyatraPettyCashForm', {
                 todayHighlight: true,
                 autoclose: true,
             });
-        }, 1500);
+        }, 1000);
 
         //LOCAL CONVEYANCE FROM KM & TO KM AMOUNT CALC
         $(document).on('input', '.localconveyance_km', function() {

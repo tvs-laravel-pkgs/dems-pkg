@@ -112,6 +112,11 @@ class PettyCashManagerVerificationController extends Controller {
 				->where('employees.id', $petty_cash[0]->employee_id)
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
+			foreach ($petty_cash as $key => $value) {
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3440)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$value->attachments = $petty_cash_attachment;
+			}
+
 		} elseif ($type_id == 2) {
 			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
@@ -147,6 +152,10 @@ class PettyCashManagerVerificationController extends Controller {
 				->where('employees.id', $petty_cash_other[0]->employee_id)
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
+			foreach ($petty_cash_other as $key => $value) {
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$value->attachments = $petty_cash_attachment;
+			}
 		}
 		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
 		return response()->json($this->data);
