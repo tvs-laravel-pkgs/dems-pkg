@@ -149,4 +149,9 @@ class TripClaimController extends Controller {
 	public function getVisitTrnasportModeClaimStatus(Request $request) {
 		return Trip::getVisitTrnasportModeClaimStatus($request);
 	}
+	public function getTripClaimAttachments(Request $request)
+	{
+		dd('in');
+
+	}
 }
