@@ -160,7 +160,7 @@ app.component('eyatraPettyCashForm', {
                 $location.path('/eyatra/petty-cash/')
                 return;
             }
-            // console.log(response);
+            console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -205,16 +205,18 @@ app.component('eyatraPettyCashForm', {
             }, 500);
             $rootScope.loading = false;
             /* Datepicker With Current Date */
-
+            var d = new Date();
+            var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
+            $("#date").val(val);
         });
 
         $scope.getRatePerkm = function(id, index) {
             if (id == 15) {
-                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.two_wheeler_limit);
-                $(".ratePerKMamount_" + index).val(self.emp_details.two_wheeler_limit);
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.two_wheeler_per_km);
+                $(".ratePerKMamount_" + index).val(self.emp_details.two_wheeler_per_km);
             } else if (id == 16) {
-                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.four_wheeler_limit);
-                $(".ratePerKMamount_" + index).val(self.emp_details.four_wheeler_limit);
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.four_wheeler_per_km);
+                $(".ratePerKMamount_" + index).val(self.emp_details.four_wheeler_per_km);
             }
         }
 
@@ -238,6 +240,11 @@ app.component('eyatraPettyCashForm', {
                     });
                 }
             }
+
+            // $(".localconveyance_to_km").on('keyup', function() {
+            //     // localconveyance_from_km
+            //     console.log('1');
+            // });
 
             //SEARCH EMPLOYEE
             self.searchEmployee = function(query) {
@@ -273,22 +280,84 @@ app.component('eyatraPettyCashForm', {
             });
         }, 1000);
 
+
+        // $.validator.addMethod("greaterThan",
+        //     function(value, element, param) {
+        //         console.log($(this).attr("data-index"));
+        //         console.log(value, element.id, param);
+        //         var $otherElement = $(param);
+        //         console.log($otherElement.val());
+        //         return parseInt(value, 10) > parseInt($otherElement.val(), 10);
+        //     });
+        // $.validator.messages.greaterThan = 'File must be JPG, GIF or PNG';
+        // $.validator.addClassRules({
+        //     local_to_km: {
+        //         greaterThan: '.local_from_km',
+        //     },
+        // });
+
         //LOCAL CONVEYANCE FROM KM & TO KM AMOUNT CALC
         $(document).on('input', '.localconveyance_km', function() {
+            var index = $(this).attr("data-index");
             var localConveyance_amount = 0;
-            var localconveyance_from_km = $(this).closest('tr').find('.localconveyance_from_km').val();
-            var localconveyance_to_km = $(this).closest('tr').find('.localconveyance_to_km').val();
-            if (localconveyance_from_km && localconveyance_to_km) {
+            var localconveyance_from_km = parseInt($(this).closest('tr').find('.localconveyance_from_km').val());
+            var localconveyance_to_km = parseInt($(this).closest('tr').find('.localconveyance_to_km').val());
+            if (localconveyance_from_km == localconveyance_to_km) {
+                $(".validation_error_" + index).text("From,To km should not be same");
+                $('#submit').hide();
+            } else if (localconveyance_from_km > localconveyance_to_km) {
+                $(".validation_error_" + index).text("To km should not be greater then From km");
+                $('#submit').hide();
+            } else if (localconveyance_to_km == 0 || localconveyance_from_km == 0) {
+                $(".validation_error_" + index).text("Invalid value");
+                $('#submit').hide();
+            } else if (localconveyance_from_km && localconveyance_to_km) {
                 var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
+                if (parseInt(localConveyance_from_to_diff)) {
+                    console.log(localConveyance_from_to_diff);
+                }
                 var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
                 localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
-                // console.log(' == localconveyance_from_km ==' + localconveyance_from_km + ' == localconveyance_to_km ==' + localconveyance_to_km + ' == localConveyance_from_to_diff ==' + localConveyance_from_to_diff + ' === localConveyance_amount ==' + localConveyance_amount);
                 $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
                 self.localConveyanceCal();
+                $(".validation_error_" + index).text("");
+                $('#submit').show();
             } else {
                 $(this).closest('tr').find('.localConveyance_amount').val('');
                 self.localConveyanceCal();
+                $(".validation_error_" + index).text("");
+                $('#submit').show();
             }
+
+
+            // if (localconveyance_from_km && localconveyance_to_km) {
+            //     var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
+            //     var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
+            //     localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
+            //     // console.log(' == localconveyance_from_km ==' + localconveyance_from_km + ' == localconveyance_to_km ==' + localconveyance_to_km + ' == localConveyance_from_to_diff ==' + localConveyance_from_to_diff + ' === localConveyance_amount ==' + localConveyance_amount);
+            //     $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
+            //     self.localConveyanceCal();
+            // } else if (localconveyance_from_km <= localconveyance_to_km) {
+            //     // console.log('sfs');
+            //     // $("#check_notequal_" + index).addClass("valid_check");
+            //     $(".validation_error_" + index).text("From,To km should not be same");
+            //     $('#submit').hide();
+            // }
+            // // else if (localconveyance_to_km == 0 || localconveyance_from_km == 0) {
+            // //     $(".validation_error_zero_" + index).text("From,To km not accept '0'");
+            // //     $('#submit').hide();
+            // // }
+            // else {
+            //     $(this).closest('tr').find('.localConveyance_amount').val('');
+            //     self.localConveyanceCal();
+            //     $(".validation_error_" + index).text("");
+            //     $(".validation_error_zero_" + index).text("");
+            //     $('#submit').show();
+            // }
+            // } else {
+            //     $(this).closest('tr').find('.localConveyance_amount').val('');
+            //     self.localConveyanceCal();
+            // }
 
         });
 
@@ -411,8 +480,14 @@ app.component('eyatraPettyCashForm', {
             }, 500);
         }
 
+
+
         var form_id = '#petty-cash';
         var v = jQuery(form_id).validate({
+            // rules: { //     valid_check: {
+            //     greaterThan: "#id1",
+            // },
+            // },
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'employee_id') {
                     error.appendTo($('.employee_error'));
@@ -421,22 +496,10 @@ app.component('eyatraPettyCashForm', {
                 }
             },
             ignore: '',
-            invalidHandler: function(event, validator) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: 'You have errors please check',
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 10000);
-            },
             submitHandler: function(form) {
-
                 let formData = new FormData($(form_id)[0]);
+                // console.log(formData);
+                // return false;
                 $('#submit').button('loading');
                 $.ajax({
                         url: laravel_routes['pettycashSave'],
@@ -458,7 +521,7 @@ app.component('eyatraPettyCashForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Petty Cash saves successfully',
+                                text: res.message,
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },

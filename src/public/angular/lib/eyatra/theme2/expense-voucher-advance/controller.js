@@ -113,7 +113,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
-                    dataTable.ajax.reload(function(json) {});
+                    $('#expense_advance_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/expense/voucher-advance/list')
                     $scope.$apply()
                 }
@@ -246,34 +246,38 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 },
                 'description': {
                     required: true,
+                    minlength: 5,
+                    maxlength: 191,
                 },
                 'expense_description': {
                     required: true,
+                    minlength: 5,
+                    maxlength: 191,
                 },
                 'expense_amount': {
                     required: true,
                 },
             },
-            messages: {
-                'employee_id': {
-                    required: 'Employee code is required',
-                },
-                'date': {
-                    required: 'Date is required',
-                },
-                'advance_amount': {
-                    required: 'Advance Amount is required',
-                },
-                'description': {
-                    required: 'Advance Amount Details is required',
-                },
-                'expense_description': {
-                    required: 'Expense Amount Details is required',
-                },
-                'expense_amount': {
-                    required: 'Expense Amount is required',
-                },
-            },
+            // messages: {
+            //     'employee_id': {
+            //         required: 'Employee code is required',
+            //     },
+            //     'date': {
+            //         required: 'Date is required',
+            //     },
+            //     'advance_amount': {
+            //         required: 'Advance Amount is required',
+            //     },
+            //     'description': {
+            //         required: 'Advance Amount Details is required',
+            //     },
+            //     'expense_description': {
+            //         required: 'Expense Amount Details is required',
+            //     },
+            //     'expense_amount': {
+            //         required: 'Expense Amount is required',
+            //     },
+            // },
 
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
@@ -286,7 +290,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        // console.log(res.success);
+                        console.log(res.message);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -298,7 +302,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Expense voucher advance saved successfully!',
+                                text: res.message,
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },
