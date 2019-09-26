@@ -8,6 +8,7 @@ use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Mail;
+use Validator;
 use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Mail\TicketNotificationMail;
@@ -100,27 +101,32 @@ class TripBookingUpdateController extends Controller {
 	public function saveTripBookingUpdates(Request $r) {
 		// dump($r->all());
 		// DB::beginTransaction();
-		// try {
-		// $validator = Validator::make($r->all(), [
-		// 	// 'travel_mode_id' => [
-		// 	// 	'required:true',
-		// 	// ],
-		// 	'reference_number' => [
-		// 		'required:true',
-		// 	],
-		// 	'amount' => [
-		// 		'required:true',
-		// 	],
-		// 	'tax' => [
-		// 		'required:true',
-		// 	],
-		// 	'attachments.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-		// ]);
+		 try {
+		 	$error_messages = [
+                'ticket_booking.*.travel_mode_id.required' => 'Ticket booking mode is required',
+                'ticket_booking.*.ticket_amount.required' =>'Ticket amount is required',
+                'ticket_booking.*.reference_number.required' =>'Ticket reference_number is required',
+                'ticket_booking.*.attachments.required' =>'Ticket attachments is required',
+            ];
 
-		// if ($validator->fails()) {
-		// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-		// }
+			$validator = Validator::make($r->all(), [
+				'ticket_booking.*.travel_mode_id' => [
+					'required:true',
+				],
+				'ticket_booking.*.ticket_amount' => [
+					'required:true',
+				],
+				'ticket_booking.*.reference_number' => [
+					'required:true',
+				],
+				'ticket_booking.*.attachments' => 'required|mimes:jpeg,png,jpg,gif,svg,pdf',
+			], $error_messages);
 
+
+			if ($validator->fails()) {
+				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+		//dd($r->all());
 		//Check Booking Method Agent of Self
 		if ($r->booking_method == 'self') {
 			//Unique validation
@@ -280,11 +286,10 @@ class TripBookingUpdateController extends Controller {
 			}
 		}
 		// DB::commit();
-		// } catch (Exception $e) {
-		// 	DB::rollBack();
-		// 	// dd($e->getMessage());
-		// 	return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
-		// }
+		} catch (Exception $e) {
+			// dd($e->getMessage());
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		}
 		return response()->json(['success' => true]);
 	}
 	public function sendTicketNotificationMail($visit) {
