@@ -114,11 +114,13 @@ class TripController extends Controller {
 			}
 		}
 
-		$trip_start_date_data = Trip::where('start_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->first();
-		$trip_end_date_data = Trip::where('start_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '<=', date("Y-m-d", strtotime($request->end_date)))->where('employee_id', Auth::user()->entity_id)->first();
+		// dd($request->start_date);
+		$trip_start_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->first();
+		// dd($trip_start_date_data);
+		$trip_end_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('employee_id', Auth::user()->entity_id)->first();
 		//dd($trip_start_date_data, $trip_end_date_data);
 		if ($trip_start_date_data || $trip_end_date_data) {
-			return response()->json(['success' => false, 'errors' => "You have another trip on This Trip Period"]);
+			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
 		}
 
 		$size = sizeof($request->visits);
