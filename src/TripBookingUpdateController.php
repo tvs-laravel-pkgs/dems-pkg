@@ -99,7 +99,7 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		// dump($r->all());
+		// dd($r->all());
 		// DB::beginTransaction();
 		 try {
 		 	$error_messages = [
@@ -183,20 +183,22 @@ class TripBookingUpdateController extends Controller {
 			$visit_bookings->igst = $r->igst;
 
 			$visit_bookings->save();
-			//dd($visit_bookings);
+
 			$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
 			Storage::makeDirectory($booking_updates_images, 0777);
-			if ($r->hasfile('attachments')) {
-				foreach ($r->file('attachments') as $image) {
-					$name = $image->getClientOriginalName();
-					$image->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
-					$attachement = new Attachment;
-					$attachement->attachment_of_id = 3180; // Visit Booking Attachment
-					$attachement->attachment_type_id = 3200; //Multi Attachment
-					$attachement->entity_id = $visit_bookings->id;
-					$attachement->name = $name;
-					$attachement->save();
-				}
+			// dd($r->attachments);
+			if (isset($r->attachments)) {
+				$image = $r->attachments;
+				$extension = $image->getClientOriginalExtension();
+				$name = $visit_bookings->id . '_ticket_booking_attachment.' . $extension;
+				$des_path = storage_path('app/public/visit/booking-updates/attachments/');
+				$image->move($des_path, $name);
+				$attachement = new Attachment;
+				$attachement->attachment_of_id = 3180; // Visit Booking Attachment
+				$attachement->attachment_type_id = 3200; //Multi Attachment
+				$attachement->entity_id = $visit_bookings->id;
+				$attachement->name = $name;
+				$attachement->save();
 			}
 		}
 		//AGENT BOOKING TRIP
