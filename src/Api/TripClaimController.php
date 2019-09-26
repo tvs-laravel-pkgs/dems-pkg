@@ -162,8 +162,8 @@ class TripClaimController extends Controller {
 					Storage::makeDirectory($item_images, 0777);
 					if (!empty($request->attachments)) {
 						//dd($request->attachments);
+						foreach ($request->attachments as $key => $attachement) {
 							$attachement=$request->attachments;
-						//foreach ($lodging_data['attachments'] as $key => $attachement) {
 							$name = $request->attachments->getClientOriginalName();
 							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
 							$attachement_lodge = new Attachment;
@@ -172,7 +172,7 @@ class TripClaimController extends Controller {
 							$attachement_lodge->entity_id = $request->trip_id;
 							$attachement_lodge->name = $name;
 							$attachement_lodge->save();
-						//}
+						}
 					}
 				}
 				if($request->is_boarding==1)

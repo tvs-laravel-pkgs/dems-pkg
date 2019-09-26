@@ -5,12 +5,12 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Entrust;
-use Mail;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Mail\TicketNotificationMail;
 use Illuminate\Support\Facades\Storage;
+use Mail;
 use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\Mail\TicketNotificationMail;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Uitoux\EYatra\VisitBooking;
@@ -98,201 +98,203 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		// dump($r->all());
-		DB::beginTransaction();
-		try {	
-			// $validator = Validator::make($r->all(), [
-			// 	// 'travel_mode_id' => [
-			// 	// 	'required:true',
-			// 	// ],
-			// 	'reference_number' => [
-			// 		'required:true',
-			// 	],
-			// 	'amount' => [
-			// 		'required:true',
-			// 	],
-			// 	'tax' => [
-			// 		'required:true',
-			// 	],
-			// 	'attachments.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-			// ]);
+		// dd($r->all());
+		// DB::beginTransaction();
+		// try {
+		// $validator = Validator::make($r->all(), [
+		// 	// 'travel_mode_id' => [
+		// 	// 	'required:true',
+		// 	// ],
+		// 	'reference_number' => [
+		// 		'required:true',
+		// 	],
+		// 	'amount' => [
+		// 		'required:true',
+		// 	],
+		// 	'tax' => [
+		// 		'required:true',
+		// 	],
+		// 	'attachments.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+		// ]);
 
-			// if ($validator->fails()) {
-			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			// }
+		// if ($validator->fails()) {
+		// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+		// }
 
-			//Check Booking Method Agent of Self
-			if ($r->booking_method == 'self') {
-				//Unique validation
-				$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
-					->where('type_id', $r->type_id)
-					->where('travel_mode_id', $r->travel_mode_id)
-					->first();
-				if ($travel_mode_id_unique) {
-					return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
-				}
-				$travel_mode_id = $r->travel_mode_id;
+		//Check Booking Method Agent of Self
+		if ($r->booking_method == 'self') {
+			//Unique validation
+			$travel_mode_id_unique = VisitBooking::where('visit_id', $r->visit_id)
+				->where('type_id', $r->type_id)
+				->where('travel_mode_id', $r->travel_mode_id)
+				->first();
+			if ($travel_mode_id_unique) {
+				return response()->json(['success' => false, 'errors' => ['Travel mode is already  taken']]);
+			}
+			$travel_mode_id = $r->travel_mode_id;
+			$booking_status_id = 3061; //Visit Status Booked
+
+		} else {
+			//check Booking Type Fresh Booking or Cancel Booking
+			if ($r->booking_type == 'fresh_booking') {
 				$booking_status_id = 3061; //Visit Status Booked
-
 			} else {
-				//check Booking Type Fresh Booking or Cancel Booking
-				if ($r->booking_type == 'fresh_booking') {
-					$booking_status_id = 3061; //Visit Status Booked
-				} else {
-					//Find Visit Details
-					// $visit_status = VisitBooking::where('visit_id', $r->visit_id)
-					// 	->where('type_id', 3100)
-					// 	->first();
-					// if (!$visit_status) {
-					// 	return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
-					// }
-					// $travel_mode_id = $visit_status->travel_mode_id;
-					$booking_status_id = 3062; //Visit Status Cancelled
-				}
-
-				// dd($booking_status_id);
+				//Find Visit Details
+				// $visit_status = VisitBooking::where('visit_id', $r->visit_id)
+				// 	->where('type_id', 3100)
+				// 	->first();
+				// if (!$visit_status) {
+				// 	return response()->json(['success' => false, 'errors' => ['Visit Details not found']]);
+				// }
+				// $travel_mode_id = $visit_status->travel_mode_id;
+				$booking_status_id = 3062; //Visit Status Cancelled
 			}
 
-			if ($r->booking_method == 'self') {
+			// dd($booking_status_id);
+		}
 
-				//Visit status update
-				$visit = Visit::find($r->visit_id);
+		if ($r->booking_method == 'self') {
+
+			//Visit status update
+			$visit = Visit::find($r->visit_id);
+			$visit->booking_status_id = $booking_status_id;
+			$visit->save();
+
+			$service_charge = 0;
+			//Total Amount of Booking Deails (include tax)
+			$tax = $r->cgst + $r->sgst + $r->igst;
+			$tax_total = $tax ? $tax : 0;
+			$total_amount = $r->amount + $tax_total + $service_charge;
+
+			$visit_bookings = new VisitBooking;
+			$visit_bookings->fill($r->all());
+			$visit_bookings->service_charge = $service_charge;
+			$visit_bookings->total = $total_amount;
+			$visit_bookings->created_by = Auth::user()->id;
+			$visit_bookings->tax = $tax_total;
+			$visit_bookings->cgst = $r->cgst;
+			$visit_bookings->sgst = $r->sgst;
+			$visit_bookings->igst = $r->igst;
+
+			$visit_bookings->save();
+
+			$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
+			Storage::makeDirectory($booking_updates_images, 0777);
+			// dd($r->attachments);
+			if (isset($r->attachments)) {
+				$image = $r->attachments;
+				$extension = $image->getClientOriginalExtension();
+				$name = $visit_bookings->id . '_ticket_booking_attachment.' . $extension;
+				$des_path = storage_path('app/public/visit/booking-updates/attachments/');
+				$image->move($des_path, $name);
+				$attachement = new Attachment;
+				$attachement->attachment_of_id = 3180; // Visit Booking Attachment
+				$attachement->attachment_type_id = 3200; //Multi Attachment
+				$attachement->entity_id = $visit_bookings->id;
+				$attachement->name = $name;
+				$attachement->save();
+			}
+		}
+		//AGENT BOOKING TRIP
+		else {
+			// dd($r->ticket_booking);
+			foreach ($r->ticket_booking as $key => $value) {
+				$visit = Visit::find($value['visit_id']);
 				$visit->booking_status_id = $booking_status_id;
 				$visit->save();
 
-				$service_charge = 0;
-				//Total Amount of Booking Deails (include tax)
-				$tax = $r->cgst + $r->sgst + $r->igst;
-				$tax_total = $tax ? $tax : 0;
-				$total_amount = $r->amount + $tax_total + $service_charge;
+				$service_charge = Agent::join('state_agent_travel_mode', 'state_agent_travel_mode.agent_id', 'agents.id')
+					->where('state_agent_travel_mode.agent_id', $visit->agent_id)
+					->where('state_agent_travel_mode.travel_mode_id', $value['travel_mode_id'])
+					->pluck('state_agent_travel_mode.service_charge')->first();
+
+				$service_charge = $service_charge ? $service_charge : 0;
+				$amount = $value['ticket_amount'] ? $value['ticket_amount'] : 0;
+				$tax_total = $value['cgst'] + $value['sgst'] + $value['igst'];
+				$tax = $tax_total ? $tax_total : 0;
+
+				$total_amount = $amount + $tax + $service_charge;
+
+				//Agent Claimed Amount
+				if ($r->booking_type == 'fresh_booking') {
+					$claim_amount = $total_amount;
+				} else {
+					//Get Same Visit Booking Details
+					$previous_visit_booking = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->select('amount', 'tax', 'service_charge')->first();
+
+					//Update Same Visit Booking details paid/claim amount
+					$visit_booking_update = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->update(['paid_amount' => $previous_visit_booking->service_charge]);
+
+					$previous_booking_amount = $previous_visit_booking->amount + $previous_visit_booking->tax;
+					$cancel_booking_amount = $amount + $tax;
+					$claim_amount = ($previous_booking_amount - $cancel_booking_amount) + $service_charge;
+
+				}
 
 				$visit_bookings = new VisitBooking;
-				$visit_bookings->fill($r->all());
+				$visit_bookings->visit_id = $value['visit_id'];
+				$visit_bookings->type_id = $r->type_id;
+				$visit_bookings->travel_mode_id = $value['travel_mode_id'];
+				$visit_bookings->reference_number = $value['reference_number'];
+				$visit_bookings->booking_type_id = $value['booking_mode_id'];
+				$visit_bookings->amount = $amount;
+				$visit_bookings->tax = $tax;
+				$visit_bookings->cgst = $value['cgst'];
+				$visit_bookings->sgst = $value['sgst'];
+				$visit_bookings->igst = $value['igst'];
 				$visit_bookings->service_charge = $service_charge;
 				$visit_bookings->total = $total_amount;
+				$visit_bookings->paid_amount = $claim_amount;
+				$visit_bookings->status_id = $r->status_id;
 				$visit_bookings->created_by = Auth::user()->id;
-				$visit_bookings->tax = $tax_total;
-				$visit_bookings->cgst = $r->cgst;
-				$visit_bookings->sgst = $r->sgst;
-				$visit_bookings->igst = $r->igst;
-
 				$visit_bookings->save();
 				//dd($visit_bookings);
+				// dump($value);
 				$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
 				Storage::makeDirectory($booking_updates_images, 0777);
-				if ($r->hasfile('attachments')) {
-					foreach ($r->file('attachments') as $image) {
-						$name = $image->getClientOriginalName();
-						$image->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
-						$attachement = new Attachment;
-						$attachement->attachment_of_id = 3180; // Visit Booking Attachment
-						$attachement->attachment_type_id = 3200; //Multi Attachment
-						$attachement->entity_id = $visit_bookings->id;
-						$attachement->name = $name;
-						$attachement->save();
-					}
+				// if ($value->hasfile('attachments')) {
+				if (isset($value['attachments'])) {
+					$image = $value['attachments'];
+
+					// dd($image);
+					// foreach ($r->file('attachments') as $image) {
+					$extension = $image->getClientOriginalExtension();
+					$name = $visit_bookings->id . '_ticket_booking_attachment.' . $extension;
+					//dump($name);
+					$des_path = storage_path('app/public/visit/booking-updates/attachments/');
+					// dd($des_path);
+					$image->move($des_path, $name);
+					$attachement = new Attachment;
+					$attachement->attachment_of_id = 3180; // Visit Booking Attachment
+					$attachement->attachment_type_id = 3200; //Multi Attachment
+					$attachement->entity_id = $visit_bookings->id;
+					$attachement->name = $name;
+					$attachement->save();
+					// }
+					//dd('end');
+					// DB::commit();
 				}
-			} 
-			//AGENT BOOKING TRIP
-			else {
-				// dd($r->ticket_booking);
-				foreach ($r->ticket_booking as $key => $value) {
-					$visit = Visit::find($value['visit_id']);
-					$visit->booking_status_id = $booking_status_id;
-					$visit->save();
 
-					$service_charge = Agent::join('state_agent_travel_mode', 'state_agent_travel_mode.agent_id', 'agents.id')
-						->where('state_agent_travel_mode.agent_id', $visit->agent_id)
-						->where('state_agent_travel_mode.travel_mode_id', $value['travel_mode_id'])
-						->pluck('state_agent_travel_mode.service_charge')->first();
-
-					$service_charge = $service_charge ? $service_charge : 0;
-					$amount = $value['ticket_amount'] ? $value['ticket_amount'] : 0;
-					$tax_total = $value['cgst'] + $value['sgst'] + $value['igst'];
-					$tax = $tax_total ? $tax_total : 0;
-
-					$total_amount = $amount + $tax + $service_charge;
-
-					//Agent Claimed Amount
-					if ($r->booking_type == 'fresh_booking') {
-						$claim_amount = $total_amount;
-					} else {
-						//Get Same Visit Booking Details
-						$previous_visit_booking = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->select('amount', 'tax', 'service_charge')->first();
-
-						//Update Same Visit Booking details paid/claim amount
-						$visit_booking_update = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->update(['paid_amount' => $previous_visit_booking->service_charge]);
-
-						$previous_booking_amount = $previous_visit_booking->amount + $previous_visit_booking->tax;
-						$cancel_booking_amount = $amount + $tax;
-						$claim_amount = ($previous_booking_amount - $cancel_booking_amount) + $service_charge;
-
-					}
-
-					$visit_bookings = new VisitBooking;
-					$visit_bookings->visit_id = $value['visit_id'];
-					$visit_bookings->type_id = $r->type_id;
-					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
-					$visit_bookings->reference_number = $value['reference_number'];
-					$visit_bookings->booking_type_id = $value['booking_mode_id'];
-					$visit_bookings->amount = $amount;
-					$visit_bookings->tax = $tax;
-					$visit_bookings->cgst = $value['cgst'];
-					$visit_bookings->sgst = $value['sgst'];
-					$visit_bookings->igst = $value['igst'];
-					$visit_bookings->service_charge = $service_charge;
-					$visit_bookings->total = $total_amount;
-					$visit_bookings->paid_amount = $claim_amount;
-					$visit_bookings->status_id = $r->status_id;
-					$visit_bookings->created_by = Auth::user()->id;
-					$visit_bookings->save();
-					//dd($visit_bookings);
-					// dump($value);
-					$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
-					Storage::makeDirectory($booking_updates_images, 0777);
-					// if ($value->hasfile('attachments')) {
-					if (isset($value['attachments'])) {
-						$image = $value['attachments'];
-
-						// dd($image);
-						// foreach ($r->file('attachments') as $image) {
-						$name = $image->getClientOriginalName();
-						//dump($name);
-						$des_path = storage_path('app/public/visit/booking-updates/attachments/');
-						// dd($des_path);
-						$image->move($des_path, $name);
-						$attachement = new Attachment;
-						$attachement->attachment_of_id = 3180; // Visit Booking Attachment
-						$attachement->attachment_type_id = 3200; //Multi Attachment
-						$attachement->entity_id = $visit_bookings->id;
-						$attachement->name = $name;
-						$attachement->save();
-						// }
-						//dd('end');
-						DB::commit();
-					}
-
-					//Ticket Employee Mail Trigger
-					if ($visit) {
-						$this->sendTicketNotificationMail($visit);
-					}
+				//Ticket Employee Mail Trigger
+				if ($visit) {
+					$this->sendTicketNotificationMail($visit);
 				}
 			}
-			DB::commit();
-		} catch (Exception $e) {
-			DB::rollBack();
-			// dd($e->getMessage());
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
+		// DB::commit();
+		// } catch (Exception $e) {
+		// 	DB::rollBack();
+		// 	// dd($e->getMessage());
+		// 	return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		// }
 		return response()->json(['success' => true]);
 	}
-	public function sendTicketNotificationMail($visit)
-	{
-			$from_mail = env('MAIL_FROM_ADDRESS');
-			$from_name = env('MAIL_USERNAME');
-			$to_user = $visit->trip->employee->user;
-			$employee_details = $visit->trip->employee;
-			$visit_details = Visit::select(
+	public function sendTicketNotificationMail($visit) {
+		$from_mail = env('MAIL_FROM_ADDRESS');
+		$from_name = env('MAIL_USERNAME');
+		$to_user = $visit->trip->employee->user;
+		$employee_details = $visit->trip->employee;
+		$visit_details = Visit::select(
 			'visits.id',
 			//'trips.id as trip_id',
 			//'users.name as employee_name',
@@ -303,9 +305,9 @@ class TripBookingUpdateController extends Controller {
 			'travel_modes.name as travel_mode_name',
 			'booking_modes.name as booking_method_name',
 			'booking_status.name as booking_status'
-			)
-			//->join('trips', 'trips.id', 'visits.trip_id')
-			//->leftjoin('users', 'trips.employee_id', 'users.id')
+		)
+		//->join('trips', 'trips.id', 'visits.trip_id')
+		//->leftjoin('users', 'trips.employee_id', 'users.id')
 			->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 			->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
@@ -315,43 +317,41 @@ class TripBookingUpdateController extends Controller {
 			->where('booking_status_id', 3061)
 			->where('visits.id', $visit->id)
 			->first();
-			//dd($visit->bookings);
-			$arr['visits_attachments']="";
-			foreach ($visit->bookings as $key => $booking) {
-					//dump($booking->attachments);
-					if(count($booking->attachments) > 0){
-						$arr['visits_attachments']=$booking->attachments;
-					}
-				}
-				//dd($arr['visits_attachments']);
-			if ($to_user->email) {
-				$arr['from_mail'] = $from_mail;
-				$arr['from_name'] = $from_name;
-				$arr['to_email'] = $to_user->email;
-				$arr['to_name'] = $to_user->name;
-				$arr['to_email'] = 'saravanan@uitoux.in';
-				//$arr['to_name'] = 'parthiban';
-				$arr['subject'] = 'Ticket Booking Mail';
-				$arr['body'] = 'Employee ticket booking notification';
-				$arr['employee_details'] = $employee_details;
-				$arr['visits'] = $visit_details;
-				if($arr['visits_attachments'])
-				{
-				$arr['attachment']=url('storage/app/public/visit/booking-updates/attachments/'.$arr['visits_attachments'][0]['name']);
-				}else
-				{
-					$arr['attachment']="";
-				}
+		//dd($visit->bookings);
+		$arr['visits_attachments'] = "";
+		foreach ($visit->bookings as $key => $booking) {
+			//dump($booking->attachments);
+			if (count($booking->attachments) > 0) {
+				$arr['visits_attachments'] = $booking->attachments;
+			}
+		}
+		//dd($arr['visits_attachments']);
+		if ($to_user->email) {
+			$arr['from_mail'] = $from_mail;
+			$arr['from_name'] = $from_name;
+			$arr['to_email'] = $to_user->email;
+			$arr['to_name'] = $to_user->name;
+			$arr['to_email'] = 'saravanan@uitoux.in';
+			//$arr['to_name'] = 'parthiban';
+			$arr['subject'] = 'Ticket Booking Mail';
+			$arr['body'] = 'Employee ticket booking notification';
+			$arr['employee_details'] = $employee_details;
+			$arr['visits'] = $visit_details;
+			if ($arr['visits_attachments']) {
+				$arr['attachment'] = url('storage/app/public/visit/booking-updates/attachments/' . $arr['visits_attachments'][0]['name']);
+			} else {
+				$arr['attachment'] = "";
+			}
 //dd($arr['attachment']);
-				//dump($visit->bookings);
-				/*$arr['visits_attachments'] = Attachment::where('entity_id',$visit->bookings)->where('attachment_of_id', 3180)->where('attachment_type_id', 3200)->get();
+			//dump($visit->bookings);
+			/*$arr['visits_attachments'] = Attachment::where('entity_id',$visit->bookings)->where('attachment_of_id', 3180)->where('attachment_type_id', 3200)->get();
 				//dd($arr['visits_attachments']);
 				//$arr['trip'] = $trip;
 				//$arr['type'] = 2;*/
-				$MailInstance = new TicketNotificationMail($arr);
-				$Mail = Mail::send($MailInstance);
-			}
-			unset($arr['visits_attachments']);
+			$MailInstance = new TicketNotificationMail($arr);
+			$Mail = Mail::send($MailInstance);
+		}
+		unset($arr['visits_attachments']);
 
 	}
 
