@@ -292,7 +292,7 @@ class Trip extends Model {
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
 		$current_date = date('d-m-Y');
-		$claim_date = $trip->employee->grade_details->claim_active_days ? $trip->employee->grade_details->claim_active_days : 5;
+		$claim_date = $trip->employee->grade_details ? $trip->employee->grade_details->claim_active_days : 5;
 		$claim_last_date = date('d-m-Y', strtotime("+" . $claim_date . " day", strtotime($trip->end_date)));
 		// dump($trip->end_date);
 		// dump($claim_last_date);
