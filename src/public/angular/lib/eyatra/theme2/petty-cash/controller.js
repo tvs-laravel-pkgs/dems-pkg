@@ -195,6 +195,11 @@ app.component('eyatraPettyCashForm', {
                 } else { //LOCAL CONVEYANCE
                     self.addlocalconveyance();
                 }
+                // setTimeout(function() {
+                //     var d = new Date();
+                //     var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
+                //     $("#date").val(val);
+                // }, 500);
             }
             setTimeout(function() {
                 if (self.type_id == 2) { //OTHER
@@ -205,9 +210,7 @@ app.component('eyatraPettyCashForm', {
             }, 500);
             $rootScope.loading = false;
             /* Datepicker With Current Date */
-            var d = new Date();
-            var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
-            $("#date").val(val);
+
         });
 
         $scope.getRatePerkm = function(id, index) {
@@ -297,6 +300,7 @@ app.component('eyatraPettyCashForm', {
         // });
 
         //LOCAL CONVEYANCE FROM KM & TO KM AMOUNT CALC
+        // var travel_two = [];
         $(document).on('input', '.localconveyance_km', function() {
             var index = $(this).attr("data-index");
             var localConveyance_amount = 0;
@@ -306,16 +310,27 @@ app.component('eyatraPettyCashForm', {
                 $(".validation_error_" + index).text("From,To km should not be same");
                 $('#submit').hide();
             } else if (localconveyance_from_km > localconveyance_to_km) {
-                $(".validation_error_" + index).text("To km should not be greater then From km");
+                $(".validation_error_" + index).text("To km should be greater then From km");
                 $('#submit').hide();
             } else if (localconveyance_to_km == 0 || localconveyance_from_km == 0) {
                 $(".validation_error_" + index).text("Invalid value");
                 $('#submit').hide();
             } else if (localconveyance_from_km && localconveyance_to_km) {
                 var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
-                if (parseInt(localConveyance_from_to_diff)) {
-                    console.log(localConveyance_from_to_diff);
-                }
+                $('.difference_km_' + index).val(localConveyance_from_to_diff);
+                // var date = $(this).closest('tr').find('#date').val();
+                // var travel_mode_id = parseInt($(this).closest('tr').find('.travel_mode_id').val());
+                // console.log(travel_mode_id, localConveyance_from_to_diff, date);
+                // if (travel_mode_id && localConveyance_from_to_diff && date) {
+                //     if (travel_mode_id == 15) {
+                //         travel_two[date].push({
+                //             date: date,
+                //             diff: localConveyance_from_to_diff,
+                //         });
+                //         // travel_mode['two'].push();
+                //     }
+                //     console.log(travel_two);
+                // }
                 var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
                 localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
                 $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
@@ -328,37 +343,6 @@ app.component('eyatraPettyCashForm', {
                 $(".validation_error_" + index).text("");
                 $('#submit').show();
             }
-
-
-            // if (localconveyance_from_km && localconveyance_to_km) {
-            //     var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
-            //     var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
-            //     localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
-            //     // console.log(' == localconveyance_from_km ==' + localconveyance_from_km + ' == localconveyance_to_km ==' + localconveyance_to_km + ' == localConveyance_from_to_diff ==' + localConveyance_from_to_diff + ' === localConveyance_amount ==' + localConveyance_amount);
-            //     $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
-            //     self.localConveyanceCal();
-            // } else if (localconveyance_from_km <= localconveyance_to_km) {
-            //     // console.log('sfs');
-            //     // $("#check_notequal_" + index).addClass("valid_check");
-            //     $(".validation_error_" + index).text("From,To km should not be same");
-            //     $('#submit').hide();
-            // }
-            // // else if (localconveyance_to_km == 0 || localconveyance_from_km == 0) {
-            // //     $(".validation_error_zero_" + index).text("From,To km not accept '0'");
-            // //     $('#submit').hide();
-            // // }
-            // else {
-            //     $(this).closest('tr').find('.localConveyance_amount').val('');
-            //     self.localConveyanceCal();
-            //     $(".validation_error_" + index).text("");
-            //     $(".validation_error_zero_" + index).text("");
-            //     $('#submit').show();
-            // }
-            // } else {
-            //     $(this).closest('tr').find('.localConveyance_amount').val('');
-            //     self.localConveyanceCal();
-            // }
-
         });
 
         self.localConveyanceCal = function() {
