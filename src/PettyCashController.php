@@ -79,7 +79,9 @@ class PettyCashController extends Controller {
 	}
 
 	public function pettycashFormData($type_id = NULL, $pettycash_id = NULL) {
+		//GET LOCALCONVEYANCE ID AND NAME
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
+
 		if (!$pettycash_id) {
 			$petty_cash = new PettyCashEmployeeDetails;
 			$petty_cash_other = new PettyCashEmployeeDetails;
@@ -91,6 +93,7 @@ class PettyCashController extends Controller {
 
 		} else {
 			$this->data['action'] = 'Edit';
+			//ADD OR EDIT LOCALCONVAYANCE
 			if ($type_id == 1) {
 				$petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
 					DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date'),
@@ -98,7 +101,7 @@ class PettyCashController extends Controller {
 					->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 					->where('petty_cash.id', $pettycash_id)
 					->where('petty_cash_employee_details.expence_type', $localconveyance_id->id)->get();
-
+				//GET ATTACHMENTS
 				foreach ($petty_cash as $key => $value) {
 					$petty_cash_attachment = Attachment::where('attachment_of_id', 3440)->where('entity_id', $value->id)->select('name', 'id')->get();
 					$value->attachments = $petty_cash_attachment;
@@ -109,7 +112,7 @@ class PettyCashController extends Controller {
 			}
 
 			$this->data['success'] = true;
-
+			//ADD OR EDIT OTHER EXPENSE
 			if ($type_id == 2) {
 				//OTHER
 				$petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
@@ -122,6 +125,7 @@ class PettyCashController extends Controller {
 					->where('users.user_type_id', 3121)
 					->where('petty_cash.id', $pettycash_id)
 					->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
+				//GET ATTACHMENTS
 				foreach ($petty_cash_other as $key => $value) {
 					$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
 					$value->attachments = $petty_cash_attachment;
@@ -141,8 +145,8 @@ class PettyCashController extends Controller {
 		$this->data['petty_cash_other'] = $petty_cash_other;
 		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
 
+		//GET AUTH EMPLOYEEE DETAILS
 		$user_role = 'Employee';
-
 		$emp_details = Employee::select(
 			'users.name as name',
 			'employees.code as code',
@@ -231,7 +235,10 @@ class PettyCashController extends Controller {
 
 	public function pettycashView($type_id, $pettycash_id) {
 		// dd($type_id, $pettycash_id);
+
+		//GET LOCALCONVEYANCE ID AND NAME
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
+		//VIEW LOCALCONVEYANCE
 		if ($type_id == 1) {
 			$this->data['petty_cash'] = $petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type', 'configs.name as status', 'petty_cash.employee_id', 'petty_cash.total')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
@@ -273,6 +280,7 @@ class PettyCashController extends Controller {
 				$petty_cash_attachment = Attachment::where('attachment_of_id', 3440)->where('entity_id', $value->id)->select('name', 'id')->get();
 				$value->attachments = $petty_cash_attachment;
 			}
+			//VIEW OTHER EXPENSE
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
 			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status')
@@ -308,6 +316,7 @@ class PettyCashController extends Controller {
 				->where('employees.id', $petty_cash_other[0]->employee_id)
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
+			//GET ATACHMENTS
 			foreach ($petty_cash_other as $key => $value) {
 				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
 				$value->attachments = $petty_cash_attachment;
@@ -329,6 +338,8 @@ class PettyCashController extends Controller {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
 			DB::beginTransaction();
+
+			//GET AMOUNT LIMIT,TWO,FOUR WHEELER AMOUNT PER KM BASED ON EMPLOYEE
 			$employee_petty_cash_check = Employee::select(
 				'outlets.amount_eligible',
 				'outlets.amount_limit',
@@ -339,10 +350,12 @@ class PettyCashController extends Controller {
 				->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 				->where('employees.id', $request->employee_id)->first();
 
+			//CHECK VALIDATION FOR MAXIMUM ELEGIBILITY AMOUNT LIMIT
 			if ($employee_petty_cash_check->expense_voucher_limit < $request->claim_total_amount) {
 				return response()->json(['success' => false, 'errors' => ['The maximum amount limit is ' . $employee_petty_cash_check->expense_voucher_limit]]);
 			}
 
+			//ADD PETTY CASH
 			$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
 			$petty_cash_employee_edit->employee_id = $request->employee_id;
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
@@ -352,8 +365,11 @@ class PettyCashController extends Controller {
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
 			$petty_cash_employee_edit->updated_at = NULL;
 			$petty_cash_employee_edit->save();
+
+			//ADD LOCALCONVEYANCE
 			if ($request->type_id == 1) {
 				if ($request->petty_cash) {
+					//REMOVE LOCALCONVEYANCE ID LIST
 					if (!empty($request->petty_cash_removal_id)) {
 						$petty_cash_removal_id = json_decode($request->petty_cash_removal_id, true);
 						PettyCashEmployeeDetails::whereIn('id', $petty_cash_removal_id)->delete();
@@ -366,12 +382,14 @@ class PettyCashController extends Controller {
 						$petty_cash_attach_removal_ids = json_decode($request->petty_cash_attach_removal_ids, true);
 						Attachment::whereIn('id', $petty_cash_attach_removal_ids)->delete();
 					}
-					// dd($expence_type->id);
+
+					//CHECK TRAVEL MODE,DATE AND DIFFERENCE_KM BASED ON PER DAY KM LIMIT
 					foreach ($request->petty_cash as $petty_cash_data) {
 						$voucher_km_difference[$petty_cash_data['travel_mode_id']][$petty_cash_data['date']][] = $petty_cash_data['difference_km'];
 					}
 					foreach ($voucher_km_difference as $travel_mode_id => $date_array) {
 						foreach ($date_array as $date_key => $distance_array) {
+							//TWO WHEELER
 							if ($travel_mode_id == 15) {
 								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
 								if ($total_distance > $employee_petty_cash_check->two_wheeler_limit) {
@@ -379,6 +397,7 @@ class PettyCashController extends Controller {
 									return response()->json(['success' => false, 'errors' => ['Maximum Two wheeler distance limit per day is ' . $employee_petty_cash_check->two_wheeler_limit]]);
 								}
 							}
+							//FOUR WHEELER
 							if ($travel_mode_id == 16) {
 								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
 								if ($total_distance > $employee_petty_cash_check->four_wheeler_limit) {
@@ -388,7 +407,9 @@ class PettyCashController extends Controller {
 							}
 						}
 					}
+					//END CHECK TRAVEL MODE,DATE AND DIFFERENCE_KM BASED ON PER DAY KM LIMIT //
 
+					//ADD LOCALCONVEYANCE TO TABLE
 					foreach ($request->petty_cash as $petty_cash_data) {
 						$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
 						$petty_cash->fill($petty_cash_data);
@@ -419,13 +440,14 @@ class PettyCashController extends Controller {
 					return response()->json(['success' => false, 'errors' => ['Local Conveyance is empty!']]);
 				}
 			} else {
-
+				//ADD OTHER EXPENSE
 				if ($request->petty_cash_other) {
 					//REMOVE OTHER EXPENSE ATTACHMENT
 					if (!empty($request->petty_cash_other_attach_removal_ids)) {
 						$petty_cash_other_attach_removal_ids = json_decode($request->petty_cash_other_attach_removal_ids, true);
 						Attachment::whereIn('id', $petty_cash_other_attach_removal_ids)->delete();
 					}
+					//REMOVE OTHER EXPENSE IDS
 					if (!empty($request->petty_cash_other_removal_id)) {
 						$petty_cash_other_removal_id = json_decode($request->petty_cash_other_removal_id, true);
 						PettyCashEmployeeDetails::whereIn('id', $petty_cash_other_removal_id)->delete();
@@ -433,6 +455,7 @@ class PettyCashController extends Controller {
 						$attachment_remove = json_decode($request->petty_cash_other_removal_id, true);
 						Attachment::where('entity_id', $attachment_remove)->where('attachment_of_id', 3441)->delete();
 					}
+					//ADD OTHER EXPENSE TO TABLE
 					foreach ($request->petty_cash_other as $petty_cash_data_other) {
 						$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
 						$petty_cash_other->fill($petty_cash_data_other);
@@ -466,7 +489,6 @@ class PettyCashController extends Controller {
 			}
 
 			//Reimbursement Transaction
-
 			$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->limit(1)->pluck('balance_amount')->first();
 			// dd($previous_balance_amount);
 			if ($previous_balance_amount) {
@@ -504,6 +526,7 @@ class PettyCashController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
+
 	public function pettycashFilterData() {
 		$this->data['status_list'] = $status_list = collect(Config::pettycashStatus())->prepend(['id' => '', 'name' => 'Select Status']);
 		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getOutletList())->prepend(['id' => '', 'name' => 'Select Outlet']);
