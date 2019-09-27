@@ -1364,6 +1364,12 @@ class Trip extends Model {
 				// 	}
 				// }
 
+				//SAVE EMPLOYEE CLAIMS
+				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+				$employee_claim->trip_id = $trip->id;
+				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->save();
+
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
@@ -1458,6 +1464,10 @@ class Trip extends Model {
 				// 	$boarding_dates_list = array();
 				// }
 
+				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+				$employee_claim->trip_id = $trip->id;
+				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->save();
 				DB::commit();
 				return response()->json(['success' => true, 'saved_lodgings' => $saved_lodgings]);
 			}
@@ -1521,6 +1531,11 @@ class Trip extends Model {
 					'boardings.city',
 					'boardings.attachments',
 				])->find($request->trip_id);
+
+				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+				$employee_claim->trip_id = $trip->id;
+				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->save();
 
 				DB::commit();
 				return response()->json(['success' => true, 'saved_boardings' => $saved_boardings]);
