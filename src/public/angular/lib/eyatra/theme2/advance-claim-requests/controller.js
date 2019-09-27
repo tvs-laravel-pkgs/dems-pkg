@@ -1,6 +1,6 @@
 app.component('eyatraAdvanceClaimRequests', {
     templateUrl: eyatra_advance_claim_request_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http) {
+    controller: function(HelperService, $rootScope, $scope, $http, $route) {
         var self = this;
         self.export_url = advance_claim_export_data_url;
         self.csrf = $('#csrf').val();
@@ -108,10 +108,8 @@ app.component('eyatraAdvanceClaimRequests', {
                 console.log('unchecked');
                 $('.booking_list').prop('checked', false);
             }
-            console.log(count);
-            console.log(selected_trips);
             if (count > 0) {
-                $('#employee_export').css({ 'display': 'block' });
+                $('#employee_export').css({ 'display': 'inline-block' });
 
             } else {
                 $('#employee_export').css({ 'display': 'none' });
@@ -119,7 +117,7 @@ app.component('eyatraAdvanceClaimRequests', {
             }
             $('.export_ids').val(selected_trips);
         });
-        $
+
         $(document.body).on('click', '.booking_list', function() {
             var count = 0;
             selected_trips = [];
@@ -127,16 +125,56 @@ app.component('eyatraAdvanceClaimRequests', {
                 count++;
                 selected_trips.push($(this).val());
             });
-            console.log(count);
-            console.log(selected_trips);
             if (count > 0) {
-                $('#employee_export').css({ 'display': 'block' });
+                $('#employee_export').css({ 'display': 'inline-block' });
 
             } else {
                 $('#employee_export').css({ 'display': 'none' });
 
             }
             $('.export_ids').val(selected_trips);
+        });
+
+        $('#employee_export').on('click', function() {
+            var export_ids = $('.export_ids').val();
+            console.log(export_ids);
+            $http.post(
+                advance_claim_approve_url, { export_ids: export_ids },
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Advance Request Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                    $('#employee_export').css({ 'display': 'none' });
+
+                    $('#eyatra_advance_claim_request_table').DataTable().ajax.reload();
+
+                    window.location.href = laravel_routes['AdvanceClaimRequestExport'];
+                }
+
+            });
+
         });
         $rootScope.loading = false;
 
