@@ -28,6 +28,7 @@ app.component('eyatraEmployees', {
                 dataType: "json",
                 data: function(d) {
                     d.outlet = $('#outlet_id').val();
+                    d.manager = $('#manager_id').val();
                     d.role = $('#role_id').val();
                     d.grade = $('#grade_id').val();
                 }
@@ -62,12 +63,17 @@ app.component('eyatraEmployees', {
             // console.log(response);
             self.grade_list = response.data.grade_list;
             self.outlet_list = response.data.outlet_list;
+            self.manager_list = response.data.manager_list;
             self.role_list = response.data.role_list;
             $rootScope.loading = false;
         });
         var dataTableFilter = $('#eyatra_employee_table').dataTable();
         $scope.onselectOutlet = function(id) {
             $('#outlet_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectManager = function(id) {
+            $('#manager_id').val(id);
             dataTableFilter.fnFilter();
         }
         $scope.onselectRole = function(id) {
@@ -80,8 +86,9 @@ app.component('eyatraEmployees', {
         }
         $scope.resetForm = function() {
             $('#outlet_id').val(null);
-            $('#role_id').val(null);
+            $('#manager_id').val(null);
             $('#grade_id').val(null);
+            $('#role_id').val(null);
             dataTableFilter.fnFilter();
         }
         $scope.resetForm();
