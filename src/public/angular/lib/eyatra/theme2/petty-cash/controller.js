@@ -283,7 +283,6 @@ app.component('eyatraPettyCashForm', {
             });
         }, 1000);
 
-
         // $.validator.addMethod("greaterThan",
         //     function(value, element, param) {
         //         console.log($(this).attr("data-index"));
@@ -389,36 +388,33 @@ app.component('eyatraPettyCashForm', {
             $('.claim_total_amount').text('₹ ' + total_claim_amount.toFixed(2));
         }
 
-        $scope.employeechecker = function(searchText, chkval) {
-            if (chkval == 1) {
-                return $http
-                    .get(get_employee_name + '/' + searchText)
-                    .then(function(res) {
-                        employee_list = res.data.employee_list;
-                        return employee_list;
-                    });
-            } else {
-                $http
-                    .get(get_employee_name + '/' + searchText)
-                    .then(function(res) {
-                        // console.log(res.data.employee_list[0]);
-                        self.selectedItem = res.data.employee_list[0];
-                    });
-            }
-        }
-
         self.addlocalconveyance = function() {
+            // $(document).ready(function() {
+            //     $('.addbtn').on('click', function() {
+            //         if ($("#petty-cash").valid()) {
             self.petty_cash_locals.push({
+                date: '',
+                purpose_id: '',
                 from_place: '',
                 to_place: '',
                 from_km: '',
                 to_km: '',
+                amount: '',
             });
+            //         } else {
+            //             return false;
+            //         }
+            //     });
+            // });
         }
+
         self.addotherexpence = function() {
             self.petty_cash_others.push({
-                expence_type: '',
-                preferred_travel_modes: '',
+                other_expence: '',
+                date_other: '',
+                amount: '',
+                tax: '',
+                remarks: '',
             });
         }
 
@@ -464,14 +460,9 @@ app.component('eyatraPettyCashForm', {
             }, 500);
         }
 
-
-
         var form_id = '#petty-cash';
+
         var v = jQuery(form_id).validate({
-            // rules: { //     valid_check: {
-            //     greaterThan: "#id1",
-            // },
-            // },
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'employee_id') {
                     error.appendTo($('.employee_error'));
@@ -482,8 +473,6 @@ app.component('eyatraPettyCashForm', {
             ignore: '',
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
-                // console.log(formData);
-                // return false;
                 $('#submit').button('loading');
                 $.ajax({
                         url: laravel_routes['pettycashSave'],
