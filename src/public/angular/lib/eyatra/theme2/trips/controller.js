@@ -42,8 +42,10 @@ app.component('eyatraTrips', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.employee_id = $('#employee_id').val();
+                    // d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                     d.status_id = $('#status_id').val();
                 }
             },
@@ -72,6 +74,14 @@ app.component('eyatraTrips', {
             '</a>'
         );*/
 
+        //CURRENT DATE SHOW IN DATEPICKER
+        setTimeout(function() {
+            $('div[data-provide="datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
+
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('eyatra_trip_table_filter');
@@ -80,12 +90,22 @@ app.component('eyatraTrips', {
         }, 500);
 
 
-        $scope.getEmployeeData = function(query) {
-            $('#employee_id').val(query);
-            dataTable.draw();
-        }
+        // $scope.getEmployeeData = function(query) {
+        //     $('#employee_id').val(query);
+        //     dataTable.draw();
+        // }
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getFromDateData = function(query) {
+            console.log(query);
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+            console.log(query);
+            $('#to_date').val(query);
             dataTable.draw();
         }
         $scope.getStatusData = function(query) {
@@ -94,8 +114,10 @@ app.component('eyatraTrips', {
         }
 
         $scope.reset_filter = function(query) {
-            $('#employee_id').val(-1);
+            // $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             $('#status_id').val(-1);
             dataTable.draw();
         }
