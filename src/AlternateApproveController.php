@@ -25,7 +25,7 @@ class AlternateApproveController extends Controller {
 			DB::raw('IF(alter_user.name IS NULL,"--",alter_user.name) as altempname'),
 			DB::raw('IF(alternateemp.code IS NULL,"--",alternateemp.code) as altempcode'),
 			'configs.name as type',
-			DB::raw('DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") as fromdate'),
+			DB::raw('IF(alternateemp.type IS 3481,"--",DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y")) as fromdate'),
 			DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
 			DB::raw('DATEDIFF(alternative_approvers.to , NOW()) as status')
 		)
@@ -208,7 +208,7 @@ class AlternateApproveController extends Controller {
 					$alternate_approve->updated_by = Auth::user()->id;
 					$alternate_approve->updated_at = Carbon::now();
 				*/
-				$alternate_approve->fill($request->all());
+				// $alternate_approve->fill($request->all());
 				$alternate_approve->created_by = Auth::user()->id;
 				$alternate_approve->created_at = Carbon::now();
 				$alternate_approve->updated_by = NULL;
@@ -216,8 +216,13 @@ class AlternateApproveController extends Controller {
 				$date = explode(' to ', $request->date);
 				$alternate_approve->employee_id = $request->employee_id;
 				$alternate_approve->alternate_employee_id = $request->alt_employee_id;
-				$alternate_approve->from = date("Y-m-d", strtotime($date[0]));
-				$alternate_approve->to = date("Y-m-d", strtotime($date[1]));
+				if (count($date) > 1) {
+					$alternate_approve->from = date("Y-m-d", strtotime($date[0]));
+					$alternate_approve->to = date("Y-m-d", strtotime($date[1]));
+				} else {
+					// $alternate_approve->from = '0000-00-00';
+					// $alternate_approve->to = '0000-00-00';
+				}
 				$alternate_approve->type = $request->type_id;
 				//dd($alternate_approve);
 				$alternate_approve->save();
