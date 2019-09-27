@@ -211,8 +211,8 @@ class AdvanceClaimRequestController extends Controller {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true]);
 	}
-	public function AdvanceClaimRequestExport(request $request) {
-		//dd($request->all());
+	public function AdvanceClaimRequestApprove(request $request) {
+
 		DB::beginTransaction();
 		try {
 			if ($request->export_ids) {
@@ -220,15 +220,29 @@ class AdvanceClaimRequestController extends Controller {
 			} else {
 				return back()->with('error', 'Trips not found');
 			}
+			$trips_status_update = Trip::whereIn('id', $trip_ids)->update(['advance_request_approval_status_id' => 3263]);
+			DB::commit();
+			return response()->json(['success' => true]);
+
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
+	}
+	public function AdvanceClaimRequestExport() {
+
+		DB::beginTransaction();
+		try {
+
 			$trips = Trip::select('users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->leftjoin('bank_details', 'bank_details.entity_id', 'employees.id')
-				->whereIn('trips.id', $trip_ids)
 				->where('users.user_type_id', 3121)
+				->leftjoin('bank_details', 'bank_details.entity_id', 'employees.id')
+				->where('trips.advance_request_approval_status_id', 3263)
 				->get();
 
-			$trips_status_update = Trip::whereIn('id', $trip_ids)->update(['advance_request_approval_status_id' => 3261]);
+			$trips_status_update = Trip::where('advance_request_approval_status_id', 3263)->update(['advance_request_approval_status_id' => 3261]);
 			DB::commit();
 			//dd($trips);
 			$trips_header = ['Employee Name', 'Employee Code', 'Account Number', 'Ifsc code', 'Amount'];
