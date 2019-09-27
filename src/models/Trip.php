@@ -1581,6 +1581,19 @@ class Trip extends Model {
 				$employee_claim->total_amount = $request->claim_total_amount;
 				$employee_claim->remarks = $request->remarks;
 
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $request->claim_total_amount) {
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->amount_to_pay = 1;
+				}
+
+				// dd($trip->advance_received);
+
 				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
 				if ($request->is_justify_my_trip) {
 					$employee_claim->is_justify_my_trip = 1;
