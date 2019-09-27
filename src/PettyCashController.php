@@ -425,13 +425,15 @@ class PettyCashController extends Controller {
 						Storage::makeDirectory($item_images, 0777);
 						if (!empty($petty_cash_data['attachments'])) {
 							foreach ($petty_cash_data['attachments'] as $key => $attachement) {
-								$name = $attachement->getClientOriginalName();
-								$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $name);
+								$random_file_name = '_' . $petty_cash->id . '_Localconveyance_file_' . rand(1, 1000) . '.';
+								$extension = $attachement->getClientOriginalExtension();
+								// dd($name . $extension);
+								$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $random_file_name . $extension);
 								$attachement_petty_cash = new Attachment;
 								$attachement_petty_cash->attachment_of_id = 3440;
 								$attachement_petty_cash->attachment_type_id = 3200;
 								$attachement_petty_cash->entity_id = $petty_cash->id;
-								$attachement_petty_cash->name = $name;
+								$attachement_petty_cash->name = $random_file_name . $extension;
 								$attachement_petty_cash->save();
 							}
 						}
@@ -471,13 +473,15 @@ class PettyCashController extends Controller {
 						Storage::makeDirectory($item_images, 0777);
 						if (!empty($petty_cash_data_other['attachments'])) {
 							foreach ($petty_cash_data_other['attachments'] as $key => $attachement) {
-								$name = $attachement->getClientOriginalName();
-								$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $name);
+								// $name = $attachement->getClientOriginalName();
+								$random_file_name = '_' . $petty_cash_other->id . '_Other_Expense_file_' . rand(1, 1000) . '.';
+								$extension = $attachement->getClientOriginalExtension();
+								$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $random_file_name . $extension);
 								$attachement_petty_other = new Attachment;
 								$attachement_petty_other->attachment_of_id = 3441;
 								$attachement_petty_other->attachment_type_id = 3200;
 								$attachement_petty_other->entity_id = $petty_cash_other->id;
-								$attachement_petty_other->name = $name;
+								$attachement_petty_other->name = $random_file_name . $extension;
 								$attachement_petty_other->save();
 
 							}
