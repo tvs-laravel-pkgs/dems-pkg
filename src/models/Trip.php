@@ -1292,6 +1292,8 @@ class Trip extends Model {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
 
+			$trip = Trip::find($request->trip_id);
+
 			//SAVING VISITS
 			if ($request->visits) {
 				// dd($request->visits);
@@ -1368,6 +1370,9 @@ class Trip extends Model {
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->employee_id = Auth::user()->entity_id;
+				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
+				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->save();
 
 				DB::commit();
@@ -1464,10 +1469,15 @@ class Trip extends Model {
 				// 	$boarding_dates_list = array();
 				// }
 
+				//SAVE EMPLOYEE CLAIMS
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->employee_id = Auth::user()->entity_id;
+				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
+				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->save();
+
 				DB::commit();
 				return response()->json(['success' => true, 'saved_lodgings' => $saved_lodgings]);
 			}
@@ -1532,9 +1542,13 @@ class Trip extends Model {
 					'boardings.attachments',
 				])->find($request->trip_id);
 
+				//SAVE EMPLOYEE CLAIMS
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->employee_id = Auth::user()->entity_id;
+				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
+				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->save();
 
 				DB::commit();

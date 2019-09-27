@@ -49,6 +49,11 @@ class TripController extends Controller {
 				}
 			})
 			->where(function ($query) use ($r) {
+				if ($r->get('trip_id')) {
+					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
 				if ($r->get('status_id')) {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
