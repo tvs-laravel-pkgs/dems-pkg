@@ -208,23 +208,6 @@ class ExpenseVoucherAdvanceController extends Controller {
 				$expense_voucher_advance->created_by = Auth::user()->id;
 				$expense_voucher_advance->status_id = 3460;
 			}
-			//STORE ATTACHMENT
-			$item_images = storage_path('expense-voucher-advance/attachments/');
-			Storage::makeDirectory($item_images, 0777);
-			if (isset($request->attachments)) {
-				foreach ($request->attachments as $key => $attachement) {
-					if (!empty($attachement)) {
-						$name = $attachement->getClientOriginalName();
-						$attachement->move(storage_path('app/public/expense-voucher-advance/attachments/'), $name);
-						$attachement_expense_voucher_advance = new Attachment;
-						$attachement_expense_voucher_advance->attachment_of_id = 3442;
-						$attachement_expense_voucher_advance->attachment_type_id = 3200;
-						$attachement_expense_voucher_advance->entity_id = $expense_voucher_advance->id;
-						$attachement_expense_voucher_advance->name = $name;
-						$attachement_expense_voucher_advance->save();
-					}
-				}
-			}
 
 			$expense_voucher_advance->fill($request->all());
 			$balence_amount = $request->advance_amount - $request->expense_amount;
@@ -244,6 +227,26 @@ class ExpenseVoucherAdvanceController extends Controller {
 				$expense_voucher_advance->expense_description = $request->expense_description;
 			}
 			$expense_voucher_advance->save();
+			//STORE ATTACHMENT
+			$item_images = storage_path('expense-voucher-advance/attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if (isset($request->attachments)) {
+				foreach ($request->attachments as $key => $attachement) {
+					if (!empty($attachement)) {
+						// $name = $attachement->getClientOriginalName();
+						$random_file_name = '_' . $expense_voucher_advance->id . '_Expence_Voucher_Advance_File_' . rand(1, 1000) . '.';
+						$extension = $attachement->getClientOriginalExtension();
+						$attachement->move(storage_path('app/public/expense-voucher-advance/attachments/'), $random_file_name . $extension);
+						dd($random_file_name . $extension);
+						$attachement_expense_voucher_advance = new Attachment;
+						$attachement_expense_voucher_advance->attachment_of_id = 3442;
+						$attachement_expense_voucher_advance->attachment_type_id = 3200;
+						$attachement_expense_voucher_advance->entity_id = $expense_voucher_advance->id;
+						$attachement_expense_voucher_advance->name = $random_file_name . $extension;
+						$attachement_expense_voucher_advance->save();
+					}
+				}
+			}
 
 			DB::commit();
 			if ($request->id) {
