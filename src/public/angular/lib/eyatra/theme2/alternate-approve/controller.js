@@ -253,6 +253,21 @@ app.component('eyatraAlternateApproveForm', {
              }
          }*/
 
+        $scope.alter_type = function(type) {
+            if (type == 3481) {
+
+                self.show_type = 'hide';
+
+                // $('#date').hide();
+            } else {
+                self.show_type = 'show';
+
+                // $('#date').show();
+            }
+            // $('#cancel_booking_visit_id').val(visit_id);
+        }
+
+
         $(document).on('click', '#submit', function(e) {
 
             var form_id = '#alternate-approve';

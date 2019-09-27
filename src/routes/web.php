@@ -31,6 +31,8 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('trip/cliam/list', 'Uitoux\EYatra\Api\TripVerificationController@listClaimList');
 		Route::post('trip/claim/view/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimViewData');
 		Route::post('trip/claim/get-form-data/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
+		Route::post('trip/claim/get-attachments', 'Uitoux\EYatra\Api\TripClaimController@getTripClaimAttachments');
+
 		Route::post('trip/claim/get-eligible-amount', 'Uitoux\EYatra\Api\TripClaimController@getEligibleAmtBasedonCitycategoryGrade');
 		Route::post('trip/claim/get-eligible-amount/by-staytype', 'Uitoux\EYatra\Api\TripClaimController@getEligibleAmtBasedonCitycategoryGradeStaytype');
 		Route::post('trip/claim/get-visit-transport-mode-claim-status', 'Uitoux\EYatra\Api\TripClaimController@getVisitTrnasportModeClaimStatus');
@@ -251,7 +253,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/advance-claim/request/approve/{trip_id}', 'Uitoux\EYatra\AdvanceClaimRequestController@approveAdvanceClaimRequest')->name('approveAdvanceClaimRequest');
 		Route::post('eyatra/advance-claim/request/reject', 'Uitoux\EYatra\AdvanceClaimRequestController@rejectAdvanceClaimRequest')->name('rejectAdvanceClaimRequest');
 		Route::get('eyatra/trip/verification/get-filter-data', 'Uitoux\EYatra\AdvanceClaimRequestController@eyatraAdvanceClaimFilterData')->name('eyatraAdvanceClaimFilterData');
-		Route::post('eyatra/advance-claim/request/export', 'Uitoux\EYatra\AdvanceClaimRequestController@AdvanceClaimRequestExport')->name('AdvanceClaimRequestExport');
+		Route::get('eyatra/advance-claim/request/export', 'Uitoux\EYatra\AdvanceClaimRequestController@AdvanceClaimRequestExport')->name('AdvanceClaimRequestExport');
+		Route::post('eyatra/advance-claim/request/multiple/approve', 'Uitoux\EYatra\AdvanceClaimRequestController@AdvanceClaimRequestApprove')->name('AdvanceClaimRequestApprove');
 
 		//AGENT REQUESTS
 		Route::get('eyatra/agent/request/get-list', 'Uitoux\EYatra\AgentRequestController@listAgentRequest')->name('listAgentRequest');

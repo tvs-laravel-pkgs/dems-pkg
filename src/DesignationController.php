@@ -22,6 +22,7 @@ class DesignationController extends Controller {
 				'designations.deleted_at',
 				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
 			)
+			->where('designations.company_id',Auth::user()->company_id)
 			->orderBy('designations.id', 'asc');
 
 		return Datatables::of($designations)

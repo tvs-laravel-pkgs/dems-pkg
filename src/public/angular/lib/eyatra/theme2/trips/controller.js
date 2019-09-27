@@ -42,8 +42,10 @@ app.component('eyatraTrips', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.employee_id = $('#employee_id').val();
+                    // d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                     d.status_id = $('#status_id').val();
                 }
             },
@@ -72,6 +74,14 @@ app.component('eyatraTrips', {
             '</a>'
         );*/
 
+        //CURRENT DATE SHOW IN DATEPICKER
+        setTimeout(function() {
+            $('div[data-provide="datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
+
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('eyatra_trip_table_filter');
@@ -80,12 +90,22 @@ app.component('eyatraTrips', {
         }, 500);
 
 
-        $scope.getEmployeeData = function(query) {
-            $('#employee_id').val(query);
-            dataTable.draw();
-        }
+        // $scope.getEmployeeData = function(query) {
+        //     $('#employee_id').val(query);
+        //     dataTable.draw();
+        // }
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getFromDateData = function(query) {
+            console.log(query);
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+            console.log(query);
+            $('#to_date').val(query);
             dataTable.draw();
         }
         $scope.getStatusData = function(query) {
@@ -94,8 +114,10 @@ app.component('eyatraTrips', {
         }
 
         $scope.reset_filter = function(query) {
-            $('#employee_id').val(-1);
+            // $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             $('#status_id').val(-1);
             dataTable.draw();
         }
@@ -313,20 +335,27 @@ app.component('eyatraTripForm', {
                     self.trip.visits[index].from_city_id = id;
                 }
             }
+            var error_details = 0;
             var leng = self.trip.visits.length;
             for (j = 0; j < leng; j++) {
                 if (self.trip.visits[j].to_city_details) {
                     from_id = self.trip.visits[j].from_city_details ? self.trip.visits[j].from_city_details.id : self.trip.visits[j].from_city_id;
-                    if (self.trip.visits[j].to_city_details.id == from_id) {
+                    if (self.trip.visits[j].to_city_details.id == self.trip.visits[j].from_city_details.id) {
+                        error_details = 1;
                         sameFromTo();
                     }
                 }
             }
-
+            if (error_details == 1) {
+                $('.btn-submit').prop('disabled', true);
+            } else {
+                $('.btn-submit').prop('disabled', false);
+            }
         }
         $scope.addVisit = function(visit_array) {
             var trip_array = self.trip.visits;
             var arr_length = trip_array.length;
+            // console.log(trip_array);
             arr_vol = arr_length - 1;
             if (!(trip_array[arr_vol].to_city_details) || !(trip_array[arr_vol].to_city_details.id)) {
                 $noty = new Noty({
@@ -346,7 +375,7 @@ app.component('eyatraTripForm', {
                 to_city_id: trip_array[arr_vol].from_city_id,
                 booking_method_name: 'Self',
                 preferred_travel_modes: '',
-                from_city_details: self.trip.from_city_details,
+                from_city_details: trip_array[arr_vol].to_city_details,
             });
             $('.datepicker_' + arr_length).datepicker('destroy');
             datecall(startdate, enddate, arr_length);
@@ -430,17 +459,25 @@ app.component('eyatraTripForm', {
         //         return [];
         //     }
         // }
+        // $('#trip-form').validate();
 
+        // var user = $('input[name^="visits"]');
+
+        // user.filter('input[name$="[to_city_id]"]').each(function() {
+        //     $(this).rules("add", {
+        //         messages: {
+        //             required: "Name is Mandatory"
+        //         }
+        //     });
+        // });
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'trip_mode[]') {
                     error.appendTo($('.trip_mode'));
-                } 
-                else if (element.hasClass("advance_amount_check")) {
+                } else if (element.hasClass("advance_amount_check")) {
                     error.appendTo($('.advance_amount_required'));
-                }
-                else {
+                } else {
                     error.insertAfter(element)
                 }
             },

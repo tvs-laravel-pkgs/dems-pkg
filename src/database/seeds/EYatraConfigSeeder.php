@@ -286,6 +286,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Financier Payment Hold',
 				'config_type_id' => 512,
 			],
+			3228 => [
+				'name' => 'Claim Inprogress',
+				'config_type_id' => 512,
+			],
 
 			//VISIT BOOKING STATUSES
 			3240 => [
@@ -352,6 +356,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3262 => [
 				'name' => 'Rejected',
+				'config_type_id' => 516,
+			],
+			3263 => [
+				'name' => 'Export',
 				'config_type_id' => 516,
 			],
 

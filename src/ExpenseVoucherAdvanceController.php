@@ -115,8 +115,8 @@ class ExpenseVoucherAdvanceController extends Controller {
 	}
 
 	public function ExpenseVoucherAdvanceFilterData() {
-		$list_of_status = array_merge(Config::ExpenseVoucherAdvanceStatus(), Config::ExpenseVoucherAdvanceStatusList());
-		$this->data['status_list'] = $status_list = collect($list_of_status)->prepend(['id' => '', 'name' => 'Select Status']);
+		//$list_of_status = array_merge(Config::ExpenseVoucherAdvanceStatus(), Config::ExpenseVoucherAdvanceStatusList());
+		$this->data['status_list'] = $status_list = collect(Config::ExpenseVoucherAdvanceStatus())->prepend(['id' => '', 'name' => 'Select Status']);
 		$this->data['employee_list'] = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
 		$this->data['outlet_list'] = collect(Outlet::getOutletList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 
@@ -246,8 +246,13 @@ class ExpenseVoucherAdvanceController extends Controller {
 			$expense_voucher_advance->save();
 
 			DB::commit();
-			$request->session()->flash('success', 'Expense voucher advance saved successfully!');
-			return response()->json(['success' => true]);
+			if ($request->id) {
+				return response()->json(['success' => true, 'message' => 'Expense voucher advance updated successfully']);
+			} else {
+				return response()->json(['success' => true, 'message' => 'Expense voucher advance saved successfully']);
+			}
+			// $request->session()->flash('success', 'Expense voucher advance saved successfully!');
+			// return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);

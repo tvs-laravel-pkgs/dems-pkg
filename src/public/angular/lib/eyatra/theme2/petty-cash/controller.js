@@ -59,13 +59,13 @@ app.component('eyatraPettyCashList', {
                 d.style.left = x.left + 'px';
             }, 500);
 
-
+            //FILTER
             $http.get(
                 expense_voucher_filter_url
             ).then(function(response) {
                 // console.log(response.data);
-                self.agent_list = response.data.agent_list;
-                self.tm_list = response.data.tm_list;
+                self.employee_list = response.data.employee_list;
+                self.outlet_list = response.data.outlet_list;
                 self.status_list = response.data.status_list;
                 // $rootScope.loading = false;
             });
@@ -75,11 +75,12 @@ app.component('eyatraPettyCashList', {
             $('#status').val(id);
             dataTable.draw();
         }
-
         $scope.reset_filter = function() {
             $('#status').val('');
             dataTable.draw();
         }
+
+        //DELETE PETTY CASH
         $scope.deletePettycash = function(id) {
             $('#deletepettycash_id').val(id);
         }
@@ -188,36 +189,34 @@ app.component('eyatraPettyCashForm', {
 
                 });
             } else {
-                // self.selectedItem = response.data.employee_list;
-                // $('.employee').val('');
-                if (self.type_id == 2) { //OTHER
+                if (self.type_id == 2) { //OTHER EXPENSE
                     self.addotherexpence();
                 } else { //LOCAL CONVEYANCE
                     self.addlocalconveyance();
                 }
             }
             setTimeout(function() {
-                if (self.type_id == 2) { //OTHER
+                if (self.type_id == 2) { //OTHER EXPENSE
                     self.otherConveyanceCal();
                 } else { // LOCAL CONVEYANCE
                     self.localConveyanceCal();
                 }
             }, 500);
             $rootScope.loading = false;
-            /* Datepicker With Current Date */
-
         });
 
+        //GET KM RATE FROM GRADE
         $scope.getRatePerkm = function(id, index) {
             if (id == 15) {
-                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.two_wheeler_limit);
-                $(".ratePerKMamount_" + index).val(self.emp_details.two_wheeler_limit);
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.two_wheeler_per_km);
+                $(".ratePerKMamount_" + index).val(self.emp_details.two_wheeler_per_km);
             } else if (id == 16) {
-                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.four_wheeler_limit);
-                $(".ratePerKMamount_" + index).val(self.emp_details.four_wheeler_limit);
+                $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.four_wheeler_per_km);
+                $(".ratePerKMamount_" + index).val(self.emp_details.four_wheeler_per_km);
             }
         }
 
+        //THIS ONLY SHOWS ON CASHIER LOGIN
         if (self.search_permission == true) {
             $(".removeDetails").on('click', function() {
                 self.emp_details = [];
@@ -228,6 +227,7 @@ app.component('eyatraPettyCashForm', {
                 }, 0);
             });
 
+            //GET EMPLOYEE DETAILS BASED AUTH USER ONLY SHOWS IN CASHIER
             $scope.getEmployee = function() {
                 if ($("#employee_id").val() != '') {
                     var id = $("#employee_id").val();
@@ -260,12 +260,7 @@ app.component('eyatraPettyCashForm', {
             }
         }
 
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-        });
+        //CURRENT DATE SHOW IN DATEPICKER
         setTimeout(function() {
             $('div[data-provide="datepicker"]').datepicker({
                 todayHighlight: true,
@@ -273,29 +268,74 @@ app.component('eyatraPettyCashForm', {
             });
         }, 1000);
 
+        // $.validator.addMethod("greaterThan",
+        //     function(value, element, param) {
+        //         console.log($(this).attr("data-index"));
+        //         console.log(value, element.id, param);
+        //         var $otherElement = $(param);
+        //         console.log($otherElement.val());
+        //         return parseInt(value, 10) > parseInt($otherElement.val(), 10);
+        //     });
+        // $.validator.messages.greaterThan = 'File must be JPG, GIF or PNG';
+        // $.validator.addClassRules({
+        //     local_to_km: {
+        //         greaterThan: '.local_from_km',
+        //     },
+        // });
+
         //LOCAL CONVEYANCE FROM KM & TO KM AMOUNT CALC
+        // var travel_two = [];
+
+        //LOCALCONVEYANCE AMOUNT SHOW BASED ON FROM AND TWO KM DIFFERENCE
         $(document).on('input', '.localconveyance_km', function() {
+            var index = $(this).attr("data-index");
             var localConveyance_amount = 0;
-            var localconveyance_from_km = $(this).closest('tr').find('.localconveyance_from_km').val();
-            var localconveyance_to_km = $(this).closest('tr').find('.localconveyance_to_km').val();
-            if (localconveyance_from_km && localconveyance_to_km) {
+            var localconveyance_from_km = parseInt($(this).closest('tr').find('.localconveyance_from_km').val());
+            var localconveyance_to_km = parseInt($(this).closest('tr').find('.localconveyance_to_km').val());
+            if (localconveyance_from_km == localconveyance_to_km) {
+                $(".validation_error_" + index).text("From,To km should not be same");
+                $('#submit').hide();
+            } else if (localconveyance_from_km > localconveyance_to_km) {
+                $(".validation_error_" + index).text("To km should be greater then From km");
+                $('#submit').hide();
+            } else if (localconveyance_to_km == 0 || localconveyance_from_km == 0) {
+                $(".validation_error_" + index).text("Invalid value");
+                $('#submit').hide();
+            } else if (localconveyance_from_km && localconveyance_to_km) {
                 var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
+                $('.difference_km_' + index).val(localConveyance_from_to_diff);
+                // var date = $(this).closest('tr').find('#date').val();
+                // var travel_mode_id = parseInt($(this).closest('tr').find('.travel_mode_id').val());
+                // console.log(travel_mode_id, localConveyance_from_to_diff, date);
+                // if (travel_mode_id && localConveyance_from_to_diff && date) {
+                //     if (travel_mode_id == 15) {
+                //         travel_two[date].push({
+                //             date: date,
+                //             diff: localConveyance_from_to_diff,
+                //         });
+                //         // travel_mode['two'].push();
+                //     }
+                //     console.log(travel_two);
+                // }
                 var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
                 localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
-                // console.log(' == localconveyance_from_km ==' + localconveyance_from_km + ' == localconveyance_to_km ==' + localconveyance_to_km + ' == localConveyance_from_to_diff ==' + localConveyance_from_to_diff + ' === localConveyance_amount ==' + localConveyance_amount);
                 $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
                 self.localConveyanceCal();
+                $(".validation_error_" + index).text("");
+                $('#submit').show();
             } else {
                 $(this).closest('tr').find('.localConveyance_amount').val('');
                 self.localConveyanceCal();
+                $(".validation_error_" + index).text("");
+                $('#submit').show();
             }
-
         });
 
+        //LOCALCONVEYANCE AMOUNT CALCULATE
         self.localConveyanceCal = function() {
             var total_petty_cash_local_amount = 0;
             $('.localConveyance_amount').each(function() {
-                var local_amount = parseInt($(this).closest('tr').find('#localConveyance_amount').val() || 0);
+                var local_amount = parseInt($(this).closest('tr').find('.localConveyance_amount_check_validation').val() || 0);
                 if (!$.isNumeric(local_amount)) {
                     local_amount = 0;
                 }
@@ -307,11 +347,13 @@ app.component('eyatraPettyCashForm', {
             $('.claim_total_amount').text('₹ ' + total_petty_cash_local_amount.toFixed(2));
             // caimTotalAmount();
         }
+
+        //OTHER EXPENSE AMOUNT CALCULATE
         self.otherConveyanceCal = function() {
             var total_petty_cash_other_amount = 0;
             $('.otherConveyance_amount').each(function() {
-                var other_amount = parseInt($(this).closest('tr').find('#otherConveyance_amount').val() || 0);
-                var other_tax = parseInt($(this).closest('tr').find('#otherConveyance_tax').val() || 0);
+                var other_amount = parseInt($(this).closest('tr').find('.otherConveyance_amount_check_validation').val() || 0);
+                var other_tax = parseInt($(this).closest('tr').find('.otherConveyance_tax_check_validation').val() || 0);
                 if (!$.isNumeric(other_amount)) {
                     other_amount = 0;
                 }
@@ -328,6 +370,7 @@ app.component('eyatraPettyCashForm', {
             // caimTotalAmount();
         }
 
+        //TOTAL AMOUNT CALCULATE
         function caimTotalAmount() {
             var total_petty_cash_local_amount = parseFloat($('.total_petty_cash_local_amount').val() || 0);
             var total_petty_cash_other_amount = parseFloat($('.total_petty_cash_other_amount').val() || 0);
@@ -336,39 +379,31 @@ app.component('eyatraPettyCashForm', {
             $('.claim_total_amount').text('₹ ' + total_claim_amount.toFixed(2));
         }
 
-        $scope.employeechecker = function(searchText, chkval) {
-            if (chkval == 1) {
-                return $http
-                    .get(get_employee_name + '/' + searchText)
-                    .then(function(res) {
-                        employee_list = res.data.employee_list;
-                        return employee_list;
-                    });
-            } else {
-                $http
-                    .get(get_employee_name + '/' + searchText)
-                    .then(function(res) {
-                        // console.log(res.data.employee_list[0]);
-                        self.selectedItem = res.data.employee_list[0];
-                    });
-            }
-        }
-
+        //ADD LOCALCONVEYANCE
         self.addlocalconveyance = function() {
             self.petty_cash_locals.push({
+                date: '',
+                purpose_id: '',
                 from_place: '',
                 to_place: '',
                 from_km: '',
                 to_km: '',
-            });
-        }
-        self.addotherexpence = function() {
-            self.petty_cash_others.push({
-                expence_type: '',
-                preferred_travel_modes: '',
+                amount: '',
             });
         }
 
+        //ADD OTHER EXPENSE
+        self.addotherexpence = function() {
+            self.petty_cash_others.push({
+                other_expence: '',
+                date_other: '',
+                amount: '',
+                tax: '',
+                remarks: '',
+            });
+        }
+
+        //REMOVE LOCALCONVEYANCE 
         self.removepettyCash = function(index, petty_cash_id) {
             if (petty_cash_id) {
                 self.petty_cash_removal_id.push(petty_cash_id);
@@ -400,6 +435,7 @@ app.component('eyatraPettyCashForm', {
             self.petty_cash_others[petty_cash_index].attachments.splice(petty_cash_attachment_index, 1);
         }
 
+        //REMOVE OTHER EXPENSE 
         self.removeotherexpence = function(index, petty_cash_other_id) {
             if (petty_cash_other_id) {
                 self.petty_cash_other_removal_id.push(petty_cash_other_id);
@@ -411,6 +447,7 @@ app.component('eyatraPettyCashForm', {
             }, 500);
         }
 
+        //FORM VALIDATION
         var form_id = '#petty-cash';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -421,21 +458,7 @@ app.component('eyatraPettyCashForm', {
                 }
             },
             ignore: '',
-            invalidHandler: function(event, validator) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: 'You have errors please check',
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 10000);
-            },
             submitHandler: function(form) {
-
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
@@ -458,7 +481,7 @@ app.component('eyatraPettyCashForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Petty Cash saves successfully',
+                                text: res.message,
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },
@@ -516,14 +539,14 @@ app.component('eyatraPettyCashView', {
             }, 500);
 
         });
-
+        //NO NEED
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
         });
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
-
+        //END
         $rootScope.loading = false;
     }
 });
