@@ -264,11 +264,11 @@ class TripBookingUpdateController extends Controller {
 
 					// dd($image);
 					// foreach ($r->file('attachments') as $image) {
+
 					$extension = $image->getClientOriginalExtension();
-					$name = $visit_bookings->id . '_ticket_booking_attachment.' . $extension;
-					//dump($name);
+					$value = rand(1, 100);
+					$name = $visit_bookings->id . '_ticket_booking_attachment' . $value . '.' . $extension;
 					$des_path = storage_path('app/public/visit/booking-updates/attachments/');
-					// dd($des_path);
 					$image->move($des_path, $name);
 					$attachement = new Attachment;
 					$attachement->attachment_of_id = 3180; // Visit Booking Attachment
@@ -277,8 +277,6 @@ class TripBookingUpdateController extends Controller {
 					$attachement->name = $name;
 					$attachement->save();
 					// }
-					//dd('end');
-					// DB::commit();
 				}
 
 				//Ticket Employee Mail Trigger
