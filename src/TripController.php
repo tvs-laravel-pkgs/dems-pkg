@@ -49,6 +49,18 @@ class TripController extends Controller {
 				}
 			})
 			->where(function ($query) use ($r) {
+				if ($r->from_date) {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("trips.start_date", $date)->orWhere(DB::raw("-1"), $r->from_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->to_date) {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("trips.end_date", $date)->orWhere(DB::raw("-1"), $r->to_date);
+				}
+			})
+			->where(function ($query) use ($r) {
 				if ($r->get('trip_id')) {
 					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
 				}

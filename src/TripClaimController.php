@@ -19,22 +19,25 @@ class TripClaimController extends Controller {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
 			->select(
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
-				'trips.status_id',
+				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				'trips.start_date',
-				'trips.end_date',
-				// DB::raw('DATE_FORMAT(trips.start_date,"%d/%m/%Y") as start_date'),
-				// DB::raw('DATE_FORMAT(trips.end_date,"%d/%m/%Y") as end_date'),
+
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
+				DB::raw('FORMAT(trips.advance_received,"2","en_IN") as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->whereIn('trips.status_id', [3023, 3025, 3026])
+
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -45,8 +48,31 @@ class TripClaimController extends Controller {
 					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
 				}
 			})
+			->where(function ($query) use ($r) {
+				if ($r->from_date) {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("trips.start_date", $date)->orWhere(DB::raw("-1"), $r->from_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->to_date) {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("trips.end_date", $date)->orWhere(DB::raw("-1"), $r->to_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('trip_id')) {
+					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+		// ->orderBy('trips.created_at', 'desc');
+			->orderBy('trips.id', 'desc');
 
 		if (!Entrust::can('view-all-trips')) {
 			$trips->where('trips.employee_id', Auth::user()->entity_id);
