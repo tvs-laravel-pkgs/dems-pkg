@@ -35,18 +35,20 @@ app.component('eyatraTripClaimList', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.employee_id = $('#employee_id').val();
+                    // d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                     d.status_id = $('#status_id').val();
                 }
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'created_date', name: 'trips.created_date', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'start_date', name: 'trips.start_date', searchable: false },
-                { data: 'end_date', name: 'trips.end_date', searchable: false },
-                { data: 'cities', name: 'c.name', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
@@ -57,6 +59,14 @@ app.component('eyatraTripClaimList', {
         });
         $('.dataTables_length select').select2();
 
+        //CURRENT DATE SHOW IN DATEPICKER
+        setTimeout(function() {
+            $('div[data-provide="datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
+
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('eyatra_trip_claim_list_table_filter');
@@ -64,12 +74,22 @@ app.component('eyatraTripClaimList', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        $scope.getEmployeeData = function(query) {
-            $('#employee_id').val(query);
-            dataTable.draw();
-        }
+        // $scope.getEmployeeData = function(query) {
+        //     $('#employee_id').val(query);
+        //     dataTable.draw();
+        // }
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getFromDateData = function(query) {
+            console.log(query);
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+            console.log(query);
+            $('#to_date').val(query);
             dataTable.draw();
         }
         $scope.getStatusData = function(query) {
@@ -78,8 +98,10 @@ app.component('eyatraTripClaimList', {
         }
 
         $scope.reset_filter = function(query) {
-            $('#employee_id').val(-1);
+            // $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             $('#status_id').val(-1);
             dataTable.draw();
         }
