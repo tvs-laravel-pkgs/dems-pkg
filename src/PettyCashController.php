@@ -332,9 +332,11 @@ class PettyCashController extends Controller {
 			$employee_petty_cash_check = Employee::select(
 				'outlets.amount_eligible',
 				'outlets.amount_limit',
-				'outlets.expense_voucher_limit'
-			)
+				'outlets.expense_voucher_limit',
+				'gae.two_wheeler_limit',
+				'gae.four_wheeler_limit')
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
+				->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 				->where('employees.id', $request->employee_id)->first();
 
 			if ($employee_petty_cash_check->expense_voucher_limit < $request->claim_total_amount) {
@@ -365,6 +367,28 @@ class PettyCashController extends Controller {
 						Attachment::whereIn('id', $petty_cash_attach_removal_ids)->delete();
 					}
 					// dd($expence_type->id);
+					foreach ($request->petty_cash as $petty_cash_data) {
+						$voucher_km_difference[$petty_cash_data['travel_mode_id']][$petty_cash_data['date']][] = $petty_cash_data['difference_km'];
+					}
+					foreach ($voucher_km_difference as $travel_mode_id => $date_array) {
+						foreach ($date_array as $date_key => $distance_array) {
+							if ($travel_mode_id == 15) {
+								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
+								if ($total_distance > $employee_petty_cash_check->two_wheeler_limit) {
+
+									return response()->json(['success' => false, 'errors' => ['Maximum Two wheeler distance limit per day is ' . $employee_petty_cash_check->two_wheeler_limit]]);
+								}
+							}
+							if ($travel_mode_id == 16) {
+								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
+								if ($total_distance > $employee_petty_cash_check->four_wheeler_limit) {
+
+									return response()->json(['success' => false, 'errors' => ['Maximum Four wheeler distance limit per day is ' . $employee_petty_cash_check->four_wheeler_limit]]);
+								}
+							}
+						}
+					}
+
 					foreach ($request->petty_cash as $petty_cash_data) {
 						$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
 						$petty_cash->fill($petty_cash_data);
