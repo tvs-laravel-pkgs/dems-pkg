@@ -32,6 +32,19 @@ class EmployeeController extends Controller {
 		$this->data['grade_list'] = $grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$this->data['role_list'] = $role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
 
+		$employees = Employee::select('reporting_to_id')
+			->distinct()
+			->whereNotNull('reporting_to_id')
+			->where('employees.company_id', Auth::user()->company_id)
+			->get()->toArray();
+		$employee_ids = array_column($employees, 'reporting_to_id');
+
+		$this->data['manager_list'] =  collect(Employee::join('users', 'users.entity_id', 'employees.id')
+            ->where('users.user_type_id', 3121)
+            ->where('users.company_id', Auth::user()->company_id)
+            ->whereIn('employees.id', $employee_ids)
+            ->select('employees.id', 'users.name')
+            ->get())->prepend(['id' => '', 'name' => 'Select Manager']); 
 		return response()->json($this->data);
 	}
 
@@ -47,6 +60,12 @@ class EmployeeController extends Controller {
 		} else {
 			$role = null;
 		}
+		if (!empty($r->manager)) {
+			$manager = $r->manager;
+		} else {
+			$manager = null;
+		}
+
 		if (!empty($r->grade)) {
 			$grade = $r->grade;
 		} else {
@@ -63,6 +82,7 @@ class EmployeeController extends Controller {
 					->where('u.user_type_id', 3121);
 			})
 			->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
+			->leftJoin('role_user', 'role_user.user_id', 'u.id')
 		// ->where('users.user_type_id', 3121)
 			->withTrashed()
 			->select(
@@ -80,11 +100,16 @@ class EmployeeController extends Controller {
 					$query->where('o.id', $outlet);
 				}
 			})
-		// ->where(function ($query) use ($r, $role) {
-		// 	if (!empty($role)) {
-		// 		$query->where('roles.id', $role);
-		// 	}
-		// })
+			->where(function ($query) use ($r, $manager) {
+			if (!empty($manager)) {
+				$query->where('e.reporting_to_id', $manager);
+			}
+			})
+			->where(function ($query) use ($r, $role) {
+				if (!empty($role)) {
+					$query->where('role_user.role_id', $role);
+				}
+			})
 			->where(function ($query) use ($r, $grade) {
 				if (!empty($grade)) {
 					$query->where('grd.id', $grade);

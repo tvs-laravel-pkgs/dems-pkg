@@ -358,6 +358,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Rejected',
 				'config_type_id' => 516,
 			],
+			3263 => [
+				'name' => 'Export',
+				'config_type_id' => 516,
+			],
 
 			//REIMBURSEMENT HISTORY STATUS
 			3270 => [
