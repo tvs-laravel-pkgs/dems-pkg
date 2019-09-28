@@ -111,6 +111,14 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\LocalTravel');
 	}
 
+	public function lodging_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3181)->where('attachment_type_id', 3200);
+	}
+
+	public function boarding_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3182)->where('attachment_type_id', 3200);
+	}
+
 	public static function create($employee, $trip_number, $faker, $trip_status_id, $admin) {
 		$trip = new Trip();
 		$trip->employee_id = $employee->id;
@@ -235,7 +243,7 @@ class Trip extends Model {
 				}
 			}
 			if (!$request->id) {
-				self::sendTripNotificationMail($trip);
+				// self::sendTripNotificationMail($trip);
 			}
 			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
@@ -735,6 +743,8 @@ class Trip extends Model {
 				'selfVisits.agent',
 				'selfVisits.status',
 				'selfVisits.attachments',
+				'lodging_attachments',
+				'boarding_attachments',
 			])->find($trip_id);
 		// dd($trip);
 		if (!$trip) {
@@ -972,6 +982,8 @@ class Trip extends Model {
 			'selfVisits.agent',
 			'selfVisits.status',
 			'selfVisits.attachments',
+			'lodging_attachments',
+			'boarding_attachments',
 		])->find($trip_id);
 
 		if (!$trip) {
@@ -1392,7 +1404,7 @@ class Trip extends Model {
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
 					Lodging::whereIn('id', $lodgings_removal_id)->delete();
-					Attachment::whereIn('entity_id', $lodgings_removal_id)->delete();
+					// Attachment::whereIn('entity_id', $lodgings_removal_id)->delete();
 				}
 
 				//SAVE
@@ -1424,19 +1436,39 @@ class Trip extends Model {
 						$lodging->save();
 
 						//STORE ATTACHMENT
-						$item_images = storage_path('app/public/trip/lodgings/attachments/');
-						Storage::makeDirectory($item_images, 0777);
-						if (!empty($lodging_data['attachments'])) {
-							foreach ($lodging_data['attachments'] as $key => $attachement) {
-								$name = $attachement->getClientOriginalName();
-								$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
-								$attachement_lodge = new Attachment;
-								$attachement_lodge->attachment_of_id = 3181;
-								$attachement_lodge->attachment_type_id = 3200;
-								$attachement_lodge->entity_id = $lodging->id;
-								$attachement_lodge->name = $name;
-								$attachement_lodge->save();
-							}
+						// $item_images = storage_path('app/public/trip/lodgings/attachments/');
+						// Storage::makeDirectory($item_images, 0777);
+						// if (!empty($lodging_data['attachments'])) {
+						// 	foreach ($lodging_data['attachments'] as $key => $attachement) {
+						// 		$name = $attachement->getClientOriginalName();
+						// 		$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
+						// 		$attachement_lodge = new Attachment;
+						// 		$attachement_lodge->attachment_of_id = 3181;
+						// 		$attachement_lodge->attachment_type_id = 3200;
+						// 		$attachement_lodge->entity_id = $lodging->id;
+						// 		$attachement_lodge->name = $name;
+						// 		$attachement_lodge->save();
+						// 	}
+						// }
+					}
+
+					// dd('1');
+					//SAVE LODGING ATTACHMENT
+					$item_images = storage_path('app/public/trip/lodgings/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($request->lodging_attachments)) {
+						foreach ($request->lodging_attachments as $key => $attachement) {
+							$value = rand(1, 100);
+							$image = $attachement;
+							$extension = $image->getClientOriginalExtension();
+							$name = $request->trip_id . '_lodging_attachment' . $value . '.' . $extension;
+							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
+							$attachement_lodge = new Attachment;
+							$attachement_lodge->attachment_of_id = 3181;
+							$attachement_lodge->attachment_type_id = 3200;
+							$attachement_lodge->entity_id = $request->trip_id;
+							$attachement_lodge->name = $name;
+							$attachement_lodge->save();
 						}
 					}
 				}
@@ -1444,11 +1476,13 @@ class Trip extends Model {
 				//GET SAVED LODGINGS
 				$saved_lodgings = Trip::with([
 					'lodgings',
+					'lodging_attachments',
 					'lodgings.city',
 					'lodgings.stateType',
 					'lodgings.attachments',
 				])->find($request->trip_id);
 
+				// dd($saved_lodgings);
 				//BOARDING CITIES LIST ==> NOT BEEN USED NOW
 
 				// $boarding_dates_list = array();
@@ -1493,7 +1527,7 @@ class Trip extends Model {
 				if (!empty($request->boardings_removal_id)) {
 					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
 					Boarding::whereIn('id', $boardings_removal_id)->delete();
-					Attachment::whereIn('entity_id', $boardings_removal_id)->delete();
+					// Attachment::whereIn('entity_id', $boardings_removal_id)->delete();
 				}
 
 				//SAVE
@@ -1518,19 +1552,37 @@ class Trip extends Model {
 						$boarding->save();
 
 						//STORE ATTACHMENT
-						$item_images = storage_path('app/public/trip/boarding/attachments/');
-						Storage::makeDirectory($item_images, 0777);
-						if (!empty($boarding_data['attachments'])) {
-							foreach ($boarding_data['attachments'] as $key => $attachement) {
-								$name = $attachement->getClientOriginalName();
-								$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
-								$attachement_board = new Attachment;
-								$attachement_board->attachment_of_id = 3182;
-								$attachement_board->attachment_type_id = 3200;
-								$attachement_board->entity_id = $boarding->id;
-								$attachement_board->name = $name;
-								$attachement_board->save();
-							}
+						// $item_images = storage_path('app/public/trip/boarding/attachments/');
+						// Storage::makeDirectory($item_images, 0777);
+						// if (!empty($boarding_data['attachments'])) {
+						// 	foreach ($boarding_data['attachments'] as $key => $attachement) {
+						// 		$name = $attachement->getClientOriginalName();
+						// 		$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
+						// 		$attachement_board = new Attachment;
+						// 		$attachement_board->attachment_of_id = 3182;
+						// 		$attachement_board->attachment_type_id = 3200;
+						// 		$attachement_board->entity_id = $boarding->id;
+						// 		$attachement_board->name = $name;
+						// 		$attachement_board->save();
+						// 	}
+						// }
+					}
+					//SAVE BOARDING ATTACHMENT
+					$item_images = storage_path('app/public/trip/boarding/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($request->boarding_attachments)) {
+						foreach ($request->boarding_attachments as $key => $attachement) {
+							$value = rand(1, 100);
+							$image = $attachement;
+							$extension = $image->getClientOriginalExtension();
+							$name = $request->trip_id . '_boarding_attachment' . $value . '.' . $extension;
+							$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
+							$attachement_lodge = new Attachment;
+							$attachement_lodge->attachment_of_id = 3182;
+							$attachement_lodge->attachment_type_id = 3200;
+							$attachement_lodge->entity_id = $request->trip_id;
+							$attachement_lodge->name = $name;
+							$attachement_lodge->save();
 						}
 					}
 				}
@@ -1538,6 +1590,7 @@ class Trip extends Model {
 				//GET SAVED BOARDINGS
 				$saved_boardings = Trip::with([
 					'boardings',
+					'boarding_attachments',
 					'boardings.city',
 					'boardings.attachments',
 				])->find($request->trip_id);

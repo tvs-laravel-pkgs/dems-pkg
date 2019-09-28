@@ -25,8 +25,10 @@ class AlternateApproveController extends Controller {
 			DB::raw('IF(alter_user.name IS NULL,"--",alter_user.name) as altempname'),
 			DB::raw('IF(alternateemp.code IS NULL,"--",alternateemp.code) as altempcode'),
 			'configs.name as type',
-			DB::raw('IF(alternateemp.type IS 3481,"--",DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y")) as fromdate'),
-			DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
+			DB::raw('(CASE WHEN alternative_approvers.type = 3481 THEN "-" ELSE DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y") END) AS fromdate'),
+			DB::raw('(CASE WHEN alternative_approvers.type = 3481 THEN "-" ELSE DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") END) AS todate'),
+			// DB::raw('IF(alternateemp.type IS 3481,"--",DATE_FORMAT(alternative_approvers.from,"%d-%m-%Y")) as fromdate'),
+			// DB::raw('DATE_FORMAT(alternative_approvers.to,"%d-%m-%Y") as todate'),
 			DB::raw('DATEDIFF(alternative_approvers.to , NOW()) as status')
 		)
 			->leftJoin('alternative_approvers', 'employees.id', 'alternative_approvers.employee_id')

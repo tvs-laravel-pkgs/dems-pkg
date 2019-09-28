@@ -181,43 +181,44 @@ class TripBookingUpdateController extends Controller {
 				$visit_bookings->sgst = $r->sgst;
 				$visit_bookings->igst = $r->igst;
 
-				// $visit_bookings->save();
+				$visit_bookings->save();
 
 				$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
 				Storage::makeDirectory($booking_updates_images, 0777);
 
-				if (!empty($r->attachments)) {
-					// dd($r->attachments);
-					foreach ($r->attachments as $key => $attachement) {
-						// dump($attachement);
+				// if (!empty($r->attachments)) {
+				// 	// dd($r->attachments);
+				// 	foreach ($r->attachments as $key => $attachement) {
+				// 		// dump($attachement);
 
-						$value = rand(1, 100);
-						$image = $attachement;
-						$extension = $image->getClientOriginalExtension();
-						$name = '1111_lodgings_attachment' . $value . '.' . $extension;
-						$attachement->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
-						$attachement_lodge = new Attachment;
-						$attachement_lodge->attachment_of_id = 3180;
-						$attachement_lodge->attachment_type_id = 3200;
-						$attachement_lodge->entity_id = $value;
-						$attachement_lodge->name = $name;
-						$attachement_lodge->save();
-					}
-				}
-
-				// if (isset($r->attachments)) {
-				// 	$image = $r->attachments;
-				// 	$extension = $image->getClientOriginalExtension();
-				// 	$name = $visit_bookings->id . '_ticket_booking_attachment.' . $extension;
-				// 	$des_path = storage_path('app/public/visit/booking-updates/attachments/');
-				// 	$image->move($des_path, $name);
-				// 	$attachement = new Attachment;
-				// 	$attachement->attachment_of_id = 3180; // Visit Booking Attachment
-				// 	$attachement->attachment_type_id = 3200; //Multi Attachment
-				// 	$attachement->entity_id = $visit_bookings->id;
-				// 	$attachement->name = $name;
-				// 	$attachement->save();
+				// 		$value = rand(1, 100);
+				// 		$image = $attachement;
+				// 		$extension = $image->getClientOriginalExtension();
+				// 		$name = '1111_lodgings_attachment' . $value . '.' . $extension;
+				// 		$attachement->move(storage_path('app/public/visit/booking-updates/attachments/'), $name);
+				// 		$attachement_lodge = new Attachment;
+				// 		$attachement_lodge->attachment_of_id = 3180;
+				// 		$attachement_lodge->attachment_type_id = 3200;
+				// 		$attachement_lodge->entity_id = $value;
+				// 		$attachement_lodge->name = $name;
+				// 		$attachement_lodge->save();
+				// 	}
 				// }
+
+				if (isset($r->attachment)) {
+					$value = rand(1, 100);
+					$image = $r->attachement;
+					$extension = $image->getClientOriginalExtension();
+					$name = $visit_bookings->id . '_ticket_booking_attachment' . $value . '.' . $extension;
+					$des_path = storage_path('app/public/visit/booking-updates/attachments/');
+					$image->move($des_path, $name);
+					$attachement = new Attachment;
+					$attachement->attachment_of_id = 3180; // Visit Booking Attachment
+					$attachement->attachment_type_id = 3200; //Multi Attachment
+					$attachement->entity_id = $visit_bookings->id;
+					$attachement->name = $name;
+					$attachement->save();
+				}
 				// dd();
 			}
 			//AGENT BOOKING TRIP
@@ -300,7 +301,7 @@ class TripBookingUpdateController extends Controller {
 
 					//Ticket Employee Mail Trigger
 					if ($visit) {
-						$this->sendTicketNotificationMail($visit);
+						// $this->sendTicketNotificationMail($visit);
 					}
 				}
 			}

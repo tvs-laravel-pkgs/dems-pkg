@@ -123,6 +123,7 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
+		// dd($request->all());
 		if ($request->advance_received) {
 			$check_trip_amount_eligible = Employee::select('gae.travel_advance_limit')
 				->leftJoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')->first();

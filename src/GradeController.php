@@ -243,6 +243,8 @@ class GradeController extends Controller {
 			$grade_details->travel_advance_limit = $request->travel_advance_limit;
 			$grade_details->two_wheeler_limit = $request->two_wheeler_limit;
 			$grade_details->four_wheeler_limit = $request->four_wheeler_limit;
+			$grade_details->four_wheeler_per_km = $request->four_wheeler_per_km;
+			$grade_details->two_wheeler_per_km = $request->two_wheeler_per_km;
 			$grade_details->save();
 
 			// $grade->gradeEligibility()->sync($request->grade_advanced);

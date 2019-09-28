@@ -157,6 +157,8 @@ class TripClaimVerificationTwoController extends Controller {
 				'selfVisits.agent',
 				'selfVisits.status',
 				'selfVisits.attachments',
+				'lodging_attachments',
+				'boarding_attachments',
 			])->find($trip_id);
 
 			if (!$trip) {
