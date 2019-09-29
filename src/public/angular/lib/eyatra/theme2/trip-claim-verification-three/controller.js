@@ -136,6 +136,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
             self.local_travels_total_amount = response.data.local_travels_total_amount;
             self.total_amount = response.data.total_amount;
             self.date = response.data.date;
+            // console.log(response.data.trip.employee.trip_employee_claim.amount_to_pay);
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
             $scope.selectPaymentMode(self.trip.employee.payment_mode_id);
@@ -297,6 +298,50 @@ app.component('eyatraTripClaimVerificationThreeView', {
             },
         });
 
+
+        //APPROVE
+        $(document).on('click', '.btn-approve', function() {
+            $trip_id = $('#trip_id').val();
+            $http.get(
+                eyatra_trip_claim_verification_three_approve_url + '/' + $trip_id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trips Claim Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                    $('#trip-claim-modal-approve-three').modal('hide');
+                    setTimeout(function() {
+                        $location.path('/eyatra/trip/claim/verification3/list')
+                        $scope.$apply()
+                    }, 1000);
+                }
+
+            });
+        });
 
         //Reject
         $(document).on('click', '.reject_btn', function() {

@@ -213,6 +213,26 @@ class TripClaimVerificationThreeController extends Controller {
 		return response()->json($this->data);
 	}
 
+	public function approveFinancierTripClaimVerification($trip_id) {
+
+		// dd($trip_id);
+		$trip = Trip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+
+		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
+		if (!$employee_claim) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$employee_claim->status_id = 3031; //Payment pending for Employee
+		$employee_claim->save();
+
+		$trip->status_id = 3031; //Payment pending for Employee
+		$trip->save();
+
+		return response()->json(['success' => true]);
+	}
 	public function approveTripClaimVerificationThree(Request $r) {
 		// dd($r->all());
 		try {

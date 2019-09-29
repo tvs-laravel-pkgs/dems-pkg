@@ -308,6 +308,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/trip/claim/verification/three/reject', 'Uitoux\EYatra\TripClaimVerificationThreeController@rejectTripClaimVerificationThree')->name('rejectTripClaimVerificationThree');
 		Route::post('eyatra/trip/claim/verification/three/approve', 'Uitoux\EYatra\TripClaimVerificationThreeController@approveTripClaimVerificationThree')->name('approveTripClaimVerificationThree');
 		Route::post('eyatra/trip/claim/hold', 'Uitoux\EYatra\TripClaimVerificationThreeController@holdTripClaimVerificationThree')->name('holdTripClaimVerificationThree');
+		Route::get('eyatra/trip/claim/verification/three/financier-approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationThreeController@approveFinancierTripClaimVerification')->name('approveFinancierTripClaimVerification');
 
 		//TRIPS BOOKING UPDATES
 		Route::get('eyatra/trips/booking-updates/get-list', 'Uitoux\EYatra\TripBookingUpdateController@listTripBookingUpdates')->name('listTripBookingUpdates');
