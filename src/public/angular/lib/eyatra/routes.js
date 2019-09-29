@@ -353,6 +353,12 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Employee Claim Verification Three',
     }).
 
+    //EMPLOYEE - CLAIM PAYMENT PENDING 
+    when('/eyatra/trip/claim/payment-pending/list', {
+        template: '<eyatra-trip-claim-payment-pending-list></eyatra-trip-claim-payment-pending-list>',
+        title: 'Employee Claim Payment Pending',
+    }).
+
 
     //TRIP VERIFICATION
     when('/eyatra/trip/verifications', {

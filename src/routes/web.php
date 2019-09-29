@@ -310,6 +310,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/trip/claim/hold', 'Uitoux\EYatra\TripClaimVerificationThreeController@holdTripClaimVerificationThree')->name('holdTripClaimVerificationThree');
 		Route::get('eyatra/trip/claim/verification/three/financier-approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationThreeController@approveFinancierTripClaimVerification')->name('approveFinancierTripClaimVerification');
 
+		//TRIP CLAIM PAYMENT PENDING FOR EMPLOYEE
+		Route::get('eyatra/trip/claim/payment-pending/list', 'Uitoux\EYatra\TripClaimPendingController@listEYatraTripClaimPaymentPendingList')->name('listEYatraTripClaimPaymentPendingList');
+
 		//TRIPS BOOKING UPDATES
 		Route::get('eyatra/trips/booking-updates/get-list', 'Uitoux\EYatra\TripBookingUpdateController@listTripBookingUpdates')->name('listTripBookingUpdates');
 		Route::get('eyatra/trips/booking-updates/get-form-data/{visit_id?}', 'Uitoux\EYatra\TripBookingUpdateController@tripBookingUpdatesFormData')->name('tripBookingUpdatesFormData');

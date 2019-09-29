@@ -166,9 +166,15 @@ app.component('eyatraAdvanceClaimRequests', {
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
+
                     $('#employee_export').css({ 'display': 'none' });
 
-                    $('#eyatra_advance_claim_request_table').DataTable().ajax.reload();
+                    var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
+
+                    dataTableFilter.fnFilter();
+                    // var table = $('#eyatra_advance_claim_request_table').dataTable();
+
+                    // table.ajax.reload();
 
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
                 }
