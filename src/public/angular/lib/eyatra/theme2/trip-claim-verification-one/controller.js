@@ -38,6 +38,8 @@ app.component('eyatraTripClaimVerificationOneList', {
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
                     d.status_id = $('#status_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                 }
             },
             columns: [
@@ -47,7 +49,7 @@ app.component('eyatraTripClaimVerificationOneList', {
                 { data: 'ename', name: 'users.name', searchable: false },
                 { data: 'start_date', name: 'trips.start_date', searchable: false },
                 { data: 'end_date', name: 'trips.end_date', searchable: false },
-                { data: 'cities', name: 'c.name', searchable: true },
+                // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
@@ -77,11 +79,22 @@ app.component('eyatraTripClaimVerificationOneList', {
             $('#status_id').val(query);
             dataTable.draw();
         }
-
+        $scope.getFromDateData = function(query) {
+            
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+            
+            $('#to_date').val(query);
+            dataTable.draw();
+        }
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
             $('#status_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             dataTable.draw();
         }
         // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification One</h3>');

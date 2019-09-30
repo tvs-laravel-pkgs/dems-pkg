@@ -81,12 +81,16 @@ class TripVerificationController extends Controller {
 	// }
 
 	public function eyatraTripVerificationFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+		
+		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 			->leftJoin('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
-			->where('employees.company_id', Auth::user()->company_id)->get();
-		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
-		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+			->where('employees.reporting_to_id', Auth::user()->entity_id)
+			->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
+		$this->data['purpose_list'] =collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+
+		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
