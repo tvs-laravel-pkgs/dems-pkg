@@ -67,6 +67,7 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function changeBookingTatkal($visit_id) {
+		dd($visit_id);
 		$visit = Visit::find($visit_id)->update(['booking_status_id' => 3063]);
 		if ($visit) {
 			return response()->json(['success' => true]);
@@ -205,9 +206,9 @@ class TripBookingUpdateController extends Controller {
 				// 	}
 				// }
 
-				if (isset($r->attachment)) {
+				if (!empty($r->attachment)) {
 					$value = rand(1, 100);
-					$image = $r->attachement;
+					$image = $r->attachment;
 					$extension = $image->getClientOriginalExtension();
 					$name = $visit_bookings->id . '_ticket_booking_attachment' . $value . '.' . $extension;
 					$des_path = storage_path('app/public/visit/booking-updates/attachments/');
@@ -279,6 +280,7 @@ class TripBookingUpdateController extends Controller {
 					$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
 					Storage::makeDirectory($booking_updates_images, 0777);
 					// if ($value->hasfile('attachments')) {
+					dd($value['attachments']);
 					if (isset($value['attachments'])) {
 						$image = $value['attachments'];
 

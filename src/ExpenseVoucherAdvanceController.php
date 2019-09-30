@@ -37,6 +37,11 @@ class ExpenseVoucherAdvanceController extends Controller {
 					$query->where('configs.id', $r->status_id);
 				}
 			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->created_date)) {
+					$query->where('expense_voucher_advance_requests.date', date("Y-m-d", strtotime($r->created_date)));
+				}
+			})
 		;
 
 		return Datatables::of($expense_voucher_requests)

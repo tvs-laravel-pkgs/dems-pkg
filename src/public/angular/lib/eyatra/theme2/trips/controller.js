@@ -871,11 +871,12 @@ app.component('eyatraTripVisitView', {
                 $scope.$apply()
                 return;
             }
-            //console.log(response.data.visit)
+            // console.log(response)
             self.visit = response.data.visit;
             self.trip = response.data.trip;
             self.bookings = response.data.bookings;
-            console.log(response.data.bookings);
+            self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
+            // console.log(response.data.bookings);
             $rootScope.loading = false;
 
         });
