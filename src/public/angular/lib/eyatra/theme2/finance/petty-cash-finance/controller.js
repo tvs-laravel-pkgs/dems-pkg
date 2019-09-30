@@ -206,7 +206,7 @@
              },
              submitHandler: function(form) {
                  let formData = new FormData($(form_id)[0]);
-                 $('#submit').button('loading');
+                 $('#accept_button').button('loading');
                  $.ajax({
                          url: laravel_routes['pettycashFinanceVerificationSave'],
                          method: "POST",
@@ -216,7 +216,7 @@
                      })
                      .done(function(res) {
                          if (!res.success) {
-                             $('#submit').button('reset');
+                             $('#accept_button').button('reset');
                              var errors = '';
                              for (var i in res.errors) {
                                  errors += '<li>' + res.errors[i] + '</li>';
@@ -241,7 +241,7 @@
                          }
                      })
                      .fail(function(xhr) {
-                         $('#submit').button('reset');
+                         $('#accept_button').button('reset');
                          custom_noty('error', 'Something went wrong at server');
                      });
              },
@@ -269,7 +269,7 @@
              },
              submitHandler: function(form) {
                  let formData = new FormData($(form_id1)[0]);
-                 $('#submit').button('loading');
+                 $('#reject_button').button('loading');
                  $.ajax({
                          url: laravel_routes['pettycashFinanceVerificationSave'],
                          method: "POST",
@@ -279,7 +279,7 @@
                      })
                      .done(function(res) {
                          if (!res.success) {
-                             $('#submit').button('reset');
+                             $('#reject_button').button('reset');
                              var errors = '';
                              for (var i in res.errors) {
                                  errors += '<li>' + res.errors[i] + '</li>';
@@ -305,7 +305,7 @@
                          }
                      })
                      .fail(function(xhr) {
-                         $('#submit').button('reset');
+                         $('#reject_button').button('reset');
                          custom_noty('error', 'Something went wrong at server');
                      });
              },

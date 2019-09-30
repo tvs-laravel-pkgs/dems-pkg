@@ -96,7 +96,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
             ignore: '',
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
+                $('#accept_button').button('loading');
                 $.ajax({
                         url: laravel_routes['expenseVoucherVerificationSave'],
                         method: "POST",
@@ -106,7 +106,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                     })
                     .done(function(res) {
                         if (!res.success) {
-                            $('#submit').button('reset');
+                            $('#accept_button').button('reset');
                             var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
@@ -131,7 +131,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                         }
                     })
                     .fail(function(xhr) {
-                        $('#submit').button('reset');
+                        $('#accept_button').button('reset');
                         custom_noty('error', 'Something went wrong at server');
                     });
             },
@@ -153,7 +153,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
             },
             submitHandler: function(form) {
                 let formData = new FormData($(form_id1)[0]);
-                $('#submit').button('loading');
+                $('#reject_button').button('loading');
                 $.ajax({
                         url: laravel_routes['expenseVoucherVerificationSave'],
                         method: "POST",
@@ -163,7 +163,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                     })
                     .done(function(res) {
                         if (!res.success) {
-                            $('#submit').button('reset');
+                            $('#reject_button').button('reset');
                             var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
@@ -189,7 +189,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                         }
                     })
                     .fail(function(xhr) {
-                        $('#submit').button('reset');
+                        $('#reject_button').button('reset');
                         custom_noty('error', 'Something went wrong at server');
                     });
             },

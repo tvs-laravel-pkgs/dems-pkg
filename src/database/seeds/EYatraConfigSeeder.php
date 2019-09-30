@@ -87,7 +87,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 501,
 			],
 			3025 => [
-				'name' => 'Payment Pending',
+				'name' => 'Payment Pending for Financier',
 				'config_type_id' => 501,
 			],
 			3026 => [
@@ -108,6 +108,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3030 => [
 				'name' => 'Financier Payment Hold',
+				'config_type_id' => 501,
+			],
+			3031 => [
+				'name' => 'Payment Pending for Employee',
 				'config_type_id' => 501,
 			],
 

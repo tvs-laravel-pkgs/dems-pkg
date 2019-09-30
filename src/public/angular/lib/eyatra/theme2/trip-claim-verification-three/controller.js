@@ -136,6 +136,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
             self.local_travels_total_amount = response.data.local_travels_total_amount;
             self.total_amount = response.data.total_amount;
             self.date = response.data.date;
+            // console.log(response.data.trip.employee.trip_employee_claim.amount_to_pay);
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
             $scope.selectPaymentMode(self.trip.employee.payment_mode_id);
@@ -298,6 +299,50 @@ app.component('eyatraTripClaimVerificationThreeView', {
         });
 
 
+        //APPROVE
+        $(document).on('click', '.btn-approve', function() {
+            $trip_id = $('#trip_id').val();
+            $http.get(
+                eyatra_trip_claim_verification_three_approve_url + '/' + $trip_id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trips Claim Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                    $('#trip-claim-modal-approve-three').modal('hide');
+                    setTimeout(function() {
+                        $location.path('/eyatra/trip/claim/verification3/list')
+                        $scope.$apply()
+                    }, 1000);
+                }
+
+            });
+        });
+
         //Reject
         $(document).on('click', '.reject_btn', function() {
             var form_id = '#trip-claim-reject-form';
@@ -405,6 +450,101 @@ app.component('eyatraTripClaimVerificationThreeView', {
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
+
+    }
+});
+
+//EMPLOYEE PAY TO COMPANY FOR TRIP CLAIM
+app.component('eyatraTripClaimPaymentPendingList', {
+    templateUrl: eyatra_trip_claim_payment_pending_list_template_url,
+    controller: function(HelperService, $rootScope, $scope, $http) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            trip_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.purpose_list = response.data.purpose_list;
+            self.trip_status_list = response.data.trip_status_list;
+            $rootScope.loading = false;
+        });
+        var dataTable = $('#payment_pending_list_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate_2,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            ajax: {
+                url: laravel_routes['listEYatraTripClaimPaymentPendingList'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.employee_id = $('#employee_id').val();
+                    d.purpose_id = $('#purpose_id').val();
+                    d.status_id = $('#status_id').val();
+                }
+            },
+            columns: [
+                { data: 'action', searchable: false, class: 'action' },
+                { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'outlet_name', name: 'outlets.name', searchable: true },
+                { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+                { data: 'total_amount', searchable: false },
+                { data: 'balance_amount', searchable: false },
+                { data: 'status', name: 'status.name', searchable: true },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+        $('.dataTables_length select').select2();
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('payment_pending_list_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getPurposeData = function(query) {
+            $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+        $scope.getStatusData = function(query) {
+            $('#status_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.reset_filter = function(query) {
+            $('#employee_id').val(-1);
+            $('#purpose_id').val(-1);
+            $('#status_id').val(-1);
+            dataTable.draw();
+        }
+        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification Three</h3>');
+        //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
+
+        // $('.add_new_button').html();
+
+        $rootScope.loading = false;
 
     }
 });
