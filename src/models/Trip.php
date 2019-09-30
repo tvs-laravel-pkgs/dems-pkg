@@ -448,6 +448,19 @@ class Trip extends Model {
 	}
 
 	public static function getVerficationPendingList($r) {
+		if (!empty($r->from_date)) {
+			$from_date = date('Y-m-d', strtotime($r->from_date));
+		} else {
+			$from_date = null;
+		}
+
+		if (!empty($r->to_date)) {
+			$to_date = date('Y-m-d', strtotime($r->to_date));
+		} else {
+			$to_date = null;
+		}
+
+		
 		// dd($r->all());
 		/*if(isset($r->period))
 		{
@@ -501,6 +514,18 @@ class Trip extends Model {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
+			
+			->where(function ($query) use ($from_date) {
+				if (!empty($from_date)) {
+					$query->where('trips.start_date', $from_date);
+				}
+			})
+			->where(function ($query) use ($to_date) {
+				if (!empty($to_date)) {
+					$query->where('trips.end_date', $to_date);
+				}
+			})
+
 		/*->where(function ($query) use ($r) {
 			if ($r->get('period')) {
 			$query->whereDate('v.date',">=",$from_date)->whereDate('v.date',"<=",$to_date);
@@ -893,10 +918,12 @@ class Trip extends Model {
 	}
 
 	public static function getFilterData() {
+		
 		$data = [];
 		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
+				->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);

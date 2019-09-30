@@ -38,6 +38,8 @@ app.component('eyatraTripVerifications', {
                     d.purpose_id = $('#purpose_id').val();
                     d.status_id = $('#status_id').val();
                     d.period = $('#period').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                 }
             },
 
@@ -48,7 +50,7 @@ app.component('eyatraTripVerifications', {
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
                 { data: 'end_date', name: 'trips.end_date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
+                // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'created_at', name: 'trips.created_at', searchable: true },
@@ -81,10 +83,22 @@ app.component('eyatraTripVerifications', {
             $('#status_id').val(query);
             dataTable.draw();
         }
+        $scope.getFromDateData = function(query) {
+            // console.log(query);
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+            // console.log(query);
+            $('#to_date').val(query);
+            dataTable.draw();
+        }
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
             $('#status_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             dataTable.draw();
         }
         /*$('#period').on('apply.daterangepicker', function(ev, picker) {
