@@ -915,6 +915,14 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Outlet Reimbursement',
 			],
 
+			//CASHIER > OUTLET REIMBURSEMENT
+			5781 => [
+				'display_order' => 1,
+				'parent_id' => 5001,
+				'name' => 'eyatra-cashier-outlet-reimbursement',
+				'display_name' => 'Cashier Outlet Reimbursement',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

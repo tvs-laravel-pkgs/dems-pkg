@@ -514,9 +514,28 @@ class PettyCashController extends Controller {
 				//Outlet
 				$outlet = Outlet::where('id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
 			} else {
-				// error
+				$outlet = Outlet::where('id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
+				if ($outlet->reimbursement_amount >= 0) {
+					$balance_amount = $outlet->reimbursement_amount - $request->claim_total_amount;
+					$reimbursementtranscation = new ReimbursementTranscation;
+					$reimbursementtranscation->outlet_id = Auth::user()->entity->outlet_id;
+					$reimbursementtranscation->company_id = Auth::user()->company_id;
+					if ($request->petty_cash_type_id == 1) {
+						$reimbursementtranscation->transcation_id = 3270;
+					} else {
+						$reimbursementtranscation->transcation_id = 3272;
+					}
+					$reimbursementtranscation->transaction_date = Carbon::now();
+					$reimbursementtranscation->transcation_type = 3272;
+					$reimbursementtranscation->amount = $request->claim_total_amount;
+					$reimbursementtranscation->balance_amount = $balance_amount;
+					$reimbursementtranscation->save();
+				} else {
+					return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
+				}
 			}
 
+			dd();
 			DB::commit();
 			if ($request->id) {
 				return response()->json(['success' => true, 'message' => 'Petty Cash updated successfully']);
