@@ -34,6 +34,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                     dataType: "json",
                     data: function(d) {
                         d.status_id = $('#status').val();
+                        d.created_date = $('.created_date').val();
                     }
                 },
                 columns: [
@@ -59,6 +60,9 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                 d.style.left = x.left + 'px';
             }, 500);
 
+            $(document).on('change', '.created_date', function() {
+                dataTable.draw();
+            });
             $scope.onselectStatus = function(id) {
                 //alert();
                 $('#status').val(id);
@@ -67,6 +71,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
 
             $scope.reset_filter = function() {
                 $('#status').val('');
+                $('.created_date').val('');
                 dataTable.draw();
             }
         });
