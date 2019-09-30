@@ -236,6 +236,7 @@ class TripController extends Controller {
 
 		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$relations[] = 'bookings';
+			$relations[] = 'bookings.attachments';
 			$relations[] = 'bookings.type';
 			$relations[] = 'bookings.travelMode';
 			$relations[] = 'bookings.paymentStatus';

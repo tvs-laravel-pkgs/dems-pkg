@@ -94,7 +94,11 @@ app.component('eyatraTripBookingUpdatesForm', {
         var form_id = '#visit-booking-update-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.attr('name') == 'attachment') {
+                    error.appendTo($('.attachment_error'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             rules: {
@@ -113,6 +117,9 @@ app.component('eyatraTripBookingUpdatesForm', {
                 'tax': {
                     maxlength: 10,
                     number: true,
+                },
+                'attachment': {
+                    required: true,
                 },
             },
             submitHandler: function(form) {
