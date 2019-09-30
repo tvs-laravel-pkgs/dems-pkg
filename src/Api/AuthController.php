@@ -36,6 +36,7 @@ class AuthController extends Controller {
 				'employee_details.walletDetail',
 				'employee_details.sbu',
 				'employee_details.sbu.lob',
+				'roles',
 			])
 				->find(Auth::user()->id);
 			// $user = Auth::user();

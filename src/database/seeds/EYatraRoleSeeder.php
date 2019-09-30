@@ -188,6 +188,16 @@ class EYatraRoleSeeder extends Seeder {
 
 					//EXPENSE VOUCHERS VERIFICATION
 					5722,
+
+					//MOBILE PERMISSIONS
+					//TRIPS
+					9000, 9001, 9002, 9003, 9004, 9005,
+
+					//TRIPS VERIFICATION
+					9006,
+
+					//CLAIM VERIFICATION
+					9007,
 				],
 			],
 

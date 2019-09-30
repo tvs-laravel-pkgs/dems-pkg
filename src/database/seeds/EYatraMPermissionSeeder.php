@@ -54,6 +54,24 @@ class EYatraMPermissionSeeder extends Seeder {
 				'display_name' => 'Delete',
 			],
 
+			//MANAGER VERIFICATIONS
+			//TRIP VERIFICATION
+			9006 => [
+				'display_order' => 1,
+				'parent_id' => 9001,
+				'name' => 'eyatra-mobile-trips-verification',
+				'display_name' => 'Trips',
+			],
+
+			//TRIP CLAIM VERIFICATION
+			9007 => [
+				'display_order' => 1,
+				'parent_id' => 9001,
+				'name' => 'eyatra-mobile-trips-claim-verification',
+				'display_name' => 'Trips',
+			],
+			//PETTY CASH SIGNATURE
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
