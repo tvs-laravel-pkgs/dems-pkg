@@ -169,19 +169,27 @@ class AlternateApproveController extends Controller {
 	}*/
 
 	public function getmanagerList(Request $r) {
-
 		$key = $r->key;
-		$employee_list = Employee::leftJoin('users as emp_user', 'emp_user.entity_id', 'employees.id')->select(
+		$employee_list = Employee::select(
 			'emp_user.name',
 			'employees.code',
 			'employees.id'
 		)
+			->leftJoin('users as emp_user', 'emp_user.entity_id', 'employees.id')
+			->join('role_user as role', 'role.user_id', 'emp_user.id')
+		// ->leftJoin('roles', 'roles.entity_id', 'employees.id')
+			->join('roles', function ($join) {
+				$join->on('roles.id', 'role.role_id')
+					->where('roles.id', 502);
+			})
 			->where(function ($q) use ($key) {
 				$q->where('employees.code', 'like', '%' . $key . '%')
 					->orWhere('emp_user.name', 'like', '%' . $key . '%')
 				;
-			})->where('emp_user.user_type_id', 3121)->where('employees.company_id', Auth::user()->company_id)
+			})
+			->where('emp_user.user_type_id', 3121)->where('employees.company_id', Auth::user()->company_id)
 			->get();
+		// dd(count($employee_list));
 		return response()->json($employee_list);
 	}
 
