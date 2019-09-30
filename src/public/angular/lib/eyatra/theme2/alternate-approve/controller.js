@@ -164,32 +164,34 @@ app.component('eyatraAlternateApproveForm', {
             }
 
         });
-        $('.daterange').daterangepicker({
-            autoUpdateInput: false,
-            /* "opens": "right", */
-            locale: {
-                cancelLabel: 'Clear',
-                format: "DD-MM-YYYY"
-            }
-        });
 
+        $scope.daterange = function() {
+            $('.daterange').daterangepicker({
+                autoUpdateInput: false,
+                /* "opens": "right", */
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: "DD-MM-YYYY"
+                }
+            });
 
-        $('.align-left.daterange').daterangepicker({
-            autoUpdateInput: false,
-            "opens": "left",
-            locale: {
-                cancelLabel: 'Clear',
-                format: "DD-MM-YYYY"
-            }
-        });
+            $('.align-left.daterange').daterangepicker({
+                autoUpdateInput: false,
+                "opens": "left",
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: "DD-MM-YYYY"
+                }
+            });
 
-        $('.daterange').on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('DD-MM-YYYY') + ' to ' + picker.endDate.format('DD-MM-YYYY'));
-        });
+            $('.daterange').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('DD-MM-YYYY') + ' to ' + picker.endDate.format('DD-MM-YYYY'));
+            });
 
-        $('.daterange').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
-        });
+            $('.daterange').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
+        }
 
         //SEARCH EMPLOYEE
         self.searchEmployee = function(query) {
@@ -261,6 +263,9 @@ app.component('eyatraAlternateApproveForm', {
                 // $('#date').hide();
             } else {
                 self.show_type = 'show';
+                setTimeout(function() {
+                    $scope.daterange();
+                }, 500);
 
                 // $('#date').show();
             }
