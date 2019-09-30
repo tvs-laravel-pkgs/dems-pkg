@@ -30,6 +30,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
                 dataType: "json",
                 data: function(d) {
                     d.employee_id = $('#employee_id').val();
+                    d.date = $('#created_date').val();
                 }
             },
 
@@ -68,8 +69,12 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
             $('#employee_id').val(id);
             dataTable.draw();
         }
+        $scope.onselectCreatedDate = function() {
+            dataTable.draw();
+        }
         $scope.reset_filter = function() {
             $('#employee_id').val('');
+            $('#created_date').val('');
             dataTable.draw();
         }
         // $rootScope.loading = false; 

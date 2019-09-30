@@ -18,6 +18,19 @@ use Yajra\Datatables\Datatables;
 
 class TripClaimVerificationOneController extends Controller {
 	public function listEYatraTripClaimVerificationOneList(Request $r) {
+
+		if (!empty($r->from_date)) {
+			$from_date = date('Y-m-d', strtotime($r->from_date));
+		} else {
+			$from_date = null;
+		}
+
+		if (!empty($r->to_date)) {
+			$to_date = date('Y-m-d', strtotime($r->to_date));
+		} else {
+			$to_date = null;
+		}
+
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -54,6 +67,16 @@ class TripClaimVerificationOneController extends Controller {
 			->where(function ($query) use ($r) {
 				if ($r->get('status_id')) {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
+			->where(function ($query) use ($from_date) {
+				if (!empty($from_date)) {
+					$query->where('trips.start_date', $from_date);
+				}
+			})
+			->where(function ($query) use ($to_date) {
+				if (!empty($to_date)) {
+					$query->where('trips.end_date', $to_date);
 				}
 			})
 			->where(function ($query) {

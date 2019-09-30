@@ -54,6 +54,16 @@ class PettyCashManagerVerificationController extends Controller {
 					$query->where('employees.id', $r->employee_id);
 				}
 			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->type)) {
+					$query->where('petty_cash_type.id', $r->type);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->date)) {
+					$query->where('petty_cash.date', date("Y-m-d", strtotime($r->date)));
+				}
+			})
 		;
 		// dd($petty_cash->petty_cash_type_id);
 

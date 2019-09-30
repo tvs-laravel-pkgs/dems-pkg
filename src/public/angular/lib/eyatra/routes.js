@@ -523,7 +523,7 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit Alternate Approve',
     }).
 
-    //OUTLET - OUTLET REIMBURSEMENT
+    //ADMIN - OUTLET - OUTLET REIMBURSEMENT
     when('/eyatra/outlet-reimbursement', {
         template: '<eyatra-outlet-reimbursement></eyatra-outlet-reimbursement>',
         title: 'Reimbursements',
@@ -538,6 +538,11 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/outlet-reimbursement/view/:outlet_id', {
         template: '<eyatra-outlet-reimbursement-view></eyatra-outlet-reimbursement-view>',
+        title: 'View Reimbursement',
+    }).
+    //CASHIER - OUTLET REIMBURSEMENT
+    when('/eyatra/cashier-outlet-reimbursement/view', {
+        template: '<eyatra-cashier-outlet-reimbursement-view></eyatra-cashier-outlet-reimbursement-view>',
         title: 'View Reimbursement',
     }).
 

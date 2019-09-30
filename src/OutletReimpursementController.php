@@ -29,9 +29,9 @@ class OutletReimpursementController extends Controller {
 			->join('employees', 'employees.id', 'outlets.cashier_id')
 			->leftjoin('users', function ($join) {
 				$join->on('users.entity_id', '=', 'employees.id')
-				->where('users.user_type_id',3121);
+					->where('users.user_type_id', 3121);
 			})
-			->where('outlets.company_id',Auth::user()->company_id)
+			->where('outlets.company_id', Auth::user()->company_id)
 			->orderBy('outlets.name', 'asc');
 
 		return Datatables::of($outlets)
@@ -188,7 +188,11 @@ class OutletReimpursementController extends Controller {
 	}
 
 	public function viewEYatraOutletReimpursement($outlet_id) {
-		//dd($outlet_id);
+		if ($outlet_id = 'cashier') {
+			$outlet_details = Outlet::where('cashier_id', Auth::user()->entity_id)->select('id')->first();
+			$outlet_id = $outlet_details->id;
+
+		}
 		$reimpurseimpurse_transactions = ReimbursementTranscations::select(
 			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
 			'amount',
@@ -200,7 +204,7 @@ class OutletReimpursementController extends Controller {
 			->join('configs', 'configs.id', 'reimbursement_transcations.transcation_id')
 			->where('outlet_id', $outlet_id)
 			->get();
-		//dd($reimpurseimpurse_transactions);
+		// dd($reimpurseimpurse_transactions);
 		$reimpurseimpurse_outlet_data = Outlet::select(
 			'outlets.name as outlet_name',
 			'outlets.code as outlet_code',
@@ -216,7 +220,7 @@ class OutletReimpursementController extends Controller {
 		// dd($reimpurseimpurse_outlet_data);
 		$this->data['reimpurseimpurse_transactions'] = $reimpurseimpurse_transactions;
 		$this->data['reimpurseimpurse_outlet_data'] = $reimpurseimpurse_outlet_data;
-		$this->data['reimbursement_amount'] = '₹ '.IND_money_format($reimpurseimpurse_outlet_data->reimbursement_amount);
+		$this->data['reimbursement_amount'] = '₹ ' . IND_money_format($reimpurseimpurse_outlet_data->reimbursement_amount);
 
 		$this->data['success'] = true;
 		return response()->json($this->data);

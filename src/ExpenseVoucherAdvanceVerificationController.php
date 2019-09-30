@@ -37,6 +37,11 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 					$query->where('employees.id', $r->employee_id);
 				}
 			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->date)) {
+					$query->where('expense_voucher_advance_requests.date', date("Y-m-d", strtotime($r->date)));
+				}
+			})
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 		;
 		// dd($expense_voucher_requests->get());

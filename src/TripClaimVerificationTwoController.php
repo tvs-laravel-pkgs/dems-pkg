@@ -56,6 +56,16 @@ class TripClaimVerificationTwoController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->from_date)) {
+					$query->where('trips.start_date', date("Y-m-d", strtotime($r->from_date)));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->to_date)) {
+					$query->where('trips.end_date',  date("Y-m-d", strtotime($r->to_date)));
+				}
+			})
 			->where(function ($query) {
 				if (Auth::user()->entity_id) {
 					//$query->where('se_manager_employee.id', Auth::user()->entity_id);

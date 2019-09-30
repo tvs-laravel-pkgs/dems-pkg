@@ -183,14 +183,21 @@ class EYatraRoleSeeder extends Seeder {
 					//CLAIM VERIFICATION 1
 					5500,
 
-					//CLAIM VERIFICATION 2
-					5520,
-
 					//EXPENSE VOUCHERS
 					5721,
 
 					//EXPENSE VOUCHERS VERIFICATION
 					5722,
+
+					//MOBILE PERMISSIONS
+					//TRIPS
+					9000, 9001, 9002, 9003, 9004, 9005,
+
+					//TRIPS VERIFICATION
+					9006,
+
+					//CLAIM VERIFICATION
+					9007,
 				],
 			],
 
@@ -233,6 +240,9 @@ class EYatraRoleSeeder extends Seeder {
 					//PETTY CASH VERIFICATION
 					5723,
 
+					//OUTLET REIMBURSEMENT
+					5781,
+
 				],
 			],
 
@@ -266,6 +276,35 @@ class EYatraRoleSeeder extends Seeder {
 					//PETTY CASH VERIFICATION
 					5724,
 
+				],
+			],
+
+			//EYATRA CLAIM VERIFIER
+			506 => [
+				//'company_id' => 1,
+				'display_order' => 1,
+				'display_name' => 'eYatra Claim Verifier',
+				'fixed_roles' => 0,
+				'created_by' => 1,
+				'permissions' => [
+
+					//TRIPS
+					5001, 5002, 5003, 5004, 5480, 5481, 5482,
+
+					//TRIPS VERIFICATION
+					5060,
+
+					//CLAIM VERIFICATION 1
+					5500,
+
+					//CLAIM VERIFICATION 2
+					5520,
+
+					//EXPENSE VOUCHERS
+					5721,
+
+					//EXPENSE VOUCHERS VERIFICATION
+					5722,
 				],
 			],
 		];
