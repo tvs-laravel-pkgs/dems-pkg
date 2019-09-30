@@ -237,9 +237,9 @@ app.component('eyatraTripBookingRequestsView', {
                     'advance_received': {
                         maxlength: 10,
                     },
-                    'ticket_booking[][attachments]': {
-                        required: true,
-                    },
+                    // 'ticket_booking[][attachments]': {
+                    //     required: true,
+                    // },
                 },
                 messages: {
                     'description': {
@@ -666,6 +666,9 @@ app.component('eyatraTripTatkalBookingRequestsView', {
             $("#close_" + id).hide();
         });
 
+
+
+
         $(document).on('click', '.submit', function() {
             var form_id = '#trip-booking-updates-form';
             var v = jQuery(form_id).validate({
@@ -682,6 +685,9 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                     },
                     'advance_received': {
                         maxlength: 10,
+                    },
+                    'ticket_booking[][attachments]': {
+                        required: true,
                     },
                 },
                 messages: {
