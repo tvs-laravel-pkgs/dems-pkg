@@ -927,7 +927,7 @@ class Trip extends Model {
 				->where('employees.company_id', Auth::user()->company_id)
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
-		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		$data['success'] = true;
 		//dd($data);
 		return response()->json($data);
