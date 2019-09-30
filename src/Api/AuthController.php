@@ -27,12 +27,15 @@ class AuthController extends Controller {
 
 		if (Auth::attempt(['mobile_number' => request('username'), 'password' => request('password')])) {
 
-			// dd(Auth::user()->id);
-
 			$user = User::with([
 				'employee_details',
 				'employee_details.grade',
 				'employee_details.designation',
+				'employee_details.bankDetail',
+				'employee_details.chequeDetail',
+				'employee_details.walletDetail',
+				'employee_details.sbu',
+				'employee_details.sbu.lob',
 			])
 				->find(Auth::user()->id);
 			// $user = Auth::user();
