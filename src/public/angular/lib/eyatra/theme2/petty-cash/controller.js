@@ -33,6 +33,8 @@ app.component('eyatraPettyCashList', {
                     dataType: "json",
                     data: function(d) {
                         d.status_id = $('#status').val();
+                        d.created_date = $('.created_date').val();
+                        d.type = $('#petty_cash_type').val();
                     }
                 },
 
@@ -46,6 +48,7 @@ app.component('eyatraPettyCashList', {
                     { data: 'date', name: 'date', searchable: false },
                     { data: 'total', name: 'total', searchable: true },
                     { data: 'status', name: 'configs.name', searchable: true },
+                    
                 ],
                 rowCallback: function(row, data) {
                     $(row).addClass('highlight-row');
@@ -67,16 +70,27 @@ app.component('eyatraPettyCashList', {
                 self.employee_list = response.data.employee_list;
                 self.outlet_list = response.data.outlet_list;
                 self.status_list = response.data.status_list;
+                self.petty_cash_type_list = response.data.petty_cash_type_list;
                 // $rootScope.loading = false;
             });
 
         });
+        $(document).on('change', '.created_date', function() {
+            dataTable.draw();
+        });
+
         $scope.onselectStatus = function(id) {
             $('#status').val(id);
             dataTable.draw();
         }
+        $scope.onselectPettyCashType = function(id) {
+            $('#petty_cash_type').val(id);
+            dataTable.draw();
+        }
         $scope.reset_filter = function() {
             $('#status').val('');
+            $('.created_date').val('');
+            $('#petty_cash_type').val('');
             dataTable.draw();
         }
 

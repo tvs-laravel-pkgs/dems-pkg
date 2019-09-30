@@ -17,6 +17,17 @@ use Yajra\Datatables\Datatables;
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
 		//dd($r->all());
+		if (!empty($r->created_date)) {
+			$date = date("Y-m-d", strtotime($r->created_date));
+		} else {
+			$date = null;
+		}
+		if (!empty($r->type)) {
+			$type = $r->type;
+		} else {
+			$type = null;
+		}
+		
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
@@ -42,6 +53,16 @@ class PettyCashController extends Controller {
 			->where(function ($query) use ($r) {
 				if (!empty($r->status_id)) {
 					$query->where('configs.id', $r->status_id);
+				}
+			})
+			->where(function ($query) use ($date) {
+				if (!empty($date)) {
+					$query->where('petty_cash.date', $date);
+				}
+			})
+			->where(function ($query) use ($type) {
+				if (!empty($type)) {
+					$query->where('petty_cash_type.id', $type);
 				}
 			})
 		;
@@ -536,6 +557,7 @@ class PettyCashController extends Controller {
 		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getOutletList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		//dd($this->data['outlet_list']);
 		$this->data['employee_list'] = $employee_list = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
+		$this->data['petty_cash_type_list'] = collect(Config::select('name','id')->where('configs.config_type_id', 527)->where(DB::raw('LOWER(configs.name)'),'!=', strtolower("Advance Expense"))->get())->prepend(['id' => '', 'name' => 'Select Petty Cash Type']);
 		return response()->json($this->data);
 	}
 	public function pettyCashDelete($type_id, $pettycash_id) {
