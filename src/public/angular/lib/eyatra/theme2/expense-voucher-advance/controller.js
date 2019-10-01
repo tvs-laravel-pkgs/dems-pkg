@@ -155,7 +155,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 // $location.path('/eyatra/expense/voucher-advance/')
                 // return;
             }
-            console.log(response);
+            // console.log(response);
 
             self.action = response.data.action;
 
@@ -166,7 +166,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
 
             if (self.action == 'Edit') {
                 self.action = 'Edit';
-                if (self.expense_voucher_advance.status_id == 3463) {
+                if (self.expense_voucher_advance.status_id == 3464 || self.expense_voucher_advance.status_id == 3466 || self.expense_voucher_advance.status_id == 3469 || self.expense_voucher_advance.status_id == 3471) {
                     $("#date").prop('readonly', true);
                     $(".date").removeAttr('data-provide');
                     $("#advance_amount").prop('readonly', true);
