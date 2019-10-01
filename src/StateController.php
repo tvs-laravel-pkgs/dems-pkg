@@ -112,7 +112,7 @@ class StateController extends Controller {
 			->where('c.config_type_id', 525)
 			->where('tm.category_id', 3403)
 			->where('entities.company_id', Auth::user()->company_id)->get()->keyBy('id');
-		// dd($travel_modes);
+
 		$option = new Agent;
 		$option->name = 'Select Agent';
 		$option->id = null;
@@ -123,19 +123,7 @@ class StateController extends Controller {
 			$this->data['status'] = 'Active';
 
 			$this->data['success'] = true;
-			foreach ($travel_modes as $travel_mode) {
-				if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
-					continue;
-				}
-				$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
-				$this->data['travel_mode_list'][$travel_mode->id]->agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
-						->leftJoin('users', 'users.entity_id', 'agents.id')
-						->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
-						->where('users.user_type_id', 3122)
-						->where('agent_travel_mode.travel_mode_id', $travel_mode->id)
-						->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
-				// dd($this->data['travel_mode_list']);
-			}
+
 		} else {
 			$this->data['action'] = 'Edit';
 			$state = NState::withTrashed()->find($state_id);
@@ -154,20 +142,23 @@ class StateController extends Controller {
 				if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
 					continue;
 				}
-				$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
-				$this->data['travel_mode_list'][$travel_mode->id]->agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
-						->leftJoin('users', 'users.entity_id', 'agents.id')
-						->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
-						->where('users.user_type_id', 3122)
-						->where('agent_travel_mode.travel_mode_id', $travel_mode->id)
-						->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
-				// dd($this->data['travel_mode_list']);
 				$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
 				$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
 			}
 		}
 
-		// dd($this->data['travel_mode_list']);
+		foreach ($travel_modes as $travel_mode) {
+			if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
+				continue;
+			}
+			$this->data['travel_mode_list'][$travel_mode->id]->agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
+					->leftJoin('users', 'users.entity_id', 'agents.id')
+					->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
+					->where('users.user_type_id', 3122)
+					->where('agent_travel_mode.travel_mode_id', $travel_mode->id)
+					->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
+		}
+
 		$this->data['state'] = $state;
 		$this->data['success'] = true;
 
