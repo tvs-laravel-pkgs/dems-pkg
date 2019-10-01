@@ -67,6 +67,13 @@ app.component('eyatraTripClaimVerificationOneList', {
             d.style.left = x.left + 'px';
         }, 500);
 
+        setTimeout(function() {
+            $('div[data-provide = "datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
+
         $scope.getEmployeeData = function(query) {
             $('#employee_id').val(query);
             dataTable.draw();
@@ -80,12 +87,12 @@ app.component('eyatraTripClaimVerificationOneList', {
             dataTable.draw();
         }
         $scope.getFromDateData = function(query) {
-            
+
             $('#from_date').val(query);
             dataTable.draw();
         }
         $scope.getToDateData = function(query) {
-            
+
             $('#to_date').val(query);
             dataTable.draw();
         }

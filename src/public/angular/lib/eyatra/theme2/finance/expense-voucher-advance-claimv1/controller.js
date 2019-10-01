@@ -1,6 +1,7 @@
 app.component('eyatraExpenseVoucherAdvanceVerificationList', {
     templateUrl: expense_voucher_advance_verification_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
+        //alert();
         var self = this;
         self.hasPermission = HelperService.hasPermission;
 
@@ -56,7 +57,12 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        setTimeout(function() {
+            $('div[data-provide = "datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
         //Filter
         $http.get(
             expense_voucher_advance_filter_url

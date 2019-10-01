@@ -62,6 +62,12 @@ app.component('eyatraPettyCashList', {
                 d.style.left = x.left + 'px';
             }, 500);
 
+            setTimeout(function() {
+                $('div[data-provide = "datepicker"]').datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                });
+            }, 1000);
             //FILTER
             $http.get(
                 expense_voucher_filter_url

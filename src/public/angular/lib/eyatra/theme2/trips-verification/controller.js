@@ -69,7 +69,12 @@ app.component('eyatraTripVerifications', {
             d.style.left = x.left + 'px';
         }, 500);
 
-
+        setTimeout(function() {
+            $('div[data-provide = "datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
         $scope.getEmployeeData = function(query) {
             //alert(query);
             $('#employee_id').val(query);
