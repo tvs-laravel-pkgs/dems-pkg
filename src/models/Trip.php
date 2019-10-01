@@ -488,7 +488,7 @@ class Trip extends Model {
 				'trips.end_date',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				'purpose.name as purpose',
-				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
+				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,2,"en_IN")) as advance_received'),
 				'trips.created_at',
 				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
 				'status.name as status'
