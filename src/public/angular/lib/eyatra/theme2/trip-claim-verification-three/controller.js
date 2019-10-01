@@ -37,6 +37,8 @@ app.component('eyatraTripClaimVerificationThreeList', {
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
                     d.status_id = $('#status_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                 }
             },
             columns: [
@@ -46,7 +48,7 @@ app.component('eyatraTripClaimVerificationThreeList', {
                 { data: 'ename', name: 'users.name', searchable: false },
                 { data: 'start_date', name: 'trips.start_date', searchable: false },
                 { data: 'end_date', name: 'trips.end_date', searchable: false },
-                { data: 'cities', name: 'c.name', searchable: true },
+                // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
@@ -76,11 +78,22 @@ app.component('eyatraTripClaimVerificationThreeList', {
             $('#status_id').val(query);
             dataTable.draw();
         }
-
+        $scope.getFromDateData = function(query) {
+            
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+            
+            $('#to_date').val(query);
+            dataTable.draw();
+        }
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
             $('#status_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             dataTable.draw();
         }
         // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification Three</h3>');
@@ -467,6 +480,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
+            self.outlet_list = response.data.outlet_list;
             $rootScope.loading = false;
         });
         var dataTable = $('#payment_pending_list_table').DataTable({
@@ -493,7 +507,8 @@ app.component('eyatraTripClaimPaymentPendingList', {
                 data: function(d) {
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
-                    d.status_id = $('#status_id').val();
+                    // d.status_id = $('#status_id').val();
+                    d.outlet = $('#outlet_id').val();
                 }
             },
             columns: [
@@ -506,6 +521,8 @@ app.component('eyatraTripClaimPaymentPendingList', {
                 { data: 'total_amount', searchable: false },
                 { data: 'balance_amount', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
+              
+                
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -528,15 +545,19 @@ app.component('eyatraTripClaimPaymentPendingList', {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
+       /* $scope.getStatusData = function(query) {
             $('#status_id').val(query);
             dataTable.draw();
+        }*/
+        $scope.onSelectOutlet = function(query) {
+            $('#outlet_id').val(query);
+            dataTable.draw();
         }
-
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            // $('#status_id').val(-1);
+            $('#outlet_id').val(-1);
             dataTable.draw();
         }
         // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification Three</h3>');

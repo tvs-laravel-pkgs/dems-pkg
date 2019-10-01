@@ -1,6 +1,7 @@
 app.component('eyatraFinanceEmpList', {
     templateUrl: eyatra_trip_claim_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
+        //alert();
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_claim_list_table').DataTable({

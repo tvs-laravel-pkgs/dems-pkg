@@ -301,6 +301,11 @@ class TripClaimPendingController extends Controller {
 				}
 			})
 			->where(function ($query) use ($r) {
+				if ($r->get('outlet')) {
+					$query->where("outlets.id", $r->get('outlet'))->orWhere(DB::raw("-1"), $r->get('outlet'));
+				}
+			})
+			->where(function ($query) use ($r) {
 				if ($r->get('status_id')) {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}

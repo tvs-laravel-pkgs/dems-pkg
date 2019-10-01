@@ -52,6 +52,16 @@ class TripClaimVerificationThreeController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->from_date)) {
+					$query->where('trips.start_date', date('Y-m-d', strtotime($r->from_date)));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->to_date)) {
+					$query->where('trips.end_date', date('Y-m-d', strtotime($r->to_date)));
+				}
+			})
 			->whereIn('ey_employee_claims.status_id', [3223, 3227]) //PAYMENT PENDING & FINANCIER PAYMENT HOLD
 		// ->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
 			->groupBy('trips.id')

@@ -65,6 +65,12 @@ app.component('eyatraPettyCashManagerList', {
                 x.left = x.left + 15;
                 d.style.left = x.left + 'px';
             }, 500);
+            setTimeout(function() {
+                $('div[data-provide = "datepicker"]').datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                });
+            }, 1000);
             $http.get(
                 expense_voucher_filter_url
             ).then(function(response) {
@@ -95,7 +101,7 @@ app.component('eyatraPettyCashManagerList', {
             $scope.onselectCreatedDate = function() {
                 dataTable.draw();
             }
-            
+
             $scope.reset_filter = function() {
                 $('#status').val('');
                 $('#outlet').val('');

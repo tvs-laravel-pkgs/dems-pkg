@@ -75,6 +75,12 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                 dataTable.draw();
             }
         });
+        setTimeout(function() {
+            $('div[data-provide = "datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
         $http.get(
             expense_voucher_advance_filter_url
         ).then(function(response) {

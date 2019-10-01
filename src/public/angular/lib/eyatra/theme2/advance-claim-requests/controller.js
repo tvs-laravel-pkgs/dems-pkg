@@ -13,11 +13,13 @@ app.component('eyatraAdvanceClaimRequests', {
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
+            self.outlet_list = response.data.outlet_list;
             $rootScope.loading = false;
         });
 
+
         var dataTable = $('#eyatra_advance_claim_request_table').DataTable({
-            stateSave: true,
+            // stateSave: true,
             "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
@@ -30,9 +32,16 @@ app.component('eyatraAdvanceClaimRequests', {
             },
             pageLength: 10,
             processing: true,
-            serverSide: false,
+            serverSide: true,
+            "bProcessing": true,
+            fixedColumns: true,
+            // scrollX: true,
+            scrollCollapse: true,
             paging: true,
             ordering: false,
+            fixedColumns: {
+                leftColumns: 1,
+            },
             ajax: {
                 url: laravel_routes['listAdvanceClaimRequest'],
                 type: "GET",
@@ -42,6 +51,7 @@ app.component('eyatraAdvanceClaimRequests', {
                     d.purpose_id = $('#purpose_id').val();
                     d.status_id = $('#status_id').val();
                     d.period = $('#period').val();
+                    d.outlet = $('#outlet_id').val();
                 }
             },
 
@@ -54,6 +64,7 @@ app.component('eyatraAdvanceClaimRequests', {
                 { data: 'end_date', name: 'triops.end_date', searchable: true },
                 { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'outlet', name: 'outlets.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'created_at', name: 'trips.created_at', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
@@ -62,6 +73,7 @@ app.component('eyatraAdvanceClaimRequests', {
                 $(row).addClass('highlight-row');
             }
         });
+
         $('.dataTables_length select').select2();
         /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Request / Advance Claim Request</p><h3 class="title">Advance Claim Request</h3>');
         $('.add_new_button').html();*/
@@ -88,10 +100,16 @@ app.component('eyatraAdvanceClaimRequests', {
             $('#status_id').val(query);
             dataTable.draw();
         }
+        $scope.onSelectOutlet = function(query) {
+            $('#outlet_id').val(query);
+            dataTable.draw();
+        }
+        
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
             $('#status_id').val(-1);
+            $('#outlet_id').val(-1);
             dataTable.draw();
         }
 
@@ -177,15 +195,12 @@ app.component('eyatraAdvanceClaimRequests', {
                     // table.ajax.reload();
 
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
-                    $('#eyatra_advance_claim_request_table').DataTable().ajax.reload(function(json) {});
-                    $location.path('eyatra/advance-claim/requests/');
-                    $scope.$apply();
                 }
 
             });
 
         });
-        // $rootScope.loading = false;
+        $rootScope.loading = false;
 
     }
 });

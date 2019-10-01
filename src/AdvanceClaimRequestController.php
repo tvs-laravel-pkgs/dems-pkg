@@ -17,6 +17,7 @@ class AdvanceClaimRequestController extends Controller {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('outlets', 'outlets.id', 'e.outlet_id')
 			->select(
 				'trips.id',
 				'trips.number',
@@ -30,7 +31,8 @@ class AdvanceClaimRequestController extends Controller {
 				'trips.advance_received',
 				'trips.created_at',
 				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
-				'status.name as status'
+				'status.name as status',
+				'outlets.name as outlet'
 
 			)
 		// ->whereNotNull('trips.advance_received')
@@ -52,7 +54,11 @@ class AdvanceClaimRequestController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->where('e.company_id', Auth::user()->company_id)
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet')) {
+					$query->where("outlets.id", $r->get('outlet'))->orWhere(DB::raw("-1"), $r->get('outlet'));
+				}
+			})
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
@@ -231,6 +237,7 @@ class AdvanceClaimRequestController extends Controller {
 		}
 	}
 	public function AdvanceClaimRequestExport() {
+
 		DB::beginTransaction();
 		try {
 
