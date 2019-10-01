@@ -160,11 +160,12 @@ app.component('eyatraGradeForm', {
                 // $scope.$apply()
                 return;
             }
-            
+
             self.entity = response.data.grade;
             self.extras = response.data.extras;
             self.action = response.data.action;
             self.grade_details = response.data.grade_details;
+            console.log(response.data.grade_details);
             $rootScope.loading = false;
 
             if (self.action == 'Edit') {
@@ -194,13 +195,13 @@ app.component('eyatraGradeForm', {
                         $(".sub_class_" + id).addClass("required");
                         $(".sub_class_" + id).prop('required', true);
                     });
-                     // expenseCb();
-                     purposeType();
-                     travelType();
-                     localTravelType();
+                    // expenseCb();
+                    purposeType();
+                    travelType();
+                    localTravelType();
                 }, 500);
 
-               
+
 
             } else {
                 self.switch_value = 'Active';
@@ -236,14 +237,14 @@ app.component('eyatraGradeForm', {
         });
         */
 
-        function purposeType(){
+        function purposeType() {
             var cheked_count = 0;
             $.each($('.purpose_type'), function() {
-                 cheked_count = $('.purpose_type:checked').length;
+                cheked_count = $('.purpose_type:checked').length;
             });
-            if(cheked_count > 0){
+            if (cheked_count > 0) {
                 $('#select_all_purpose_type').prop('checked', true);
-            }else{
+            } else {
                 $('#select_all_purpose_type').prop('checked', false);
             }
         }
@@ -252,33 +253,33 @@ app.component('eyatraGradeForm', {
             purposeType();
         });
 
-        function travelType(){
+        function travelType() {
             var cheked_count = 0;
             $.each($('.travel_type'), function() {
-                 cheked_count = $('.travel_type:checked').length;
+                cheked_count = $('.travel_type:checked').length;
             });
-            if(cheked_count > 0){
+            if (cheked_count > 0) {
                 $('#select_all_travel_type').prop('checked', true);
-            }else{
+            } else {
                 $('#select_all_travel_type').prop('checked', false);
             }
         }
 
         $(document).on('click', '.travel_type', function() {
-            travelType();  
+            travelType();
         });
 
-        function localTravelType(){
+        function localTravelType() {
             var cheked_count = 0;
             $.each($('.local_travel_type'), function() {
-                 cheked_count = $('.local_travel_type:checked').length;
+                cheked_count = $('.local_travel_type:checked').length;
             });
-            if(cheked_count > 0){
+            if (cheked_count > 0) {
                 $('#select_all_local_travel_type').prop('checked', true);
-            }else{
+            } else {
                 $('#select_all_local_travel_type').prop('checked', false);
             }
-             
+
         }
         $(document).on('click', '.local_travel_type', function() {
             localTravelType();
@@ -295,7 +296,7 @@ app.component('eyatraGradeForm', {
 
         function hasDecimalPlace(value, x) {
             var pointIndex = value.indexOf('.');
-            return  pointIndex >= 0 && pointIndex < value.length - x;
+            return pointIndex >= 0 && pointIndex < value.length - x;
         }
 
         $('.toggle_cb').on('click', function() {
@@ -312,11 +313,12 @@ app.component('eyatraGradeForm', {
         });
         $(document).on('keydown keyup change', '.amount_check', function(e) {
             var keys_ids = $(this).data("eligible");
-            key_id =  keys_ids.split("_");   
+            key_id = keys_ids.split("_");
             if ($(this).val() < 100) {
-                    $('#eligible_amount_data_' + key_id[0] +'_'+ key_id[1]).attr({"min" : 100
-            });
-            } 
+                $('#eligible_amount_data_' + key_id[0] + '_' + key_id[1]).attr({
+                    "min": 100
+                });
+            }
         });
 
         /*
@@ -366,7 +368,7 @@ app.component('eyatraGradeForm', {
 
         var form_id = '#grade-form';
         var v = jQuery(form_id).validate({
-            errorPlacement: function(error, element) {  
+            errorPlacement: function(error, element) {
                 error.insertAfter(element)
             },
             invalidHandler: function(event, validator) {
@@ -389,7 +391,7 @@ app.component('eyatraGradeForm', {
                     minlength: 2,
                     maxlength: 191,
                 },
-                
+
                 'discount_percentage': {
                     required: true,
                     min: 1,

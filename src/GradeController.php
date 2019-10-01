@@ -148,7 +148,7 @@ class GradeController extends Controller {
 					$local_travel_types_list[$local_travel_type->id]->checked = true;
 				}
 			}
-			$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit')->first();
+			$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit','two_wheeler_per_km','four_wheeler_per_km')->first();
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
