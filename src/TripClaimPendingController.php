@@ -288,6 +288,7 @@ class TripClaimPendingController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
+			->where('ey_employee_claims.amount_to_pay', 2)
 
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
@@ -297,6 +298,11 @@ class TripClaimPendingController extends Controller {
 			->where(function ($query) use ($r) {
 				if ($r->get('trip_id')) {
 					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet')) {
+					$query->where("outlets.id", $r->get('outlet'))->orWhere(DB::raw("-1"), $r->get('outlet'));
 				}
 			})
 			->where(function ($query) use ($r) {
