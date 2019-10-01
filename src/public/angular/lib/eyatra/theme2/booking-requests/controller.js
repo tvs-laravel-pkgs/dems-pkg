@@ -27,7 +27,8 @@ app.component('eyatraTripBookingRequests', {
                 dataType: "json",
                 data: function(d) {
                     d.employee = $('#employee_name').val();
-                    d.status = $('#status_id').val();
+                    //alert($('#status').val());
+                    d.status = $('#status').val();
                 }
             },
             columns: [
@@ -73,13 +74,13 @@ app.component('eyatraTripBookingRequests', {
             dataTableFilter.fnFilter();
         }
         $scope.onselectStatus = function(id) {
-            $('#status_id').val(id);
+            $('#status').val(id);
             dataTableFilter.fnFilter();
         }
 
         $scope.resetForm = function() {
             $('#employee_name').val(null);
-            $('#status_id').val(null);
+            $('#status').val(null);
             dataTableFilter.fnFilter();
         }
 
@@ -497,7 +498,6 @@ app.component('eyatraTripBookingRequestsView', {
 app.component('eyatraTripTatkalBookingRequests', {
     templateUrl: eyatra_tatkal_booking_requests_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
-
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#eyatra_trip_tatkal_booking_requests_table').DataTable({
@@ -523,7 +523,7 @@ app.component('eyatraTripTatkalBookingRequests', {
                 dataType: "json",
                 data: function(d) {
                     d.employee = $('#employee_name').val();
-                    d.status = $('#status_id').val();
+                    d.status = $('#status').val();
                 }
             },
             columns: [
@@ -569,13 +569,13 @@ app.component('eyatraTripTatkalBookingRequests', {
             dataTableFilter.fnFilter();
         }
         $scope.onselectStatus = function(id) {
-            $('#status_id').val(id);
+            $('#status').val(id);
             dataTableFilter.fnFilter();
         }
 
         $scope.resetForm = function() {
             $('#employee_name').val(null);
-            $('#status_id').val(null);
+            $('#status').val(null);
             dataTableFilter.fnFilter();
         }
 
