@@ -104,23 +104,23 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
         });
 
-        $(".bottom-expand-btn").on('click', function() {
-            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
-                $(".separate-bottom-fixed-layer").removeClass("in");
-            } else {
-                $(".separate-bottom-fixed-layer").addClass("in");
-                $(".bottom-expand-btn").css({ 'display': 'none' });
-            }
-        });
-        $(".approve-close").on('click', function() {
-            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
-                $(".separate-bottom-fixed-layer").removeClass("in");
-                $(".bottom-expand-btn").css({ 'display': 'inline-block' });
-            } else {
-                $(".separate-bottom-fixed-layer").addClass("in");
-            }
-        });
-        var d = new Date();
+        // $(".bottom-expand-btn").on('click', function() {
+       //     if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+       //         $(".separate-bottom-fixed-layer").removeClass("in");
+       //     } else {
+       //         $(".separate-bottom-fixed-layer").addClass("in");
+       //         $(".bottom-expand-btn").css({ 'display': 'none' });
+       //     }
+       // });
+       // $(".approve-close").on('click', function() {
+       //     if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+       //         $(".separate-bottom-fixed-layer").removeClass("in");
+       //         $(".bottom-expand-btn").css({ 'display': 'inline-block' });
+       //     } else {
+       //         $(".separate-bottom-fixed-layer").addClass("in");
+       //     }
+       // });
+       var d= new Date();
         var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
         $("#cuttent_date").val(val);
 

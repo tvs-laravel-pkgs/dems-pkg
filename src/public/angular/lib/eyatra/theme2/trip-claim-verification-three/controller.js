@@ -196,7 +196,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
                 $(".bottom-expand-btn").css({ 'display': 'none' });
             }
         });
-        $(".btn-close").on('click', function() {
+        $(".btn_close").on('click', function() {
             if ($(".separate-bottom-fixed-layer").hasClass("in")) {
                 $(".separate-bottom-fixed-layer").removeClass("in");
                 $(".bottom-expand-btn").css({ 'display': 'inline-block' });
