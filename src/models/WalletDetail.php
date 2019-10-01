@@ -9,8 +9,6 @@ class WalletDetail extends Model {
 	public $timestamps = false;
 
 	protected $fillable = [
-		'id',
-		'wallet_of_id',
 		'entity_id',
 		'type_id',
 		'value',
