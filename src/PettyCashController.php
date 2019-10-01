@@ -27,7 +27,7 @@ class PettyCashController extends Controller {
 		} else {
 			$type = null;
 		}
-		
+
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
@@ -371,6 +371,8 @@ class PettyCashController extends Controller {
 				->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 				->where('employees.id', $request->employee_id)->first();
 
+			$get_two_four_wheeler_id = Entity::PettyCashTravelModeList();
+
 			//CHECK VALIDATION FOR MAXIMUM ELEGIBILITY AMOUNT LIMIT
 			if ($employee_petty_cash_check->expense_voucher_limit < $request->claim_total_amount) {
 				return response()->json(['success' => false, 'errors' => ['The maximum amount limit is ' . $employee_petty_cash_check->expense_voucher_limit]]);
@@ -411,7 +413,7 @@ class PettyCashController extends Controller {
 					foreach ($voucher_km_difference as $travel_mode_id => $date_array) {
 						foreach ($date_array as $date_key => $distance_array) {
 							//TWO WHEELER
-							if ($travel_mode_id == 15) {
+							if ($travel_mode_id == $get_two_four_wheeler_id[0]->id) {
 								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
 								if ($total_distance > $employee_petty_cash_check->two_wheeler_limit) {
 
@@ -419,7 +421,7 @@ class PettyCashController extends Controller {
 								}
 							}
 							//FOUR WHEELER
-							if ($travel_mode_id == 16) {
+							if ($travel_mode_id == $get_two_four_wheeler_id[1]->id) {
 								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
 								if ($total_distance > $employee_petty_cash_check->four_wheeler_limit) {
 
@@ -555,8 +557,6 @@ class PettyCashController extends Controller {
 					return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
 				}
 			}
-
-			dd();
 			DB::commit();
 			if ($request->id) {
 				return response()->json(['success' => true, 'message' => 'Petty Cash updated successfully']);
@@ -576,7 +576,7 @@ class PettyCashController extends Controller {
 		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getOutletList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		//dd($this->data['outlet_list']);
 		$this->data['employee_list'] = $employee_list = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
-		$this->data['petty_cash_type_list'] = collect(Config::select('name','id')->where('configs.config_type_id', 527)->where(DB::raw('LOWER(configs.name)'),'!=', strtolower("Advance Expense"))->get())->prepend(['id' => '', 'name' => 'Select Petty Cash Type']);
+		$this->data['petty_cash_type_list'] = collect(Config::select('name', 'id')->where('configs.config_type_id', 527)->where(DB::raw('LOWER(configs.name)'), '!=', strtolower("Advance Expense"))->get())->prepend(['id' => '', 'name' => 'Select Petty Cash Type']);
 		return response()->json($this->data);
 	}
 	public function pettyCashDelete($type_id, $pettycash_id) {
