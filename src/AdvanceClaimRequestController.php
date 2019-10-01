@@ -230,7 +230,6 @@ class AdvanceClaimRequestController extends Controller {
 		}
 	}
 	public function AdvanceClaimRequestExport() {
-
 		DB::beginTransaction();
 		try {
 

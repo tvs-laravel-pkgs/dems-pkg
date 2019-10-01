@@ -177,12 +177,15 @@ app.component('eyatraAdvanceClaimRequests', {
                     // table.ajax.reload();
 
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
+                    $('#eyatra_advance_claim_request_table').DataTable().ajax.reload(function(json) {});
+                    $location.path('eyatra/advance-claim/requests/');
+                    $scope.$apply();
                 }
 
             });
 
         });
-        $rootScope.loading = false;
+        // $rootScope.loading = false;
 
     }
 });
