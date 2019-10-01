@@ -238,7 +238,6 @@ app.component('eyatraTripForm', {
             $form_data_url
         ).then(function(response) {
             console.log(response.data);
-
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -269,14 +268,15 @@ app.component('eyatraTripForm', {
                 $('#trip_periods').data('daterangepicker').setStartDate(start_date);
                 $('#trip_periods').data('daterangepicker').setEndDate(end_date);
             }
-            console.log(self.trip.trip_periods);
+            // console.log(self.trip.trip_periods);
             self.advance_eligibility = response.data.advance_eligibility;
+            self.grade_advance_eligibility_amount = response.data.grade_advance_eligibility_amount;
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }
             self.extras = response.data.extras;
             self.action = response.data.action;
-            console.log(self.trip);
+            // console.log(self.trip);
             // console.log(response.data.trip.end_date);
             if (self.action == 'New') {
                 self.trip.trip_type = 'single';
@@ -470,6 +470,15 @@ app.component('eyatraTripForm', {
         //         }
         //     });
         // });
+        $('.advance_amount_check').on('keyup', function() {
+            if (parseInt($(".advance_amount_check").val()) > parseInt(self.grade_advance_eligibility_amount)) {
+                $('.maximum_amount_eligible').text('Maximum advance amount is ' + parseInt(self.grade_advance_eligibility_amount));
+                $('.btn-submit').prop('disabled', true);
+            } else {
+                $('.maximum_amount_eligible').text('');
+                $('.btn-submit').prop('disabled', false);
+            }
+        })
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
