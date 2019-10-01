@@ -352,14 +352,16 @@ class Trip extends Model {
 				$data['message'] = 'Trip not found';
 			}
 		}
+
 		$grade = Auth::user()->entity;
 		//dd('ss', Auth::user()->id, Auth::user()->entity->outlet, Auth::user()->entity->outlet->address);
-		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility')->where('grade_id', $grade->grade_id)->first();
+		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility', 'travel_advance_limit')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
 		} else {
 			$data['advance_eligibility'] = '';
 		}
+		$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
 		//dd(Auth::user()->entity->outlet->address);
 
 		$data['extras'] = [
