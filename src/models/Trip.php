@@ -231,6 +231,7 @@ class Trip extends Model {
 					if ($visit_data['booking_method_name'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
 
+						// dd($state->agents);
 						$agent = $state->agents()->where('company_id', Auth::user()->company_id)->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
 
 						if (!$agent) {
@@ -460,7 +461,6 @@ class Trip extends Model {
 			$to_date = null;
 		}
 
-		
 		// dd($r->all());
 		/*if(isset($r->period))
 		{
@@ -514,7 +514,7 @@ class Trip extends Model {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			
+
 			->where(function ($query) use ($from_date) {
 				if (!empty($from_date)) {
 					$query->where('trips.start_date', $from_date);
@@ -918,7 +918,7 @@ class Trip extends Model {
 	}
 
 	public static function getFilterData() {
-		
+
 		$data = [];
 		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')

@@ -48,7 +48,7 @@ app.component('eyatraPettyCashList', {
                     { data: 'date', name: 'date', searchable: false },
                     { data: 'total', name: 'total', searchable: true },
                     { data: 'status', name: 'configs.name', searchable: true },
-                    
+
                 ],
                 rowCallback: function(row, data) {
                     $(row).addClass('highlight-row');
@@ -175,7 +175,7 @@ app.component('eyatraPettyCashForm', {
                 $location.path('/eyatra/petty-cash/')
                 return;
             }
-            // console.log(response);
+            console.log(response);
             self.extras = response.data.extras;
             self.localconveyance = response.data.localconveyance;
             self.action = response.data.action;
@@ -221,10 +221,10 @@ app.component('eyatraPettyCashForm', {
 
         //GET KM RATE FROM GRADE
         $scope.getRatePerkm = function(id, index) {
-            if (id == 15) {
+            if (id == self.extras.travel_mode_list[0].id) {
                 $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.two_wheeler_per_km);
                 $(".ratePerKMamount_" + index).val(self.emp_details.two_wheeler_per_km);
-            } else if (id == 16) {
+            } else if (id == self.extras.travel_mode_list[1].id) {
                 $(".ratePerKMtext_" + index).html('Per Km - ₹ ' + self.emp_details.four_wheeler_per_km);
                 $(".ratePerKMamount_" + index).val(self.emp_details.four_wheeler_per_km);
             }
