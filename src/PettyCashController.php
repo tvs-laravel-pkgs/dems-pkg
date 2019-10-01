@@ -371,6 +371,8 @@ class PettyCashController extends Controller {
 				->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 				->where('employees.id', $request->employee_id)->first();
 
+			$get_two_four_wheeler_id = Entity::PettyCashTravelModeList();
+
 			//CHECK VALIDATION FOR MAXIMUM ELEGIBILITY AMOUNT LIMIT
 			if ($employee_petty_cash_check->expense_voucher_limit < $request->claim_total_amount) {
 				return response()->json(['success' => false, 'errors' => ['The maximum amount limit is ' . $employee_petty_cash_check->expense_voucher_limit]]);
@@ -411,7 +413,7 @@ class PettyCashController extends Controller {
 					foreach ($voucher_km_difference as $travel_mode_id => $date_array) {
 						foreach ($date_array as $date_key => $distance_array) {
 							//TWO WHEELER
-							if ($travel_mode_id == 15) {
+							if ($travel_mode_id == $get_two_four_wheeler_id[0]->id) {
 								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
 								if ($total_distance > $employee_petty_cash_check->two_wheeler_limit) {
 
@@ -419,7 +421,7 @@ class PettyCashController extends Controller {
 								}
 							}
 							//FOUR WHEELER
-							if ($travel_mode_id == 16) {
+							if ($travel_mode_id == $get_two_four_wheeler_id[1]->id) {
 								$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
 								if ($total_distance > $employee_petty_cash_check->four_wheeler_limit) {
 
