@@ -289,6 +289,7 @@ class TripClaimPendingController extends Controller {
 			)
 			->where('e.company_id', Auth::user()->company_id)
 			->where('ey_employee_claims.amount_to_pay', 2)
+			->where('ey_employee_claims.status_id', 3031)
 
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
