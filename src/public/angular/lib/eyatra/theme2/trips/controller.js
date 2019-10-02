@@ -202,6 +202,9 @@ app.component('eyatraTripForm', {
             }
             self.trip = response.data.trip;
             self.trip.trip_periods = '';
+            self.advance_eligibility = response.data.advance_eligibility;
+            self.grade_advance_eligibility_amount = response.data.grade_advance_eligibility_amount;
+            self.eligible_date = response.data.eligible_date;
 
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
@@ -218,15 +221,49 @@ app.component('eyatraTripForm', {
                     // $('#trip_periods').data('daterangepicker').setStartDate(start_date);
                     // $('#trip_periods').data('daterangepicker').setEndDate(end_date);
                 }
-                $scope.options = {
+                // $scope.options = {
+                //     locale: {
+                //         cancelLabel: 'Clear',
+                //         format: "DD-MM-YYYY",
+                //         separator: " to ",
+                //     },
+                //     showDropdowns: false,
+                //     autoApply: true,
+                // };
+
+                $(".daterange").daterangepicker({
+                    autoclose: true,
+                    minDate: new Date(self.eligible_date),
                     locale: {
                         cancelLabel: 'Clear',
                         format: "DD-MM-YYYY",
                         separator: " to ",
                     },
                     showDropdowns: false,
+                    startDate: start_date,
+                    endDate: end_date,
                     autoApply: true,
-                };
+                });
+
+                // $(".daterange122").on('click', function() {
+                //     // alert('12');
+                //     // setTimeout(function() {
+                //     $(".daterange").daterangepicker({
+                //         autoclose: true,
+                //         minDate: new Date(self.eligible_date),
+                //         locale: {
+                //             cancelLabel: 'Clear',
+                //             format: "DD-MM-YYYY",
+                //             separator: " to ",
+                //         },
+                //         startDate: start_date,
+                //         endDate: end_date,
+                //         showDropdowns: false,
+                //         autoApply: true,
+                //     });
+                //     // }, 500);
+                // });
+
 
             } else {
                 setTimeout(function() {
@@ -245,9 +282,7 @@ app.component('eyatraTripForm', {
                 }, 500);
             }
             // console.log(self.trip.trip_periods);
-            self.advance_eligibility = response.data.advance_eligibility;
-            self.grade_advance_eligibility_amount = response.data.grade_advance_eligibility_amount;
-            self.eligible_date = response.data.eligible_date;
+
 
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
@@ -287,6 +322,8 @@ app.component('eyatraTripForm', {
             self.trip.end_date = date[1];
             $scope.onChange(self.trip.start_date, self.trip.end_date);
         });
+
+
 
         // $scope.options = {
         //     locale: {
