@@ -589,6 +589,7 @@ app.component('eyatraTripClaimForm', {
                         data: { travel_mode_id: travel_mode_id },
                     })
                     .done(function(res) {
+                        //console.log(res.is_no_vehicl_claim);
                         var is_no_vehicl_claim = res.is_no_vehicl_claim;
                         //IF TRANSPORT HAS NO VEHICLE CLAIM
                         if (is_no_vehicl_claim) {
@@ -596,28 +597,35 @@ app.component('eyatraTripClaimForm', {
                                 self.trip.visits[key].self_booking = {
                                     amount: '0.00',
                                     tax: '0.00',
-                                    reference_number: '--'
+                                    reference_number: '--',
+                                    readonly: true
                                 };
                             } else {
+                                self.trip.visits[key].self_booking.readonly = true;
                                 self.trip.visits[key].self_booking.amount = '0.00';
                                 self.trip.visits[key].self_booking.tax = '0.00';
                                 self.trip.visits[key].self_booking.reference_number = '--';
                             }
+
                         } else {
                             if (!self.trip.visits[key].self_booking) {
                                 self.trip.visits[key].self_booking = {
                                     amount: '',
                                     tax: '',
-                                    reference_number: ''
+                                    reference_number: '',
+                                    readonly: false
                                 };
                             } else {
+                                self.trip.visits[key].self_booking.readonly = false;
                                 self.trip.visits[key].self_booking.amount = '';
                                 self.trip.visits[key].self_booking.tax = '';
                                 self.trip.visits[key].self_booking.reference_number = '';
                             }
+
                         }
 
-                        $scope.$apply()
+                        $scope.$apply();
+                        self.travelCal();
                     })
                     .fail(function(xhr) {
                         console.log(xhr);
@@ -1083,11 +1091,13 @@ app.component('eyatraTripClaimForm', {
             }, 500);
         }
         self.travelCal = function() {
+            //alert();
             var total_travel_amount = 0;
             $('.travel_amount').each(function() {
                 var travel_amount = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_amount').val() || 0);
-                //alert(lodging_amount);
+                //alert(travel_amount);
                 var travel_tax = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_tax').val() || 0);
+                //alert(travel_tax);
                 if (!$.isNumeric(travel_amount)) {
                     travel_amount = 0;
                 }

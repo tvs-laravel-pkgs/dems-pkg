@@ -237,7 +237,7 @@ app.component('eyatraTripForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -259,10 +259,6 @@ app.component('eyatraTripForm', {
                 var start_date = response.data.trip.start_date;
                 var end_date = response.data.trip.end_date;
 
-                //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
-                /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
-     $('.daterange').val(picker.start_date.format('DD-MM-YYYY') + ' to ' + picker.end_date.format('DD-MM-YYYY'));
- });*/
                 trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
                 $('#trip_periods').val(trip_periods);
                 $('#trip_periods').data('daterangepicker').setStartDate(start_date);
@@ -429,9 +425,6 @@ app.component('eyatraTripForm', {
         }
 
         self.removeLodging = function(index, lodging_id) {
-            // alert('remove');
-            // alert(index);
-            // alert(lodging_id);
             if (lodging_id) {
                 lodgings_removal_id.push(lodging_id);
                 $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
@@ -439,46 +432,15 @@ app.component('eyatraTripForm', {
             self.trip.visits.splice(index, 1);
         }
 
-        //SEARCH CITY
-        // self.searchCity = function(query) {
-        //     if (query) {
-        //         return new Promise(function(resolve, reject) {
-        //             $http
-        //                 .post(
-        //                     trip_search_city_url, {
-        //                         key: query,
-        //                     }
-        //                 )
-        //                 .then(function(response) {
-        //                     console.log(response.data);
-        //                     resolve(response.data);
-        //                 });
-        //             //reject(response);
-        //         });
+        // $('.advance_amount_check').on('keyup', function() {
+        //     if (parseInt($(".advance_amount_check").val()) > parseInt(self.grade_advance_eligibility_amount)) {
+        //         $('.maximum_amount_eligible').text('Maximum advance amount is ' + parseInt(self.grade_advance_eligibility_amount));
+        //         $('.btn-submit').prop('disabled', true);
         //     } else {
-        //         return [];
+        //         $('.maximum_amount_eligible').text('');
+        //         $('.btn-submit').prop('disabled', false);
         //     }
-        // }
-        // $('#trip-form').validate();
-
-        // var user = $('input[name^="visits"]');
-
-        // user.filter('input[name$="[to_city_id]"]').each(function() {
-        //     $(this).rules("add", {
-        //         messages: {
-        //             required: "Name is Mandatory"
-        //         }
-        //     });
-        // });
-        $('.advance_amount_check').on('keyup', function() {
-            if (parseInt($(".advance_amount_check").val()) > parseInt(self.grade_advance_eligibility_amount)) {
-                $('.maximum_amount_eligible').text('Maximum advance amount is ' + parseInt(self.grade_advance_eligibility_amount));
-                $('.btn-submit').prop('disabled', true);
-            } else {
-                $('.maximum_amount_eligible').text('');
-                $('.btn-submit').prop('disabled', false);
-            }
-        })
+        // })
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -502,6 +464,9 @@ app.component('eyatraTripForm', {
                 'advance_received': {
                     minlength: 3,
                     maxlength: 10,
+                    max: function() {
+                        return parseInt(self.grade_advance_eligibility_amount);
+                    }
                 },
                 'trip_mode[]': {
                     required: true,
