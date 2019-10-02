@@ -184,7 +184,7 @@ app.component('eyatraTripForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            // console.log(response.data.eligible_date);
+            console.log(response.data);
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -202,18 +202,46 @@ app.component('eyatraTripForm', {
             }
             self.trip = response.data.trip;
             self.trip.trip_periods = '';
-            if (response.data.trip.start_date && response.data.trip.end_date) {
-                var start_date = response.data.trip.start_date;
-                var end_date = response.data.trip.end_date;
 
-                //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
-                /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
+            if (response.data.action == "Edit") {
+                if (response.data.trip.start_date && response.data.trip.end_date) {
+                    var start_date = response.data.trip.start_date;
+                    var end_date = response.data.trip.end_date;
+
+                    //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
+                    /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
      $('.daterange').val(picker.start_date.format('DD-MM-YYYY') + ' to ' + picker.end_date.format('DD-MM-YYYY'));
  });*/
-                trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
-                $('#trip_periods').val(trip_periods);
-                $('#trip_periods').data('daterangepicker').setStartDate(start_date);
-                $('#trip_periods').data('daterangepicker').setEndDate(end_date);
+                    trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
+                    self.trip.trip_periods = trip_periods;
+                    $scope.onChange(start_date, end_date);
+                    // $('#trip_periods').data('daterangepicker').setStartDate(start_date);
+                    // $('#trip_periods').data('daterangepicker').setEndDate(end_date);
+                }
+                $scope.options = {
+                    locale: {
+                        cancelLabel: 'Clear',
+                        format: "DD-MM-YYYY",
+                        separator: " to ",
+                    },
+                    showDropdowns: false,
+                    autoApply: true,
+                };
+
+            } else {
+                setTimeout(function() {
+                    $(".daterange").daterangepicker({
+                        autoclose: true,
+                        minDate: new Date(self.eligible_date),
+                        locale: {
+                            cancelLabel: 'Clear',
+                            format: "DD-MM-YYYY",
+                            separator: " to ",
+                        },
+                        showDropdowns: false,
+                        autoApply: true,
+                    });
+                }, 500);
             }
             // console.log(self.trip.trip_periods);
             self.advance_eligibility = response.data.advance_eligibility;
@@ -248,25 +276,10 @@ app.component('eyatraTripForm', {
             $scope.showBank = false;
             $scope.showCheque = false;
             $scope.showWallet = false;
-
-            setTimeout(function() {
-                $(".daterange").daterangepicker({
-                    autoclose: true,
-                    minDate: new Date(self.eligible_date),
-                    locale: {
-                        cancelLabel: 'Clear',
-                        format: "DD-MM-YYYY",
-                        separator: " to ",
-                    },
-                    showDropdowns: false,
-                    autoApply: true,
-                });
-                $(".daterange").val('');
-            }, 500);
         });
 
         $(".daterange").on('change', function() {
-            // console.log($("#trip_periods").val());
+            console.log($("#trip_periods").val());
             var dates = $("#trip_periods").val();
             var date = dates.split(" to ");
             self.trip.start_date = date[0];
