@@ -156,7 +156,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function saveEYatraAgentClaim(Request $request) {
-		// dd($request->booking_list);
+		//dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -177,6 +177,14 @@ class AgentClaimController extends Controller {
 				// 'tax' => "required",
 				// 'invoice_amount' => "required",
 			]);
+			if ($request->invoice_number) {
+				//dd($request->invoice_number);
+				$agent_claim_number = AgentClaim::where('invoice_number', 'LIKE', '%' . $request->invoice_number . '%')->first();
+				//dd($agent_claim_number);
+				if ($agent_claim_number) {
+					return response()->json(['success' => false, 'errors' => ['Invoice number already exists']]);
+				}
+			}
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
