@@ -375,6 +375,8 @@ class Trip extends Model {
 		];
 		$data['trip'] = $trip;
 
+		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
+
 		return response()->json($data);
 	}
 
