@@ -184,7 +184,7 @@ app.component('eyatraTripForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            // console.log(response.data.eligible_date);
+            // console.log(response.data);
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -202,18 +202,47 @@ app.component('eyatraTripForm', {
             }
             self.trip = response.data.trip;
             self.trip.trip_periods = '';
-            if (response.data.trip.start_date && response.data.trip.end_date) {
-                var start_date = response.data.trip.start_date;
-                var end_date = response.data.trip.end_date;
 
-                //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
-                /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
+            if (response.data.action == "Edit") {
+                if (response.data.trip.start_date && response.data.trip.end_date) {
+                    var start_date = response.data.trip.start_date;
+                    var end_date = response.data.trip.end_date;
+
+                    //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
+                    /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
      $('.daterange').val(picker.start_date.format('DD-MM-YYYY') + ' to ' + picker.end_date.format('DD-MM-YYYY'));
  });*/
-                trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
-                $('#trip_periods').val(trip_periods);
-                $('#trip_periods').data('daterangepicker').setStartDate(start_date);
-                $('#trip_periods').data('daterangepicker').setEndDate(end_date);
+                    trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
+                    self.trip.trip_periods = trip_periods;
+                    $scope.onChange(start_date, end_date);
+                    // $('#trip_periods').data('daterangepicker').setStartDate(start_date);
+                    // $('#trip_periods').data('daterangepicker').setEndDate(end_date);
+                }
+                $scope.options = {
+                    locale: {
+                        cancelLabel: 'Clear',
+                        format: "DD-MM-YYYY",
+                        separator: " to ",
+                    },
+                    showDropdowns: false,
+                    autoApply: true,
+                };
+
+            } else {
+                setTimeout(function() {
+                    $(".daterange").daterangepicker({
+                        autoclose: true,
+                        minDate: new Date(self.eligible_date),
+                        locale: {
+                            cancelLabel: 'Clear',
+                            format: "DD-MM-YYYY",
+                            separator: " to ",
+                        },
+                        showDropdowns: false,
+                        autoApply: true,
+                    });
+                    $(".daterange").val('');
+                }, 500);
             }
             // console.log(self.trip.trip_periods);
             self.advance_eligibility = response.data.advance_eligibility;
@@ -248,21 +277,6 @@ app.component('eyatraTripForm', {
             $scope.showBank = false;
             $scope.showCheque = false;
             $scope.showWallet = false;
-
-            setTimeout(function() {
-                $(".daterange").daterangepicker({
-                    autoclose: true,
-                    minDate: new Date(self.eligible_date),
-                    locale: {
-                        cancelLabel: 'Clear',
-                        format: "DD-MM-YYYY",
-                        separator: " to ",
-                    },
-                    showDropdowns: false,
-                    autoApply: true,
-                });
-                $(".daterange").val('');
-            }, 500);
         });
 
         $(".daterange").on('change', function() {
@@ -413,7 +427,7 @@ app.component('eyatraTripForm', {
         }
         $scope.trip_mode = function(id) {
             var trip_array = self.trip.visits;
-            console.log(trip_array);
+            // console.log(trip_array);
 
             if (id == 1) {
                 var arr_length = self.trip.visits.length;
@@ -543,7 +557,7 @@ app.component('eyatraTripForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('.btn-submit').button('reset');
                             /*var errors = '';
@@ -604,7 +618,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -645,7 +659,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -724,7 +738,7 @@ app.component('eyatraTripView', {
                     method: "GET",
                 })
                 .done(function(res) {
-                    console.log(res.success);
+                    // console.log(res.success);
                     if (!res.success) {
                         $('#submit').button('reset');
                         var errors = '';
@@ -813,7 +827,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
