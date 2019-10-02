@@ -470,7 +470,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
 //EMPLOYEE PAY TO COMPANY FOR TRIP CLAIM
 app.component('eyatraTripClaimPaymentPendingList', {
     templateUrl: eyatra_trip_claim_payment_pending_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http) {
+    controller: function(HelperService, $location, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -512,6 +512,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
                 }
             },
             columns: [
+                { data: 'checkbox', searchable: false },
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
@@ -560,6 +561,136 @@ app.component('eyatraTripClaimPaymentPendingList', {
             $('#outlet_id').val(-1);
             dataTable.draw();
         }
+
+
+        $('#head_booking').on('click', function() {
+            var count = 0;
+            selected_employee_claims= [];
+            if (event.target.checked == true) {
+                $('.employee_claim_list').prop('checked', true);
+                $.each($('.employee_claim_list:checked'), function() {
+                    count++;
+                    selected_employee_claims.push($(this).val());
+                });
+            } else {
+                $('.employee_claim_list').prop('checked', false);
+            }
+            if (count > 0) {
+                $('#approve').css({ 'display': 'inline-block' });
+
+            } else {
+                $('#approve').css({ 'display': 'none' });
+
+            }
+            $('.approve_ids').val(selected_employee_claims);
+          
+        });
+
+        $(document.body).on('click', '.employee_claim_list', function() {
+            var count = 0;
+            selected_employee_claims = [];
+            $.each($('.employee_claim_list:checked'), function() {
+                count++;
+                selected_employee_claims.push($(this).val());
+            });
+            if (count > 0) {
+                $('#approve').css({ 'display': 'inline-block' });
+
+            } else {
+                $('#approve').css({ 'display': 'none' });
+
+            }
+            $('.approve_ids').val(selected_employee_claims);
+        });
+        
+
+        $(document.body).on('click', '.approve_claim', function() {
+            var id = $(this).data('claim_id');
+            $http.post(
+                employee_claim_payment_pending_single_approve_url, { id: id },
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Employee Claim Payment Pending Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+
+                    $('#approve').css({ 'display': 'none' });
+
+                    var dataTableFilter = $('#payment_pending_list_table').dataTable();
+                    dataTableFilter.fnFilter();
+                    $location.path('/eyatra/trip/claim/payment-pending/list');
+                    $scope.$apply();
+                    // window.location.href = laravel_routes['listEYatraTripClaimPaymentPendingList'];
+                }
+        });
+        });
+
+        $('#approve').on('click', function() {
+            var approve_ids = $('.approve_ids').val();
+            $http.post(
+                employee_claim_payment_pending_approve_url, { approve_ids: approve_ids },
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Employee Claim Payment Pending Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+
+                    $('#approve').css({ 'display': 'none' });
+
+                    var dataTableFilter = $('#payment_pending_list_table').dataTable();
+                    dataTableFilter.fnFilter();
+                    $location.path('/eyatra/trip/claim/payment-pending/list');
+                    $scope.$apply();
+                    // window.location.href = laravel_routes['listEYatraTripClaimPaymentPendingList'];
+                }
+
+            });
+
+        });
+
+
         // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification Three</h3>');
         //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
 
