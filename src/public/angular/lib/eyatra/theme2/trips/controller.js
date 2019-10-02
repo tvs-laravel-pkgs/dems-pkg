@@ -184,7 +184,7 @@ app.component('eyatraTripForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -241,6 +241,7 @@ app.component('eyatraTripForm', {
                         showDropdowns: false,
                         autoApply: true,
                     });
+                    $(".daterange").val('');
                 }, 500);
             }
             // console.log(self.trip.trip_periods);
@@ -279,7 +280,7 @@ app.component('eyatraTripForm', {
         });
 
         $(".daterange").on('change', function() {
-            console.log($("#trip_periods").val());
+            // console.log($("#trip_periods").val());
             var dates = $("#trip_periods").val();
             var date = dates.split(" to ");
             self.trip.start_date = date[0];
@@ -426,7 +427,7 @@ app.component('eyatraTripForm', {
         }
         $scope.trip_mode = function(id) {
             var trip_array = self.trip.visits;
-            console.log(trip_array);
+            // console.log(trip_array);
 
             if (id == 1) {
                 var arr_length = self.trip.visits.length;
@@ -556,7 +557,7 @@ app.component('eyatraTripForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('.btn-submit').button('reset');
                             /*var errors = '';
@@ -617,7 +618,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -658,7 +659,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -737,7 +738,7 @@ app.component('eyatraTripView', {
                     method: "GET",
                 })
                 .done(function(res) {
-                    console.log(res.success);
+                    // console.log(res.success);
                     if (!res.success) {
                         $('#submit').button('reset');
                         var errors = '';
@@ -826,7 +827,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
