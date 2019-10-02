@@ -444,13 +444,24 @@ class Trip extends Model {
 		// }
 
 		if ($request->status_ids) {
-			$trips->where('trips.status_id', $request->status_ids);
+			// dump($request->status_ids);
+			// dump($request->status_ids[0]);
+			// $status_ids = explode(',', $request->status_ids[0]);
+			// dd($status_ids);
+
+			$trips->whereIn('trips.status_id', $request->status_ids);
 		} else {
-			$trips->where('trips.status_id', '!=', 3026);
+			$trips->whereNotIn('trips.status_id', [3026]);
 		}
 
+		// if ($request->status_ids) {
+		// 	$trips->where('trips.status_id', $request->status_ids);
+		// } else {
+		// 	$trips->where('trips.status_id', '!=', 3026);
+		// }
+
 		if ($request->purpose_ids) {
-			$trips->where('trips.purpose_ids', $request->purpose_ids);
+			$trips->where('trips.purpose_id', $request->purpose_ids);
 		}
 
 		// if ($request->get('from_date')) {
@@ -1680,7 +1691,7 @@ class Trip extends Model {
 
 			//FINAL SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
-				dd($request->all());
+				// dd($request->all());
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 
