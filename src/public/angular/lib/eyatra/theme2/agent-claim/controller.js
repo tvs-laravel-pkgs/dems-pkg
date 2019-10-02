@@ -2,6 +2,7 @@ app.component('eyatraAgentClaimList', {
     templateUrl: eyatra_agent_claim_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $location, $http) {
         var self = this;
+
         self.hasPermission = HelperService.hasPermission;
         // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
@@ -132,7 +133,7 @@ app.component('eyatraAgentClaimForm', {
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             self.gstin_tax = response.data.gstin_tax;
-            console.log(self.booking_list);
+            console.log(response.data.agent_claim);
 
             if (self.action == 'Edit') {
                 self.trips_count = response.data.trips_count;
@@ -162,6 +163,16 @@ app.component('eyatraAgentClaimForm', {
             total = (net_amt + tax);
             $("#invoice_amount").val(total.toFixed(2));
         });
+
+          $(document).on("click", ".booking_list", function() {
+           
+            if ($('.booking_list:checked').length > 0) {
+                $('.booking_all_list').prop('checked', true);
+            } else {
+                $('.booking_all_list').prop('checked', false);
+            }
+        });
+
 
         $(document).on('click', '.booking_list', function() {
             var total_amount = 0;
