@@ -13,6 +13,7 @@ use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
 	public function listTrip(Request $r) {
+
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -51,13 +52,13 @@ class TripController extends Controller {
 			->where(function ($query) use ($r) {
 				if ($r->from_date) {
 					$date = date('Y-m-d', strtotime($r->from_date));
-					$query->where("trips.start_date", $date)->orWhere(DB::raw("-1"), $r->from_date);
+					$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
 				}
 			})
 			->where(function ($query) use ($r) {
 				if ($r->to_date) {
 					$date = date('Y-m-d', strtotime($r->to_date));
-					$query->where("trips.end_date", $date)->orWhere(DB::raw("-1"), $r->to_date);
+					$query->where("trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
 				}
 			})
 			->where(function ($query) use ($r) {

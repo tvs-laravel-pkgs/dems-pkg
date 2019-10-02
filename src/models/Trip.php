@@ -384,7 +384,7 @@ class Trip extends Model {
 		// dd(Auth::user()->company_id);
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
+			->leftjoin('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
@@ -398,6 +398,7 @@ class Trip extends Model {
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				'trips.start_date',
 				'trips.end_date',
+				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				DB::raw('FORMAT(claim.total_amount,2) as claim_amount'),
@@ -421,33 +422,69 @@ class Trip extends Model {
 		if ($request->number) {
 			$trips->where('trips.number', 'like', '%' . $request->number . '%');
 		}
-		if ($request->from_date && $request->to_date) {
-			$trips->where('v.departure_date', '>=', $request->from_date);
-			$trips->where('v.departure_date', '<=', $request->to_date);
+		if ($request->from_date) {
+			$date = date('Y-m-d', strtotime($request->get('from_date')));
+			$trips->where("trips.start_date", '>=', $date);
+		}
+		if ($request->to_date) {
+			$date = date('Y-m-d', strtotime($request->get('to_date')));
+			$trips->where("trips.end_date", '<=', $date);
+		}
+		// else {
+		// 	$today = Carbon::today();
+		// 	$from_date = $today->copy()->subMonths(3);
+		// 	$trips->where('trips.start_date', '>=', $from_date);
+		// }
+		// if ($request->to_date) {
+		// 	$trips->where('trips.end_date', '<=', $request->to_date);
+		// } else {
+		// 	$today = Carbon::today();
+		// 	$to_date = $today->copy()->addMonths(3);
+		// 	$trips->where('trips.end_date', '<=', $to_date);
+		// }
+
+		if ($request->status_ids) {
+			$trips->where('trips.status_id', $request->status_ids);
 		} else {
-			$today = Carbon::today();
-			$from_date = $today->copy()->subMonths(3);
-			$to_date = $today->copy()->addMonths(3);
-			$trips->where('v.departure_date', '>=', $from_date);
-			$trips->where('v.departure_date', '<=', $to_date);
+			$trips->where('trips.status_id', '!=', 3026);
 		}
 
-		if ($request->status_ids && $request->status_ids[0]) {
-			$status_ids = explode(',', $request->status_ids[0]);
-			$trips->whereIn('trips.status_id', $status_ids);
-		} else {
-			$trips->whereNotIn('trips.status_id', [3026]);
+		if ($request->purpose_ids) {
+			$trips->where('trips.purpose_ids', $request->purpose_ids);
 		}
-		if ($request->purpose_ids && $request->purpose_ids[0]) {
-			$purpose_ids = explode(',', $request->purpose_ids[0]);
-			$trips->whereIn('trips.purpose_id', $purpose_ids);
-		}
-		if ($request->from_city_id) {
-			$trips->whereIn('v.from_city_id', $request->from_city_id);
-		}
-		if ($request->to_city_id) {
-			$trips->whereIn('v.to_city_id', $request->to_city_id);
-		}
+
+		// if ($request->get('from_date')) {
+		// 	$date = date('Y-m-d', strtotime($request->get('from_date')));
+		// 	// dd($date);
+		// 	$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $request->get('from_date'));
+		// }
+		// if ($request->from_date && $request->to_date) {
+		// 	$trips->where('trips.start_date', '>=', $request->from_date);
+		// 	$trips->where('trips.end_date', '<=', $request->to_date);
+		// } else {
+		// 	$today = Carbon::today();
+		// 	$from_date = $today->copy()->subMonths(3);
+		// 	$to_date = $today->copy()->addMonths(3);
+		// 	$trips->where('trips.start_date', '>=', $from_date);
+		// 	$trips->where('trips.end_date', '<=', $to_date);
+		// }
+
+		// if ($request->status_ids && $request->status_ids[0]) {
+		// 	$status_ids = explode(',', $request->status_ids[0]);
+		// 	$trips->whereIn('trips.status_id', $status_ids);
+		// } else {
+		// 	$trips->whereNotIn('trips.status_id', [3026]);
+		// }
+		// if ($request->purpose_ids && $request->purpose_ids[0]) {
+		// 	$purpose_ids = explode(',', $request->purpose_ids[0]);
+		// 	$trips->whereIn('trips.purpose_id', $purpose_ids);
+		// }
+		// if ($request->from_city_id) {
+		// 	$trips->whereIn('v.from_city_id', $request->from_city_id);
+		// }
+		// if ($request->to_city_id) {
+		// 	$trips->whereIn('v.to_city_id', $request->to_city_id);
+		// }
 		return $trips;
 	}
 
@@ -1643,7 +1680,7 @@ class Trip extends Model {
 
 			//FINAL SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
-				// dd($request->all());
+				dd($request->all());
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 
