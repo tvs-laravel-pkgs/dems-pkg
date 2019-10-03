@@ -9,7 +9,6 @@ class Visit extends Model {
 	public $timestamps = false;
 
 	protected $fillable = [
-		'id',
 		'trip_id',
 		'from_city_id',
 		'to_city_id',
