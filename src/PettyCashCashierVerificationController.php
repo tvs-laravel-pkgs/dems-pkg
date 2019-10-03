@@ -13,6 +13,7 @@ use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
+use Uitoux\EYatra\ReimbursementTranscation;
 use Uitoux\EYatra\WalletDetail;
 use Yajra\Datatables\Datatables;
 
@@ -203,6 +204,51 @@ class PettyCashCashierVerificationController extends Controller {
 			DB::beginTransaction();
 			if ($request->petty_cash_id) {
 				$petty_cash_cashier_approve = PettyCash::where('id', $request->petty_cash_id)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+
+				//Reimbursement Transaction
+				$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
+				// dd($previous_balance_amount);
+				if ($previous_balance_amount) {
+					$balance_amount = $previous_balance_amount - $request->amount;
+					$reimbursementtranscation = new ReimbursementTranscation;
+					$reimbursementtranscation->outlet_id = Auth::user()->entity->outlet_id;
+					$reimbursementtranscation->company_id = Auth::user()->company_id;
+					if ($request->type_id == 1) {
+						$reimbursementtranscation->transcation_id = 3270;
+					} else {
+						$reimbursementtranscation->transcation_id = 3272;
+					}
+					$reimbursementtranscation->transaction_date = Carbon::now();
+					$reimbursementtranscation->transcation_type = 3272;
+					$reimbursementtranscation->amount = $request->amount;
+					$reimbursementtranscation->balance_amount = $balance_amount;
+					$reimbursementtranscation->save();
+
+					//Outlet
+					$outlet = Outlet::where('id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
+				} else {
+					$outlet = Outlet::where('id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
+					// dd($outlet->reimbursement_amount);
+					if ($outlet->reimbursement_amount >= 0) {
+						$balance_amount = $outlet->reimbursement_amount - $request->amount;
+						$reimbursementtranscation = new ReimbursementTranscation;
+						$reimbursementtranscation->outlet_id = Auth::user()->entity->outlet_id;
+						$reimbursementtranscation->company_id = Auth::user()->company_id;
+						if ($request->type_id == 1) {
+							$reimbursementtranscation->transcation_id = 3270;
+						} else {
+							$reimbursementtranscation->transcation_id = 3272;
+						}
+						$reimbursementtranscation->transaction_date = Carbon::now();
+						$reimbursementtranscation->transcation_type = 3272;
+						$reimbursementtranscation->amount = $request->amount;
+						$reimbursementtranscation->balance_amount = $balance_amount;
+						$reimbursementtranscation->save();
+					} else {
+						return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
+					}
+				}
+
 				//PAYMENT SAVE
 				if ($request->type_id == 1) {
 					$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3253, 'payment_mode_id' => $request->payment_mode_id]);
