@@ -9,7 +9,7 @@ class Lodging extends Model {
 	use SoftDeletes;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'trip_id',
 		'city_id',
 		// 'check_in_date',

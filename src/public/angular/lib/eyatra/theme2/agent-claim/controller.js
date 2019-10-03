@@ -156,7 +156,7 @@ app.component('eyatraAgentClaimForm', {
             $rootScope.loading = false;
         });
         var total = 0;
-         $(document).on('change', '#tax', function() {
+         $(document).on('keyup', '#tax', function() {
         // $('#tax').on('change', function() {
             var net_amt = parseFloat($(".net_amount").val());
             var tax = parseFloat($("#tax").val());
@@ -175,6 +175,7 @@ app.component('eyatraAgentClaimForm', {
 
 
         $(document).on('click', '.booking_list', function() {
+           
             var total_amount = 0;
             var count = 0;
             var amount = 0;
@@ -193,6 +194,13 @@ app.component('eyatraAgentClaimForm', {
             $(".amount").html(amount.toFixed(2));
             $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
+             
+            if($("#tax").val() != ''){
+                var net_amt = parseFloat($(".net_amount").val());
+                var tax = parseFloat($("#tax").val());
+                var total_amount = (net_amt + tax);
+                $("#invoice_amount").val(total_amount.toFixed(2));
+            }
             if (count > 0) {
                 if (self.action != 'Edit') {
 
@@ -208,6 +216,8 @@ app.component('eyatraAgentClaimForm', {
         });
 
         $('#head_booking').on('click', function() {
+            $("#tax").val('');
+            $("#invoice_amount").val('');
             var total_amount = 0;
             var count = 0;
             var amount = 0;

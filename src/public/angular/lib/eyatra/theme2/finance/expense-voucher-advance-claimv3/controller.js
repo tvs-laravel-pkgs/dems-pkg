@@ -130,6 +130,8 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
                 $('#accept_button').button('loading');
+                $("#accept_button").prop("disabled", "disabled");
+
                 $.ajax({
                         url: laravel_routes['expenseVoucherVerification3Save'],
                         method: "POST",
@@ -187,6 +189,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             submitHandler: function(form) {
                 let formData = new FormData($(form_id1)[0]);
                 $('#reject_button').button('loading');
+                $("#reject_button").prop("disabled", "disabled");
                 $.ajax({
                         url: laravel_routes['expenseVoucherVerification3Save'],
                         method: "POST",

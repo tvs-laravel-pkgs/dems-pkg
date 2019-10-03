@@ -8,7 +8,7 @@ class Attachment extends Model {
 	public $timestamps = false;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'attachment_of_id',
 		'attachment_type_id',
 		'entity_id',

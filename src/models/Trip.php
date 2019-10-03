@@ -21,7 +21,7 @@ class Trip extends Model {
 	use SoftDeletes;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'number',
 		'employee_id',
 		'purpose_id',
@@ -247,7 +247,13 @@ class Trip extends Model {
 			}
 			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
-			return response()->json(['success' => true, 'message' => 'Trip saved successfully!', 'trip' => $trip]);
+
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => 'Trip added successfully!', 'trip' => $trip]);
+			} else {
+				return response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'trip' => $trip]);
+			}
+
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);

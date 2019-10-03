@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class Sbu extends Model {
 	protected $table = 'sbus';
 	protected $fillable = [
-		'id',
+		// 'id',
 		'lob_id',
 		'name',
 	];

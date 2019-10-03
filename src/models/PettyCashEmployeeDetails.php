@@ -12,7 +12,7 @@ class PettyCashEmployeeDetails extends Model {
 	public $timestamps = false;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'petty_cash_id',
 		'expence_type',
 		'petty_cash_type',
