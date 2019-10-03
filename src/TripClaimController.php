@@ -33,7 +33,7 @@ class TripClaimController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				DB::raw('FORMAT(trips.advance_received,"2","en_IN") as advance_received'),
+				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)

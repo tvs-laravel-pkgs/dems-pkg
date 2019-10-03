@@ -245,26 +245,6 @@ app.component('eyatraTripForm', {
                     autoApply: true,
                 });
 
-                // $(".daterange122").on('click', function() {
-                //     // alert('12');
-                //     // setTimeout(function() {
-                //     $(".daterange").daterangepicker({
-                //         autoclose: true,
-                //         minDate: new Date(self.eligible_date),
-                //         locale: {
-                //             cancelLabel: 'Clear',
-                //             format: "DD-MM-YYYY",
-                //             separator: " to ",
-                //         },
-                //         startDate: start_date,
-                //         endDate: end_date,
-                //         showDropdowns: false,
-                //         autoApply: true,
-                //     });
-                //     // }, 500);
-                // });
-
-
             } else {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
@@ -281,7 +261,6 @@ app.component('eyatraTripForm', {
                     $(".daterange").val('');
                 }, 500);
             }
-            // console.log(self.trip.trip_periods);
 
 
             if (self.advance_eligibility == 1) {
@@ -322,18 +301,6 @@ app.component('eyatraTripForm', {
             self.trip.end_date = date[1];
             $scope.onChange(self.trip.start_date, self.trip.end_date);
         });
-
-
-
-        // $scope.options = {
-        //     locale: {
-        //         cancelLabel: 'Clear',
-        //         format: "DD-MM-YYYY",
-        //         separator: " to ",
-        //     },
-        //     showDropdowns: false,
-        //     autoApply: true,
-        // };
 
         var startdate;
         var enddate;
