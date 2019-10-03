@@ -181,25 +181,138 @@ app.component('eyatraTripForm', {
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
 
-        $scope.options = {
-            locale: {
-                cancelLabel: 'Clear',
-                format: "DD-MM-YYYY",
-                separator: " to ",
-            },
-            showDropdowns: false,
-            autoApply: true,
-            // singleDatePicker:true
-        };
+        $http.get(
+            $form_data_url
+        ).then(function(response) {
+            // console.log(response.data);
+            if (!response.data.success) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/eyatra/trips')
+                return;
+            }
+            self.trip = response.data.trip;
+            self.trip.trip_periods = '';
+            self.advance_eligibility = response.data.advance_eligibility;
+            self.grade_advance_eligibility_amount = response.data.grade_advance_eligibility_amount;
+            self.eligible_date = response.data.eligible_date;
+
+            if (response.data.action == "Edit") {
+                if (response.data.trip.start_date && response.data.trip.end_date) {
+                    var start_date = response.data.trip.start_date;
+                    var end_date = response.data.trip.end_date;
+
+                    //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
+                    /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
+     $('.daterange').val(picker.start_date.format('DD-MM-YYYY') + ' to ' + picker.end_date.format('DD-MM-YYYY'));
+ });*/
+                    trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
+                    self.trip.trip_periods = trip_periods;
+                    $scope.onChange(start_date, end_date);
+                    // $('#trip_periods').data('daterangepicker').setStartDate(start_date);
+                    // $('#trip_periods').data('daterangepicker').setEndDate(end_date);
+                }
+                // $scope.options = {
+                //     locale: {
+                //         cancelLabel: 'Clear',
+                //         format: "DD-MM-YYYY",
+                //         separator: " to ",
+                //     },
+                //     showDropdowns: false,
+                //     autoApply: true,
+                // };
+
+                $(".daterange").daterangepicker({
+                    autoclose: true,
+                    minDate: new Date(self.eligible_date),
+                    locale: {
+                        cancelLabel: 'Clear',
+                        format: "DD-MM-YYYY",
+                        separator: " to ",
+                    },
+                    showDropdowns: false,
+                    startDate: start_date,
+                    endDate: end_date,
+                    autoApply: true,
+                });
+
+            } else {
+                setTimeout(function() {
+                    $(".daterange").daterangepicker({
+                        autoclose: true,
+                        minDate: new Date(self.eligible_date),
+                        locale: {
+                            cancelLabel: 'Clear',
+                            format: "DD-MM-YYYY",
+                            separator: " to ",
+                        },
+                        showDropdowns: false,
+                        autoApply: true,
+                    });
+                    $(".daterange").val('');
+                }, 500);
+            }
+
+
+            if (self.advance_eligibility == 1) {
+                $("#advance").show().prop('disabled', false);
+            }
+            self.extras = response.data.extras;
+            self.action = response.data.action;
+            // console.log(self.trip);
+            // console.log(response.data.trip.end_date);
+            if (self.action == 'New') {
+                self.trip.trip_type = 'single';
+                self.booking_method_name = 'self';
+                self.trip.visits = [];
+                arr_ind = 1;
+                self.trip.visits.push({
+                    from_city_id: response.data.extras.employee_city.id,
+                    to_city_id: '',
+                    booking_method_name: 'Self',
+                    preferred_travel_modes: '',
+                    from_city_details: self.trip.from_city_details,
+
+                });
+                self.checked = true;
+                $scope.round_trip = false;
+                $scope.multi_trip = false;
+            }
+            $rootScope.loading = false;
+            $scope.showBank = false;
+            $scope.showCheque = false;
+            $scope.showWallet = false;
+        });
+
+        $(".daterange").on('change', function() {
+            // console.log($("#trip_periods").val());
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.trip.start_date = date[0];
+            self.trip.end_date = date[1];
+            $scope.onChange(self.trip.start_date, self.trip.end_date);
+        });
 
         var startdate;
         var enddate;
         var id;
-        $scope.onChange = function() {
-            self.trip.start_date = moment($scope.startDate).format('DD-MM-YYYY');
-            self.trip.end_date = moment($scope.endDate).format('DD-MM-YYYY');
-            startdate = self.trip.start_date;
-            enddate = self.trip.end_date;
+        $scope.onChange = function(start_date, end_date) {
+            // self.trip.start_date = moment($scope.startDate).format('DD-MM-YYYY');
+            // self.trip.end_date = moment($scope.endDate).format('DD-MM-YYYY');
+            // startdate = self.trip.start_date;
+            // enddate = self.trip.end_date;
+            startdate = start_date;
+            enddate = end_date;
+            // console.log(startdate, enddate);
             var arr_length = self.trip.visits.length;
             for (var i = 0; i < arr_length; i++) {
                 $('.datepicker_' + i).datepicker('destroy');
@@ -234,68 +347,6 @@ app.component('eyatraTripForm', {
                 $noty.close();
             }, 100000);
         }
-        $http.get(
-            $form_data_url
-        ).then(function(response) {
-            // console.log(response.data);
-            if (!response.data.success) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 1000);
-                $location.path('/eyatra/trips')
-                return;
-            }
-            self.trip = response.data.trip;
-            self.trip.trip_periods = '';
-            if (response.data.trip.start_date && response.data.trip.end_date) {
-                var start_date = response.data.trip.start_date;
-                var end_date = response.data.trip.end_date;
-
-                trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
-                $('#trip_periods').val(trip_periods);
-                $('#trip_periods').data('daterangepicker').setStartDate(start_date);
-                $('#trip_periods').data('daterangepicker').setEndDate(end_date);
-            }
-            // console.log(self.trip.trip_periods);
-            self.advance_eligibility = response.data.advance_eligibility;
-            self.grade_advance_eligibility_amount = response.data.grade_advance_eligibility_amount;
-            if (self.advance_eligibility == 1) {
-                $("#advance").show().prop('disabled', false);
-            }
-            self.extras = response.data.extras;
-            self.action = response.data.action;
-            // console.log(self.trip);
-            // console.log(response.data.trip.end_date);
-            if (self.action == 'New') {
-                self.trip.trip_type = 'single';
-                self.booking_method_name = 'self';
-                self.trip.visits = [];
-                arr_ind = 1;
-                self.trip.visits.push({
-                    from_city_id: response.data.extras.employee_city.id,
-                    to_city_id: '',
-                    booking_method_name: 'Self',
-                    preferred_travel_modes: '',
-                    from_city_details: self.trip.from_city_details,
-
-                });
-                self.checked = true;
-                $scope.round_trip = false;
-                $scope.multi_trip = false;
-            }
-            $rootScope.loading = false;
-            $scope.showBank = false;
-            $scope.showCheque = false;
-            $scope.showWallet = false;
-        });
 
 
         $("#advance").hide().prop('disabled', true);
@@ -380,7 +431,7 @@ app.component('eyatraTripForm', {
         }
         $scope.trip_mode = function(id) {
             var trip_array = self.trip.visits;
-            console.log(trip_array);
+            // console.log(trip_array);
 
             if (id == 1) {
                 var arr_length = self.trip.visits.length;
@@ -510,7 +561,7 @@ app.component('eyatraTripForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('.btn-submit').button('reset');
                             /*var errors = '';
@@ -571,7 +622,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -612,7 +663,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -691,7 +742,7 @@ app.component('eyatraTripView', {
                     method: "GET",
                 })
                 .done(function(res) {
-                    console.log(res.success);
+                    // console.log(res.success);
                     if (!res.success) {
                         $('#submit').button('reset');
                         var errors = '';
@@ -780,7 +831,7 @@ app.component('eyatraTripView', {
                         method: "GET",
                     })
                     .done(function(res) {
-                        console.log(res);
+                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {

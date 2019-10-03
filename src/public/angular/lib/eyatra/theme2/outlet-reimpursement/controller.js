@@ -175,8 +175,6 @@ app.component('eyatraOutletReimbursement', {
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-
-
 app.component('eyatraEntityForm1', {
     templateUrl: eyatra_entity_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
@@ -288,7 +286,8 @@ app.component('eyatraEntityForm1', {
         });
     }
 });
-
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
 //Admin Outlet reimbursement view
 app.component('eyatraOutletReimbursementView', {
     templateUrl: eyatra_outlet_reimpursement_view_template_url,
@@ -306,25 +305,24 @@ app.component('eyatraOutletReimbursementView', {
         });
     }
 });
-
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
 //Cashier Outlet reimbursement view
-app.component('eyatraCashierOutletReimbursementView', {
-    templateUrl: eyatra_outlet_reimpursement_view_template_url,
+// app.component('eyatraCashierOutletReimbursementView', {
+//     templateUrl: eyatra_outlet_reimpursement_view_template_url,
 
-    controller: function($http, $location, $routeParams, HelperService, $scope) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        $http.get(
-            eyatra_outlet_reimpursement_view_url + '/' + 'cashier',
-        ).then(function(response) {
-            console.log(response.data);
-            self.reimpurseimpurse_outlet_data = response.data.reimpurseimpurse_outlet_data;
-            self.reimbursement_amount = response.data.reimbursement_amount;
-            self.reimpurseimpurse_transactions = response.data.reimpurseimpurse_transactions;
-        });
-    }
-});
-
-
+//     controller: function($http, $location, $routeParams, HelperService, $scope) {
+//         var self = this;
+//         self.hasPermission = HelperService.hasPermission;
+//         $http.get(
+//             eyatra_outlet_reimpursement_view_url + '/' + 'cashier',
+//         ).then(function(response) {
+//             console.log(response.data);
+//             self.reimpurseimpurse_outlet_data = response.data.reimpurseimpurse_outlet_data;
+//             self.reimbursement_amount = response.data.reimbursement_amount;
+//             self.reimpurseimpurse_transactions = response.data.reimpurseimpurse_transactions;
+//         });
+//     }
+// });
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------

@@ -18,23 +18,29 @@ use Yajra\Datatables\Datatables;
 class OutletController extends Controller {
 	public function listEYatraOutlet(Request $r) {
 		$outlets = Outlet::withTrashed()
-			->join('ey_addresses as a', 'a.entity_id', 'outlets.id')
-			->join('ncities as city', 'city.id', 'a.city_id')
-			->join('nstates as s', 's.id', 'city.state_id')
+			->leftJoin('ey_addresses as a', function ($join) {
+				$join->on('a.entity_id', '=', 'outlets.id')
+					->where('a.address_of_id', 3160);
+			})
+			->leftJoin('ncities as city', 'city.id', 'a.city_id')
+			->leftJoin('nstates as s', 's.id', 'city.state_id')
 			->leftjoin('regions as r', 'r.state_id', 's.id')
-			->join('countries as c', 'c.id', 's.country_id')
+			->leftJoin('countries as c', 'c.id', 's.country_id')
 			->select(
 				'outlets.id',
 				'outlets.code',
 				'outlets.name',
-				'city.name as city_name',
-				's.name as state_name',
+				DB::raw('IF(city.name IS NULL,"---",city.name) as city_name'),
+				// 'city.name as city_name',
+				DB::raw('IF(s.name IS NULL,"---",s.name) as state_name'),
+				// 's.name as state_name',
 				DB::raw('IF(r.name IS NULL,"---",r.name) as region_name'),
-				'c.name as country_name',
+				DB::raw('IF(c.name IS NULL,"---",c.name) as country_name'),
+				// 'c.name as country_name',
 				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 			->where('outlets.company_id', Auth::user()->company_id)
-			->where('a.address_of_id', 3160)
+		// ->where('a.address_of_id', 3160)
 			->where(function ($query) use ($r) {
 				if ($r->get('region_id')) {
 					$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));

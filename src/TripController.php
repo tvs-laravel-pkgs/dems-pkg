@@ -13,6 +13,7 @@ use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
 	public function listTrip(Request $r) {
+
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -33,7 +34,7 @@ class TripController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				DB::raw('FORMAT(trips.advance_received,"2","en_IN") as advance_received'),
+				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
@@ -51,13 +52,13 @@ class TripController extends Controller {
 			->where(function ($query) use ($r) {
 				if ($r->from_date) {
 					$date = date('Y-m-d', strtotime($r->from_date));
-					$query->where("trips.start_date", $date)->orWhere(DB::raw("-1"), $r->from_date);
+					$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
 				}
 			})
 			->where(function ($query) use ($r) {
 				if ($r->to_date) {
 					$date = date('Y-m-d', strtotime($r->to_date));
-					$query->where("trips.end_date", $date)->orWhere(DB::raw("-1"), $r->to_date);
+					$query->where("trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
 				}
 			})
 			->where(function ($query) use ($r) {
@@ -132,12 +133,24 @@ class TripController extends Controller {
 			}
 		}
 
-		// dd($request->start_date);
-		$trip_start_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->first();
+		if ($request->id) {
+			// $trip_start_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->where('id', '!=', $request->id)->first();
+			// $trip_end_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('employee_id', Auth::user()->entity_id)->where('id', '!=', $request->id)->first();
+			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
+				->where('id', '!=', $request->id)
+				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->first();
+		} else {
+			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
+				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->first();
+		}
+
 		// dd($trip_start_date_data);
-		$trip_end_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('employee_id', Auth::user()->entity_id)->first();
-		//dd($trip_start_date_data, $trip_end_date_data);
-		if ($trip_start_date_data || $trip_end_date_data) {
+		// dd($trip_start_date_data, $trip_end_date_data);
+		if ($trip_start_date_data) {
 			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
 		}
 

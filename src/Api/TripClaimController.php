@@ -192,6 +192,32 @@ class TripClaimController extends Controller {
 					}
 				}
 			}
+
+			if ($request->google_attachment == 1) {
+
+				$trip_id = $request->trip_id;
+
+				$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
+
+				$item_images = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
+				Storage::makeDirectory($item_images, 0777);
+				if ($request->hasfile('google_attachments')) {
+					foreach ($request->file('google_attachments') as $key => $attachement) {
+						$value = rand(1, 100);
+						$image = $attachement;
+						$extension = $image->getClientOriginalExtension();
+						$name = $request->trip_id . 'google_attachment' . $value . '.' . $extension;
+						$image->move(storage_path('app/public/trip/ey_employee_claims/google_attachments/'), $name);
+						$attachement = new Attachment;
+						$attachement->attachment_of_id = 3185;
+						$attachement->attachment_type_id = 3200;
+						$attachement->entity_id = $employee_claim->id;
+						$attachement->name = $name;
+						$attachement->save();
+					}
+
+				}
+			}
 			return response()->json(['success' => true]);
 		}
 

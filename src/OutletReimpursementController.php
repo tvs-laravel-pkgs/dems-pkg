@@ -22,7 +22,7 @@ class OutletReimpursementController extends Controller {
 				'outlets.id as outlet_id',
 				'outlets.code as outlet_code',
 				'outlets.name as outlet_name',
-				'outlets.reimbursement_amount as amount',
+				DB::raw('IF((outlets.reimbursement_amount) IS NULL,"---",outlets.reimbursement_amount) as amount'),
 				'users.name as cashier_name',
 				'employees.code as cashier_code'
 			)
@@ -261,6 +261,49 @@ class OutletReimpursementController extends Controller {
 	}
 	public function getStateList(Request $request) {
 		return NState::getList($request->country_id);
+	}
+
+	//CASHIER
+	public function listCashierOutletReimpursement(Request $r) {
+		$outlets = Outlet::withTrashed()
+			->select(
+				'outlets.id as outlet_id',
+				'outlets.code as outlet_code',
+				'outlets.name as outlet_name',
+				DB::raw('IF((outlets.reimbursement_amount) IS NULL,"---",outlets.reimbursement_amount) as amount'),
+				'users.name as cashier_name',
+				'employees.code as cashier_code'
+			)
+			->join('employees', 'employees.id', 'outlets.cashier_id')
+			->leftjoin('users', function ($join) {
+				$join->on('users.entity_id', '=', 'employees.id')
+					->where('users.user_type_id', 3121);
+			})
+
+			->where('outlets.cashier_id', Auth::user()->entity_id)
+			->where('outlets.company_id', Auth::user()->company_id)
+		// ->groupby('outlets.id')
+			->orderBy('outlets.name', 'asc');
+
+		return Datatables::of($outlets)
+			->addColumn('action', function ($outlets) {
+
+				$img1 = asset('public/img/content/table/edit-yellow.svg');
+				$img2 = asset('public/img/content/table/eye.svg');
+				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
+				$img2_active = asset('public/img/content/table/eye-active.svg');
+				$img3 = asset('public/img/content/table/delete-default.svg');
+				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$outlet_code_name = $outlets->outlet_code . " / " . $outlets->outlet_name;
+				$outlet_cashier_name = $outlets->cashier_code;
+				$outlet_amount = $outlets->amount;
+				return '
+				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive action" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
+				</a>';
+
+			})
+			->make(true);
 	}
 
 }

@@ -276,6 +276,7 @@ class TripClaimPendingController extends Controller {
 			->where('users.user_type_id', 3121)
 			->select(
 				'ey_employee_claims.id',
+				'ey_employee_claims.trip_id',
 				'trips.number',
 				'e.code as ecode',
 				'users.name as ename',
@@ -320,6 +321,12 @@ class TripClaimPendingController extends Controller {
 		// dd($trips);
 
 		return Datatables::of($trips)
+
+			->addColumn('checkbox', function ($trips) {
+				return '<input id="employee_claim_' . $trips->id . '" type="checkbox" class="check-bottom-layer employee_claim_list " name="employee_claim_list"  value="' . $trips->id . '" data-trip_id="' . $trips->trip_id . '" >
+			                                                        <label for="employee_claim_' . $trips->id . '"></label>';
+			})
+
 			->addColumn('action', function ($trip) {
 
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
@@ -333,7 +340,10 @@ class TripClaimPendingController extends Controller {
 
 				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
+				</a>
+				<button title="approve" data-claim_id="' . $trip->id . '" class="btn btn-sm approve_claim"><i class="fa fa-thumbs-up"></i></button>
+
+				';
 
 			})
 			->addColumn('balance_amount', function ($trip) {
@@ -342,6 +352,48 @@ class TripClaimPendingController extends Controller {
 				return $balance_amount;
 			})
 			->make(true);
+	}
+	public function EmployeeClaimPaymentPendingApprove(request $request) {
+
+		DB::beginTransaction();
+		try {
+
+			if ($request->approve_ids) {
+				$employee_claim_ids = explode(',', $request->approve_ids);
+			} else {
+				return back()->with('error', 'Employee claim not found');
+			}
+			$employee_claim_status_update = EmployeeClaim::whereIn('id', $employee_claim_ids)->update(['status_id' => 3026]);
+			$trip_ids = EmployeeClaim::whereIn('id', $employee_claim_ids)->pluck('trip_id');
+			$employee_claim_trip_status_update = Trip::whereIn('id', $trip_ids)->update(['status_id' => 3026]);
+			DB::commit();
+			return response()->json(['success' => true]);
+
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
+	}
+	public function EmployeeClaimPaymentPendingSingleApprove(request $request) {
+
+		DB::beginTransaction();
+		try {
+
+			if ($request->id) {
+				$employee_claim_id = $request->id;
+			} else {
+				return back()->with('error', 'Employee claim not found');
+			}
+			$employee_claim_status_update = EmployeeClaim::where('id', $employee_claim_id)->update(['status_id' => 3026]);
+			$trip_id = EmployeeClaim::where('id', $employee_claim_id)->pluck('trip_id');
+			$employee_claim_trip_status_update = Trip::where('id', $trip_id)->update(['status_id' => 3026]);
+			DB::commit();
+			return response()->json(['success' => true]);
+
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
 	}
 
 }

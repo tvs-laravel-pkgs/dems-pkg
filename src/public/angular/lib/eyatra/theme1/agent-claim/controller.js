@@ -1,6 +1,7 @@
 app.component('eyatraAgentClaimList', {
     templateUrl: eyatra_agent_claim_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $location, $http) {
+        // alert();
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         // console.log(self.hasPermission);
