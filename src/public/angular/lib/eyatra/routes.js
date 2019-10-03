@@ -541,6 +541,10 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Reimbursement',
     }).
     //CASHIER - OUTLET REIMBURSEMENT
+    when('/eyatra/outlet-reimbursement/list', {
+        template: '<eyatra-cashier-outlet-reimbursement></eyatra-cashier-outlet-reimbursement>',
+        title: 'Cashier Reimbursements',
+    }).
     when('/eyatra/cashier-outlet-reimbursement/view', {
         template: '<eyatra-cashier-outlet-reimbursement-view></eyatra-cashier-outlet-reimbursement-view>',
         title: 'View Reimbursement',

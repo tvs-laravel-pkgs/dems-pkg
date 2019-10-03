@@ -331,6 +331,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/outlet-reimpursement/view/{outlet_id}', 'Uitoux\EYatra\OutletReimpursementController@viewEYatraOutletReimpursement')->name('viewEYatraOutletReimpursement');
 		Route::post('eyatra/outlet-reimpursement/cash/topup', 'Uitoux\EYatra\OutletReimpursementController@cashTopUp')->name('cashTopUp');
 
+		//OUTLET REIMPURSEMENT
+		Route::get('eyatra/outlet-reimpursement/cashier/get-list', 'Uitoux\EYatra\OutletReimpursementController@listCashierOutletReimpursement')->name('listCashierOutletReimpursement');
+
 		//HELPERS
 		Route::post('eyatra/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
 		Route::post('eyatra/state/get', 'Uitoux\EYatra\StateController@getStateList')->name('getStateList');
