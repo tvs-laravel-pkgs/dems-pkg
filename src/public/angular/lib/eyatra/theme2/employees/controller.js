@@ -695,21 +695,32 @@ app.component('importJobs', {
             if (type == 3380) {
                 $('#employee_import').show();
                 $('#outlet_import').hide();
-
+                $('#city_import').hide();
+                $('#grade_import').hide();
             } else if (type == 3381) {
                 $('#employee_import').hide();
+                $('#city_import').hide();
+                $('#grade_import').hide();
                 $('#outlet_import').show();
             } 
             else if (type == 3382) {
                 $('#employee_import').hide();
                 $('#outlet_import').hide();
                 $('#city_import').show();
-            } 
+                $('#grade_import').hide();
+            }
+             else if (type == 3383) {
+                $('#employee_import').hide();
+                $('#outlet_import').hide();
+                $('#city_import').hide();
+                $('#grade_import').show();
+            }  
 
             else {
                 $('#employee_import').hide();
                 $('#outlet_import').hide();
                 $('#city_import').hide();
+                $('#grade_import').hide();
 
             }
         }
