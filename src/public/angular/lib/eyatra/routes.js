@@ -230,7 +230,7 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/eyatra/import/jobs', {
         template: '<import-jobs></import-jobs>',
-        title: 'Import Employees',
+        title: 'Import Jobs',
     }).
     //END
 
