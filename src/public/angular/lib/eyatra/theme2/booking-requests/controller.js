@@ -143,7 +143,7 @@ app.component('eyatraTripBookingRequestsView', {
                 $scope.$apply()
                 return;
             }
-            // console.log(response.data);
+            console.log(response.data);
             self.trip = response.data.trip;
             self.age = response.data.age;
             self.total_amount = response.data.total_amount;
@@ -589,7 +589,7 @@ app.component('eyatraTripTatkalBookingRequests', {
 //Agent Tatkal Booking Form
 app.component('eyatraTripTatkalBookingRequestsView', {
     templateUrl: eyatra_tatkal_booking_requests_view_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
+    controller: function($http, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/agent/requests')
             $scope.$apply()
@@ -619,7 +619,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                     $noty.close();
                 }, 1000);
                 $location.path('/eyatra/trips/tatkal/booking-requests')
-                $scope.$apply()
+                $scope.$apply();
                 return;
             }
             if (!response.data.trip.visits || response.data.trip.visits.length == 0) {
@@ -635,7 +635,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                     $noty.close();
                 }, 1000);
                 $location.path('/eyatra/trips/tatkal/booking-requests')
-                $scope.$apply()
+                $scope.$apply();
                 return;
             }
             // console.log(response.data);
@@ -728,7 +728,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                                     $noty.close();
                                 }, 5000);
                                 $location.path('/eyatra/trips/tatkal/booking-requests')
-                                $scope.$apply()
+                                $scope.$apply();
                             }
                         })
                         .fail(function(xhr) {
