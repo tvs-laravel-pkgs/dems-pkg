@@ -7,6 +7,7 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
@@ -124,14 +125,25 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
-		// dd($request->all());
+
 		if ($request->advance_received) {
+			$get_previous_entry = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.employee_id', Auth::user()->entity_id)->where('ey_employee_claims.status_id', 3031)->orderBy('ey_employee_claims.id', 'DESC')->select('ey_employee_claims.balance_amount')->first();
+			if ($get_previous_entry) {
+				$previous_amount = $get_previous_entry->balance_amount;
+				if ($request->advance_received > $previous_amount) {
+					return response()->json(['success' => false, 'errors' => ['Your Previous Trip Claim Amount is Pending.Pay previous trip balance Amount']]);
+				} else {
+
+				}
+			}
+
 			$check_trip_amount_eligible = Employee::select('gae.travel_advance_limit')
 				->leftJoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')->first();
 			if ($check_trip_amount_eligible->travel_advance_limit < $request->advance_received) {
 				return response()->json(['success' => false, 'errors' => ['Maximum Eligibility Advance Amount is ' . $check_trip_amount_eligible->travel_advance_limit]]);
 			}
 		}
+		// dd($request->all());
 
 		if ($request->id) {
 			// $trip_start_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->where('id', '!=', $request->id)->first();
