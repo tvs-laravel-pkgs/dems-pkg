@@ -51,6 +51,9 @@ Route::group(['middleware' => ['api']], function () {
 		//DASHBOARD
 		Route::get('eyatra/dashboard', 'Uitoux\EYatra\Api\TripController@getDashboard');
 
+		//DIGITAL SIGNATURE
+		Route::post('petty-cash/digital-signature-attachments', 'Uitoux\EYatra\Api\TripClaimController@getdigitalsignatureAttachments');
+
 	});
 });
 

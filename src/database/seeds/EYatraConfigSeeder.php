@@ -601,6 +601,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'City',
 				'config_type_id' => 523,
 			],
+			3383 => [
+				'name' => 'Grade',
+				'config_type_id' => 523,
+			],
 
 			//TRAVEL MODE CATEGORY TYPE
 			3400 => [

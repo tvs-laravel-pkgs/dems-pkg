@@ -249,7 +249,7 @@ class TripBookingUpdateController extends Controller {
 						$previous_visit_booking = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->select('amount', 'tax', 'service_charge')->first();
 
 						//Update Same Visit Booking details paid/claim amount
-						$visit_booking_update = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->update(['paid_amount' => $previous_visit_booking->service_charge]);
+						$visit_booking_update = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->update(['paid_amount' => $service_charge]);
 
 						$previous_booking_amount = $previous_visit_booking->amount + $previous_visit_booking->tax;
 						$cancel_booking_amount = $amount + $tax;

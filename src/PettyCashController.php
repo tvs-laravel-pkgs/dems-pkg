@@ -447,7 +447,7 @@ class PettyCashController extends Controller {
 						Storage::makeDirectory($item_images, 0777);
 						if (!empty($petty_cash_data['attachments'])) {
 							foreach ($petty_cash_data['attachments'] as $key => $attachement) {
-								$random_file_name = '_' . $petty_cash->id . '_Localconveyance_file_' . rand(1, 1000) . '.';
+								$random_file_name = $petty_cash->id . '_Localconveyance_file_' . rand(1, 1000) . '.';
 								$extension = $attachement->getClientOriginalExtension();
 								// dd($name . $extension);
 								$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $random_file_name . $extension);
@@ -496,7 +496,7 @@ class PettyCashController extends Controller {
 						if (!empty($petty_cash_data_other['attachments'])) {
 							foreach ($petty_cash_data_other['attachments'] as $key => $attachement) {
 								// $name = $attachement->getClientOriginalName();
-								$random_file_name = '_' . $petty_cash_other->id . '_Other_Expense_file_' . rand(1, 1000) . '.';
+								$random_file_name = $petty_cash_other->id . '_Other_Expense_file_' . rand(1, 1000) . '.';
 								$extension = $attachement->getClientOriginalExtension();
 								$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $random_file_name . $extension);
 								$attachement_petty_other = new Attachment;
