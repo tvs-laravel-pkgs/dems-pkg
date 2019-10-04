@@ -158,17 +158,37 @@ app.component('eyatraTripBookingRequestsView', {
         });
 
         $scope.userDetailId = 0;
-        $scope.showUserDetail = function(id) {
+        $scope.showUserDetail = function(id, amount) {
+            // console.log(id, parseInt(amount));
             $("#open_cancel_form_" + id).hide();
+            $(".close_to_hide_" + id).show();
             $("#close_" + id).show();
             $scope.userDetailId = id;
+            setTimeout(function() {
+                $(".cancellation_amount_" + id).val(parseInt(amount));
+            }, 500);
+
         }
 
         $(document).on('click', '.close_icon', function() {
             var id = $(this).attr('data-visit_id');
             $scope.userDetailId = 0;
             $("#open_cancel_form_" + id).show();
+            $(".close_to_hide_" + id).hide();
             $("#close_" + id).hide();
+        });
+
+
+        $(document).on('input', '.refund_amount', function() {
+            var refund_amount = $(".refund_amount").val();
+            var cancel_amount = $(".amount_cancel").val();
+            if (parseInt(refund_amount) > parseInt(cancel_amount)) {
+                $('.error_refund_amount').text('Amount should be lower then Ticket Amount');
+                $("#cancel").attr('disabled', true);
+            } else {
+                $('.error_refund_amount').text('');
+                $("#cancel").attr('disabled', false);
+            }
         });
 
         $(document).on('click', '.booking_cancel', function() {
@@ -638,7 +658,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                 $scope.$apply();
                 return;
             }
-            // console.log(response.data);
+            console.log(response.data);
             self.trip = response.data.trip;
             self.age = response.data.age;
             self.total_amount = response.data.total_amount;
@@ -665,9 +685,6 @@ app.component('eyatraTripTatkalBookingRequestsView', {
             $("#open_cancel_form_" + id).show();
             $("#close_" + id).hide();
         });
-
-
-
 
         $(document).on('click', '.submit', function() {
             var form_id = '#trip-booking-updates-form';
