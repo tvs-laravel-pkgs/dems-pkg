@@ -394,7 +394,7 @@ app.component('eyatraTripClaimForm', {
                         var d1 = first_dep_date_time.split(/[- :/*]+/);
                         var a1 = first_arrival_date_time.split(/[- :/*]+/);
                         var d2 = sec_dep_date.split(/[- :/*]+/);
-                        // var c = value.split(/[- :/*]+/);
+                        var c = value.split(/[- :/*]+/);
 
                         var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0], parseInt(d1[3]), parseInt(d1[4]), d1[5]);
                         var arrival_date = new Date(a1[2], parseInt(a1[1]) - 1, a1[0], parseInt(a1[3]), parseInt(a1[4]), a1[5]);
@@ -402,10 +402,10 @@ app.component('eyatraTripClaimForm', {
 
                         if (arrival_date <= from) {
                             arrival_date_error_flag++;
-                            $('.arrival_date_validation_' + index).text('Please enter value greater than departure');
+                            $('.arrival_date_validation_' + index).text('Please enter value greater than depature');
                         } else if (arrival_date >= to) {
                             arrival_date_error_flag++;
-                            $('.arrival_date_validation_' + index).text('Please enter value less than next departure');
+                            $('.arrival_date_validation_' + index).text('Please enter value lesser than next depature');
                         } else {
                             //arrival_date_error_flag = 0;
                             $('.arrival_date_validation_' + index).text('');
@@ -418,7 +418,7 @@ app.component('eyatraTripClaimForm', {
                         var d1 = first_dep_date_time.split(/[- :/*]+/);
                         var a1 = first_arrival_date_time.split(/[- :/*]+/);
                         //var d2 = sec_dep_date.split(/[- :/*]+/);
-                        // var c = value.split(/[- :/*]+/);
+                        var c = value.split(/[- :/*]+/);
 
                         var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0], parseInt(d1[3]), parseInt(d1[4]), d1[5]);
                         var arrival_date = new Date(a1[2], parseInt(a1[1]) - 1, a1[0], parseInt(a1[3]), parseInt(a1[4]), a1[5]);
@@ -740,180 +740,39 @@ app.component('eyatraTripClaimForm', {
                     })
                     .done(function(res) {
                         //console.log(res.is_no_vehicl_claim);
-
-                        var category_type = res.category_type;
-
-                        //if Vehicle Has No Claim
-                        if (category_type == 3402) {
+                        var is_no_vehicl_claim = res.is_no_vehicl_claim;
+                        //IF TRANSPORT HAS NO VEHICLE CLAIM
+                        if (is_no_vehicl_claim) {
                             if (!self.trip.visits[key].self_booking) {
                                 self.trip.visits[key].self_booking = {
+                                    amount: '0.00',
                                     tax: '0.00',
                                     reference_number: '--',
                                     readonly: true
-                                };     
+                                };
                             } else {
                                 self.trip.visits[key].self_booking.readonly = true;
+                                self.trip.visits[key].self_booking.amount = '0.00';
                                 self.trip.visits[key].self_booking.tax = '0.00';
                                 self.trip.visits[key].self_booking.reference_number = '--';
                             }
-                            
-                            if (!self.trip.visits[key].self_booking_km) {
-                                self.trip.visits[key].self_booking_km = {
-                                    km_start: '--',
-                                    km_end: '--',
-                                    toll_fee: '--',
-                                    readonly: true
-                                };
-                            }
-                            else
-                            {
-                                self.trip.visits[key].self_booking_km.readonly = true;
-                                self.trip.visits[key].self_booking_km.km_start = '--';
-                                self.trip.visits[key].self_booking_km.km_end = '--';
-                                self.trip.visits[key].self_booking_km.toll_fee = '--';
-                            }
-                            if (!self.trip.visits[key].self_amount) {
-                                self.trip.visits[key].self_amount = { 
-                                    amount: '0.00',
-                                    readonly: true
-                                };
-                            }
-                            else
-                            {
-                                self.trip.visits[key].self_amount.readonly = true;
-                                self.trip.visits[key].self_amount.amount = '0.00';
-                            }
-                            self.trip.visits[key].self_booking.km_start = '--';
-                            self.trip.visits[key].self_booking.km_end = '--';
-                            self.trip.visits[key].self_booking.toll_fee = '--';
-                        }
-                        //if Vehicle has own vehicle type
-                        else if(category_type == 3400){
-                            
+
+                        } else {
                             if (!self.trip.visits[key].self_booking) {
                                 self.trip.visits[key].self_booking = {
-                                    tax: '0.00',
-                                    reference_number: '--',
-                                    readonly: true
-                                };     
-                            } else {
-                                self.trip.visits[key].self_booking.readonly = true;
-                                self.trip.visits[key].self_booking.tax = '0.00';
-                                self.trip.visits[key].self_booking.reference_number = '--';
-                            }
-                            
-                            if (!self.trip.visits[key].self_booking_km) {
-                                self.trip.visits[key].self_booking_km = {
-                                    km_start: '',
-                                    km_end: '',
-                                    toll_fee: '0.00',
-                                    readonly: false
-                                };
-                            }
-                            else
-                            {
-                                self.trip.visits[key].self_booking_km.readonly = false;
-                                self.trip.visits[key].self_booking_km.km_start = '';
-                                self.trip.visits[key].self_booking_km.km_end = '';
-                                self.trip.visits[key].self_booking_km.toll_fee = '';
-                            }
-                            if (!self.trip.visits[key].self_amount) {
-                                self.trip.visits[key].self_amount = { 
-                                    amount: '0.00',
-                                    readonly: false
-                                };
-                            }
-                            else
-                            {
-                                self.trip.visits[key].self_amount.readonly = false;
-                                self.trip.visits[key].self_amount.amount = '0.00';
-                            }
-                            self.trip.visits[key].self_booking.km_start = '';
-                            self.trip.visits[key].self_booking.km_end = '';
-                            self.trip.visits[key].self_booking.toll_fee = '0.00';
-                        }
-                        //Vehicle has Claim
-                        else {
-                            if (!self.trip.visits[key].self_booking) {
-                                self.trip.visits[key].self_booking = {
-                                    tax: '0.00',
+                                    amount: '',
+                                    tax: '',
                                     reference_number: '',
                                     readonly: false
-                                };     
+                                };
                             } else {
                                 self.trip.visits[key].self_booking.readonly = false;
-                                self.trip.visits[key].self_booking.tax = '0.00';
+                                self.trip.visits[key].self_booking.amount = '';
+                                self.trip.visits[key].self_booking.tax = '';
                                 self.trip.visits[key].self_booking.reference_number = '';
                             }
-                            
-                            if (!self.trip.visits[key].self_booking_km) {
-                                self.trip.visits[key].self_booking_km = {
-                                    km_start: '--',
-                                    km_end: '--',
-                                    toll_fee: '--',
-                                    readonly: true
-                                };
-                            }
-                            else
-                            {
-                                self.trip.visits[key].self_booking_km.readonly = true;
-                                self.trip.visits[key].self_booking_km.km_start = '--';
-                                self.trip.visits[key].self_booking_km.km_end = '--';
-                                self.trip.visits[key].self_booking_km.toll_fee = '--';
-                            }
-                            if (!self.trip.visits[key].self_amount) {
-                                self.trip.visits[key].self_amount = { 
-                                    amount: '0.00',
-                                    readonly: false
-                                };
-                            }
-                            else
-                            {
-                                self.trip.visits[key].self_amount.readonly = false;
-                                self.trip.visits[key].self_amount.amount = '0.00';
-                            }
-
-                            self.trip.visits[key].self_booking.km_start = '--';
-                            self.trip.visits[key].self_booking.km_end = '--';
-                            self.trip.visits[key].self_booking.toll_fee = '--';
 
                         }
-
-                        //Old Method for Claim and Not Claim Vehicle Method
-                        // var is_no_vehicl_claim = res.is_no_vehicl_claim;
-                        // //IF TRANSPORT HAS NO VEHICLE CLAIM
-                        // if (is_no_vehicl_claim) {
-                        //     if (!self.trip.visits[key].self_booking) {
-                            //     self.trip.visits[key].self_booking = {
-                            //         amount: '0.00',
-                            //         tax: '0.00',
-                            //         reference_number: '--',
-                            //         readonly: true
-                            //     };
-                            // } else {
-                            //     self.trip.visits[key].self_booking.readonly = true;
-                            //     self.trip.visits[key].self_booking.amount = '0.00';
-                            //     self.trip.visits[key].self_booking.tax = '0.00';
-                            //     self.trip.visits[key].self_booking.reference_number = '--';
-                            // }
-
-                        // } else {
-
-                        //     if (!self.trip.visits[key].self_booking) {
-                            //     self.trip.visits[key].self_booking = {
-                            //         amount: '',
-                            //         tax: '',
-                            //         reference_number: '',
-                            //         readonly: false
-                            //     };
-                            // } else {
-                            //     self.trip.visits[key].self_booking.readonly = false;
-                            //     self.trip.visits[key].self_booking.amount = '';
-                            //     self.trip.visits[key].self_booking.tax = '';
-                            //     self.trip.visits[key].self_booking.reference_number = '';
-                            // }
-
-                        // }
 
                         $scope.$apply();
                         self.travelCal();
