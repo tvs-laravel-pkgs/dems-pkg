@@ -239,7 +239,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				foreach ($request->attachments as $key => $attachement) {
 					if (!empty($attachement)) {
 						// $name = $attachement->getClientOriginalName();
-						$random_file_name = '_' . $expense_voucher_advance->id . '_Expence_Voucher_Advance_File_' . rand(1, 1000) . '.';
+						$random_file_name = $expense_voucher_advance->id . '_Expence_Voucher_Advance_File_' . rand(1, 1000) . '.';
 						$extension = $attachement->getClientOriginalExtension();
 						$attachement->move(storage_path('app/public/expense-voucher-advance/attachments/'), $random_file_name . $extension);
 						$attachement_expense_voucher_advance = new Attachment;
