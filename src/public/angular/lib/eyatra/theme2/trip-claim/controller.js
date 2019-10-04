@@ -162,6 +162,7 @@ app.component('eyatraTripClaimForm', {
         var boardings_removal_id = [];
         var local_travels_removal_id = [];
         var arrival_date_error_flag = 0;
+        var arrival_from_to_km_error_flag = 0;
         $('.testt1').imageuploadify();
         $scope.searchTravelMode;
         $scope.clearSearchTravelMode = function() {
@@ -199,7 +200,7 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }*/
-            // console.log(response.data.trip);
+            console.log(response.data);
             // console.log(response.data.travel_dates);
             // console.log(response.data.cities_with_expenses);
             self.cities_with_expenses = response.data.cities_with_expenses;
@@ -304,7 +305,61 @@ app.component('eyatraTripClaimForm', {
 
         });
 
+        // var arrival_date_error_flag = 0;
+        $(document).on('input', '.localconveyance_km', function() {
+            var index = $(this).attr("data-index");
+            console.log(index);
+            var localConveyance_amount = 0;
+            var localconveyance_from_km = parseInt($(this).closest('tr').find('.localconveyance_from_km').val());
+            var localconveyance_to_km = parseInt($(this).closest('tr').find('.localconveyance_to_km').val());
+            console.log(localconveyance_from_km, localconveyance_to_km);
+            if (localconveyance_from_km == localconveyance_to_km) {
+                $(".validation_error_" + index).text("From,To km should not be same");
+                // $('#submit').hide();
+                arrival_from_to_km_error_flag = 1;
+            } else if (localconveyance_from_km > localconveyance_to_km) {
+                $(".validation_error_" + index).text("To km should be greater then From km");
+                // $('#submit').hide();
+                arrival_from_to_km_error_flag = 1;
+            } else if (localconveyance_to_km == 0 || localconveyance_from_km == 0) {
+                $(".validation_error_" + index).text("Invalid value");
+                // $('#submit').hide();
+                arrival_from_to_km_error_flag = 1;
+            } else if (localconveyance_from_km && localconveyance_to_km) {
+                var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
+                $('.difference_km_' + index).val(localConveyance_from_to_diff);
+                var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
+                localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
+                $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
+                self.localConveyanceCal();
+                $(".validation_error_" + index).text("");
+                // $('#submit').show();
+                arrival_from_to_km_error_flag = 0;
+            } else {
+                $(this).closest('tr').find('.localConveyance_amount').val('');
+                self.localConveyanceCal();
+                $(".validation_error_" + index).text("");
+                // $('#submit').show();
+                arrival_from_to_km_error_flag = 0;
+            }
+        });
 
+        //LOCALCONVEYANCE AMOUNT CALCULATE
+        self.localConveyanceCal = function() {
+            var total_petty_cash_local_amount = 0;
+            $('.localConveyance_amount').each(function() {
+                var local_amount = parseInt($(this).closest('tr').find('.localConveyance_amount_check_validation').val() || 0);
+                if (!$.isNumeric(local_amount)) {
+                    local_amount = 0;
+                }
+                total_petty_cash_local_amount += local_amount;
+            });
+            $('.localConveyance').text('₹ ' + total_petty_cash_local_amount.toFixed(2));
+            $('.total_petty_cash_local_amount').val(total_petty_cash_local_amount.toFixed(2));
+            $('.claim_total_amount').val(total_petty_cash_local_amount.toFixed(2));
+            $('.claim_total_amount').text('₹ ' + total_petty_cash_local_amount.toFixed(2));
+            // caimTotalAmount();
+        }
 
         //TOOLTIP MOUSEOVER
         $(document).on('mouseover', ".attachment_tooltip", function() {
@@ -435,7 +490,7 @@ app.component('eyatraTripClaimForm', {
                     }
 
                 }
-                console.log(' arrival_date_error_flag =' + arrival_date_error_flag);
+                // console.log(' arrival_date_error_flag =' + arrival_date_error_flag);
             });
         }
 
@@ -750,13 +805,13 @@ app.component('eyatraTripClaimForm', {
                                     tax: '0.00',
                                     reference_number: '--',
                                     readonly: true
-                                };     
+                                };
                             } else {
                                 self.trip.visits[key].self_booking.readonly = true;
                                 self.trip.visits[key].self_booking.tax = '0.00';
                                 self.trip.visits[key].self_booking.reference_number = '--';
                             }
-                            
+
                             if (!self.trip.visits[key].self_booking_km) {
                                 self.trip.visits[key].self_booking_km = {
                                     km_start: '--',
@@ -764,22 +819,18 @@ app.component('eyatraTripClaimForm', {
                                     toll_fee: '--',
                                     readonly: true
                                 };
-                            }
-                            else
-                            {
+                            } else {
                                 self.trip.visits[key].self_booking_km.readonly = true;
                                 self.trip.visits[key].self_booking_km.km_start = '--';
                                 self.trip.visits[key].self_booking_km.km_end = '--';
                                 self.trip.visits[key].self_booking_km.toll_fee = '--';
                             }
                             if (!self.trip.visits[key].self_amount) {
-                                self.trip.visits[key].self_amount = { 
+                                self.trip.visits[key].self_amount = {
                                     amount: '0.00',
                                     readonly: true
                                 };
-                            }
-                            else
-                            {
+                            } else {
                                 self.trip.visits[key].self_amount.readonly = true;
                                 self.trip.visits[key].self_amount.amount = '0.00';
                             }
@@ -788,20 +839,27 @@ app.component('eyatraTripClaimForm', {
                             self.trip.visits[key].self_booking.toll_fee = '--';
                         }
                         //if Vehicle has own vehicle type
-                        else if(category_type == 3400){
-                            
+                        else if (category_type == 3400) {
+                            if (travel_mode_id == self.extras.travel_mode_list[6].id) {
+                                // $(".ratePerKMtext_" + key).html('Per Km - ₹ ' + self.employee.four_wheeler_per_km);
+                                $(".ratePerKMamount_" + key).val(self.employee.four_wheeler_per_km);
+                            } else if (travel_mode_id == self.extras.travel_mode_list[11].id) {
+                                // $(".ratePerKMtext_" + key).html('Per Km - ₹ ' + self.employee.two_wheeler_per_km);
+                                $(".ratePerKMamount_" + key).val(self.employee.two_wheeler_per_km);
+                            }
+
                             if (!self.trip.visits[key].self_booking) {
                                 self.trip.visits[key].self_booking = {
                                     tax: '0.00',
                                     reference_number: '--',
                                     readonly: true
-                                };     
+                                };
                             } else {
                                 self.trip.visits[key].self_booking.readonly = true;
                                 self.trip.visits[key].self_booking.tax = '0.00';
                                 self.trip.visits[key].self_booking.reference_number = '--';
                             }
-                            
+
                             if (!self.trip.visits[key].self_booking_km) {
                                 self.trip.visits[key].self_booking_km = {
                                     km_start: '',
@@ -809,22 +867,18 @@ app.component('eyatraTripClaimForm', {
                                     toll_fee: '0.00',
                                     readonly: false
                                 };
-                            }
-                            else
-                            {
+                            } else {
                                 self.trip.visits[key].self_booking_km.readonly = false;
                                 self.trip.visits[key].self_booking_km.km_start = '';
                                 self.trip.visits[key].self_booking_km.km_end = '';
                                 self.trip.visits[key].self_booking_km.toll_fee = '';
                             }
                             if (!self.trip.visits[key].self_amount) {
-                                self.trip.visits[key].self_amount = { 
+                                self.trip.visits[key].self_amount = {
                                     amount: '0.00',
                                     readonly: false
                                 };
-                            }
-                            else
-                            {
+                            } else {
                                 self.trip.visits[key].self_amount.readonly = false;
                                 self.trip.visits[key].self_amount.amount = '0.00';
                             }
@@ -839,13 +893,13 @@ app.component('eyatraTripClaimForm', {
                                     tax: '0.00',
                                     reference_number: '',
                                     readonly: false
-                                };     
+                                };
                             } else {
                                 self.trip.visits[key].self_booking.readonly = false;
                                 self.trip.visits[key].self_booking.tax = '0.00';
                                 self.trip.visits[key].self_booking.reference_number = '';
                             }
-                            
+
                             if (!self.trip.visits[key].self_booking_km) {
                                 self.trip.visits[key].self_booking_km = {
                                     km_start: '--',
@@ -853,22 +907,18 @@ app.component('eyatraTripClaimForm', {
                                     toll_fee: '--',
                                     readonly: true
                                 };
-                            }
-                            else
-                            {
+                            } else {
                                 self.trip.visits[key].self_booking_km.readonly = true;
                                 self.trip.visits[key].self_booking_km.km_start = '--';
                                 self.trip.visits[key].self_booking_km.km_end = '--';
                                 self.trip.visits[key].self_booking_km.toll_fee = '--';
                             }
                             if (!self.trip.visits[key].self_amount) {
-                                self.trip.visits[key].self_amount = { 
+                                self.trip.visits[key].self_amount = {
                                     amount: '0.00',
                                     readonly: false
                                 };
-                            }
-                            else
-                            {
+                            } else {
                                 self.trip.visits[key].self_amount.readonly = false;
                                 self.trip.visits[key].self_amount.amount = '0.00';
                             }
@@ -884,34 +934,34 @@ app.component('eyatraTripClaimForm', {
                         // //IF TRANSPORT HAS NO VEHICLE CLAIM
                         // if (is_no_vehicl_claim) {
                         //     if (!self.trip.visits[key].self_booking) {
-                            //     self.trip.visits[key].self_booking = {
-                            //         amount: '0.00',
-                            //         tax: '0.00',
-                            //         reference_number: '--',
-                            //         readonly: true
-                            //     };
-                            // } else {
-                            //     self.trip.visits[key].self_booking.readonly = true;
-                            //     self.trip.visits[key].self_booking.amount = '0.00';
-                            //     self.trip.visits[key].self_booking.tax = '0.00';
-                            //     self.trip.visits[key].self_booking.reference_number = '--';
-                            // }
+                        //     self.trip.visits[key].self_booking = {
+                        //         amount: '0.00',
+                        //         tax: '0.00',
+                        //         reference_number: '--',
+                        //         readonly: true
+                        //     };
+                        // } else {
+                        //     self.trip.visits[key].self_booking.readonly = true;
+                        //     self.trip.visits[key].self_booking.amount = '0.00';
+                        //     self.trip.visits[key].self_booking.tax = '0.00';
+                        //     self.trip.visits[key].self_booking.reference_number = '--';
+                        // }
 
                         // } else {
 
                         //     if (!self.trip.visits[key].self_booking) {
-                            //     self.trip.visits[key].self_booking = {
-                            //         amount: '',
-                            //         tax: '',
-                            //         reference_number: '',
-                            //         readonly: false
-                            //     };
-                            // } else {
-                            //     self.trip.visits[key].self_booking.readonly = false;
-                            //     self.trip.visits[key].self_booking.amount = '';
-                            //     self.trip.visits[key].self_booking.tax = '';
-                            //     self.trip.visits[key].self_booking.reference_number = '';
-                            // }
+                        //     self.trip.visits[key].self_booking = {
+                        //         amount: '',
+                        //         tax: '',
+                        //         reference_number: '',
+                        //         readonly: false
+                        //     };
+                        // } else {
+                        //     self.trip.visits[key].self_booking.readonly = false;
+                        //     self.trip.visits[key].self_booking.amount = '';
+                        //     self.trip.visits[key].self_booking.tax = '';
+                        //     self.trip.visits[key].self_booking.reference_number = '';
+                        // }
 
                         // }
 
@@ -1570,8 +1620,7 @@ app.component('eyatraTripClaimForm', {
             },
             submitHandler: function(form) {
                 //alert('123');
-                // alert(arrival_date_error_flag);
-                if (arrival_date_error_flag == 0) {
+                if (arrival_date_error_flag == 0 && arrival_from_to_km_error_flag == 0) {
 
                     let formData = new FormData($(form_transport_id)[0]);
                     $('#transport_submit').html('loading');
@@ -1628,11 +1677,20 @@ app.component('eyatraTripClaimForm', {
                             custom_noty('error', 'Something went wrong at server');
                         });
                 } else {
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: 'Please correct the Depature and arrival dates',
-                    }).show();
+                    if (arrival_date_error_flag == 1) {
+                        $noty = new Noty({
+                            type: 'error',
+                            layout: 'topRight',
+                            text: 'Please correct the Depature and arrival dates',
+                        }).show();
+                    }
+                    if (arrival_from_to_km_error_flag == 1) {
+                        $noty = new Noty({
+                            type: 'error',
+                            layout: 'topRight',
+                            text: 'Please correct the From and To KMs',
+                        }).show();
+                    }
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
