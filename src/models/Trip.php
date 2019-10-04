@@ -1379,8 +1379,10 @@ class Trip extends Model {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
 
+			// dd($request->all());
 			DB::beginTransaction();
 
+			// dd($request->trip_id);
 			if (empty($request->trip_id)) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
@@ -1429,6 +1431,8 @@ class Trip extends Model {
 							$visit_booking->save();
 						}
 
+						// dd($visit_booking);
+
 					}
 				}
 
@@ -1466,9 +1470,26 @@ class Trip extends Model {
 				$employee_claim->employee_id = Auth::user()->entity_id;
 				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $request->claim_total_amount) {
+						$balance_amount = $trip->advance_received - $request->claim_total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->amount_to_pay = 1;
+				}
+
+				// dump($trip->advance_received);
+				// dump($request->claim_total_amount);
+
 				$employee_claim->save();
 
 				DB::commit();
+				// dd($employee_claim);
 				return response()->json(['success' => true]);
 			}
 
@@ -1591,6 +1612,18 @@ class Trip extends Model {
 				$employee_claim->employee_id = Auth::user()->entity_id;
 				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $request->claim_total_amount) {
+						$balance_amount = $trip->advance_received - $request->claim_total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->amount_to_pay = 1;
+				}
 				$employee_claim->save();
 
 				DB::commit();
@@ -1683,6 +1716,18 @@ class Trip extends Model {
 				$employee_claim->employee_id = Auth::user()->entity_id;
 				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $request->claim_total_amount) {
+						$balance_amount = $trip->advance_received - $request->claim_total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->amount_to_pay = 1;
+				}
 				$employee_claim->save();
 
 				DB::commit();
@@ -1718,6 +1763,8 @@ class Trip extends Model {
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {
 					if ($trip->advance_received > $request->claim_total_amount) {
+						$balance_amount = $trip->advance_received - $request->claim_total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
 						$employee_claim->amount_to_pay = 2;
 					} else {
 						$employee_claim->amount_to_pay = 1;
