@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Config extends Model {
 	protected $fillable = [
-		'id',
+		// 'id',
 		'config_type_id',
 		'name',
 	];

@@ -256,7 +256,7 @@ app.component('eyatraCoaCodeForm', {
                 }
 
             },
-            invalidHandler: function(event, validator) {
+            /*invalidHandler: function(event, validator) {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight', 
@@ -270,7 +270,7 @@ app.component('eyatraCoaCodeForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-            },
+            },*/
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);

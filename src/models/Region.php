@@ -10,7 +10,7 @@ class Region extends Model {
 	protected $table = 'regions';
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'company_id',
 		'name',
 		'code',
@@ -33,5 +33,5 @@ class Region extends Model {
 		$data = $regon_list->prepend($option);
 		return $data;
 	}
-	
+
 }

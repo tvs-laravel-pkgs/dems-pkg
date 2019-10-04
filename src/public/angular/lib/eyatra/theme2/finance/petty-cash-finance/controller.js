@@ -207,6 +207,8 @@
              submitHandler: function(form) {
                  let formData = new FormData($(form_id)[0]);
                  $('#accept_button').button('loading');
+                 $("#accept_button").prop("disabled", "disabled");
+
                  $.ajax({
                          url: laravel_routes['pettycashFinanceVerificationSave'],
                          method: "POST",
@@ -270,6 +272,7 @@
              submitHandler: function(form) {
                  let formData = new FormData($(form_id1)[0]);
                  $('#reject_button').button('loading');
+                 $("#reject_button").prop("disabled", "disabled");
                  $.ajax({
                          url: laravel_routes['pettycashFinanceVerificationSave'],
                          method: "POST",

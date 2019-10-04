@@ -10,7 +10,7 @@ class NCountry extends Model {
 	protected $table = 'countries';
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'name',
 		'code',
 	];

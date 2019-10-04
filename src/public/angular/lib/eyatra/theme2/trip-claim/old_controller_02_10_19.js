@@ -161,7 +161,6 @@ app.component('eyatraTripClaimForm', {
         var lodgings_removal_id = [];
         var boardings_removal_id = [];
         var local_travels_removal_id = [];
-        var arrival_date_error_flag = 0;
         $('.testt1').imageuploadify();
         $scope.searchTravelMode;
         $scope.clearSearchTravelMode = function() {
@@ -372,155 +371,6 @@ app.component('eyatraTripClaimForm', {
         //     $(".table-condensed .next").css('visibility', 'hidden');
         // });
 
-
-        // DEPATURE AND ARRIVAL DATE VALIDATION
-        $scope.dateArrivalDepatureValidation = function(index, type, value) {
-            //alert();
-            arrival_date_error_flag = 0;
-            $('.visit_arrival_date').each(function(i) {
-                //alert(i);
-                if (self.trip.visits[i].departure_time) {
-                    var index = i;
-                    var first_dep_time = convert_to_24h(self.trip.visits[index].departure_time);
-                    var first_arrival_time = convert_to_24h(self.trip.visits[index].arrival_time);
-                    var first_dep_date_time = self.trip.visits[index].departure_date + ' ' + first_dep_time;
-                    var first_arrival_date_time = self.trip.visits[index].arrival_date + ' ' + first_arrival_time;
-                    var next_index = index;
-                    next_index++;
-                    if (self.trip.visits[next_index]) {
-                        var sec_dept_time = convert_to_24h(self.trip.visits[next_index].departure_time);
-                        console.log('next index' + sec_dept_time);
-                        var sec_dep_date = self.trip.visits[next_index].departure_date + ' ' + sec_dept_time;
-                        var d1 = first_dep_date_time.split(/[- :/*]+/);
-                        var a1 = first_arrival_date_time.split(/[- :/*]+/);
-                        var d2 = sec_dep_date.split(/[- :/*]+/);
-                        var c = value.split(/[- :/*]+/);
-
-                        var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0], parseInt(d1[3]), parseInt(d1[4]), d1[5]);
-                        var arrival_date = new Date(a1[2], parseInt(a1[1]) - 1, a1[0], parseInt(a1[3]), parseInt(a1[4]), a1[5]);
-                        var to = new Date(d2[2], parseInt(d2[1]) - 1, d2[0], parseInt(d2[3]), parseInt(d2[4]), d2[5]);
-
-                        if (arrival_date <= from) {
-                            arrival_date_error_flag++;
-                            $('.arrival_date_validation_' + index).text('Please enter value greater than depature');
-                        } else if (arrival_date >= to) {
-                            arrival_date_error_flag++;
-                            $('.arrival_date_validation_' + index).text('Please enter value lesser than next depature');
-                        } else {
-                            //arrival_date_error_flag = 0;
-                            $('.arrival_date_validation_' + index).text('');
-                        }
-
-                    } else {
-                        console.log('no index');
-                        //var sec_dep_date = self.trip.end_date + ' ' + '00:00:00';
-                        //console.log('sec_dep_date' );
-                        var d1 = first_dep_date_time.split(/[- :/*]+/);
-                        var a1 = first_arrival_date_time.split(/[- :/*]+/);
-                        //var d2 = sec_dep_date.split(/[- :/*]+/);
-                        var c = value.split(/[- :/*]+/);
-
-                        var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0], parseInt(d1[3]), parseInt(d1[4]), d1[5]);
-                        var arrival_date = new Date(a1[2], parseInt(a1[1]) - 1, a1[0], parseInt(a1[3]), parseInt(a1[4]), a1[5]);
-                        // var to = new Date(d2[2], parseInt(d2[1]) - 1, d2[0], parseInt(d2[3]), parseInt(d2[4]), d2[5]);
-
-
-                        if (arrival_date <= from) {
-                            arrival_date_error_flag++;
-                            $('.arrival_date_validation_' + index).text('Please enter value greater than depature');
-                        } else {
-                            //arrival_date_error_flag = 0;
-                            $('.arrival_date_validation_' + index).text('');
-                        }
-                    }
-
-                }
-                console.log(' arrival_date_error_flag =' + arrival_date_error_flag);
-            });
-        }
-
-        //     console.log(index, type, value)
-        //     if (type && value) {
-        //         var first_dep_time = convert_to_24h(self.trip.visits[index].departure_time);
-        //         var first_arrival_time = convert_to_24h(self.trip.visits[index].arrival_time);
-        //         var first_dep_date_time = self.trip.visits[index].departure_date + ' ' + first_dep_time;
-        //         var first_arrival_date_time = self.trip.visits[index].arrival_date + ' ' + first_arrival_time;
-        //         var next_index = index;
-        //         next_index++;
-        //         if (self.trip.visits[next_index]) {
-        //             var sec_dept_time = convert_to_24h(self.trip.visits[next_index].departure_time);
-        //             console.log('next index' + sec_dept_time);
-        //             var sec_dep_date = self.trip.visits[next_index].departure_date + ' ' + sec_dept_time;
-        //             var d1 = first_dep_date_time.split(/[- :/*]+/);
-        //             var a1 = first_arrival_date_time.split(/[- :/*]+/);
-        //             var d2 = sec_dep_date.split(/[- :/*]+/);
-        //             var c = value.split(/[- :/*]+/);
-
-        //             var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0], parseInt(d1[3]), parseInt(d1[4]), d1[5]);
-        //             var arrival_date = new Date(a1[2], parseInt(a1[1]) - 1, a1[0], parseInt(a1[3]), parseInt(a1[4]), a1[5]);
-        //             var to = new Date(d2[2], parseInt(d2[1]) - 1, d2[0], parseInt(d2[3]), parseInt(d2[4]), d2[5]);
-
-        //             if (arrival_date <= from) {
-        //                 arrival_date_error_flag = 1;
-        //                 $('.arrival_date_validation_' + index).text('Please enter value greater than depature');
-        //             } else if (arrival_date >= to) {
-        //                 $('.arrival_date_validation_' + index).text('Please enter value lesser than next depature');
-        //             } else {
-        //                 arrival_date_error_flag = 0;
-        //                 $('.arrival_date_validation_' + index).text('');
-        //             }
-
-        //         } else {
-        //             console.log('no index');
-        //             //var sec_dep_date = self.trip.end_date + ' ' + '00:00:00';
-        //             //console.log('sec_dep_date' );
-        //             var d1 = first_dep_date_time.split(/[- :/*]+/);
-        //             var a1 = first_arrival_date_time.split(/[- :/*]+/);
-        //             //var d2 = sec_dep_date.split(/[- :/*]+/);
-        //             var c = value.split(/[- :/*]+/);
-
-        //             var from = new Date(d1[2], parseInt(d1[1]) - 1, d1[0], parseInt(d1[3]), parseInt(d1[4]), d1[5]);
-        //             var arrival_date = new Date(a1[2], parseInt(a1[1]) - 1, a1[0], parseInt(a1[3]), parseInt(a1[4]), a1[5]);
-        //             // var to = new Date(d2[2], parseInt(d2[1]) - 1, d2[0], parseInt(d2[3]), parseInt(d2[4]), d2[5]);
-
-
-        //             if (arrival_date <= from) {
-        //                 arrival_date_error_flag = 1;
-        //                 $('.arrival_date_validation_' + index).text('Please enter value greater than depature');
-        //             } else {
-        //                 arrival_date_error_flag = 0;
-        //                 $('.arrival_date_validation_' + index).text('');
-        //             }
-        //         }
-        //     }
-        //     $rootScope.loading = false;
-
-        // }
-
-        function convert_to_24h(time_str) {
-            // Convert a string like 10:05:23 PM to 24h format, returns like [22,5,23]
-            var time = time_str.match(/(\d+):(\d+) (\w)/);
-            var hours = Number(time[1]);
-            var minutes = Number(time[2]);
-            //alert(minutes);
-            //var seconds = Number(time[3]);
-            var meridian = time[3].toLowerCase();
-
-            if (meridian == 'p' && hours < 12) {
-                hours += 12;
-            } else if (meridian == 'a' && hours == 12) {
-                hours -= 12;
-            }
-            //alert(minutes.count());
-            if (hours < 10) {
-                hours = '0' + hours;
-            }
-            if (minutes < 10) {
-                minutes = minutes + '0';
-            }
-            //alert(hours, minutes);
-            return hours + ':' + minutes + ':00';
-        };
 
         //ENABLE DISABLE DATE 
         $scope.dateEnableDisable = function(index, type, value) {
@@ -1397,7 +1247,6 @@ app.component('eyatraTripClaimForm', {
         $(document).on('click', '.claim_submit_btn', function() {
             self.enable_switch_tab = false;
             //GET ACTIVE FORM 
-            //alert();
             var current_form = $(this).attr('data-submit_type');
             var next_form = $(this).attr('data-next_submit_type');
             $('#claim_' + current_form + '_expense_form').submit();
@@ -1428,74 +1277,62 @@ app.component('eyatraTripClaimForm', {
                 error.insertAfter(element.parent())
             },
             submitHandler: function(form) {
-                //alert('123');
-                // alert(arrival_date_error_flag);
-                if (arrival_date_error_flag == 0) {
-
-                    let formData = new FormData($(form_transport_id)[0]);
-                    $('#transport_submit').html('loading');
-                    $("#transport_submit").attr("disabled", true);
-                    self.enable_switch_tab = false;
-                    $.ajax({
-                            url: eyatra_trip_claim_save_url,
-                            method: "POST",
-                            data: formData,
-                            processData: false,
-                            contentType: false,
-                            async: false,
-                        })
-                        .done(function(res) {
-                            console.log(res);
-                            if (!res.success) {
-                                $('#transport_submit').html('Save & Next');
-                                $("#transport_submit").attr("disabled", false);
-                                var errors = '';
-                                for (var i in res.errors) {
-                                    errors += '<li>' + res.errors[i] + '</li>';
-                                }
-                                custom_noty('error', errors);
-                                self.enable_switch_tab = false;
-                                $scope.$apply()
-                            } else {
-                                $noty = new Noty({
-                                    type: 'success',
-                                    layout: 'topRight',
-                                    text: 'Transport expenses saved successfully!!',
-                                    animation: {
-                                        speed: 500 // unavailable - no need
-                                    },
-                                }).show();
-                                setTimeout(function() {
-                                    $noty.close();
-                                }, 5000);
-                                // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
-                                //     self.trip.lodgings[key].date_range_list = val;
-                                // });// $scope.$apply()
-                                // $('.tab_li').removeClass('active');
-                                // $('.tab_lodging').addClass('active');
-                                // $('.tab-pane').removeClass('in active');
-                                // $('#lodging-expenses').addClass('in active');
-                                self.enable_switch_tab = true;
-                                $scope.$apply()
-                                $('#transport_submit').html('Save & Next');
-                                $("#transport_submit").attr("disabled", false);
-                            }
-                        })
-                        .fail(function(xhr) {
+                //console.log(self.item);
+                let formData = new FormData($(form_transport_id)[0]);
+                $('#transport_submit').html('loading');
+                $("#transport_submit").attr("disabled", true);
+                self.enable_switch_tab = false;
+                $.ajax({
+                        url: eyatra_trip_claim_save_url,
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        async: false,
+                    })
+                    .done(function(res) {
+                        console.log(res);
+                        if (!res.success) {
                             $('#transport_submit').html('Save & Next');
                             $("#transport_submit").attr("disabled", false);
-                            custom_noty('error', 'Something went wrong at server');
-                        });
-                } else {
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: 'Please correct the Depature and arrival dates',
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                }
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                            self.enable_switch_tab = false;
+                            $scope.$apply()
+                        } else {
+                            $noty = new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Transport expenses saved successfully!!',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
+                            }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
+                            //     self.trip.lodgings[key].date_range_list = val;
+                            // });// $scope.$apply()
+                            // $('.tab_li').removeClass('active');
+                            // $('.tab_lodging').addClass('active');
+                            // $('.tab-pane').removeClass('in active');
+                            // $('#lodging-expenses').addClass('in active');
+                            self.enable_switch_tab = true;
+                            $scope.$apply()
+                            $('#transport_submit').html('Save & Next');
+                            $("#transport_submit").attr("disabled", false);
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $('#transport_submit').html('Save & Next');
+                        $("#transport_submit").attr("disabled", false);
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+
             },
         });
 

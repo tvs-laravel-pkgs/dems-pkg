@@ -573,7 +573,8 @@ app.component('eyatraTripForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Trip saved successfully',
+                                text:res.message,
+                                // text: 'Trip saved successfully',
                                 animation: {
                                     speed: 500 // unavailable - no need
                                 },

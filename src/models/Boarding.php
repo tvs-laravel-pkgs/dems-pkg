@@ -9,7 +9,7 @@ class Boarding extends Model {
 	use SoftDeletes;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'trip_id',
 		'city_id',
 		'expense_name',

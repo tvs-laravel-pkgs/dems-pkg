@@ -236,6 +236,7 @@ class TripController extends Controller {
 			'bookingMethod',
 			'bookingStatus',
 			'agent',
+			'agent.user',
 			'status',
 			'attachments',
 			'managerVerificationStatus',

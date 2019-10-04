@@ -10,7 +10,7 @@ class Entity extends Model {
 	use SoftDeletes;
 	protected $table = 'entities';
 	protected $fillable = [
-		'id',
+		// 'id',
 		'company_id',
 		'entity_type_id',
 		'name',

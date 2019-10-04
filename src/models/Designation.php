@@ -8,7 +8,7 @@ class Designation extends Model {
 	use SoftDeletes;
 	protected $table = 'designations';
 	protected $fillable = [
-		'id',
+		// 'id',
 		'company_id',
 		'name',
 		'grade_id',
