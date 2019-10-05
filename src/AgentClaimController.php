@@ -285,9 +285,9 @@ class AgentClaimController extends Controller {
 			->where('users.user_type_id', 3122)
 			->where('ey_agent_claims.id', $agent_claim_id)->first();
 
-		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'),
 			'visit_bookings.id',
-			'visit_bookings.paid_amount',
+			// 'visit_bookings.paid_amount',
 			'configs.name as status',
 			'trips.number as trip',
 			'trips.id as trip_id',
