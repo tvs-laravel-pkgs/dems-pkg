@@ -216,6 +216,8 @@ app.component('eyatraTripClaimForm', {
             self.travelled_cities_with_dates = response.data.travelled_cities_with_dates;
             self.lodge_cities = response.data.lodge_cities;
             self.travel_dates_list = response.data.travel_dates_list;
+            self.travel_values = response.data.travel_values;
+            console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
@@ -788,6 +790,9 @@ app.component('eyatraTripClaimForm', {
         //GET CLAIM STATUS BY TRNASPORT MODE IN TRANSPORT EXPENSES
         $scope.getVisitTrnasportModeClaimStatus = function(travel_mode_id, key) {
             if (travel_mode_id) {
+                var test = self.travel_values;
+                console.log(test[travel_mode_id]);
+
                 $.ajax({
                         url: get_claim_status_by_travel_mode_id,
                         method: "GET",

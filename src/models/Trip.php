@@ -879,6 +879,23 @@ class Trip extends Model {
 		// $end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
 		// $days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
 
+		//Get Own Vehicle details
+		$vehicle_details = Entity::join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')->where('travel_mode_category_type.category_id', 3400)->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 502)->select('entities.name', 'entities.id')->get();
+		$values = [];
+		foreach ($vehicle_details as $key => $value) {
+			$stripped = strtolower(preg_replace('/\s/', '', $value->name));
+			if ($stripped == 'twowheeler') {
+				$values[$value->id] = '5';
+			} elseif ($stripped == 'fourwheeler') {
+				$values[$value->id] = '10';
+			} else {
+				$values[$value->id] = '0';
+			}
+		}
+
+		$data['travel_values'] = $values;
+		// dd($values);
+
 		//DAYS CALC BTW START & END DATE
 		$datediff = strtotime($trip->end_date) - strtotime($trip->start_date);
 		$no_of_days = ($datediff / (60 * 60 * 24)) + 1;
