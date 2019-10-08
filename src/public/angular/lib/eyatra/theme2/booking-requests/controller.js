@@ -95,7 +95,7 @@ app.component('eyatraTripBookingRequests', {
 app.component('eyatraTripBookingRequestsView', {
     templateUrl: agent_request_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
-        //alert();
+        // alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/eyatra/agent/requests')
             $scope.$apply()
@@ -116,9 +116,6 @@ app.component('eyatraTripBookingRequestsView', {
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
                 }).show();
                 setTimeout(function() {
                     $noty.close();
@@ -127,22 +124,19 @@ app.component('eyatraTripBookingRequestsView', {
                 $scope.$apply()
                 return;
             }
-            if (!response.data.trip.visits || response.data.trip.visits.length == 0) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                    animation: {
-                        speed: 500 // unavailable - no need
-                    },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 1000);
-                $location.path('/eyatra/trips/booking-requests')
-                $scope.$apply()
-                return;
-            }
+            // if (!response.data.trip.visits || response.data.trip.visits.length == 0) {
+            //     $noty = new Noty({
+            //         type: 'error',
+            //         layout: 'topRight',
+            //         text: response.data.error,
+            //     }).show();
+            //     setTimeout(function() {
+            //         $noty.close();
+            //     }, 1000);
+            //     $location.path('/eyatra/trips/booking-requests')
+            //     $scope.$apply()
+            //     return;
+            // }
             console.log(response.data);
             self.trip = response.data.trip;
             self.age = response.data.age;

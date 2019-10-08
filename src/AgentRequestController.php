@@ -138,7 +138,7 @@ class AgentRequestController extends Controller {
 	}
 
 	public function agentRequestFormData($trip_id) {
-		//dd($trip_id);
+
 		$trip = Trip::with([
 			'agentVisits',
 			'agentVisits.fromCity',
@@ -167,33 +167,23 @@ class AgentRequestController extends Controller {
 		}
 
 		$age = '--';
-		// dd(date('Y', strtotime($trip->employee->date_of_birth)));
 		if ($trip->employee) {
 			$age = date('Y') - date('Y', strtotime($trip->employee->date_of_birth));
 		}
-		$visits = $trip->visits;
-		// $bookings = $trip->agentVisits;
-		// foreach ($bookings as $key => $booking) {
-		// 	foreach ($booking->bookings as $key => $visit_booking) {
-		// 		//dd($book);
-		// 		$file_name = Attachment::select('name')
-		// 			->where('entity_id', $visit_booking->id)
-		// 			->where('attachment_of_id', 3180)
-		// 			->first();
-		// 		$visit_booking->file_name = url('app/public/visit/booking-updates/attachments/' . $file_name->name);
+		$visits = $trip->agent_visits;
 
-		// 	}
-		// }
-		//dd($visit_booking);
 		$trip_status = 'not_booked';
 		$ticket_amount = 0;
 		$service_charge = 0;
 		$total_amount = 0;
-		foreach ($visits as $key => $value) {
-			if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062) {
-				$trip_status = 'booked';
+		if ($visits) {
+			foreach ($visits as $key => $value) {
+				if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062) {
+					$trip_status = 'booked';
+				}
 			}
 		}
+
 		if ($trip_status == 'booked') {
 			$visits = Trip::select(DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.service_charge) as service_charge'))
 				->join('visits', 'trips.id', 'visits.trip_id')
