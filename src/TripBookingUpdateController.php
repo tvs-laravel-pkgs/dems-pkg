@@ -228,12 +228,14 @@ class TripBookingUpdateController extends Controller {
 					$visit = Visit::find($value['visit_id']);
 					$visit->booking_status_id = $booking_status_id;
 					$visit->save();
-
+					$trip = Trip::find($visit->trip_id);
+					// dump($trip);
+					$state = $trip->employee->outlet->address->city->state;
 					$service_charge = Agent::join('state_agent_travel_mode', 'state_agent_travel_mode.agent_id', 'agents.id')
 						->where('state_agent_travel_mode.agent_id', $visit->agent_id)
+						->where('state_agent_travel_mode.state_id', $state->id)
 						->where('state_agent_travel_mode.travel_mode_id', $value['travel_mode_id'])
 						->pluck('state_agent_travel_mode.service_charge')->first();
-
 					$service_charge = $service_charge ? $service_charge : 0;
 					$amount = $value['ticket_amount'] ? $value['ticket_amount'] : 0;
 					$tax_total = $value['cgst'] + $value['sgst'] + $value['igst'];
