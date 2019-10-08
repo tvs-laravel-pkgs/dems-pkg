@@ -885,13 +885,14 @@ class Trip extends Model {
 		foreach ($vehicle_details as $key => $value) {
 			$stripped = strtolower(preg_replace('/\s/', '', $value->name));
 			if ($stripped == 'twowheeler') {
-				$values[$value->id] = '5';
+				$values[$value->id] = $employee->two_wheeler_per_km;
 			} elseif ($stripped == 'fourwheeler') {
-				$values[$value->id] = '10';
+				$values[$value->id] = $employee->four_wheeler_per_km;
 			} else {
 				$values[$value->id] = '0';
 			}
 		}
+		// dd($values);
 
 		$data['travel_values'] = $values;
 		// dd($values);
@@ -993,6 +994,7 @@ class Trip extends Model {
 			'booking_type_list' => $booking_type_list,
 			'travel_cities_list' => $travel_cities_list,
 		];
+		// dd($trip);
 		$data['trip'] = $trip;
 		return response()->json($data);
 	}
@@ -1397,6 +1399,7 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
+		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -1452,6 +1455,9 @@ class Trip extends Model {
 							$visit_booking->amount = $visit_data['amount'];
 							$visit_booking->tax = $visit_data['tax'];
 							$visit_booking->gstin = $visit_data['gstin'];
+							$visit_booking->km_start = $visit_data['km_start'];
+							$visit_booking->km_end = $visit_data['km_end'];
+							$visit_booking->toll_fee = $visit_data['toll_fee'];
 							$visit_booking->service_charge = '0.00';
 							$visit_booking->total = $visit_data['total'];
 							$visit_booking->paid_amount = $visit_data['total'];

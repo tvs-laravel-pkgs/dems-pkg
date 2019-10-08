@@ -160,12 +160,12 @@ app.component('eyatraAgentForm', {
             }
             self.agent = response.data.agent;
             self.address = response.data.address;
-            
+
             self.user = response.data.user;
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-           
+
             if (response.data.agent.payment_mode_id == null || !response.data.agent.payment_mode_id) {
                 self.agent.payment_mode_id = 3244;
             }
@@ -177,7 +177,7 @@ app.component('eyatraAgentForm', {
                 } else {
                     self.switch_value = 'Inactive';
                 }
-                    
+
                 self.switch_password = 'No';
                 $("#hide_password").hide();
 
@@ -222,18 +222,18 @@ app.component('eyatraAgentForm', {
                 $('.travelcheckbox').prop('checked', false);
             }
         });
-        
+
         $(document).on('click', '.travelcheckbox', function() {
-          var cheked_count = 0;
+            var cheked_count = 0;
             $.each($('.travelcheckbox'), function() {
-                 cheked_count = $('.travelcheckbox:checked').length;
+                cheked_count = $('.travelcheckbox:checked').length;
             });
-            if(cheked_count > 0){
+            if (cheked_count > 0) {
                 $('#travel_mode').prop('checked', true);
-            }else{
+            } else {
                 $('#travel_mode').prop('checked', false);
             }
-            
+
         });
         //SELECT PAYMENT MODE
         // $scope.selectPaymentMode = function(payment_id) {
@@ -329,11 +329,9 @@ app.component('eyatraAgentForm', {
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'travel_mode[]') {
                     error.appendTo($('.travel_mode_error'));
-                } 
-                else if(element.hasClass('agent_password_check')){
+                } else if (element.hasClass('agent_password_check')) {
                     error.appendTo($('.password_error'));
-                }
-                else {
+                } else {
                     error.insertAfter(element)
                 }
             },
@@ -430,7 +428,7 @@ app.component('eyatraAgentForm', {
                     maxlength: 50,
                     minlength: 3,
                 },
-              
+
                 'account_number': {
                     required: function(element) {
                         if ($("#bank").is(':checked')) {

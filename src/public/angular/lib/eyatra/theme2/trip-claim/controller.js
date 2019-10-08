@@ -217,7 +217,7 @@ app.component('eyatraTripClaimForm', {
             self.lodge_cities = response.data.lodge_cities;
             self.travel_dates_list = response.data.travel_dates_list;
             self.travel_values = response.data.travel_values;
-            console.log(self.travel_values);
+            // console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
@@ -310,11 +310,12 @@ app.component('eyatraTripClaimForm', {
         // var arrival_date_error_flag = 0;
         $(document).on('input', '.localconveyance_km', function() {
             var index = $(this).attr("data-index");
-            console.log(index);
+            // console.log(index);
             var localConveyance_amount = 0;
             var localconveyance_from_km = parseInt($(this).closest('tr').find('.localconveyance_from_km').val());
             var localconveyance_to_km = parseInt($(this).closest('tr').find('.localconveyance_to_km').val());
-            console.log(localconveyance_from_km, localconveyance_to_km);
+
+            // console.log(localconveyance_from_km, localconveyance_to_km, travel_toll_fee);
             if (localconveyance_from_km == localconveyance_to_km) {
                 $(".validation_error_" + index).text("From,To km should not be same");
                 // $('#submit').hide();
@@ -333,35 +334,18 @@ app.component('eyatraTripClaimForm', {
                 var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
                 localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
                 $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
-                self.localConveyanceCal();
+                self.travelCal();
                 $(".validation_error_" + index).text("");
                 // $('#submit').show();
                 arrival_from_to_km_error_flag = 0;
             } else {
                 $(this).closest('tr').find('.localConveyance_amount').val('');
-                self.localConveyanceCal();
+                self.travelCal();
                 $(".validation_error_" + index).text("");
                 // $('#submit').show();
                 arrival_from_to_km_error_flag = 0;
             }
         });
-
-        //LOCALCONVEYANCE AMOUNT CALCULATE
-        self.localConveyanceCal = function() {
-            var total_petty_cash_local_amount = 0;
-            $('.localConveyance_amount').each(function() {
-                var local_amount = parseInt($(this).closest('tr').find('.localConveyance_amount_check_validation').val() || 0);
-                if (!$.isNumeric(local_amount)) {
-                    local_amount = 0;
-                }
-                total_petty_cash_local_amount += local_amount;
-            });
-            $('.localConveyance').text('₹ ' + total_petty_cash_local_amount.toFixed(2));
-            $('.total_petty_cash_local_amount').val(total_petty_cash_local_amount.toFixed(2));
-            $('.claim_total_amount').val(total_petty_cash_local_amount.toFixed(2));
-            $('.claim_total_amount').text('₹ ' + total_petty_cash_local_amount.toFixed(2));
-            // caimTotalAmount();
-        }
 
         //TOOLTIP MOUSEOVER
         $(document).on('mouseover', ".attachment_tooltip", function() {
@@ -446,7 +430,7 @@ app.component('eyatraTripClaimForm', {
                     next_index++;
                     if (self.trip.visits[next_index]) {
                         var sec_dept_time = convert_to_24h(self.trip.visits[next_index].departure_time);
-                        console.log('next index' + sec_dept_time);
+                        // console.log('next index' + sec_dept_time);
                         var sec_dep_date = self.trip.visits[next_index].departure_date + ' ' + sec_dept_time;
                         var d1 = first_dep_date_time.split(/[- :/*]+/);
                         var a1 = first_arrival_date_time.split(/[- :/*]+/);
@@ -469,7 +453,7 @@ app.component('eyatraTripClaimForm', {
                         }
 
                     } else {
-                        console.log('no index');
+                        // console.log('no index');
                         //var sec_dep_date = self.trip.end_date + ' ' + '00:00:00';
                         //console.log('sec_dep_date' );
                         var d1 = first_dep_date_time.split(/[- :/*]+/);
@@ -790,8 +774,9 @@ app.component('eyatraTripClaimForm', {
         //GET CLAIM STATUS BY TRNASPORT MODE IN TRANSPORT EXPENSES
         $scope.getVisitTrnasportModeClaimStatus = function(travel_mode_id, key) {
             if (travel_mode_id) {
-                var test = self.travel_values;
-                console.log(test[travel_mode_id]);
+                var travel_mode_ids = self.travel_values;
+                // console.log(travel_mode_ids[travel_mode_id]);
+                // console.log(travel_mode_ids[id]);
 
                 $.ajax({
                         url: get_claim_status_by_travel_mode_id,
@@ -839,29 +824,29 @@ app.component('eyatraTripClaimForm', {
                                 self.trip.visits[key].self_amount.readonly = true;
                                 self.trip.visits[key].self_amount.amount = '0.00';
                             }
+
+                            self.trip.visits[key].self_booking.amount = '0.00';
                             self.trip.visits[key].self_booking.km_start = '--';
                             self.trip.visits[key].self_booking.km_end = '--';
                             self.trip.visits[key].self_booking.toll_fee = '--';
                         }
                         //if Vehicle has own vehicle type
                         else if (category_type == 3400) {
-                            if (travel_mode_id == self.extras.travel_mode_list[6].id) {
-                                // $(".ratePerKMtext_" + key).html('Per Km - ₹ ' + self.employee.four_wheeler_per_km);
-                                $(".ratePerKMamount_" + key).val(self.employee.four_wheeler_per_km);
-                            } else if (travel_mode_id == self.extras.travel_mode_list[11].id) {
-                                // $(".ratePerKMtext_" + key).html('Per Km - ₹ ' + self.employee.two_wheeler_per_km);
-                                $(".ratePerKMamount_" + key).val(self.employee.two_wheeler_per_km);
-                            }
+                            // if (travel_mode_id == travel_mode_ids[travel_mode_id]) {
+                            //     alert('1');
+                            // $(".ratePerKMtext_" + key).html('Per Km - ₹ ' + self.employee.four_wheeler_per_km);
+                            $(".ratePerKMamount_" + key).val(travel_mode_ids[travel_mode_id]);
+                            // }
 
                             if (!self.trip.visits[key].self_booking) {
                                 self.trip.visits[key].self_booking = {
-                                    tax: '0.00',
+                                    tax: '',
                                     reference_number: '--',
                                     readonly: true
                                 };
                             } else {
                                 self.trip.visits[key].self_booking.readonly = true;
-                                self.trip.visits[key].self_booking.tax = '0.00';
+                                self.trip.visits[key].self_booking.tax = '';
                                 self.trip.visits[key].self_booking.reference_number = '--';
                             }
 
@@ -874,9 +859,9 @@ app.component('eyatraTripClaimForm', {
                                 };
                             } else {
                                 self.trip.visits[key].self_booking_km.readonly = false;
-                                self.trip.visits[key].self_booking_km.km_start = '';
-                                self.trip.visits[key].self_booking_km.km_end = '';
-                                self.trip.visits[key].self_booking_km.toll_fee = '';
+                                self.trip.visits[key].self_booking_km.km_start = self.trip.visits[key].self_booking.km_start ? self.trip.visits[key].self_booking.km_start : '';
+                                self.trip.visits[key].self_booking_km.km_end = self.trip.visits[key].self_booking.km_end ? self.trip.visits[key].self_booking.km_end : '';
+                                self.trip.visits[key].self_booking_km.toll_fee = self.trip.visits[key].self_booking.toll_fee ? self.trip.visits[key].self_booking.toll_fee : '0.00';
                             }
                             if (!self.trip.visits[key].self_amount) {
                                 self.trip.visits[key].self_amount = {
@@ -885,11 +870,11 @@ app.component('eyatraTripClaimForm', {
                                 };
                             } else {
                                 self.trip.visits[key].self_amount.readonly = false;
-                                self.trip.visits[key].self_amount.amount = '0.00';
+                                self.trip.visits[key].self_amount.amount = self.trip.visits[key].self_amount.amount ? self.trip.visits[key].self_amount.amount : '0.00';
                             }
-                            self.trip.visits[key].self_booking.km_start = '';
-                            self.trip.visits[key].self_booking.km_end = '';
-                            self.trip.visits[key].self_booking.toll_fee = '0.00';
+                            // self.trip.visits[key].self_booking.km_start = '';
+                            // self.trip.visits[key].self_booking.km_end = '';
+                            // self.trip.visits[key].self_booking.toll_fee = '0.00';
                         }
                         //Vehicle has Claim
                         else {
@@ -901,8 +886,8 @@ app.component('eyatraTripClaimForm', {
                                 };
                             } else {
                                 self.trip.visits[key].self_booking.readonly = false;
-                                self.trip.visits[key].self_booking.tax = '0.00';
-                                self.trip.visits[key].self_booking.reference_number = '';
+                                self.trip.visits[key].self_booking.tax = self.trip.visits[key].self_booking.tax ? self.trip.visits[key].self_booking.tax : '0.00';
+                                self.trip.visits[key].self_booking.reference_number = self.trip.visits[key].self_booking.reference_number ? self.trip.visits[key].self_booking.reference_number : '';
                             }
 
                             if (!self.trip.visits[key].self_booking_km) {
@@ -925,13 +910,12 @@ app.component('eyatraTripClaimForm', {
                                 };
                             } else {
                                 self.trip.visits[key].self_amount.readonly = false;
-                                self.trip.visits[key].self_amount.amount = '0.00';
+                                self.trip.visits[key].self_amount.amount = self.trip.visits[key].self_amount.amount ? self.trip.visits[key].self_amount.amount : '0.00';
                             }
 
                             self.trip.visits[key].self_booking.km_start = '--';
                             self.trip.visits[key].self_booking.km_end = '--';
                             self.trip.visits[key].self_booking.toll_fee = '--';
-
                         }
 
                         //Old Method for Claim and Not Claim Vehicle Method
@@ -1437,24 +1421,28 @@ app.component('eyatraTripClaimForm', {
             }, 500);
         }
         self.travelCal = function() {
-            //alert();
+            // alert();
             var total_travel_amount = 0;
             $('.travel_amount').each(function() {
                 var travel_amount = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_amount').val() || 0);
-                //alert(travel_amount);
+                // alert(travel_amount);
                 var travel_tax = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_tax').val() || 0);
-                //alert(travel_tax);
+                var travel_toll_fee = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
+                // console.log(travel_toll_fee);
                 if (!$.isNumeric(travel_amount)) {
                     travel_amount = 0;
                 }
                 if (!$.isNumeric(travel_tax)) {
                     travel_tax = 0;
                 }
-                travel_current_total = travel_amount + travel_tax;
+                if (!$.isNumeric(travel_toll_fee)) {
+                    travel_toll_fee = 0;
+                }
+                travel_current_total = travel_amount + travel_tax + travel_toll_fee;
                 total_travel_amount += travel_current_total;
                 $(this).closest('tr').find('.visit_booking_total_amount').val(travel_current_total);
             });
-            // console.log(total_travel_amount);
+            console.log(total_travel_amount);
             $('.transport_expenses').text('₹ ' + total_travel_amount.toFixed(2));
             $('.total_travel_amount').val(total_travel_amount.toFixed(2));
             caimTotalAmount();
