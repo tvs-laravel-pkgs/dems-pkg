@@ -39,12 +39,12 @@ class EmployeeController extends Controller {
 			->get()->toArray();
 		$employee_ids = array_column($employees, 'reporting_to_id');
 
-		$this->data['manager_list'] =  collect(Employee::join('users', 'users.entity_id', 'employees.id')
-            ->where('users.user_type_id', 3121)
-            ->where('users.company_id', Auth::user()->company_id)
-            ->whereIn('employees.id', $employee_ids)
-            ->select('employees.id', 'users.name')
-            ->get())->prepend(['id' => '', 'name' => 'Select Manager']); 
+		$this->data['manager_list'] = collect(Employee::join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('users.company_id', Auth::user()->company_id)
+				->whereIn('employees.id', $employee_ids)
+				->select('employees.id', 'users.name')
+				->get())->prepend(['id' => '', 'name' => 'Select Manager']);
 		return response()->json($this->data);
 	}
 
@@ -101,9 +101,9 @@ class EmployeeController extends Controller {
 				}
 			})
 			->where(function ($query) use ($r, $manager) {
-			if (!empty($manager)) {
-				$query->where('e.reporting_to_id', $manager);
-			}
+				if (!empty($manager)) {
+					$query->where('e.reporting_to_id', $manager);
+				}
 			})
 			->where(function ($query) use ($r, $role) {
 				if (!empty($role)) {
@@ -214,29 +214,30 @@ class EmployeeController extends Controller {
 				'mobile_number.required' => "Mobile Number is Required",
 				'username.required' => "Username is Required",
 				'mobile_number.unique' => "Mobile Number is already taken",
+				'username.unique' => "Username is already taken",
 				'email.unique' => "Email is already taken",
 			];
 
 			$validator = Validator::make($request->all(), [
 				'code' => [
-					'unique:employees,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+					'unique:employees,code,' . $request->id . ',id',
 					'required:true',
 				],
 				'mobile_number' => [
 					'required:true',
-					'unique:users,mobile_number,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+					'unique:users,mobile_number,' . $request->user_id . ',id',
 				],
 				'name' => [
 					'required:true',
 				],
 				'username' => [
 					'required:true',
-					'unique:users,username,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+					'unique:users,username,' . $request->user_id . ',id',
 
 				],
 				'email' => [
 					'required:true',
-					'unique:users,email,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id,
+					'unique:users,email,' . $request->user_id . ',id',
 
 				],
 			], $error_messages);
