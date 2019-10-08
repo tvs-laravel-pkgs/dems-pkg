@@ -188,11 +188,12 @@ class OutletReimpursementController extends Controller {
 	}
 
 	public function viewEYatraOutletReimpursement($outlet_id) {
-		if ($outlet_id = 'cashier') {
+		//dd($outlet_id);
+		/*if ($outlet_id = 'cashier') {
 			$outlet_details = Outlet::where('cashier_id', Auth::user()->entity_id)->select('id')->first();
 			$outlet_id = $outlet_details->id;
 
-		}
+		}*/
 		$reimpurseimpurse_transactions = ReimbursementTranscations::select(
 			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
 			'amount',

@@ -113,6 +113,7 @@
              self.wallet_mode_list = response.data.wallet_mode_list;
              self.rejection_list = response.data.rejection_list;
              self.employee = response.data.employee;
+             console.log(self.employee);
              self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
              self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
 
