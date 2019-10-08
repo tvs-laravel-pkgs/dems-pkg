@@ -272,7 +272,7 @@ app.component('eyatraCityForm', {
 
                 'name': {
                     required: true,
-                    minlength: 3,
+                    minlength: 1,
                     maxlength: 191,
                 },
                 'country_id': {
@@ -300,7 +300,7 @@ app.component('eyatraCityForm', {
                 //     maxlength: 'Please enter maximum of 2 letters',
                 // },
                 'name': {
-                    minlength: 'Please enter minimum of 3 letters',
+                    minlength: 'Please enter minimum of 1 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 // 'travel_modes[]': {
