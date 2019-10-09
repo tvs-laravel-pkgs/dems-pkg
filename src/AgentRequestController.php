@@ -170,7 +170,7 @@ class AgentRequestController extends Controller {
 		if ($trip->employee) {
 			$age = date('Y') - date('Y', strtotime($trip->employee->date_of_birth));
 		}
-		$visits = $trip->agent_visits;
+		$visits = $trip->agentVisits;
 
 		$trip_status = 'not_booked';
 		$ticket_amount = 0;
