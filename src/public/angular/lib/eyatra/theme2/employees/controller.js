@@ -320,10 +320,9 @@ app.component('eyatraEmployeeForm', {
             errorPlacement: function(error, element) {
                 if (element.hasClass("joining")) {
                     error.appendTo($('.joining_error'));
-                }
-                else if (element.hasClass("employee_password_check")) {
+                } else if (element.hasClass("employee_password_check")) {
                     error.appendTo($('.password_error'));
-                } 
+                }
                 // else if (element.hasClass("company_code")) {
                 //     error.appendTo($('.company_code_error'));
                 // } 
@@ -702,21 +701,17 @@ app.component('importJobs', {
                 $('#city_import').hide();
                 $('#grade_import').hide();
                 $('#outlet_import').show();
-            } 
-            else if (type == 3382) {
+            } else if (type == 3382) {
                 $('#employee_import').hide();
                 $('#outlet_import').hide();
                 $('#city_import').show();
                 $('#grade_import').hide();
-            }
-             else if (type == 3383) {
+            } else if (type == 3383) {
                 $('#employee_import').hide();
                 $('#outlet_import').hide();
                 $('#city_import').hide();
                 $('#grade_import').show();
-            }  
-
-            else {
+            } else {
                 $('#employee_import').hide();
                 $('#outlet_import').hide();
                 $('#city_import').hide();
@@ -731,18 +726,18 @@ app.component('importJobs', {
         var img_close = $('#img-close').html();
         var img_file = $('#img-file').html();
         var del_arr = [];
-        $(".form-group").on('change','.input-file',function(){
+        $(".form-group").on('change', '.input-file', function() {
             var html = [];
             del_arr = [];
             $(".insert-file").empty();
-            $(this.files).each(function(i,v){
-                html.push("<div class='file-return-parent'>"+img_file+"<p class='file-return'>"+v.name+"</p><button type='button' onclick='angular.element(this).scope().deletefiles(this)' class='remove-hn btn' >"+img_close+"</button></div>");
+            $(this.files).each(function(i, v) {
+                html.push("<div class='file-return-parent'>" + img_file + "<p class='file-return'>" + v.name + "</p><button type='button' onclick='angular.element(this).scope().deletefiles(this)' class='remove-hn btn' >" + img_close + "</button></div>");
                 del_arr.push(v.name);
             });
             $(".insert-file").append(html);
         });
         /* Remove Function */
-        $scope.deletefiles=function (this_parents) {
+        $scope.deletefiles = function(this_parents) {
             var del_name = $(this_parents).siblings().text();
             var del_index = del_arr.indexOf(del_name);
             if (del_index >= 0) {
@@ -757,14 +752,15 @@ app.component('importJobs', {
             var v = jQuery(form_ids).validate({
                 ignore: '',
                 rules: {
-                   
+
                     'import_type_id': {
                         required: true,
                     },
                 },
-               
+
                 submitHandler: function(form) {
                     let formData = new FormData($(form_id)[0]);
+                    $('#submit_employee_import').button('loading');
                     $.ajax({
                             url: save_import_jobs_url,
                             method: "POST",
@@ -775,8 +771,8 @@ app.component('importJobs', {
                         .done(function(res) {
 
                             if (!res.success) {
-                                $('#submit').button('reset');
-                                $('#submit').prop('disabled', true);
+                                $('#submit_employee_import').button('reset');
+                                // $('#submit_employee_import').prop('disabled', true);
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
@@ -806,7 +802,7 @@ app.component('importJobs', {
                             }
                         })
                         .fail(function(xhr) {
-                            $('#submit').button('reset');
+                            $('#submit_employee_import').button('reset');
                             new Noty({
                                 type: 'error',
                                 layout: 'topRight',

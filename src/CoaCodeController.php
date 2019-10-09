@@ -179,10 +179,11 @@ class CoaCodeController extends Controller {
 
 	public function saveEYatraCoaCode(Request $request) {
 		//validation
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			$error_messages = [
 				'number.required' => 'Number is required',
+				'number.unique' => 'Number is already taken',
 				'account_description.required' => 'Account Description is required',
 				'account_types.required' => 'Account Type is required',
 				'normal_balance.unique' => 'Normal Balance is required',
@@ -194,7 +195,14 @@ class CoaCodeController extends Controller {
 			];
 
 			$validator = Validator::make($request->all(), [
+				'number' => [
+					'required',
+					'unique:coa_codes,number,' . $request->id,
+				],
+				'account_description' => 'required',
+				'account_types' => 'required',
 			], $error_messages);
+
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
