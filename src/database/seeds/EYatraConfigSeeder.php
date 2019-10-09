@@ -484,7 +484,7 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3318 => [
-				'name' => 'Other Expenses',
+				'name' => 'Other Expense',
 				'config_type_id' => 519,
 			],
 			3319 => [

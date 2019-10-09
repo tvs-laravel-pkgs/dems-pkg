@@ -9,6 +9,7 @@ app.component('eyatraOutlets', {
         ).then(function(response) {
             // console.log(response.data);
             self.region_list = response.data.region_list;
+            self.cashier_list = response.data.cashier_list;
             // self.city_list = response.data.city_list;
             // self.state_list = response.data.state_list;
             self.country_list = response.data.country_list;
@@ -41,6 +42,7 @@ app.component('eyatraOutlets', {
                     d.city_id = $('#city_id').val();
                     d.state_id = $('#state_id').val();
                     d.country_id = $('#country_id').val();
+                    d.cashier_id = $('#cashier_id').val();
                 }
             },
 
@@ -48,6 +50,8 @@ app.component('eyatraOutlets', {
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'outlets.code', searchable: true },
                 { data: 'name', name: 'outlets.name', searchable: true },
+                { data: 'emp_code', name: 'employees.code', searchable: true },
+                { data: 'emp_name', name: 'users.name', searchable: true },
                 { data: 'region_name', name: 'r.name', searchable: true },
                 { data: 'city_name', name: 'city.name', searchable: true },
                 { data: 'state_name', name: 's.name', searchable: true },
@@ -75,6 +79,10 @@ app.component('eyatraOutlets', {
             'Add New' +
             '</a>'
         );*/
+        $scope.getCashierData = function(query) {
+            $('#cashier_id').val(query);
+            dataTable.draw();
+        }
         $scope.getRegionData = function(query) {
             $('#region_id').val(query);
             dataTable.draw();
@@ -98,6 +106,7 @@ app.component('eyatraOutlets', {
             $('#city_id').val(-1);
             $('#state_id').val(-1);
             $('#country_id').val(-1);
+            $('#cashier_id').val();
             dataTable.draw();
         }
         $scope.deleteOutletConfirm = function($outlet_id) {

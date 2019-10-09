@@ -26,6 +26,11 @@ class OutletController extends Controller {
 			->leftJoin('nstates as s', 's.id', 'city.state_id')
 			->leftjoin('regions as r', 'r.state_id', 's.id')
 			->leftJoin('countries as c', 'c.id', 's.country_id')
+			->leftJoin('employees', 'employees.id', 'outlets.cashier_id')
+			->leftJoin('users', function ($join) {
+				$join->on('users.entity_id', 'employees.id')
+					->where('users.user_type_id', 3121);
+			})
 			->select(
 				'outlets.id',
 				'outlets.code',
@@ -37,10 +42,17 @@ class OutletController extends Controller {
 				DB::raw('IF(r.name IS NULL,"---",r.name) as region_name'),
 				DB::raw('IF(c.name IS NULL,"---",c.name) as country_name'),
 				// 'c.name as country_name',
-				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status')
+				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'),
+				'employees.code as emp_code',
+				'users.name as emp_name'
 			)
 			->where('outlets.company_id', Auth::user()->company_id)
 		// ->where('a.address_of_id', 3160)
+			->where(function ($query) use ($r) {
+				if ($r->get('cashier_id')) {
+					$query->where("outlets.cashier_id", $r->get('cashier_id'))->orWhere(DB::raw("-1"), $r->get('cashier_id'));
+				}
+			})
 			->where(function ($query) use ($r) {
 				if ($r->get('region_id')) {
 					$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
@@ -179,6 +191,13 @@ class OutletController extends Controller {
 		$option->name = 'Select State';
 		$option->id = null;
 		$this->data['state_list'] = $state_list = collect(NState::select('name', 'id')
+				->get())->prepend($option);
+		$option = new Employee;
+		$option->name = 'Select Cashier';
+		$option->id = null;
+		// $this->data['cashier_list'] = $cashier_list = collect(Employee::select('name', 'id')
+		$this->data['cashier_list'] = $cashier_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('role_user', 'role_user.user_id', 'users.id')->where('role_user.role_id', 504)->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
+			DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
 				->get())->prepend($option);
 		$this->data['success'] = true;
 		//dd($this->data);
