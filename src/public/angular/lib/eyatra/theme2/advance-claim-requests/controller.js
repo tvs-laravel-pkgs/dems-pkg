@@ -1,6 +1,6 @@
 app.component('eyatraAdvanceClaimRequests', {
     templateUrl: eyatra_advance_claim_request_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http, $route) {
+    controller: function(HelperService, $rootScope, $scope, $http, $route, $timeout, $location) {
         var self = this;
         self.export_url = advance_claim_export_data_url;
         self.csrf = $('#csrf').val();
@@ -104,7 +104,7 @@ app.component('eyatraAdvanceClaimRequests', {
             $('#outlet_id').val(query);
             dataTable.draw();
         }
-        
+
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
@@ -187,14 +187,19 @@ app.component('eyatraAdvanceClaimRequests', {
 
                     $('#employee_export').css({ 'display': 'none' });
 
-                    var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
+                    //var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
 
-                    dataTableFilter.fnFilter();
+                    //dataTableFilter.fnFilter();
                     // var table = $('#eyatra_advance_claim_request_table').dataTable();
 
                     // table.ajax.reload();
 
+
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
+                    $timeout(function() {
+                        $location.path('/eyatra/advance-claim/requests')
+                        // $scope.$apply()
+                    }, 500);
                 }
 
             });
