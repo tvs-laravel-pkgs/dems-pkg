@@ -49,11 +49,16 @@ class EntityController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
+
+				if ($entity->name == 'Local Conveyance') {
+					return '';
+				} else {
+					return '
 				<a href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
 				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
+				}
 
 			})
 			->addColumn('status', function ($entity) {

@@ -882,6 +882,32 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-role-delete',
 				'display_name' => 'Delete',
 			],
+
+			//MASTERS > PETTY CASH EXPENSE TYPES
+			5640 => [
+				'display_order' => 1,
+				'parent_id' => 5020,
+				'name' => 'eyatra-pettycash-expense-types',
+				'display_name' => 'Petty Cash Expense Types',
+			],
+			5641 => [
+				'display_order' => 1,
+				'parent_id' => 5640,
+				'name' => 'eyatra-pettycash-expense-types-add',
+				'display_name' => 'Add',
+			],
+			5642 => [
+				'display_order' => 2,
+				'parent_id' => 5640,
+				'name' => 'eyatra-pettycash-expense-types-edit',
+				'display_name' => 'Edit',
+			],
+			5643 => [
+				'display_order' => 3,
+				'parent_id' => 5640,
+				'name' => 'eyatra-pettycash-expense-types-delete',
+				'display_name' => 'Delete',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

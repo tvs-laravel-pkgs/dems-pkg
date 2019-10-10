@@ -109,6 +109,9 @@ class EYatraRoleSeeder extends Seeder {
 					//MASTERS > IMPORT JOBS
 					5464,
 
+					//MASTERS > PETTY CASH EXPENSE TYPES
+					5640, 5641, 5642, 5643,
+
 					// //EMPLOYEE CLAIM VERIFICATION 1
 					// 5500,
 
