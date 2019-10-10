@@ -637,9 +637,9 @@ app.component('eyatraJobsImportList', {
                 { data: 'server_status', name: 'import_status.status', searchable: true },
 
             ],
-            rowCallback: function(row, data) {
-                $(row).addClass('highlight-row');
-            }
+            // rowCallback: function(row, data) {
+            //     $(row).addClass('highlight-row');
+            // }
         });
         $('.dataTables_length select').select2();
         setTimeout(function() {

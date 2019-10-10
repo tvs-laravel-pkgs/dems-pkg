@@ -31,7 +31,7 @@ class EYatraTC1Seeder extends Seeder {
 	 * @return void
 	 */
 	public function run() {
-		$this->call(EYatraConfigSeeder::class);
+		// $this->call(EYatraConfigSeeder::class);
 
 		$faker = Faker::create();
 

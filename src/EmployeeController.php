@@ -513,15 +513,15 @@ class EmployeeController extends Controller {
 			})
 			->addColumn('action', function ($import_data) {
 				return '
-				<a class="btn btn-sm" href="' . URL::to($import_data->export_file) . '">
+				<a class="btn btn-sm btn-red" href="' . URL::to($import_data->export_file) . '">
 					Download Error Reports
 				</a>
 				<br><br>
-                <a class="btn btn-sm" href="' . URL::to($import_data->src_file) . '">
+                <a class="btn btn-sm btn-blue" href="' . URL::to($import_data->src_file) . '">
                 	Download Source File
                 </a>
 				<br><br>
-                <a class="btn btn-sm" id="update_job_import_status" class="restart-import-job update_job_import_status" data-id="' . $import_data->id . '">
+                <a class="btn btn-sm btn-green" id="update_job_import_status" class="restart-import-job update_job_import_status" data-id="' . $import_data->id . '">
                 	Restart
                 </a>
                 ';
