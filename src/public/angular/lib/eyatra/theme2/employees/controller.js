@@ -172,7 +172,7 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response);
+            console.log(response.data.employee);
             self.employee = response.data.employee;
             self.extras = response.data.extras;
 

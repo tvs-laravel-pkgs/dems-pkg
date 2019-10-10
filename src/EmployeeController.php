@@ -181,7 +181,7 @@ class EmployeeController extends Controller {
 		}
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
-		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Type']);
 		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$designation_list = [];
@@ -211,6 +211,8 @@ class EmployeeController extends Controller {
 		//validation
 		try {
 			$error_messages = [
+				'code.required' => "Employee Code is Required",
+				'code.unique' => "Employee Code is already taken",
 				'mobile_number.required' => "Mobile Number is Required",
 				'username.required' => "Username is Required",
 				'mobile_number.unique' => "Mobile Number is already taken",
@@ -251,7 +253,7 @@ class EmployeeController extends Controller {
 				return response()->json(['success' => false, 'errors' => ['Role is required']]);
 			}
 
-			if ($request->date_of_joining < $request->date_of_birth) {
+			if (strtotime($request->date_of_joining) <= strtotime($request->date_of_birth)) {
 				return response()->json(['success' => false, 'errors' => ['Date of joining should be greater than date of birth']]);
 			}
 

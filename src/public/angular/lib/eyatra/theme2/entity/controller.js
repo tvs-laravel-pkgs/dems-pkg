@@ -113,6 +113,10 @@ app.component('eyatraEntityList', {
         {
                 $rootScope.title = 'City Category';
         }
+        else if($routeParams.entity_type_id == '512')
+        {
+                $rootScope.title = 'Petty Cash Expense Types';
+        }
 
         $rootScope.loading = false;
     }

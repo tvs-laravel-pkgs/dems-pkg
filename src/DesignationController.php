@@ -6,7 +6,6 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Uitoux\EYatra\Designation;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -22,7 +21,7 @@ class DesignationController extends Controller {
 				'designations.deleted_at',
 				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
 			)
-			->where('designations.company_id',Auth::user()->company_id)
+			->where('designations.company_id', Auth::user()->company_id)
 			->orderBy('designations.id', 'asc');
 
 		return Datatables::of($designations)
@@ -101,7 +100,8 @@ class DesignationController extends Controller {
 
 				'name' => [
 					'required:true',
-					Rule::unique('designations')->ignore($request->id),
+					'unique:designations,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+					// Rule::unique('designations')->ignore($request->id),
 				],
 			], $error_messages);
 			if ($validator->fails()) {

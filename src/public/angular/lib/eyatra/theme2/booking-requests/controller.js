@@ -63,7 +63,7 @@ app.component('eyatraTripBookingRequests', {
         $http.get(
             eyatra_booking_requests_filter_url
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.employee_list = response.data.employee_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -137,7 +137,7 @@ app.component('eyatraTripBookingRequestsView', {
             //     $scope.$apply()
             //     return;
             // }
-            console.log(response.data);
+            // console.log(response.data);
             self.trip = response.data.trip;
             self.age = response.data.age;
             self.total_amount = response.data.total_amount;
