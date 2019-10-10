@@ -476,7 +476,7 @@ class EmployeeController extends Controller {
 		}
 		$import_data = ImportJob::select(
 			'import_jobs.*',
-			DB::raw('DATE_FORMAT(import_jobs.created_at,"%d-%m-%Y") as import_date'),
+			DB::raw('DATE_FORMAT(import_jobs.created_at,"%d-%m-%Y %h:%i %p") as import_date'),
 			'users.name as user_name',
 			'status.name as job_status',
 			'type.name as type'

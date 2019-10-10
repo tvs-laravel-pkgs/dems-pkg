@@ -206,7 +206,9 @@ app.component('eyatraOutletForm', {
             }
             // console.log(response);
             self.outlet = response.data.outlet;
+            console.log(response.data.outlet);
             // self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
+            self.outlet.cashier.id = response.data.outlet.cashier.entity_id;
             self.amount_eligiblity = response.data.amount_eligiblity;
             self.amount_approver = response.data.amount_approver;
             // console.log(response.data.outlet.amount_limit);
