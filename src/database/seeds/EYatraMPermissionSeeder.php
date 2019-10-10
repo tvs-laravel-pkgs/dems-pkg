@@ -31,7 +31,7 @@ class EYatraMPermissionSeeder extends Seeder {
 			//TRIPS
 			9002 => [
 				'display_order' => 1,
-				'parent_id' => 9001,
+				'parent_id' => 9000,
 				'name' => 'eyatra-mobile-trips',
 				'display_name' => 'Trips',
 			],
@@ -58,17 +58,17 @@ class EYatraMPermissionSeeder extends Seeder {
 			//TRIP VERIFICATION
 			9006 => [
 				'display_order' => 1,
-				'parent_id' => 9001,
+				'parent_id' => 9000,
 				'name' => 'eyatra-mobile-trips-verification',
-				'display_name' => 'Trips',
+				'display_name' => 'Trip Verification',
 			],
 
 			//TRIP CLAIM VERIFICATION
 			9007 => [
 				'display_order' => 1,
-				'parent_id' => 9001,
+				'parent_id' => 9000,
 				'name' => 'eyatra-mobile-trips-claim-verification',
-				'display_name' => 'Trips',
+				'display_name' => 'Claim Verification',
 			],
 			//PETTY CASH SIGNATURE
 
