@@ -42,7 +42,7 @@ app.component('eyatraOutlets', {
                     d.city_id = $('#city_id').val();
                     d.state_id = $('#state_id').val();
                     d.country_id = $('#country_id').val();
-                    d.cashier_id = $('#cashier_id').val();
+                    d.cashier_id = $('#cashier').val();
                 }
             },
 
@@ -80,7 +80,7 @@ app.component('eyatraOutlets', {
             '</a>'
         );*/
         $scope.getCashierData = function(query) {
-            $('#cashier_id').val(query);
+            $('#cashier').val(query);
             dataTable.draw();
         }
         $scope.getRegionData = function(query) {
@@ -106,7 +106,7 @@ app.component('eyatraOutlets', {
             $('#city_id').val(-1);
             $('#state_id').val(-1);
             $('#country_id').val(-1);
-            $('#cashier_id').val();
+            $('#cashier').val();
             dataTable.draw();
         }
         $scope.deleteOutletConfirm = function($outlet_id) {
