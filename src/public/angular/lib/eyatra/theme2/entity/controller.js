@@ -101,6 +101,22 @@ app.component('eyatraEntityList', {
                 });
             }
         });
+        if($routeParams.entity_type_id == '501')
+        {
+                $rootScope.title = 'Trip Purpose';
+        }
+        else if($routeParams.entity_type_id == '503')
+        {
+                $rootScope.title = 'Other Expense';
+        }
+        else if($routeParams.entity_type_id == '506')
+        {
+                $rootScope.title = 'City Category';
+        }
+        else if($routeParams.entity_type_id == '512')
+        {
+                $rootScope.title = 'Petty Cash Expense Types';
+        }
 
         $rootScope.loading = false;
     }
