@@ -197,14 +197,14 @@ class PettyCashFinanceVerificationController extends Controller {
 	}
 
 	public function pettycashFinanceVerificationSave(Request $request) {
-		 //dd($request->all());
+		//dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->petty_cash_id) {
 				$petty_cash_finance_approve = PettyCash::where('id', $request->petty_cash_id)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				//Reimbursement Transaction
 				$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
-				$employee=Employee::where('id',$request->emp_id)->first();
+				$employee = Employee::where('id', $request->emp_id)->first();
 				//dd($employee->outlet_id);
 				// dd($previous_balance_amount);
 				if ($previous_balance_amount) {
@@ -220,19 +220,19 @@ class PettyCashFinanceVerificationController extends Controller {
 						$reimbursementtranscation->transcation_type = 3272;
 					}
 					$reimbursementtranscation->transaction_date = Carbon::now();
-					
+
 					$reimbursementtranscation->petty_cash_id = $request->petty_cash_id;
 					$reimbursementtranscation->amount = $request->amount;
 					$reimbursementtranscation->balance_amount = $balance_amount;
 					$reimbursementtranscation->save();
-					$outlet = Outlet::where('id',$employee->outlet_id)->update(['reimbursement_amount' => $balance_amount,'updated_at' => Carbon::now()]);
+					$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
 
 					//Outlet
 					$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
 				} else {
 					//dd(Auth::user()->entity->outlet_id);
 					$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
-					 //dd($outlet->reimbursement_amount);
+					//dd($outlet->reimbursement_amount);
 					if ($outlet->reimbursement_amount >= 0) {
 						$balance_amount = $outlet->reimbursement_amount - $request->amount;
 						$reimbursementtranscation = new ReimbursementTranscation;
@@ -251,7 +251,7 @@ class PettyCashFinanceVerificationController extends Controller {
 						$reimbursementtranscation->amount = $request->amount;
 						$reimbursementtranscation->balance_amount = $balance_amount;
 						$reimbursementtranscation->save();
-						$outlet = Outlet::where('id',$employee->outlet_id)->update(['reimbursement_amount' => $balance_amount,'updated_at' => Carbon::now()]);
+						$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
 
 					} else {
 						return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
@@ -280,7 +280,7 @@ class PettyCashFinanceVerificationController extends Controller {
 					$payment->created_by = Auth::user()->id;
 					$payment->save();
 					$activity['entity_id'] = $request->petty_cash_id;
-					$activity['entity_type'] = 'Other Expenses';
+					$activity['entity_type'] = 'Other Expense';
 					$activity['details'] = "Claim is paid by Financier";
 					$activity['activity'] = "paid";
 					$activity_log = ActivityLog::saveLog($activity);
