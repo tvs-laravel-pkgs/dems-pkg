@@ -3,7 +3,6 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
-use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Agent;
@@ -12,7 +11,6 @@ use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\ReimbursementTranscation;
-use Validator;
 use Yajra\Datatables\Datatables;
 
 class OutletReimpursementController extends Controller {
@@ -104,89 +102,6 @@ class OutletReimpursementController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function saveEYatraState(Request $request) {
-		//validation
-		//dd($request->all());
-		try {
-			$error_messages = [
-				'code.required' => 'State Code is required',
-				'code.unique' => 'State Code has already been taken',
-				'name.required' => 'State Name is required',
-				'name.unique' => 'State Name has already been taken',
-
-			];
-
-			$validator = Validator::make($request->all(), [
-				'code' => [
-					'required',
-					'unique:nstates,code,' . $request->id . ',id,country_id,' . $request->country_id,
-					'max:2',
-				],
-				'name' => [
-					'required',
-					'unique:nstates,name,' . $request->id . ',id,country_id,' . $request->country_id,
-					'max:191',
-				],
-
-			], $error_messages);
-			if ($validator->fails()) {
-				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			}
-
-			DB::beginTransaction();
-			if (!$request->id) {
-				$state = new NState;
-				$state->created_by = Auth::user()->id;
-				$state->created_at = Carbon::now();
-				$state->updated_at = NULL;
-
-			} else {
-				$state = NState::withTrashed()->where('id', $request->id)->first();
-
-				$state->updated_by = Auth::user()->id;
-				$state->updated_at = Carbon::now();
-
-				$state->travelModes()->sync([]);
-			}
-			if ($request->status == 'Active') {
-				$state->deleted_at = NULL;
-				$state->deleted_by = NULL;
-			} else {
-				$state->deleted_at = date('Y-m-d H:i:s');
-				$state->deleted_by = Auth::user()->id;
-
-			}
-
-			$state->fill($request->all());
-			$state->save();
-
-			//SAVING state_agent_travel_mode
-			if (count($request->travel_modes) > 0) {
-				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
-					if (!isset($pivot_data['agent_id'])) {
-						continue;
-					}
-					if (!isset($pivot_data['service_charge'])) {
-						continue;
-					}
-					$state->travelModes()->attach($travel_mode, $pivot_data);
-				}
-			}
-
-			DB::commit();
-			$request->session()->flash('success', 'State saved successfully!');
-			if (empty($request->id)) {
-				return response()->json(['success' => true, 'message' => 'State Added successfully']);
-			} else {
-				return response()->json(['success' => true, 'message' => 'State Updated Successfully']);
-			}
-			return response()->json(['success' => true]);
-		} catch (Exception $e) {
-			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
-		}
-	}
-
 	public function viewEYatraOutletReimpursement($outlet_id) {
 		//dd($outlet_id);
 		/*if ($outlet_id = 'cashier') {
@@ -194,7 +109,7 @@ class OutletReimpursementController extends Controller {
 			$outlet_id = $outlet_details->id;
 
 		}*/
-		$reimpurseimpurse_transactions = ReimbursementTranscations::select(
+		$reimpurseimpurse_transactions = ReimbursementTranscation::select(
 			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
 			'amount',
 			'balance_amount',
@@ -203,7 +118,8 @@ class OutletReimpursementController extends Controller {
 			DB::raw('IF(petty_cash_id IS NULL,"NULL",petty_cash_id) as petty_cash_id')
 		)
 			->join('configs', 'configs.id', 'reimbursement_transcations.transcation_id')
-			->where('outlet_id', $outlet_id)
+			->where('reimbursement_transcations.outlet_id', $outlet_id)
+			->orderBy('reimbursement_transcations.id', 'DESC')
 			->get();
 		// dd($reimpurseimpurse_transactions);
 		$reimpurseimpurse_outlet_data = Outlet::select(
