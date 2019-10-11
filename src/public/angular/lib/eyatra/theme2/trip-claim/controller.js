@@ -1650,7 +1650,7 @@ app.component('eyatraTripClaimForm', {
                                 }).show();
                                 setTimeout(function() {
                                     $noty.close();
-                                }, 5000);
+                                }, 4000);
                                 // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
                                 //     self.trip.lodgings[key].date_range_list = val;
                                 // });// $scope.$apply()
@@ -1686,7 +1686,7 @@ app.component('eyatraTripClaimForm', {
                     }
                     setTimeout(function() {
                         $noty.close();
-                    }, 5000);
+                    }, 4000);
                 }
             },
         });
@@ -1741,7 +1741,7 @@ app.component('eyatraTripClaimForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 5000);
+                            }, 4000);
                             // self.boarding_dates_list = res.boarding_dates_list;
                             // self.local_travel_dates_list = res.boarding_dates_list;
                             // if (!self.trip.boardings.length) {
@@ -1829,7 +1829,7 @@ app.component('eyatraTripClaimForm', {
                             }).show();
                             setTimeout(function() {
                                 $noty.close();
-                            }, 5000);
+                            }, 4000);
                             // $('.tab_li').removeClass('active');
                             // $('.tab_local_travel').addClass('active');
                             // $('.tab-pane').removeClass('in active');
@@ -1933,7 +1933,7 @@ app.component('eyatraTripClaimForm', {
                                 $noty.close();
                                 $location.path('/eyatra/trip/claim/list')
                                 $scope.$apply()
-                            }, 500);
+                            }, 1000);
                         }
                     })
                     .fail(function(xhr) {

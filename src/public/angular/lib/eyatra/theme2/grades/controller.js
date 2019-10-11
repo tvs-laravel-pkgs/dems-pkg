@@ -288,7 +288,7 @@ app.component('eyatraGradeForm', {
         $(document).on('keypress', '.validate_decimal', function(e) {
             var character = String.fromCharCode(e.keyCode)
             var newValue = this.value + character;
-            if (isNaN(newValue) || hasDecimalPlace(newValue, 3)) {
+            if (isNaN(newValue) || hasDecimalPlace(newValue, 5)) {
                 e.preventDefault();
                 return false;
             }
