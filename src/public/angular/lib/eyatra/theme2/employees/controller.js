@@ -353,8 +353,8 @@ app.component('eyatraEmployeeForm', {
                 },
                 'aadhar_no': {
                     required: true,
-                    maxlength: 16,
-                    minlength: 16,
+                    maxlength: 12,
+                    minlength: 12,
                 },
                 'pan_no': {
                     required: true,
