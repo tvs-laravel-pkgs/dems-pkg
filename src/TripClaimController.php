@@ -12,12 +12,14 @@ use Yajra\Datatables\Datatables;
 
 class TripClaimController extends Controller {
 	public function listEYatraTripClaimList(Request $r) {
+		//dd('test');
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('ey_employee_claims as claims', 'claims.trip_id', 'trips.id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
 			->where('users.user_type_id', 3121)
 			->select(
