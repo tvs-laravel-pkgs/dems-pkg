@@ -213,11 +213,14 @@ class PettyCashController extends Controller {
 				'users.name',
 				'employees.code',
 				'employees.id as emp_id',
-				'configs.name as designation'
+				'configs.name as designation',
+				'gae.two_wheeler_per_km',
+				'gae.four_wheeler_per_km',
 			)
 				->join('users', 'users.entity_id', 'employees.id')
 				->join('entities', 'entities.id', 'employees.grade_id')
 				->join('configs', 'configs.id', 'users.user_type_id')
+				->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 				->where('employees.id', $id)
 				->where('users.user_type_id', 3121)
 				->where('employees.company_id', Auth::user()->company_id)
@@ -236,11 +239,15 @@ class PettyCashController extends Controller {
 			'users.name',
 			'employees.code',
 			'employees.id as emp_id',
-			'configs.name as designation'
+			'configs.name as designation',
+			'gae.two_wheeler_per_km',
+			'gae.four_wheeler_per_km',
+
 		)
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('entities', 'entities.id', 'employees.grade_id')
 			->join('configs', 'configs.id', 'users.user_type_id')
+			->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 			->where(function ($q) use ($key) {
 				$q->where('employees.code', 'like', '%' . $key . '%')
 					->orWhere('users.name', 'like', '%' . $key . '%')
