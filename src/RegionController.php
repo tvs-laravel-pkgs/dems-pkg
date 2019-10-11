@@ -97,7 +97,7 @@ class RegionController extends Controller {
 			}
 			$this->data['success'] = true;
 		}
-		$country_list = collect(NCountry::select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Country']);
+		$country_list = collect(NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Country']);
 		$state_list = [];
 		$this->data['extras'] = [
 			'country_list' => $country_list,

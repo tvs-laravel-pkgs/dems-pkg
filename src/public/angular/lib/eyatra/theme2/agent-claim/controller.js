@@ -156,16 +156,16 @@ app.component('eyatraAgentClaimForm', {
             $rootScope.loading = false;
         });
         var total = 0;
-         $(document).on('keyup', '#tax', function() {
-        // $('#tax').on('change', function() {
+        $(document).on('keyup', '#tax', function() {
+            // $('#tax').on('change', function() {
             var net_amt = parseFloat($(".net_amount").val());
             var tax = parseFloat($("#tax").val());
             total = (net_amt + tax);
             $("#invoice_amount").val(total.toFixed(2));
         });
 
-          $(document).on("click", ".booking_list", function() {
-           
+        $(document).on("click", ".booking_list", function() {
+
             if ($('.booking_list:checked').length > 0) {
                 $('.booking_all_list').prop('checked', true);
             } else {
@@ -175,7 +175,7 @@ app.component('eyatraAgentClaimForm', {
 
 
         $(document).on('click', '.booking_list', function() {
-           
+
             var total_amount = 0;
             var count = 0;
             var amount = 0;
@@ -194,8 +194,8 @@ app.component('eyatraAgentClaimForm', {
             $(".amount").html(amount.toFixed(2));
             $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
-             
-            if($("#tax").val() != ''){
+
+            if ($("#tax").val() != '') {
                 var net_amt = parseFloat($(".net_amount").val());
                 var tax = parseFloat($("#tax").val());
                 var total_amount = (net_amt + tax);
@@ -402,6 +402,7 @@ app.component('eyatraAgentClaimView', {
         $http.get(
             eyatra_agent_claim_view_data_url + '/' + $routeParams.agent_claim_id
         ).then(function(response) {
+            console.log(response.data);
             self.agent_claim_view = response.data.agent_claim_view;
             self.booking_list = response.data.booking_list;
             self.gstin_tax = response.data.gstin_tax;

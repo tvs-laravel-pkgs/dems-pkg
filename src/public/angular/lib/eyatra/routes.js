@@ -410,11 +410,11 @@ app.config(['$routeProvider', function($routeProvider) {
     //AGENT - TATKAL BOOKING REQUESTS
     when('/eyatra/trips/tatkal/booking-requests', {
         template: '<eyatra-trip-tatkal-booking-requests></eyatra-trip-booking-requests>',
-        title: 'Trips Booking Requests',
+        title: 'Tatkal Booking Requests List',
     }).
     when('/eyatra/trips/tatkal/booking-requests/view/:trip_id', {
         template: '<eyatra-trip-tatkal-booking-requests-view></eyatra-booking-requests-view>',
-        title: 'Trip Booking Request View',
+        title: 'Tatkal Booking Requests View',
     }).
 
     //AGENT CLAIM
