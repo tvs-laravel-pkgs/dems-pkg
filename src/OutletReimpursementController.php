@@ -244,6 +244,7 @@ class OutletReimpursementController extends Controller {
 			$outlet->reimbursement_amount = $reimbursement_amount + $request->topup_amount;
 			$outlet->save();
 			$reimbursement_transaction = new ReimbursementTranscation;
+			$reimbursement_transaction->company_id = Auth::user()->company_id;
 			$reimbursement_transaction->outlet_id = $outlet->id;
 			$reimbursement_transaction->transcation_id = 3271;
 			$reimbursement_transaction->transaction_date = date('Y-m-d', strtotime($request->transaction_date));

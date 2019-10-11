@@ -2,8 +2,8 @@
 
 namespace Uitoux\EYatra;
 
-use Auth;
 use Illuminate\Database\Eloquent\Model;
+
 //use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ReimbursementTranscation extends Model {
@@ -16,6 +16,7 @@ class ReimbursementTranscation extends Model {
 		'transaction_date',
 		'transcation_type',
 		'amount',
-		'balance_amount'
+		'balance_amount',
+		'company_id',
 	];
 }
