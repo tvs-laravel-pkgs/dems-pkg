@@ -273,6 +273,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function viewEYatraAgentClaim($agent_claim_id) {
+		//dd('in');
 		$this->data['agent_claim_view'] = $agent_claim_view = AgentClaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',
@@ -395,6 +396,7 @@ class AgentClaimController extends Controller {
 		return response()->json($this->data);
 	}
 	public function viewEYatraFinanceAgentClaim($agent_claim_id) {
+		//dd('test');
 		$this->data['agent_claim_view'] = $agent_claim_view = AgentClaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->join('configs', 'configs.id', 'ey_agent_claims.status_id')->select(
 			'ey_agent_claims.id',
@@ -409,9 +411,9 @@ class AgentClaimController extends Controller {
 			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
 			->where('users.user_type_id', 3122)->first();
 
-		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)as paid_amount'),
 			'visit_bookings.id',
-			'visit_bookings.paid_amount',
+			//'visit_bookings.paid_amount',
 			'configs.name as status',
 			'trips.number as trip',
 			'trips.id as trip_id',
