@@ -215,7 +215,7 @@ class PettyCashController extends Controller {
 				'employees.id as emp_id',
 				'configs.name as designation',
 				'gae.two_wheeler_per_km',
-				'gae.four_wheeler_per_km',
+				'gae.four_wheeler_per_km'
 			)
 				->join('users', 'users.entity_id', 'employees.id')
 				->join('entities', 'entities.id', 'employees.grade_id')
@@ -241,8 +241,7 @@ class PettyCashController extends Controller {
 			'employees.id as emp_id',
 			'configs.name as designation',
 			'gae.two_wheeler_per_km',
-			'gae.four_wheeler_per_km',
-
+			'gae.four_wheeler_per_km'
 		)
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('entities', 'entities.id', 'employees.grade_id')
