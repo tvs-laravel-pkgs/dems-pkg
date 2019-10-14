@@ -407,7 +407,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 518,
 			],
 
-			//ACTIVITY LOG ENTITY TYPES
+			//ACTIVITY LOG ENTITY TYPES - I
 			3300 => [
 				'name' => 'Trip',
 				'config_type_id' => 519,
@@ -708,6 +708,12 @@ class EYatraConfigSeeder extends Seeder {
 			3481 => [
 				'name' => 'Permanent',
 				'config_type_id' => 529,
+			],
+
+			//ACTIVITY LOG ENTITY TYPES - II
+			3500 => [
+				'name' => 'Petty Cash Expense types',
+				'config_type_id' => 519,
 			],
 		];
 
