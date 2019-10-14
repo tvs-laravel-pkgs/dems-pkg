@@ -315,6 +315,9 @@ class GradeController extends Controller {
 		$grade_advanced = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
 		$this->data['grade_advanced'] = count($grade_advanced) ? 'Yes' : 'No';
 		$this->data['action'] = 'View';
+
+		$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit','two_wheeler_per_km','four_wheeler_per_km')->first();
+		
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

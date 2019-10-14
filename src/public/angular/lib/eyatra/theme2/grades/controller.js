@@ -455,12 +455,19 @@ app.component('eyatraGradeView', {
         ).then(function(response) {
             self.entity = response.data.grade;
             self.extras = response.data.extras;
+            self.grade_details = response.data.grade_details;
             self.action = response.data.action;
             self.grade_advanced = response.data.grade_advanced;
             if (response.data.grade.deleted_at == null) {
                 self.status = 'Active';
             } else {
                 self.status = 'Inactive';
+            }
+            
+            if (self.grade_details.deviation_eligiblity == 1) {
+                self.deviation_eligiblity = 'Yes';
+            } else {
+                self.deviation_eligiblity = 'No';
             }
         });
         $('.btn-nxt').on("click", function() {

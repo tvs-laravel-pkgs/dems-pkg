@@ -375,6 +375,7 @@ class EmployeeController extends Controller {
 			'user',
 			'reportingTo.user',
 			'paymentMode',
+			'designation',
 		])
 			->find($employee_id);
 
