@@ -43,7 +43,7 @@ app.component('eyatraDesignation', {
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Designations</p><h3 class="title">Designations</h3>');
         //$('.page-header-content .display-inline-block .data-table-title').html('Designations');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-designation\')">' +
+            '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-designation-add\')">' +
             'Add New' +
             '</a>'
         );

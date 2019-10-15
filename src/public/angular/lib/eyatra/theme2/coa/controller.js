@@ -53,7 +53,7 @@ app.component('coaDataList', {
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'COA Sub Masters' + '</p><h3 class="title">' + 'COA Sub Masters' + '</h3>');
         var add_url = '#!/eyatra/coa-sub-master/add/';
         $('.add_new_button').html(
-            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+            '<a href=' + add_url + ' type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-coa-sub-groups-add\')">' +
             'Add New' +
             '</a>'
         );

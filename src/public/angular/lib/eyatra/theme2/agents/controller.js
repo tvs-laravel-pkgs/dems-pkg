@@ -3,6 +3,7 @@ app.component('eyatraAgents', {
     controller: function(HelperService, $rootScope, $scope, $http, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-agent-add');
         var dataTable = $('#agent_list').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,

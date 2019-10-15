@@ -3,6 +3,7 @@ app.component('eyatraRegions', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-region-add');
 
         $http.get(
             region_filter_data_url

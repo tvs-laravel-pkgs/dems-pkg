@@ -3,6 +3,7 @@ app.component('eyatraGrades', {
     controller: function($http, HelperService, $rootScope, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-grade-add');
         var dataTable = $('#eyatra_grade_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -463,7 +464,7 @@ app.component('eyatraGradeView', {
             } else {
                 self.status = 'Inactive';
             }
-            
+
             if (self.grade_details.deviation_eligiblity == 1) {
                 self.deviation_eligiblity = 'Yes';
             } else {

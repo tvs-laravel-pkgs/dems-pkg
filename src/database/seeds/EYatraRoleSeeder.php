@@ -50,10 +50,10 @@ class EYatraRoleSeeder extends Seeder {
 					5620, 5621, 5622, 5623,
 
 					//MASTERS > OUTLETS
-					5480, 5481, 5482, 5483,
+					5480, 5481, 5482, 5483, 5484,
 
 					//MASTERS > EMPLOYEES
-					5520, 5521, 5522, 5523,
+					5520, 5521, 5522, 5523, 5524,
 
 					//MASTERS > AGENTS
 					5080, 5081, 5082, 5083,
@@ -77,7 +77,7 @@ class EYatraRoleSeeder extends Seeder {
 					5140, 5141, 5142, 5143,
 
 					//MASTERS > CITIES
-					5160, 5161, 5162, 5163,
+					5160, 5161, 5162, 5163,5164
 
 					//MASTERS > DESIGNATIONS
 					5180, 5181, 5182, 5183,

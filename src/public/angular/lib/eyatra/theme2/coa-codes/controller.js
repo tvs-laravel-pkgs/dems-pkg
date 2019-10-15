@@ -3,6 +3,8 @@ app.component('eyatraCoaCode', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-coa-codes-add');
+
         var dataTable = $('#eyatra_coa_code_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,

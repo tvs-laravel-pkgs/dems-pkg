@@ -3,7 +3,8 @@ app.component('eyatraOutlets', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-
+        self.permissionadd = self.hasPermission('eyatra-outlet-add');
+        self.permissionimport = self.hasPermission('eyatra-import-outlet');
         $http.get(
             outlet_filter_data_url
         ).then(function(response) {
@@ -206,13 +207,13 @@ app.component('eyatraOutletForm', {
             }
             // console.log(response);
             self.outlet = response.data.outlet;
-            
+
             console.log(response.data.outlet);
             // self.threshhold_amount = Number(response.data.outlet.amount_limit).toLocaleString('en-IN');
-            if(self.action =="Edit"){
+            if (self.action == "Edit") {
                 self.outlet.cashier.id = response.data.outlet.cashier.entity_id;
             }
-            
+
             self.amount_eligiblity = response.data.amount_eligiblity;
             self.amount_approver = response.data.amount_approver;
             // console.log(response.data.outlet.amount_limit);
@@ -636,7 +637,7 @@ app.component('eyatraOutletView', {
             outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
             self.outlet = response.data.outlet;
-           
+
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
             self.amount = response.data.amount;

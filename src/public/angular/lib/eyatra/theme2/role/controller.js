@@ -252,7 +252,7 @@ app.component('eyatraRoleList', {
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Roles</p><h3 class="title">Roles</h3>');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/master/roles/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-role\')">' +
+            '<a href="#!/eyatra/master/roles/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-role-add\')">' +
             'Add New' +
             '</a>'
         );
@@ -329,11 +329,11 @@ app.component('eyatraRoleForm', {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
-                },  
+                },
             },
             messages: {
                 'permission_ids[]': "Select atleast one permission",
-               
+
             },
             errorPlacement: function(error, element) {
                 if (element.hasClass("parent_check")) {
@@ -448,44 +448,43 @@ app.component('eyatraRoleForm', {
         $(document).on('change', '.sub_child', function() {
 
             ids = $(this).data("id");
-            id = ids.split("_");    
-       
+            id = ids.split("_");
+
             var its_value = $(this).val();
             if ($(this).is(":checked")) {
                 $(this).parents('li').find('.childs2_' + its_value).prop('checked', true);
-            } 
-            else{
+            } else {
                 $(this).parents('li').find('.childs2_' + its_value).prop('checked', false);
             }
 
             var sub_cheked_count = 0;
-                $(this).parents('li').find('.sub_child').each(function() {
-                     sub_cheked_count = 
-                      $('.sub_parent_childs_' + id[0]).filter(':checked').length;
-                });
+            $(this).parents('li').find('.sub_child').each(function() {
+                sub_cheked_count =
+                    $('.sub_parent_childs_' + id[0]).filter(':checked').length;
+            });
 
-            if(sub_cheked_count > 0){
+            if (sub_cheked_count > 0) {
                 $(this).parents('li').find('.sc_' + id[0]).prop('checked', true);
                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
-                
-            }else{
-               
+
+            } else {
+
                 $(this).parents('li').find('.sc_' + id[0]).prop('checked', false);
-                 var cross_check_parent = 0;
-                
-                 $('.main_parent_' + id[1]).each(function() {
-                    cross_check_parent = 
-                      $('.main_parent_' + id[1]).filter(':checked').length;
+                var cross_check_parent = 0;
+
+                $('.main_parent_' + id[1]).each(function() {
+                    cross_check_parent =
+                        $('.main_parent_' + id[1]).filter(':checked').length;
 
                 });
 
-                 if(cross_check_parent > 0){
+                if (cross_check_parent > 0) {
                     $(this).parents('li').find('.pc_' + id[0]).prop('checked', true);
-                 }else{
+                } else {
                     $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
-                 }
+                }
             }
-            
+
         });
 
         //on click parent check its child 
@@ -494,80 +493,79 @@ app.component('eyatraRoleForm', {
             var parent_value = $(this).val();
             var cross_check_parent = 0;
             ids = $(this).data("id");
-            id =  ids.split("_");   
-            
+            id = ids.split("_");
+
             if ($(this).prop("checked") == true) {
-                
-                $('.sub_parent_childs_' +  id[0]).prop('checked', true);
-                $('.sub_parent_childs2_' +  id[0]).prop('checked', true);
+
+                $('.sub_parent_childs_' + id[0]).prop('checked', true);
+                $('.sub_parent_childs2_' + id[0]).prop('checked', true);
                 $('.pc_' + id[1]).prop('checked', true);
             } else if ($(this).prop("checked") == false) {
-              
-                $('.sub_parent_childs_' +  id[0]).prop('checked', false);
-                $('.sub_parent_childs2_' +  id[0]).prop('checked', false);
-                
+
+                $('.sub_parent_childs_' + id[0]).prop('checked', false);
+                $('.sub_parent_childs2_' + id[0]).prop('checked', false);
+
                 $('.main_parent_' + id[1]).each(function() {
-                    cross_check_parent = 
-                      $('.main_parent_' + id[1]).filter(':checked').length;
+                    cross_check_parent =
+                        $('.main_parent_' + id[1]).filter(':checked').length;
 
                 });
-                 if(cross_check_parent > 0){
+                if (cross_check_parent > 0) {
                     $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
-                 }else{
+                } else {
                     $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
-                 }
+                }
             }
-            
+
         });
 
 
         //On click super sub child check its parents
-        
+
         $(document).on('change', '.super_sub_child', function() {
-                ids = $(this).attr("data-id");
-                id = ids.split("_"); 
+            ids = $(this).attr("data-id");
+            id = ids.split("_");
             if ($(this).is(":checked")) {
                 $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
                 $(this).parents('li').find('.sc_' + id[0]).prop('checked', true);
                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
-            } else 
-            {
+            } else {
                 var super_sub_child_count = 0;
                 $(this).parents('li').find('.super_sub_child').each(function() {
-                     super_sub_child_count = 
-                      $('.childs2_' + id[2]).filter(':checked').length;
+                    super_sub_child_count =
+                        $('.childs2_' + id[2]).filter(':checked').length;
                 });
-                
-                if(super_sub_child_count > 0){
-                   
-                 $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
-                }else{
-                    
-                 $(this).parents('li').find('.child_' + id[2]).prop('checked', false);
+
+                if (super_sub_child_count > 0) {
+
+                    $(this).parents('li').find('.child_' + id[2]).prop('checked', true);
+                } else {
+
+                    $(this).parents('li').find('.child_' + id[2]).prop('checked', false);
                 }
 
                 var total_sub_child_count = 0;
                 $(this).parents('li').find('.sub_parent_childs_' + id[0]).each(function() {
-                     total_sub_child_count = 
-                      $('.sub_parent_childs_' + id[0]).filter(':checked').length;
+                    total_sub_child_count =
+                        $('.sub_parent_childs_' + id[0]).filter(':checked').length;
                 });
 
-                if(total_sub_child_count > 0){
-                 $(this).parents('li').find('.sc' + id[0]).prop('checked', true);
-                }else{
-                 $(this).parents('li').find('.sc_' + id[0]).prop('checked', false);
+                if (total_sub_child_count > 0) {
+                    $(this).parents('li').find('.sc' + id[0]).prop('checked', true);
+                } else {
+                    $(this).parents('li').find('.sc_' + id[0]).prop('checked', false);
                 }
 
                 var total_child_count = 0;
                 $(this).parents('li').find('.main_parent_' + id[1]).each(function() {
-                     total_child_count = 
-                      $('.main_parent_' + id[1]).filter(':checked').length;
+                    total_child_count =
+                        $('.main_parent_' + id[1]).filter(':checked').length;
                 });
-            
-                if(total_child_count > 0){
-                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
-                }else{
-                 $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
+
+                if (total_child_count > 0) {
+                    $(this).parents('li').find('.pc_' + id[1]).prop('checked', true);
+                } else {
+                    $(this).parents('li').find('.pc_' + id[1]).prop('checked', false);
                 }
 
             }
@@ -579,8 +577,8 @@ app.component('eyatraRoleForm', {
         // On click main parent check its child,sub child, super sub child
 
         $(document).on("change", ".parent_check", function() {
-            var parent_id = $(this).val();  
-           
+            var parent_id = $(this).val();
+
             if ($(this).prop("checked") == true) {
                 $('.main_parent_' + parent_id).prop('checked', true);
                 $('.sub_test_' + parent_id).prop('checked', true);

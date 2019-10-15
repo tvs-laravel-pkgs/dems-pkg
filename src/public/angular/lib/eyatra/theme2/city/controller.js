@@ -3,6 +3,8 @@ app.component('eyatraCity', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permissionadd = self.hasPermission('eyatra-city-add');
+        self.permissionimport = self.hasPermission('eyatra-import-city');
         var dataTable = $('#eyatra_city_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,

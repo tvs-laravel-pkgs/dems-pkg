@@ -4,6 +4,8 @@ app.component('eyatraStates', {
         // alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-state-add');
+        
         var dataTable = $('#eyatra_state_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -133,21 +135,21 @@ app.component('eyatraStateForm', {
             $form_data_url
         ).then(function(response) {
             // if (!response.data.success) {
-    //     $noty = new Noty({
-    //         type: 'error',
-    //         layout: 'topRight',
-    //         text: response.data.error,
-    //         animation: {
-    //             speed: 500 // unavailable - no need
-    //         },
-    //     }).show();
-    //     setTimeout(function() {
-    //         $noty.close();
-    //     }, 5000);
-    //     $location.path('/eyatra/states')
-    //     $scope.$apply()
-    //     return;
-    // }
+            //     $noty = new Noty({
+            //         type: 'error',
+            //         layout: 'topRight',
+            //         text: response.data.error,
+            //         animation: {
+            //             speed: 500 // unavailable - no need
+            //         },
+            //     }).show();
+            //     setTimeout(function() {
+            //         $noty.close();
+            //     }, 5000);
+            //     $location.path('/eyatra/states')
+            //     $scope.$apply()
+            //     return;
+            // }
             console.log(response);
             self.state = response.data.state;
             self.country_list = response.data.country_list;

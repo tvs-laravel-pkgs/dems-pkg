@@ -285,6 +285,12 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-city-delete',
 				'display_name' => 'Delete',
 			],
+			5164 => [
+				'display_order' => 3,
+				'parent_id' => 5160,
+				'name' => 'eyatra-import-city',
+				'display_name' => 'Import City',
+			],
 
 			//MASTERS > DESIGNATIONS
 			5180 => [
@@ -681,6 +687,12 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-outlet-delete',
 				'display_name' => 'Delete',
 			],
+			5484 => [
+				'display_order' => 1,
+				'parent_id' => 5480,
+				'name' => 'eyatra-import-outlet',
+				'display_name' => 'Import Outlet',
+			],
 
 			//TRIPS
 			5500 => [
@@ -750,6 +762,12 @@ class EYatraPermissionSeeder extends Seeder {
 				'parent_id' => 5520,
 				'name' => 'eyatra-employee-delete',
 				'display_name' => 'Delete',
+			],
+			5524 => [
+				'display_order' => 1,
+				'parent_id' => 5520,
+				'name' => 'eyatra-import-employee',
+				'display_name' => 'Import Employee',
 			],
 
 			//AGENTS

@@ -4,6 +4,8 @@ app.component('eyatraEmployees', {
         // console.log('s');
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permissionadd = self.hasPermission('eyatra-employee-add');
+        self.permissionimport = self.hasPermission('eyatra-import-employee');
 
         var dataTable = $('#eyatra_employee_table').DataTable({
             stateSave: true,
@@ -595,6 +597,7 @@ app.component('eyatraJobsImportList', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-import-jobs');
 
         var dataTable = $('#eyatra_employee_import_table').DataTable({
             stateSave: true,
@@ -620,12 +623,11 @@ app.component('eyatraJobsImportList', {
                 data: function(d) {
                     d.from_date = $('.from').val();
                     d.to_date = $('.to').val();
-
+                    d.type = $('#type').val();
                 }
             },
 
             columns: [
-
                 { data: 'action', name: 'action', class: 'action' },
                 { data: 'import_date', searchable: false },
                 { data: 'type', name: 'type.name', searchable: true },
@@ -649,15 +651,26 @@ app.component('eyatraJobsImportList', {
             d.style.left = x.left + 'px';
         }, 500);
 
+        //Filter
+        $http.get(
+            get_import_jobs_form_data_url
+        ).then(function(response) {
+            self.import_type_list = response.data.import_type_list;
+        });
+
         var dataTableFilter = $('#eyatra_employee_import_table').dataTable();
 
         $('.from,.to').on('change', function() {
-
             dataTableFilter.fnFilter();
         });
+        $scope.onselectType = function(type) {
+            $("#type").val(type);
+            dataTable.fnFilter();
+        }
         $scope.resetForm = function() {
             $('.from').val(null);
             $('.to').val(null);
+            $('#type').val(null);
             dataTableFilter.fnFilter();
         }
         $scope.resetForm();

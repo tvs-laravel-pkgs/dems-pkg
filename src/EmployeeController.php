@@ -477,6 +477,11 @@ class EmployeeController extends Controller {
 		} else {
 			$end_date = null;
 		}
+		if (!empty($request->type)) {
+			$type = $request->type;
+		} else {
+			$type = null;
+		}
 		$import_data = ImportJob::select(
 			'import_jobs.*',
 			DB::raw('DATE_FORMAT(import_jobs.created_at,"%d-%m-%Y %h:%i %p") as import_date'),
@@ -491,6 +496,11 @@ class EmployeeController extends Controller {
 				if (!empty($start_date) && !empty($end_date)) {
 					$query->whereDate('import_jobs.created_at', '>=', $start_date)
 						->whereDate('import_jobs.created_at', '<=', $end_date);
+				}
+			})
+			->where(function ($query) use ($request, $type) {
+				if (!empty($type)) {
+					$query->where('import_jobs.type_id', '=', $type);
 				}
 			})
 			->where('import_jobs.created_by', '=', Auth::user()->id)
