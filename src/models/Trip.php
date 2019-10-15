@@ -280,7 +280,7 @@ class Trip extends Model {
 			'employee.user',
 			'employee.designation',
 			'employee.grade',
-			'employee.grade_details',
+			'employee.grade.gradeEligibility',
 			'purpose',
 			'status',
 		])
@@ -307,7 +307,7 @@ class Trip extends Model {
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
 		$current_date = strtotime(date('d-m-Y'));
-		$claim_date = $trip->employee->grade_details ? $trip->employee->grade_details->claim_active_days : 5;
+		$claim_date = $trip->employee->grade ? $trip->employee->grade->gradeEligibility->claim_active_days : 5;
 
 		$claim_last_date = strtotime("+" . $claim_date . " day", strtotime($trip->end_date));
 
@@ -1113,6 +1113,7 @@ class Trip extends Model {
 		)
 			->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->where('visits.trip_id', $trip_id)
+			->where('visits.booking_method_id', 3040)
 			->groupby('visits.id')
 			->get()
 			->toArray();
