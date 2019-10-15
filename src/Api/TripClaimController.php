@@ -211,7 +211,7 @@ class TripClaimController extends Controller {
 						$attachement = new Attachment;
 						$attachement->attachment_of_id = 3185;
 						$attachement->attachment_type_id = 3200;
-						$attachement->entity_id = $employee_claim->id;
+						$attachement->entity_id = $trip_id;
 						$attachement->name = $name;
 						$attachement->save();
 					}
