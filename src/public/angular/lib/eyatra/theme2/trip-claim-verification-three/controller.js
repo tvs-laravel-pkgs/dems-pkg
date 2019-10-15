@@ -119,6 +119,8 @@ app.component('eyatraTripClaimVerificationThreeView', {
         self.eyatra_trip_claim_verification_three_lodging_attachment_url = eyatra_trip_claim_verification_three_lodging_attachment_url;
         self.eyatra_trip_claim_verification_three_boarding_attachment_url = eyatra_trip_claim_verification_three_boarding_attachment_url;
         self.eyatra_trip_claim_verification_three_local_travel_attachment_url = eyatra_trip_claim_verification_three_local_travel_attachment_url;
+        self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
+        
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -148,6 +150,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
             self.boardings_total_amount = response.data.boardings_total_amount;
             self.local_travels_total_amount = response.data.local_travels_total_amount;
             self.total_amount = response.data.total_amount;
+            self.trip_justify = response.data.trip_justify;
             self.date = response.data.date;
             // console.log(response.data.trip.employee.trip_employee_claim.amount_to_pay);
             self.payment_mode_list = response.data.payment_mode_list;
@@ -173,14 +176,25 @@ app.component('eyatraTripClaimVerificationThreeView', {
 
         });
 
-        //TOOLTIP MOUSEOVER
-        $(document).on('mouseover', ".attachment_tooltip", function() {
+        // //TOOLTIP MOUSEOVER
+        // $(document).on('mouseover', ".attachment_tooltip", function() {
+        //     var $this = $(this);
+        //     $this.tooltip({
+        //         title: $this.attr('data-title'),
+        //         placement: "top"
+        //     });
+        //     $this.tooltip('show');
+        // });
+        $(document).on('mouseover', ".separate-file-attachment", function() {
             var $this = $(this);
-            $this.tooltip({
-                title: $this.attr('data-title'),
-                placement: "top"
-            });
-            $this.tooltip('show');
+
+            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
+                $this.tooltip({
+                    title: $this.children().children(".attachment-file-name").text(),
+                    placement: "top"
+                });
+                $this.tooltip('show');
+            }
         });
 
         $(".bottom-expand-btn").on('click', function() {

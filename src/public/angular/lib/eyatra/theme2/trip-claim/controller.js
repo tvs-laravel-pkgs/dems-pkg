@@ -1960,6 +1960,7 @@ app.component('eyatraTripClaimView', {
         self.eyatra_trip_claim_lodging_attachment_url = eyatra_trip_claim_lodging_attachment_url;
         self.eyatra_trip_claim_boarding_attachment_url = eyatra_trip_claim_boarding_attachment_url;
         self.eyatra_trip_claim_local_travel_attachment_url = eyatra_trip_claim_local_travel_attachment_url;
+        self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -1988,6 +1989,7 @@ app.component('eyatraTripClaimView', {
             self.boardings_total_amount = response.data.boardings_total_amount;
             self.local_travels_total_amount = response.data.local_travels_total_amount;
             self.total_amount = response.data.total_amount;
+            self.trip_justify = response.data.trip_justify;
             if (self.trip.advance_received) {
                 if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {
                     self.pay_to_employee = (parseInt(self.total_amount) - parseInt(self.trip.advance_received)).toFixed(2);
@@ -2008,13 +2010,16 @@ app.component('eyatraTripClaimView', {
         });
 
         //TOOLTIP MOUSEOVER
-        $(document).on('mouseover', ".attachment_tooltip", function() {
+        $(document).on('mouseover', ".separate-file-attachment", function() {
             var $this = $(this);
-            $this.tooltip({
-                title: $this.attr('data-title'),
-                placement: "top"
-            });
-            $this.tooltip('show');
+
+            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
+                $this.tooltip({
+                    title: $this.children().children(".attachment-file-name").text(),
+                    placement: "top"
+                });
+                $this.tooltip('show');
+            }
         });
 
         /* Pane Next Button */

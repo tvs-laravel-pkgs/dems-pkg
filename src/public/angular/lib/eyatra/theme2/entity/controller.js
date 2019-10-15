@@ -5,6 +5,7 @@ app.component('eyatraEntityList', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable;
         var id = '';
+        var add_url = '#!/eyatra/entity/add/' + self.id;
         var title = '';
         $http.get(
             eyatra_entity_list_data_url + '/' + $routeParams.entity_type_id
@@ -58,11 +59,55 @@ app.component('eyatraEntityList', {
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + response.data.entity_type.name + '</p><h3 class="title">' + response.data.entity_type.name + '</h3>');
             var add_url = '#!/eyatra/entity/add/' + self.id;
             if (self.id) {
-                $('.add_new_button').html(
-                    '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
-                    'Add New' +
-                    '</a>'
-                );
+                if ($routeParams.entity_type_id == '501') {
+                    $rootScope.title = 'Trip Purpose';
+                    self.trip_add_permission = self.hasPermission('eyatra-travel-purposes-add');
+                    console.log(self.trip_add_permission);
+                    if (self.trip_add_permission) {
+                        //alert('test');
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New1' +
+                            '</a>'
+                        );
+                    }
+                } else if ($routeParams.entity_type_id == '503') {
+                    $rootScope.title = 'Other Expense';
+                    self.other_add_permission = self.hasPermission('eyatra-local-travel-modes-add');
+                    console.log(self.other_add_permission);
+                    if (self.other_add_permission) {
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New' +
+                            '</a>'
+                        );
+                    }
+                } else if ($routeParams.entity_type_id == '506') {
+                    $rootScope.title = 'City Category';
+                    self.city_category_add_permission = self.hasPermission('eyatra-category-add');
+                    if (self.city_category_add_permission) {
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New' +
+                            '</a>'
+                        );
+                    }
+                } else if ($routeParams.entity_type_id == '512') {
+                    $rootScope.title = 'Petty Cash Expense Types';
+                    self.petty_cash_expense_add_permission = self.hasPermission('eyatra-pettycash-expense-types');
+                    if (self.petty_cash_expense_add_permission) {
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New' +
+                            '</a>'
+                        );
+                    }
+                }
+                /*   $('.add_new_button').html(
+                '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                'Add New' +
+                '</a>'
+                );*/
             }
 
             setTimeout(function() {
@@ -101,22 +146,7 @@ app.component('eyatraEntityList', {
                 });
             }
         });
-        if($routeParams.entity_type_id == '501')
-        {
-                $rootScope.title = 'Trip Purpose';
-        }
-        else if($routeParams.entity_type_id == '503')
-        {
-                $rootScope.title = 'Other Expense';
-        }
-        else if($routeParams.entity_type_id == '506')
-        {
-                $rootScope.title = 'City Category';
-        }
-        else if($routeParams.entity_type_id == '512')
-        {
-                $rootScope.title = 'Petty Cash Expense Types';
-        }
+
 
         $rootScope.loading = false;
     }

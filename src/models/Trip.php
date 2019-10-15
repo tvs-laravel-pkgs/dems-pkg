@@ -119,6 +119,10 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3182)->where('attachment_type_id', 3200);
 	}
 
+	public function google_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3185)->where('attachment_type_id', 3200);
+	}
+
 	public static function create($employee, $trip_number, $faker, $trip_status_id, $admin) {
 		$trip = new Trip();
 		$trip->employee_id = $employee->id;
@@ -1098,12 +1102,15 @@ class Trip extends Model {
 			'selfVisits.attachments',
 			'lodging_attachments',
 			'boarding_attachments',
+			'google_attachments',
+
 		])->find($trip_id);
 
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
 		}
+
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
@@ -1169,6 +1176,13 @@ class Trip extends Model {
 		$data['success'] = true;
 
 		$data['trip'] = $trip;
+		$data['trip_justify'] = 0;
+
+		if ($trip->employee->tripEmployeeClaim) {
+			if (($trip->employee->tripEmployeeClaim->is_justify_my_trip == 1) || ($trip->employee->tripEmployeeClaim->remarks != '')) {
+				$data['trip_justify'] = 1;
+			}
+		}
 
 		return response()->json($data);
 	}
@@ -1839,13 +1853,17 @@ class Trip extends Model {
 				$item_images = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
 				Storage::makeDirectory($item_images, 0777);
 				if ($request->hasfile('google_attachments')) {
-					foreach ($request->file('google_attachments') as $image) {
-						$name = $image->getClientOriginalName();
+
+					foreach ($request->file('google_attachments') as $key => $attachement) {
+						$value = rand(1, 100);
+						$image = $attachement;
+						$extension = $image->getClientOriginalExtension();
+						$name = $trip->id . 'google_attachment' . $value . '.' . $extension;
 						$image->move(storage_path('app/public/trip/ey_employee_claims/google_attachments/'), $name);
 						$attachement = new Attachment;
 						$attachement->attachment_of_id = 3185;
 						$attachement->attachment_type_id = 3200;
-						$attachement->entity_id = $employee_claim->id;
+						$attachement->entity_id = $trip->id;
 						$attachement->name = $name;
 						$attachement->save();
 					}
