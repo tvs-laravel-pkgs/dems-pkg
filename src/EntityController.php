@@ -5,6 +5,7 @@ use App\EntityType;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Entity;
@@ -49,15 +50,33 @@ class EntityController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
-
+				$action='';
+				if($entity->entity_type_id == 501)
+				{
+					$edit_class="visibility:hidden";
+					if(Entrust::can('eyatra-travel-purposes-edit'))
+					{
+						$edit_class= "";
+						$action .='<a style='.$edit_class.' href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
+				
+					}
+					$delete_class="visibility:hidden";
+					if(Entrust::can('eyatra-travel-purposes-delete'))
+					{
+						$delete_class= "";
+					}
+				}
+				
 				if ($entity->name == 'Local Conveyance') {
 					return '';
 				} else {
-					return '
-				<a href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
+					return $action;
+
+				/*<a style='.$edit_class.' href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
+				 <a style='.$delete_class.' href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';*/
 				}
 
 			})
