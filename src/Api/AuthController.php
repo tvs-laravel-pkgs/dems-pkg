@@ -34,6 +34,7 @@ class AuthController extends Controller {
 				'employee_details.bankDetail',
 				'employee_details.chequeDetail',
 				'employee_details.walletDetail',
+				'employee_details.walletDetail.type',
 				'employee_details.sbu',
 				'employee_details.sbu.lob',
 				'roles',
