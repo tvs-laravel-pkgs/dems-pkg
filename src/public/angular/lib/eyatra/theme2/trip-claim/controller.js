@@ -2010,12 +2010,12 @@ app.component('eyatraTripClaimView', {
         });
 
         //TOOLTIP MOUSEOVER
-        $(document).on('mouseover', ".attachment_tooltip", function() {
+        $(document).on('mouseover', ".separate-file-attachment", function() {
             var $this = $(this);
 
-            if (this.offsetWidth < this.scrollWidth && !$this.attr('title')) {
+            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
                 $this.tooltip({
-                    title: $this.children(".attachment-file-name").text(),
+                    title: $this.children().children(".attachment-file-name").text(),
                     placement: "top"
                 });
                 $this.tooltip('show');
