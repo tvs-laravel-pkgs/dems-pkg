@@ -677,7 +677,7 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
-		$trip->status_id = 3062;
+		$trip->status_id = 3032;
 		$trip->save();
 
 		$activity['entity_id'] = $trip_id;

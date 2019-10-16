@@ -114,6 +114,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Payment Pending for Employee',
 				'config_type_id' => 501,
 			],
+			3032 => [
+				'name' => 'Cancelled',
+				'config_type_id' => 501,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [
