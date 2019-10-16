@@ -67,7 +67,7 @@ app.component('eyatraEntityList', {
                         //alert('test');
                         $('.add_new_button').html(
                             '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
-                            'Add New1' +
+                            'Add New' +
                             '</a>'
                         );
                     }

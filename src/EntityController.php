@@ -50,34 +50,55 @@ class EntityController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
-				$action='';
-				if($entity->entity_type_id == 501)
-				{
-					$edit_class="visibility:hidden";
-					if(Entrust::can('eyatra-travel-purposes-edit'))
-					{
-						$edit_class= "";
-						$action .='<a style='.$edit_class.' href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
-				
-					}
-					$delete_class="visibility:hidden";
-					if(Entrust::can('eyatra-travel-purposes-delete'))
-					{
-						$delete_class= "";
-					}
-				}
-				
-				if ($entity->name == 'Local Conveyance') {
-					return '';
-				} else {
-					return $action;
+				$action = '';
 
-				/*<a style='.$edit_class.' href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				 <a style='.$delete_class.' href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';*/
+				if ($entity->entity_type_id == 501) {
+					$edit_class = "visibility:hidden";
+					if (Entrust::can('eyatra-travel-purposes-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-travel-purposes-delete')) {
+						$delete_class = "";
+					}
+				} elseif ($entity->entity_type_id == 503) {
+					if (Entrust::can('eyatra-local-travel-modes-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-local-travel-modes-delete')) {
+						$delete_class = "";
+					}
+				} elseif ($entity->entity_type_id == 512) {
+					if (Entrust::can('eyatra-pettycash-expense-types-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-pettycash-expense-types-delete')) {
+						$delete_class = "";
+					}
+
+				} elseif ($entity->entity_type_id == 506) {
+					if (Entrust::can('eyatra-category-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-category-delete')) {
+						$delete_class = "";
+					}
+
 				}
+
+				$action .= '<a style=' . $edit_class . ' href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
+
+				$action .= '<a style=' . $delete_class . ' href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
+
+				return $action;
 
 			})
 			->addColumn('status', function ($entity) {
