@@ -730,6 +730,20 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Import Outlet',
 			],
 
+			//MASTERS > ALTERNATE APPROVAL
+			5490 => [
+				'display_order' => 1,
+				'parent_id' => 5020,
+				'name' => 'eyatra-alternate-approval',
+				'display_name' => 'Alternate Approve',
+			],
+			5491 => [
+				'display_order' => 1,
+				'parent_id' => 5490,
+				'name' => 'eyatra-alternate-approval-edit',
+				'display_name' => 'Edit',
+			],
+
 			//TRIPS
 			5500 => [
 				'display_order' => 1,

@@ -4,6 +4,7 @@ app.component('eyatraDesignation', {
         //alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-designation-add');
         var dataTable = $('#eyatra_designation_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate,
@@ -42,11 +43,14 @@ app.component('eyatraDesignation', {
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Designations</p><h3 class="title">Designations</h3>');
         //$('.page-header-content .display-inline-block .data-table-title').html('Designations');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-designation-add\')">' +
-            'Add New' +
-            '</a>'
-        );
+        if (self.permission == true) {
+            $('.add_new_button').html(
+                '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary">' +
+                'Add New' +
+                '</a>'
+            );
+        }
+
         $scope.deleteDesignationConfirm = function(designation_id) {
             $("#delete_designation_id").val(designation_id);
         }

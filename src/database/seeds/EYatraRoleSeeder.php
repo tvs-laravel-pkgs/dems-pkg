@@ -52,6 +52,9 @@ class EYatraRoleSeeder extends Seeder {
 					//MASTERS > OUTLETS
 					5480, 5481, 5482, 5483, 5484,
 
+					//MASTERS > ALTERNATE APPROVAL
+					5490, 5491,
+
 					//MASTERS > EMPLOYEES
 					5520, 5521, 5522, 5523, 5524,
 

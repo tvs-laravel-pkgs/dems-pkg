@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Designation;
 use Validator;
@@ -32,16 +33,27 @@ class DesignationController extends Controller {
 
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/designation/edit/' . $designations->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
 
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-designation-edit')) {
+					$edit_class = "";
+				}
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-designation-delete')) {
+					$delete_class = "";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/designation/edit/' . $designations->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
+				</a> ';
+
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_state"
 				onclick="angular.element(this).scope().deleteDesignationConfirm(' . $designations->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
+				return $action;
 			})
 			->addColumn('status', function ($designations) {
 				if ($designations->deleted_at) {
