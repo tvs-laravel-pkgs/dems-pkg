@@ -291,7 +291,6 @@ class TripClaimVerificationThreeController extends Controller {
 			$employee_claim->payment_id = $payment->id;
 			$employee_claim->save();
 
-			dd();
 			DB::commit();
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
