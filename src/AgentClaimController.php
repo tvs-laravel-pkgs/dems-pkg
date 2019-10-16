@@ -444,7 +444,6 @@ class AgentClaimController extends Controller {
 		return response()->json($this->data);
 	}
 	public function payAgentClaimRequest(Request $r) {
-
 		$agent_claim = AgentClaim::find($r->agent_claim_id);
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim Request not found']]);
@@ -460,6 +459,10 @@ class AgentClaimController extends Controller {
 		// $payment->payment_mode_id = $agent_claim->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
+
+		$agent_claim->payment_id = $payment->id;
+		$agent_claim->save();
+
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
 		$activity['details'] = "Claim is paid by Cashier";
