@@ -1520,7 +1520,7 @@ class Trip extends Model {
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
 				$employee_claim->employee_id = Auth::user()->entity_id;
-				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
+				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {
@@ -1662,7 +1662,7 @@ class Trip extends Model {
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
 				$employee_claim->employee_id = Auth::user()->entity_id;
-				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
+				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {
@@ -1766,7 +1766,7 @@ class Trip extends Model {
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
 				$employee_claim->employee_id = Auth::user()->entity_id;
-				$employee_claim->status_id = 3228; //CLAIM INPROGRESS
+				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {

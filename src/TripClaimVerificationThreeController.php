@@ -11,6 +11,7 @@ use Uitoux\EYatra\LocalTravel;
 use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
+use Validator;
 use Yajra\Datatables\Datatables;
 
 class TripClaimVerificationThreeController extends Controller {
@@ -247,15 +248,32 @@ class TripClaimVerificationThreeController extends Controller {
 		// dd($r->all());
 		try {
 			DB::beginTransaction();
+			$error_messages = [
+				'reference_number.unique' => "Reference Number is already taken",
+			];
+
+			$validator = Validator::make($r->all(), [
+				'reference_number' => [
+					'required:true',
+					'unique:payments,reference_number',
+
+				],
+			], $error_messages);
+
+			if ($validator->fails()) {
+				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+
 			$trip = Trip::find($r->trip_id);
 			if (!$trip) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
+
 			$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
 			if (!$employee_claim) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
-			$employee_claim->status_id = 3225; //PAID
+			$employee_claim->status_id = 3026; //PAID
 			$employee_claim->save();
 
 			$trip->status_id = 3026; //PAID
@@ -265,30 +283,15 @@ class TripClaimVerificationThreeController extends Controller {
 			$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
 			$payment->fill($r->all());
 			$payment->date = date('Y-m-d', strtotime($r->date));
-			$payment->payment_of_id = 3252;
+			$payment->payment_of_id = 3251;
 			$payment->entity_id = $trip->id;
 			$payment->created_by = Auth::user()->id;
 			$payment->save();
 
-			//BANK DETAIL SAVE
-			if ($r->bank_name) {
-				$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
-				$bank_detail->fill($r->all());
-				$bank_detail->detail_of_id = 3243;
-				$bank_detail->entity_id = $trip->id;
-				$bank_detail->account_type_id = 3252;
-				$bank_detail->save();
-			}
+			$employee_claim->payment_id = $payment->id;
+			$employee_claim->save();
 
-			//WALLET SAVE
-			if ($r->type_id) {
-				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
-				$wallet_detail->fill($r->all());
-				$wallet_detail->wallet_of_id = 3252;
-				$wallet_detail->entity_id = $trip->id;
-				$wallet_detail->save();
-			}
-
+			dd();
 			DB::commit();
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {

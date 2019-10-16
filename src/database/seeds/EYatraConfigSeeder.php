@@ -118,6 +118,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Cancelled',
 				'config_type_id' => 501,
 			],
+			3033 => [
+				'name' => 'Claim Inprogress',
+				'config_type_id' => 501,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [
