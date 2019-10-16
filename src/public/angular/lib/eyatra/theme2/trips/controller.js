@@ -3,6 +3,7 @@ app.component('eyatraTrips', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('trip-add');
         $http.get(
             trip_filter_data_url
         ).then(function(response) {
@@ -573,7 +574,7 @@ app.component('eyatraTripForm', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text:res.message,
+                                text: res.message,
                                 // text: 'Trip saved successfully',
                                 animation: {
                                     speed: 500 // unavailable - no need
