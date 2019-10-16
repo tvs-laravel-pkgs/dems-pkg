@@ -282,6 +282,9 @@ class Trip extends Model {
 			'visits.managerVerificationStatus',
 			'employee',
 			'employee.user',
+			'employee.manager',
+			'employee.manager.user',
+			'employee.user',
 			'employee.designation',
 			'employee.grade',
 			'employee.grade.gradeEligibility',
@@ -651,6 +654,12 @@ class Trip extends Model {
 		if (!$status_exist) {
 			return response()->json(['success' => false, 'errors' => ['Manager Approved so this trip cannot be deleted']]);
 		}
+
+		$status_exist = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
+		if ($status_exist) {
+			return response()->json(['success' => false, 'errors' => ['Advance Request Approved so this trip cannot be deleted']]);
+		}
+
 		$trip = Trip::where('id', $trip_id)->first();
 
 		$activity['entity_id'] = $trip->id;
