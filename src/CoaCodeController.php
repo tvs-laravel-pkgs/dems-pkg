@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\CoaCode;
 use Uitoux\EYatra\Entity;
@@ -111,17 +112,44 @@ class CoaCodeController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/coa-code/edit/' . $coacode->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/coa-code/view/' . $coacode->id . '">
+
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-coa-codes-edit')) {
+					$edit_class = "";
+				}
+
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-coa-codes-delete')) {
+					$delete_class = "";
+				}
+
+				$action = '';
+
+				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/coa-code/edit/' . $coacode->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+
+				$action .= '<a href="#!/eyatra/coa-code/view/' . $coacode->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_coa_code"
+				</a> ';
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_coa_code"
 				onclick="angular.element(this).scope().deleteCoaCodeConfirm(' . $coacode->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
-                </a>';
+                </a> ';
+
+				return $action;
+
+				// return '
+				// <a href="#!/eyatra/coa-code/edit/' . $coacode->id . '">
+				// 	<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
+				// </a>
+				// <a href="#!/eyatra/coa-code/view/' . $coacode->id . '">
+				// 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				// </a>
+				// <a href="javascript:;" data-toggle="modal" data-target="#delete_coa_code"
+				// onclick="angular.element(this).scope().deleteCoaCodeConfirm(' . $coacode->id . ')" dusk = "delete-btn" title="Delete">
+				//             <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
+				//             </a>';
 
 			})
 			->addColumn('status', function ($coacode) {

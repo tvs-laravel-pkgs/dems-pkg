@@ -4,6 +4,7 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
@@ -50,12 +51,25 @@ class TravelModeController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-travel-modes-edit')) {
+					$edit_class = "";
+				}
 
-				<a href="#!/eyatra/travel-mode/edit/' . $entity->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_travel_mode" onclick="angular.element(this).scope().deleteTravelMode(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-travel-modes-delete')) {
+					$delete_class = "";
+				}
+
+				$action = '';
+
+				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/travel-mode/edit/' . $entity->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+
+				$action .= '<a style="' . $delete_class . '" href="javascript:;"  data-toggle="modal" data-target="#delete_travel_mode" onclick="angular.element(this).scope().deleteTravelMode(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
+
+				return $action;
 
 			})
 			->addColumn('status', function ($entity) {

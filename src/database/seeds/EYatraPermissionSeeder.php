@@ -351,136 +351,154 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-rejection',
 				'display_name' => 'Rejection',
 			],
-
-			//MASTERS > REJECTION REASONS > TRIP REQUEST REJECTION REASONS
-			5240 => [
+			5221 => [
 				'display_order' => 1,
 				'parent_id' => 5220,
-				'name' => 'eyatra-trip-request-reject',
-				'display_name' => 'Trip Request Reject',
-			],
-			5241 => [
-				'display_order' => 1,
-				'parent_id' => 5240,
-				'name' => 'eyatra-trip-request-reject-add',
+				'name' => 'eyatra-rejection-add',
 				'display_name' => 'Add',
 			],
-			5242 => [
+			5222 => [
 				'display_order' => 2,
-				'parent_id' => 5240,
-				'name' => 'eyatra-trip-request-reject-edit',
+				'parent_id' => 5220,
+				'name' => 'eyatra-rejection-edit',
 				'display_name' => 'Edit',
 			],
-			5243 => [
+			5223 => [
 				'display_order' => 3,
-				'parent_id' => 5240,
-				'name' => 'eyatra-trip-request-reject-delete',
+				'parent_id' => 5220,
+				'name' => 'eyatra-rejection-delete',
 				'display_name' => 'Delete',
 			],
 
-			//MASTERS > REJECTION REASONS > TRIP ADVANCE REJECTION REASONS
-			5260 => [
-				'display_order' => 1,
-				'parent_id' => 5220,
-				'name' => 'eyatra-trip-advance-reject',
-				'display_name' => 'Trip Advance Reject',
-			],
-			5261 => [
-				'display_order' => 1,
-				'parent_id' => 5260,
-				'name' => 'eyatra-trip-advance-reject-add',
-				'display_name' => 'Add',
-			],
-			5262 => [
-				'display_order' => 2,
-				'parent_id' => 5260,
-				'name' => 'eyatra-trip-advance-reject-edit',
-				'display_name' => 'Edit',
-			],
-			5263 => [
-				'display_order' => 3,
-				'parent_id' => 5260,
-				'name' => 'eyatra-trip-advance-reject-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > REJECTION REASONS > TRIP REQUEST REJECTION REASONS
+			// 5240 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5220,
+			// 	'name' => 'eyatra-trip-request-reject',
+			// 	'display_name' => 'Trip Request Reject',
+			// ],
+			// 5241 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5240,
+			// 	'name' => 'eyatra-trip-request-reject-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5242 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5240,
+			// 	'name' => 'eyatra-trip-request-reject-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5243 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5240,
+			// 	'name' => 'eyatra-trip-request-reject-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
-			//MASTERS > REJECTION REASONS > TRIP CLAIM REJECTION REASONS
-			5280 => [
-				'display_order' => 1,
-				'parent_id' => 5220,
-				'name' => 'eyatra-trip-claim-reject',
-				'display_name' => 'Trip Claim Reject',
-			],
-			5281 => [
-				'display_order' => 1,
-				'parent_id' => 5280,
-				'name' => 'eyatra-trip-claim-reject-add',
-				'display_name' => 'Add',
-			],
-			5282 => [
-				'display_order' => 2,
-				'parent_id' => 5280,
-				'name' => 'eyatra-trip-claim-reject-edit',
-				'display_name' => 'Edit',
-			],
-			5283 => [
-				'display_order' => 3,
-				'parent_id' => 5280,
-				'name' => 'eyatra-trip-claim-reject-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > REJECTION REASONS > TRIP ADVANCE REJECTION REASONS
+			// 5260 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5220,
+			// 	'name' => 'eyatra-trip-advance-reject',
+			// 	'display_name' => 'Trip Advance Reject',
+			// ],
+			// 5261 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5260,
+			// 	'name' => 'eyatra-trip-advance-reject-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5262 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5260,
+			// 	'name' => 'eyatra-trip-advance-reject-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5263 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5260,
+			// 	'name' => 'eyatra-trip-advance-reject-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
-			//MASTERS > REJECTION REASONS > AGENT CLAIM REJECTION REASONS
-			5300 => [
-				'display_order' => 1,
-				'parent_id' => 5220,
-				'name' => 'eyatra-agent-claim-reject',
-				'display_name' => 'Trip Claim Reject',
-			],
-			5301 => [
-				'display_order' => 1,
-				'parent_id' => 5300,
-				'name' => 'eyatra-agent-claim-reject-add',
-				'display_name' => 'Add',
-			],
-			5302 => [
-				'display_order' => 2,
-				'parent_id' => 5300,
-				'name' => 'eyatra-agent-claim-reject-edit',
-				'display_name' => 'Edit',
-			],
-			5303 => [
-				'display_order' => 3,
-				'parent_id' => 5300,
-				'name' => 'eyatra-agent-claim-reject-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > REJECTION REASONS > TRIP CLAIM REJECTION REASONS
+			// 5280 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5220,
+			// 	'name' => 'eyatra-trip-claim-reject',
+			// 	'display_name' => 'Trip Claim Reject',
+			// ],
+			// 5281 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5280,
+			// 	'name' => 'eyatra-trip-claim-reject-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5282 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5280,
+			// 	'name' => 'eyatra-trip-claim-reject-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5283 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5280,
+			// 	'name' => 'eyatra-trip-claim-reject-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
-			//MASTERS > REJECTION REASONS > VOUCHER CLAIM REJECTION REASONS
-			5320 => [
-				'display_order' => 1,
-				'parent_id' => 5220,
-				'name' => 'eyatra-voucher-claim-reject',
-				'display_name' => 'Voucher Claim Reject',
-			],
-			5321 => [
-				'display_order' => 1,
-				'parent_id' => 5320,
-				'name' => 'eyatra-voucher-claim-reject-add',
-				'display_name' => 'Add',
-			],
-			5322 => [
-				'display_order' => 2,
-				'parent_id' => 5320,
-				'name' => 'eyatra-voucher-claim-reject-edit',
-				'display_name' => 'Edit',
-			],
-			5323 => [
-				'display_order' => 3,
-				'parent_id' => 5320,
-				'name' => 'eyatra-voucher-claim-reject-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > REJECTION REASONS > AGENT CLAIM REJECTION REASONS
+			// 5300 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5220,
+			// 	'name' => 'eyatra-agent-claim-reject',
+			// 	'display_name' => 'Trip Claim Reject',
+			// ],
+			// 5301 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5300,
+			// 	'name' => 'eyatra-agent-claim-reject-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5302 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5300,
+			// 	'name' => 'eyatra-agent-claim-reject-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5303 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5300,
+			// 	'name' => 'eyatra-agent-claim-reject-delete',
+			// 	'display_name' => 'Delete',
+			// ],
+
+			// //MASTERS > REJECTION REASONS > VOUCHER CLAIM REJECTION REASONS
+			// 5320 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5220,
+			// 	'name' => 'eyatra-voucher-claim-reject',
+			// 	'display_name' => 'Voucher Claim Reject',
+			// ],
+			// 5321 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5320,
+			// 	'name' => 'eyatra-voucher-claim-reject-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5322 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5320,
+			// 	'name' => 'eyatra-voucher-claim-reject-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5323 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5320,
+			// 	'name' => 'eyatra-voucher-claim-reject-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
 			//MASTERS > COA CATEGORIES
 			5340 => [
@@ -489,136 +507,154 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-coa-categories',
 				'display_name' => 'COA Categories',
 			],
-
-			//MASTERS > COA CATEGORIES > ACCOUNT TYPES
-			5360 => [
+			5341 => [
 				'display_order' => 1,
 				'parent_id' => 5340,
-				'name' => 'eyatra-coa-account-types',
-				'display_name' => 'COA Account Types',
-			],
-			5361 => [
-				'display_order' => 1,
-				'parent_id' => 5360,
-				'name' => 'eyatra-coa-account-types-add',
+				'name' => 'eyatra-coa-categories-add',
 				'display_name' => 'Add',
 			],
-			5362 => [
-				'display_order' => 2,
-				'parent_id' => 5360,
-				'name' => 'eyatra-coa-account-types-edit',
+			5342 => [
+				'display_order' => 1,
+				'parent_id' => 5340,
+				'name' => 'eyatra-coa-categories-edit',
 				'display_name' => 'Edit',
 			],
-			5363 => [
-				'display_order' => 3,
-				'parent_id' => 5360,
-				'name' => 'eyatra-coa-account-types-delete',
+			5343 => [
+				'display_order' => 1,
+				'parent_id' => 5340,
+				'name' => 'eyatra-coa-categories-delete',
 				'display_name' => 'Delete',
 			],
 
-			//MASTERS > COA CATEGORIES > BALANCE TYPES
-			5380 => [
-				'display_order' => 1,
-				'parent_id' => 5340,
-				'name' => 'eyatra-coa-balance-types',
-				'display_name' => 'COA Balance Types',
-			],
-			5381 => [
-				'display_order' => 1,
-				'parent_id' => 5380,
-				'name' => 'eyatra-coa-balance-types-add',
-				'display_name' => 'Add',
-			],
-			5382 => [
-				'display_order' => 2,
-				'parent_id' => 5380,
-				'name' => 'eyatra-coa-balance-types-edit',
-				'display_name' => 'Edit',
-			],
-			5383 => [
-				'display_order' => 3,
-				'parent_id' => 5380,
-				'name' => 'eyatra-coa-balance-types-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > COA CATEGORIES > ACCOUNT TYPES
+			// 5360 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5340,
+			// 	'name' => 'eyatra-coa-account-types',
+			// 	'display_name' => 'COA Account Types',
+			// ],
+			// 5361 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5360,
+			// 	'name' => 'eyatra-coa-account-types-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5362 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5360,
+			// 	'name' => 'eyatra-coa-account-types-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5363 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5360,
+			// 	'name' => 'eyatra-coa-account-types-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
-			//MASTERS > COA CATEGORIES > FINAL STATEMENT
-			5400 => [
-				'display_order' => 1,
-				'parent_id' => 5340,
-				'name' => 'eyatra-coa-final-statement',
-				'display_name' => 'COA Final Statement',
-			],
-			5401 => [
-				'display_order' => 1,
-				'parent_id' => 5400,
-				'name' => 'eyatra-coa-final-statement-add',
-				'display_name' => 'Add',
-			],
-			5402 => [
-				'display_order' => 2,
-				'parent_id' => 5400,
-				'name' => 'eyatra-coa-final-statement-edit',
-				'display_name' => 'Edit',
-			],
-			5403 => [
-				'display_order' => 3,
-				'parent_id' => 5400,
-				'name' => 'eyatra-coa-final-statement-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > COA CATEGORIES > BALANCE TYPES
+			// 5380 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5340,
+			// 	'name' => 'eyatra-coa-balance-types',
+			// 	'display_name' => 'COA Balance Types',
+			// ],
+			// 5381 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5380,
+			// 	'name' => 'eyatra-coa-balance-types-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5382 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5380,
+			// 	'name' => 'eyatra-coa-balance-types-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5383 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5380,
+			// 	'name' => 'eyatra-coa-balance-types-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
-			//MASTERS > COA CATEGORIES > GROUPS
-			5420 => [
-				'display_order' => 1,
-				'parent_id' => 5340,
-				'name' => 'eyatra-coa-groups',
-				'display_name' => 'COA Groups',
-			],
-			5421 => [
-				'display_order' => 1,
-				'parent_id' => 5420,
-				'name' => 'eyatra-coa-groups-add',
-				'display_name' => 'Add',
-			],
-			5422 => [
-				'display_order' => 2,
-				'parent_id' => 5420,
-				'name' => 'eyatra-coa-groups-edit',
-				'display_name' => 'Edit',
-			],
-			5423 => [
-				'display_order' => 3,
-				'parent_id' => 5420,
-				'name' => 'eyatra-coa-groups-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > COA CATEGORIES > FINAL STATEMENT
+			// 5400 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5340,
+			// 	'name' => 'eyatra-coa-final-statement',
+			// 	'display_name' => 'COA Final Statement',
+			// ],
+			// 5401 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5400,
+			// 	'name' => 'eyatra-coa-final-statement-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5402 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5400,
+			// 	'name' => 'eyatra-coa-final-statement-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5403 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5400,
+			// 	'name' => 'eyatra-coa-final-statement-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
-			//MASTERS > COA CATEGORIES > SUB GROUPS
-			5440 => [
-				'display_order' => 1,
-				'parent_id' => 5340,
-				'name' => 'eyatra-coa-sub-groups',
-				'display_name' => 'COA Groups',
-			],
-			5441 => [
-				'display_order' => 1,
-				'parent_id' => 5440,
-				'name' => 'eyatra-coa-sub-groups-add',
-				'display_name' => 'Add',
-			],
-			5442 => [
-				'display_order' => 2,
-				'parent_id' => 5440,
-				'name' => 'eyatra-coa-sub-groups-edit',
-				'display_name' => 'Edit',
-			],
-			5443 => [
-				'display_order' => 3,
-				'parent_id' => 5440,
-				'name' => 'eyatra-coa-sub-groups-delete',
-				'display_name' => 'Delete',
-			],
+			// //MASTERS > COA CATEGORIES > GROUPS
+			// 5420 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5340,
+			// 	'name' => 'eyatra-coa-groups',
+			// 	'display_name' => 'COA Groups',
+			// ],
+			// 5421 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5420,
+			// 	'name' => 'eyatra-coa-groups-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5422 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5420,
+			// 	'name' => 'eyatra-coa-groups-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5423 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5420,
+			// 	'name' => 'eyatra-coa-groups-delete',
+			// 	'display_name' => 'Delete',
+			// ],
+
+			// //MASTERS > COA CATEGORIES > SUB GROUPS
+			// 5440 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5340,
+			// 	'name' => 'eyatra-coa-sub-groups',
+			// 	'display_name' => 'COA Groups',
+			// ],
+			// 5441 => [
+			// 	'display_order' => 1,
+			// 	'parent_id' => 5440,
+			// 	'name' => 'eyatra-coa-sub-groups-add',
+			// 	'display_name' => 'Add',
+			// ],
+			// 5442 => [
+			// 	'display_order' => 2,
+			// 	'parent_id' => 5440,
+			// 	'name' => 'eyatra-coa-sub-groups-edit',
+			// 	'display_name' => 'Edit',
+			// ],
+			// 5443 => [
+			// 	'display_order' => 3,
+			// 	'parent_id' => 5440,
+			// 	'name' => 'eyatra-coa-sub-groups-delete',
+			// 	'display_name' => 'Delete',
+			// ],
 
 			//MASTERS > COA CODES
 			5460 => [

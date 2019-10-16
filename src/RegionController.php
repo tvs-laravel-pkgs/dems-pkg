@@ -6,6 +6,7 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
@@ -53,17 +54,34 @@ class RegionController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/region/edit/' . $region->id . '">
+
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-region-edit')) {
+					$edit_class = "";
+				}
+
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-region-delete')) {
+					$delete_class = "";
+				}
+
+				$action = '';
+
+				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/region/edit/' . $region->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/region/view/' . $region->id . '">
+				</a> ';
+
+				$action .= '<a href="#!/eyatra/region/view/' . $region->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_region"
+				</a> ';
+
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_region"
 				onclick="angular.element(this).scope().deleteRegion(' . $region->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-                </a>';
+                </a> ';
+
+				return $action;
 
 			})
 			->addColumn('status', function ($region) {

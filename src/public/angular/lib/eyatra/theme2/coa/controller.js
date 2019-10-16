@@ -52,11 +52,15 @@ app.component('coaDataList', {
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'COA Sub Masters' + '</p><h3 class="title">' + 'COA Sub Masters' + '</h3>');
         var add_url = '#!/eyatra/coa-sub-master/add/';
-        $('.add_new_button').html(
-            '<a href=' + add_url + ' type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-coa-sub-groups-add\')">' +
-            'Add New' +
-            '</a>'
-        );
+        self.trip_add_permission = self.hasPermission('eyatra-coa-categories-add');
+        if (self.trip_add_permission) {
+            $('.add_new_button').html(
+                '<a href=' + add_url + ' type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-coa-sub-groups-add\')">' +
+                'Add New' +
+                '</a>'
+            );
+        }
+
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('coa_data_table');
