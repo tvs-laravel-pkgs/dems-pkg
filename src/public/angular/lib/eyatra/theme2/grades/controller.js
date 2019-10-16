@@ -32,7 +32,7 @@ app.component('eyatraGrades', {
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'text-left' },
                 { data: 'grade_name', name: 'entities.name', searchable: true },
                 { data: 'grade_eligiblity', searchable: false },
                 { data: 'expense_count', searchable: false },

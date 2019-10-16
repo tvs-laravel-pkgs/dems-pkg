@@ -8,6 +8,7 @@ use Auth;
 use Carbon\Carbon;
 use DateTime;
 use DB;
+use Entrust;
 use File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -137,18 +138,28 @@ class EmployeeController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 
-				return '
-				<a href="#!/eyatra/employee/edit/' . $employee->id . '">
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-employee-edit')) {
+					$edit_class = "";
+				}
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-employee-delete')) {
+					$delete_class = "eyatra-employee-delete";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/employee/edit/' . $employee->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/employee/view/' . $employee->id . '">
+				</a> ';
+				$action .= '<a href="#!/eyatra/employee/view/' . $employee->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_emp"
+				</a> ';
+				$action .= '<a style="' . $delete_class . '"href="javascript:;" data-toggle="modal" data-target="#delete_emp"
 				onclick="angular.element(this).scope().deleteEmployee(' . $employee->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
+				return $action;
 			})
 			->addColumn('status', function ($agent) {
 				if ($agent->status == 'Inactive') {

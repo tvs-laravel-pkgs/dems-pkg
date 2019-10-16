@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
 use Yajra\Datatables\Datatables;
@@ -81,8 +82,14 @@ class AlternateApproveController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
+
+				$edit_calss = "visibility:hidden";
+				if (Entrust::can('eyatra-alternate-approval-edit')) {
+					$edit_calss = "";
+				}
+
 				return '
-				<a href="#!/eyatra/alternate-approve/edit/' . $alternate_approve->id . '">
+				<a style="' . $edit_calss . '" href="#!/eyatra/alternate-approve/edit/' . $alternate_approve->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a>'
 				;

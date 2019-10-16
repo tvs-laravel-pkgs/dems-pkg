@@ -218,6 +218,7 @@ app.component('eyatraRoleList', {
     controller: function($scope, $http, HelperService) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-role-add');
         var dataTable = $('#list_table').DataTable({
             "dom": dom_structure_separate,
             "language": {
@@ -239,7 +240,7 @@ app.component('eyatraRoleList', {
                 data: function(d) {}
             },
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'action' },
                 { data: 'role', name: 'roles.display_name', searchable: true },
                 { data: 'description', searchable: false },
                 { data: 'status', name: 'status', searchable: false },
@@ -251,13 +252,13 @@ app.component('eyatraRoleList', {
         $('.on_focus').focus();
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Roles</p><h3 class="title">Roles</h3>');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/master/roles/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-role-add\')">' +
-            'Add New' +
-            '</a>'
-        );
-
-
+        if (self.permission == true) {
+            $('.add_new_button').html(
+                '<a href="#!/eyatra/master/roles/add" type="button" class="btn btn-secondary">' +
+                'Add New' +
+                '</a>'
+            );
+        }
     }
 });
 

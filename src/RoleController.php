@@ -6,6 +6,7 @@ use App\Permission;
 use App\Role;
 use Auth;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Validator;
@@ -22,7 +23,11 @@ class RoleController extends Controller {
 					$img1 = asset('public/img/content/yatra/table/edit.svg');
 					$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 
-					return '<a href="#!/eyatra/master/roles/edit/' . $roles->id . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
+					$edit_class = "visibility:hidden";
+					if (Entrust::can('eyatra-role-edit')) {
+						$edit_class = "";
+					}
+					return '<a style="' . $edit_class . '" href="#!/eyatra/master/roles/edit/' . $roles->id . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
 					// return '<a href="' . route('editRolesAngular', ['role_id' => $roles->id]) . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
 				} else {
 					return '-';
