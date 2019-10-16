@@ -77,7 +77,7 @@ class EYatraRoleSeeder extends Seeder {
 					5140, 5141, 5142, 5143,
 
 					//MASTERS > CITIES
-					5160, 5161, 5162, 5163,5164
+					5160, 5161, 5162, 5163, 5164,
 
 					//MASTERS > DESIGNATIONS
 					5180, 5181, 5182, 5183,
