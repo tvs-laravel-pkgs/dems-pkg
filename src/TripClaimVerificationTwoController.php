@@ -63,7 +63,7 @@ class TripClaimVerificationTwoController extends Controller {
 			})
 			->where(function ($query) use ($r) {
 				if (!empty($r->to_date)) {
-					$query->where('trips.end_date',  date("Y-m-d", strtotime($r->to_date)));
+					$query->where('trips.end_date', date("Y-m-d", strtotime($r->to_date)));
 				}
 			})
 			->where(function ($query) {
@@ -91,7 +91,7 @@ class TripClaimVerificationTwoController extends Controller {
 
 				}
 			})
-			->where('ey_employee_claims.status_id', 3224) //SENIOR MANAGER APPROVAL PENDING
+			->where('ey_employee_claims.status_id', 3029) //SENIOR MANAGER APPROVAL PENDING
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
@@ -258,9 +258,18 @@ class TripClaimVerificationTwoController extends Controller {
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$employee_claim->status_id = 3223; //Payment Pending
+		// if ($trip->advance_received > $employee_claim->claim_total_amount) {
+		// 	$trip->status_id = 3031; // Payment Pending for Employee
+		// 	$employee_claim->status_id = 3031; // Payment Pending for Employee
+		// } else {
+		// 	$trip->status_id = 3025; // Payment Pending for Financier
+		// 	$employee_claim->status_id = 3025; // Payment Pending for Financier
+		// }
+		// // $employee_claim->status_id = 3223; //Payment Pending
+
+		$employee_claim->status_id = 3034; //PAYMENT PENDING
 		$employee_claim->save();
-		$trip->status_id = 3025; //Payment Pending
+		$trip->status_id = 3034; // Payment Pending
 		$trip->save();
 		return response()->json(['success' => true]);
 	}

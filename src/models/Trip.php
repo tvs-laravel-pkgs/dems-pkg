@@ -1806,9 +1806,14 @@ class Trip extends Model {
 
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
-					$trip->status_id = 3025; // Payment Pending
+					// if ($trip->advance_received > $request->claim_total_amount) {
+					// 	$trip->status_id = 3031; // Payment Pending for Employee
+					// } else {
+					// 	$trip->status_id = 3025; // Payment Pending for Financier
+					// }
+					$trip->status_id = 3034; // Payment Pending
 				} else {
-					$trip->status_id = 3023; //claimed
+					$trip->status_id = 3023; //Claim requested
 				}
 				$trip->claim_amount = $request->claim_total_amount; //claimed
 				$trip->claimed_date = date('Y-m-d H:i:s');
@@ -1844,9 +1849,14 @@ class Trip extends Model {
 				}
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
-					$employee_claim->status_id = 3223; //PAYMENT PENDING
+					// if ($trip->advance_received > $request->claim_total_amount) {
+					// 	$employee_claim->status_id = 3031; // Payment Pending for Employee
+					// } else {
+					// 	$employee_claim->status_id = 3025; // Payment Pending for Financier
+					// }
+					$employee_claim->status_id = 3034; //PAYMENT PENDING
 				} else {
-					$employee_claim->status_id = 3222; //CLAIM REQUESTED
+					$employee_claim->status_id = 3023; //CLAIM REQUESTED
 				}
 				//CHECK EMPLOYEE GRADE HAS DEVIATION ELIGIBILITY ==> IF DEVIATION ELIGIBILITY IS 2-NO MEANS THERE IS NO DEVIATION, 1-YES MEANS NEED TO CHECK IN REQUEST
 				$grade_advance_eligibility = GradeAdvancedEligiblity::where('grade_id', $request->grade_id)->first();

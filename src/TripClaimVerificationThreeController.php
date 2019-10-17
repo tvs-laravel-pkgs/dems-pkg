@@ -63,7 +63,8 @@ class TripClaimVerificationThreeController extends Controller {
 					$query->where('trips.end_date', date('Y-m-d', strtotime($r->to_date)));
 				}
 			})
-			->whereIn('ey_employee_claims.status_id', [3223, 3227]) //PAYMENT PENDING & FINANCIER PAYMENT HOLD
+		// ->whereIn('ey_employee_claims.status_id', [3031, 3025, 3030]) //PAYMENT PENDING FOR EMPLOYEE & PAYMENT PENDING FOR FINANCIER & FINANCIER PAYMENT HOLD
+			->whereIn('ey_employee_claims.status_id', [3034, 3030]) //PAYMENT PENDING & FINANCIER PAYMENT HOLD
 		// ->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
@@ -329,7 +330,7 @@ class TripClaimVerificationThreeController extends Controller {
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$employee_claim->status_id = 3227; //Financier Payment Hold
+		$employee_claim->status_id = 3030; //Financier Payment Hold
 		$employee_claim->save();
 
 		$trip->status_id = 3030; //Financier Payment Hold

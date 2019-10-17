@@ -105,10 +105,17 @@ class TripClaimController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		if ($employee_claim->is_deviation == 0) {
-			$employee_claim->status_id = 3223; //Payment Pending
-			$trip->status_id = 3025; //Payment Pending
+			// if ($trip->advance_received > $employee_claim->claim_total_amount) {
+			// 	$trip->status_id = 3031; // Payment Pending for Employee
+			// 	$employee_claim->status_id = 3031;
+			// } else {
+			// 	$trip->status_id = 3025; // Payment Pending for Financier
+			// 	$employee_claim->status_id = 3025;
+			// }
+			$employee_claim->status_id = 3034; //PAYMENT PENDING
+			$trip->status_id = 3034; // Payment Pending
 		} else {
-			$employee_claim->status_id = 3224; //Senior Manager Approval Pending
+			$employee_claim->status_id = 3029; //Senior Manager Approval Pending
 			$trip->status_id = 3029; //Senior Manager Approval Pending
 		}
 		$employee_claim->save();
@@ -132,7 +139,7 @@ class TripClaimController extends Controller {
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$employee_claim->status_id = 3226; //Claim Rejected
+		$employee_claim->status_id = 3024; //Claim Rejected
 		$employee_claim->save();
 
 		$trip->rejection_id = $r->reject_id;
@@ -141,7 +148,7 @@ class TripClaimController extends Controller {
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
-		$activity['details'] = "Employee Claims V1 Rejected";
+		$activity['details'] = "Manager Rejected Employee Claim";
 		$activity['activity'] = "reject";
 		$activity_log = ActivityLog::saveLog($activity);
 		return response()->json(['success' => true]);

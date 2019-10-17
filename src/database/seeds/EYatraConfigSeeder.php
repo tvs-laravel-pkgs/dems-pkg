@@ -125,6 +125,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Claim Inprogress',
 				'config_type_id' => 501,
 			],
+			3034 => [
+				'name' => 'Payment Pending',
+				'config_type_id' => 501,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [
