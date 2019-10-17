@@ -88,7 +88,6 @@ class AdvanceClaimRequestController extends Controller {
 	}
 
 	public function advanceClaimRequestFormData($trip_id) {
-
 		$trip = Trip::with([
 			'advanceRequestPayment',
 			'visits',
@@ -101,8 +100,11 @@ class AdvanceClaimRequestController extends Controller {
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
-			'employee.bankDetail',
-			'employee.walletDetail',
+			'employee.user',
+			'employee.designation',
+			'employee.grade',
+			'employee.manager',
+			'employee.manager.user',
 			'purpose',
 			'status',
 		])
@@ -145,25 +147,6 @@ class AdvanceClaimRequestController extends Controller {
 		$payment->entity_id = $trip->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
-
-		//BANK DETAIL SAVE
-		if ($r->bank_name) {
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
-			$bank_detail->fill($r->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $trip->id;
-			$bank_detail->account_type_id = 3243;
-			$bank_detail->save();
-		}
-
-		//WALLET SAVE
-		if ($r->type_id) {
-			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
-			$wallet_detail->fill($r->all());
-			$wallet_detail->wallet_of_id = 3243;
-			$wallet_detail->entity_id = $trip->id;
-			$wallet_detail->save();
-		}
 
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);

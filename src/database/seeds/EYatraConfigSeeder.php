@@ -44,6 +44,7 @@ class EYatraConfigSeeder extends Seeder {
 			527 => 'Petty Cash Type',
 			528 => 'Advance Expense Voucher',
 			529 => 'Alternate Approver Type',
+			530 => 'Agent Claim Status',
 		];
 
 		$configs = [
@@ -60,10 +61,12 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Boarding Expenses',
 				'config_type_id' => 500,
 			],
-			3003 => [
-				'name' => 'Local Travel Expenses',
-				'config_type_id' => 500,
-			],
+
+			//Don't Enable - Parthi (If enable this config, it will be displayed in grade form. so i need to hide this config.Client dont want in grade form )
+			// 3003 => [
+			// 	'name' => 'Local Travel Expenses',
+			// 	'config_type_id' => 500,
+			// ],
 
 			//TRIP STATUSES
 			3020 => [
@@ -267,7 +270,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//VISIT STATUSES
 			3220 => [
-				'name' => 'New',
+				'name' => 'New Requested',
 				'config_type_id' => 512,
 			],
 			3221 => [
@@ -722,6 +725,20 @@ class EYatraConfigSeeder extends Seeder {
 			3500 => [
 				'name' => 'Petty Cash Expense types',
 				'config_type_id' => 519,
+			],
+
+			//AGENT CLAIM STATUS
+			3520 => [
+				'name' => 'Claim Requested',
+				'config_type_id' => 530,
+			],
+			3521 => [
+				'name' => 'Paid',
+				'config_type_id' => 530,
+			],
+			3522 => [
+				'name' => 'Claim Rejected',
+				'config_type_id' => 530,
 			],
 		];
 

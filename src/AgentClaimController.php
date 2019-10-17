@@ -46,7 +46,7 @@ class AgentClaimController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 
-				if ($agent_claim_list->claim_status == '3024') {
+				if ($agent_claim_list->claim_status == '3522') {
 					return '
 						<a href="#!/eyatra/agent/claim/edit/' . $agent_claim_list->id . '">
 							<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
@@ -156,7 +156,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function saveEYatraAgentClaim(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -170,21 +170,21 @@ class AgentClaimController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'invoice_number' => [
 					'required:true',
-					'unique:ey_agent_claims,invoice_number,' . $request->id . ',id,agent_id,' . Auth::user()->id,
+					'unique:ey_agent_claims,invoice_number,' . $request->id . ',id,agent_id,' . Auth::user()->entity_id,
 				],
 				'date' => "required",
 				'net_amount' => "required",
 				// 'tax' => "required",
 				// 'invoice_amount' => "required",
 			]);
-			if ($request->invoice_number) {
-				//dd($request->invoice_number);
-				$agent_claim_number = AgentClaim::where('invoice_number', 'LIKE', '%' . $request->invoice_number . '%')->first();
-				//dd($agent_claim_number);
-				if ($agent_claim_number) {
-					return response()->json(['success' => false, 'errors' => ['Invoice number already exists']]);
-				}
-			}
+			// if ($request->invoice_number) {
+			// 	//dd($request->invoice_number);
+			// 	$agent_claim_number = AgentClaim::where('invoice_number', 'LIKE', '%' . $request->invoice_number . '%')->first();
+			// 	//dd($agent_claim_number);
+			// 	if ($agent_claim_number) {
+			// 		return response()->json(['success' => false, 'errors' => ['Invoice number already exists']]);
+			// 	}
+			// }
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
@@ -223,7 +223,7 @@ class AgentClaimController extends Controller {
 			$agentClaim->tax = $request->tax;
 			// dd($invoice_amount);
 			$agentClaim->invoice_amount = $request->invoice_amount;
-			$agentClaim->status_id = 3222;
+			$agentClaim->status_id = 3520;
 			$agentClaim->fill($request->all());
 			if ($request->invoice_amount == '' || $request->invoice_amount == null) {
 				$agentClaim->invoice_amount = $request->net_amount;
@@ -279,10 +279,12 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
 			'ey_agent_claims.tax',
+			'configs.name as status',
 			'users.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
 			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->join('configs', 'configs.id', 'ey_agent_claims.status_id')
 			->where('users.user_type_id', 3122)
 			->where('ey_agent_claims.id', $agent_claim_id)->first();
 
@@ -322,8 +324,11 @@ class AgentClaimController extends Controller {
 
 		$created_date_filter = date('Y-m-d', strtotime($r->created_date));
 		$invoice_date_filter = date('Y-m-d', strtotime($r->invoice_date));
-		$Agent_name = $r->Agent_name;
-		$Agent_status = $r->Agent_status;
+		$agent_name = $r->Agent_name;
+		$agent_status = $r->Agent_status;
+		if (!$agent_status) {
+			$agent_status = 3520;
+		}
 		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
@@ -344,14 +349,14 @@ class AgentClaimController extends Controller {
 					$query->whereDate('ey_agent_claims.created_at', '=', $created_date_filter);
 				}
 			})
-			->where(function ($query) use ($Agent_name) {
-				if ($Agent_name != Null) {
-					$query->where('ey_agent_claims.agent_id', '=', $Agent_name);
+			->where(function ($query) use ($agent_name) {
+				if ($agent_name != Null) {
+					$query->where('ey_agent_claims.agent_id', '=', $agent_name);
 				}
 			})
-			->where(function ($query) use ($Agent_status) {
-				if ($Agent_status != Null) {
-					$query->where('ey_agent_claims.status_id', '=', $Agent_status);
+			->where(function ($query) use ($agent_status) {
+				if ($agent_status != Null) {
+					$query->where('ey_agent_claims.status_id', '=', $agent_status);
 				}
 			})
 			->where(function ($query) use ($invoice_date_filter) {
@@ -390,7 +395,7 @@ class AgentClaimController extends Controller {
 			->orderBy('ey_agent_claims.id', 'desc')
 			->get();
 		$this->data['status'] = $status = Config::select('name', 'id')
-			->where('config_type_id', '=', 512)
+			->where('config_type_id', '=', 530)
 			->get();
 
 		return response()->json($this->data);
@@ -561,7 +566,7 @@ class AgentClaimController extends Controller {
 		}
 		$agent_claim->rejection_id = $r->reject_id;
 		$agent_claim->rejection_remarks = $r->remarks;
-		$agent_claim->status_id = 3024;
+		$agent_claim->status_id = 3522;
 		$agent_claim->save();
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
