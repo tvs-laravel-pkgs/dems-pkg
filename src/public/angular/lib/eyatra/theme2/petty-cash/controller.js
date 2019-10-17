@@ -288,24 +288,6 @@ app.component('eyatraPettyCashForm', {
             });
         }, 1000);
 
-        // $.validator.addMethod("greaterThan",
-        //     function(value, element, param) {
-        //         console.log($(this).attr("data-index"));
-        //         console.log(value, element.id, param);
-        //         var $otherElement = $(param);
-        //         console.log($otherElement.val());
-        //         return parseInt(value, 10) > parseInt($otherElement.val(), 10);
-        //     });
-        // $.validator.messages.greaterThan = 'File must be JPG, GIF or PNG';
-        // $.validator.addClassRules({
-        //     local_to_km: {
-        //         greaterThan: '.local_from_km',
-        //     },
-        // });
-
-        //LOCAL CONVEYANCE FROM KM & TO KM AMOUNT CALC
-        // var travel_two = [];
-
         //LOCALCONVEYANCE AMOUNT SHOW BASED ON FROM AND TWO KM DIFFERENCE
         $(document).on('input', '.localconveyance_km', function() {
             var index = $(this).attr("data-index");
@@ -524,51 +506,23 @@ app.component('eyatraPettyCashForm', {
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraPettyCashView', {
-    templateUrl: pettycash_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope) {
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        $http.get(
-            petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
-        ).then(function(response) {
-            // console.log(response);
-            self.petty_cash = response.data.petty_cash;
-            self.type_id = $routeParams.type_id;
-            self.petty_cash_other = response.data.petty_cash_other;
-            self.employee = response.data.employee;
-            self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
-            self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
+            templateUrl: pettycash_view_template_url,
+            controller: function($http, $location, $routeParams, HelperService, $rootScope) {
+                var self = this;
+                self.hasPermission = HelperService.hasPermission;
+                $http.get(
+                    petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
+                ).then(function(response) {
+                        // console.log(response);
+                        self.petty_cash = response.data.petty_cash;
+                        self.type_id = $routeParams.type_id;
+                        self.petty_cash_other = response.data.petty_cash_other;
+                        self.employee = response.data.employee;
+                        self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
+                        self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
 
-            var local_total = 0;
-            $.each(self.petty_cash, function(key, value) {
-                local_total += parseFloat(value.amount);
-            });
-            var total_amount = 0;
-            var total_tax = 0;
-            $.each(self.petty_cash_other, function(key, value) {
-                total_amount += parseFloat(value.amount);
-                total_tax += parseFloat(value.tax);
-            });
-            var other_total = total_amount + total_tax;
-            var total_amount = local_total + other_total;
-            // console.log(total_amount);
-            setTimeout(function() {
-                $(".localconveyance").html('₹ ' + local_total.toFixed(2));
-                $(".other_expences").html('₹ ' + other_total.toFixed(2));
-                $(".Total_amount").html('₹ ' + total_amount.toFixed(2));
-            }, 500);
-
-        });
-        //NO NEED
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-        });
-        //END
-        $rootScope.loading = false;
-    }
-});
-//------------------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------------------------
+                        $rootScope.loading = false;
+                    }
+                });
+            //------------------------------------------------------------------------------------------------------------------
+            //------------------------------------------------------------------------------------------------------------------------

@@ -138,26 +138,6 @@ app.component('eyatraPettyCashManagerView', {
                 $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/eyatra/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
 
-            var local_total = 0;
-            $.each(self.petty_cash, function(key, value) {
-                local_total += parseFloat(value.amount);
-            });
-            var total_amount = 0;
-            var total_tax = 0;
-            $.each(self.petty_cash_other, function(key, value) {
-                total_amount += parseFloat(value.amount);
-                total_tax += parseFloat(value.tax);
-            });
-            var other_total = total_amount + total_tax;
-            var total_amount = local_total + other_total;
-            // console.log(total_amount);
-            setTimeout(function() {
-                $(".localconveyance").html('₹ ' + local_total.toFixed(2));
-                $(".other_expences").html('₹ ' + other_total.toFixed(2));
-                $(".Total_amount").html('₹ ' + total_amount.toFixed(2));
-            }, 500);
-
-
         });
 
         var form_id = '#approve';
@@ -264,13 +244,6 @@ app.component('eyatraPettyCashManagerView', {
                         custom_noty('error', 'Something went wrong at server');
                     });
             },
-        });
-
-        $('.btn-nxt').on("click", function() {
-            $('.editDetails-tabs li.active').next().children('a').trigger("click");
-        });
-        $('.btn-prev').on("click", function() {
-            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
         $rootScope.loading = false;
