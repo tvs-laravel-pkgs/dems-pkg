@@ -153,11 +153,11 @@ app.component('eyatraTripClaimVerificationOneView', {
             self.travel_cities = response.data.travel_cities;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.travel_dates = response.data.travel_dates;
-            self.transport_total_amount = response.data.transport_total_amount;
-            self.lodging_total_amount = response.data.lodging_total_amount;
-            self.boardings_total_amount = response.data.boardings_total_amount;
-            self.local_travels_total_amount = response.data.local_travels_total_amount;
-            self.total_amount = response.data.total_amount;
+            // self.transport_total_amount = response.data.transport_total_amount;
+            // self.lodging_total_amount = response.data.lodging_total_amount;
+            // self.boardings_total_amount = response.data.boardings_total_amount;
+            // self.local_travels_total_amount = response.data.local_travels_total_amount;
+            self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
             if (self.trip.advance_received) {
                 if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {

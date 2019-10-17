@@ -7,13 +7,8 @@ use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\AlternateApprove;
-use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\EmployeeClaim;
-use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\LocalTravel;
-use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\Trip;
-use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 
 class TripClaimVerificationOneController extends Controller {
@@ -122,135 +117,137 @@ class TripClaimVerificationOneController extends Controller {
 
 	public function viewEYatraTripClaimVerificationOne($trip_id) {
 
-		if (!$trip_id) {
-			$this->data['success'] = false;
-			$this->data['message'] = 'Trip not found';
-		} else {
-			$trip = Trip::with([
-				'visits' => function ($q) {
-					$q->orderBy('id', 'asc');
-				},
-				'visits.fromCity',
-				'visits.toCity',
-				'visits.travelMode',
-				'visits.bookingMethod',
-				'visits.bookingStatus',
-				'visits.selfBooking',
-				'visits.attachments',
-				'visits.agent',
-				'visits.status',
-				'visits.managerVerificationStatus',
-				'advanceRequestStatus',
-				'employee',
-				'employee.user',
-				'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
-					$q->where('trip_id', $trip_id);
-				},
-				'employee.grade',
-				'employee.designation',
-				'employee.reportingTo',
-				'employee.reportingTo.user',
-				'employee.outlet',
-				'employee.Sbu',
-				'employee.Sbu.lob',
-				'selfVisits' => function ($q) {
-					$q->orderBy('id', 'asc');
-				},
-				'purpose',
-				'lodgings',
-				'lodgings.city',
-				'lodgings.stateType',
-				'lodgings.attachments',
-				'boardings',
-				'boardings.city',
-				'boardings.attachments',
-				'localTravels',
-				'localTravels.fromCity',
-				'localTravels.toCity',
-				'localTravels.travelMode',
-				'localTravels.attachments',
-				'selfVisits.fromCity',
-				'selfVisits.toCity',
-				'selfVisits.travelMode',
-				'selfVisits.bookingMethod',
-				'selfVisits.selfBooking',
-				'selfVisits.agent',
-				'selfVisits.status',
-				'selfVisits.attachments',
-				'lodging_attachments',
-				'boarding_attachments',
-			])->find($trip_id);
+		return Trip::getClaimViewData($trip_id);
 
-			if (!$trip) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'Trip not found';
-			}
-			$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
-				->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
+		// if (!$trip_id) {
+		// 	$this->data['success'] = false;
+		// 	$this->data['message'] = 'Trip not found';
+		// } else {
+		// 	$trip = Trip::with([
+		// 		'visits' => function ($q) {
+		// 			$q->orderBy('id', 'asc');
+		// 		},
+		// 		'visits.fromCity',
+		// 		'visits.toCity',
+		// 		'visits.travelMode',
+		// 		'visits.bookingMethod',
+		// 		'visits.bookingStatus',
+		// 		'visits.selfBooking',
+		// 		'visits.attachments',
+		// 		'visits.agent',
+		// 		'visits.status',
+		// 		'visits.managerVerificationStatus',
+		// 		'advanceRequestStatus',
+		// 		'employee',
+		// 		'employee.user',
+		// 		'employee.tripEmployeeClaim' => function ($q) use ($trip_id) {
+		// 			$q->where('trip_id', $trip_id);
+		// 		},
+		// 		'employee.grade',
+		// 		'employee.designation',
+		// 		'employee.reportingTo',
+		// 		'employee.reportingTo.user',
+		// 		'employee.outlet',
+		// 		'employee.Sbu',
+		// 		'employee.Sbu.lob',
+		// 		'selfVisits' => function ($q) {
+		// 			$q->orderBy('id', 'asc');
+		// 		},
+		// 		'purpose',
+		// 		'lodgings',
+		// 		'lodgings.city',
+		// 		'lodgings.stateType',
+		// 		'lodgings.attachments',
+		// 		'boardings',
+		// 		'boardings.city',
+		// 		'boardings.attachments',
+		// 		'localTravels',
+		// 		'localTravels.fromCity',
+		// 		'localTravels.toCity',
+		// 		'localTravels.travelMode',
+		// 		'localTravels.attachments',
+		// 		'selfVisits.fromCity',
+		// 		'selfVisits.toCity',
+		// 		'selfVisits.travelMode',
+		// 		'selfVisits.bookingMethod',
+		// 		'selfVisits.selfBooking',
+		// 		'selfVisits.agent',
+		// 		'selfVisits.status',
+		// 		'selfVisits.attachments',
+		// 		'lodging_attachments',
+		// 		'boarding_attachments',
+		// 	])->find($trip_id);
 
-			$transport_total = Visit::select(
-				DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
-				DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax')
-			)
-				->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
-				->where('visits.trip_id', $trip_id)
-				->groupby('visits.id')
-				->get()
-				->toArray();
-			$visit_amounts = array_column($transport_total, 'visit_amount');
-			$visit_taxes = array_column($transport_total, 'visit_tax');
-			$visit_amounts_total = array_sum($visit_amounts);
-			$visit_taxes_total = array_sum($visit_taxes);
+		// 	if (!$trip) {
+		// 		$this->data['success'] = false;
+		// 		$this->data['message'] = 'Trip not found';
+		// 	}
+		// 	$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
+		// 		->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
-			$transport_total_amount = $visit_amounts_total ? $visit_amounts_total : 0.00;
-			$transport_total_tax = $visit_taxes_total ? $visit_taxes_total : 0.00;
-			$this->data['transport_total_amount'] = number_format($transport_total_amount, 2, '.', '');
+		// 	$transport_total = Visit::select(
+		// 		DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
+		// 		DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax')
+		// 	)
+		// 		->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+		// 		->where('visits.trip_id', $trip_id)
+		// 		->groupby('visits.id')
+		// 		->get()
+		// 		->toArray();
+		// 	$visit_amounts = array_column($transport_total, 'visit_amount');
+		// 	$visit_taxes = array_column($transport_total, 'visit_tax');
+		// 	$visit_amounts_total = array_sum($visit_amounts);
+		// 	$visit_taxes_total = array_sum($visit_taxes);
 
-			$lodging_total = Lodging::select(
-				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
-				DB::raw('COALESCE(SUM(tax), 0.00) as tax')
-			)
-				->where('trip_id', $trip_id)
-				->groupby('trip_id')
-				->first();
-			$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
-			$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
-			$this->data['lodging_total_amount'] = number_format($lodging_total_amount, 2, '.', '');
+		// 	$transport_total_amount = $visit_amounts_total ? $visit_amounts_total : 0.00;
+		// 	$transport_total_tax = $visit_taxes_total ? $visit_taxes_total : 0.00;
+		// 	$this->data['transport_total_amount'] = number_format($transport_total_amount, 2, '.', '');
 
-			$boardings_total = Boarding::select(
-				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
-				DB::raw('COALESCE(SUM(tax), 0.00) as tax')
-			)
-				->where('trip_id', $trip_id)
-				->groupby('trip_id')
-				->first();
-			$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
-			$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
-			$this->data['boardings_total_amount'] = number_format($boardings_total_amount, 2, '.', '');
+		// 	$lodging_total = Lodging::select(
+		// 		DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+		// 		DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		// 	)
+		// 		->where('trip_id', $trip_id)
+		// 		->groupby('trip_id')
+		// 		->first();
+		// 	$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
+		// 	$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
+		// 	$this->data['lodging_total_amount'] = number_format($lodging_total_amount, 2, '.', '');
 
-			$local_travels_total = LocalTravel::select(
-				DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
-				DB::raw('COALESCE(SUM(tax), 0.00) as tax')
-			)
-				->where('trip_id', $trip_id)
-				->groupby('trip_id')
-				->first();
-			$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
-			$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
-			$this->data['local_travels_total_amount'] = number_format($local_travels_total_amount, 2, '.', '');
+		// 	$boardings_total = Boarding::select(
+		// 		DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+		// 		DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		// 	)
+		// 		->where('trip_id', $trip_id)
+		// 		->groupby('trip_id')
+		// 		->first();
+		// 	$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
+		// 	$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
+		// 	$this->data['boardings_total_amount'] = number_format($boardings_total_amount, 2, '.', '');
 
-			$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
-			$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
-			$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
-			$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
+		// 	$local_travels_total = LocalTravel::select(
+		// 		DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+		// 		DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		// 	)
+		// 		->where('trip_id', $trip_id)
+		// 		->groupby('trip_id')
+		// 		->first();
+		// 	$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
+		// 	$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
+		// 	$this->data['local_travels_total_amount'] = number_format($local_travels_total_amount, 2, '.', '');
 
-			$this->data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
+		// 	$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+		// 	$this->data['total_amount'] = number_format($total_amount, 2, '.', '');
+		// 	$this->data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
+		// 	$this->data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 
-			$this->data['success'] = true;
-		}
-		$this->data['trip'] = $trip;
+		// 	$this->data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
 
-		return response()->json($this->data);
+		// 	$this->data['success'] = true;
+		// }
+		// $this->data['trip'] = $trip;
+
+		// return response()->json($this->data);
 	}
 
 	public function approveTripClaimVerificationOne($trip_id) {

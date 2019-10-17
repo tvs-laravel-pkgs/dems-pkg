@@ -338,7 +338,7 @@ class TripClaimPendingController extends Controller {
 
 				return '
 
-				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
+				<a href="#!/eyatra/trip/claim/view/' . $trip->trip_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<button title="approve" data-claim_id="' . $trip->id . '" class="btn btn-sm approve_claim"><i class="fa fa-thumbs-up"></i></button>

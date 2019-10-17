@@ -194,12 +194,19 @@ app.component('eyatraAdvanceClaimRequests', {
 
                     // table.ajax.reload();
 
+                    var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
+                    dataTableFilter.fnFilter();
 
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
-                    $timeout(function() {
-                        $location.path('/eyatra/advance-claim/requests')
-                        // $scope.$apply()
-                    }, 500);
+                    
+                    $location.path('/eyatra/trip/claim/payment-pending/list');
+                    $scope.$apply();
+
+
+                    // $timeout(function() {
+                    //     $location.path('/eyatra/advance-claim/requests')
+                    //     // $scope.$apply()
+                    // }, 500);
                 }
 
             });
