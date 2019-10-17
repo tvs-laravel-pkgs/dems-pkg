@@ -1123,60 +1123,63 @@ class Trip extends Model {
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
-		$transport_total = Visit::select(
-			DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
-			DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax')
-		)
-			->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
-			->where('visits.trip_id', $trip_id)
-			->where('visits.booking_method_id', 3040)
-			->groupby('visits.id')
-			->get()
-			->toArray();
-		$visit_amounts = array_column($transport_total, 'visit_amount');
-		$visit_taxes = array_column($transport_total, 'visit_tax');
-		$visit_amounts_total = array_sum($visit_amounts);
-		$visit_taxes_total = array_sum($visit_taxes);
+		// $transport_total = Visit::select(
+		// 	DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
+		// 	DB::raw('COALESCE(SUM(visit_bookings.tax), 0.00) as visit_tax'),
+		// 	DB::raw('COALESCE(SUM(visit_bookings.toll_fee), 0.00) as toll_fees')
+		// )
+		// 	->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+		// 	->where('visits.trip_id', $trip_id)
+		// 	->where('visits.booking_method_id', 3040)
+		// 	->groupby('visits.id')
+		// 	->get()
+		// 	->toArray();
+		// $visit_amounts = array_column($transport_total, 'visit_amount');
+		// $visit_taxes = array_column($transport_total, 'visit_tax');
+		// $visit_toll_fees = array_column($transport_total, 'toll_fees');
+		// $visit_amounts_total = array_sum($visit_amounts);
+		// $visit_taxes_total = array_sum($visit_taxes);
 
-		$transport_total_amount = $visit_amounts_total ? $visit_amounts_total : 0.00;
-		$transport_total_tax = $visit_taxes_total ? $visit_taxes_total : 0.00;
-		$data['transport_total_amount'] = number_format($transport_total_amount, 2, '.', '');
+		// $transport_total_amount = $visit_amounts_total ? $visit_amounts_total : 0.00;
+		// $transport_total_tax = $visit_taxes_total ? $visit_taxes_total : 0.00;
+		// $data['transport_total_amount'] = number_format($transport_total_amount, 2, '.', '');
 
-		$lodging_total = Lodging::select(
-			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
-			DB::raw('COALESCE(SUM(tax), 0.00) as tax')
-		)
-			->where('trip_id', $trip_id)
-			->groupby('trip_id')
-			->first();
-		$lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
-		$lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
-		$data['lodging_total_amount'] = number_format($lodging_total_amount, 2, '.', '');
+		// $lodging_total = Lodging::select(
+		// 	DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+		// 	DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		// )
+		// 	->where('trip_id', $trip_id)
+		// 	->groupby('trip_id')
+		// 	->first();
+		// $lodging_total_amount = $lodging_total ? $lodging_total->amount : 0.00;
+		// $lodging_total_tax = $lodging_total ? $lodging_total->tax : 0.00;
+		// $data['lodging_total_amount'] = number_format($lodging_total_amount, 2, '.', '');
 
-		$boardings_total = Boarding::select(
-			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
-			DB::raw('COALESCE(SUM(tax), 0.00) as tax')
-		)
-			->where('trip_id', $trip_id)
-			->groupby('trip_id')
-			->first();
-		$boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
-		$boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
-		$data['boardings_total_amount'] = number_format($boardings_total_amount, 2, '.', '');
+		// $boardings_total = Boarding::select(
+		// 	DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+		// 	DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		// )
+		// 	->where('trip_id', $trip_id)
+		// 	->groupby('trip_id')
+		// 	->first();
+		// $boardings_total_amount = $boardings_total ? $boardings_total->amount : 0.00;
+		// $boardings_total_tax = $boardings_total ? $boardings_total->tax : 0.00;
+		// $data['boardings_total_amount'] = number_format($boardings_total_amount, 2, '.', '');
 
-		$local_travels_total = LocalTravel::select(
-			DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
-			DB::raw('COALESCE(SUM(tax), 0.00) as tax')
-		)
-			->where('trip_id', $trip_id)
-			->groupby('trip_id')
-			->first();
-		$local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
-		$local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
-		$data['local_travels_total_amount'] = number_format($local_travels_total_amount, 2, '.', '');
+		// $local_travels_total = LocalTravel::select(
+		// 	DB::raw('COALESCE(SUM(amount), 0.00) as amount'),
+		// 	DB::raw('COALESCE(SUM(tax), 0.00) as tax')
+		// )
+		// 	->where('trip_id', $trip_id)
+		// 	->groupby('trip_id')
+		// 	->first();
+		// $local_travels_total_amount = $local_travels_total ? $local_travels_total->amount : 0.00;
+		// $local_travels_total_tax = $local_travels_total ? $local_travels_total->tax : 0.00;
+		// $data['local_travels_total_amount'] = number_format($local_travels_total_amount, 2, '.', '');
 
-		$total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
-		$data['total_amount'] = number_format($total_amount, 2, '.', '');
+		// $total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
+		// $data['total_amount'] = number_format($total_amount, 2, '.', '');
+
 		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 
@@ -1450,6 +1453,7 @@ class Trip extends Model {
 			//SAVING VISITS
 			if ($request->visits) {
 				// dd($request->visits);
+				$transport_total_amount = 0;
 				foreach ($request->visits as $visit_data) {
 					if (!empty($visit_data['id'])) {
 						$visit = Visit::find($visit_data['id']);
@@ -1490,13 +1494,18 @@ class Trip extends Model {
 							$visit_booking->created_by = Auth::user()->id;
 							$visit_booking->status_id = 3241; //Claimed
 							$visit_booking->save();
+
+							$transport_total = 0;
+							if ($visit_booking) {
+								$transport_total = $visit_booking->amount + $visit_booking->tax + $visit_booking->toll_fee;
+								$transport_total_amount += $transport_total;
+							}
 						}
 
 						// dd($visit_booking);
 
 					}
 				}
-
 				//CHECK NEXT VISIT EXIST
 				//ONLY SELF VISITS WILL COME IN POST NOT AGENT BOOKED ==> NOT BEEN USED NOW
 
@@ -1528,6 +1537,7 @@ class Trip extends Model {
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->transport_total = $transport_total_amount;
 				$employee_claim->employee_id = Auth::user()->entity_id;
 				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
@@ -1579,7 +1589,7 @@ class Trip extends Model {
 					if ($lodge_stayed_days > $trip_total_days) {
 						return response()->json(['success' => false, 'errors' => ['Total lodging days should be less than total trip days']]);
 					}
-
+					$lodging_total_amount = 0;
 					foreach ($request->lodgings as $lodging_data) {
 
 						$lodging = Lodging::firstOrNew([
@@ -1598,6 +1608,12 @@ class Trip extends Model {
 						$lodging->created_by = Auth::user()->id;
 						$lodging->save();
 
+						$lodging_total = 0;
+						if ($lodging) {
+							$lodging_total = $lodging->amount + $lodging->tax;
+							$lodging_total_amount += $lodging_total;
+						}
+
 						//STORE ATTACHMENT
 						// $item_images = storage_path('app/public/trip/lodgings/attachments/');
 						// Storage::makeDirectory($item_images, 0777);
@@ -1614,7 +1630,6 @@ class Trip extends Model {
 						// 	}
 						// }
 					}
-
 					// dd('1');
 					//SAVE LODGING ATTACHMENT
 					$item_images = storage_path('app/public/trip/lodgings/attachments/');
@@ -1670,6 +1685,7 @@ class Trip extends Model {
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->lodging_total = $lodging_total_amount;
 				$employee_claim->employee_id = Auth::user()->entity_id;
 				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
@@ -1715,6 +1731,7 @@ class Trip extends Model {
 						return response()->json(['success' => false, 'errors' => ['Total boarding days should be less than total trip days']]);
 					}
 
+					$boarding_total_amount = 0;
 					foreach ($request->boardings as $boarding_data) {
 						$boarding = Boarding::firstOrNew([
 							'id' => $boarding_data['id'],
@@ -1725,6 +1742,12 @@ class Trip extends Model {
 						$boarding->to_date = date('Y-m-d', strtotime($boarding_data['to_date']));
 						$boarding->created_by = Auth::user()->id;
 						$boarding->save();
+
+						$boarding_total = 0;
+						if ($boarding) {
+							$boarding_total = $boarding->amount + $boarding->tax;
+							$boarding_total_amount += $boarding_total;
+						}
 
 						//STORE ATTACHMENT
 						// $item_images = storage_path('app/public/trip/boarding/attachments/');
@@ -1742,6 +1765,7 @@ class Trip extends Model {
 						// 	}
 						// }
 					}
+					// dd($boarding_total_amount);
 					//SAVE BOARDING ATTACHMENT
 					$item_images = storage_path('app/public/trip/boarding/attachments/');
 					Storage::makeDirectory($item_images, 0777);
@@ -1774,6 +1798,7 @@ class Trip extends Model {
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->trip_id = $trip->id;
 				$employee_claim->total_amount = $request->claim_total_amount;
+				$employee_claim->boarding_total = $boarding_total_amount;
 				$employee_claim->employee_id = Auth::user()->entity_id;
 				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
@@ -1900,6 +1925,7 @@ class Trip extends Model {
 					LocalTravel::whereIn('id', $local_travels_removal_id)->delete();
 				}
 				if ($request->local_travels) {
+					$local_total_amount = 0;
 					foreach ($request->local_travels as $local_travel_data) {
 						$local_travel = LocalTravel::firstOrNew([
 							'id' => $local_travel_data['id'],
@@ -1910,22 +1936,30 @@ class Trip extends Model {
 						$local_travel->created_by = Auth::user()->id;
 						$local_travel->save();
 
-						//STORE ATTACHMENT
-						$item_images = storage_path('app/public/trip/local_travels/attachments/');
-						Storage::makeDirectory($item_images, 0777);
-						if (!empty($local_travel_data['attachments'])) {
-							foreach ($local_travel_data['attachments'] as $key => $attachement) {
-								$name = $attachement->getClientOriginalName();
-								$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
-								$attachement_local_travel = new Attachment;
-								$attachement_local_travel->attachment_of_id = 3183;
-								$attachement_local_travel->attachment_type_id = 3200;
-								$attachement_local_travel->entity_id = $local_travel->id;
-								$attachement_local_travel->name = $name;
-								$attachement_local_travel->save();
-							}
+						$local_amount_total = 0;
+						if ($local_travel) {
+							$local_amount_total = $local_travel->amount + $local_travel->tax;
+							$local_total_amount += $local_amount_total;
 						}
+
+						// //STORE ATTACHMENT
+						// $item_images = storage_path('app/public/trip/local_travels/attachments/');
+						// Storage::makeDirectory($item_images, 0777);
+						// if (!empty($local_travel_data['attachments'])) {
+						// 	foreach ($local_travel_data['attachments'] as $key => $attachement) {
+						// 		$name = $attachement->getClientOriginalName();
+						// 		$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
+						// 		$attachement_local_travel = new Attachment;
+						// 		$attachement_local_travel->attachment_of_id = 3183;
+						// 		$attachement_local_travel->attachment_type_id = 3200;
+						// 		$attachement_local_travel->entity_id = $local_travel->id;
+						// 		$attachement_local_travel->name = $name;
+						// 		$attachement_local_travel->save();
+						// 	}
+						// }
 					}
+					$employee_claim->local_travel_total = $local_total_amount;
+					$employee_claim->save();
 				}
 
 				DB::commit();

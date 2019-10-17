@@ -806,14 +806,14 @@ app.component('eyatraTripClaimForm', {
                                 self.trip.visits[key].self_booking_km = {
                                     km_start: '--',
                                     km_end: '--',
-                                    toll_fee: '--',
+                                    toll_fee: '0',
                                     readonly: true
                                 };
                             } else {
                                 self.trip.visits[key].self_booking_km.readonly = true;
                                 self.trip.visits[key].self_booking_km.km_start = '--';
                                 self.trip.visits[key].self_booking_km.km_end = '--';
-                                self.trip.visits[key].self_booking_km.toll_fee = '--';
+                                self.trip.visits[key].self_booking_km.toll_fee = '0';
                             }
                             if (!self.trip.visits[key].self_amount) {
                                 self.trip.visits[key].self_amount = {
@@ -828,7 +828,7 @@ app.component('eyatraTripClaimForm', {
                             self.trip.visits[key].self_booking.amount = '0.00';
                             self.trip.visits[key].self_booking.km_start = '--';
                             self.trip.visits[key].self_booking.km_end = '--';
-                            self.trip.visits[key].self_booking.toll_fee = '--';
+                            self.trip.visits[key].self_booking.toll_fee = '0';
                         }
                         //if Vehicle has own vehicle type
                         else if (category_type == 3400) {
@@ -894,14 +894,14 @@ app.component('eyatraTripClaimForm', {
                                 self.trip.visits[key].self_booking_km = {
                                     km_start: '--',
                                     km_end: '--',
-                                    toll_fee: '--',
+                                    toll_fee: '0',
                                     readonly: true
                                 };
                             } else {
                                 self.trip.visits[key].self_booking_km.readonly = true;
                                 self.trip.visits[key].self_booking_km.km_start = '--';
                                 self.trip.visits[key].self_booking_km.km_end = '--';
-                                self.trip.visits[key].self_booking_km.toll_fee = '--';
+                                self.trip.visits[key].self_booking_km.toll_fee = '0';
                             }
                             if (!self.trip.visits[key].self_amount) {
                                 self.trip.visits[key].self_amount = {
@@ -915,7 +915,7 @@ app.component('eyatraTripClaimForm', {
 
                             self.trip.visits[key].self_booking.km_start = '--';
                             self.trip.visits[key].self_booking.km_end = '--';
-                            self.trip.visits[key].self_booking.toll_fee = '--';
+                            self.trip.visits[key].self_booking.toll_fee = '0';
                         }
 
                         //Old Method for Claim and Not Claim Vehicle Method
@@ -1984,11 +1984,11 @@ app.component('eyatraTripClaimView', {
             self.gender = (response.data.trip.employee.gender).toLowerCase();
             self.travel_cities = response.data.travel_cities;
             self.travel_dates = response.data.travel_dates;
-            self.transport_total_amount = response.data.transport_total_amount;
-            self.lodging_total_amount = response.data.lodging_total_amount;
-            self.boardings_total_amount = response.data.boardings_total_amount;
-            self.local_travels_total_amount = response.data.local_travels_total_amount;
-            self.total_amount = response.data.total_amount;
+            // self.transport_total_amount = response.data.transport_total_amount;
+            // self.lodging_total_amount = response.data.lodging_total_amount;
+            // self.boardings_total_amount = response.data.boardings_total_amount;
+            // self.local_travels_total_amount = response.data.local_travels_total_amount;
+            self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
             if (self.trip.advance_received) {
                 if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {
