@@ -506,23 +506,25 @@ app.component('eyatraPettyCashForm', {
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraPettyCashView', {
-            templateUrl: pettycash_view_template_url,
-            controller: function($http, $location, $routeParams, HelperService, $rootScope) {
-                var self = this;
-                self.hasPermission = HelperService.hasPermission;
-                $http.get(
-                    petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
-                ).then(function(response) {
-                        // console.log(response);
-                        self.petty_cash = response.data.petty_cash;
-                        self.type_id = $routeParams.type_id;
-                        self.petty_cash_other = response.data.petty_cash_other;
-                        self.employee = response.data.employee;
-                        self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
-                        self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
+    templateUrl: pettycash_view_template_url,
+    controller: function($http, $location, $routeParams, HelperService, $rootScope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
+        ).then(function(response) {
+                // console.log(response);
+                self.petty_cash = response.data.petty_cash;
+                self.type_id = $routeParams.type_id;
+                self.petty_cash_other = response.data.petty_cash_other;
+                self.employee = response.data.employee;
+                self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
+                self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
 
-                        $rootScope.loading = false;
-                    }
-                });
+                $rootScope.loading = false;
+            
+        });
+    }
+});
             //------------------------------------------------------------------------------------------------------------------
             //------------------------------------------------------------------------------------------------------------------------
