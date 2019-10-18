@@ -29,6 +29,8 @@ class AuthController extends Controller {
 
 			$user = User::with([
 				'employee_details',
+				'employee_details.reportingTo',
+				'employee_details.reportingTo.user',
 				'employee_details.paymentMode',
 				'employee_details.grade',
 				'employee_details.designation',
