@@ -429,12 +429,13 @@ class Trip extends Model {
 			)
 			->where('u.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
+			->where('trips.employee_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 		;
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
+		// if (!Entrust::can('view-all-trips')) {
+		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
+		// }
 
 		//FILTERS
 		if ($request->number) {
