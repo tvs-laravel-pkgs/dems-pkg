@@ -466,8 +466,8 @@ class Trip extends Model {
 			// dump($request->status_ids[0]);
 			// $status_ids = explode(',', $request->status_ids[0]);
 			// dd($status_ids);
-
-			$trips->whereIn('trips.status_id', $request->status_ids);
+			// dd($request->status_ids);
+			$trips->whereIn('trips.status_id', json_decode($request->status_ids));
 		} else {
 			$trips->whereNotIn('trips.status_id', [3026]);
 		}
