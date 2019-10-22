@@ -93,6 +93,11 @@ class EntityController extends Controller {
 
 				}
 
+				if ($entity->name == 'Local Conveyance') {
+					$edit_class = "visibility:hidden";
+					$delete_class = "visibility:hidden";
+				}
+
 				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 
