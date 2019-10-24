@@ -78,7 +78,7 @@ class TripClaimVerificationLevelController extends Controller {
 
 				}
 			})
-			->where('ey_employee_claims.status_id', 3222) //CLAIM REQUESTED
+			->where('ey_employee_claims.status_id', 3023) //CLAIM REQUESTED
 		//->where('e.reporting_to_id', Auth::user()->entity_id) //MANAGER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')->get();

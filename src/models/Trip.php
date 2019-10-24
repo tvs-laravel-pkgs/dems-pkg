@@ -1710,7 +1710,7 @@ class Trip extends Model {
 			}
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
-
+				// dd($request->all());
 				//REMOVE BOARDINGS ATTACHMENT
 				if (!empty($request->boardings_attach_removal_ids)) {
 					$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
