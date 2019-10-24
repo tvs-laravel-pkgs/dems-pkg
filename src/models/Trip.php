@@ -556,6 +556,7 @@ class Trip extends Model {
 				'users.name as ename',
 				'trips.start_date',
 				'trips.end_date',
+				'trips.status_id',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				'purpose.name as purpose',
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,2,"en_IN")) as advance_received'),
