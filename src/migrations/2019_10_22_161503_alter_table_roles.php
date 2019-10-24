@@ -12,7 +12,7 @@ class AlterTableRoles extends Migration {
 	 */
 	public function up() {
 		Schema::table('roles', function (Blueprint $table) {
-			$table->unsignedInteger('company_id')->default(1)->after('id');
+			$table->unsignedInteger('company_id')->default(4)->after('id');
 			$table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade')->onUpdate('cascade');
 
 		});

@@ -82,7 +82,11 @@ class EmployeeController extends Controller {
 				$join->on('u.entity_id', '=', 'e.id')
 					->where('u.user_type_id', 3121);
 			})
-			->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
+			->leftJoin('users as mngr', function ($join) {
+				$join->on('mngr.entity_id', 'm.id')
+					->where('mngr.user_type_id', 3121);
+			})
+		// ->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
 			->leftJoin('role_user', 'role_user.user_id', 'u.id')
 		// ->where('users.user_type_id', 3121)
 			->withTrashed()
@@ -91,7 +95,8 @@ class EmployeeController extends Controller {
 				'e.code',
 				'u.name',
 				'o.code as outlet_code',
-				DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
+				DB::raw('CONCAT(m.code," / ",mngr.name) as manager_code'),
+				// DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
 				// DB::raw('IF(mngr.name IS NULL,"--",mngr.name) as manager_name'),
 				'grd.name as grade',
 				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
@@ -193,7 +198,7 @@ class EmployeeController extends Controller {
 		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Type']);
-		$role_list = collect(Role::getList())->prepend(['id' => '', 'name' => 'Select Role']);
+		$role_list = collect(Role::getList());
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$designation_list = [];
 		// dd($designation_list);

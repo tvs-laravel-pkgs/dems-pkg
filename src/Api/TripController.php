@@ -4,6 +4,7 @@ namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 use Auth;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
 
 class TripController extends Controller {
