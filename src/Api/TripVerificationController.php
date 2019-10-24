@@ -9,6 +9,14 @@ use Uitoux\EYatra\Trip;
 class TripVerificationController extends Controller {
 	public $successStatus = 200;
 
+	public function listTripVerification(Request $r) {
+		$trips = Trip::getVerficationPendingList($r);
+		$trips = $trips->get()
+		;
+		return response()->json(['success' => true, 'trips' => $trips]);
+
+	}
+
 	public function approveTrip($trip_id, Request $r) {
 		return Trip::approveTrip($r);
 	}
