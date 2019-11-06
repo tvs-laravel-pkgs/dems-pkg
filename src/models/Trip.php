@@ -518,6 +518,114 @@ class Trip extends Model {
 		return $trips;
 	}
 
+	public static function getEmployeeClaimList($request) {
+		// dd(Auth::user()->company_id);
+		$trips = Trip::from('trips')
+			->join('visits as v', 'v.trip_id', 'trips.id')
+			->leftjoin('ncities as c', 'c.id', 'v.from_city_id')
+			->join('employees as e', 'e.id', 'trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
+			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('users as u', 'u.entity_id', 'e.id')
+			->join('ey_employee_claims as claim', 'claim.trip_id', 'trips.id')
+
+			->select(
+				'trips.id',
+				'trips.number',
+				DB::raw('CONCAT(u.name," ( ",e.code," ) ") as ecode'),
+				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
+				'trips.start_date',
+				'trips.end_date',
+				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				DB::raw('FORMAT(claim.total_amount,2) as claim_amount'),
+				//Changed to purpose_name. do not revert - Abdul
+				'purpose.name as purpose_name',
+				'trips.advance_received',
+				'trips.status_id as status_id',
+				'status.name as status_name',
+				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
+			)
+			->where('u.user_type_id', 3121)
+			->where('e.company_id', Auth::user()->company_id)
+			->where('trips.employee_id', Auth::user()->entity_id)
+			->groupBy('trips.id')
+			->orderBy('trips.created_at', 'desc')
+		;
+		// if (!Entrust::can('view-all-trips')) {
+		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
+		// }
+
+		//FILTERS
+		if ($request->number) {
+			$trips->where('trips.number', 'like', '%' . $request->number . '%');
+		}
+		if ($request->from_date) {
+			$date = date('Y-m-d', strtotime($request->get('from_date')));
+			$trips->where("trips.start_date", '>=', $date);
+		}
+		if ($request->to_date) {
+			$date = date('Y-m-d', strtotime($request->get('to_date')));
+			$trips->where("trips.end_date", '<=', $date);
+		}
+
+		if ($request->status_ids) {
+			// dump($request->status_ids);
+			// dump($request->status_ids[0]);
+			// $status_ids = explode(',', $request->status_ids[0]);
+			// dd($status_ids);
+			// dd($request->status_ids);
+			$trips->whereIn('claim.status_id', json_decode($request->status_ids));
+		} else {
+			$trips->whereNotIn('claim.status_id', [3023]);
+		}
+
+		// if ($request->status_ids) {
+		// 	$trips->where('trips.status_id', $request->status_ids);
+		// } else {
+		// 	$trips->where('trips.status_id', '!=', 3026);
+		// }
+
+		if ($request->purpose_ids) {
+			$trips->where('trips.purpose_id', $request->purpose_ids);
+		}
+
+		// if ($request->get('from_date')) {
+		// 	$date = date('Y-m-d', strtotime($request->get('from_date')));
+		// 	// dd($date);
+		// 	$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $request->get('from_date'));
+		// }
+		// if ($request->from_date && $request->to_date) {
+		// 	$trips->where('trips.start_date', '>=', $request->from_date);
+		// 	$trips->where('trips.end_date', '<=', $request->to_date);
+		// } else {
+		// 	$today = Carbon::today();
+		// 	$from_date = $today->copy()->subMonths(3);
+		// 	$to_date = $today->copy()->addMonths(3);
+		// 	$trips->where('trips.start_date', '>=', $from_date);
+		// 	$trips->where('trips.end_date', '<=', $to_date);
+		// }
+
+		// if ($request->status_ids && $request->status_ids[0]) {
+		// 	$status_ids = explode(',', $request->status_ids[0]);
+		// 	$trips->whereIn('trips.status_id', $status_ids);
+		// } else {
+		// 	$trips->whereNotIn('trips.status_id', [3026]);
+		// }
+		// if ($request->purpose_ids && $request->purpose_ids[0]) {
+		// 	$purpose_ids = explode(',', $request->purpose_ids[0]);
+		// 	$trips->whereIn('trips.purpose_id', $purpose_ids);
+		// }
+		// if ($request->from_city_id) {
+		// 	$trips->whereIn('v.from_city_id', $request->from_city_id);
+		// }
+		// if ($request->to_city_id) {
+		// 	$trips->whereIn('v.to_city_id', $request->to_city_id);
+		// }
+		return $trips;
+	}
+
 	public static function getVerficationPendingList($r) {
 		if (!empty($r->from_date)) {
 			$from_date = date('Y-m-d', strtotime($r->from_date));

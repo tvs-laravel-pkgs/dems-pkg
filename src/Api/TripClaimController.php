@@ -25,6 +25,16 @@ class TripClaimController extends Controller {
 
 	}
 
+	public function listClaimList(Request $r) {
+		$trips = Trip::getEmployeeClaimList($r);
+		$trips = $trips
+		// ->whereRaw('MAX(v.date) < CURDATE()')
+		->get()
+		;
+		return response()->json(['success' => true, 'trips' => $trips]);
+
+	}
+
 	public function getClaimFormData($trip_id) {
 		return Trip::getClaimFormData($trip_id);
 	}
