@@ -52,7 +52,7 @@ class TripController extends Controller {
 
 		// dd($trip_start_date_data);
 		if ($trip_start_date_data) {
-			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
+			return response()->json(['success' => false, 'errors' => ["You have another trip on this trip period"]]);
 		}
 		// dd($request->visits);
 		$size = sizeof($request->visits);

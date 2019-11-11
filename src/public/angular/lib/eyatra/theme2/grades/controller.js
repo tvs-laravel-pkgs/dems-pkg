@@ -170,17 +170,33 @@ app.component('eyatraGradeForm', {
             $rootScope.loading = false;
 
             if (self.action == 'Edit') {
-                if (self.grade_details.advanced_eligibility == 1) {
-                    self.grade_advanced_value = 'Yes';
-                    // $(".grade_advanced").prop('checked', true);
-                } else {
-                    self.grade_advanced_value = 'No';
-                    // $(".grade_advanced").prop('checked', false);
+                
+                if (self.grade_details)
+                {
+                    if (self.grade_details.advanced_eligibility == 1) {
+                        self.grade_advanced_value = 'Yes';
+                        // $(".grade_advanced").prop('checked', true);
+                    } else {
+                        self.grade_advanced_value = 'No';
+                        // $(".grade_advanced").prop('checked', false);
+                    }
+                    if (self.entity.deleted_at == null) {
+                        self.switch_value = 'Active';
+                    } else {
+                        self.switch_value = 'Inactive';
+                    }
+
+                    if (self.grade_details.deviation_eligiblity == 1) {
+                        self.deviation_eligiblity = 'Yes';
+                    } else {
+                        self.deviation_eligiblity = 'No';
+                    }
                 }
-                if (self.entity.deleted_at == null) {
-                    self.switch_value = 'Active';
-                } else {
+                else
+                {
+                    self.grade_advanced_value = 'No';
                     self.switch_value = 'Inactive';
+                    self.deviation_eligiblity = 'No';
                 }
 
                 if (self.grade_details.deviation_eligiblity == 1) {
