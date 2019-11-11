@@ -199,12 +199,6 @@ app.component('eyatraGradeForm', {
                     self.deviation_eligiblity = 'No';
                 }
 
-                if (self.grade_details.deviation_eligiblity == 1) {
-                    self.deviation_eligiblity = 'Yes';
-                } else {
-                    self.deviation_eligiblity = 'No';
-                }
-
                 $timeout(function() {
                     $.each($('.expense_cb:checked'), function() {
                         var id = $(this).val();
