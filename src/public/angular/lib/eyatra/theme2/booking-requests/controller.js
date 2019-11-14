@@ -177,7 +177,7 @@ app.component('eyatraTripBookingRequestsView', {
             var refund_amount = $(".refund_amount").val();
             var cancel_amount = $(".amount_cancel").val();
             if (parseInt(refund_amount) > parseInt(cancel_amount)) {
-                $('.error_refund_amount').text('Amount should be lower then Ticket Amount');
+                $('.error_refund_amount').text('Amount should be less than Ticket Amount');
                 $("#cancel").attr('disabled', true);
             } else {
                 $('.error_refund_amount').text('');

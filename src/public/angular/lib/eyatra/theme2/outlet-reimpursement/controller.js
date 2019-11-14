@@ -128,6 +128,7 @@ app.component('eyatraOutletReimbursement', {
                 }
             });
             if ($("#cash_topup").valid()) {
+                $('#submit').button('loading');
                 $http.post(
                     eyatra_outlet_reimpursement_cash_topup_url, {
                         id: id,
@@ -135,9 +136,9 @@ app.component('eyatraOutletReimbursement', {
                         transaction_date: transaction_date
                     }
                 ).then(function(response) {
+                    $('#submit').button('reset');
                     console.log(response.data.success);
                     if (response.data.success) {
-
                         $('#transaction_date').val('');
                         $('#topup_amount').val('');
                         $('#outlet_reimpursement_modal').modal('hide');

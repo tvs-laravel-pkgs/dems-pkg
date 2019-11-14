@@ -244,12 +244,12 @@ class AgentClaimController extends Controller {
 			// $visit_book = VisitBooking::whereIn('id', $request->booking_list)->update(['status_id' => 3222, 'agent_claim_id' => $agentClaim->id]);
 
 			//STORE ATTACHMENT
-			$item_images = 'agent_claim/attachments/';
+			$item_images = 'agent-claim/attachments/';
 			Storage::makeDirectory($item_images, 0777);
 			if (!empty($request->invoice_attachmet)) {
 				$attachement = $request->invoice_attachmet;
 				$name = $attachement->getClientOriginalName();
-				$attachement->move(storage_path('app/public/agent_claim/attachments/'), $name);
+				$attachement->move(storage_path('app/public/agent-claim/attachments/'), $name);
 				$attachement_vendor_claim = new Attachment;
 				$attachement_vendor_claim->attachment_of_id = 3161; //agent id from configs
 				$attachement_vendor_claim->attachment_type_id = 3200;

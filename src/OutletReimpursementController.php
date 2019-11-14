@@ -42,7 +42,7 @@ class OutletReimpursementController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				$outlet_code_name = $outlets->outlet_code . " / " . $outlets->outlet_name;
-				$outlet_cashier_name = $outlets->cashier_code;
+				$outlet_cashier_name = $outlets->cashier_code . " / " . $outlets->cashier_name;
 				$outlet_amount = $outlets->amount;
 				return '
 				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">

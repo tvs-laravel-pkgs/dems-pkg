@@ -233,7 +233,9 @@ class EmployeeController extends Controller {
 				'username.required' => "Username is Required",
 				'mobile_number.unique' => "Mobile Number is already taken",
 				'username.unique' => "Username is already taken",
-				'email.unique' => "Email is already taken",
+				'aadhar_no.unique' => "Aadhar Number is already taken",
+				'pan_no.unique' => "PAN Number is already taken",
+				// 'email.unique' => "Email is already taken",
 			];
 
 			$validator = Validator::make($request->all(), [
@@ -253,11 +255,22 @@ class EmployeeController extends Controller {
 					'unique:users,username,' . $request->user_id . ',id',
 
 				],
-				'email' => [
+				// 'email' => [
+				// 	'required:true',
+				// 	'unique:users,email,' . $request->user_id . ',id',
+
+				// ],
+				'aadhar_no' => [
 					'required:true',
-					'unique:users,email,' . $request->user_id . ',id',
+					'unique:employees,aadhar_no,' . $request->id . ',id',
 
 				],
+				'pan_no' => [
+					'required:true',
+					'unique:employees,pan_no,' . $request->id . ',id',
+
+				],
+
 			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
