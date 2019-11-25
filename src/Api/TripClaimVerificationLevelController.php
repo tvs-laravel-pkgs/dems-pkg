@@ -226,10 +226,10 @@ class TripClaimVerificationLevelController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		if ($employee_claim->is_deviation == 0) {
-			$employee_claim->status_id = 3223; //Payment Pending
-			$trip->status_id = 3025; //Payment Pending
+			$employee_claim->status_id = 3034; //Payment Pending
+			$trip->status_id = 3034; //Payment Pending
 		} else {
-			$employee_claim->status_id = 3224; //Senior Manager Approval Pending
+			$employee_claim->status_id = 3029; //Senior Manager Approval Pending
 			$trip->status_id = 3029; //Senior Manager Approval Pending
 		}
 		$employee_claim->save();
