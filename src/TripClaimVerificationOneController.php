@@ -288,8 +288,8 @@ class TripClaimVerificationOneController extends Controller {
 			// $employee_claim->status_id = 3034; //PAYMENT PENDING
 			// $trip->status_id = 3034; // Payment Pending
 		} else {
-			$employee_claim->status_id = 3029; //Senior Manager Approval Pending
-			$trip->status_id = 3029; //Senior Manager Approval Pending
+			$employee_claim->status_id = 3034; //PAYMENT PENDING
+			$trip->status_id = 3034; // Payment Pending
 		}
 		$employee_claim->save();
 		$trip->save();
