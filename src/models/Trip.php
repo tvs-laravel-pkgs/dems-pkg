@@ -1993,14 +1993,29 @@ class Trip extends Model {
 				} else {
 					$employee_claim->status_id = 3023; //CLAIM REQUESTED
 				}
+
+				$employee_claim->created_by = Auth::user()->id;
+				$employee_claim->save();
+
 				//CHECK EMPLOYEE GRADE HAS DEVIATION ELIGIBILITY ==> IF DEVIATION ELIGIBILITY IS 2-NO MEANS THERE IS NO DEVIATION, 1-YES MEANS NEED TO CHECK IN REQUEST
 				$grade_advance_eligibility = GradeAdvancedEligiblity::where('grade_id', $request->grade_id)->first();
 				if ($grade_advance_eligibility && $grade_advance_eligibility->deviation_eligiblity == 2) {
 					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
 				} else {
-					$employee_claim->is_deviation = $request->is_deviation;
+					$advance_received = $trip->advance_received ? $trip->advance_received : 0;
+
+					if ($advance_received > 0) {
+						if ($advance_received > $employee_claim->total_amount) {
+							$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+						} else {
+							$employee_claim->is_deviation = 1; //DEVIATION YES
+						}
+					} else {
+						$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+					}
+					// $employee_claim->is_deviation = $request->is_deviation;
 				}
-				$employee_claim->created_by = Auth::user()->id;
+
 				$employee_claim->save();
 
 				//STORE GOOGLE ATTACHMENT

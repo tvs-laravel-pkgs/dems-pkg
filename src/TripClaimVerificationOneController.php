@@ -260,37 +260,28 @@ class TripClaimVerificationOneController extends Controller {
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		// if ($employee_claim->is_deviation == 0) {
+		// 	// if ($trip->advance_received > $employee_claim->claim_total_amount) {
+		// 	// 	$trip->status_id = 3031; // Payment Pending for Employee
+		// 	// 	$employee_claim->status_id = 3031; // Payment Pending for Employee
+		// 	// } else {
+		// 	// 	$trip->status_id = 3025; // Payment Pending for Financier
+		// 	// 	$employee_claim->status_id = 3025; // Payment Pending for Financier
+		// 	// }
+		// 	$employee_claim->status_id = 3034; //PAYMENT PENDING
+		// 	$trip->status_id = 3034; // Payment Pending
+		// } else {
+		// 	$employee_claim->status_id = 3029; //Senior Manager Approval Pending
+		// 	$trip->status_id = 3029; //Senior Manager Approval Pending
+		// }
 		if ($employee_claim->is_deviation == 0) {
-			$advance_received = $trip->advance_received ? $trip->advance_received : 0;
-			if ($advance_received > 0) {
-				if ($advance_received > $employee_claim->claim_total_amount) {
-					$employee_claim->status_id = 3034; //PAYMENT PENDING
-					$trip->status_id = 3034; // Payment Pending
-				} else {
-					$employee_claim->status_id = 3029; //Senior Manager Approval Pending
-					$trip->status_id = 3029; //Senior Manager Approval Pending
-				}
-			} else {
-				$employee_claim->status_id = 3034; //PAYMENT PENDING
-				$trip->status_id = 3034; // Payment Pending
-			}
-			// if ($trip->advance_received > $employee_claim->claim_total_amount) {
-			// 	// $trip->status_id = 3031; // Payment Pending for Employee
-			// 	// $employee_claim->status_id = 3031; // Payment Pending for Employee
-			// 	$employee_claim->status_id = 3034; //PAYMENT PENDING
-			// 	$trip->status_id = 3034; // Payment Pending
-			// } else {
-			// 	// $trip->status_id = 3025; // Payment Pending for Financier
-			// 	// $employee_claim->status_id = 3025; // Payment Pending for Financier
-			// 	$employee_claim->status_id = 3029; //Senior Manager Approval Pending
-			// 	$trip->status_id = 3029; //Senior Manager Approval Pending
-			// }
-			// $employee_claim->status_id = 3034; //PAYMENT PENDING
-			// $trip->status_id = 3034; // Payment Pending
+			$employee_claim->status_id = 3034; //Payment Pending
+			$trip->status_id = 3034; //Payment Pending
 		} else {
-			$employee_claim->status_id = 3034; //PAYMENT PENDING
-			$trip->status_id = 3034; // Payment Pending
+			$employee_claim->status_id = 3029; //Senior Manager Approval Pending
+			$trip->status_id = 3029; //Senior Manager Approval Pending
 		}
+
 		$employee_claim->save();
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
