@@ -150,7 +150,7 @@ class EmployeeController extends Controller {
 				}
 				$delete_class = "visibility:hidden";
 				if (Entrust::can('eyatra-employee-delete')) {
-					$delete_class = "eyatra-employee-delete";
+					$delete_class = "";
 				}
 
 				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/employee/edit/' . $employee->id . '">
