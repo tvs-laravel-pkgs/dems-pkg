@@ -35,8 +35,10 @@ class TripClaimVerificationLevelController extends Controller {
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
+				DB::raw('FORMAT(ey_employee_claims.total_amount,2,"en_IN") as claim_amount'),
+				'trips.created_at',
 
 				'status.name as status'
 			)
