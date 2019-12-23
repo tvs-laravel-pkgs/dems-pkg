@@ -27,7 +27,7 @@ class TripController extends Controller {
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
-				'users.name as ename',
+				'users.name as ename', 'trips.status_id',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 
 				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
@@ -91,13 +91,19 @@ class TripController extends Controller {
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 
 				$action = '';
-				$edit_class = "visibility:hidden";
-				if (Entrust::can('trip-edit')) {
-					$edit_class = "";
-				}
-				$delete_class = "visibility:hidden";
-				if (Entrust::can('trip-delete')) {
-					$delete_class = "";
+
+				if ($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
+					$edit_class = "visibility:hidden";
+					if (Entrust::can('trip-edit')) {
+						$edit_class = "";
+					}
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('trip-delete')) {
+						$delete_class = "";
+					}
+				} else {
+					$edit_class = "visibility:hidden";
+					$delete_class = "visibility:hidden";
 				}
 
 				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/trip/edit/' . $trip->id . '">

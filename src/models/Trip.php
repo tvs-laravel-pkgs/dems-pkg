@@ -1759,6 +1759,28 @@ class Trip extends Model {
 							$attachement_lodge->save();
 						}
 					}
+
+					//SAVE EMPLOYEE CLAIMS
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->trip_id = $trip->id;
+					$employee_claim->total_amount = $request->claim_total_amount;
+					$employee_claim->lodging_total = $lodging_total_amount;
+					$employee_claim->employee_id = Auth::user()->entity_id;
+					$employee_claim->status_id = 3033; //CLAIM INPROGRESS
+					$employee_claim->created_by = Auth::user()->id;
+					//To Find Amount to Pay Financier or Employee
+					if ($trip->advance_received) {
+						if ($trip->advance_received > $request->claim_total_amount) {
+							$balance_amount = $trip->advance_received - $request->claim_total_amount;
+							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+							$employee_claim->amount_to_pay = 2;
+						} else {
+							$employee_claim->amount_to_pay = 1;
+						}
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+					$employee_claim->save();
 				}
 
 				//GET SAVED LODGINGS
@@ -1790,32 +1812,10 @@ class Trip extends Model {
 				// } else {
 				// 	$boarding_dates_list = array();
 				// }
-
-				//SAVE EMPLOYEE CLAIMS
-				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
-				$employee_claim->trip_id = $trip->id;
-				$employee_claim->total_amount = $request->claim_total_amount;
-				$employee_claim->lodging_total = $lodging_total_amount;
-				$employee_claim->employee_id = Auth::user()->entity_id;
-				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
-				$employee_claim->created_by = Auth::user()->id;
-				//To Find Amount to Pay Financier or Employee
-				if ($trip->advance_received) {
-					if ($trip->advance_received > $request->claim_total_amount) {
-						$balance_amount = $trip->advance_received - $request->claim_total_amount;
-						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-						$employee_claim->amount_to_pay = 2;
-					} else {
-						$employee_claim->amount_to_pay = 1;
-					}
-				} else {
-					$employee_claim->amount_to_pay = 1;
-				}
-				$employee_claim->save();
-
 				DB::commit();
 				return response()->json(['success' => true, 'saved_lodgings' => $saved_lodgings]);
 			}
+
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
 				// dd($request->all());
@@ -1833,7 +1833,6 @@ class Trip extends Model {
 
 				//SAVE
 				if ($request->boardings) {
-
 					//TOTAL BOARDING DAYS SHOULD NOT EXCEED TOTAL TRIP DAYS
 					$boarding_days = (int) array_sum(array_column($request->boardings, 'days'));
 					$trip_total_days = (int) $request->trip_total_days;
@@ -1894,6 +1893,28 @@ class Trip extends Model {
 							$attachement_lodge->save();
 						}
 					}
+
+					//SAVE EMPLOYEE CLAIMS
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->trip_id = $trip->id;
+					$employee_claim->total_amount = $request->claim_total_amount;
+					$employee_claim->boarding_total = $boarding_total_amount;
+					$employee_claim->employee_id = Auth::user()->entity_id;
+					$employee_claim->status_id = 3033; //CLAIM INPROGRESS
+					$employee_claim->created_by = Auth::user()->id;
+					//To Find Amount to Pay Financier or Employee
+					if ($trip->advance_received) {
+						if ($trip->advance_received > $request->claim_total_amount) {
+							$balance_amount = $trip->advance_received - $request->claim_total_amount;
+							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+							$employee_claim->amount_to_pay = 2;
+						} else {
+							$employee_claim->amount_to_pay = 1;
+						}
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+					$employee_claim->save();
 				}
 
 				//GET SAVED BOARDINGS
@@ -1903,29 +1924,6 @@ class Trip extends Model {
 					'boardings.city',
 					'boardings.attachments',
 				])->find($request->trip_id);
-
-				//SAVE EMPLOYEE CLAIMS
-				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
-				$employee_claim->trip_id = $trip->id;
-				$employee_claim->total_amount = $request->claim_total_amount;
-				$employee_claim->boarding_total = $boarding_total_amount;
-				$employee_claim->employee_id = Auth::user()->entity_id;
-				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
-				$employee_claim->created_by = Auth::user()->id;
-				//To Find Amount to Pay Financier or Employee
-				if ($trip->advance_received) {
-					if ($trip->advance_received > $request->claim_total_amount) {
-						$balance_amount = $trip->advance_received - $request->claim_total_amount;
-						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-						$employee_claim->amount_to_pay = 2;
-					} else {
-						$employee_claim->amount_to_pay = 1;
-					}
-				} else {
-					$employee_claim->amount_to_pay = 1;
-				}
-				$employee_claim->save();
-
 				DB::commit();
 				return response()->json(['success' => true, 'saved_boardings' => $saved_boardings]);
 			}
