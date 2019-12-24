@@ -670,7 +670,7 @@ class Trip extends Model {
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,2,"en_IN")) as advance_received'),
 				'trips.created_at',
 				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
-				'status.name as status'
+				'status.name as status', 'status.name as status_name'
 
 			)
 			->where('users.user_type_id', 3121)
