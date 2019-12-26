@@ -1,5 +1,5 @@
 app.component('eyatraLocalTravelModeList', {
-    templateUrl: local_travel_mode_data_list_template_url,
+    templateUrl: eyatra_local_trip_verification_list_template_url,
     controller: function(HelperService, $http, $rootScope, $scope, $routeParams) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -34,15 +34,13 @@ app.component('eyatraLocalTravelModeList', {
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'name', name: 'entities.name' },
-                { data: 'category_name', name: 'c.name' },
-                { data: 'created_by', name: 'users.username' },
-                { data: 'updated_by', name: 'updater.username' },
-                { data: 'deleted_by', name: 'deactivator.username' },
-                { data: 'created_at', name: 'entities.created_at', searchable: false },
-                { data: 'updated_at1', name: 'entities.updated_at', searchable: false },
-                { data: 'deleted_at', name: 'entities.deleted_at', searchable: false },
-                { data: 'status', searchable: false },
+                { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'created_date', name: 'trips.created_date', searchable: false },
+                { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'travel_period', name: 'travel_period', searchable: false },
+                { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');

@@ -28,7 +28,6 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/local-travel-mode/edit/:travel_mode_id', {
         template: '<eyatra-local-travel-mode-form></eyatra-local-travel-mode-form>',
         title: 'Edit Local Travel Mode',
-
     }).
 
     //TRAVEL MODE
@@ -592,13 +591,16 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-local-view></eyatra-trip-local-view>',
         title: 'View Local Trip',
     }).
-    when('/local-trip/verification/:trip_id', {
-        template: '<eyatra-trip-local-verification-view></eyatra-trip-local-verification-view>',
-        title: 'View Local Trip',
+  
+
+    //LOCAL TRIP VERIFICATION
+    when('/local-trip/verification', {
+        template: '<eyatra-local-trip-verifications></eyatra-local-trip-verifications>',
+        title: 'Local Trips',
     }).
-    when('/local-trip/financier-verification/:trip_id', {
-        template: '<eyatra-trip-local-financier-verification-view></eyatra-trip-local-financier-verification-view>',
-        title: 'View Local Trip',
+    when('/local-trip/verification/form/:trip_id', {
+        template: '<eyatra-local-trip-verification-form></eyatra-local-trip-verification-form>',
+        title: 'Lcoal Trip Verification Form',
     });
 
 }]);
