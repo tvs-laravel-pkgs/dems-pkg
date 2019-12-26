@@ -45,6 +45,7 @@ class EYatraConfigSeeder extends Seeder {
 			528 => 'Advance Expense Voucher',
 			529 => 'Alternate Approver Type',
 			530 => 'Agent Claim Status',
+			531 => 'Local Trip Statuses',
 		];
 
 		$configs = [
@@ -743,6 +744,40 @@ class EYatraConfigSeeder extends Seeder {
 			3522 => [
 				'name' => 'Claim Rejected',
 				'config_type_id' => 530,
+			],
+
+			//LOCAL TRIP STATUS
+			3540 => [
+				'name' => 'Approval Pending',
+				'config_type_id' => 531,
+			],
+			3541 => [
+				'name' => 'Approved',
+				'config_type_id' => 531,
+			],
+			3542 => [
+				'name' => 'Rejected',
+				'config_type_id' => 531,
+			],
+			3543 => [
+				'name' => 'Trip Claim Requested',
+				'config_type_id' => 531,
+			],
+			3544 => [
+				'name' => 'Claim Approved',
+				'config_type_id' => 531,
+			],
+			3545 => [
+				'name' => 'Claim Rejected',
+				'config_type_id' => 531,
+			],
+			3546 => [
+				'name' => 'Financier Hold',
+				'config_type_id' => 531,
+			],
+			3547 => [
+				'name' => 'Paid',
+				'config_type_id' => 531,
 			],
 		];
 

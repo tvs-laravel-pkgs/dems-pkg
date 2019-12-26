@@ -12,10 +12,10 @@ class AlterEyEmployeeClaim extends Migration {
 	 */
 	public function up() {
 		Schema::table('ey_employee_claims', function (Blueprint $table) {
-			$table->unsignedDecimal('transport_total', 10, 2)->nullable()->after('total_amount');
-			$table->unsignedDecimal('lodging_total', 10, 2)->nullable()->after('transport_total');
-			$table->unsignedDecimal('boarding_total', 10, 2)->nullable()->after('lodging_total');
-			$table->unsignedDecimal('local_travel_total', 10, 2)->nullable()->after('boarding_total');
+			// $table->unsignedDecimal('transport_total', 10, 2)->nullable()->after('total_amount');
+			// $table->unsignedDecimal('lodging_total', 10, 2)->nullable()->after('transport_total');
+			// $table->unsignedDecimal('boarding_total', 10, 2)->nullable()->after('lodging_total');
+			// $table->unsignedDecimal('local_travel_total', 10, 2)->nullable()->after('boarding_total');
 		});
 	}
 

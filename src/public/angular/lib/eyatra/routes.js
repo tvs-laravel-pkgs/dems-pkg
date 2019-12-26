@@ -558,6 +558,32 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/finance/agent/claim/view/:agent_claim_id', {
         template: '<eyatra-agent-claim-verification-view></eyatra-agent-claim-verification-view>',
         title: 'View Agent Claim',
+    }).
+
+    //LOCAL TRIP
+    when('/local-trips', {
+        template: '<eyatra-local-trips></eyatra-local-trips>',
+        title: 'Local Trips',
+    }).
+    when('/local-trip/add', {
+        template: '<eyatra-trip-local-form></eyatra-trip-local-form>',
+        title: 'Add Local Trip',
+    }).
+    when('/local-trip/edit/:trip_id', {
+        template: '<eyatra-trip-local-form></eyatra-trip-local-form>',
+        title: 'Edit Local Trip',
+    }).
+    when('/local-trip/view/:trip_id', {
+        template: '<eyatra-trip-local-view></eyatra-trip-local-view>',
+        title: 'View Local Trip',
+    }).
+    when('/local-trip/verification/:trip_id', {
+        template: '<eyatra-trip-local-verification-view></eyatra-trip-local-verification-view>',
+        title: 'View Local Trip',
+    }).
+    when('/local-trip/financier-verification/:trip_id', {
+        template: '<eyatra-trip-local-financier-verification-view></eyatra-trip-local-financier-verification-view>',
+        title: 'View Local Trip',
     });
 
 }]);
