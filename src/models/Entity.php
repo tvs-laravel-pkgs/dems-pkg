@@ -35,6 +35,10 @@ class Entity extends Model {
 	public function categories() {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'travel_mode_category_type', 'travel_mode_id', 'category_id');
 	}
+
+	public function local_travel_mode_categories() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'local_travel_mode_category_type', 'travel_mode_id', 'category_id');
+	}
 	// public function gradeEligibility() {
 	// 	return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_advanced_eligibility', 'grade_id', 'advanced_eligibility');
 	// }
@@ -94,12 +98,12 @@ class Entity extends Model {
 	public static function uiClaimTravelModeList() {
 		//$employee=Employee::where('id',Auth::user()->entity_id)->first();
 		return Entity::select('entities.id', 'entities.name')
-		->join('grade_travel_mode','grade_travel_mode.travel_mode_id','entities.id')
-		->join('employees','employees.grade_id','grade_travel_mode.grade_id')
-		->where('entities.entity_type_id', 502)
-		->where('employees.id', Auth::user()->entity_id)
-		->where('entities.company_id', Auth::user()->company_id)
-		->get();
+			->join('grade_travel_mode', 'grade_travel_mode.travel_mode_id', 'entities.id')
+			->join('employees', 'employees.grade_id', 'grade_travel_mode.grade_id')
+			->where('entities.entity_type_id', 502)
+			->where('employees.id', Auth::user()->entity_id)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
 	}
 
 	public static function uiLocaTravelModeList() {
@@ -107,12 +111,12 @@ class Entity extends Model {
 	}
 	public static function uiClaimLocaTravelModeList() {
 		return Entity::select('entities.id', 'entities.name')
-		->join('grade_local_travel_mode','grade_local_travel_mode.local_travel_mode_id','entities.id')
-		->join('employees','employees.grade_id','grade_local_travel_mode.grade_id')
-		->where('entities.entity_type_id', 503)
-		->where('employees.id', Auth::user()->entity_id)
-		->where('entities.company_id', Auth::user()->company_id)
-		->get();
+			->join('grade_local_travel_mode', 'grade_local_travel_mode.local_travel_mode_id', 'entities.id')
+			->join('employees', 'employees.grade_id', 'grade_local_travel_mode.grade_id')
+			->where('entities.entity_type_id', 503)
+			->where('employees.id', Auth::user()->entity_id)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
 	}
 
 	public static function getGradeList() {

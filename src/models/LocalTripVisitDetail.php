@@ -17,4 +17,7 @@ class LocalTripVisitDetail extends Model {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
 
+	public function travelMode() {
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'travel_mode_id');
+	}
 }

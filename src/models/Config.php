@@ -22,6 +22,11 @@ class Config extends Model {
 	public static function categoryList() {
 		return Config::where('config_type_id', 525)->select('id', 'name')->get()->keyBy('id');
 	}
+
+	public static function amountCategoryList() {
+		return Config::where('config_type_id', 532)->select('id', 'name')->get()->keyBy('id');
+	}
+
 	public static function paymentModeList() {
 		return Config::where('config_type_id', 514)->select('id', 'name')->get();
 	}

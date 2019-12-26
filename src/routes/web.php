@@ -88,6 +88,13 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/travel-mode/view/{entity_id}', 'Uitoux\EYatra\TravelModeController@viewEYatraTravelMode')->name('viewEYatraTravelMode');
 		Route::get('eyatra/travel-mode/delete/{travel_mode_id}', 'Uitoux\EYatra\TravelModeController@deleteEYatraTravelMode')->name('deleteEYatraTravelMode');
 
+		//LOCAL TRAVEL MODE
+		Route::get('eyatra/local-travel-mode/get-list', 'Uitoux\EYatra\LocalTravelModeController@listEYatraLocalTravelMode')->name('listEYatraLocalTravelMode');
+		Route::get('eyatra/local-travel-mode/get-form-data/{travel_mode_id?}', 'Uitoux\EYatra\LocalTravelModeController@eyatraLocalTravelModeFormData')->name('eyatraLocalTravelModeFormData');
+		Route::post('eyatra/local-travel-mode/save', 'Uitoux\EYatra\LocalTravelModeController@saveEYatraLocalTravelMode')->name('saveEYatraLocalTravelMode');
+		Route::get('eyatra/local-travel-mode/view/{entity_id}', 'Uitoux\EYatra\LocalTravelModeController@viewEYatraLocalTravelMode')->name('viewEYatraLocalTravelMode');
+		Route::get('eyatra/local-travel-mode/delete/{travel_mode_id}', 'Uitoux\EYatra\LocalTravelModeController@deleteEYatraLocalTravelMode')->name('deleteEYatraLocalTravelMode');
+
 		//COA NG
 		Route::get('coa/get-form-data-ng/{entity_id?}', 'Uitoux\EYatra\CoaController@eyatraCoaFormDataNg')->name('eyatraCoaFormDataNg');
 
@@ -382,7 +389,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/get-list', 'Uitoux\EYatra\LocalTripController@listLocalTrip')->name('listLocalTrip');
 		Route::get('eyatra/local-trip/get-form-data/{trip_id?}', 'Uitoux\EYatra\LocalTripController@localTripFormData')->name('localTripFormData');
 		Route::post('eyatra/local-trip/save', 'Uitoux\EYatra\LocalTripController@saveLocalTrip')->name('saveLocalTrip');
-		Route::get('eyatra/trip/view/{trip_id}', 'Uitoux\EYatra\TripController@viewTrip')->name('viewTrip');
+		Route::get('eyatra/local-trip/view/{trip_id}', 'Uitoux\EYatra\LocalTripController@viewLocalTrip')->name('viewLocalTrip');
 		Route::get('eyatra/trip/delete/{trip_id}', 'Uitoux\EYatra\TripController@deleteTrip')->name('deleteTrip');
 		Route::get('eyatra/trip/cancel/{trip_id}', 'Uitoux\EYatra\TripController@cancelTrip')->name('cancelTrip');
 		Route::get('eyatra/trip/verification-request/{trip_id}', 'Uitoux\EYatra\TripController@tripVerificationRequest')->name('tripVerificationRequest');
@@ -392,6 +399,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trips/visit/delete/{visit_id}', 'Uitoux\EYatra\TripController@deleteVisit')->name('deleteVisit');
 		// Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\TripController@searchCity')->name('searchCity');
 		Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
-		Route::get('eyatra/trip/get-filter-data', 'Uitoux\EYatra\TripController@eyatraTripFilterData')->name('eyatraTripFilterData');
+		Route::get('eyatra/local-trip/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFilterData')->name('eyatraLocalTripFilterData');
 	});
 });

@@ -46,6 +46,8 @@ class EYatraConfigSeeder extends Seeder {
 			529 => 'Alternate Approver Type',
 			530 => 'Agent Claim Status',
 			531 => 'Local Trip Statuses',
+			532 => 'Local Trave Mode Category Types - EYatra',
+
 		];
 
 		$configs = [
@@ -778,6 +780,16 @@ class EYatraConfigSeeder extends Seeder {
 			3547 => [
 				'name' => 'Paid',
 				'config_type_id' => 531,
+			],
+
+			//TRAVEL MODE CATEGORY TYPE
+			3560 => [
+				'name' => 'Extra Amount Not Eligible',
+				'config_type_id' => 532,
+			],
+			3561 => [
+				'name' => 'Extra Amount Eligible',
+				'config_type_id' => 532,
 			],
 		];
 

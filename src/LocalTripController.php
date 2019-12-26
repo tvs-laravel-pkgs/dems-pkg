@@ -16,26 +16,19 @@ class LocalTripController extends Controller {
 	public function listLocalTrip(Request $r) {
 
 		$trips = LocalTrip::from('local_trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
-			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->join('employees as e', 'e.id', 'local_trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
+			->join('configs as status', 'status.id', 'local_trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'local_trips.employee_id')
 			->where('users.user_type_id', 3121)
 			->select(
-				'trips.id',
-				'trips.number',
+				'local_trips.id',
+				'local_trips.number',
 				'e.code as ecode',
-				'users.name as ename', 'trips.status_id',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-
-				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
-				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
+				'users.name as ename', 'local_trips.status_id',
+				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
@@ -53,18 +46,18 @@ class LocalTripController extends Controller {
 			->where(function ($query) use ($r) {
 				if ($r->from_date) {
 					$date = date('Y-m-d', strtotime($r->from_date));
-					$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
+					$query->where("local_trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
 				}
 			})
 			->where(function ($query) use ($r) {
 				if ($r->to_date) {
 					$date = date('Y-m-d', strtotime($r->to_date));
-					$query->where("trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
+					$query->where("local_trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
 				}
 			})
 			->where(function ($query) use ($r) {
 				if ($r->get('trip_id')) {
-					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
+					$query->where("local_trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
 				}
 			})
 			->where(function ($query) use ($r) {
@@ -72,79 +65,13 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->where('trips.employee_id', Auth::user()->entity_id)
-			->groupBy('trips.id')
+			->where('local_trips.employee_id', Auth::user()->entity_id)
+			->groupBy('local_trips.id')
 		// ->orderBy('trips.created_at', 'desc');
-			->orderBy('trips.id', 'desc')
-			->get()
+			->orderBy('local_trips.id', 'desc')
+		// ->get()
 		;
-		dd($trips);
 
-		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
-			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
-			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
-			->where('users.user_type_id', 3121)
-			->select(
-				'trips.id',
-				'trips.number',
-				'e.code as ecode',
-				'users.name as ename', 'trips.status_id',
-				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-
-				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
-				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
-				'purpose.name as purpose',
-				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
-				'status.name as status'
-			)
-			->where('e.company_id', Auth::user()->company_id)
-
-			->where(function ($query) use ($r) {
-				if ($r->get('employee_id')) {
-					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('purpose_id')) {
-					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->from_date) {
-					$date = date('Y-m-d', strtotime($r->from_date));
-					$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->to_date) {
-					$date = date('Y-m-d', strtotime($r->to_date));
-					$query->where("trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('trip_id')) {
-					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('status_id')) {
-					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
-				}
-			})
-			->where('trips.employee_id', Auth::user()->entity_id)
-			->groupBy('trips.id')
-		// ->orderBy('trips.created_at', 'desc');
-			->orderBy('trips.id', 'desc');
-
-		// if (!Entrust::can('view-all-trips')) {
-		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
-		// }
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
@@ -157,13 +84,13 @@ class LocalTripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
+				if ($trip->status_id == '3540' || $trip->status_id == '3542' || $trip->status_id == '3545') {
 					$edit_class = "visibility:hidden";
-					if (Entrust::can('trip-edit')) {
+					if (!Entrust::can('trip-edit')) {
 						$edit_class = "";
 					}
 					$delete_class = "visibility:hidden";
-					if (Entrust::can('trip-delete')) {
+					if (!Entrust::can('trip-delete')) {
 						$delete_class = "";
 					}
 				} else {
@@ -171,10 +98,10 @@ class LocalTripController extends Controller {
 					$delete_class = "visibility:hidden";
 				}
 
-				$action .= '<a style="' . $edit_class . '" href="#!/trip/edit/' . $trip->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/local-trip/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a> ';
-				$action .= '<a href="#!/trip/view/' . $trip->id . '">
+				$action .= '<a href="#!/local-trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
 				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_trip"
@@ -196,48 +123,42 @@ class LocalTripController extends Controller {
 
 		// dd($request->all());
 
-		// if ($request->id) {
-		// 	$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
-		// 		->where('id', '!=', $request->id)
-		// 		->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-		// 		->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-		// 		->first();
-		// } else {
-		// 	$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
-		// 		->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-		// 		->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-		// 		->first();
-		// }
+		if ($request->id) {
+			$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
+				->where('id', '!=', $request->id)
+				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->first();
+		} else {
+			$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
+				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->first();
+		}
 
-		// if ($trip_start_date_data) {
-		// 	return response()->json(['success' => false, 'errors' => "You have another local trip on this trip period"]);
-		// }
+		if ($trip_start_date_data) {
+			return response()->json(['success' => false, 'errors' => "You have another local trip on this trip period"]);
+		}
 
-		// $size = sizeof($request->visits);
-		// for ($i = 0; $i < $size; $i++) {
-		// 	if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {
-		// 		return response()->json(['success' => false, 'errors' => "Departure date should be within Trip Period"]);
+		if ($request->trip_detail) {
+			$size = sizeof($request->trip_detail);
+			for ($i = 0; $i < $size; $i++) {
+				if (!(($request->trip_detail[$i]['travel_date'] >= $request->start_date) && ($request->trip_detail[$i]['travel_date'] <= $request->end_date))) {
+					return response()->json(['success' => false, 'errors' => "Visit date should be within Trip Period"]);
 
-		// 	}
+				}
 
-		// 	$next_key = $i + 1;
-		// 	if (!($next_key >= $size)) {
-		// 		//dump($next_key);
-		// 		if ($request->visits[$next_key]['date'] < $request->visits[$i]['date']) {
-		// 			return response()->json(['success' => false, 'errors' => "Return Date Should Be Greater Than Or Equal To Departure Date"]);
-		// 		}
-		// 	}
-
-		// }
+			}
+		}
 		return LocalTrip::saveTrip($request);
 	}
 
-	public function viewTrip($trip_id) {
-		return Trip::getViewData($trip_id);
+	public function viewLocalTrip($trip_id) {
+		return LocalTrip::getViewData($trip_id);
 	}
 
-	public function eyatraTripFilterData() {
-		return Trip::getFilterData();
+	public function eyatraLocalTripFilterData() {
+		return LocalTrip::getFilterData();
 	}
 
 	public function deleteTrip($trip_id) {

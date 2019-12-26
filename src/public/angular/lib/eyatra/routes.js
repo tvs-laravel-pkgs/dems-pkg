@@ -16,6 +16,21 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit Entity Master',
 
     }).
+    //LOCAL TRAVEL MODE
+    when('/local-travel-mode/list', {
+        template: '<eyatra-local-travel-mode-list></eyatra-local-travel-mode-list>',
+        title: 'Local Travel Mode List',
+    }).
+    when('/local-travel-mode/add', {
+        template: '<eyatra-local-travel-mode-form></eyatra-local-travel-mode-form>',
+        title: 'Add Local Travel Mode',
+    }).
+    when('/local-travel-mode/edit/:travel_mode_id', {
+        template: '<eyatra-local-travel-mode-form></eyatra-local-travel-mode-form>',
+        title: 'Edit Local Travel Mode',
+
+    }).
+
     //TRAVEL MODE
     when('/travel-mode/list', {
         template: '<eyatra-travel-mode-list></eyatra-travel-mode-list>',
