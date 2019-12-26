@@ -71,7 +71,7 @@ class TripClaimVerificationThreeController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 
 				return '
-				<a href="#!/eyatra/trip/claim/verification3/view/' . $trip->id . '">
+				<a href="#!/trip/claim/verification3/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
 

@@ -157,7 +157,7 @@ app.component('eyatraRegionForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/regions')
+                $location.path('/regions')
                 $scope.$apply()
                 return;
             }
@@ -256,7 +256,7 @@ app.component('eyatraRegionForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/regions')
+                            $location.path('/regions')
                             $scope.$apply()
                         }
                     })

@@ -161,7 +161,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                             }, 5000);
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/expense/voucher-advance/verification3/')
+                                $location.path('/expense/voucher-advance/verification3/')
                             }, 500);
                         }
                     })
@@ -220,7 +220,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/expense/voucher-advance/verification3/')
+                                $location.path('/expense/voucher-advance/verification3/')
                             }, 500);
                         }
                     })

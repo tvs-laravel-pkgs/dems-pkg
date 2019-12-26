@@ -45,7 +45,7 @@ app.component('eyatraAgentClaimList', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/agent/claim/add" type="button" class="btn btn-secondary">' +
+            '<a href="#!/agent/claim/add" type="button" class="btn btn-secondary">' +
             'Add New' +
             '</a>'
         );
@@ -71,7 +71,7 @@ app.component('eyatraAgentClaimList', {
                         $noty.close();
                     }, 1000);
                     $('#agent_claim_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('/eyatra/agent/claim/list');
+                    $location.path('/agent/claim/list');
                     // $scope.$apply();
                 } else {
                     $noty = new Noty({
@@ -115,7 +115,7 @@ app.component('eyatraAgentClaimForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/agent/claim/list')
+                $location.path('/agent/claim/list')
                 // $scope.$apply()
                 return;
             }
@@ -290,7 +290,7 @@ app.component('eyatraAgentClaimForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/agent/claim/list')
+                            $location.path('/agent/claim/list')
                             $scope.$apply()
                         }
                     })

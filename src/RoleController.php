@@ -27,7 +27,7 @@ class RoleController extends Controller {
 					if (Entrust::can('eyatra-role-edit')) {
 						$edit_class = "";
 					}
-					return '<a style="' . $edit_class . '" href="#!/eyatra/master/roles/edit/' . $roles->id . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
+					return '<a style="' . $edit_class . '" href="#!/master/roles/edit/' . $roles->id . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
 					// return '<a href="' . route('editRolesAngular', ['role_id' => $roles->id]) . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
 				} else {
 					return '-';

@@ -44,7 +44,7 @@ class DesignationController extends Controller {
 					$delete_class = "";
 				}
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/designation/edit/' . $designations->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/designation/edit/' . $designations->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a> ';
 

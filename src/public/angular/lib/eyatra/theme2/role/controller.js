@@ -254,7 +254,7 @@ app.component('eyatraRoleList', {
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Roles</p><h3 class="title">Roles</h3>');
         if (self.permission == true) {
             $('.add_new_button').html(
-                '<a href="#!/eyatra/master/roles/add" type="button" class="btn btn-secondary">' +
+                '<a href="#!/master/roles/add" type="button" class="btn btn-secondary">' +
                 'Add New' +
                 '</a>'
             );
@@ -284,7 +284,7 @@ app.component('eyatraRoleForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/roles/list/')
+                $location.path('/roles/list/')
                 $scope.$apply()
                 return;
             }
@@ -374,7 +374,7 @@ app.component('eyatraRoleForm', {
                             }, 5000);
 
                         } else {
-                            $location.path('/eyatra/roles/list/')
+                            $location.path('/roles/list/')
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',

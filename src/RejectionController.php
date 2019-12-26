@@ -59,7 +59,7 @@ class RejectionController extends Controller {
 
 				$action = '';
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/rejection-reason/edit/' . $entity->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/rejection-reason/edit/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 
 				$action .= '<a style="' . $delete_class . '" href="javascript:;"  data-toggle="modal" data-target="#delete_entity_modal" onclick="angular.element(this).scope().deleteEntityData(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';

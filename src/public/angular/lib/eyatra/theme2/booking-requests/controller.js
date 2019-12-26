@@ -97,7 +97,7 @@ app.component('eyatraTripBookingRequestsView', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
         // alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/agent/requests')
+            $location.path('/agent/requests')
             $scope.$apply()
             return;
         }
@@ -120,7 +120,7 @@ app.component('eyatraTripBookingRequestsView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips/booking-requests')
+                $location.path('/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -427,7 +427,7 @@ app.component('eyatraTripBookingRequestsView', {
                     }, 1000);
                     $('#approval_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -475,7 +475,7 @@ app.component('eyatraTripBookingRequestsView', {
                     }, 1000);
                     $('#reject_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -605,7 +605,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
     templateUrl: eyatra_tatkal_booking_requests_view_template_url,
     controller: function($http, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/agent/requests')
+            $location.path('/agent/requests')
             $scope.$apply()
             return;
         }
@@ -632,7 +632,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips/tatkal/booking-requests')
+                $location.path('/trips/tatkal/booking-requests')
                 $scope.$apply();
                 return;
             }
@@ -738,7 +738,7 @@ app.component('eyatraTripTatkalBookingRequestsView', {
                                 setTimeout(function() {
                                     $noty.close();
                                 }, 5000);
-                                $location.path('/eyatra/trips/tatkal/booking-requests')
+                                $location.path('/trips/tatkal/booking-requests')
                                 $scope.$apply();
                             }
                         })

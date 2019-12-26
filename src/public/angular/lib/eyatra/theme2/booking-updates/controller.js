@@ -55,7 +55,7 @@ app.component('eyatraTripBookingUpdatesForm', {
     templateUrl: booking_updates_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         if (typeof($routeParams.visit_id) == 'undefined') {
-            $location.path('/eyatra/trip/booking-updates')
+            $location.path('/trip/booking-updates')
             $scope.$apply()
             return;
         }
@@ -78,7 +78,7 @@ app.component('eyatraTripBookingUpdatesForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips')
+                $location.path('/trips')
                 $scope.$apply()
                 return;
             }
@@ -155,7 +155,7 @@ app.component('eyatraTripBookingUpdatesForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/trip/view/' + trip_id)
+                            $location.path('/trip/view/' + trip_id)
                             $scope.$apply()
                         }
                     })

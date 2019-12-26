@@ -318,7 +318,7 @@ app.component('eyatraFinanceEmpForm', {
                                 $noty.close();
                             }, 1000);
 
-                            $location.path('/eyatra/trip/claim/list')
+                            $location.path('/trip/claim/list')
                             $scope.$apply()
                         }
                     })
@@ -360,7 +360,7 @@ app.component('eyatraEmpView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trip/claim/list')
+                $location.path('/trip/claim/list')
                 $scope.$apply()
                 return;
             }

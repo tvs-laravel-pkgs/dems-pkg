@@ -153,10 +153,10 @@ class EmployeeController extends Controller {
 					$delete_class = "";
 				}
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/employee/edit/' . $employee->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/employee/edit/' . $employee->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a> ';
-				$action .= '<a href="#!/eyatra/employee/view/' . $employee->id . '">
+				$action .= '<a href="#!/employee/view/' . $employee->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
 				$action .= '<a style="' . $delete_class . '"href="javascript:;" data-toggle="modal" data-target="#delete_emp"

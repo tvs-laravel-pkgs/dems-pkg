@@ -98,7 +98,7 @@ class EntityController extends Controller {
 					$delete_class = "visibility:hidden";
 				}
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 
 				$action .= '<a style="' . $delete_class . '" href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';

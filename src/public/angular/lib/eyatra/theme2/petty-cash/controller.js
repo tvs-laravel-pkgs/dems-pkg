@@ -178,7 +178,7 @@ app.component('eyatraPettyCashForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/petty-cash/')
+                $location.path('/petty-cash/')
                 return;
             }
             // console.log(response);
@@ -491,7 +491,7 @@ app.component('eyatraPettyCashForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/petty-cash')
+                            $location.path('/petty-cash')
                             $scope.$apply()
                         }
                     })

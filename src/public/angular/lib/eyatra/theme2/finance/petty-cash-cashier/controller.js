@@ -117,9 +117,9 @@ app.component('eyatraPettyCashCashierView', {
             self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
 
             if ($routeParams.type_id == 1) {
-                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/eyatra/petty-cash/verification2">Expense Voucher list</a> / View</p><h3 class="title">Localconveyance Voucher Claim</h3>');
+                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/petty-cash/verification2">Expense Voucher list</a> / View</p><h3 class="title">Localconveyance Voucher Claim</h3>');
             } else {
-                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/eyatra/petty-cash/verification2">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
+                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/petty-cash/verification2">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
             var d = new Date();
             var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
@@ -218,7 +218,7 @@ app.component('eyatraPettyCashCashierView', {
                             }, 5000);
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification2/')
+                                $location.path('/petty-cash/verification2/')
                             }, 500);
                         }
                     })
@@ -282,7 +282,7 @@ app.component('eyatraPettyCashCashierView', {
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification2/')
+                                $location.path('/petty-cash/verification2/')
                             }, 500);
                         }
                     })

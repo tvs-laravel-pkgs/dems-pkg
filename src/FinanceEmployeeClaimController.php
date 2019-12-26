@@ -35,10 +35,10 @@ class FinanceEmployeeClaimController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/designation/edit/' . $designations->id . '">
+				<a href="#!/designation/edit/' . $designations->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/designation/view/' . $designations->id . '">
+				<a href="#!/designation/view/' . $designations->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"

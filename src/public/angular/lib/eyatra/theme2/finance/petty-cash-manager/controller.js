@@ -133,9 +133,9 @@ app.component('eyatraPettyCashManagerView', {
             self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
 
             if ($routeParams.type_id == 1) {
-                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/eyatra/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Localconveyance Voucher Claim</h3>');
+                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Localconveyance Voucher Claim</h3>');
             } else {
-                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/eyatra/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
+                $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
 
         });
@@ -175,7 +175,7 @@ app.component('eyatraPettyCashManagerView', {
                             }, 5000);
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification1/')
+                                $location.path('/petty-cash/verification1/')
                             }, 500);
                         }
                     })
@@ -235,7 +235,7 @@ app.component('eyatraPettyCashManagerView', {
                             $(".remarks").val('');
                             $("#alert-modal-reject").modal('hide');
                             $timeout(function() {
-                                $location.path('/eyatra/petty-cash/verification1/')
+                                $location.path('/petty-cash/verification1/')
                             }, 500);
                         }
                     })

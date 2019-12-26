@@ -52,7 +52,7 @@ app.component('entityDataList', {
         $rootScope.title = 'Rejection Reasons';
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Rejection Reasons' + '</p><h3 class="title">' + 'Rejection Reasons' + '</h3>');
-        var add_url = '#!/eyatra/rejection-reason/add/';
+        var add_url = '#!/rejection-reason/add/';
         self.trip_add_permission = self.hasPermission('eyatra-rejection-add');
         if (self.trip_add_permission) {
             $('.add_new_button').html(
@@ -127,7 +127,7 @@ app.component('entityDataForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/rejection-reason/list')
+                $location.path('/rejection-reason/list')
                 $scope.$apply()
                 return;
             }
@@ -195,7 +195,7 @@ app.component('entityDataForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/rejection-reason/list')
+                            $location.path('/rejection-reason/list')
                             $scope.$apply()
                         }
                     })

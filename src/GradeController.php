@@ -104,10 +104,10 @@ class GradeController extends Controller {
 					$delete_class = "";
 				}
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/grade/edit/' . $grade_list->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/grade/edit/' . $grade_list->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a> ';
-				$action .= '<a href="#!/eyatra/grade/view/' . $grade_list->id . '">
+				$action .= '<a href="#!/grade/view/' . $grade_list->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
 				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_grade"

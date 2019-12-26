@@ -45,7 +45,7 @@ class OutletReimpursementController extends Controller {
 				$outlet_cashier_name = $outlets->cashier_code . " / " . $outlets->cashier_name;
 				$outlet_amount = $outlets->amount;
 				return '
-				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">
+				<a href="#!/outlet-reimbursement/view/' . $outlets->outlet_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#outlet_reimpursement_modal"
@@ -216,7 +216,7 @@ class OutletReimpursementController extends Controller {
 				$outlet_cashier_name = $outlets->cashier_code;
 				$outlet_amount = $outlets->amount;
 				return '
-				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">
+				<a href="#!/outlet-reimbursement/view/' . $outlets->outlet_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive action" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
 				</a>';
 

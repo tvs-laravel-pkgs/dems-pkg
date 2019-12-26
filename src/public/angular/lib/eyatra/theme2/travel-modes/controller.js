@@ -52,7 +52,7 @@ app.component('eyatraTravelModeList', {
 
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Travel Modes' + '</p><h3 class="title">' + 'Travel Modes' + '</h3>');
-        var add_url = '#!/eyatra/travel-mode/add';
+        var add_url = '#!/travel-mode/add';
         if (self.add_permission) {
             $('.add_new_button').html(
                 '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
@@ -126,7 +126,7 @@ app.component('eyatraTravelModeForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/travel-mode/list')
+                $location.path('/travel-mode/list')
                 $scope.$apply()
                 return;
             }
@@ -199,7 +199,7 @@ app.component('eyatraTravelModeForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/travel-mode/list')
+                            $location.path('/travel-mode/list')
                             $scope.$apply()
                         }
                     })

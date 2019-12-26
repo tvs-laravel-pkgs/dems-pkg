@@ -125,7 +125,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                         $noty.close();
                     }, 5000);
                     $('#expense_advance_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('/eyatra/expense/voucher-advance/list')
+                    $location.path('/expense/voucher-advance/list')
                     $scope.$apply()
                 }
             });
@@ -321,7 +321,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/expense/voucher-advance/list')
+                            $location.path('/expense/voucher-advance/list')
                             $scope.$apply()
                         }
                     })

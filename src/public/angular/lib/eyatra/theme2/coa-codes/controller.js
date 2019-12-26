@@ -164,7 +164,7 @@ app.component('eyatraCoaCodeForm', {
                     $noty.close();
                 }, 1000);
 
-                $location.path('/eyatra/coa-codes')
+                $location.path('/coa-codes')
                 $scope.$apply()
                 return;
             }
@@ -306,7 +306,7 @@ app.component('eyatraCoaCodeForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/coa-codes')
+                            $location.path('/coa-codes')
                             $scope.$apply()
                         }
                     })

@@ -109,7 +109,7 @@ app.component('eyatraAgents', {
                         $noty.close();
                     }, 5000);
                     $('#agent_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('/eyatra/agents');
+                    $location.path('/agents');
                     // $scope.$apply();
                 } else {
                     $noty = new Noty({
@@ -155,7 +155,7 @@ app.component('eyatraAgentForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/agents');
+                $location.path('/agents');
                 $scope.$apply();
                 return;
             }
@@ -576,7 +576,7 @@ app.component('eyatraAgentForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/agents');
+                            $location.path('/agents');
                             $scope.$apply();
                         }
                     })

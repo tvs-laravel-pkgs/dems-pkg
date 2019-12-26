@@ -5,7 +5,7 @@ app.component('eyatraAgentRequestForm', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
         //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/agent/requests')
+            $location.path('/agent/requests')
             $scope.$apply()
             return;
         }
@@ -29,7 +29,7 @@ app.component('eyatraAgentRequestForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra / agent / requests')
+                $location.path('/agent/requests')
                 $scope.$apply()
                 return;
             }
@@ -45,7 +45,7 @@ app.component('eyatraAgentRequestForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/agent/requests')
+                $location.path('/agent/requests')
                 $scope.$apply()
                 return;
             }
@@ -123,7 +123,7 @@ app.component('eyatraAgentRequestForm', {
                     }, 1000);
                     $('#approval_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -171,7 +171,7 @@ app.component('eyatraAgentRequestForm', {
                     }, 1000);
                     $('#reject_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -234,7 +234,7 @@ app.component('eyatraAgentRequestForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/trips')
+                            $location.path('/trips')
                             $scope.$apply()
                         }
                     })

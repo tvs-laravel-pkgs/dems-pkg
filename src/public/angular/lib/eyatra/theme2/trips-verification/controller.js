@@ -151,7 +151,7 @@ app.component('eyatraTripVerificationForm', {
     templateUrl: trip_verification_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/trip/verifications')
+            $location.path('/trip/verifications')
             $scope.$apply()
             return;
         }
@@ -174,7 +174,7 @@ app.component('eyatraTripVerificationForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips')
+                $location.path('/trips')
                 $scope.$apply()
                 return;
             }
@@ -243,7 +243,7 @@ app.component('eyatraTripVerificationForm', {
                     }, 1000);
                     $('#alert-approval_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -291,7 +291,7 @@ app.component('eyatraTripVerificationForm', {
                                 }, 1000);
                                 $('#alert-modal-approve').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/trip/verifications')
+                                    $location.path('/trip/verifications')
                                     $scope.$apply()
                                 }, 500);
 
@@ -346,7 +346,7 @@ app.component('eyatraTripVerificationForm', {
                                 }, 1000);
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/trip/verifications')
+                                    $location.path('/trip/verifications')
                                     $scope.$apply()
                                 }, 500);
 

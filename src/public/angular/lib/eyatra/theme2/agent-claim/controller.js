@@ -78,7 +78,7 @@ app.component('eyatraAgentClaimList', {
                         $noty.close();
                     }, 1000);
                     $('#agent_claim_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('/eyatra/agent/claim/list');
+                    $location.path('/agent/claim/list');
                     // $scope.$apply();
                 } else {
                     $noty = new Noty({
@@ -122,7 +122,7 @@ app.component('eyatraAgentClaimForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/agent/claim/list')
+                $location.path('/agent/claim/list')
                 // $scope.$apply()
                 return;
             }
@@ -379,7 +379,7 @@ app.component('eyatraAgentClaimForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/agent/claim/list')
+                            $location.path('/agent/claim/list')
                             $scope.$apply()
                         }
                     })
@@ -441,7 +441,7 @@ app.component('eyatraTripBookingView', {
     templateUrl: trip_booking_view_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/agent/requests')
+            $location.path('/agent/requests')
             $scope.$apply()
             return;
         }
@@ -467,7 +467,7 @@ app.component('eyatraTripBookingView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips/booking-requests')
+                $location.path('/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -483,7 +483,7 @@ app.component('eyatraTripBookingView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips/booking-requests')
+                $location.path('/trips/booking-requests')
                 $scope.$apply()
                 return;
             }
@@ -711,7 +711,7 @@ app.component('eyatraTripBookingView', {
                     }, 1000);
                     $('#approval_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -759,7 +759,7 @@ app.component('eyatraTripBookingView', {
                     }, 1000);
                     $('#reject_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }

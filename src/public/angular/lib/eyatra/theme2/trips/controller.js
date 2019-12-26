@@ -198,7 +198,7 @@ app.component('eyatraTripForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips')
+                $location.path('/trips')
                 return;
             }
             self.trip = response.data.trip;
@@ -583,7 +583,7 @@ app.component('eyatraTripForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/trips')
+                            $location.path('/trips')
                             $scope.$apply()
                         }
                     })
@@ -731,7 +731,7 @@ app.component('eyatraTripView', {
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
-                    $location.path('/eyatra/trips')
+                    $location.path('/trips')
                     $scope.$apply()
                 }
 
@@ -764,7 +764,7 @@ app.component('eyatraTripView', {
                         setTimeout(function() {
                             $noty.close();
                         }, 1000);
-                        $location.path('/eyatra/trips')
+                        $location.path('/trips')
                         $scope.$apply()
                     }
                 })
@@ -811,7 +811,7 @@ app.component('eyatraTripView', {
                         $noty.close();
                     }, 5000);
                     setTimeout(function() {
-                        $location.path('/eyatra/trips')
+                        $location.path('/trips')
                         $scope.$apply()
                     }, 500);
 
@@ -871,7 +871,7 @@ app.component('eyatraTripVisitView', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
 
         if (typeof($routeParams.visit_id) == 'undefined') {
-            $location.path('/eyatra/trips')
+            $location.path('/trips')
             $scope.$apply()
             return;
         }
@@ -894,7 +894,7 @@ app.component('eyatraTripVisitView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trips')
+                $location.path('/trips')
                 $scope.$apply()
                 return;
             }

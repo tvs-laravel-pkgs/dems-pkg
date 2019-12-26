@@ -201,7 +201,7 @@ app.component('eyatraOutletForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/outlets')
+                $location.path('/outlets')
                 $scope.$apply()
                 return;
             }
@@ -614,7 +614,7 @@ app.component('eyatraOutletForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/outlets')
+                            $location.path('/outlets')
                             $scope.$apply()
                         }
                     })

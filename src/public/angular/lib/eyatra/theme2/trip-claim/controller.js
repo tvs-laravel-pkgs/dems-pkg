@@ -1931,7 +1931,7 @@ app.component('eyatraTripClaimForm', {
                             $('#trip-claim-modal-justify-one').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                                $location.path('/eyatra/trip/claim/list')
+                                $location.path('/trip/claim/list')
                                 $scope.$apply()
                             }, 1000);
                         }
@@ -1976,7 +1976,7 @@ app.component('eyatraTripClaimView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trip/claim/list')
+                $location.path('/trip/claim/list')
                 $scope.$apply()
                 return;
             }

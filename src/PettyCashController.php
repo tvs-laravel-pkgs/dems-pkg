@@ -78,10 +78,10 @@ class PettyCashController extends Controller {
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				if ($petty_cash->status_id == 3280 || $petty_cash->status_id == 3282 || $petty_cash->status_id == 3284) {
 					return '
-				<a href="#!/eyatra/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
+				<a href="#!/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a>
-				<a href="#!/eyatra/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
+				<a href="#!/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				<a href="javascript:;" data-toggle="modal" data-target="#petty_cash_confirm_box"
@@ -89,7 +89,7 @@ class PettyCashController extends Controller {
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 				} else {
-					return '<a href="#!/eyatra/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
+					return '<a href="#!/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
 				}

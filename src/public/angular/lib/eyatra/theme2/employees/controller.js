@@ -170,7 +170,7 @@ app.component('eyatraEmployeeForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/employees')
+                $location.path('/employees')
                 $scope.$apply()
                 return;
             }
@@ -513,7 +513,7 @@ app.component('eyatraEmployeeForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/employees')
+                            $location.path('/employees')
                             $scope.$apply()
                         }
                     })
@@ -810,7 +810,7 @@ app.component('importJobs', {
                                 setTimeout(function() {
                                     $noty.close();
                                 }, 5000);
-                                $location.path('/eyatra/import/job/list')
+                                $location.path('/import/job/list')
                                 $scope.$apply()
                             }
                         })

@@ -166,7 +166,7 @@ app.component('eyatraAgentClaimVerificationView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/agent/claim/verification1/list')
+                $location.path('/agent/claim/verification1/list')
                 // $scope.$apply()
                 return;
             }
@@ -317,7 +317,7 @@ app.component('eyatraAgentClaimVerificationView', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/agent/claim/verification1/list')
+                            $location.path('/agent/claim/verification1/list')
                             $scope.$apply()
                         }
                     })
@@ -368,7 +368,7 @@ app.component('eyatraAgentClaimVerificationView', {
                                 }, 1000);
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/agent/claim/verification1/list')
+                                    $location.path('/agent/claim/verification1/list')
                                     $scope.$apply()
                                 }, 500);
 

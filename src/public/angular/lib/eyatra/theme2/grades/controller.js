@@ -157,7 +157,7 @@ app.component('eyatraGradeForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/grades')
+                $location.path('/grades')
                 // $scope.$apply()
                 return;
             }
@@ -442,7 +442,7 @@ app.component('eyatraGradeForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/grades')
+                            $location.path('/grades')
                             $scope.$apply()
                         }
                     })

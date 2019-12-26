@@ -45,7 +45,7 @@ app.component('eyatraDesignation', {
         //$('.page-header-content .display-inline-block .data-table-title').html('Designations');
         if (self.permission == true) {
             $('.add_new_button').html(
-                '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary">' +
+                '<a href="#!/designation/add" type="button" class="btn btn-secondary">' +
                 'Add New' +
                 '</a>'
             );
@@ -122,7 +122,7 @@ app.component('eyatraDesignationForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/designations')
+                $location.path('/designations')
                 $scope.$apply()
                 return;
             }
@@ -193,7 +193,7 @@ app.component('eyatraDesignationForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/designations')
+                            $location.path('/designations')
                             $scope.$apply()
                         }
                     })

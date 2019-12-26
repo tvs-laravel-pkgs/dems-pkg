@@ -48,7 +48,7 @@ app.component('eyatraOutletReimbursement', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        var add_url = '#!/eyatra/entity/add/' + self.id;
+        var add_url = '#!/entity/add/' + self.id;
         if (self.id) {
             $('.add_new_button').html(
                 '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
@@ -199,7 +199,7 @@ app.component('eyatraEntityForm1', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
             }
@@ -275,7 +275,7 @@ app.component('eyatraEntityForm1', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                            $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
                     })

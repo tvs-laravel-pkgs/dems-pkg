@@ -91,16 +91,16 @@ class TripClaimController extends Controller {
 				if ($trip->status_id == 3023) {
 
 					return '
-				<a href="#!/eyatra/trip/claim/edit/' . $trip->id . '">
+				<a href="#!/trip/claim/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
+				<a href="#!/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
 				} else {
 					return '
 
-				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
+				<a href="#!/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
 				}

@@ -111,8 +111,8 @@ class AgentController extends Controller {
 					$delete_class = "";
 				}
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/agent/edit/' . $agent->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
-				$action .= '<a href="#!/eyatra/agent/view/' . $agent->id . '"><img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a> ';
+				$action .= '<a style="' . $edit_class . '" href="#!/agent/edit/' . $agent->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+				$action .= '<a href="#!/agent/view/' . $agent->id . '"><img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a> ';
 				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#agent_confirm_box"
 				onclick="angular.element(this).scope().deleteAgentConfirm(' . $agent->id . ')" dusk = "delete-btn" title="Delete"><img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" ></a>';
 

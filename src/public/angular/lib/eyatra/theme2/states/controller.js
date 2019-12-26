@@ -412,7 +412,7 @@ app.component('eyatraStateForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/states')
+                            $location.path('/states')
                             $scope.$apply()
                         }
                     })

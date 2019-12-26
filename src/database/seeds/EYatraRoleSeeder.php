@@ -20,7 +20,7 @@ class EYatraRoleSeeder extends Seeder {
 			500 => [
 				//'company_id' => 1,
 				'display_order' => 1,
-				'display_name' => 'eYatra Admin',
+				'display_name' => 'Admin',
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
@@ -155,7 +155,7 @@ class EYatraRoleSeeder extends Seeder {
 			501 => [
 				//'company_id' => 1,
 				'display_order' => 1,
-				'display_name' => 'eYatra Employee',
+				'display_name' => 'Employee',
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
@@ -180,7 +180,7 @@ class EYatraRoleSeeder extends Seeder {
 			502 => [
 				//'company_id' => 1,
 				'display_order' => 1,
-				'display_name' => 'eYatra Manager',
+				'display_name' => 'Manager',
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
@@ -213,7 +213,7 @@ class EYatraRoleSeeder extends Seeder {
 			503 => [
 				//'company_id' => 1,
 				'display_order' => 1,
-				'display_name' => 'eYatra Agent',
+				'display_name' => 'Agent',
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
@@ -234,7 +234,7 @@ class EYatraRoleSeeder extends Seeder {
 			504 => [
 				//'company_id' => 1,
 				'display_order' => 1,
-				'display_name' => 'eYatra Cashier',
+				'display_name' => 'Cashier',
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
@@ -261,7 +261,7 @@ class EYatraRoleSeeder extends Seeder {
 			505 => [
 				//'company_id' => 1,
 				'display_order' => 1,
-				'display_name' => 'eYatra Financier',
+				'display_name' => 'Financier',
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [
@@ -279,7 +279,7 @@ class EYatraRoleSeeder extends Seeder {
 			506 => [
 				//'company_id' => 1,
 				'display_order' => 1,
-				'display_name' => 'eYatra Claim Verifier',
+				'display_name' => 'Claim Verifier',
 				'fixed_roles' => 0,
 				'created_by' => 1,
 				'permissions' => [

@@ -5,7 +5,7 @@ app.component('eyatraEntityList', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable;
         var id = '';
-        var add_url = '#!/eyatra/entity/add/' + self.id;
+        var add_url = '#!/entity/add/' + self.id;
         var title = '';
         $http.get(
             eyatra_entity_list_data_url + '/' + $routeParams.entity_type_id
@@ -57,7 +57,7 @@ app.component('eyatraEntityList', {
             });
             $('.dataTables_length select').select2();
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + response.data.entity_type.name + '</p><h3 class="title">' + response.data.entity_type.name + '</h3>');
-            var add_url = '#!/eyatra/entity/add/' + self.id;
+            var add_url = '#!/entity/add/' + self.id;
             if (self.id) {
                 if ($routeParams.entity_type_id == '501') {
                     $rootScope.title = 'Trip Purpose';
@@ -177,7 +177,7 @@ app.component('eyatraEntityForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
             }
@@ -266,7 +266,7 @@ app.component('eyatraEntityForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                            $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
                     })

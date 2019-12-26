@@ -199,7 +199,7 @@ app.component('eyatraAdvanceClaimRequests', {
 
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
                     
-                    $location.path('/eyatra/trip/claim/payment-pending/list');
+                    $location.path('/trip/claim/payment-pending/list');
                     $scope.$apply();
 
 
@@ -222,7 +222,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
     templateUrl: advance_claim_request_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/advance-claim/requests')
+            $location.path('/advance-claim/requests')
             $scope.$apply()
             return;
         }
@@ -250,7 +250,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/advance-claim/requests')
+                $location.path('/advance-claim/requests')
                 $scope.$apply()
                 return;
             }
@@ -337,7 +337,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
                     }, 1000);
                     $('#approval_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/advance-claim/requests')
+                        $location.path('/advance-claim/requests')
                         $scope.$apply()
                     }, 500);
                 }
@@ -385,7 +385,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
                     }, 1000);
                     $('#reject_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/advance-claim/requests')
+                        $location.path('/advance-claim/requests')
                         $scope.$apply()
                     }, 500);
                 }
@@ -472,7 +472,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
                                     $noty.close();
                                 }, 1000);
                                 setTimeout(function() {
-                                    $location.path('/eyatra/advance-claim/requests')
+                                    $location.path('/advance-claim/requests')
                                     $scope.$apply()
                                 }, 500);
 
@@ -527,7 +527,7 @@ app.component('eyatraAdvanceClaimRequestForm', {
                                 }, 1000);
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/advance-claim/requests')
+                                    $location.path('/advance-claim/requests')
                                     $scope.$apply()
                                 }, 500);
 

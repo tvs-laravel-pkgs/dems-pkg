@@ -94,7 +94,7 @@ app.component('eyatraAgentBookingUpdateForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/trips/booking-requests/view/' + $routeParams.visit_id)
+                            $location.path('/trips/booking-requests/view/' + $routeParams.visit_id)
                             $scope.$apply()
                         }
                     })

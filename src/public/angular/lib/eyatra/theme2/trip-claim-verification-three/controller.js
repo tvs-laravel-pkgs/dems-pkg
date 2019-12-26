@@ -136,7 +136,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/eyatra/trip/claim/verification3/list')
+                $location.path('/trip/claim/verification3/list')
                 $scope.$apply()
                 return;
             }
@@ -314,7 +314,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 1000);
-                            $location.path('/eyatra/trip/claim/verification3/list')
+                            $location.path('/trip/claim/verification3/list')
                             $scope.$apply()
                         }
                     })
@@ -362,7 +362,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
                     }, 1000);
                     $('#trip-claim-modal-approve-three').modal('hide');
                     setTimeout(function() {
-                        $location.path('/eyatra/trip/claim/verification3/list')
+                        $location.path('/trip/claim/verification3/list')
                         $scope.$apply()
                     }, 1000);
                 }
@@ -410,7 +410,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
                                 }, 1000);
                                 $('#trip-claim-modal-reject-three').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/trip/claim/verification3/list')
+                                    $location.path('/trip/claim/verification3/list')
                                     $scope.$apply()
                                 }, 500);
 
@@ -455,7 +455,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
                                 $noty.close();
                             }, 1000);
                             setTimeout(function() {
-                                $location.path('/eyatra/trip/claim/verification3/list')
+                                $location.path('/trip/claim/verification3/list')
                                 $scope.$apply()
                             }, 500);
 
@@ -653,7 +653,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
 
                     var dataTableFilter = $('#payment_pending_list_table').dataTable();
                     dataTableFilter.fnFilter();
-                    $location.path('/eyatra/trip/claim/payment-pending/list');
+                    $location.path('/trip/claim/payment-pending/list');
                     $scope.$apply();
                     // window.location.href = laravel_routes['listEYatraTripClaimPaymentPendingList'];
                 }
@@ -695,7 +695,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
 
                     var dataTableFilter = $('#payment_pending_list_table').dataTable();
                     dataTableFilter.fnFilter();
-                    $location.path('/eyatra/trip/claim/payment-pending/list');
+                    $location.path('/trip/claim/payment-pending/list');
                     $scope.$apply();
                     // window.location.href = laravel_routes['listEYatraTripClaimPaymentPendingList'];
                 }

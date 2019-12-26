@@ -68,11 +68,11 @@ class RegionController extends Controller {
 
 				$action = '';
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/region/edit/' . $region->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/region/edit/' . $region->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a> ';
 
-				$action .= '<a href="#!/eyatra/region/view/' . $region->id . '">
+				$action .= '<a href="#!/region/view/' . $region->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
 

@@ -184,7 +184,7 @@ app.component('eyatraCityForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 5000);
-                $location.path('/eyatra/cities')
+                $location.path('/cities')
                 $scope.$apply()
                 return;
             }
@@ -355,7 +355,7 @@ app.component('eyatraCityForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
-                            $location.path('/eyatra/cities')
+                            $location.path('/cities')
                             $scope.$apply()
                         }
                     })

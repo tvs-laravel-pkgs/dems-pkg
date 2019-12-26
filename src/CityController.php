@@ -90,11 +90,11 @@ class CityController extends Controller {
 
 				$action = '';
 
-				$action .= '<a style="' . $edit_class . '" href="#!/eyatra/city/edit/' . $city->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/city/edit/' . $city->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a> ';
 
-				$action .= '<a href="#!/eyatra/city/view/' . $city->id . '">
+				$action .= '<a href="#!/city/view/' . $city->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
 
@@ -104,18 +104,6 @@ class CityController extends Controller {
                 </a> ';
 
 				return $action;
-
-				// return '
-				// <a href="#!/eyatra/city/edit/' . $city->id . '">
-				// 	<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				// </a>
-				// <a href="#!/eyatra/city/view/' . $city->id . '">
-				// 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				// </a>
-				// <a href="javascript:;" data-toggle="modal" data-target="#delete_city"
-				// onclick="angular.element(this).scope().deleteCityConfirm(' . $city->id . ')" dusk = "delete-btn" title="Delete">
-				//             <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-				//             </a>';
 
 			})
 			->addColumn('status', function ($city) {

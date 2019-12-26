@@ -89,7 +89,7 @@ class AlternateApproveController extends Controller {
 				}
 
 				return '
-				<a style="' . $edit_calss . '" href="#!/eyatra/alternate-approve/edit/' . $alternate_approve->id . '">
+				<a style="' . $edit_calss . '" href="#!/alternate-approve/edit/' . $alternate_approve->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a>'
 				;
