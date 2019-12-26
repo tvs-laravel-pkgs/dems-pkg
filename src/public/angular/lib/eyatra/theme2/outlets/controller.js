@@ -73,13 +73,6 @@ app.component('eyatraOutlets', {
         }, 500);
         $('#eyatra_outlet_table_filter').find('input').addClass("on_focus");
         $('.on_focus').focus();
-        /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Outlets</p><h3 class="title">Outlets</h3>');
-        // $('.page-header-content .display-inline-block .data-table-title').html('Outlets');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/outlet/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-outlet\')">' +
-            'Add New' +
-            '</a>'
-        );*/
         $scope.getCashierData = function(query) {
             $('#cashier').val(query);
             dataTable.draw();

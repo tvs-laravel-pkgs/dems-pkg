@@ -46,13 +46,6 @@ app.component('eyatraGrades', {
             }
         });
         $('.dataTables_length select').select2();
-        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Grades</p><h3 class="title">Grades</h3>');
-        // $('.add_new_button').html(
-        //     '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-grade\')">' +
-        //     'Add New' +
-        //     '</a>'
-        // );
-
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('eyatra_grade_table_filter');

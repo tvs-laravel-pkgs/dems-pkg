@@ -53,12 +53,7 @@ app.component('eyatraRegions', {
             }
         });
         $('.dataTables_length select').select2();
-        /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Regions</p><h3 class="title">Regions</h3>');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/region/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-region\')">' +
-            'Add New' +
-            '</a>'
-        );*/
+
         $('#eyatra_region_table_filter').find('input').addClass("on_focus");
         $('.on_focus').focus();
         setTimeout(function() {

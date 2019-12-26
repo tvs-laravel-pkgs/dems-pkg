@@ -453,7 +453,7 @@ app.component('eyatraAgentForm', {
                             return false;
                         }
                     },
-                    maxlength: 10,
+                    maxlength: 15,
                     minlength: 3,
                 },
                 'check_favour': {

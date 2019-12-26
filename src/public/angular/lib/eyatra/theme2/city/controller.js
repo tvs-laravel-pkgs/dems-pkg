@@ -109,13 +109,7 @@ app.component('eyatraCity', {
             dataTableFilter.fnFilter();
         }
 
-        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Cities</p><h3 class="title">Cities</h3>');
-        // // $('.page-header-content .display-inline-block .data-table-title').html('City');
-        // $('.add_new_button').html(
-        //     '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-city\')">' +
-        //     'Add New' +
-        //     '</a>'
-        // );
+
         $scope.deleteCityConfirm = function($city_id) {
             $("#delete_city_id").val($city_id);
         }

@@ -408,7 +408,7 @@ app.component('eyatraEmployeeForm', {
                             return false;
                         }
                     },
-                    maxlength: 10,
+                    maxlength: 15,
                     minlength: 3,
                 },
                 'cheque_favour': {

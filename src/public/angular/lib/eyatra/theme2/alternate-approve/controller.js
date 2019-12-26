@@ -46,7 +46,7 @@ app.component('eyatraAlternateApproveList', {
         $('#alternate_approve_list_filter').find('input').addClass("on_focus");
         $('.on_focus').focus();
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<a href="#!/alternate-approve"><p class="breadcrumb">Master / Notification / List</p></a><h3 class="title">Alternate Approve List</h3>');
+        $('.separate-page-header-content .data-table-title').html('<a href="#!/alternate-approve"><p class="breadcrumb">Alternate Approvers / List</p></a><h3 class="title">Alternate Approve List</h3>');
         // $('.add_new_button').html(
         //     '<a href="#!/eyatra/alternate-approve/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\' \')">' +
         //     'Add New' +

@@ -43,7 +43,7 @@ app.component('eyatraEmployees', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('Employees');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/employee/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
+            '<a href="#!/employee/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-trip\')">' +
             'Add New' +
             '</a>'
         );

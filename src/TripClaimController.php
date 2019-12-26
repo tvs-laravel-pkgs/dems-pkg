@@ -28,7 +28,7 @@ class TripClaimController extends Controller {
 				'e.code as ecode',
 				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-
+				'trips.status_id',
 				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
@@ -88,7 +88,7 @@ class TripClaimController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				if ($trip->status_id == 3023) {
+				if ($trip->status_id == 3024) {
 
 					return '
 				<a href="#!/trip/claim/edit/' . $trip->id . '">
