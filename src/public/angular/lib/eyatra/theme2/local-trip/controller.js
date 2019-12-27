@@ -172,7 +172,174 @@ app.component('eyatraTripLocalForm', {
         var arr_ind;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
-         var trip_detail_removal_id = [];
+        var trip_detail_removal_id = [];
+        $http.get(
+            $form_data_url
+        ).then(function(response) {
+            if (!response.data.success) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/local-trips')
+                return;
+            }
+
+            self.trip = response.data.trip;
+            self.trip.trip_periods = '';
+            self.eligible_date = response.data.eligible_date;
+
+            if (response.data.action == "Edit") {
+                if (response.data.trip.start_date && response.data.trip.end_date) {
+                    var start_date = response.data.trip.start_date;
+                    var end_date = response.data.trip.end_date;
+                    trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
+                    self.trip.trip_periods = trip_periods;
+                }
+                $(".daterange").daterangepicker({
+                    autoclose: true,
+                    minDate: new Date(self.eligible_date),
+                    locale: {
+                        cancelLabel: 'Clear',
+                        format: "DD-MM-YYYY",
+                        separator: " to ",
+                    },
+                    showDropdowns: false,
+                    startDate: start_date,
+                    endDate: end_date,
+                    autoApply: true,
+                });
+            } else {
+                setTimeout(function() {
+                    $(".daterange").daterangepicker({
+                        autoclose: true,
+                        minDate: new Date(self.eligible_date),
+                        locale: {
+                            cancelLabel: 'Clear',
+                            format: "DD-MM-YYYY",
+                            separator: " to ",
+                        },
+                        showDropdowns: false,
+                        autoApply: true,
+                    });
+                    $(".daterange").val('');
+                }, 500);
+            }
+
+            if (self.advance_eligibility == 1) {
+                $("#advance").show().prop('disabled', false);
+            }
+            self.extras = response.data.extras;
+            self.action = response.data.action;
+
+            $rootScope.loading = false;
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.trip.start_date = date[0];
+            self.trip.end_date = date[1];
+        });
+
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+
+        self.searchCity = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            laravel_routes['searchCity'], {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            resolve(response.data);
+                        });
+                });
+            } else {
+                return [];
+            }
+        }
+        var form_id = '#local-trip-form';
+        var v = jQuery(form_id).validate({
+            ignore: '',
+            rules: {
+                'trip_mode[]': {
+                    required: true,
+                },
+            },
+            messages: {
+                'trip_mode[]': {
+                    required: 'Select Visit Mode',
+                },
+            },
+            invalidHandler: function(event, validator) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'You have errors,Please check all tabs',
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+            },
+            submitHandler: function(form) {
+
+                let formData = new FormData($(form_id)[0]);
+                $('.btn-submit').button('loading');
+                $.ajax({
+                        url: laravel_routes['saveLocalTrip'],
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                    .done(function(res) {
+                        // console.log(res.success);
+                        if (!res.success) {
+                            $('.btn-submit').button('reset');
+                            custom_noty('error', res.errors);
+                        } else {
+                            $noty = new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: res.message,
+                            }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/local-trips')
+                            $scope.$apply()
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $('.btn-submit').button('reset');
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+            },
+        });
+    }
+});
+
+app.component('eyatraLocalTripForm', {
+    templateUrl: local_trip_visit_form_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
+        $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? local_trip_form_data_url : local_trip_form_data_url + '/' + $routeParams.trip_id;
+        var self = this;
+        var arr_ind;
+        self.hasPermission = HelperService.hasPermission;
+        self.angular_routes = angular_routes;
+        var trip_detail_removal_id = [];
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -218,8 +385,9 @@ app.component('eyatraTripLocalForm', {
                     autoApply: true,
                 });
 
-                self.calculatetotalamount();
-
+                setTimeout(function() {
+                    self.calculatetotalamount();
+                }, 1000);
             } else {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
@@ -305,7 +473,7 @@ app.component('eyatraTripLocalForm', {
             self.trip.visit_details.splice(index, 1);
             setTimeout(function() {
                 self.calculatetotalamount();
-            }, 500);
+            }, 1500);
         }
 
         //OTHER EXPENSE AMOUNT CALCULATE
@@ -321,7 +489,6 @@ app.component('eyatraTripLocalForm', {
                 total_amount = total_amount + claim_amount;
 
             });
-
             $('.amount_validate1').each(function() {
                 var extra_amount = parseFloat($(this).closest('tr').find('.claim_extra_amount').val() || 0);
                 if (!$.isNumeric(extra_amount)) {
@@ -329,7 +496,7 @@ app.component('eyatraTripLocalForm', {
                 }
                 total_extra_amount += extra_amount;
             });
-                total_petty_cash_other_amount = total_extra_amount + total_amount;
+            total_petty_cash_other_amount = total_extra_amount + total_amount;
             $('.other_expenses').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
             $('.total_petty_cash_other_amount').val(total_petty_cash_other_amount.toFixed(2));
             $('.claim_total_amount').val(total_petty_cash_other_amount.toFixed(2));
@@ -483,259 +650,5 @@ app.component('eyatraTripLocalView', {
             console.log(self.trip);
             self.claim_status = response.data.claim_status;
         });
-
-
-        //REQUEST AGENT FOR CANCEL VISIT BOOKING
-        $scope.requestVisitBookingPopup = function(visit_id) {
-            $('#booking_visit_id').val(visit_id);
-        }
-
-        $scope.requestCancelBooking = function() {
-            var cancel_booking_visit_id = $('#booking_visit_id').val();
-            if (cancel_booking_visit_id) {
-                $.ajax({
-                        url: trip_visit_request_cancel_booking_url + '/' + cancel_booking_visit_id,
-                        method: "GET",
-                    })
-                    .done(function(res) {
-                        // console.log(res);
-                        if (!res.success) {
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Booking cancelled successfully',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            setTimeout(function() {
-                                $noty.close();
-                            }, 1000);
-                            $route.reload();
-                        }
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
-        }
-
-        //CANCEL VISIT BOOKING
-        $scope.cancelVisitBookingPopup = function(visit_id) {
-            $('#cancel_booking_visit_id').val(visit_id);
-        }
-
-        $scope.cancelVisitBooking = function() {
-            var cancel_booking_visit_id = $('#cancel_booking_visit_id').val();
-            if (cancel_booking_visit_id) {
-                $.ajax({
-                        url: trip_visit_cancel_booking_url + '/' + cancel_booking_visit_id,
-                        method: "GET",
-                    })
-                    .done(function(res) {
-                        // console.log(res);
-                        if (!res.success) {
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Booking cancelled successfully',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            setTimeout(function() {
-                                $noty.close();
-                            }, 1000);
-                            $('#request_cancel_trip').modal('hide');
-                            $route.reload();
-                        }
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
-        }
-
-        //DELETE TRIP
-        $scope.deleteTrip = function(id) {
-            $('#del').val(id);
-        }
-        $scope.confirmDeleteTrip = function() {
-            $id = $('#del').val();
-            $http.get(
-                trip_delete_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trip Deleted Successfully',
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                    $location.path('/trips')
-                    $scope.$apply()
-                }
-
-            });
-        }
-
-        self.verificationRequest = function(trip_id) {
-            $.ajax({
-                    url: trip_verification_request_url + '/' + trip_id,
-                    method: "GET",
-                })
-                .done(function(res) {
-                    // console.log(res.success);
-                    if (!res.success) {
-                        $('#submit').button('reset');
-                        var errors = '';
-                        for (var i in res.errors) {
-                            errors += '<li>' + res.errors[i] + '</li>';
-                        }
-                        custom_noty('error', errors);
-                    } else {
-                        $noty = new Noty({
-                            type: 'success',
-                            layout: 'topRight',
-                            text: 'Trip successfully sent for verification',
-                            animation: {
-                                speed: 500 // unavailable - no need
-                            },
-                        }).show();
-                        setTimeout(function() {
-                            $noty.close();
-                        }, 1000);
-                        $location.path('/trips')
-                        $scope.$apply()
-                    }
-                })
-                .fail(function(xhr) {
-                    $('#submit').button('reset');
-                    custom_noty('error', 'Something went wrong at server');
-                });
-        }
-
-        //CANCEL TRIP
-        $scope.confirmCancelTrip = function() {
-            $id = $('#trip_id').val();
-
-            $http.get(
-                trip_cancel_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                } else {
-                    $('#cancel_trip').modal('hide');
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trip Cancelled Successfully',
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                    setTimeout(function() {
-                        $location.path('/trips')
-                        $scope.$apply()
-                    }, 500);
-
-                }
-
-            });
-        }
-
-        //DELETE VISIT BOOKING
-        $scope.deleteVisitBookingPopup = function(visit_id) {
-            $('#delete_booking_visit_id').val(visit_id);
-        }
-
-        $scope.deleteBooking = function() {
-            var delete_booking_visit_id = $('#delete_booking_visit_id').val();
-            if (delete_booking_visit_id) {
-                $.ajax({
-                        url: trip_visit_delete_booking_url + '/' + delete_booking_visit_id,
-                        method: "GET",
-                    })
-                    .done(function(res) {
-                        // console.log(res);
-                        if (!res.success) {
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Visit Deleted successfully',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            setTimeout(function() {
-                                $noty.close();
-                            }, 1000);
-                            $('#request_cancel_trip').modal('hide');
-                            $route.reload();
-                        }
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
-        }
-
-
     }
 });

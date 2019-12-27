@@ -403,5 +403,7 @@ Route::group(['middleware' => ['web']], function () {
 
 		//LOCAL TRIPS VERIFICATION
 		Route::get('eyatra/local-trip/verification/get-list', 'Uitoux\EYatra\LocalTripController@listLocalTripVerification')->name('listLocalTripVerification');
+		Route::get('eyatra/local-trip/verification/approve/{trip_id?}', 'Uitoux\EYatra\LocalTripController@approveLocalTrip')->name('approveLocalTrip');
+		Route::post('eyatra/local-trip/verification/reject', 'Uitoux\EYatra\LocalTripController@rejectLocalTrip')->name('rejectLocalTrip');
 	});
 });

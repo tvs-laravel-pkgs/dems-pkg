@@ -85,13 +85,13 @@ class LocalTripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == '3540' || $trip->status_id == '3542' || $trip->status_id == '3545') {
+				if ($trip->status_id == '3540' || $trip->status_id == '3541' || $trip->status_id == '3542' || $trip->status_id == '3545') {
 					$edit_class = "visibility:hidden";
-					if (!Entrust::can('trip-edit')) {
+					if (Entrust::can('trip-edit')) {
 						$edit_class = "";
 					}
 					$delete_class = "visibility:hidden";
-					if (!Entrust::can('trip-delete')) {
+					if (Entrust::can('trip-delete')) {
 						$delete_class = "";
 					}
 				} else {
@@ -99,9 +99,15 @@ class LocalTripController extends Controller {
 					$delete_class = "visibility:hidden";
 				}
 
-				$action .= '<a style="' . $edit_class . '" href="#!/local-trip/edit/' . $trip->id . '">
+				if ($trip->status_id == '3541' || $trip->status_id == '3545') {
+					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/trip-edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
-				</a> ';
+					</a> ';
+				} else {
+					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/edit/' . $trip->id . '">
+					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+					</a> ';
+				}
 				$action .= '<a href="#!/local-trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
@@ -311,9 +317,9 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-		// ->where('local_trips.employee_id', Auth::user()->entity_id)
+			->whereIN('local_trips.status_id', [3540, 3543])
+		// ->orWhere('local_trips.status_id', 3543)
 			->groupBy('local_trips.id')
-		// ->orderBy('trips.created_at', 'desc');
 			->orderBy('local_trips.id', 'desc')
 		// ->get()
 		;
@@ -351,6 +357,15 @@ class LocalTripController extends Controller {
 				return $action;
 			})
 			->make(true);
+	}
+
+	public function approveLocalTrip($trip_id) {
+		return LocalTrip::approveTrip($trip_id);
+	}
+
+	public function rejectLocalTrip(Request $r) {
+		return LocalTrip::rejectTrip($r);
+
 	}
 
 }

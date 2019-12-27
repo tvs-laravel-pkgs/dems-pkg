@@ -18,6 +18,12 @@ class LocalTrip extends Model {
 		return $this->hasMany('Uitoux\EYatra\LocalTripVisitDetail', 'trip_id');
 	}
 
+	public function getStartDateAttribute($date) {
+		return empty($date) ? '' : date('d-m-Y', strtotime($date));
+	}
+	public function getEndDateAttribute($date) {
+		return empty($date) ? '' : date('d-m-Y', strtotime($date));
+	}
 	public function employee() {
 		return $this->belongsTo('Uitoux\EYatra\Employee')->withTrashed();
 	}
@@ -44,6 +50,7 @@ class LocalTrip extends Model {
 			// $trip = LocalTrip::find($trip_id);
 
 			$trip = LocalTrip::withTrashed()->with([
+				'purpose',
 				'visitDetails',
 			])->find($trip_id);
 
@@ -214,7 +221,7 @@ class LocalTrip extends Model {
 			return response()->json($data);
 		}
 
-		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
+		$days = LocalTrip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
 		$trip->days = $days->days;
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
@@ -237,8 +244,57 @@ class LocalTrip extends Model {
 		$data['trip'] = $trip;
 		$data['success'] = true;
 
+		$data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();
+
 		return response()->json($data);
 
+	}
+
+	public static function approveTrip($trip_id) {
+
+		$trip = LocalTrip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Lcoal Trip not found']]);
+		}
+		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
+		if ($trip_visit_details > 0) {
+			$trip->status_id = 3544;
+		} else {
+			$trip->status_id = 3541;
+		}
+
+		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['details'] = 'Trip is Approved by Manager';
+		$activity['activity'] = "approve";
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
+		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
+	}
+
+	public static function rejectTrip($r) {
+		$trip = LocalTrip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Local Trip not found']]);
+		}
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
+		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $r->trip_id)->count();
+		if ($trip_visit_details > 0) {
+			$trip->status_id = 3545;
+		} else {
+			$trip->status_id = 3542;
+		}
+		$trip->save();
+		$activity['entity_id'] = $trip->id;
+		$activity['entity_type'] = 'trip';
+		$activity['activity'] = "reject";
+		$activity['details'] = 'Trip is Rejected by Manager';
+		//dd($activity);
+		$activity_log = ActivityLog::saveLog($activity);
+
+		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
 
 }

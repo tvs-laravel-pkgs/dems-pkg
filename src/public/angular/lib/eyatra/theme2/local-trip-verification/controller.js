@@ -107,3 +107,131 @@ app.component('eyatraLocalTripVerifications', {
 
     }
 });
+app.component('eyatraLocalTripVerificationView', {
+    templateUrl: local_trip_verification_view_template_url,
+    controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
+
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            local_trip_view_url + '/' + $routeParams.trip_id
+        ).then(function(response) {
+            self.trip = response.data.trip;
+            self.claim_status = response.data.claim_status;
+            self.trip_reject_reasons = response.data.trip_reject_reasons;
+            console.log(self.trip_reject_reasons);
+        });
+
+
+        self.approveTrip = function() {
+            self.trip.visits.push({
+                visit_date: '',
+                booking_method: 'Self',
+                preferred_travel_modes: '',
+            });
+        }
+
+        //APPROVE TRIP
+        self.approveTrip = function(id) {
+            $('#trip_id').val(id);
+        }
+
+        $scope.clearSearch = function() {
+            $scope.search = '';
+        };
+
+        $(document).on('click', '.approve_btn', function() {
+            $id = $('#trip_id').val();
+            $http.get(
+                local_trip_verification_approve_url + '/' + $id,
+            ).then(function(response) {
+                console.log(response);
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Local Trip Approved Successfully',
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 2000);
+                    $('#alert-modal-approve').modal('hide');
+                    setTimeout(function() {
+                        $location.path('/local-trip/verification')
+                        $scope.$apply()
+                    }, 500);
+                }
+
+            });
+        });
+
+        //Reject
+        $(document).on('click', '.reject_btn', function() {
+            var form_id = '#trip-reject-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#reject_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['rejectLocalTrip'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#reject_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Manager Rejected successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $('#alert-modal-reject').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/local-trip/verification')
+                                    $scope.$apply()
+                                }, 500);
+
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+
+
+    }
+});
