@@ -113,6 +113,8 @@ app.component('eyatraLocalTripVerificationView', {
 
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.local_travel_attachment_url = local_travel_attachment_url;
+        
         $http.get(
             local_trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
@@ -130,6 +132,19 @@ app.component('eyatraLocalTripVerificationView', {
                 preferred_travel_modes: '',
             });
         }
+
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment-view-list", function() {
+            var $this = $(this);
+
+            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
+                $this.tooltip({
+                    title: $this.children(".attachment-view-file").text(),
+                    placement: "top"
+                });
+                $this.tooltip('show');
+            }
+        });
 
         //APPROVE TRIP
         self.approveTrip = function(id) {

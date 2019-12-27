@@ -268,6 +268,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Google Attachment',
 				'config_type_id' => 510,
 			],
+			3186 => [
+				'name' => 'Local Trip Expense',
+				'config_type_id' => 510,
+			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [

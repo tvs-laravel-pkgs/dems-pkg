@@ -20,4 +20,8 @@ class LocalTripVisitDetail extends Model {
 	public function travelMode() {
 		return $this->belongsTo('Uitoux\EYatra\Entity', 'travel_mode_id');
 	}
+
+	public function expenseAttachments() {
+		return $this->hasOne('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3186)->where('attachment_type_id', 3186);
+	}
 }

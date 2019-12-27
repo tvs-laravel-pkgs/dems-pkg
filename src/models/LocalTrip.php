@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\LocalTripVisitDetail;
 use Validator;
 
@@ -52,6 +53,7 @@ class LocalTrip extends Model {
 			$trip = LocalTrip::withTrashed()->with([
 				'purpose',
 				'visitDetails',
+				'visitDetails.expenseAttachments',
 			])->find($trip_id);
 
 			if (!$trip) {
@@ -77,6 +79,7 @@ class LocalTrip extends Model {
 	}
 
 	public static function saveTrip($request) {
+		// dd($request->all());
 		try {
 			//validation
 			$validator = Validator::make($request->all(), [
@@ -97,6 +100,11 @@ class LocalTrip extends Model {
 					'message' => 'Validation Errors',
 					'errors' => $validator->errors()->all(),
 				]);
+			}
+
+			if (!empty($request->attachment_removal_ids)) {
+				$attachment_removal_ids = json_decode($request->attachment_removal_ids, true);
+				Attachment::whereIn('id', $attachment_removal_ids)->delete();
 			}
 
 			DB::beginTransaction();
@@ -158,6 +166,27 @@ class LocalTrip extends Model {
 					$visit->created_by = Auth::user()->id;
 					$visit->created_at = Carbon::now();
 					$visit->save();
+
+					//SAVE BOARDING ATTACHMENT
+					$item_images = storage_path('app/public/local-trip/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($visit_data['attachments'])) {
+
+						$attachement = $visit_data['attachments'];
+						$name = $attachement->getClientOriginalName();
+						$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+						$value = rand(1, 100);
+						$extension = $attachement->getClientOriginalExtension();
+						$name = $value . '-' . $file_name;
+						$attachement->move(storage_path('app/public/local-trip/attachments/'), $name);
+						$attachement_file = new Attachment;
+						$attachement_file->attachment_of_id = 3186;
+						$attachement_file->attachment_type_id = 3186;
+						$attachement_file->entity_id = $visit->id;
+						$attachement_file->name = $name;
+						$attachement_file->save();
+					}
+
 					$i++;
 				}
 			}
@@ -201,6 +230,7 @@ class LocalTrip extends Model {
 				$q->orderBy('local_trip_visit_details.travel_date');
 			},
 			'visitDetails.travelMode',
+			'visitDetails.expenseAttachments',
 			'employee',
 			'employee.user',
 			'employee.manager',

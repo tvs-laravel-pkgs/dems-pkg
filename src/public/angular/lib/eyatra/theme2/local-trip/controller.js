@@ -172,6 +172,7 @@ app.component('eyatraTripLocalForm', {
         var arr_ind;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.local_travel_attachment_url = local_travel_attachment_url;
         var trip_detail_removal_id = [];
         $http.get(
             $form_data_url
@@ -339,7 +340,9 @@ app.component('eyatraLocalTripForm', {
         var arr_ind;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.local_travel_attachment_url = local_travel_attachment_url;
         var trip_detail_removal_id = [];
+        var attachment_removal_id = [];
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -464,7 +467,7 @@ app.component('eyatraLocalTripForm', {
             }
         }
 
-        //REMOVE OTHER EXPENSE 
+        //REMOVE VISIT 
         self.removelocaltrip = function(index, local_trip_detail_id) {
             if (local_trip_detail_id) {
                 trip_detail_removal_id.push(local_trip_detail_id);
@@ -475,6 +478,18 @@ app.component('eyatraLocalTripForm', {
                 self.calculatetotalamount();
             }, 1500);
         }
+
+        //REMOVE VISIT ATTACHMENT
+        self.removeOtherAttachment = function(index, attachment_id) {
+            console.log(attachment_id);
+            if (attachment_id) {
+                attachment_removal_id.push(attachment_id);
+                $('#attachment_removal_ids').val(JSON.stringify(attachment_removal_id));
+            }
+            $('.attachment_'+index).hide();
+        }
+
+         
 
         //OTHER EXPENSE AMOUNT CALCULATE
         self.calculatetotalamount = function() {
@@ -643,12 +658,26 @@ app.component('eyatraTripLocalView', {
 
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.local_travel_attachment_url = local_travel_attachment_url;
         $http.get(
             local_trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
             console.log(self.trip);
             self.claim_status = response.data.claim_status;
+        });
+
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment-view-list", function() {
+            var $this = $(this);
+
+            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
+                $this.tooltip({
+                    title: $this.children(".attachment-view-file").text(),
+                    placement: "top"
+                });
+                $this.tooltip('show');
+            }
         });
     }
 });
