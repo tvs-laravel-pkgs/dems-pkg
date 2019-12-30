@@ -64,6 +64,15 @@ class LocalTrip extends Model {
 
 		$grade = Auth::user()->entity;
 
+		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('local_trip_amount')->where('grade_id', $grade->grade_id)->first();
+
+		if ($grade_eligibility) {
+			$beta_amount = $grade_eligibility->local_trip_amount;
+		} else {
+			$beta_amount = 0;
+		}
+		$data['beta_amount'] = $beta_amount;
+
 		$data['extras'] = [
 			'city_list' => NCity::getList(),
 			'travel_mode_list' => Entity::join('local_travel_mode_category_type', 'local_travel_mode_category_type.travel_mode_id', 'entities.id')->select('entities.name', 'entities.id')->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 503)->get()->prepend(['id' => '', 'name' => 'Select Travel Mode']),
@@ -140,7 +149,9 @@ class LocalTrip extends Model {
 			$trip->end_date = date('Y-m-d', strtotime($request->end_date));
 			$trip->description = $request->description;
 			$trip->employee_id = Auth::user()->entity->id;
-			$trip->claim_amount = $request->claim_total_amount;
+			$trip->beta_amount = $request->total_beta_amount;
+			$trip->other_amount = $request->total_other_amount;
+			$trip->claim_amount = $request->total_claim_amount;
 			$trip->save();
 
 			$trip->number = 'TRP' . $trip->id;
@@ -160,7 +171,7 @@ class LocalTrip extends Model {
 					$visit->travel_date = date('Y-m-d', strtotime($visit_data['travel_date']));
 					$visit->from_place = $visit_data['from_place'];
 					$visit->to_place = $visit_data['to_place'];
-					$visit->amount = $visit_data['amount'];
+					// $visit->amount = $visit_data['amount'];
 					$visit->extra_amount = $visit_data['extra_amount'];
 					$visit->description = $visit_data['description'];
 					$visit->created_by = Auth::user()->id;
@@ -233,6 +244,9 @@ class LocalTrip extends Model {
 			'visitDetails.expenseAttachments',
 			'employee',
 			'employee.user',
+			'employee.outlet',
+			'employee.sbu',
+			'employee.sbu.lob',
 			'employee.manager',
 			'employee.manager.user',
 			'employee.user',

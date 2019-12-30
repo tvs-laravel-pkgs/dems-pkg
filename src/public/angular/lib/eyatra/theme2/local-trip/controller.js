@@ -364,6 +364,7 @@ app.component('eyatraLocalTripForm', {
             console.log(self.trip);
             self.trip.trip_periods = '';
             self.eligible_date = response.data.eligible_date;
+            self.beta_amount = response.data.beta_amount;
 
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
@@ -486,37 +487,52 @@ app.component('eyatraLocalTripForm', {
                 attachment_removal_id.push(attachment_id);
                 $('#attachment_removal_ids').val(JSON.stringify(attachment_removal_id));
             }
-            $('.attachment_'+index).hide();
+            $('.attachment_' + index).hide();
         }
 
-         
+
 
         //OTHER EXPENSE AMOUNT CALCULATE
         self.calculatetotalamount = function() {
-            var total_petty_cash_other_amount = 0;
-            var total_extra_amount = 0;
             var total_amount = 0;
-            $('.amount_validate').each(function() {
-                var claim_amount = parseFloat($(this).closest('tr').find('.claim_amount').val() || 0);
-                if (!$.isNumeric(claim_amount)) {
-                    claim_amount = 0;
-                }
-                total_amount = total_amount + claim_amount;
+            var total_extra_amount = 0;
+            var total_beta_amount = 0;
+            var total_days = 0;
+            var days = [];
 
-            });
-            $('.amount_validate1').each(function() {
-                var extra_amount = parseFloat($(this).closest('tr').find('.claim_extra_amount').val() || 0);
-                if (!$.isNumeric(extra_amount)) {
-                    extra_amount = 0;
-                }
-                total_extra_amount += extra_amount;
-            });
-            total_petty_cash_other_amount = total_extra_amount + total_amount;
-            $('.other_expenses').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
-            $('.total_petty_cash_other_amount').val(total_petty_cash_other_amount.toFixed(2));
-            $('.claim_total_amount').val(total_petty_cash_other_amount.toFixed(2));
-            $('.claim_total_amount').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
-            // caimTotalAmount();
+            setTimeout(function() {
+                $('.trip_date').each(function() {
+                    var trip_date = $(this).closest('tr').find('.trip_date').val();
+                    if (days.includes(trip_date)) {} else {
+                        days.push(trip_date);
+                        total_days++;
+                    }
+                });
+
+                $('.amount_validate1').each(function() {
+                    var extra_amount = parseFloat($(this).closest('tr').find('.claim_extra_amount').val() || 0);
+                    if (!$.isNumeric(extra_amount)) {
+                        extra_amount = 0;
+                    }
+                    total_extra_amount += extra_amount;
+                });
+                total_beta_amount = total_days * self.beta_amount;
+
+                total_amount = total_extra_amount + total_beta_amount;
+
+                //Total Beta Amount
+                $('.claim_beta_amount').val(total_beta_amount.toFixed(2));
+                $('.claim_beta_amount').text('₹ ' + total_beta_amount.toFixed(2));
+
+                //Total Other Amount
+                $('.claim_other_amount').val(total_extra_amount.toFixed(2));
+                $('.claim_other_amount').text('₹ ' + total_extra_amount.toFixed(2));
+
+                //Total Amount
+                $('.claim_total_amount').val(total_amount.toFixed(2));
+                $('.claim_total_amount').text('₹ ' + total_amount.toFixed(2));
+                console.log(total_days);
+            }, 1000);
         }
 
         self.addotherexpence = function() {
@@ -654,6 +670,36 @@ app.component('eyatraLocalTripForm', {
 
 app.component('eyatraTripLocalView', {
     templateUrl: local_trip_view_template_url,
+    controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
+
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.local_travel_attachment_url = local_travel_attachment_url;
+        $http.get(
+            local_trip_view_url + '/' + $routeParams.trip_id
+        ).then(function(response) {
+            self.trip = response.data.trip;
+            console.log(self.trip);
+            self.claim_status = response.data.claim_status;
+        });
+
+        //TOOLTIP MOUSEOVER
+        $(document).on('mouseover', ".attachment-view-list", function() {
+            var $this = $(this);
+
+            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
+                $this.tooltip({
+                    title: $this.children(".attachment-view-file").text(),
+                    placement: "top"
+                });
+                $this.tooltip('show');
+            }
+        });
+    }
+});
+
+app.component('eyatraLocalTripView', {
+    templateUrl: local_trip_detail_view_template_url,
     controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
 
         var self = this;

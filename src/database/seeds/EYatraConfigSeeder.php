@@ -758,11 +758,11 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 531,
 			],
 			3541 => [
-				'name' => 'Approved',
+				'name' => 'Manager Approved',
 				'config_type_id' => 531,
 			],
 			3542 => [
-				'name' => 'Rejected',
+				'name' => 'Manager Rejected',
 				'config_type_id' => 531,
 			],
 			3543 => [
@@ -770,11 +770,11 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 531,
 			],
 			3544 => [
-				'name' => 'Claim Approved',
+				'name' => 'Claim Approved by Manager',
 				'config_type_id' => 531,
 			],
 			3545 => [
-				'name' => 'Claim Rejected',
+				'name' => 'Claim Rejected by Manager',
 				'config_type_id' => 531,
 			],
 			3546 => [
@@ -782,6 +782,10 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 531,
 			],
 			3547 => [
+				'name' => 'Financier Rejected',
+				'config_type_id' => 531,
+			],
+			3548 => [
 				'name' => 'Paid',
 				'config_type_id' => 531,
 			],

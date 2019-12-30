@@ -595,16 +595,34 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-local-view></eyatra-trip-local-view>',
         title: 'View Local Trip',
     }).
+    when('/local-trip/detail-view/:trip_id', {
+        template: '<eyatra-local-trip-view></eyatra-local-trip-view>',
+        title: 'View Local Trip',
+    }).
   
 
-    //LOCAL TRIP VERIFICATION
+    //LOCAL TRIP MANAGER VERIFICATION
     when('/local-trip/verification', {
         template: '<eyatra-local-trip-verifications></eyatra-local-trip-verifications>',
         title: 'Local Trips',
     }).
     when('/local-trip/verification/view/:trip_id', {
         template: '<eyatra-local-trip-verification-view></eyatra-local-trip-verification-view>',
-        title: 'Lcoal Trip Verification Form',
+        title: 'Lcoal Trip Verification View',
+    }).
+    when('/local-trip/verification/detail-view/:trip_id', {
+        template: '<eyatra-local-trip-verification-detail-view></eyatra-local-trip-verification-detail-view>',
+        title: 'View Local Trip',
+    }).
+
+    //LOCAL TRIP FINANCIER VERIFICATION
+    when('/local-trip/financier/verification', {
+        template: '<eyatra-local-trip-financier-verifications></eyatra-local-trip-financier-verifications>',
+        title: 'Local Trips',
+    }).
+    when('/local-trip/financier/verification/view/:trip_id', {
+        template: '<eyatra-local-trip-financier-verification-view></eyatra-local-trip-financier-verification-view>',
+        title: 'Lcoal Trip Verification View',
     });
 
 }]);
