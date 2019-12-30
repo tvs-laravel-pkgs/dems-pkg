@@ -575,7 +575,7 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
     //LOCAL TRIP
-    when('/local-trips', {
+    when('/local-trip/list', {
         template: '<eyatra-local-trips></eyatra-local-trips>',
         title: 'Local Trips',
     }).
@@ -602,7 +602,7 @@ app.config(['$routeProvider', function($routeProvider) {
   
 
     //LOCAL TRIP MANAGER VERIFICATION
-    when('/local-trip/verification', {
+    when('/local-trip/verification/list', {
         template: '<eyatra-local-trip-verifications></eyatra-local-trip-verifications>',
         title: 'Local Trips Verification',
     }).
@@ -616,8 +616,8 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
     //LOCAL TRIP FINANCIER VERIFICATION
-    when('/local-trip/financier/verification', {
-        template: '<eyatra-local-trip-financier-verifications></eyatra-local-trip-financier-verifications>',
+    when('/local-trip/financier/verification/list', {
+        template: '<eyatra-local-trip-financier-verification></eyatra-local-trip-financier-verification>',
         title: 'Local Trips',
     }).
     when('/local-trip/financier/verification/view/:trip_id', {

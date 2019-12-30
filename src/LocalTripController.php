@@ -292,5 +292,101 @@ class LocalTripController extends Controller {
 	public function rejectLocalTrip(Request $r) {
 		return LocalTrip::rejectTrip($r);
 	}
+	public function listFinancierLocalTripVerification(Request $r) {
+
+		$trips = LocalTrip::from('local_trips')
+			->join('employees as e', 'e.id', 'local_trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
+			->join('configs as status', 'status.id', 'local_trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'local_trips.employee_id')
+			->where('users.user_type_id', 3121)
+			->select(
+				'local_trips.id',
+				'local_trips.number',
+				'e.code as ecode',
+				'users.name as ename', 'local_trips.status_id',
+				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				'purpose.name as purpose',
+				'status.name as status'
+			)
+			->where('e.company_id', Auth::user()->company_id)
+
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->from_date) {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("local_trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->to_date) {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("local_trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('trip_id')) {
+					$query->where("local_trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
+			->whereIN('local_trips.status_id', [3546, 3544])
+			->groupBy('local_trips.id')
+		// ->orderBy('trips.created_at', 'desc');
+			->orderBy('local_trips.id', 'desc')
+		// ->get()
+		;
+
+		return Datatables::of($trips)
+			->addColumn('action', function ($trip) {
+
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
+
+				$action = '';
+
+				$action .= '<a href="#!/local-trip/financier/verification/view/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a> ';
+
+				return $action;
+			})
+			->make(true);
+	}
+
+	public function financierApproveLocalTrip($trip_id) {
+
+		dd($trip_id);
+		return LocalTrip::approveTrip($trip_id);
+	}
+
+	public function financierHoldLocalTrip($trip_id) {
+		dd($trip_id);
+		return LocalTrip::approveTrip($trip_id);
+	}
+
+	public function financierRejectLocalTrip(Request $r) {
+
+		dd($r->all());
+		return LocalTrip::rejectTrip($r);
+	}
 
 }

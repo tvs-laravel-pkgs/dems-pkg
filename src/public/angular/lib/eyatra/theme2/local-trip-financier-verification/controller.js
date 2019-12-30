@@ -1,5 +1,5 @@
-app.component('eyatraLocalTripVerifications', {
-    templateUrl: eyatra_local_trip_verification_list_template_url,
+app.component('eyatraLocalTripFinancierVerification', {
+    templateUrl: eyatra_local_trip_financier_verification_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -30,7 +30,7 @@ app.component('eyatraLocalTripVerifications', {
             paging: true,
             ordering: false,
             ajax: {
-                url: laravel_routes['listLocalTripVerification'],
+                url: laravel_routes['listFinancierLocalTripVerification'],
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
@@ -104,179 +104,23 @@ app.component('eyatraLocalTripVerifications', {
             dataTable.draw();
         }
         $rootScope.loading = false;
-
     }
 });
-app.component('eyatraLocalTripVerificationView', {
-    templateUrl: local_trip_verification_view_template_url,
+app.component('eyatraLocalTripFinancierVerificationView', {
+    templateUrl: local_trip_financier_verification_view_template_url,
     controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
 
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.local_travel_attachment_url = local_travel_attachment_url;
-        
-        $http.get(
-            local_trip_view_url + '/' + $routeParams.trip_id
-        ).then(function(response) {
-            self.trip = response.data.trip;
-            self.claim_status = response.data.claim_status;
-            self.trip_reject_reasons = response.data.trip_reject_reasons;
-            console.log(self.trip_reject_reasons);
-        });
-
-
-        self.approveTrip = function() {
-            self.trip.visits.push({
-                visit_date: '',
-                booking_method: 'Self',
-                preferred_travel_modes: '',
-            });
-        }
-
-        //TOOLTIP MOUSEOVER
-        $(document).on('mouseover', ".attachment-view-list", function() {
-            var $this = $(this);
-
-            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
-                $this.tooltip({
-                    title: $this.children(".attachment-view-file").text(),
-                    placement: "top"
-                });
-                $this.tooltip('show');
-            }
-        });
-
-        //APPROVE TRIP
-        self.approveTrip = function(id) {
-            $('#trip_id').val(id);
-        }
-
-        $scope.clearSearch = function() {
-            $scope.search = '';
-        };
-
-        $(document).on('click', '.approve_btn', function() {
-            $id = $('#trip_id').val();
-            $http.get(
-                local_trip_verification_approve_url + '/' + $id,
-            ).then(function(response) {
-                console.log(response);
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 1000);
-                } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Local Trip Approved Successfully',
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 2000);
-                    $('#alert-modal-approve').modal('hide');
-                    setTimeout(function() {
-                        $location.path('/local-trip/verification/list')
-                        $scope.$apply()
-                    }, 500);
-                }
-
-            });
-        });
-
-        //Reject
-        $(document).on('click', '.reject_btn', function() {
-            var form_id = '#trip-reject-form';
-            var v = jQuery(form_id).validate({
-                ignore: '',
-
-                submitHandler: function(form) {
-
-                    let formData = new FormData($(form_id)[0]);
-                    $('#reject_btn').button('loading');
-                    $.ajax({
-                            url: laravel_routes['rejectLocalTrip'],
-                            method: "POST",
-                            data: formData,
-                            processData: false,
-                            contentType: false,
-                        })
-                        .done(function(res) {
-                            console.log(res.success);
-                            if (!res.success) {
-                                $('#reject_btn').button('reset');
-                                var errors = '';
-                                for (var i in res.errors) {
-                                    errors += '<li>' + res.errors[i] + '</li>';
-                                }
-                                custom_noty('error', errors);
-                            } else {
-                                $noty = new Noty({
-                                    type: 'success',
-                                    layout: 'topRight',
-                                    text: 'Manager Rejected successfully',
-                                    animation: {
-                                        speed: 500 // unavailable - no need
-                                    },
-                                }).show();
-                                setTimeout(function() {
-                                    $noty.close();
-                                }, 1000);
-                                $('#alert-modal-reject').modal('hide');
-                                setTimeout(function() {
-                                    $location.path('/local-trip/verification/list')
-                                    $scope.$apply()
-                                }, 1000);
-
-                            }
-                        })
-                        .fail(function(xhr) {
-                            $('#submit').button('reset');
-                            custom_noty('error', 'Something went wrong at server');
-                        });
-                },
-            });
-        });
-
-
-    }
-});
-
-app.component('eyatraLocalTripVerificationDetailView', {
-    templateUrl: local_trip_verification_detail_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
-
-        var self = this;
-        self.hasPermission = HelperService.hasPermission;
-        self.local_travel_attachment_url = local_travel_attachment_url;
-        self.local_travel_google_attachment_url = local_travel_google_attachment_url;
-
         $http.get(
             local_trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
             self.claim_status = response.data.claim_status;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
-            console.log(self.trip_reject_reasons);
+            console.log(self.trip_claim_rejection_list);
         });
-
-
-        self.approveTrip = function() {
-            self.trip.visits.push({
-                visit_date: '',
-                booking_method: 'Self',
-                preferred_travel_modes: '',
-            });
-        }
 
         //TOOLTIP MOUSEOVER
         $(document).on('mouseover', ".attachment-view-list", function() {
@@ -303,7 +147,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
         $(document).on('click', '.approve_btn', function() {
             $id = $('#trip_id').val();
             $http.get(
-                local_trip_verification_approve_url + '/' + $id,
+                local_trip_financier_verification_approve_url + '/' + $id,
             ).then(function(response) {
                 console.log(response);
                 if (!response.data.success) {
@@ -330,13 +174,16 @@ app.component('eyatraLocalTripVerificationDetailView', {
                     }, 2000);
                     $('#alert-modal-approve').modal('hide');
                     setTimeout(function() {
-                        $location.path('/local-trip/verification/list')
+                        $location.path('/local-trip/financier/verification/list')
                         $scope.$apply()
                     }, 500);
                 }
 
             });
         });
+
+        //Hold
+        // local_trip_financier_verification_hold_url
 
         //Reject
         $(document).on('click', '.reject_btn', function() {
@@ -349,7 +196,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
                     let formData = new FormData($(form_id)[0]);
                     $('#reject_btn').button('loading');
                     $.ajax({
-                            url: laravel_routes['rejectLocalTrip'],
+                            url: laravel_routes['financierRejectLocalTrip'],
                             method: "POST",
                             data: formData,
                             processData: false,
@@ -378,9 +225,9 @@ app.component('eyatraLocalTripVerificationDetailView', {
                                 }, 1000);
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/local-trip/verification/list')
+                                    $location.path('/local-trip/financier/verification/list')
                                     $scope.$apply()
-                                }, 500);
+                                }, 1000);
 
                             }
                         })
@@ -391,7 +238,5 @@ app.component('eyatraLocalTripVerificationDetailView', {
                 },
             });
         });
-
-
     }
 });

@@ -186,7 +186,7 @@ app.component('eyatraTripLocalForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/local-trips')
+                $location.path('/local-trip/list')
                 return;
             }
 
@@ -320,7 +320,7 @@ app.component('eyatraTripLocalForm', {
                             $('#trip-claim-modal-justify-one').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                                $location.path('/local-trips')
+                                $location.path('/local-trip/list')
                                 $scope.$apply()
                             }, 2000);
                         }
@@ -358,7 +358,7 @@ app.component('eyatraLocalTripForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/local-trips')
+                $location.path('/local-trip/list')
                 return;
             }
 
@@ -657,7 +657,7 @@ app.component('eyatraLocalTripForm', {
                             $('#trip-claim-modal-justify-one').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                                $location.path('/local-trips')
+                                $location.path('/local-trip/list')
                                 $scope.$apply()
                             }, 2000);
                         }
