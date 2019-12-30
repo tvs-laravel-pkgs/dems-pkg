@@ -22,6 +22,6 @@ class LocalTripVisitDetail extends Model {
 	}
 
 	public function expenseAttachments() {
-		return $this->hasOne('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3186)->where('attachment_type_id', 3186);
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3186)->where('attachment_type_id', 3200);
 	}
 }

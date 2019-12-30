@@ -9,8 +9,6 @@ use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\LocalTrip;
-use Uitoux\EYatra\Trip;
-use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 
 class LocalTripController extends Controller {
@@ -99,7 +97,7 @@ class LocalTripController extends Controller {
 					$delete_class = "visibility:hidden";
 				}
 
-				if ($trip->status_id == '3541' || $trip->status_id == '3545') {
+				if ($trip->status_id == '3542' || $trip->status_id == '3545') {
 					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/trip-edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 					</a> ';
@@ -134,15 +132,18 @@ class LocalTripController extends Controller {
 	}
 
 	public function saveLocalTrip(Request $request) {
-
-		// dd($request->all());
-
 		if ($request->id) {
 			$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
 				->where('id', '!=', $request->id)
 				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->first();
+			$trip = LocalTrip::find($request->id);
+			if ($trip->status_id >= 3542) {
+				if ($request->trip_detail == '') {
+					return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
+				}
+			}
 		} else {
 			$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
 				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
@@ -164,6 +165,7 @@ class LocalTripController extends Controller {
 
 			}
 		}
+
 		return LocalTrip::saveTrip($request);
 	}
 
@@ -176,100 +178,11 @@ class LocalTripController extends Controller {
 	}
 
 	public function deleteTrip($trip_id) {
-
-		return Trip::deleteTrip($trip_id);
-
+		return LocalTrip::deleteTrip($trip_id);
 	}
 
 	public function cancelTrip($trip_id) {
-
-		return Trip::cancelTrip($trip_id);
-	}
-
-	public function tripVerificationRequest($trip_id) {
-		$trip = Trip::find($trip_id);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$trip->status_id = 3021;
-		$trip->save();
-
-		$trip->visits()->update(['manager_verification_status_id' => 3080]);
-		return response()->json(['success' => true]);
-	}
-
-	public function cancelTripVisitBooking($visit_id) {
-		return Trip::cancelTripVisitBooking($visit_id);
-	}
-
-	public function visitFormData($visit_id) {
-
-		$visit = Visit::find($visit_id);
-		if (!$visit) {
-			return response()->json(['success' => false, 'errors' => ['Visit not found']]);
-		}
-
-		$relations = [
-			'type',
-			'fromCity',
-			'toCity',
-			'travelMode',
-			'bookingMethod',
-			'bookingStatus',
-			'agent',
-			'agent.user',
-			'status',
-			'attachments',
-			'managerVerificationStatus',
-			'trip.employee',
-			'trip.purpose',
-			'trip.status',
-			'trip.lodgings',
-			'trip.lodgings.city',
-			'trip.lodgings.stateType',
-			'trip.boardings',
-			'trip.boardings.city',
-			'trip.boardings.attachments',
-			'trip.localTravels',
-			'trip.localTravels.fromCity',
-			'trip.localTravels.toCity',
-			'trip.localTravels.travelMode',
-			'trip.localTravels.attachments',
-		];
-
-		//Booking Status
-		//3061 => Booking
-		//3062 => Cancel
-
-		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
-			$relations[] = 'bookings';
-			$relations[] = 'bookings.attachments';
-			$relations[] = 'bookings.type';
-			$relations[] = 'bookings.travelMode';
-			$relations[] = 'bookings.paymentStatus';
-		}
-
-		$visit = Visit::with($relations)
-			->find($visit_id);
-
-		$this->data['visit'] = $visit;
-		$this->data['trip'] = $visit->trip;
-		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
-			$this->data['bookings'] = $visit->bookings;
-			//dd($this->data['bookings'][0]->total, IND_money_format($this->data['bookings'][0]->total));
-		} else {
-			$this->data['bookings'] = [];
-		}
-
-		$this->data['success'] = true;
-		return response()->json($this->data);
-	}
-
-	public function requestCancelVisitBooking($visit_id) {
-		return Trip::requestCancelVisitBooking($visit_id);
-	}
-	public function deleteVisit($visit_id) {
-		return Trip::deleteVisit($visit_id);
+		return LocalTrip::cancelTrip($trip_id);
 	}
 
 	public function listLocalTripVerification(Request $r) {
@@ -357,10 +270,16 @@ class LocalTripController extends Controller {
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 
 				$action = '';
-				$action .= '<a href="#!/local-trip/verification/view/' . $trip->id . '">
+
+				if ($trip->status_id < '3543') {
+					$action .= '<a href="#!/local-trip/verification/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
-
+				} else {
+					$action .= '<a href="#!/local-trip/verification/detail-view/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a> ';
+				}
 				return $action;
 			})
 			->make(true);
@@ -372,7 +291,6 @@ class LocalTripController extends Controller {
 
 	public function rejectLocalTrip(Request $r) {
 		return LocalTrip::rejectTrip($r);
-
 	}
 
 }

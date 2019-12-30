@@ -604,7 +604,7 @@ app.config(['$routeProvider', function($routeProvider) {
     //LOCAL TRIP MANAGER VERIFICATION
     when('/local-trip/verification', {
         template: '<eyatra-local-trip-verifications></eyatra-local-trip-verifications>',
-        title: 'Local Trips',
+        title: 'Local Trips Verification',
     }).
     when('/local-trip/verification/view/:trip_id', {
         template: '<eyatra-local-trip-verification-view></eyatra-local-trip-verification-view>',

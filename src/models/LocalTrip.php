@@ -37,6 +37,10 @@ class LocalTrip extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'status_id');
 	}
 
+	public function google_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3187)->where('attachment_type_id', 3200);
+	}
+
 	public static function getLocalTripFormData($trip_id) {
 		$data = [];
 		if (!$trip_id) {
@@ -129,7 +133,7 @@ class LocalTrip extends Model {
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
 				$trip_visit_details = LocalTripVisitDetail::where('trip_id', $request->id)->count();
-				if ($trip->status_id == 3541) {
+				if ($trip->status_id == 3542) {
 					$trip->status_id = 3543;
 				} elseif ($trip->status_id == 3542) {
 					$trip->status_id = 3540;
@@ -153,9 +157,41 @@ class LocalTrip extends Model {
 			$trip->other_amount = $request->total_other_amount;
 			$trip->claim_amount = $request->total_claim_amount;
 			$trip->save();
-
 			$trip->number = 'TRP' . $trip->id;
 			$trip->save();
+
+			if ($request->is_justify_my_trip) {
+				$trip->is_justify_my_trip = 1;
+			} else {
+				$trip->is_justify_my_trip = 0;
+			}
+			$trip->remarks = $request->remarks;
+			$trip->save();
+
+			//STORE GOOGLE ATTACHMENT
+			$item_images = storage_path('app/public/local-trip/google_attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if ($request->hasfile('google_attachments')) {
+
+				foreach ($request->file('google_attachments') as $key => $attachement) {
+					$image = $attachement;
+					$extension = $image->getClientOriginalExtension();
+					$name = $image->getClientOriginalName();
+					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+					$value = rand(1, 100);
+					$extension = $image->getClientOriginalExtension();
+					$name = $value . '-' . $file_name;
+					$image->move(storage_path('app/public/local-trip/google_attachments/'), $name);
+					$attachement_file = new Attachment;
+					$attachement_file->attachment_of_id = 3187;
+					$attachement_file->attachment_type_id = 3200;
+					$attachement_file->entity_id = $trip->id;
+					$attachement_file->name = $name;
+					$attachement_file->save();
+				}
+
+			}
+
 			$activity['entity_id'] = $trip->id;
 			$activity['entity_type'] = 'trip';
 			$activity['details'] = 'Local Trip is Added';
@@ -178,24 +214,26 @@ class LocalTrip extends Model {
 					$visit->created_at = Carbon::now();
 					$visit->save();
 
-					//SAVE BOARDING ATTACHMENT
+					//SAVE VISIT EXPENSE ATTACHMENT
 					$item_images = storage_path('app/public/local-trip/attachments/');
 					Storage::makeDirectory($item_images, 0777);
 					if (!empty($visit_data['attachments'])) {
-
-						$attachement = $visit_data['attachments'];
-						$name = $attachement->getClientOriginalName();
-						$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
-						$value = rand(1, 100);
-						$extension = $attachement->getClientOriginalExtension();
-						$name = $value . '-' . $file_name;
-						$attachement->move(storage_path('app/public/local-trip/attachments/'), $name);
-						$attachement_file = new Attachment;
-						$attachement_file->attachment_of_id = 3186;
-						$attachement_file->attachment_type_id = 3186;
-						$attachement_file->entity_id = $visit->id;
-						$attachement_file->name = $name;
-						$attachement_file->save();
+						foreach ($visit_data['attachments'] as $key => $attachement) {
+							$image = $attachement;
+							$extension = $image->getClientOriginalExtension();
+							$name = $image->getClientOriginalName();
+							$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+							$value = rand(1, 100);
+							$extension = $image->getClientOriginalExtension();
+							$name = $value . '-' . $file_name;
+							$image->move(storage_path('app/public/local-trip/attachments/'), $name);
+							$attachement_file = new Attachment;
+							$attachement_file->attachment_of_id = 3186;
+							$attachement_file->attachment_type_id = 3200;
+							$attachement_file->entity_id = $visit->id;
+							$attachement_file->name = $name;
+							$attachement_file->save();
+						}
 					}
 
 					$i++;
@@ -255,6 +293,7 @@ class LocalTrip extends Model {
 			'employee.grade.gradeEligibility',
 			'purpose',
 			'status',
+			'google_attachments',
 		])
 			->find($trip_id);
 
@@ -290,6 +329,8 @@ class LocalTrip extends Model {
 
 		$data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();
 
+		$data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
+
 		return response()->json($data);
 
 	}
@@ -304,7 +345,7 @@ class LocalTrip extends Model {
 		if ($trip_visit_details > 0) {
 			$trip->status_id = 3544;
 		} else {
-			$trip->status_id = 3541;
+			$trip->status_id = 3542;
 		}
 
 		$trip->save();
@@ -328,7 +369,7 @@ class LocalTrip extends Model {
 		if ($trip_visit_details > 0) {
 			$trip->status_id = 3545;
 		} else {
-			$trip->status_id = 3542;
+			$trip->status_id = 3541;
 		}
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
@@ -339,6 +380,20 @@ class LocalTrip extends Model {
 		$activity_log = ActivityLog::saveLog($activity);
 
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
+	}
+
+	public static function deleteTrip($trip_id) {
+
+		$trip = LocalTrip::where('id', $trip_id)->first();
+
+		$activity['entity_id'] = $trip->id;
+		$trip = $trip->forceDelete();
+
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		return response()->json(['success' => true]);
+
 	}
 
 }

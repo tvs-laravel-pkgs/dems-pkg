@@ -121,7 +121,7 @@ app.component('eyatraLocalTrips', {
         $scope.confirmDeleteTrip = function() {
             $id = $('#del').val();
             $http.get(
-                trip_delete_url + '/' + $id,
+                local_trip_delete_url + '/' + $id,
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
@@ -316,11 +316,13 @@ app.component('eyatraTripLocalForm', {
                                 layout: 'topRight',
                                 text: res.message,
                             }).show();
+
+                            $('#trip-claim-modal-justify-one').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
-                            $location.path('/local-trips')
-                            $scope.$apply()
+                                $location.path('/local-trips')
+                                $scope.$apply()
+                            }, 2000);
                         }
                     })
                     .fail(function(xhr) {
@@ -652,11 +654,12 @@ app.component('eyatraLocalTripForm', {
                                 layout: 'topRight',
                                 text: res.message,
                             }).show();
+                            $('#trip-claim-modal-justify-one').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                            }, 1000);
-                            $location.path('/local-trips')
-                            $scope.$apply()
+                                $location.path('/local-trips')
+                                $scope.$apply()
+                            }, 2000);
                         }
                     })
                     .fail(function(xhr) {
@@ -705,12 +708,21 @@ app.component('eyatraLocalTripView', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.local_travel_attachment_url = local_travel_attachment_url;
+        self.local_travel_google_attachment_url = local_travel_google_attachment_url;
         $http.get(
             local_trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
             console.log(self.trip);
             self.claim_status = response.data.claim_status;
+        });
+
+        /* Pane Next Button */
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
         //TOOLTIP MOUSEOVER
