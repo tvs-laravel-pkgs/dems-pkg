@@ -9,6 +9,7 @@ use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\LocalTrip;
+use Validator;
 use Yajra\Datatables\Datatables;
 
 class LocalTripController extends Controller {
@@ -374,7 +375,6 @@ class LocalTripController extends Controller {
 	}
 
 	public function financierApproveLocalTrip(Request $r) {
-
 		try {
 			DB::beginTransaction();
 			$error_messages = [
@@ -393,32 +393,25 @@ class LocalTripController extends Controller {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
 
-			$trip = Trip::find($r->trip_id);
+			$trip = LocalTrip::find($r->trip_id);
 			if (!$trip) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
 
-			$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
-			if (!$employee_claim) {
-				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-			}
-			$employee_claim->status_id = 3026; //PAID
-			$employee_claim->save();
-
-			$trip->status_id = 3026; //PAID
+			$trip->status_id = 3548; //PAID
 			$trip->save();
 
 			//PAYMENT SAVE
 			$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
 			$payment->fill($r->all());
 			$payment->date = date('Y-m-d', strtotime($r->date));
-			$payment->payment_of_id = 3251;
+			$payment->payment_of_id = 3255;
 			$payment->entity_id = $trip->id;
 			$payment->created_by = Auth::user()->id;
 			$payment->save();
 
-			$employee_claim->payment_id = $payment->id;
-			$employee_claim->save();
+			$trip->payment_id = $payment->id;
+			$trip->save();
 
 			DB::commit();
 			return response()->json(['success' => true]);
@@ -428,8 +421,8 @@ class LocalTripController extends Controller {
 		}
 	}
 
-	public function financierHoldLocalTrip($trip_id) {
-		$trip = LocalTrip::find($trip_id);
+	public function financierHoldLocalTrip(Request $r) {
+		$trip = LocalTrip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Local Trip not found']]);
 		}
@@ -439,9 +432,15 @@ class LocalTripController extends Controller {
 	}
 
 	public function financierRejectLocalTrip(Request $r) {
-
-		dd($r->all());
-		return LocalTrip::rejectTrip($r);
+		$trip = LocalTrip::find($r->trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Local Trip not found']]);
+		}
+		$trip->rejection_id = $r->reject_id;
+		$trip->rejection_remarks = $r->remarks;
+		$trip->status_id = 3547;
+		$trip->save();
+		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
 
 }

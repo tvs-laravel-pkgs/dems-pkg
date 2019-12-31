@@ -374,6 +374,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Employee Petty Cash Other Expense Claim',
 				'config_type_id' => 515,
 			],
+			3255 => [
+				'name' => 'Local Trip Expense Claim',
+				'config_type_id' => 515,
+			],
 
 			//ADVANCE REQUEST APPROVAL STATUSES
 			3260 => [

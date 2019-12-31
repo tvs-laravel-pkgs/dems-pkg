@@ -135,6 +135,29 @@ app.component('eyatraLocalTripFinancierVerificationView', {
             }
         });
 
+
+        $(".bottom-expand-btn").on('click', function() {
+            console.log(' click ==');
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                console.log(' has ==');
+
+                $(".separate-bottom-fixed-layer").removeClass("in");
+            } else {
+                console.log(' has not ==');
+
+                $(".separate-bottom-fixed-layer").addClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'none' });
+            }
+        });
+        $(".btn_close").on('click', function() {
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                $(".separate-bottom-fixed-layer").removeClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'inline-block' });
+            } else {
+                $(".separate-bottom-fixed-layer").addClass("in");
+            }
+        });
+
         //APPROVE TRIP
         self.approveTrip = function(id) {
             $('#trip_id').val(id);
@@ -145,14 +168,14 @@ app.component('eyatraLocalTripFinancierVerificationView', {
         };
 
         $(document).on('click', '.approve_btn', function() {
-            var form_id = '#trip-reject-form';
+            var form_id = '#trip-claim-finance-form';
             var v = jQuery(form_id).validate({
                 ignore: '',
 
                 submitHandler: function(form) {
 
                     let formData = new FormData($(form_id)[0]);
-                    $('#reject_btn').button('loading');
+                    $('#submit').button('loading');
                     $.ajax({
                             url: laravel_routes['financierApproveLocalTrip'],
                             method: "POST",
@@ -163,7 +186,7 @@ app.component('eyatraLocalTripFinancierVerificationView', {
                         .done(function(res) {
                             console.log(res.success);
                             if (!res.success) {
-                                $('#reject_btn').button('reset');
+                                $('#submit').button('reset');
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
@@ -173,7 +196,7 @@ app.component('eyatraLocalTripFinancierVerificationView', {
                                 $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
-                                    text: 'financier Approved successfully',
+                                    text: 'Financier Approved successfully',
                                     animation: {
                                         speed: 500 // unavailable - no need
                                     },
@@ -181,7 +204,6 @@ app.component('eyatraLocalTripFinancierVerificationView', {
                                 setTimeout(function() {
                                     $noty.close();
                                 }, 1000);
-                                $('#alert-modal-approve').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/local-trip/financier/verification/list')
                                     $scope.$apply()
@@ -198,47 +220,49 @@ app.component('eyatraLocalTripFinancierVerificationView', {
         });
 
         //Hold
-        $(document).on('click', '.hold_btn', function() {
-            $id = $('#trip_id').val();
-            $http.get(
-                local_trip_financier_verification_hold_url + '/' + $id,
-            ).then(function(response) {
-                console.log(response);
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 1000);
-                } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Local Trip Hold Successfully',
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 2000);
-                    $('#alert-modal-hold').modal('hide');
-                    setTimeout(function() {
-                        $location.path('/local-trip/financier/verification/list')
-                        $scope.$apply()
-                    }, 500);
-                }
 
-            });
-        });
+        $scope.tripClaimHold = function(trip_id) {
+            if (trip_id) {
+                $('#Hold').button('loading');
+                $.ajax({
+                        url: laravel_routes['financierHoldLocalTrip'],
+                        method: "POST",
+                        data: { trip_id: trip_id },
+                    })
+                    .done(function(res) {
+                        console.log(res.success);
+                        if (!res.success) {
+                            $('#reject_btn').button('reset');
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            $noty = new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Trips Claim Holded successfully',
+                            }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            setTimeout(function() {
+                                $location.path('/local-trip/financier/verification/list')
+                                $scope.$apply()
+                            }, 500);
+
+                        }
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
+                    });
+            }
+        }
 
         //Reject
         $(document).on('click', '.reject_btn', function() {
-            var form_id = '#trip-reject-form';
+            var form_id = '#trip-claim-reject-form';
             var v = jQuery(form_id).validate({
                 ignore: '',
 
@@ -274,7 +298,7 @@ app.component('eyatraLocalTripFinancierVerificationView', {
                                 setTimeout(function() {
                                     $noty.close();
                                 }, 1000);
-                                $('#alert-modal-reject').modal('hide');
+                                $('#trip-claim-modal-reject-three').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/local-trip/financier/verification/list')
                                     $scope.$apply()

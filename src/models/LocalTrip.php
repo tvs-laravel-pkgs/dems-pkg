@@ -247,7 +247,6 @@ class LocalTrip extends Model {
 				}
 				LocalTripVisitDetail::where('trip_id', $request->id)->forceDelete();
 				$activity['activity'] = "edit";
-
 			}
 
 			$employee = Employee::where('id', Auth::user()->entity->id)->first();
@@ -259,6 +258,7 @@ class LocalTrip extends Model {
 			$trip->beta_amount = $request->total_beta_amount;
 			$trip->other_amount = $request->total_other_amount;
 			$trip->claim_amount = $request->total_claim_amount;
+			$trip->claimed_date = date('Y-m-d');
 			$trip->save();
 			$trip->number = 'TRP' . $trip->id;
 			$trip->save();
