@@ -410,11 +410,13 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/verification/get-list', 'Uitoux\EYatra\LocalTripController@listLocalTripVerification')->name('listLocalTripVerification');
 		Route::get('eyatra/local-trip/verification/approve/{trip_id?}', 'Uitoux\EYatra\LocalTripController@approveLocalTrip')->name('approveLocalTrip');
 		Route::post('eyatra/local-trip/verification/reject', 'Uitoux\EYatra\LocalTripController@rejectLocalTrip')->name('rejectLocalTrip');
+		Route::get('eyatra/local-trip/verification/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripVerificationFilterData')->name('eyatraLocalTripVerificationFilterData');
 
 		//LOCAL TRIP FINANCIER VERIFICATION
 		Route::get('eyatra/local-trip/financier/verification/get-list', 'Uitoux\EYatra\LocalTripController@listFinancierLocalTripVerification')->name('listFinancierLocalTripVerification');
 		Route::post('eyatra/local-trip/financier/verification/approve', 'Uitoux\EYatra\LocalTripController@financierApproveLocalTrip')->name('financierApproveLocalTrip');
 		Route::post('eyatra/local-trip/financier/verification/hold', 'Uitoux\EYatra\LocalTripController@financierHoldLocalTrip')->name('financierHoldLocalTrip');
 		Route::post('eyatra/local-trip/financier/verification/reject', 'Uitoux\EYatra\LocalTripController@financierRejectLocalTrip')->name('financierRejectLocalTrip');
+		Route::get('eyatra/local-trip/financier/verification/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFinancierVerificationFilterData')->name('eyatraLocalTripFinancierVerificationFilterData');
 	});
 });

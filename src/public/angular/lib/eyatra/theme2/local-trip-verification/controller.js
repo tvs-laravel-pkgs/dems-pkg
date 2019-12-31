@@ -3,15 +3,15 @@ app.component('eyatraLocalTripVerifications', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        // $http.get(
-        //     local_trip_verification_filter_data_url
-        // ).then(function(response) {
-        //     console.log(response.data);
-        //     self.employee_list = response.data.employee_list;
-        //     self.purpose_list = response.data.purpose_list;
-        //     self.trip_status_list = response.data.trip_status_list;
-        //     $rootScope.loading = false;
-        // });
+        $http.get(
+            local_trip_verification_filter_data_url
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.purpose_list = response.data.purpose_list;
+            self.trip_status_list = response.data.trip_status_list;
+            $rootScope.loading = false;
+        });
         var dataTable = $('#eyatra_local_trip_verification_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -45,8 +45,8 @@ app.component('eyatraLocalTripVerifications', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'created_date', name: 'trips.created_date', searchable: false },
+                { data: 'number', name: 'local_trips.number', searchable: true },
+                { data: 'created_date', name: 'local_trips.created_date', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },
@@ -61,7 +61,7 @@ app.component('eyatraLocalTripVerifications', {
 
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_trip_verification_table_filter');
+            var d = document.getElementById('eyatra_local_trip_verification_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);

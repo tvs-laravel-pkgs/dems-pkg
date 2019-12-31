@@ -176,7 +176,14 @@ class LocalTripController extends Controller {
 	}
 
 	public function eyatraLocalTripFilterData() {
-		return LocalTrip::getFilterData();
+		return LocalTrip::getFilterData($type = 1);
+	}
+
+	public function eyatraLocalTripVerificationFilterData() {
+		return LocalTrip::getFilterData($type = 2);
+	}
+	public function eyatraLocalTripFinancierVerificationFilterData() {
+		return LocalTrip::getFilterData($type = 3);
 	}
 
 	public function deleteTrip($trip_id) {

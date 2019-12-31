@@ -184,7 +184,7 @@ class LocalTrip extends Model {
 		$data['extras'] = [
 			'travel_mode_list' => Entity::join('local_travel_mode_category_type', 'local_travel_mode_category_type.travel_mode_id', 'entities.id')->select('entities.name', 'entities.id')->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 503)->get()->prepend(['id' => '', 'name' => 'Select Travel Mode']),
 			'eligible_travel_mode_list' => DB::table('local_travel_mode_category_type')->where('category_id', 3561)->pluck('travel_mode_id')->toArray(),
-			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
+			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
 		];
 		$data['trip'] = $trip;
 
@@ -356,22 +356,32 @@ class LocalTrip extends Model {
 		}
 	}
 
-	public static function getFilterData() {
+	public static function getFilterData($type) {
 
 		$data = [];
-		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->where('employees.reporting_to_id', Auth::user()->entity_id)
-				->where('employees.company_id', Auth::user()->company_id)
-				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
-		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
-		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 531)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
-
-		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+		if ($type == 1) {
+			$grade = Auth::user()->entity;
+			$data['purpose_list'] = DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']);
+			$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 531)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		} elseif ($type == 2) {
+			$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+			$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+					->leftJoin('users', 'users.entity_id', 'employees.id')
+					->where('users.user_type_id', 3121)
+					->where('employees.reporting_to_id', Auth::user()->entity_id)
+					->where('employees.company_id', Auth::user()->company_id)
+					->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		} else {
+			$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+					->leftJoin('users', 'users.entity_id', 'employees.id')
+					->where('users.user_type_id', 3121)
+					->where('employees.company_id', Auth::user()->company_id)
+					->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+			$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+			$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+		}
 
 		$data['success'] = true;
-		//dd($data);
 		return response()->json($data);
 	}
 

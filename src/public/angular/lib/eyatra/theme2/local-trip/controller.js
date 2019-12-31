@@ -53,8 +53,8 @@ app.component('eyatraLocalTrips', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'created_date', name: 'trips.created_date', searchable: false },
+                { data: 'number', name: 'local_trips.number', searchable: true },
+                { data: 'created_date', name: 'local_trips.created_date', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },
@@ -77,7 +77,7 @@ app.component('eyatraLocalTrips', {
 
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_trip_table_filter');
+            var d = document.getElementById('eyatra_local_trip_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);

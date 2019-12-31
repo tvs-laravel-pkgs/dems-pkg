@@ -132,6 +132,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Payment Pending',
 				'config_type_id' => 501,
 			],
+			3035 => [
+				'name' => 'Claim Approved',
+				'config_type_id' => 501,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [
@@ -800,11 +804,11 @@ class EYatraConfigSeeder extends Seeder {
 
 			//TRAVEL MODE CATEGORY TYPE
 			3560 => [
-				'name' => 'Extra Amount Not Eligible',
+				'name' => 'Other Amount Not Eligible',
 				'config_type_id' => 532,
 			],
 			3561 => [
-				'name' => 'Extra Amount Eligible',
+				'name' => 'Other Amount Eligible',
 				'config_type_id' => 532,
 			],
 		];

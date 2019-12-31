@@ -1,12 +1,12 @@
 app.component('eyatraLocalTravelModeList', {
-    templateUrl: eyatra_local_trip_verification_list_template_url,
+    templateUrl: local_travel_mode_data_list_template_url,
     controller: function(HelperService, $http, $rootScope, $scope, $routeParams) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.add_permission = self.hasPermission('eyatra-travel-modes-add');
         var dataTable;
 
-        var dataTable = $('#travel_mode_table').DataTable({
+        var dataTable = $('#local_travel_mode_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate,
             "language": {
@@ -34,13 +34,15 @@ app.component('eyatraLocalTravelModeList', {
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'created_date', name: 'trips.created_date', searchable: false },
-                { data: 'ecode', name: 'e.code', searchable: true },
-                { data: 'ename', name: 'users.name', searchable: true },
-                { data: 'travel_period', name: 'travel_period', searchable: false },
-                { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'status', name: 'status.name', searchable: true },
+                { data: 'name', name: 'entities.name' },
+                { data: 'category_name', name: 'c.name' },
+                { data: 'created_by', name: 'users.username' },
+                { data: 'updated_by', name: 'updater.username' },
+                { data: 'deleted_by', name: 'deactivator.username' },
+                { data: 'created_at', name: 'entities.created_at', searchable: false },
+                { data: 'updated_at', name: 'entities.updated_at', searchable: false },
+                { data: 'deleted_at', name: 'entities.deleted_at', searchable: false },
+                { data: 'status', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -60,7 +62,7 @@ app.component('eyatraLocalTravelModeList', {
         }
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('travel_mode_table');
+            var d = document.getElementById('local_travel_mode_table');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
 
