@@ -764,43 +764,43 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 530,
 			],
 
-			//LOCAL TRIP STATUS
-			3540 => [
-				'name' => 'Approval Pending',
-				'config_type_id' => 531,
-			],
-			3541 => [
-				'name' => 'Manager Rejected',
-				'config_type_id' => 531,
-			],
-			3542 => [
-				'name' => 'Manager Approved',
-				'config_type_id' => 531,
-			],
-			3543 => [
-				'name' => 'Trip Claim Requested',
-				'config_type_id' => 531,
-			],
-			3544 => [
-				'name' => 'Claim Approved by Manager',
-				'config_type_id' => 531,
-			],
-			3545 => [
-				'name' => 'Claim Rejected by Manager',
-				'config_type_id' => 531,
-			],
-			3546 => [
-				'name' => 'Financier Hold',
-				'config_type_id' => 531,
-			],
-			3547 => [
-				'name' => 'Financier Rejected',
-				'config_type_id' => 531,
-			],
-			3548 => [
-				'name' => 'Paid',
-				'config_type_id' => 531,
-			],
+			// //LOCAL TRIP STATUS
+			// 3540 => [
+			// 	'name' => 'Approval Pending',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3541 => [
+			// 	'name' => 'Manager Rejected',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3542 => [
+			// 	'name' => 'Manager Approved',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3543 => [
+			// 	'name' => 'Trip Claim Requested',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3544 => [
+			// 	'name' => 'Claim Approved by Manager',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3545 => [
+			// 	'name' => 'Claim Rejected by Manager',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3546 => [
+			// 	'name' => 'Financier Hold',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3547 => [
+			// 	'name' => 'Financier Rejected',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3548 => [
+			// 	'name' => 'Paid',
+			// 	'config_type_id' => 531,
+			// ],
 
 			//TRAVEL MODE CATEGORY TYPE
 			3560 => [

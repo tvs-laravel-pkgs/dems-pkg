@@ -291,6 +291,13 @@ app.component('eyatraLocalTripVerificationDetailView', {
             }
         });
 
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
+        
         //APPROVE TRIP
         self.approveTrip = function(id) {
             $('#trip_id').val(id);

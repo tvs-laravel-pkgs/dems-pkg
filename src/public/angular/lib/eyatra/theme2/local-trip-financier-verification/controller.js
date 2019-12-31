@@ -135,6 +135,12 @@ app.component('eyatraLocalTripFinancierVerificationView', {
             }
         });
 
+        $('.btn-nxt').on("click", function() {
+            $('.editDetails-tabs li.active').next().children('a').trigger("click");
+        });
+        $('.btn-prev').on("click", function() {
+            $('.editDetails-tabs li.active').prev().children('a').trigger("click");
+        });
 
         $(".bottom-expand-btn").on('click', function() {
             console.log(' click ==');

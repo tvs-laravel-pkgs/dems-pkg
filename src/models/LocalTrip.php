@@ -103,7 +103,7 @@ class LocalTrip extends Model {
 				'purpose.name as purpose',
 				'status.name as status'
 			)
-			->whereIN('local_trips.status_id', [3540, 3543])
+			->whereIN('local_trips.status_id', [3021, 3023])
 			->groupBy('local_trips.id')
 			->orderBy('local_trips.id', 'desc')
 		;
@@ -230,20 +230,20 @@ class LocalTrip extends Model {
 				$trip->created_at = Carbon::now();
 				$trip->updated_at = NULL;
 				$activity['activity'] = "add";
-				$trip->status_id = 3540; //Manager Approval Pending
+				$trip->status_id = 3021; //Manager Approval Pending
 			} else {
 				$trip = LocalTrip::find($request->id);
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
 				$trip_visit_details = LocalTripVisitDetail::where('trip_id', $request->id)->count();
-				if ($trip->status_id == 3542) {
-					$trip->status_id = 3543;
-				} elseif ($trip->status_id == 3542) {
-					$trip->status_id = 3540;
-				} elseif ($trip->status_id == 3545) {
-					$trip->status_id = 3543;
+				if ($trip->status_id == 3028) {
+					$trip->status_id = 3023;
+				} elseif ($trip->status_id == 3028) {
+					$trip->status_id = 3021;
+				} elseif ($trip->status_id == 3024) {
+					$trip->status_id = 3023;
 				} else {
-					$trip->status_id = 3540;
+					$trip->status_id = 3021;
 				}
 				LocalTripVisitDetail::where('trip_id', $request->id)->forceDelete();
 				$activity['activity'] = "edit";
@@ -456,9 +456,9 @@ class LocalTrip extends Model {
 		}
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
-			$trip->status_id = 3544;
+			$trip->status_id = 3035;
 		} else {
-			$trip->status_id = 3542;
+			$trip->status_id = 3028;
 		}
 
 		$trip->save();
@@ -480,9 +480,9 @@ class LocalTrip extends Model {
 		$trip->rejection_remarks = $r->remarks;
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $r->trip_id)->count();
 		if ($trip_visit_details > 0) {
-			$trip->status_id = 3545;
+			$trip->status_id = 3024;
 		} else {
-			$trip->status_id = 3541;
+			$trip->status_id = 3022;
 		}
 		$trip->save();
 		$activity['entity_id'] = $trip->id;

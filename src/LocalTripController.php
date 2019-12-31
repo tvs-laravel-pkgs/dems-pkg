@@ -84,7 +84,7 @@ class LocalTripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == '3540' || $trip->status_id == '3541' || $trip->status_id == '3542' || $trip->status_id == '3545') {
+				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3024') {
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
 						$edit_class = "";
@@ -98,7 +98,7 @@ class LocalTripController extends Controller {
 					$delete_class = "visibility:hidden";
 				}
 
-				if ($trip->status_id == '3542' || $trip->status_id == '3545') {
+				if ($trip->status_id == '3028' || $trip->status_id == '3024') {
 					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/trip-edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 					</a> ';
@@ -107,7 +107,7 @@ class LocalTripController extends Controller {
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 					</a> ';
 				}
-				if ($trip->status_id < '3543') {
+				if ($trip->status_id < '3023') {
 					$action .= '<a href="#!/local-trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
@@ -141,7 +141,7 @@ class LocalTripController extends Controller {
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->first();
 			$trip = LocalTrip::find($request->id);
-			if ($trip->status_id >= 3542) {
+			if ($trip->status_id >= 3028) {
 				if ($request->trip_detail == '') {
 					return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
 				}
@@ -246,8 +246,7 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->whereIN('local_trips.status_id', [3540, 3543])
-		// ->orWhere('local_trips.status_id', 3543)
+			->whereIN('local_trips.status_id', [3021, 3023])
 			->groupBy('local_trips.id')
 			->orderBy('local_trips.id', 'desc')
 		// ->get()
@@ -280,7 +279,7 @@ class LocalTripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id < '3543') {
+				if ($trip->status_id < '3023') {
 					$action .= '<a href="#!/local-trip/verification/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
@@ -353,7 +352,7 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->whereIN('local_trips.status_id', [3546, 3544])
+			->whereIN('local_trips.status_id', [3030, 3035])
 			->groupBy('local_trips.id')
 		// ->orderBy('trips.created_at', 'desc');
 			->orderBy('local_trips.id', 'desc')
@@ -405,7 +404,7 @@ class LocalTripController extends Controller {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
 
-			$trip->status_id = 3548; //PAID
+			$trip->status_id = 3026; //PAID
 			$trip->save();
 
 			//PAYMENT SAVE
@@ -433,7 +432,7 @@ class LocalTripController extends Controller {
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Local Trip not found']]);
 		}
-		$trip->status_id = 3546;
+		$trip->status_id = 3030;
 		$trip->save();
 		return response()->json(['success' => true, 'message' => 'Trip Hold successfully!']);
 	}
@@ -445,7 +444,7 @@ class LocalTripController extends Controller {
 		}
 		$trip->rejection_id = $r->reject_id;
 		$trip->rejection_remarks = $r->remarks;
-		$trip->status_id = 3547;
+		$trip->status_id = 3024;
 		$trip->save();
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
