@@ -623,6 +623,18 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/local-trip/financier/verification/view/:trip_id', {
         template: '<eyatra-local-trip-financier-verification-view></eyatra-local-trip-financier-verification-view>',
         title: 'Lcoal Trip Verification View',
-    });
+    }).
 
+    //REPORT
+    //OUTSTATION TRIP REPORT
+    when('/report/outstation-trip/list', {
+        template: '<eyatra-outstation-trip></eyatra-outstation-trip>',
+        title: 'Outstation Trip Reports',
+    }).
+    //LOCAL TRIP REPORT
+    when('/report/local-trip/list', {
+        template: '<eyatra-local-trip></eyatra-local-trip>',
+        title: 'Local Trip Reports',
+    });
+    
 }]);

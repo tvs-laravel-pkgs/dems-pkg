@@ -280,6 +280,9 @@ class EYatraRoleSeeder extends Seeder {
 					//APPROVALS / VERIFICATION
 					5600, 5602, 5605, 5606, 5609, 5611,
 
+					//REPORTS
+					5680, 5681, 5682,
+
 				],
 			],
 

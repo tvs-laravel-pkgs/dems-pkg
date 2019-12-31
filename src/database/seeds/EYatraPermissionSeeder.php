@@ -897,7 +897,7 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_order' => 6,
 				'parent_id' => 5600,
 				'name' => 'eyatra-indv-financier-claims-verification3',
-				'display_name' => 'Financier Claim Verification 3',
+				'display_name' => 'Financier Trip Claim Verification',
 			],
 
 			5606 => [
@@ -1031,6 +1031,28 @@ class EYatraPermissionSeeder extends Seeder {
 				'parent_id' => 5660,
 				'name' => 'eyatra-indv-claimed-local-trips',
 				'display_name' => 'My Claimed Local Trips',
+			],
+
+			//REPORTS
+			5680 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'eyatra-reports',
+				'display_name' => 'Reports',
+			],
+
+			//MASTERS > TRAVEL PURPOSES
+			5681 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-outstation-trip-report',
+				'display_name' => 'Outstation Trip Report',
+			],
+			5682 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-local-trip-report',
+				'display_name' => 'Local Trip Report',
 			],
 		];
 
