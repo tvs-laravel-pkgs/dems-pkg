@@ -924,6 +924,18 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-indv-expense-vouchers-verification3',
 				'display_name' => 'Expense Vouchers Financier Verfication',
 			],
+			5610 => [
+				'display_order' => 1,
+				'parent_id' => 5600,
+				'name' => 'eyatra-indv-local-trip-verifications',
+				'display_name' => 'Local Trips Verification',
+			],
+			5611 => [
+				'display_order' => 8,
+				'parent_id' => 5600,
+				'name' => 'eyatra-indv-financier-local-trip-claims-verification',
+				'display_name' => 'Financier Local Trip Claim Verification',
+			],
 
 			//ROLES
 			5620 => [
@@ -975,6 +987,50 @@ class EYatraPermissionSeeder extends Seeder {
 				'parent_id' => 5640,
 				'name' => 'eyatra-pettycash-expense-types-delete',
 				'display_name' => 'Delete',
+			],
+
+			//LOCAL TRIPS
+			5660 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'local-trips',
+				'display_name' => 'Local Trips',
+			],
+			5661 => [
+				'display_order' => 1,
+				'parent_id' => 5660,
+				'name' => 'local-trip-add',
+				'display_name' => 'Add',
+			],
+			5662 => [
+				'display_order' => 2,
+				'parent_id' => 5660,
+				'name' => 'local-trip-edit',
+				'display_name' => 'Edit',
+			],
+			5663 => [
+				'display_order' => 3,
+				'parent_id' => 5660,
+				'name' => 'local-trip-delete',
+				'display_name' => 'Delete',
+			],
+			5664 => [
+				'display_order' => 4,
+				'parent_id' => 5660,
+				'name' => 'local-view-all-trips',
+				'display_name' => 'View All',
+			],
+			5665 => [
+				'display_order' => 4,
+				'parent_id' => 5660,
+				'name' => 'eyatra-indv-local-trips',
+				'display_name' => 'My Local Trips',
+			],
+			5666 => [
+				'display_order' => 4,
+				'parent_id' => 5660,
+				'name' => 'eyatra-indv-claimed-local-trips',
+				'display_name' => 'My Claimed Local Trips',
 			],
 		];
 

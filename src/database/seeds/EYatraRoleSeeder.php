@@ -169,6 +169,8 @@ class EYatraRoleSeeder extends Seeder {
 					//MOBILE PERMISSIONS
 					//TRIPS
 					9000, 9001, 9002, 9003, 9004, 9005,
+					//LOCAL TRIPS
+					5660, 5661, 5662, 5663, 5664, 5665, 5666,
 
 					//EXPENSE VOUCHERS
 					5560,
@@ -191,11 +193,14 @@ class EYatraRoleSeeder extends Seeder {
 					//TRIPS
 					5500, 5501, 5502, 5503, 5504, 5505, 5506,
 
+					//LOCAL TRIPS
+					5660, 5661, 5662, 5663, 5664, 5665, 5666,
+
 					//EXPENSE VOUCHERS
 					5560,
 
 					//APPROVALS / VERIFICATION
-					5600, 5601, 5603, 5607,
+					5600, 5601, 5603, 5607, 5610,
 
 					//MOBILE PERMISSIONS
 					//TRIPS
@@ -245,6 +250,9 @@ class EYatraRoleSeeder extends Seeder {
 					//TRIPS
 					5500, 5501, 5502, 5503, 5504, 5505, 5506,
 
+					//LOCAL TRIPS
+					5660, 5661, 5662, 5663, 5664, 5665, 5666,
+
 					//EXPENSE VOUCHERS
 					5560,
 
@@ -270,7 +278,7 @@ class EYatraRoleSeeder extends Seeder {
 					// 5000,
 
 					//APPROVALS / VERIFICATION
-					5600, 5602, 5605, 5606, 5609,
+					5600, 5602, 5605, 5606, 5609, 5611,
 
 				],
 			],
@@ -290,11 +298,15 @@ class EYatraRoleSeeder extends Seeder {
 					//TRIPS
 					5500, 5501, 5502, 5503, 5504, 5505, 5506,
 
+					//LOCAL TRIPS
+					5660, 5661, 5662, 5663, 5664, 5665, 5666,
+
 					//EXPENSE VOUCHERS
 					5560,
 
 					//APPROVALS / VERIFICATION
-					5600, 5601, 5603, 5604, 5607,
+					5600, 5601, 5603, 5604, 5607, 5610,
+
 				],
 			],
 		];

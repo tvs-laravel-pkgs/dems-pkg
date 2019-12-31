@@ -3,7 +3,7 @@ app.component('eyatraLocalTrips', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        self.permission = self.hasPermission('trip-add');
+        self.permission = self.hasPermission('local-trip-add');
         $http.get(
             local_trip_filter_data_url
         ).then(function(response) {

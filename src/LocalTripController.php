@@ -27,7 +27,7 @@ class LocalTripController extends Controller {
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
 				'status.name as status'
 			)
@@ -86,11 +86,11 @@ class LocalTripController extends Controller {
 
 				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3024') {
 					$edit_class = "visibility:hidden";
-					if (Entrust::can('trip-edit')) {
+					if (Entrust::can('local-trip-edit')) {
 						$edit_class = "";
 					}
 					$delete_class = "visibility:hidden";
-					if (Entrust::can('trip-delete')) {
+					if (Entrust::can('local-trip-delete')) {
 						$delete_class = "";
 					}
 				} else {
@@ -208,7 +208,7 @@ class LocalTripController extends Controller {
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
 				'status.name as status'
 			)
@@ -314,7 +314,7 @@ class LocalTripController extends Controller {
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
 				'status.name as status'
 			)

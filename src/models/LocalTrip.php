@@ -54,7 +54,7 @@ class LocalTrip extends Model {
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
 				'status.name as status'
 			)
@@ -99,7 +99,7 @@ class LocalTrip extends Model {
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
 				'status.name as status'
 			)
