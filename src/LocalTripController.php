@@ -417,6 +417,7 @@ class LocalTripController extends Controller {
 			$payment->save();
 
 			$trip->payment_id = $payment->id;
+			$trip->claim_approval_datetime = date('Y-m-d H:i:s');
 			$trip->save();
 
 			DB::commit();

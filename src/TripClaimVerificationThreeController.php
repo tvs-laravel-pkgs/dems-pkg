@@ -148,6 +148,7 @@ class TripClaimVerificationThreeController extends Controller {
 			$payment->save();
 
 			$employee_claim->payment_id = $payment->id;
+			$employee_claim->claim_approval_datetime = date('Y-m-d H:i:s');
 			$employee_claim->save();
 
 			DB::commit();
