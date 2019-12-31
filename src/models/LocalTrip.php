@@ -41,6 +41,110 @@ class LocalTrip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3187)->where('attachment_type_id', 3200);
 	}
 
+	public static function getLocalTripList($request) {
+		$trips = LocalTrip::from('local_trips')
+			->join('employees as e', 'e.id', 'local_trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
+			->join('configs as status', 'status.id', 'local_trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'local_trips.employee_id')
+			->where('users.user_type_id', 3121)
+			->select(
+				'local_trips.id',
+				'local_trips.number',
+				'e.code as ecode',
+				'users.name as ename', 'local_trips.status_id',
+				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				'purpose.name as purpose',
+				'status.name as status'
+			)
+			->where('local_trips.employee_id', Auth::user()->entity_id)
+			->groupBy('local_trips.id')
+			->orderBy('local_trips.id', 'desc')
+		;
+
+		//FILTERS
+		if ($request->number) {
+			$trips->where('local_trips.number', 'like', '%' . $request->number . '%');
+		}
+		if ($request->from_date) {
+			$date = date('Y-m-d', strtotime($request->get('from_date')));
+			$trips->where("local_trips.start_date", '>=', $date);
+		}
+		if ($request->to_date) {
+			$date = date('Y-m-d', strtotime($request->get('to_date')));
+			$trips->where("local_trips.end_date", '<=', $date);
+		}
+		if ($request->status_ids) {
+			$trips->whereIn('local_trips.status_id', json_decode($request->status_ids));
+		}
+		if ($request->purpose_ids) {
+			$trips->where('local_trips.purpose_id', $request->purpose_ids);
+		}
+
+		return $trips;
+	}
+
+	public static function getVerficationPendingList($request) {
+
+		$trips = LocalTrip::from('local_trips')
+			->join('employees as e', 'e.id', 'local_trips.employee_id')
+			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
+			->join('configs as status', 'status.id', 'local_trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'local_trips.employee_id')
+			->where('users.user_type_id', 3121)
+			->select(
+				'local_trips.id',
+				'local_trips.number',
+				'e.code as ecode',
+				'users.name as ename', 'local_trips.status_id',
+				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(local_trips.created_at,"%d-%m-%Y") as created_date'),
+				'purpose.name as purpose',
+				'status.name as status'
+			)
+			->whereIN('local_trips.status_id', [3540, 3543])
+			->groupBy('local_trips.id')
+			->orderBy('local_trips.id', 'desc')
+		;
+
+		//FILTERS
+		if ($request->number) {
+			$trips->where('local_trips.number', 'like', '%' . $request->number . '%');
+		}
+		if ($request->from_date) {
+			$date = date('Y-m-d', strtotime($request->get('from_date')));
+			$trips->where("local_trips.start_date", '>=', $date);
+		}
+		if ($request->to_date) {
+			$date = date('Y-m-d', strtotime($request->get('to_date')));
+			$trips->where("local_trips.end_date", '<=', $date);
+		}
+		if ($request->status_ids) {
+			$trips->whereIn('local_trips.status_id', json_decode($request->status_ids));
+		}
+		if ($request->purpose_ids) {
+			$trips->where('local_trips.purpose_id', $request->purpose_ids);
+		}
+
+		$now = date('Y-m-d');
+		$sub_employee_id = AlternateApprove::select('employee_id')
+			->where('from', '<=', $now)
+			->where('to', '>=', $now)
+			->where('alternate_employee_id', Auth::user()->entity_id)
+			->get()
+			->toArray();
+		$ids = array_column($sub_employee_id, 'employee_id');
+		array_push($ids, Auth::user()->entity_id);
+		if (count($sub_employee_id) > 0) {
+			$trips = $trips->whereIn('e.reporting_to_id', $ids); //Alternate MANAGER
+		} else {
+			$trips = $trips->where('e.reporting_to_id', Auth::user()->entity_id); //MANAGER
+		}
+
+		return $trips;
+	}
+
 	public static function getLocalTripFormData($trip_id) {
 		$data = [];
 		if (!$trip_id) {
@@ -78,7 +182,6 @@ class LocalTrip extends Model {
 		$data['beta_amount'] = $beta_amount;
 
 		$data['extras'] = [
-			'city_list' => NCity::getList(),
 			'travel_mode_list' => Entity::join('local_travel_mode_category_type', 'local_travel_mode_category_type.travel_mode_id', 'entities.id')->select('entities.name', 'entities.id')->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 503)->get()->prepend(['id' => '', 'name' => 'Select Travel Mode']),
 			'eligible_travel_mode_list' => DB::table('local_travel_mode_category_type')->where('category_id', 3561)->pluck('travel_mode_id')->toArray(),
 			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),

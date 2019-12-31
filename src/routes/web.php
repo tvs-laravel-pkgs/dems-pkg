@@ -58,6 +58,19 @@ Route::group(['middleware' => ['api']], function () {
 		//DIGITAL SIGNATURE
 		Route::post('petty-cash/digital-signature-attachments', 'Uitoux\EYatra\Api\TripClaimController@getdigitalsignatureAttachments');
 
+		//LOCAL TRIP
+		Route::post('local-trip/list', 'Uitoux\EYatra\Api\LocalTripController@listLocalTrip');
+		Route::post('local-trip/get-form-data', 'Uitoux\EYatra\Api\LocalTripController@getTripFormData');
+		Route::post('local-trip/save', 'Uitoux\EYatra\Api\LocalTripController@saveLocalTrip');
+		Route::get('local-trip/view/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@viewTrip');
+		Route::get('local-trip/delete/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@deleteTrip');
+
+		//LOCAL TRIP VERIFICATION
+		Route::post('local-trip/verification/get-list', 'Uitoux\EYatra\Api\LocalTripController@listTripVerification');
+
+		Route::get('local-trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@approveTrip');
+		Route::post('local-trip/verification/reject', 'Uitoux\EYatra\Api\LocalTripController@rejectTrip');
+
 	});
 });
 
@@ -390,7 +403,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/get-form-data/{trip_id?}', 'Uitoux\EYatra\LocalTripController@localTripFormData')->name('localTripFormData');
 		Route::post('eyatra/local-trip/save', 'Uitoux\EYatra\LocalTripController@saveLocalTrip')->name('saveLocalTrip');
 		Route::get('eyatra/local-trip/view/{trip_id}', 'Uitoux\EYatra\LocalTripController@viewLocalTrip')->name('viewLocalTrip');
-		Route::get('eyatra/trip/delete/{trip_id}', 'Uitoux\EYatra\TripController@deleteTrip')->name('deleteTrip');
 		Route::get('eyatra/local-trip/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFilterData')->name('eyatraLocalTripFilterData');
 		Route::get('eyatra/local-trip/delete/{trip_id}', 'Uitoux\EYatra\LocalTripController@deleteTrip')->name('deleteTrip');
 

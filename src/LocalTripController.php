@@ -132,6 +132,7 @@ class LocalTripController extends Controller {
 	}
 
 	public function saveLocalTrip(Request $request) {
+		// dd($request->all());
 		if ($request->id) {
 			$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
 				->where('id', '!=', $request->id)
@@ -372,15 +373,69 @@ class LocalTripController extends Controller {
 			->make(true);
 	}
 
-	public function financierApproveLocalTrip($trip_id) {
+	public function financierApproveLocalTrip(Request $r) {
 
-		dd($trip_id);
-		return LocalTrip::approveTrip($trip_id);
+		try {
+			DB::beginTransaction();
+			$error_messages = [
+				'reference_number.unique' => "Reference Number is already taken",
+			];
+
+			$validator = Validator::make($r->all(), [
+				'reference_number' => [
+					'required:true',
+					'unique:payments,reference_number',
+
+				],
+			], $error_messages);
+
+			if ($validator->fails()) {
+				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+
+			$trip = Trip::find($r->trip_id);
+			if (!$trip) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			}
+
+			$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+			if (!$employee_claim) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			}
+			$employee_claim->status_id = 3026; //PAID
+			$employee_claim->save();
+
+			$trip->status_id = 3026; //PAID
+			$trip->save();
+
+			//PAYMENT SAVE
+			$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
+			$payment->fill($r->all());
+			$payment->date = date('Y-m-d', strtotime($r->date));
+			$payment->payment_of_id = 3251;
+			$payment->entity_id = $trip->id;
+			$payment->created_by = Auth::user()->id;
+			$payment->save();
+
+			$employee_claim->payment_id = $payment->id;
+			$employee_claim->save();
+
+			DB::commit();
+			return response()->json(['success' => true]);
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		}
 	}
 
 	public function financierHoldLocalTrip($trip_id) {
-		dd($trip_id);
-		return LocalTrip::approveTrip($trip_id);
+		$trip = LocalTrip::find($trip_id);
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Local Trip not found']]);
+		}
+		$trip->status_id = 3546;
+		$trip->save();
+		return response()->json(['success' => true, 'message' => 'Trip Hold successfully!']);
 	}
 
 	public function financierRejectLocalTrip(Request $r) {
