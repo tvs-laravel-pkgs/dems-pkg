@@ -120,6 +120,14 @@ app.component('eyatraLocalTrip', {
             console.log(response.data);
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
+            self.start_date = response.data.local_trip_start_date;
+            self.end_date = response.data.local_trip_end_date;
+            var trip_periods = response.data.local_trip_start_date + ' to ' + response.data.local_trip_end_date;
+            self.trip_periods = trip_periods;
+
+            setTimeout(function() {
+                dataTable.draw();
+            }, 1000);
             $rootScope.loading = false;
         });
         var dataTable = $('#eyatra_local_trip_table').DataTable({
@@ -183,7 +191,6 @@ app.component('eyatraLocalTrip', {
             });
         }, 1000);
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
@@ -191,17 +198,11 @@ app.component('eyatraLocalTrip', {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
-            dataTable.draw();
-        }
         $scope.getFromDateData = function(query) {
-            // console.log(query);
             $('#from_date').val(query);
             dataTable.draw();
         }
         $scope.getToDateData = function(query) {
-            // console.log(query);
             $('#to_date').val(query);
             dataTable.draw();
         }
@@ -210,8 +211,38 @@ app.component('eyatraLocalTrip', {
             $('#purpose_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
-            dataTable.draw();
+            self.trip.trip_periods = '';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
         }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            // startDate: start_date,//         endDate: end_date,
+            autoApply: true,
+        });
+        // $(".daterange").val('');
+
+
+        $(".daterange").on('change', function() {
+            // console.log($("#trip_periods").val());
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
+
         $rootScope.loading = false;
 
     }

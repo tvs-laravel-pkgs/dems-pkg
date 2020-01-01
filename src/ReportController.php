@@ -7,25 +7,13 @@ use Auth;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
+use Session;
 use Uitoux\EYatra\LocalTrip;
 use Yajra\Datatables\Datatables;
 
 class ReportController extends Controller {
 
 	public function eyatraOutstationFilterData() {
-		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->where('employees.company_id', Auth::user()->company_id)
-				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
-		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
-		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
-
-		$data['success'] = true;
-		return response()->json($data);
-	}
-
-	public function eyatraLocalFilterData() {
 		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
@@ -174,11 +162,38 @@ class ReportController extends Controller {
 
 	}
 
+	public function eyatraLocalFilterData() {
+		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)
+				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+
+		$data['success'] = true;
+
+		$local_trip_start_date = session('local_trip_start_date');
+		$local_trip_end_date = session('local_trip_end_date');
+		if ($local_trip_start_date == '<%$ctrl.start_date%>') {
+			$local_trip_start_date = '';
+			$local_trip_end_date = '';
+		}
+
+		$data['local_trip_start_date'] = $local_trip_start_date;
+		$data['local_trip_end_date'] = $local_trip_end_date;
+
+		return response()->json($data);
+	}
+
 	public function listLocalTripReport(Request $r) {
 
 		session(['local_employee_id' => $r->get('employee_id')]);
 		session(['local_purpose_id' => $r->get('purpose_id')]);
-
+		if (!$r->from_date == '<%$ctrl.start_date%>') {
+			session(['local_trip_start_date' => $r->get('from_date')]);
+			session(['local_trip_end_date' => $r->get('to_date')]);
+		}
 		$trips = LocalTrip::from('local_trips')
 			->join('employees as e', 'e.id', 'local_trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
@@ -209,13 +224,15 @@ class ReportController extends Controller {
 				}
 			})
 			->where(function ($query) use ($r) {
-				if (!empty($r->from_date)) {
-					$query->where('local_trips.start_date', date('Y-m-d', strtotime($r->from_date)));
+				if ($r->from_date != '<%$ctrl.start_date%>') {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("local_trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
 				}
 			})
 			->where(function ($query) use ($r) {
-				if (!empty($r->to_date)) {
-					$query->where('local_trips.end_date', date('Y-m-d', strtotime($r->to_date)));
+				if ($r->to_date) {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("local_trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
 				}
 			})
 			->where('local_trips.status_id', 3026)
