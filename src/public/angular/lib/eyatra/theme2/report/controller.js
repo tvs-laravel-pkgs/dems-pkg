@@ -117,6 +117,8 @@ app.component('eyatraOutstationTrip', {
             $('#from_date').val('');
             $('#to_date').val('');
             self.trip_periods = '';
+            self.filter_employee_id = '';
+            self.filter_purpose_id = '';
             setTimeout(function() {
                 dataTable.draw();
             }, 500);
@@ -256,6 +258,8 @@ app.component('eyatraLocalTrip', {
             $('#from_date').val('');
             $('#to_date').val('');
             self.trip_periods = '';
+            self.filter_employee_id = '';
+            self.filter_purpose_id = '';
             setTimeout(function() {
                 dataTable.draw();
             }, 500);

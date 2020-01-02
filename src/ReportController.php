@@ -277,8 +277,11 @@ class ReportController extends Controller {
 
 		$local_start_date = session('local_start_date');
 		$local_end_date = session('local_end_date');
-		$data['filter_employee_id'] = $filter_employee_id = session('local_employee_id') ? intval(session('local_employee_id')) : '';
-		$data['filter_purpose_id'] = $filter_purpose_id = session('local_purpose_id') ? intval(session('local_purpose_id')) : '';
+
+		$filter_employee_id = session('local_employee_id') ? intval(session('local_employee_id')) : '';
+		$data['filter_employee_id'] = ($filter_employee_id == '-1') ? '' : $filter_employee_id;
+		$filter_purpose_id = session('local_purpose_id') ? intval(session('local_purpose_id')) : '';
+		$data['filter_purpose_id'] = ($filter_purpose_id == '-1') ? '' : $filter_purpose_id;
 
 		if (!$local_start_date) {
 			$local_start_date = date('01-m-Y');
