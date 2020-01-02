@@ -118,9 +118,11 @@ class ReportController extends Controller {
 		ini_set('memory_limit', '-1');
 		ini_set('max_execution_time', 0);
 
-		$employee_id = session('employee_id');
-		$purpose_id = session('purpose_id');
-		// dd($employee_id, $purpose_id);
+		$employee_id = session('outstation_employee_id');
+		$purpose_id = session('outstation_purpose_id');
+		$outstation_start_date = session('outstation_start_date');
+		$outstation_end_date = session('outstation_end_date');
+		// dd($employee_id, $purpose_id, $outstation_start_date, $outstation_end_date);
 
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
@@ -146,35 +148,43 @@ class ReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->groupBy('trips.id');
 
-		if ($employee_id != '-1') {
+		if ($employee_id && $employee_id != '-1') {
 			$trips = $trips->where("e.id", $employee_id);
 		}
-		if ($purpose_id != '-1') {
+		if ($purpose_id && $purpose_id != '-1') {
 			$trips = $trips->where("purpose.id", $purpose_id);
 		}
+		if ($outstation_start_date) {
+			$date = date('Y-m-d', strtotime($outstation_start_date));
+			$trips = $trips->where("trips.start_date", '>=', $date);
+		}
+		if ($outstation_end_date) {
+			$date = date('Y-m-d', strtotime($outstation_end_date));
+			$trips = $trips->where("trips.end_date", '<=', $date);
+		}
+
 		$trips = $trips->get();
 
-		$trips_header = ['Trip', 'Employee Code', 'Employee Name', 'Travel Period', 'Purpose', 'Total Amount', 'Claim Approved Date'];
+		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Travel Period', 'Purpose', 'Total Amount', 'Claim Approved Date & Time'];
 		$trips_details = array();
 		if ($trips) {
 			foreach ($trips as $key => $trip) {
-				$trips_detail = array();
-				$trips_detail['trip_id'] = $trip->number;
-				$trips_detail['emp_code'] = $trip->ecode;
-				$trips_detail['emp_name'] = $trip->ename;
-				$trips_detail['travel_period'] = $trip->travel_period;
-				$trips_detail['purpose'] = $trip->purpose;
-				$trips_detail['total_amount'] = $trip->total_amount;
-				$trips_detail['calim_approve_date'] = $trip->claim_approval_datetime;
-
-				$trips_details[] = $trips_detail;
+				$trips_details[] = [
+					$trip->number,
+					$trip->ecode,
+					$trip->ename,
+					$trip->travel_period,
+					$trip->purpose,
+					$trip->total_amount,
+					$trip->claim_approval_datetime,
+				];
 			}
 		}
 
 		// dd($trips_header, $trips_details);
 		Excel::create('Outstation Trip Report', function ($excel) use ($trips_header, $trips_details) {
 			$excel->sheet('Outstation Trip Report', function ($sheet) use ($trips_header, $trips_details) {
-				$sheet->fromArray($trips_details, NULL, 'A2');
+				$sheet->fromArray($trips_details, NULL, 'A1');
 				$sheet->row(1, $trips_header);
 				$sheet->row(1, function ($row) {
 					$row->setBackground('#07c63a');
@@ -316,12 +326,21 @@ class ReportController extends Controller {
 			->groupBy('local_trips.id')
 			->orderBy('local_trips.created_at', 'desc');
 
-		if ($employee_id != '-1') {
+		if ($employee_id && $employee_id != '-1') {
 			$trips = $trips->where("e.id", $employee_id);
 		}
-		if ($purpose_id != '-1') {
+		if ($purpose_id && $purpose_id != '-1') {
 			$trips = $trips->where("purpose.id", $purpose_id);
 		}
+		if ($local_start_date) {
+			$date = date('Y-m-d', strtotime($local_start_date));
+			$trips = $trips->where("local_trips.start_date", '>=', $date);
+		}
+		if ($local_end_date) {
+			$date = date('Y-m-d', strtotime($local_end_date));
+			$trips = $trips->where("local_trips.end_date", '<=', $date);
+		}
+
 		$trips = $trips->get();
 
 		// dd($trips);
