@@ -499,7 +499,6 @@ class LocalTrip extends Model {
 
 		$trip = LocalTrip::where('id', $trip_id)->first();
 
-		$activity['entity_id'] = $trip->id;
 		$trip = $trip->forceDelete();
 
 		if (!$trip) {
