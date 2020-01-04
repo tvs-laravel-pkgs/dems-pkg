@@ -17,18 +17,6 @@ class Entity extends Model {
 		'created_by',
 	];
 
-	public function getCreatedAtAttribute($date) {
-		return empty($date) ? '' : date('d-m-Y H:i:s', strtotime($date));
-	}
-
-	public function getUpdatedAtAttribute($date) {
-		return empty($date) ? '' : date('d-m-Y H:i:s', strtotime($date));
-	}
-
-	public function getDeletedAtAttribute($date) {
-		return empty($date) ? '' : date('d-m-Y H:i:s', strtotime($date));
-	}
-
 	public function expenseTypes() {
 		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id')->withPivot('eligible_amount', 'city_category_id');
 	}
