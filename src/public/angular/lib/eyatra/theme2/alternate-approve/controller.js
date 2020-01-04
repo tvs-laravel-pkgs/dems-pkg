@@ -137,14 +137,7 @@ app.component('eyatraAlternateApproveForm', {
             if (self.action == 'Edit') {
 
                 setTimeout(function() {
-                    $('.daterange').daterangepicker({
-                        autoUpdateInput: false,
-                         "opens": "left", 
-                        locale: {
-                            cancelLabel: 'Clear',
-                            format: "DD-MM-YYYY"
-                        }
-                    });
+                    $scope.daterange();
                 }, 500);
 
                 self.action = 'Edit';
