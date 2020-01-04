@@ -43,7 +43,7 @@ class LocalTravelModeController extends Controller {
 		// ->where('c.config_type_id', 525)
 			->orderBy('entities.id', 'desc');
 
-		dd($entities->get());
+		// dd($entities->get());
 
 		return Datatables::of($entities)
 			->addColumn('action', function ($entity) {
