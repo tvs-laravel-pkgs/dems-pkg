@@ -21,12 +21,12 @@ class LocalTravelModeController extends Controller {
 				'entities.name',
 				'c.name as category_name',
 				'users.username as created_by',
-				DB::raw('IF(updater.username IS NULL,"---",updater.username) as updated_by'),
-				DB::raw('IF(deactivator.username IS NULL,"---",deactivator.username) as deleted_by'),
+				// DB::raw('IF(updater.username IS NULL,"---",updater.username) as updated_by'),
+				// DB::raw('IF(deactivator.username IS NULL,"---",deactivator.username) as deleted_by'),
 				'entities.created_at',
 				//'entities.updated_at',
-				DB::raw('IF(entities.updated_at IS NULL,"---",entities.updated_at) as updated_at'),
-				DB::raw('IF(entities.deleted_at IS NULL,"---",entities.deleted_at) as deleted_at'),
+				// DB::raw('IF(entities.updated_at IS NULL,"---",entities.updated_at) as updated_at'),
+				// DB::raw('IF(entities.deleted_at IS NULL,"---",entities.deleted_at) as deleted_at'),
 				DB::raw('IF(entities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 
