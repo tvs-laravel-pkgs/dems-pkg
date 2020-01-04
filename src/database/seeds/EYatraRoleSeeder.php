@@ -310,6 +310,16 @@ class EYatraRoleSeeder extends Seeder {
 					//APPROVALS / VERIFICATION
 					5600, 5601, 5603, 5604, 5607, 5610,
 
+					//MOBILE PERMISSIONS
+					//TRIPS
+					9000, 9001, 9002, 9003, 9004, 9005,
+
+					//TRIPS VERIFICATION
+					9006,
+
+					//CLAIM VERIFICATION
+					9007,
+
 				],
 			],
 		];
