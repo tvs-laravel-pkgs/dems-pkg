@@ -105,7 +105,7 @@ class AlternateApproveController extends Controller {
 				} elseif (is_null($alternate_approve->status)) {
 					return '<span style="color:#337DFF;">N/A</span>';
 				} else {
-					return '<span style="color:#63ce63;">Valid</span>';
+					return '<span style="color:#63ce63;">Active</span>';
 				}
 			})
 			->make(true);

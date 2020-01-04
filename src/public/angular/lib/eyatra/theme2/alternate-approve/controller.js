@@ -135,6 +135,18 @@ app.component('eyatraAlternateApproveForm', {
             $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);
             self.extras = response.data.extras;
             if (self.action == 'Edit') {
+
+                setTimeout(function() {
+                    $('.daterange').daterangepicker({
+                        autoUpdateInput: false,
+                         "opens": "left", 
+                        locale: {
+                            cancelLabel: 'Clear',
+                            format: "DD-MM-YYYY"
+                        }
+                    });
+                }, 500);
+
                 self.action = 'Edit';
                 self.alternate_approve.alt_employee = response.data.alternate_approve.alt_employee.user.name;
             } else {
