@@ -30,7 +30,7 @@ class LocalTravelModeController extends Controller {
 				DB::raw('IF(entities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 
-			->join('users', 'users.id', '=', 'entities.created_by')
+			->leftjoin('users', 'users.id', '=', 'entities.created_by')
 			->leftjoin('users as updater', 'updater.id', '=', 'entities.updated_by')
 			->leftjoin('users as deactivator', 'deactivator.id', '=', 'entities.deleted_by')
 			->leftjoin('local_travel_mode_category_type as tm', 'tm.travel_mode_id', '=', 'entities.id')
@@ -43,7 +43,7 @@ class LocalTravelModeController extends Controller {
 		// ->where('c.config_type_id', 525)
 			->orderBy('entities.id', 'desc');
 
-		// dd($entities->get());
+		dd($entities->get());
 
 		return Datatables::of($entities)
 			->addColumn('action', function ($entity) {
