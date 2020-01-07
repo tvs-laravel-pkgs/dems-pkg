@@ -80,6 +80,8 @@ Route::group(['middleware' => ['web']], function () {
 
 	Route::group(['middleware' => ['auth']], function () {
 
+		Route::post('/dems/dashboard/get-data', 'Uitoux\EYatra\DashboardController@getDEMSDashboardData')->name('getDEMSDashboardData');
+
 		//ENTITIES
 		Route::get('eyatra/entity/get-list-data/{entity_type_id?}', 'Uitoux\EYatra\EntityController@getEntityListData')->name('getEntityListData');
 		Route::get('eyatra/entity/get-list', 'Uitoux\EYatra\EntityController@listEYatraEntity')->name('listEYatraEntity');
