@@ -88,16 +88,15 @@ class AuthController extends Controller {
 		$user = User::join('employees', 'employees.id', 'users.entity_id')->where('users.mobile_number', $request->input('mobile'))->where('users.user_type_id', 3121)->where('employees.code', $request->input('emp_code'))->select('users.*')->first();
 
 		if ($user) {
-			$user->otp = generateOtp($user->contact_number);
+			$sender_id = config('custom.sms_sender_id');
+			$mobile_number = $user->mobile_number;
+			$otp_no = mt_rand(100000, 999999);
+			$user->otp = $otp_no;
 			$user->save();
-
-			//OTP MAIL SEND
-			// $arr = array();
-			// $arr['id'] = $user->id;
-			// $MailInstance = new ForgetPasswordOTPMail($arr);
-			// $Mail = Mail::send($MailInstance);
-			// $user['token'] = $user->createToken('eYatra')->accessToken;
-
+			$message = "Your OTP is " . $otp_no . " to reset password in DEMS Application. Please enter OTP to verify your mobile number.";
+			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
+			$result = 1;
+			$user_id = $user->id;
 			return response()->json(['status' => 'true', 'data' => $user], $this->successStatus);
 		} else {
 			return response()->json(['status' => 'false', 'error' => 'Incorrect mobile number'], $this->successStatus);
