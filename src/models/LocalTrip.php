@@ -8,6 +8,7 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\LocalTripVisitDetail;
 use Validator;
 
@@ -39,6 +40,10 @@ class LocalTrip extends Model {
 
 	public function google_attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3187)->where('attachment_type_id', 3200);
+	}
+
+	public function expenseAttachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3186)->where('attachment_type_id', 3200);
 	}
 
 	public static function getLocalTripList($request) {
@@ -161,7 +166,7 @@ class LocalTrip extends Model {
 			$trip = LocalTrip::withTrashed()->with([
 				'purpose',
 				'visitDetails',
-				'visitDetails.expenseAttachments',
+				'expenseAttachments',
 			])->find($trip_id);
 
 			if (!$trip) {
@@ -316,32 +321,32 @@ class LocalTrip extends Model {
 					$visit->created_by = Auth::user()->id;
 					$visit->created_at = Carbon::now();
 					$visit->save();
-
-					//SAVE VISIT EXPENSE ATTACHMENT
-					$item_images = storage_path('app/public/local-trip/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($visit_data['attachments'])) {
-						foreach ($visit_data['attachments'] as $key => $attachement) {
-							$image = $attachement;
-							$extension = $image->getClientOriginalExtension();
-							$name = $image->getClientOriginalName();
-							$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
-							$value = rand(1, 100);
-							$extension = $image->getClientOriginalExtension();
-							$name = $value . '-' . $file_name;
-							$image->move(storage_path('app/public/local-trip/attachments/'), $name);
-							$attachement_file = new Attachment;
-							$attachement_file->attachment_of_id = 3186;
-							$attachement_file->attachment_type_id = 3200;
-							$attachement_file->entity_id = $visit->id;
-							$attachement_file->name = $name;
-							$attachement_file->save();
-						}
-					}
-
 					$i++;
 				}
 			}
+
+			//SAVE EXPENSE ATTACHMENT
+			$item_images = storage_path('app/public/local-trip/attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if (!empty($request->expense_attachments)) {
+				foreach ($request->expense_attachments as $key => $attachement) {
+					$image = $attachement;
+					$extension = $image->getClientOriginalExtension();
+					$name = $image->getClientOriginalName();
+					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+					$value = rand(1, 100);
+					$extension = $image->getClientOriginalExtension();
+					$name = $value . '-' . $file_name;
+					$image->move(storage_path('app/public/local-trip/attachments/'), $name);
+					$attachement_file = new Attachment;
+					$attachement_file->attachment_of_id = 3186;
+					$attachement_file->attachment_type_id = 3200;
+					$attachement_file->entity_id = $trip->id;
+					$attachement_file->name = $name;
+					$attachement_file->save();
+				}
+			}
+
 			DB::commit();
 
 			if (empty($request->id)) {
@@ -392,7 +397,6 @@ class LocalTrip extends Model {
 				$q->orderBy('local_trip_visit_details.travel_date');
 			},
 			'visitDetails.travelMode',
-			'visitDetails.expenseAttachments',
 			'employee',
 			'employee.user',
 			'employee.outlet',
@@ -406,6 +410,7 @@ class LocalTrip extends Model {
 			'employee.grade.gradeEligibility',
 			'purpose',
 			'status',
+			'expenseAttachments',
 			'google_attachments',
 		])
 			->find($trip_id);

@@ -4,6 +4,8 @@ namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\LocalTrip;
 use Uitoux\EYatra\Trip;
 
@@ -60,6 +62,63 @@ class LocalTripController extends Controller {
 		return LocalTrip::saveTrip($request);
 	}
 
+	public function saveAttachments(Request $request) {
+		if ($request->google_attachment == 1) {
+
+			$trip_id = $request->trip_id;
+
+			//STORE GOOGLE ATTACHMENT
+			$item_images = storage_path('app/public/local-trip/google_attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if (!empty($request->google_attachments)) {
+				foreach ($request->google_attachments as $key => $attachement) {
+					$image = $attachement;
+					$extension = $image->getClientOriginalExtension();
+					$name = $image->getClientOriginalName();
+					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+					$value = rand(1, 100);
+					$extension = $image->getClientOriginalExtension();
+					$name = $value . '-' . $file_name;
+					$image->move(storage_path('app/public/local-trip/google_attachments/'), $name);
+					$attachement_file = new Attachment;
+					$attachement_file->attachment_of_id = 3187;
+					$attachement_file->attachment_type_id = 3200;
+					$attachement_file->entity_id = $trip_id;
+					$attachement_file->name = $name;
+					$attachement_file->save();
+				}
+
+			}
+		}
+		if ($request->expense_attachment == 1) {
+
+			$trip_id = $request->trip_id;
+
+			//SAVE EXPENSE ATTACHMENT
+			$item_images = storage_path('app/public/local-trip/attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if (!empty($request->expense_attachments)) {
+				foreach ($request->expense_attachments as $key => $attachement) {
+					$image = $attachement;
+					$extension = $image->getClientOriginalExtension();
+					$name = $image->getClientOriginalName();
+					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+					$value = rand(1, 100);
+					$extension = $image->getClientOriginalExtension();
+					$name = $value . '-' . $file_name;
+					$image->move(storage_path('app/public/local-trip/attachments/'), $name);
+					$attachement_file = new Attachment;
+					$attachement_file->attachment_of_id = 3186;
+					$attachement_file->attachment_type_id = 3200;
+					$attachement_file->entity_id = $trip_id;
+					$attachement_file->name = $name;
+					$attachement_file->save();
+				}
+			}
+		}
+		return response()->json(['success' => true]);
+
+	}
 	public function viewTrip($trip_id, Request $request) {
 		return LocalTrip::getViewData($trip_id);
 	}

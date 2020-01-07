@@ -362,6 +362,7 @@ app.component('eyatraLocalTripForm', {
                 return;
             }
 
+            $('.testt1').imageuploadify();
             self.trip = response.data.trip;
             console.log(self.trip);
             self.trip.trip_periods = '';

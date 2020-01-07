@@ -65,7 +65,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('local-trip/view/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@viewTrip');
 		Route::get('local-trip/cancel/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@cancelTrip');
 		Route::get('local-trip/delete/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@deleteTrip');
-
+		Route::post('local-trip/save/attachments', 'Uitoux\EYatra\Api\LocalTripController@saveAttachments');
 		//LOCAL TRIP VERIFICATION
 		Route::post('local-trip/verification/get-list', 'Uitoux\EYatra\Api\LocalTripController@listTripVerification');
 
