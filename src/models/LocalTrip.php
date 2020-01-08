@@ -243,13 +243,14 @@ class LocalTrip extends Model {
 				$trip_visit_details = LocalTripVisitDetail::where('trip_id', $request->id)->count();
 				if ($trip->status_id == 3028) {
 					$trip->status_id = 3023;
-				} elseif ($trip->status_id == 3028) {
+				} elseif ($trip->status_id == 3022) {
 					$trip->status_id = 3021;
 				} elseif ($trip->status_id == 3024) {
 					$trip->status_id = 3023;
-				} else {
-					$trip->status_id = 3021;
 				}
+				// else {
+				// 	$trip->status_id = 3021;
+				// }
 				LocalTripVisitDetail::where('trip_id', $request->id)->forceDelete();
 				$activity['activity'] = "edit";
 			}
