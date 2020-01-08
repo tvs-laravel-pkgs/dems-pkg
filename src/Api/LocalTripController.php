@@ -68,7 +68,7 @@ class LocalTripController extends Controller {
 			$trip_id = $request->trip_id;
 
 			//STORE GOOGLE ATTACHMENT
-			$item_images = storage_path('app/public/local-trip/google_attachments/');
+			$item_images = storage_path('app/public/trip/local-trip/google_attachments/');
 			Storage::makeDirectory($item_images, 0777);
 			if (!empty($request->google_attachments)) {
 				foreach ($request->google_attachments as $key => $attachement) {
@@ -79,7 +79,7 @@ class LocalTripController extends Controller {
 					$value = rand(1, 100);
 					$extension = $image->getClientOriginalExtension();
 					$name = $value . '-' . $file_name;
-					$image->move(storage_path('app/public/local-trip/google_attachments/'), $name);
+					$image->move(storage_path('app/public/trip/local-trip/google_attachments/'), $name);
 					$attachement_file = new Attachment;
 					$attachement_file->attachment_of_id = 3187;
 					$attachement_file->attachment_type_id = 3200;
@@ -95,7 +95,7 @@ class LocalTripController extends Controller {
 			$trip_id = $request->trip_id;
 
 			//SAVE EXPENSE ATTACHMENT
-			$item_images = storage_path('app/public/local-trip/attachments/');
+			$item_images = storage_path('app/public/trip/local-trip/attachments/');
 			Storage::makeDirectory($item_images, 0777);
 			if (!empty($request->expense_attachments)) {
 				foreach ($request->expense_attachments as $key => $attachement) {
@@ -106,7 +106,7 @@ class LocalTripController extends Controller {
 					$value = rand(1, 100);
 					$extension = $image->getClientOriginalExtension();
 					$name = $value . '-' . $file_name;
-					$image->move(storage_path('app/public/local-trip/attachments/'), $name);
+					$image->move(storage_path('app/public/trip/local-trip/attachments/'), $name);
 					$attachement_file = new Attachment;
 					$attachement_file->attachment_of_id = 3186;
 					$attachement_file->attachment_type_id = 3200;
