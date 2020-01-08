@@ -200,7 +200,7 @@ class LocalTrip extends Model {
 	}
 
 	public static function saveTrip($request) {
-		dd($request->all());
+		dd($request->purpose_id);
 		try {
 			//validation
 			$validator = Validator::make($request->all(), [
