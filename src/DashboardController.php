@@ -2,64 +2,94 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
-use Auth;
 use Illuminate\Http\Request;
 use Session;
 use Uitoux\EYatra\EmployeeClaim;
+use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Trip;
 
 class DashboardController extends Controller {
 	public function getDEMSDashboardData(Request $request) {
 
-		if (date('m') >= 4) {
-			$start_year = date('Y');
-			$end_year = date('Y', strtotime('+1 year'));
+		if ($request->selected_year) {
+			session(['fyc_year_session' => $request->selected_year]);
+			$fyc_year_session = $request->selected_year;
 		} else {
-			$start_year = date('Y', strtotime('-1 year'));
-			$end_year = date('Y');
+			if (date('m') >= 4) {
+				$start_year = date('Y');
+				$end_year = date('Y', strtotime('+1 year'));
+			} else {
+				$start_year = date('Y', strtotime('-1 year'));
+				$end_year = date('Y');
+			}
+
+			$fyc_year_session = session('fyc_year_session');
+			if (!$fyc_year_session) {
+				$fyc_year_session = $start_year . '-' . $end_year;
+			}
+
 		}
 
-		$fyc_year_session = session('fyc_year_session');
-		if (!$fyc_year_session) {
-			$fyc_year_session = $start_year . '-' . $end_year;
+		if ($request->selected_month) {
+			session(['fyc_month_session' => $request->selected_month]);
+			$fyc_month_session = $request->selected_month;
+		} else {
+			$fyc_month_session = session('fyc_month_session');
+			if (!$fyc_month_session) {
+				$fyc_month_session = date('m');
+			}
+
 		}
 
-		$fyc_month_session = session('fyc_month_session');
-		if (!$fyc_month_session) {
-			$fyc_month_session = date('m', strtotime('-1 month'));
-		}
-		$this->data['current_fyc'] = $start_year . '-' . $end_year;
+		$this->data['current_fyc'] = $fyc_year_session;
 		$this->data['fyc_year_session'] = $fyc_year_session;
 		$this->data['fyc_month_session'] = $fyc_month_session;
 
-		$split_year = explode('-', $fyc_year_session);
-		$first_year = $split_year[0];
-		$second_year = $split_year[1];
+		if ($fyc_month_session != '-1') {
+			$split_year = explode('-', $fyc_year_session);
+			$first_year = $split_year[0];
+			$second_year = $split_year[1];
 
-		if ($fyc_month_session <= 3) {
-			$month = date($second_year . '-' . $fyc_month_session . '-01');
-		} elseif ($fyc_month_session <= 6) {
-			$month = date($first_year . '-' . $fyc_month_session . '-01');
-		} elseif ($fyc_month_session <= 9) {
-			$month = date($first_year . '-' . $fyc_month_session . '-01');
-		} else {
-			$month = date($first_year . '-' . $fyc_month_session . '-01');
+			if ($fyc_month_session <= 3) {
+				$start_date = date($second_year . '-' . $fyc_month_session . '-01');
+			} else {
+				$start_date = date($first_year . '-' . $fyc_month_session . '-01');
+			}
+
+			$end_date = date('Y-m-t', strtotime($start_date));
 		}
 
-		$this->data['year_list'] = config('custom.FINANCIAL_YEAR');
-		$this->data['month_list'] = config('custom.MONTH_LIST');
+		$this->data['outlet_list'] = collect(Outlet::get())->prepend(['id' => '', 'name' => 'All Outlet']);
 
-		$this->data['start_year'] = $start_year;
-		$this->data['end_year'] = $end_year;
-		// dd($request->all());
+		$selected_year = explode('-', $fyc_year_session);
 
-		// $outstation_trip_claim_pending = EmployeeClaim::whereNotIn('status_id', [3026, 3031, 3032])->where('employee_id', Auth::user()->entity_id)->count();
-		$outstation_total_trip_claim = EmployeeClaim::where('status_id', 3026)->where('employee_id', Auth::user()->entity_id)->count();
-		$total_outstation_trips = Trip::where('status_id', '!=', '3032')->where('employee_id', Auth::user()->entity_id)->count();
+		if ($request->selected_month && $request->selected_month != '-1') {
+			$this->data['total_outstation_trips'] = $total_outstation_trips = Trip::where('status_id', '!=', '3032')->where('start_date', '>=', $start_date)->where('end_date', '<=', $end_date)->count();
+			$this->data['outstation_total_trip_claim'] = $outstation_total_trip_claim = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', 3026)->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->count();
+		} else {
+			$start_date = $selected_year[0] . '-04-01';
+			$end_date = $selected_year[1] . '-03-31';
 
-		$outstation_trip_claim_pending = $total_outstation_trips - $outstation_total_trip_claim;
-		// dd($total_outstation_trips, $outstation_total_trip_claim, $outstation_trip_claim_pending);
-		// $this->data['entity_type'] = $entity_type;
+			$this->data['total_outstation_trips'] = $total_outstation_trips = Trip::where('status_id', '!=', '3032')->where('start_date', '>=', $start_date)->where('end_date', '<=', $end_date)->count();
+			$this->data['outstation_total_trip_claim'] = $outstation_total_trip_claim = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', 3026)->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->count();
+		}
+		$this->data['outstation_trip_claim_pending'] = $outstation_trip_claim_pending = $total_outstation_trips - $outstation_total_trip_claim;
+
+		if ($total_outstation_trips > 0) {
+			if ($outstation_total_trip_claim > 0) {
+				$this->data['outstation_total_trip_claim_percen'] = number_format((float) (($outstation_total_trip_claim / $total_outstation_trips) * 100), 2, '.', '') . "%";
+			} else {
+				$this->data['outstation_total_trip_claim_percen'] = number_format((float) $outstation_total_trip_claim, 2, '.', '') . "%";
+			}
+			$this->data['outstation_trip_claim_pending_percen'] = number_format((float) (($outstation_trip_claim_pending / $total_outstation_trips) * 100), 2, '.', '') . "%";
+			$this->data['total_outstation_trip_percen'] = number_format((float) 100, 2, '.', '') . "%";
+
+		} else {
+			$this->data['outstation_total_trip_claim_percen'] = number_format((float) $total_outstation_trips, 2, '.', '') . "%";
+			$this->data['outstation_trip_claim_pending_percen'] = number_format((float) $total_outstation_trips, 2, '.', '') . "%";
+			$this->data['total_outstation_trip_percen'] = number_format((float) 0, 2, '.', '') . "%";
+		}
+
 		return response()->json($this->data);
 	}
 }
