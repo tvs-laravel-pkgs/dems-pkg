@@ -73,6 +73,19 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit COA',
     }).
 
+     //ROLES
+    when('/roles/list', {
+        template: '<eyatra-role-list></eyatra-role-list>',
+        title: 'Roles',
+    }).
+    when('/roles/add', {
+        template: '<eyatra-role-form></eyatra-role-form>',
+        title: 'Add Role',
+    }).
+    when('/roles/edit/:id', {
+        template: '<eyatra-role-form></eyatra-role-form>',
+        title: 'Edit Role',
+    }).
 
     //GRADES
     when('/grades', {

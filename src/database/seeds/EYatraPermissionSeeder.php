@@ -17,7 +17,7 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_order' => 100,
 				'parent_id' => NULL,
 				'name' => 'eyatra',
-				'display_name' => 'eYatra',
+				'display_name' => 'Web Portal',
 			],
 			// 5001 => [
 			// 	'display_order' => 101,

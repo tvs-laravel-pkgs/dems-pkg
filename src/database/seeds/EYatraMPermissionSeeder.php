@@ -17,7 +17,7 @@ class EYatraMPermissionSeeder extends Seeder {
 				'display_order' => 1,
 				'parent_id' => NULL,
 				'name' => 'eyatra-mobile-app',
-				'display_name' => 'eYatra Mobile App',
+				'display_name' => 'Mobile App',
 			],
 
 			//DASHBOARD

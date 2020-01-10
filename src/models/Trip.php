@@ -859,12 +859,12 @@ class Trip extends Model {
 	}
 
 	public static function getDashboardData() {
-		$total_trips = Trip::where('employee_id', Auth::user()->entity_id)
+		$total_trips = Trip::where('status_id', '!=', '3032')->where('employee_id', Auth::user()->entity_id)
 			->count();
 
-		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3028)->where('end_date', '<', date('Y-m-d'))->count();
+		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', '!=', '3032')->where('status_id', '!=', '3026')->count();
 
-		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('start_date', '>', date('Y-m-d'))->count();
+		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', '!=', '3032')->where('start_date', '>', date('Y-m-d'))->count();
 
 		$dashboard_details['total_trips'] = $total_trips;
 		$dashboard_details['total_claims_pending'] = $total_claims_pending;
