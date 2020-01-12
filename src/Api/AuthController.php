@@ -4,7 +4,6 @@ namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 // use Mail;
 use App\User;
-use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -71,16 +70,7 @@ class AuthController extends Controller {
 			$user->entity->outlet->address;
 			$user->employee = $user->entity;
 			$user['token'] = $user->createToken('eYatra')->accessToken;
-			$getversion_code = DB::table('version_control')->where('project_name', 'dems')->orderBy('id', 'DESC')->first();
-			if ($getversion_code != NULL) {
-				$version_code = $getversion_code->version_code;
-				$version_name = $getversion_code->version_name;
-			} else {
-				$version_code = 0;
-				$version_name = 0;
-			}
-
-			return response()->json(['success' => true, 'user' => $user, 'version_code' => $version_code, 'version_name' => $version_name], $this->successStatus);
+			return response()->json(['success' => true, 'user' => $user], $this->successStatus);
 		} else {
 			return response()->json(['success' => false, 'message' => 'Invalid username/password'], $this->successStatus);
 		}

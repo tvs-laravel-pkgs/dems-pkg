@@ -869,7 +869,17 @@ class Trip extends Model {
 		$dashboard_details['total_trips'] = $total_trips;
 		$dashboard_details['total_claims_pending'] = $total_claims_pending;
 		$dashboard_details['total_upcoming_trips'] = $total_upcoming_trips;
-		return response()->json(['success' => true, 'dashboard_details' => $dashboard_details]);
+
+		$getversion_code = DB::table('version_control')->where('project_name', 'dems')->orderBy('id', 'DESC')->first();
+		if ($getversion_code != NULL) {
+			$version_code = $getversion_code->version_code;
+			$version_name = $getversion_code->version_name;
+		} else {
+			$version_code = 0;
+			$version_name = 0;
+		}
+
+		return response()->json(['success' => true, 'dashboard_details' => $dashboard_details, 'version_code' => $version_code, 'version_name' => $version_name]);
 	}
 	public static function approveTrip($r) {
 		$trip = Trip::find($r->trip_id);
