@@ -247,6 +247,8 @@ class LocalTrip extends Model {
 					$trip->status_id = 3021;
 				} elseif ($trip->status_id == 3024) {
 					$trip->status_id = 3023;
+				} elseif ($trip->status_id == 3032) {
+					$trip->status_id = 3021;
 				}
 				// else {
 				// 	$trip->status_id = 3021;
