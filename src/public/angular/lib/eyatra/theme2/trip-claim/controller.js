@@ -1640,17 +1640,18 @@ app.component('eyatraTripClaimForm', {
                                 self.enable_switch_tab = false;
                                 $scope.$apply()
                             } else {
-                                $noty = new Noty({
-                                    type: 'success',
-                                    layout: 'topRight',
-                                    text: 'Transport expenses saved successfully!!',
-                                    animation: {
-                                        speed: 500 // unavailable - no need
-                                    },
-                                }).show();
-                                setTimeout(function() {
-                                    $noty.close();
-                                }, 4000);
+                                // $noty = new Noty({
+                                //     type: 'success',
+                                //     layout: 'topRight',
+                                //     text: 'Transport expenses saved successfully!!',
+                                //     animation: {
+                                //         speed: 500 // unavailable - no need
+                                //     },
+                                // }).show();
+                                // setTimeout(function() {
+                                //     $noty.close();
+                                // }, 4000);
+                                custom_noty('success', 'Transport expenses saved successfully!');
                                 // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
                                 //     self.trip.lodgings[key].date_range_list = val;
                                 // });// $scope.$apply()
@@ -1731,17 +1732,18 @@ app.component('eyatraTripClaimForm', {
                             self.enable_switch_tab = false;
                             $scope.$apply()
                         } else {
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Lodge expenses saved successfully!!',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            setTimeout(function() {
-                                $noty.close();
-                            }, 4000);
+                            // $noty = new Noty({
+                            //     type: 'success',
+                            //     layout: 'topRight',
+                            //     text: 'Lodge expenses saved successfully!!',
+                            //     animation: {
+                            //         speed: 500 // unavailable - no need
+                            //     },
+                            // }).show();
+                            // setTimeout(function() {
+                            //     $noty.close();
+                            // }, 4000);
+                            custom_noty('success', 'Lodging expenses saved successfully!');
                             // self.boarding_dates_list = res.boarding_dates_list;
                             // self.local_travel_dates_list = res.boarding_dates_list;
                             // if (!self.trip.boardings.length) {
@@ -1819,17 +1821,18 @@ app.component('eyatraTripClaimForm', {
                             self.enable_switch_tab = false;
                             $scope.$apply()
                         } else {
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Boarding expenses saved successfully!!',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            setTimeout(function() {
-                                $noty.close();
-                            }, 4000);
+                            // $noty = new Noty({
+                            //     type: 'success',
+                            //     layout: 'topRight',
+                            //     text: 'Boarding expenses saved successfully!!',
+                            //     animation: {
+                            //         speed: 500 // unavailable - no need
+                            //     },
+                            // }).show();
+                            // setTimeout(function() {
+                            //     $noty.close();
+                            // }, 4000);
+                            custom_noty('success', 'Boarding expenses saved successfully!');
                             // $('.tab_li').removeClass('active');
                             // $('.tab_local_travel').addClass('active');
                             // $('.tab-pane').removeClass('in active');
