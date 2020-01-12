@@ -879,7 +879,10 @@ class Trip extends Model {
 			$version_name = 0;
 		}
 
-		return response()->json(['success' => true, 'dashboard_details' => $dashboard_details, 'version_code' => $version_code, 'version_name' => $version_name]);
+		$dashboard_details['version_code'] = $version_code;
+		$dashboard_details['version_name'] = $version_name;
+
+		return response()->json(['success' => true, 'dashboard_details' => $dashboard_details]);
 	}
 	public static function approveTrip($r) {
 		$trip = Trip::find($r->trip_id);
