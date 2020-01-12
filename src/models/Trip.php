@@ -380,7 +380,7 @@ class Trip extends Model {
 			$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
 		} else {
 			$data['advance_eligibility'] = '';
-			$data['grade_advance_eligibility_amount'] = "0";
+			$data['grade_advance_eligibility_amount'] = 0;
 		}
 		//dd(Auth::user()->entity->outlet->address);
 
