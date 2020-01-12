@@ -4,6 +4,7 @@ namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 // use Mail;
 use App\User;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
