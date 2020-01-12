@@ -70,7 +70,16 @@ class AuthController extends Controller {
 			$user->entity->outlet->address;
 			$user->employee = $user->entity;
 			$user['token'] = $user->createToken('eYatra')->accessToken;
-			return response()->json(['success' => true, 'user' => $user], $this->successStatus);
+			$getversion_code = DB::table('version_control')->where('project_name', 'dems')->orderBy('id', 'DESC')->first();
+			if ($getversion_code != NULL) {
+				$version_code = $getversion_code->version_code;
+				$version_name = $getversion_code->version_name;
+			} else {
+				$version_code = 0;
+				$version_name = 0;
+			}
+
+			return response()->json(['success' => true, 'user' => $user, 'version_code' => $version_code, 'version_name' => $version_name], $this->successStatus);
 		} else {
 			return response()->json(['success' => false, 'message' => 'Invalid username/password'], $this->successStatus);
 		}
