@@ -377,10 +377,11 @@ class Trip extends Model {
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility', 'travel_advance_limit')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
+			$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
 		} else {
 			$data['advance_eligibility'] = '';
+			$data['grade_advance_eligibility_amount'] = "0";
 		}
-		$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
 		//dd(Auth::user()->entity->outlet->address);
 
 		$data['extras'] = [
