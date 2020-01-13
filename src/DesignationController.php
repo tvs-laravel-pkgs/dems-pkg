@@ -112,7 +112,7 @@ class DesignationController extends Controller {
 
 				'name' => [
 					'required:true',
-					'unique:designations,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+					'unique:designations,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',grade_id,' . $request->grade_id,
 					// Rule::unique('designations')->ignore($request->id),
 				],
 			], $error_messages);
