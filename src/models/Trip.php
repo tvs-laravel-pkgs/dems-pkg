@@ -809,7 +809,7 @@ class Trip extends Model {
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
 		$visit = Visit::where('trip_id', $trip_id)->update(['status_id' => 3221]);
-
+		$visit = Visit::where('trip_id', $trip_id)->where('booking_method_id', '=', 3040)->update(['booking_status_id' => 3062]);
 		return response()->json(['success' => true]);
 	}
 

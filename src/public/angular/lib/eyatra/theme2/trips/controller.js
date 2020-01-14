@@ -803,6 +803,7 @@ app.component('eyatraTripView', {
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
+                    $('#cancel_trip').modal('hide');    
                     setTimeout(function() {
                         $location.path('/trips')
                         $scope.$apply()
