@@ -409,6 +409,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFilterData')->name('eyatraLocalTripFilterData');
 		Route::get('eyatra/local-trip/delete/{trip_id}', 'Uitoux\EYatra\LocalTripController@deleteTrip')->name('deleteTrip');
 
+		//LOCAL TRIP CLAIM
+		Route::get('eyatra/local-trip/claim/get-list', 'Uitoux\EYatra\LocalTripController@listClaimedLocalTrip')->name('listClaimedLocalTrip');
+
 		//LOCAL TRIP MANAGER VERIFICATION
 		Route::get('eyatra/local-trip/verification/get-list', 'Uitoux\EYatra\LocalTripController@listLocalTripVerification')->name('listLocalTripVerification');
 		Route::get('eyatra/local-trip/verification/approve/{trip_id?}', 'Uitoux\EYatra\LocalTripController@approveLocalTrip')->name('approveLocalTrip');

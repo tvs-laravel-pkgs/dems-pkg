@@ -72,6 +72,7 @@ class TripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
+			->whereIN('trips.status_id', [3021, 3022, 3028, 3032])
 			->where('trips.employee_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 		// ->orderBy('trips.created_at', 'desc');

@@ -600,17 +600,28 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-local-form></eyatra-trip-local-form>',
         title: 'Edit Local Trip',
     }).
-    when('/local-trip/trip-edit/:trip_id', {
-        template: '<eyatra-local-trip-form></eyatra-local-trip-form>',
-        title: 'Edit Local Trip',
-    }).
+   
     when('/local-trip/view/:trip_id', {
         template: '<eyatra-trip-local-view></eyatra-trip-local-view>',
         title: 'View Local Trip',
     }).
-    when('/local-trip/detail-view/:trip_id', {
-        template: '<eyatra-local-trip-view></eyatra-local-trip-view>',
-        title: 'View Local Trip',
+    
+    //LOCAL TRIP CLAIM
+    when('/local-trip/claim/list', {
+        template: '<eyatra-claimed-local-trips></eyatra-claimed-local-trips>',
+        title: 'Local Trip Claim List',
+    }).
+    when('/local-trip/claim/add/:trip_id', {
+        template: '<eyatra-local-trip-claim-form></eyatra-local-trip-claim-form>',
+        title: 'Local Trip Calim Form',
+    }).
+    when('/local-trip/claim/edit/:trip_id', {
+        template: '<eyatra-local-trip-claim-form></eyatra-local-trip-claim-form>',
+        title: 'Local Trip Calim Form',
+    }).
+    when('/local-trip/claim/view/:trip_id', {
+        template: '<eyatra-local-trip-claim-view></eyatra-local-trip-claim-view>',
+        title: 'View Local Trip Claim',
     }).
   
 

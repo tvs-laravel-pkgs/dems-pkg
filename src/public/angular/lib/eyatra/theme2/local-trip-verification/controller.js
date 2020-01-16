@@ -175,14 +175,7 @@ app.component('eyatraLocalTripVerificationView', {
                         $noty.close();
                     }, 1000);
                 } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Local Trip Approved Successfully',
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 2000);
+                    custom_noty('success', 'Local Trip Approved Successfully');
                     $('#alert-modal-approve').modal('hide');
                     setTimeout(function() {
                         $location.path('/local-trip/verification/list')
@@ -220,17 +213,7 @@ app.component('eyatraLocalTripVerificationView', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                $noty = new Noty({
-                                    type: 'success',
-                                    layout: 'topRight',
-                                    text: 'Manager Rejected successfully',
-                                    animation: {
-                                        speed: 500 // unavailable - no need
-                                    },
-                                }).show();
-                                setTimeout(function() {
-                                    $noty.close();
-                                }, 1000);
+                                custom_noty('success', 'Local Trip Rejected Successfully');
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/local-trip/verification/list')
@@ -307,7 +290,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
             $scope.search = '';
         };
 
-        $(document).on('click', '.approve_btn', function() {
+        $(document).on('click', '.claim_approve_btn', function() {
             $id = $('#trip_id').val();
             $http.get(
                 local_trip_verification_approve_url + '/' + $id,
@@ -327,14 +310,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
                         $noty.close();
                     }, 1000);
                 } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Local Trip Approved Successfully',
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 2000);
+                    custom_noty('success', 'Local Trip Claim Approved Successfully');
                     $('#alert-modal-approve').modal('hide');
                     setTimeout(function() {
                         $location.path('/local-trip/verification/list')
@@ -346,7 +322,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
         });
 
         //Reject
-        $(document).on('click', '.reject_btn', function() {
+        $(document).on('click', '.claim_reject_btn', function() {
             var form_id = '#trip-reject-form';
             var v = jQuery(form_id).validate({
                 ignore: '',
@@ -372,17 +348,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                $noty = new Noty({
-                                    type: 'success',
-                                    layout: 'topRight',
-                                    text: 'Manager Rejected successfully',
-                                    animation: {
-                                        speed: 500 // unavailable - no need
-                                    },
-                                }).show();
-                                setTimeout(function() {
-                                    $noty.close();
-                                }, 1000);
+                                custom_noty('success', 'Local Trip Claim Rejected Successfully');
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/local-trip/verification/list')
