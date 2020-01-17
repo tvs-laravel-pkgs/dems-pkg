@@ -430,6 +430,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/report/outstation-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraOutstationFilterData')->name('eyatraOutstationFilterData');
 		Route::get('eyatra/report/outstation-trip/get-list', 'Uitoux\EYatra\ReportController@listOutstationTripReport')->name('listOutstationTripReport');
 		Route::get('eyatra/report/outstation-trip/export', 'Uitoux\EYatra\ReportController@outstationTripExport')->name('outstationTripExport');
+		Route::post('eyatra/employee/get-list', 'Uitoux\EYatra\ReportController@getEmployeeByOutlet')->name('getEmployeeByOutlet');
 
 		//LOCAL TRIP REPORT
 		Route::get('eyatra/report/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraLocalFilterData')->name('eyatraLocalFilterData');

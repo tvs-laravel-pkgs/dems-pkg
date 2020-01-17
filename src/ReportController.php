@@ -14,11 +14,7 @@ use Yajra\Datatables\Datatables;
 class ReportController extends Controller {
 
 	public function eyatraOutstationFilterData() {
-		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->where('employees.company_id', Auth::user()->company_id)
-				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
@@ -35,11 +31,30 @@ class ReportController extends Controller {
 
 		$data['outstation_start_date'] = $outstation_start_date;
 		$data['outstation_end_date'] = $outstation_end_date;
+		$data['filter_outlet_id'] = $filter_outlet_id = session('outstation_outlet_id') ? intval(session('outstation_outlet_id')) : '-1';
+		$data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : '-1';
 
 		$data['success'] = true;
 		return response()->json($data);
 	}
 
+	public function getEmployeeByOutlet(Request $r) {
+		$employee_list = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where(function ($query) use ($r) {
+					if ($r->outlet_id != '-1') {
+						$query->where('employees.outlet_id', $r->outlet_id);
+
+					}
+				})
+				->where('employees.company_id', Auth::user()->company_id)
+				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
+		$data['employee_list'] = $employee_list;
+		$data['success'] = true;
+		return response()->json($data);
+	}
 	public function listOutstationTripReport(Request $r) {
 
 		if ($r->from_date != '<%$ctrl.start_date%>') {
@@ -50,14 +65,20 @@ class ReportController extends Controller {
 			Session::put('outstation_employee_id', $r->employee_id);
 			Session::put('outstation_purpose_id', $r->purpose_id);
 		}
+		if ($r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			Session::put('outstation_outlet_id', $r->outlet_id);
+		}
+		if ($r->status_id != '<%$ctrl.filter_status_id%>') {
+			Session::put('outstation_status_id', $r->status_id);
+		}
 
 		$trips = EmployeeClaim::leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->leftJoin('visits as v', 'v.trip_id', 'trips.id')
 			->leftJoin('ncities as c', 'c.id', 'v.from_city_id')
 			->leftJoin('employees as e', 'e.id', 'trips.employee_id')
-		// ->join('outlets', 'outlets.id', 'e.outlet_id')
+			->join('outlets', 'outlets.id', 'e.outlet_id')
 			->leftJoin('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->leftJoin('configs as status', 'status.id', 'trips.status_id')
+			->leftJoin('configs as status', 'status.id', 'ey_employee_claims.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
 			->where('users.user_type_id', 3121)
 			->select(
@@ -68,7 +89,8 @@ class ReportController extends Controller {
 				'users.name as ename',
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				'purpose.name as purpose',
-				'ey_employee_claims.total_amount',
+				'ey_employee_claims.total_amount', 'outlets.name as outlet_name',
+				'status.name as status',
 				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
 			)
 			->where('e.company_id', Auth::user()->company_id)
@@ -94,7 +116,18 @@ class ReportController extends Controller {
 					$query->where("trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
 				}
 			})
-			->where('ey_employee_claims.status_id', 3026)
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet_id') && $r->get('employee_id') != '<%$ctrl.filter_outlet_id%>') {
+					$query->where("e.outlet_id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id') && (($r->get('status_id') != '<%$ctrl.filter_status_id%>') && ($r->get('status_id') != -1))) {
+					$query->where("ey_employee_claims.status_id", $r->get('status_id'));
+				} else {
+					$query->where('ey_employee_claims.status_id', 3026);
+				}
+			})
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
