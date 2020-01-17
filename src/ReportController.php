@@ -155,15 +155,17 @@ class ReportController extends Controller {
 		$purpose_id = session('outstation_purpose_id');
 		$outstation_start_date = session('outstation_start_date');
 		$outstation_end_date = session('outstation_end_date');
-		// dd($employee_id, $purpose_id, $outstation_start_date, $outstation_end_date);
+		$outstation_outlet_id = session('outstation_outlet_id');
+		$outstation_status_id = session('outstation_status_id');
+		// dd($employee_id, $purpose_id, $outstation_start_date, $outstation_end_date, $outstation_outlet_id, $outstation_status_id);
 
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
-		// ->join('outlets', 'outlets.id', 'e.outlet_id')
+			->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('configs as status', 'status.id', 'ey_employee_claims.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
 			->where('users.user_type_id', 3121)
 			->select(
@@ -175,11 +177,23 @@ class ReportController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				'purpose.name as purpose',
 				'ey_employee_claims.total_amount',
-				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
+				'status.name as status',
+				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
+				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->where('ey_employee_claims.status_id', 3026)
+		// ->where('ey_employee_claims.status_id', 3026)
 			->groupBy('trips.id');
+
+		if ($outstation_outlet_id && $outstation_outlet_id != '-1') {
+			$trips = $trips->where("e.outlet_id", $outstation_outlet_id);
+		}
+
+		if ($outstation_status_id && $outstation_status_id != '-1') {
+			$trips = $trips->where("ey_employee_claims.status_id", $outstation_status_id);
+		} else {
+			$trips = $trips->whereIn('ey_employee_claims.status_id', [3023, 3030, 3026]);
+		}
 
 		if ($employee_id && $employee_id != '-1') {
 			$trips = $trips->where("e.id", $employee_id);
@@ -198,7 +212,7 @@ class ReportController extends Controller {
 
 		$trips = $trips->get();
 
-		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Travel Period', 'Purpose', 'Total Amount', 'Claim Approved Date & Time'];
+		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
 		$trips_details = array();
 		if ($trips) {
 			foreach ($trips as $key => $trip) {
@@ -206,9 +220,11 @@ class ReportController extends Controller {
 					$trip->number,
 					$trip->ecode,
 					$trip->ename,
+					$trip->outlet_name,
 					$trip->travel_period,
 					$trip->purpose,
 					$trip->total_amount,
+					$trip->status,
 					$trip->claim_approval_datetime,
 				];
 			}
