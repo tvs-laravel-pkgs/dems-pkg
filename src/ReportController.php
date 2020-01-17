@@ -125,7 +125,7 @@ class ReportController extends Controller {
 				if ($r->get('status_id') && (($r->get('status_id') != '<%$ctrl.filter_status_id%>') && ($r->get('status_id') != -1))) {
 					$query->where("ey_employee_claims.status_id", $r->get('status_id'));
 				} else {
-					$query->whereIn('ey_employee_claims.status_id', [3023,3030,3026);
+					$query->whereIn('ey_employee_claims.status_id', [3023, 3030, 3026]);
 				}
 			})
 			->groupBy('trips.id')
