@@ -72,6 +72,9 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('local-trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@approveTrip');
 		Route::post('local-trip/verification/reject', 'Uitoux\EYatra\Api\LocalTripController@rejectTrip');
 
+		//Profile Image Save
+		Route::post('/profile/save/image', 'Uitoux\EYatra\Api\ProfileController@saveImage')->name('profileSaveImage');
+
 	});
 });
 
