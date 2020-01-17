@@ -197,18 +197,29 @@ app.component('eyatraLocalTrip', {
             console.log(response.data);
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
+            self.outlet_list = response.data.outlet_list;
             self.start_date = response.data.local_trip_start_date;
             self.end_date = response.data.local_trip_end_date;
             self.filter_employee_id = response.data.filter_employee_id;
             self.filter_purpose_id = response.data.filter_purpose_id;
+            self.filter_status_id = response.data.filter_status_id;
             var trip_periods = response.data.local_trip_start_date + ' to ' + response.data.local_trip_end_date;
             self.trip_periods = trip_periods;
-
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
             setTimeout(function() {
                 $('#from_date').val(self.start_date);
                 $('#to_date').val(self.end_date);
+                $('#outlet_id').val(self.filter_outlet_id);
+                get_employees(self.filter_outlet_id, status = 0);
+                self.filter_employee_id = response.data.filter_employee_id;
+                $('#employee_id').val(self.filter_employee_id);
+                $('#status_id').val(self.filter_status_id);
                 dataTable.draw();
-            }, 1000);
+            }, 1500);
             $rootScope.loading = false;
         });
         var dataTable = $('#eyatra_local_trip_table').DataTable({
@@ -233,11 +244,13 @@ app.component('eyatraLocalTrip', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
+                    d.outlet_id = $('#outlet_id').val();
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
                     d.period = $('#period').val();
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
+                    d.status_id = $('#status_id').val();
                 }
             },
 
@@ -250,7 +263,7 @@ app.component('eyatraLocalTrip', {
                 { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'total_amount', searchable: false },
-                { data: 'claim_approval_datetime', searchable: false },
+                { data: 'status', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -287,17 +300,47 @@ app.component('eyatraLocalTrip', {
             $('#to_date').val(query);
             dataTable.draw();
         }
+        $scope.getOutletData = function(outlet_id) {
+            dataTable.draw();
+            get_employees(outlet_id, status = 1);
+        }
+        $scope.getStatusData = function(query) {
+            $('#status_id').val(query);
+            dataTable.draw();
+        }
         $scope.reset_filter = function(query) {
+            $('#outlet_id').val(-1);
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
+            $('#status_id').val('');
             self.trip_periods = '';
             self.filter_employee_id = '';
             self.filter_purpose_id = '';
+            self.filter_outlet_id = '-1';
+            self.filter_status_id = '-1';
             setTimeout(function() {
                 dataTable.draw();
             }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
         }
 
         $(".daterange").daterangepicker({

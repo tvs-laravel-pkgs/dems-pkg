@@ -76,7 +76,7 @@ class ReportController extends Controller {
 			->leftJoin('visits as v', 'v.trip_id', 'trips.id')
 			->leftJoin('ncities as c', 'c.id', 'v.from_city_id')
 			->leftJoin('employees as e', 'e.id', 'trips.employee_id')
-			->join('outlets', 'outlets.id', 'e.outlet_id')
+			->leftJoin('outlets', 'outlets.id', 'e.outlet_id')
 			->leftJoin('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->leftJoin('configs as status', 'status.id', 'ey_employee_claims.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
@@ -89,7 +89,7 @@ class ReportController extends Controller {
 				'users.name as ename',
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				'purpose.name as purpose',
-				'ey_employee_claims.total_amount', 'outlets.name as outlet_name',
+				'ey_employee_claims.total_amount', DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name'),
 				'status.name as status',
 				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
 			)
@@ -253,12 +253,19 @@ class ReportController extends Controller {
 			Session::put('local_employee_id', $r->employee_id);
 			Session::put('local_purpose_id', $r->purpose_id);
 		}
+		if ($r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			Session::put('local_outlet_id', $r->outlet_id);
+		}
+		if ($r->status_id != '<%$ctrl.filter_status_id%>') {
+			Session::put('local_status_id', $r->status_id);
+		}
 
 		$trips = LocalTrip::from('local_trips')
-			->join('employees as e', 'e.id', 'local_trips.employee_id')
-			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
-			->join('configs as status', 'status.id', 'local_trips.status_id')
+			->leftJoin('employees as e', 'e.id', 'local_trips.employee_id')
+			->leftJoin('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
+			->leftJoin('configs as status', 'status.id', 'local_trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'local_trips.employee_id')
+			->leftJoin('outlets', 'outlets.id', 'e.outlet_id')
 			->where('users.user_type_id', 3121)
 			->select(
 				'local_trips.id',
@@ -268,7 +275,7 @@ class ReportController extends Controller {
 				'users.name as ename',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
 				'purpose.name as purpose',
-				'local_trips.claim_amount as total_amount',
+				'local_trips.claim_amount as total_amount', 'status.name as status',
 				DB::raw('DATE_FORMAT(local_trips.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
 
 			)
@@ -295,7 +302,19 @@ class ReportController extends Controller {
 					$query->where("local_trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
 				}
 			})
-			->where('local_trips.status_id', 3026)
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet_id') && $r->get('employee_id') != '<%$ctrl.filter_outlet_id%>') {
+					$query->where("e.outlet_id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id') && (($r->get('status_id') != '<%$ctrl.filter_status_id%>') && ($r->get('status_id') != -1))) {
+					$query->where("local_trips.status_id", $r->get('status_id'));
+				} else {
+					$query->whereIn('local_trips.status_id', [3023, 3030, 3026]);
+				}
+			})
+		// ->where('local_trips.status_id', 3026)
 			->groupBy('local_trips.id')
 			->orderBy('local_trips.created_at', 'desc');
 
@@ -314,11 +333,7 @@ class ReportController extends Controller {
 	}
 
 	public function eyatraLocalFilterData() {
-		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->where('employees.company_id', Auth::user()->company_id)
-				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
@@ -337,6 +352,9 @@ class ReportController extends Controller {
 			$local_end_date = date('t-m-Y');
 		}
 
+		$data['filter_outlet_id'] = $filter_outlet_id = session('local_outlet_id') ? intval(session('local_outlet_id')) : '-1';
+		$data['filter_status_id'] = $filter_status_id = session('local_status_id') ? intval(session('local_status_id')) : '-1';
+
 		$data['local_trip_start_date'] = $local_start_date;
 		$data['local_trip_end_date'] = $local_end_date;
 
@@ -353,6 +371,8 @@ class ReportController extends Controller {
 		$purpose_id = session('local_purpose_id');
 		$local_start_date = session('local_start_date');
 		$local_end_date = session('local_end_date');
+		$local_outlet_id = session('local_outlet_id');
+		$local_status_id = session('local_status_id');
 		// dd($employee_id, $purpose_id, $local_start_date, $local_end_date);
 
 		$trips = LocalTrip::from('local_trips')
@@ -360,6 +380,7 @@ class ReportController extends Controller {
 			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
 			->join('configs as status', 'status.id', 'local_trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'local_trips.employee_id')
+			->leftJoin('outlets', 'outlets.id', 'e.outlet_id')
 			->where('users.user_type_id', 3121)
 			->select(
 				'local_trips.id',
@@ -369,14 +390,24 @@ class ReportController extends Controller {
 				'users.name as ename',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
 				'purpose.name as purpose',
-				'local_trips.claim_amount as total_amount',
-				DB::raw('DATE_FORMAT(local_trips.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
-
+				'local_trips.claim_amount as total_amount', 'status.name as status',
+				DB::raw('DATE_FORMAT(local_trips.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
+				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->where('local_trips.status_id', 3026)
+		// ->where('local_trips.status_id', 3026)
 			->groupBy('local_trips.id')
 			->orderBy('local_trips.created_at', 'desc');
+
+		if ($local_outlet_id && $local_outlet_id != '-1') {
+			$trips = $trips->where("e.outlet_id", $local_outlet_id);
+		}
+
+		if ($local_status_id && $local_status_id != '-1') {
+			$trips = $trips->where("local_trips.status_id", $local_status_id);
+		} else {
+			$trips = $trips->whereIn('local_trips.status_id', [3023, 3030, 3026]);
+		}
 
 		if ($employee_id && $employee_id != '-1') {
 			$trips = $trips->where("e.id", $employee_id);
@@ -396,7 +427,7 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 
 		// dd($trips);
-		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Travel Period', 'Purpose', 'Total Amount', 'Claim Approved Date & Time'];
+		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
 		$trips_details = array();
 		if ($trips) {
 			foreach ($trips as $key => $trip) {
@@ -404,9 +435,11 @@ class ReportController extends Controller {
 					$trip->number,
 					$trip->ecode,
 					$trip->ename,
+					$trip->outlet_name,
 					$trip->travel_period,
 					$trip->purpose,
 					$trip->total_amount,
+					$trip->status,
 					$trip->claim_approval_datetime,
 				];
 			}
