@@ -219,7 +219,7 @@ class DashboardController extends Controller {
 
 		//OUTSTATION TRIP
 		//TOTAL OUTSTATION TRIP
-		$total_outstation_trips = Trip::where('trips.status_id', '!=', '3032')->where('trips.status_id', '!=', '3021')->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
+		$total_outstation_trips = Trip::where('trips.status_id', '!=', '3032')->where('trips.status_id', '!=', '3022')->where('trips.status_id', '!=', '3021')->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP PAID
 		$total_outstation_trip_claim = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', 3026)->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP PAYMENT REQUESTED
@@ -231,7 +231,7 @@ class DashboardController extends Controller {
 
 		//LOCAL TRIP
 		//TOTAL LOCAL TRIP
-		$total_local_trips = LocalTrip::where('local_trips.status_id', '!=', '3032')->where('local_trips.status_id', '!=', '3021')->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date);
+		$total_local_trips = LocalTrip::where('local_trips.status_id', '!=', '3032')->where('local_trips.status_id', '!=', '3022')->where('local_trips.status_id', '!=', '3021')->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date);
 		//TOTAL LOCAL TRIP PAID
 		$total_local_trip_claim = LocalTrip::where('local_trips.status_id', 3026)->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date);
 		//TOTAL LOCAL TRIP PAYMENT REQUESTED
