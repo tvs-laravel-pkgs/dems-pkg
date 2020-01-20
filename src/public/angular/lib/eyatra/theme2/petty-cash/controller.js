@@ -285,6 +285,7 @@ app.component('eyatraPettyCashForm', {
             $('div[data-provide="datepicker"]').datepicker({
                 todayHighlight: true,
                 autoclose: true,
+                endDate: "today",
             });
         }, 1000);
 
@@ -380,6 +381,18 @@ app.component('eyatraPettyCashForm', {
             $('.claim_total_amount').val(total_claim_amount.toFixed(2));
             $('.claim_total_amount').text('₹ ' + total_claim_amount.toFixed(2));
         }
+
+        $('body').on('click', "#datepicker", function() {
+            var id = $(this).data('picker');
+            setTimeout(function() {
+                $(".datepicker_" + id).datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                    endDate: "today",
+                });
+            }, 500);
+        });
+
 
         //ADD LOCALCONVEYANCE
         self.addlocalconveyance = function() {
@@ -513,18 +526,18 @@ app.component('eyatraPettyCashView', {
         $http.get(
             petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
-                // console.log(response);
-                self.petty_cash = response.data.petty_cash;
-                self.type_id = $routeParams.type_id;
-                self.petty_cash_other = response.data.petty_cash_other;
-                self.employee = response.data.employee;
-                self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
-                self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
+            // console.log(response);
+            self.petty_cash = response.data.petty_cash;
+            self.type_id = $routeParams.type_id;
+            self.petty_cash_other = response.data.petty_cash_other;
+            self.employee = response.data.employee;
+            self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
+            self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
 
-                $rootScope.loading = false;
-            
+            $rootScope.loading = false;
+
         });
     }
 });
-            //------------------------------------------------------------------------------------------------------------------
-            //------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
