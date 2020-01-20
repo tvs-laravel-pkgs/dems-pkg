@@ -96,15 +96,11 @@ class DashboardController extends Controller {
 
 		// dd($this->data);
 		$this->data['outstation_trip_claim_pending'] = $outstation_trip_claim_pending = $total_outstation_trips - $outstation_total_trip_claim;
-
 		$this->data['total_local_trip_count'] = $total_local_trips = $result['total_local_trips']->count();
 		$this->data['claimed_local_trips_count'] = $total_local_trip_claim = $result['total_local_trip_claim']->count();
-
 		$this->data['claim_requested_local_trips_count'] = $total_local_trip_claim_requested = $result['total_local_trip_claim_requested']->count();
 		$this->data['ready_for_claimed_local_trips_count'] = $total_local_trip_ready_for_claim = $result['total_local_trip_ready_for_claim']->count();
 		$this->data['upcoming_local_trips_count'] = $total_upcoming_local_trips = $result['total_upcoming_local_trips']->count();
-
-		$this->data['not_claimed_local_trip_count'] = $total_local_trip_claim_pending = $total_local_trips - $total_local_trip_claim;
 
 		$this->data['total_petty_cash_count'] = $total_petty_cash = $result['total_petty_cash']->count();
 		$this->data['claimed_petty_cash_count'] = $total_petty_cash_claim = $result['total_petty_cash_claim']->count();
@@ -142,7 +138,6 @@ class DashboardController extends Controller {
 			} else {
 				$this->data['claimed_local_trips_per'] = number_format((float) $total_local_trip_claim, 2, '.', '') . "%";
 			}
-			$this->data['not_claimed_local_trip_per'] = number_format((float) (($total_local_trip_claim_pending / $total_local_trips) * 100), 2, '.', '') . "%";
 
 			$this->data['claim_requested_local_trips_per'] = number_format((float) (($total_local_trip_claim_requested / $total_local_trips) * 100), 2, '.', '') . "%";
 			$this->data['ready_for_claimed_local_trips_per'] = number_format((float) (($total_local_trip_ready_for_claim / $total_local_trips) * 100), 2, '.', '') . "%";
@@ -152,7 +147,6 @@ class DashboardController extends Controller {
 
 		} else {
 			$this->data['claimed_local_trips_per'] = number_format((float) $total_local_trips, 2, '.', '') . "%";
-			$this->data['not_claimed_local_trip_per'] = number_format((float) $total_local_trips, 2, '.', '') . "%";
 			$this->data['claim_requested_local_trips_per'] = number_format((float) 0, 2, '.', '') . "%";
 			$this->data['ready_for_claimed_local_trips_per'] = number_format((float) 0, 2, '.', '') . "%";
 			$this->data['upcoming_local_trips_per'] = number_format((float) 0, 2, '.', '') . "%";
@@ -251,23 +245,37 @@ class DashboardController extends Controller {
 		$total_petty_cash = PettyCash::whereBetween('petty_cash.date', [$start_date, $end_date]);
 		$total_petty_cash_claim = PettyCash::whereBetween('petty_cash.date', [$start_date, $end_date])->where('petty_cash.status_id', 3283);
 
-		// if ($outlet_id && $outlet_id != '-1') {
-		// 	$total_outstation_trips = $total_outstation_trips->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.outlet_id', $outlet_id);
-		// 	$outstation_total_trip_claim = $outstation_total_trip_claim->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.outlet_id', $outlet_id);
+		if ($outlet_id && $outlet_id != '-1') {
+			$total_outstation_trips = $total_outstation_trips->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_outstation_trip_claim = $total_outstation_trip_claim->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_outstation_claim_requested = $total_outstation_claim_requested->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_outstation_ready_for_claim = $total_outstation_ready_for_claim->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_upcoming_outstation_trips = $total_upcoming_outstation_trips->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.outlet_id', $outlet_id);
 
-		// 	$total_local_trips = $total_local_trips->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.outlet_id', $outlet_id);
-		// 	$total_local_trip_claim = $total_local_trip_claim->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_local_trips = $total_local_trips->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_local_trip_claim = $total_local_trip_claim->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_local_trip_claim_requested = $total_local_trip_claim_requested->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_local_trip_ready_for_claim = $total_local_trip_ready_for_claim->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_upcoming_local_trips = $total_upcoming_local_trips->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.outlet_id', $outlet_id);
 
-		// 	$total_petty_cash = $total_petty_cash->leftjoin('employees', 'employees.id', 'petty_cash.employee_id')->where('employees.outlet_id', $outlet_id);
-		// 	$total_petty_cash_claim = $total_petty_cash_claim->leftjoin('employees', 'employees.id', 'petty_cash.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_petty_cash = $total_petty_cash->leftjoin('employees', 'employees.id', 'petty_cash.employee_id')->where('employees.outlet_id', $outlet_id);
+			$total_petty_cash_claim = $total_petty_cash_claim->leftjoin('employees', 'employees.id', 'petty_cash.employee_id')->where('employees.outlet_id', $outlet_id);
 
-		// }
+		}
 
 		if (!Entrust::can('eyatra-masters')) {
 			$total_outstation_trips = $total_outstation_trips->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.id', Auth::user()->entity_id);
-			$outstation_total_trip_claim = $outstation_total_trip_claim->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+			$total_outstation_trip_claim = $total_outstation_trip_claim->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+			$total_outstation_claim_requested = $total_outstation_claim_requested->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+			$total_outstation_ready_for_claim = $total_outstation_ready_for_claim->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+			$total_upcoming_outstation_trips = $total_upcoming_outstation_trips->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+
 			$total_local_trips = $total_local_trips->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.id', Auth::user()->entity_id);
 			$total_local_trip_claim = $total_local_trip_claim->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+			$total_local_trip_claim_requested = $total_local_trip_claim_requested->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+			$total_local_trip_ready_for_claim = $total_local_trip_ready_for_claim->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+			$total_upcoming_local_trips = $total_upcoming_local_trips->leftjoin('employees', 'employees.id', 'local_trips.employee_id')->where('employees.id', Auth::user()->entity_id);
+
 			$total_petty_cash = $total_petty_cash->leftjoin('employees', 'employees.id', 'petty_cash.employee_id')->where('employees.id', Auth::user()->entity_id);
 			$total_petty_cash_claim = $total_petty_cash_claim->leftjoin('employees', 'employees.id', 'petty_cash.employee_id')->where('employees.id', Auth::user()->entity_id);
 		}
