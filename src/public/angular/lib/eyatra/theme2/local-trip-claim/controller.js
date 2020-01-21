@@ -208,7 +208,7 @@ app.component('eyatraLocalTripClaimForm', {
 
                 $(".daterange").daterangepicker({
                     autoclose: true,
-                    minDate: new Date(self.eligible_date),
+                    // minDate: new Date(self.eligible_date),
                     locale: {
                         cancelLabel: 'Clear',
                         format: "DD-MM-YYYY",
@@ -227,7 +227,7 @@ app.component('eyatraLocalTripClaimForm', {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
                         autoclose: true,
-                        minDate: new Date(self.eligible_date),
+                        // minDate: new Date(self.eligible_date),
                         locale: {
                             cancelLabel: 'Clear',
                             format: "DD-MM-YYYY",

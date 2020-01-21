@@ -227,7 +227,7 @@ app.component('eyatraTripForm', {
 
                 $(".daterange").daterangepicker({
                     autoclose: true,
-                    minDate: new Date(self.eligible_date),
+                    // minDate: new Date(self.eligible_date),
                     locale: {
                         cancelLabel: 'Clear',
                         format: "DD-MM-YYYY",
@@ -243,7 +243,7 @@ app.component('eyatraTripForm', {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
                         autoclose: true,
-                        minDate: new Date(self.eligible_date),
+                        // minDate: new Date(self.eligible_date),
                         locale: {
                             cancelLabel: 'Clear',
                             format: "DD-MM-YYYY",

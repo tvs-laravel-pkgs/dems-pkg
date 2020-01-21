@@ -203,7 +203,7 @@ app.component('eyatraTripLocalForm', {
                 }
                 $(".daterange").daterangepicker({
                     autoclose: true,
-                    minDate: new Date(self.eligible_date),
+                    // minDate: new Date(self.eligible_date),
                     locale: {
                         cancelLabel: 'Clear',
                         format: "DD-MM-YYYY",
@@ -218,7 +218,7 @@ app.component('eyatraTripLocalForm', {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
                         autoclose: true,
-                        minDate: new Date(self.eligible_date),
+                        // minDate: new Date(self.eligible_date),
                         locale: {
                             cancelLabel: 'Clear',
                             format: "DD-MM-YYYY",
@@ -380,7 +380,7 @@ app.component('eyatraLocalTripForm', {
 
                 $(".daterange").daterangepicker({
                     autoclose: true,
-                    minDate: new Date(self.eligible_date),
+                    // minDate: new Date(self.eligible_date),
                     locale: {
                         cancelLabel: 'Clear',
                         format: "DD-MM-YYYY",
@@ -399,7 +399,7 @@ app.component('eyatraLocalTripForm', {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
                         autoclose: true,
-                        minDate: new Date(self.eligible_date),
+                        // minDate: new Date(self.eligible_date),
                         locale: {
                             cancelLabel: 'Clear',
                             format: "DD-MM-YYYY",
