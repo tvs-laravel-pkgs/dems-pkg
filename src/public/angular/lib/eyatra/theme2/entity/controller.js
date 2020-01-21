@@ -93,7 +93,7 @@ app.component('eyatraEntityList', {
                         );
                     }
                 } else if ($routeParams.entity_type_id == '512') {
-                    $rootScope.title = 'Petty Cash Expense Types';
+                    $rootScope.title = 'Expense Types';
                     self.petty_cash_expense_add_permission = self.hasPermission('eyatra-pettycash-expense-types');
                     if (self.petty_cash_expense_add_permission) {
                         $('.add_new_button').html(
