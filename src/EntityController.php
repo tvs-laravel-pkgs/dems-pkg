@@ -186,7 +186,6 @@ class EntityController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
-			//dd('ss');
 			$e_name = EntityType::where('id', $request->type_id)->first();
 			// dd($e_name);
 			$activity['entity_id'] = $entity->id;

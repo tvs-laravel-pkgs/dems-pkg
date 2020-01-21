@@ -51,6 +51,7 @@ app.component('eyatraAgentRequestForm', {
             }
             // console.log(response.data.trip);
             self.trip = response.data.trip;
+
             self.travel_mode_list = response.data.travel_mode_list;
             self.attachments = response.data.attachments;
             //console.log(response.data.attachments);

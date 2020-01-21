@@ -332,7 +332,6 @@ class Trip extends Model {
 		}
 		$data['trip'] = $trip;
 		$data['success'] = true;
-
 		return response()->json($data);
 
 	}
