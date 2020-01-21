@@ -51,7 +51,7 @@ app.component('eyatraLocalTravelModeList', {
         });
 
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Travel Modes' + '</p><h3 class="title">' + 'Travel Modes' + '</h3>');
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Local Travel Mode' + '</p><h3 class="title">' + 'Local Travel Mode' + '</h3>');
         var add_url = '#!/local-travel-mode/add';
         if (self.add_permission) {
             $('.add_new_button').html(
@@ -84,7 +84,7 @@ app.component('eyatraLocalTravelModeList', {
                     $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
-                        text: 'Travel Mode Deleted Successfully',
+                        text: 'Local Travel Mode Deleted Successfully',
                         animation: {
                             speed: 500 // unavailable - no need
                         },

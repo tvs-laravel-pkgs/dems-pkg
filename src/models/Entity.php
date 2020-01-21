@@ -109,6 +109,11 @@ class Entity extends Model {
 	public static function uiLocaTravelModeList() {
 		return Entity::where('entity_type_id', 503)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
+
+	public static function uiClaimExpenseList() {
+		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('name', '!=', 'Local Conveyance')->where('company_id', Auth::user()->company_id)->get();
+	}
+
 	public static function uiClaimLocaTravelModeList() {
 		return Entity::select('entities.id', 'entities.name')
 			->join('grade_local_travel_mode', 'grade_local_travel_mode.local_travel_mode_id', 'entities.id')

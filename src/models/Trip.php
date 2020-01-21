@@ -1125,7 +1125,12 @@ class Trip extends Model {
 		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
 		$travel_mode_list = collect(Entity::uiClaimTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
 		//dd($travel_mode_list);
-		$local_travel_mode_list = collect(Entity::uiClaimLocaTravelModeList()->prepend(['id' => '', 'name' => 'Select Local Travel Mode']));
+		$local_travels = Entity::uiClaimLocaTravelModeList();
+		$expense_types = Entity::uiClaimExpenseList();
+		$local_travels_expense_types = $local_travels->merge($expense_types);
+
+		// $local_travel_mode_list = collect(Entity::uiClaimLocaTravelModeList()->prepend(['id' => '', 'name' => 'Select Local Travel Mode']));
+		$local_travel_mode_list = collect($local_travels_expense_types->prepend(['id' => '', 'name' => 'Select Local Travel / Expense Type']));
 		//dd($local_travel_mode_list);
 		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$data['extras'] = [

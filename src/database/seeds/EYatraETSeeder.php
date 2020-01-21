@@ -25,7 +25,7 @@ class EYatraETSeeder extends Seeder {
 			509 => 'Trip Claim Request',
 			510 => 'Agent Claim Request',
 			511 => 'Voucher Claim Request',
-			512 => 'Petty Cash Expense types',
+			512 => 'Expense types',
 			513 => 'COA Account Types',
 			514 => 'COA Balance Types',
 			515 => 'COA Final Statement',
