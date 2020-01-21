@@ -3,6 +3,8 @@ app.component('eyatraCity', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permissionadd = self.hasPermission('eyatra-city-add');
+        self.permissionimport = self.hasPermission('eyatra-import-city');
         var dataTable = $('#eyatra_city_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -35,13 +37,15 @@ app.component('eyatraCity', {
                 { data: 'city_name', name: 'ncities.name', searchable: true },
                 { data: 'name', name: 'entities.name', searchable: true },
                 { data: 'state_name', name: 'nstates.name', searchable: true },
-                { data: 'country_name', name: 'country.name', searchable: true },
+                { data: 'country_name', name: 'countries.name', searchable: true },
                 { data: 'status', name: 'ncities.deleted_at', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
         });
+        $('#eyatra_city_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $('.dataTables_length select').select2();
 
         setTimeout(function() {
@@ -52,30 +56,35 @@ app.component('eyatraCity', {
         }, 500);
 
         $scope.loadState = function(country_id) {
-            $.ajax({
-                    url: get_state_by_country,
-                    method: "POST",
-                    data: { country_id: country_id },
-                })
-                .done(function(res) {
-                    self.state_list = [];
-                    $(res).each(function(i, v) {
-                        self.state_list.push({
-                            id: v['id'],
-                            name: v['name'],
+            if (country_id != null) {
+                $.ajax({
+                        url: get_state_by_country,
+                        method: "POST",
+                        data: { country_id: country_id },
+                    })
+                    .done(function(res) {
+                        self.state_list = [];
+                        $(res).each(function(i, v) {
+                            self.state_list.push({
+                                id: v['id'],
+                                name: v['name'],
+                            });
                         });
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
                     });
-                })
-                .fail(function(xhr) {
-                    console.log(xhr);
-                });
+            } else {
+                self.state_list = [];
+            }
+
         }
         $http.get(
             city_filter_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.country_list = response.data.country_list;
-            self.state_list = response.data.state_list;
+            // self.state_list = response.data.state_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
         });
@@ -100,13 +109,7 @@ app.component('eyatraCity', {
             dataTableFilter.fnFilter();
         }
 
-        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Cities</p><h3 class="title">Cities</h3>');
-        // // $('.page-header-content .display-inline-block .data-table-title').html('City');
-        // $('.add_new_button').html(
-        //     '<a href="#!/eyatra/city/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-city\')">' +
-        //     'Add New' +
-        //     '</a>'
-        // );
+
         $scope.deleteCityConfirm = function($city_id) {
             $("#delete_city_id").val($city_id);
         }
@@ -116,21 +119,33 @@ app.component('eyatraCity', {
             $http.get(
                 city_delete_url + '/' + $city_id,
             ).then(function(response) {
-                console.log(response.data);
+                // console.log(response.data);
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'City Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'City not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 }
             });
         }
@@ -152,12 +167,18 @@ app.component('eyatraCityForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/cities')
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/cities')
                 $scope.$apply()
                 return;
             }
@@ -169,6 +190,7 @@ app.component('eyatraCityForm', {
             self.action = response.data.action;
 
         });
+        $('#on_focus').focus();
 
         $('#travel_mode').on('click', function() {
             if (event.target.checked == true) {
@@ -194,23 +216,31 @@ app.component('eyatraCityForm', {
         });
 
         $scope.loadState = function(country_id) {
-            $.ajax({
-                    url: get_state_by_country,
-                    method: "POST",
-                    data: { country_id: country_id },
-                })
-                .done(function(res) {
-                    self.extras.state_list = [];
-                    $(res).each(function(i, v) {
-                        self.extras.state_list.push({
-                            id: v['id'],
-                            name: v['name'],
+
+            if (country_id != null) {
+
+                $.ajax({
+                        url: get_state_by_country,
+                        method: "POST",
+                        data: { country_id: country_id },
+
+                    })
+                    .done(function(res) {
+                        self.extras.state_list = [];
+                        $(res).each(function(i, v) {
+                            self.extras.state_list.push({
+                                id: v['id'],
+                                name: v['name'],
+                            });
                         });
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr);
                     });
-                })
-                .fail(function(xhr) {
-                    console.log(xhr);
-                });
+            } else {
+
+                self.extras.state_list = [];
+            }
         }
 
         $('.btn-nxt').on("click", function() {
@@ -238,7 +268,7 @@ app.component('eyatraCityForm', {
 
                 'name': {
                     required: true,
-                    minlength: 3,
+                    minlength: 1,
                     maxlength: 191,
                 },
                 'country_id': {
@@ -266,20 +296,26 @@ app.component('eyatraCityForm', {
                 //     maxlength: 'Please enter maximum of 2 letters',
                 // },
                 'name': {
-                    minlength: 'Please enter minimum of 3 letters',
+                    minlength: 'Please enter minimum of 1 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
                 // 'travel_modes[]': {
                 //     required: 'Travel mode required',
                 // }
             },
-            invalidHandler: function(event, validator) {
-                new Noty({
+            /*invalidHandler: function(event, validator) {
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-            },
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+            },*/
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
@@ -292,7 +328,7 @@ app.component('eyatraCityForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -301,13 +337,19 @@ app.component('eyatraCityForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'City saved successfully',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/cities')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $location.path('/cities')
                             $scope.$apply()
                         }
                     })

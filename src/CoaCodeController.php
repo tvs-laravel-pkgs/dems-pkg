@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\CoaCode;
 use Uitoux\EYatra\Entity;
@@ -14,11 +15,19 @@ use Yajra\Datatables\Datatables;
 class CoaCodeController extends Controller {
 
 	public function eyatraCoaCodeFilter() {
+		$option = new Entity;
+		$option->name = 'Select Account Type';
+		$option->id = null;
+		$this->data['acc_type_list'] = $acc_type_list = Entity::where('entity_type_id', 513)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get()->prepend($option);
 
-		$this->data['acc_type_list'] = $acc_type_list = Entity::where('entity_type_id', 513)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
-
-		$this->data['group_list'] = $group_list = Entity::where('entity_type_id', 516)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
-		$this->data['sub_group_list'] = $sub_group_list = Entity::where('entity_type_id', 517)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get();
+		$option = new Entity;
+		$option->name = 'Select Group';
+		$option->id = null;
+		$this->data['group_list'] = $group_list = Entity::where('entity_type_id', 516)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get()->prepend($option);
+		$option = new Entity;
+		$option->name = 'Select Sub Group';
+		$option->id = null;
+		$this->data['sub_group_list'] = $sub_group_list = Entity::where('entity_type_id', 517)->where('company_id', Auth::user()->company_id)->select('name', 'id')->get()->prepend($option);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),
@@ -103,17 +112,32 @@ class CoaCodeController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/coa-code/edit/' . $coacode->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/coa-code/view/' . $coacode->id . '">
+
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-coa-codes-edit')) {
+					$edit_class = "";
+				}
+
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-coa-codes-delete')) {
+					$delete_class = "";
+				}
+
+				$action = '';
+
+				$action .= '<a style="' . $edit_class . '" href="#!/coa-code/edit/' . $coacode->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+
+				$action .= '<a href="#!/coa-code/view/' . $coacode->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_coa_code"
+				</a> ';
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_coa_code"
 				onclick="angular.element(this).scope().deleteCoaCodeConfirm(' . $coacode->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover="this.src="' . $img3_active . '" onmouseout="this.src="' . $img3 . '" >
-                </a>';
+                </a> ';
+
+				return $action;
 
 			})
 			->addColumn('status', function ($coacode) {
@@ -171,10 +195,11 @@ class CoaCodeController extends Controller {
 
 	public function saveEYatraCoaCode(Request $request) {
 		//validation
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			$error_messages = [
 				'number.required' => 'Number is required',
+				'number.unique' => 'Number is already taken',
 				'account_description.required' => 'Account Description is required',
 				'account_types.required' => 'Account Type is required',
 				'normal_balance.unique' => 'Normal Balance is required',
@@ -186,7 +211,14 @@ class CoaCodeController extends Controller {
 			];
 
 			$validator = Validator::make($request->all(), [
+				'number' => [
+					'required',
+					'unique:coa_codes,number,' . $request->id,
+				],
+				'account_description' => 'required',
+				'account_types' => 'required',
 			], $error_messages);
+
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
@@ -216,7 +248,11 @@ class CoaCodeController extends Controller {
 
 			$coacode->fill($request->all());
 			$coacode->save();
-
+			$activity['entity_id'] = $coacode->id;
+			$activity['entity_type'] = 'COA Codes';
+			$activity['details'] = empty($request->id) ? "COA Codes Added" : "COA Codes updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			$request->session()->flash('success', 'Coa Code saved successfully!');
 			if (empty($request->id)) {
@@ -255,6 +291,11 @@ class CoaCodeController extends Controller {
 
 	public function deleteEYatraCoaCode($coa_code_id) {
 		$coacode = CoaCode::withTrashed()->where('id', $coa_code_id)->first();
+		$activity['entity_id'] = $coacode->id;
+		$activity['entity_type'] = 'COA Codes';
+		$activity['details'] = "COA Codes deleted";
+		$activity['activity'] = "delete";
+		$activity_log = ActivityLog::saveLog($activity);
 		$coacode->forceDelete();
 		if (!$coacode) {
 			return response()->json(['success' => false, 'errors' => ['Coa Code not found']]);

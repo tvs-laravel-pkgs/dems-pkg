@@ -2,6 +2,7 @@ app.component('eyatraAgentClaimList', {
     templateUrl: eyatra_agent_claim_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $location, $http) {
         var self = this;
+
         self.hasPermission = HelperService.hasPermission;
         // console.log(self.hasPermission);
         var dataTable = $('#agent_claim_list').DataTable({
@@ -42,12 +43,7 @@ app.component('eyatraAgentClaimList', {
             }
         });
         $('.dataTables_length select').select2();
-        /* $('.page-header-content .display-inline-block .data-table-title').html('Agent Claims');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/agent/claim/add" type="button" class="btn btn-secondary">' +
-            'Add New' +
-            '</a>'
-        ); */
+
         /* Search Block */
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
@@ -65,20 +61,32 @@ app.component('eyatraAgentClaimList', {
                 eyatra_agent_claim_delete_data_url + '/' + id,
             ).then(function(response) {
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Agent Claim Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#agent_claim_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('/eyatra/agent/claim/list');
+                    $location.path('/agent/claim/list');
                     // $scope.$apply();
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Agent Claim not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -98,12 +106,18 @@ app.component('eyatraAgentClaimForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.message,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/agent/claim/list')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/agent/claim/list')
                 // $scope.$apply()
                 return;
             }
@@ -114,7 +128,7 @@ app.component('eyatraAgentClaimForm', {
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             self.gstin_tax = response.data.gstin_tax;
-            console.log(self.booking_list);
+            console.log(response.data.agent_claim);
 
             if (self.action == 'Edit') {
                 self.trips_count = response.data.trips_count;
@@ -137,14 +151,26 @@ app.component('eyatraAgentClaimForm', {
             $rootScope.loading = false;
         });
         var total = 0;
-        $('#tax').on('change', function() {
+        $(document).on('keyup', '#tax', function() {
+            // $('#tax').on('change', function() {
             var net_amt = parseFloat($(".net_amount").val());
             var tax = parseFloat($("#tax").val());
             total = (net_amt + tax);
             $("#invoice_amount").val(total.toFixed(2));
         });
 
+        $(document).on("click", ".booking_list", function() {
+
+            if ($('.booking_list:checked').length > 0) {
+                $('.booking_all_list').prop('checked', true);
+            } else {
+                $('.booking_all_list').prop('checked', false);
+            }
+        });
+
+
         $(document).on('click', '.booking_list', function() {
+
             var total_amount = 0;
             var count = 0;
             var amount = 0;
@@ -163,6 +189,13 @@ app.component('eyatraAgentClaimForm', {
             $(".amount").html(amount.toFixed(2));
             $(".net_amount").val(amount.toFixed(2));
             $("#count").html(count);
+
+            if ($("#tax").val() != '') {
+                var net_amt = parseFloat($(".net_amount").val());
+                var tax = parseFloat($("#tax").val());
+                var total_amount = (net_amt + tax);
+                $("#invoice_amount").val(total_amount.toFixed(2));
+            }
             if (count > 0) {
                 if (self.action != 'Edit') {
 
@@ -178,6 +211,8 @@ app.component('eyatraAgentClaimForm', {
         });
 
         $('#head_booking').on('click', function() {
+            $("#tax").val('');
+            $("#invoice_amount").val('');
             var total_amount = 0;
             var count = 0;
             var amount = 0;
@@ -328,12 +363,18 @@ app.component('eyatraAgentClaimForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/agent/claim/list')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/agent/claim/list')
                             $scope.$apply()
                         }
                     })
@@ -356,6 +397,7 @@ app.component('eyatraAgentClaimView', {
         $http.get(
             eyatra_agent_claim_view_data_url + '/' + $routeParams.agent_claim_id
         ).then(function(response) {
+            console.log(response.data);
             self.agent_claim_view = response.data.agent_claim_view;
             self.booking_list = response.data.booking_list;
             self.gstin_tax = response.data.gstin_tax;
@@ -389,6 +431,363 @@ app.component('eyatraAgentClaimView', {
     }
 });
 
+//Booking View 
+app.component('eyatraTripBookingView', {
+    templateUrl: trip_booking_view_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
+        if (typeof($routeParams.trip_id) == 'undefined') {
+            $location.path('/agent/requests')
+            $scope.$apply()
+            return;
+        }
+        $form_data_url = booking_view_form_data_url + '/' + $routeParams.trip_id;
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.angular_routes = angular_routes;
+
+        $scope.showBookingForm = true;
+        $scope.showCancelForm = false;
+        $http.get(
+            $form_data_url
+        ).then(function(response) {
+            if (!response.data.success) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/trips/booking-requests')
+                $scope.$apply()
+                return;
+            }
+            if (!response.data.trip.visits || response.data.trip.visits.length == 0) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/trips/booking-requests')
+                $scope.$apply()
+                return;
+            }
+            console.log(response);
+            self.trip = response.data.trip;
+            self.age = response.data.age;
+            self.total_amount = response.data.total_amount;
+            self.ticket_amount = response.data.ticket_amount;
+            self.service_charge = response.data.service_charge;
+            self.trip_status = response.data.trip_status;
+            self.booking_mode_list = response.data.booking_mode_list;
+            self.travel_mode_list = response.data.travel_mode_list;
+            self.attachment_path = response.data.attach_path;
+            self.action = response.data.action;
+            $rootScope.loading = false;
+
+        });
+
+        $scope.userDetailId = 0;
+        $scope.showUserDetail = function(id) {
+            $("#open_cancel_form_" + id).hide();
+            $("#close_" + id).show();
+            $scope.userDetailId = id;
+        }
+
+        $(document).on('click', '.close_icon', function() {
+            var id = $(this).attr('data-visit_id');
+            $scope.userDetailId = 0;
+            $("#open_cancel_form_" + id).show();
+            $("#close_" + id).hide();
+        });
+
+        $(document).on('click', '.booking_cancel', function() {
+            var form_id = '#visit-booking-cancel-form';
+            var v = jQuery(form_id).validate({
+                errorPlacement: function(error, element) {
+                    error.insertAfter(element)
+                },
+                ignore: '',
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#cancel').button('loading');
+                    $.ajax({
+                            url: laravel_routes['saveTripBookingUpdates'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#cancel').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Booking details updated successfully!',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $route.reload();
+                                $scope.$apply()
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+        $(document).on('click', '.submit', function() {
+            var form_id = '#trip-booking-updates-form';
+            var v = jQuery(form_id).validate({
+                errorPlacement: function(error, element) {
+                    error.insertAfter(element)
+                },
+                ignore: '',
+                rules: {
+                    'ticket_booking[][ticket_amount]': {
+                        required: true,
+                    },
+                    'description': {
+                        maxlength: 255,
+                    },
+                    'advance_received': {
+                        maxlength: 10,
+                    },
+                },
+                messages: {
+                    'description': {
+                        maxlength: 'Please enter maximum of 255 letters',
+                    },
+                },
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#submit').button('loading');
+                    $.ajax({
+                            url: laravel_routes['saveTripBookingUpdates'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#submit').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Booking details updated successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $route.reload();
+                                $scope.$apply()
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+
+        // Select and loop the container element of the elements you want to equalise
+        setTimeout(function() {
+            // Cache the highest
+            var highestBox = new Array();
+            // Loop to get all element Widths
+            $('.match-height').each(function() {
+                // Need to let sizes be whatever they want so no overflow on resize   
+                // Then add size (no units) to array
+                highestBox.push($(this).height());
+            });
+            // Find max Width of all elements
+            var max = Math.max.apply(Math, highestBox);
+            // Set the height of all those children to whichever was highest 
+            $('.match-height').height(max);
+
+            // Cache the highest
+            var highestBox_1 = new Array();
+            // Loop to get all element Widths
+            $('.match-height-1').each(function() {
+                // Need to let sizes be whatever they want so no overflow on resize
+                // Then add size (no units) to array
+                highestBox_1.push($(this).height());
+            });
+            // Find max Width of all elements
+            var max_1 = Math.max.apply(Math, highestBox_1);
+            // Set the height of all those children to whichever was highest 
+            $('.match-height-1').height(max_1);
+
+        }, 1400);
+
+        self.approveTrip = function() {
+            self.trip.visits.push({
+                visit_date: '',
+                booking_method: 'Self',
+                preferred_travel_modes: '',
+            });
+        }
+
+        //APPROVE TRIP
+        self.approveTrip = function(id) {
+            $('#trip_id').val(id);
+        }
+
+        self.confirmApproveTrip = function() {
+            $id = $('#trip_id').val();
+            $http.get(
+                trip_verification_approve_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trip Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                    $('#approval_modal').modal('hide');
+                    $timeout(function() {
+                        $location.path('/trip/verifications')
+                        $scope.$apply()
+                    }, 500);
+                }
+
+            });
+        }
+
+        //REJECT TRIP
+        self.rejectTrip = function(id, type) {
+            $('#trip_id').val(id);
+        }
+
+        self.confirmRejectTrip = function() {
+            $id = $('#trip_id').val();
+            $http.get(
+                trip_verification_reject_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trip Rejected Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                    $('#reject_modal').modal('hide');
+                    $timeout(function() {
+                        $location.path('/trip/verifications')
+                        $scope.$apply()
+                    }, 500);
+                }
+
+            });
+        }
+
+        /* File Upload Start */
+        $(function() {
+            // We can attach the `fileselect` event to all file inputs on the page
+            $(document).on('change', ':file', function() {
+                var input = $(this),
+                    numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                    label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+                input.trigger('fileselect', [numFiles, label]);
+            });
+
+            // We can watch for our custom `fileselect` event like this
+            $(':file').on('fileselect', function(event, numFiles, label) {
+                var input = $(this).parents('.input-group').find(':text'),
+                    log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                if (input.length) {
+                    input.val(log);
+                } else {
+
+                }
+            });
+        });
+        /* File Upload End */
+    }
+});
+//End
 
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------

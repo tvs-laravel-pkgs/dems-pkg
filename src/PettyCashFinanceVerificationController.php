@@ -2,42 +2,72 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
-use Storage;
+use Uitoux\EYatra\BankDetail;
+use Uitoux\EYatra\ChequeDetail;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
+use Uitoux\EYatra\ReimbursementTranscation;
+use Uitoux\EYatra\WalletDetail;
 use Yajra\Datatables\Datatables;
 
 class PettyCashFinanceVerificationController extends Controller {
-	public function listPettyCashVerificationFinance() {
+	public function listPettyCashVerificationFinance(Request $r) {
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
 			'petty_cash.total',
-			'employees.name as ename',
+			'users.name as ename',
 			'outlets.name as oname',
 			'employees.code as ecode',
+			'employees.id as employee_id',
 			'outlets.code as ocode',
-			'configs.name as status'
+			'configs.name as status',
+			'petty_cash_type.name as petty_cash_type',
+			'petty_cash_type.id as petty_cash_type_id'
 		)
+			->leftJoin('configs as petty_cash_type', 'petty_cash_type.id', 'petty_cash.petty_cash_type_id')
 			->join('configs', 'configs.id', 'petty_cash.status_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
+			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
-			->where('petty_cash.status_id', 3281)
-			->where('cashier.id', Auth::user()->entity_id)
+			->where('petty_cash.status_id', 3285)
+			->where('users.user_type_id', 3121)
+		// ->where('outlets.amount_eligible', 0)
+		// ->where('petty_cash.total', '>=', 'outlets.amount_limit')
 			->where('employees.company_id', Auth::user()->company_id)
 			->orderBy('petty_cash.id', 'desc')
+			->groupBy('petty_cash.id')
+			->where(function ($query) use ($r) {
+				if (!empty($r->status_id)) {
+					$query->where('configs.id', $r->status_id);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->outlet_id)) {
+					$query->where('outlets.id', $r->outlet_id);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if (!empty($r->employee_id)) {
+					$query->where('employees.id', $r->employee_id);
+				}
+			})
+
 		;
 
 		return Datatables::of($petty_cash)
 			->addColumn('action', function ($petty_cash) {
 
+				$type_id = $petty_cash->petty_cash_type_id == '3440' ? 1 : 2;
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
@@ -45,119 +75,118 @@ class PettyCashFinanceVerificationController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/petty-cash/verification2/view/' . $petty_cash->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
-
+					<a href="#!/petty-cash/verification3/view/' . $type_id . '/' . $petty_cash->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a>';
 			})
 			->make(true);
 	}
-	public function pettycashfinanceFormData($pettycash_id = NULL) {
-		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
-		if (!$pettycash_id) {
-			$petty_cash = new PettyCashEmployeeDetails;
-			$petty_cash_other = new PettyCashEmployeeDetails;
-			$this->data['action'] = 'Add';
-			$this->data['success'] = true;
-			$this->data['message'] = 'Petty Cash not found';
-			$this->data['employee_list'] = [];
-			$this->data['employee'] = '';
 
-		} else {
-			$this->data['action'] = 'Edit';
-			$petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
-				DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date'),
-				'petty_cash.id as petty_cash_id')
+	public function pettycashFinanceVerificationView($type_id, $pettycash_id) {
+		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
+		if ($type_id == 1) {
+			$this->data['petty_cash'] = $petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type', 'configs.name as status', 'petty_cash.employee_id', 'petty_cash.total', 'employees.payment_mode_id')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
+				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
+				->join('employees', 'employees.id', 'petty_cash.employee_id')
+				->join('entities as purpose', 'purpose.id', 'petty_cash_employee_details.purpose_id')
+				->join('configs', 'configs.id', 'petty_cash.status_id')
+				->join('entities as travel', 'travel.id', 'petty_cash_employee_details.travel_mode_id')
 				->where('petty_cash.id', $pettycash_id)
 				->where('petty_cash_employee_details.expence_type', $localconveyance_id->id)->get();
+			$this->data['employee'] = $employee = Employee::select(
+				'users.name as name',
+				'employees.id as emp_id',
+				'employees.code as code',
+				'designations.name as designation',
+				'entities.name as grade',
+				'users.mobile_number',
+				'outlets.name as outlet_name',
+				'sbus.name as sbus_name',
+				'lobs.name as lobs_name',
+				'emp_manager.name as emp_manager')
+				->leftjoin('designations', 'designations.id', 'employees.designation_id')
+				->leftjoin('entities', 'entities.id', 'employees.grade_id')
+				->leftjoin('users', function ($join) {
+					$join->on('users.entity_id', '=', 'employees.id')
+						->where('users.user_type_id', 3121);
+				})
+				->leftjoin('users as emp_manager', function ($join) {
+					$join->on('emp_manager.entity_id', '=', 'employees.reporting_to_id')
+						->where('emp_manager.user_type_id', 3121);
+				})
+				->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+				->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+				->leftjoin('lobs', 'lobs.id', 'sbus.lob_id')
+				->orWhere('employees.id', $petty_cash[0]->employee_id)
+				->where('users.company_id', Auth::user()->company_id)
+				->first();
+
+			foreach ($petty_cash as $key => $value) {
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3440)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$value->attachments = $petty_cash_attachment;
+			}
+			$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $petty_cash[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash[0]->employee_id)->where('wallet_of_id', 3121)->first();
+		} elseif ($type_id == 2) {
 			// dd($petty_cash);
-			$petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
-				DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'),
-				'petty_cash.id as petty_cash_id', 'petty_cash.employee_id', 'employees.name as ename', 'entities.name as other_expence')
+			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status', 'employees.payment_mode_id')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
+				->join('configs', 'configs.id', 'petty_cash.status_id')
 				->where('petty_cash.id', $pettycash_id)
 				->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
-
-			if (!$petty_cash) {
-				$this->data['success'] = false;
-				$this->data['message'] = 'Petty Cash not found';
-			}
-			$this->data['success'] = true;
-			$this->data['employee_list'] = Employee::select('name', 'id', 'code')->get();
-			$this->data['employee'] = $employee = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
+			$this->data['employee'] = $employee = Employee::select(
+				'users.name as name',
+				'employees.id as emp_id',
+				'employees.code as code',
+				'designations.name as designation',
+				'entities.name as grade',
+				'users.mobile_number',
+				'outlets.name as outlet_name',
+				'sbus.name as sbus_name',
+				'lobs.name as lobs_name',
+				'emp_manager.name as emp_manager')
 				->leftjoin('designations', 'designations.id', 'employees.designation_id')
 				->leftjoin('entities', 'entities.id', 'employees.grade_id')
-				->where('employees.id', $petty_cash_other[0]->employee_id)->first();
+				->leftjoin('users', function ($join) {
+					$join->on('users.entity_id', '=', 'employees.id')
+						->where('users.user_type_id', 3121);
+				})
+				->leftjoin('users as emp_manager', function ($join) {
+					$join->on('emp_manager.entity_id', '=', 'employees.reporting_to_id')
+						->where('emp_manager.user_type_id', 3121);
+				})
+				->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+				->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+				->leftjoin('lobs', 'lobs.id', 'sbus.lob_id')
+				->where('employees.id', $petty_cash_other[0]->employee_id)
+				->where('users.company_id', Auth::user()->company_id)
+				->first();
+			foreach ($petty_cash_other as $key => $value) {
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$value->attachments = $petty_cash_attachment;
+			}
+
+			$this->data['bank_detail'] = $bank_detail = BankDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['cheque_detail'] = $cheque_detail = ChequeDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('detail_of_id', 3121)->first();
+			$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash_other[0]->employee_id)->where('wallet_of_id', 3121)->first();
 		}
+		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
+		$this->data['payment_mode_list'] = $payment_mode_list;
+		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
+		$this->data['wallet_mode_list'] = $wallet_mode_list;
 
-		$this->data['extras'] = [
-			'purpose_list' => Entity::uiPurposeList(),
-			'expence_type' => Entity::uiExpenceTypeListBasedPettyCash(),
-			'travel_mode_list' => Entity::uiTravelModeList(),
-		];
-		$this->data['petty_cash'] = $petty_cash;
-		$this->data['petty_cash_other'] = $petty_cash_other;
-		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
-		$emp_details = [];
-		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
-			$user_role = 'Cashier';
-		} else if (Entrust::can('eyatra-employees')) {
-			$user_role = 'Employee';
-			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id')->join('entities', 'entities.id', 'employees.grade_id')->where('employees.id', Auth::user()->entity_id)->first();
-		}
-		$this->data['user_role'] = $user_role;
-		$this->data['emp_details'] = $emp_details;
-		return response()->json($this->data);
-	}
-
-	public function pettycashFinanceVerificationView($pettycash_id) {
-		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
-		$this->data['petty_cash'] = $petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type', 'configs.name as status')
-			->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
-			->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
-			->join('entities as purpose', 'purpose.id', 'petty_cash_employee_details.purpose_id')
-			->join('configs', 'configs.id', 'petty_cash.status_id')
-			->join('entities as travel', 'travel.id', 'petty_cash_employee_details.travel_mode_id')
-			->where('petty_cash.id', $pettycash_id)
-			->where('petty_cash_employee_details.expence_type', $localconveyance_id->id)->get();
-		// dd($petty_cash);
-		$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'employees.name as ename', 'entities.name as other_expence')
-			->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
-			->join('employees', 'employees.id', 'petty_cash.employee_id')
-			->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
-			->where('petty_cash.id', $pettycash_id)
-			->where('petty_cash_employee_details.expence_type', '!=', $localconveyance_id->id)->get();
-
-		$this->data['employee'] = $employee = Employee::select(
-			'employees.name as name',
-			'employees.code as code',
-			'designations.name as designation',
-			'entities.name as grade',
-			'users.mobile_number',
-			'outlets.name as outlet_name',
-			'sbus.name as sbus_name',
-			'lobs.name as lobs_name',
-			'emp_manager.name as emp_manager')
-			->leftjoin('designations', 'designations.id', 'employees.designation_id')
-			->leftjoin('entities', 'entities.id', 'employees.grade_id')
-			->leftjoin('users', 'users.entity_id', 'employees.id')
-			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
-			->leftjoin('employees as emp_manager', 'emp_manager.id', 'employees.reporting_to_id')
-			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
-			->leftjoin('lobs', 'lobs.id', 'sbus.lob_id')
-			->where('employees.id', $petty_cash_other[0]->employee_id)
-			->where('users.company_id', Auth::user()->company_id)
-			->first();
 		// dd(Entrust::can('eyatra-indv-expense-vouchers-verification2'));
 		$emp_details = [];
 		if (Entrust::can('eyatra-indv-expense-vouchers-verification2')) {
 			$user_role = 'Cashier';
 		} else {
 			$user_role = 'Employee';
-			$emp_details = Employee::select('entities.name as empgrade', 'employees.name', 'employees.code', 'employees.id as employee_id')->join('entities', 'entities.id', 'employees.grade_id')->where('employees.id', Auth::user()->entity_id)->first();
+			$emp_details = Employee::select('entities.name as empgrade', 'users.name', 'employees.code', 'employees.id as employee_id')->join('entities', 'entities.id', 'employees.grade_id')
+				->join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)->where('employees.id', Auth::user()->entity_id)->first();
 		}
 		$this->data['user_role'] = $user_role;
 		$this->data['emp_details'] = $emp_details;
@@ -166,126 +195,96 @@ class PettyCashFinanceVerificationController extends Controller {
 
 		return response()->json($this->data);
 	}
-	public function pettycashFinanceVerificationgetEmployee($emp_id) {
-		$this->data['emp_details'] = $emp_details = Employee::select('employees.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade')
-			->leftjoin('designations', 'designations.id', 'employees.designation_id')
-			->leftjoin('entities', 'entities.id', 'employees.grade_id')
-			->where('employees.id', $emp_id)->first();
-		return response()->json($this->data);
-	}
-
-	public function pettycashFinanceSave(Request $request) {
-		try {
-			// $validator = Validator::make($request->all(), [
-			// 	'purpose_id' => [
-			// 		'required',
-			// 	],
-			// ]);
-			// if ($validator->fails()) {
-			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			// }
-			DB::beginTransaction();
-
-			$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
-			if ($request->employee_id) {
-				$petty_cash_employee_edit->employee_id = $request->employee_id;
-			} else {
-				$petty_cash_employee_edit->employee_id = Auth::user()->entity_id;
-			}
-			$petty_cash_employee_edit->total = $request->claim_total_amount;
-			$petty_cash_employee_edit->status_id = 3280;
-			$petty_cash_employee_edit->created_by = Auth::user()->id;
-			$petty_cash_employee_edit->created_at = Carbon::now();
-			$petty_cash_employee_edit->updated_at = NULL;
-			$petty_cash_employee_edit->save();
-			if ($request->petty_cash) {
-				if (!empty($request->petty_cash_removal_id)) {
-					$petty_cash_removal_id = json_decode($request->petty_cash_removal_id, true);
-					PettyCashEmployeeDetails::whereIn('id', $petty_cash_removal_id)->delete();
-				}
-				// dd($expence_type->id);
-				foreach ($request->petty_cash as $petty_cash_data) {
-					$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
-					$petty_cash->petty_cash_id = $petty_cash_employee_edit->id;
-					$petty_cash->expence_type = $petty_cash_data['localconveyance'];
-					$date = date("Y-m-d", strtotime($petty_cash_data['date']));
-					$petty_cash->date = $date;
-					$petty_cash->purpose_id = $petty_cash_data['purpose_id'];
-					$petty_cash->travel_mode_id = $petty_cash_data['travel_mode_id'];
-					$petty_cash->from_place = $petty_cash_data['from_place'];
-					$petty_cash->to_place = $petty_cash_data['to_place'];
-					$petty_cash->from_km = $petty_cash_data['from_km'];
-					$petty_cash->to_km = $petty_cash_data['to_km'];
-					$petty_cash->amount = $petty_cash_data['amount'];
-					$petty_cash->created_by = Auth::user()->id;
-					$petty_cash->created_at = Carbon::now();
-					$petty_cash->save();
-					//STORE ATTACHMENT
-					$item_images = storage_path('petty-cash/localconveyance/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($petty_cash_data['attachments'])) {
-						foreach ($petty_cash_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $name);
-							$attachement_petty_cash = new Attachment;
-							$attachement_petty_cash->attachment_of_id = 3268;
-							$attachement_petty_cash->attachment_type_id = 3200;
-							$attachement_petty_cash->entity_id = $petty_cash->id;
-							$attachement_petty_cash->name = $name;
-							$attachement_petty_cash->save();
-						}
-					}
-				}
-			}
-			if ($request->petty_cash_other) {
-				if (!empty($request->petty_cash_other_removal_id)) {
-					$petty_cash_other_removal_id = json_decode($request->petty_cash_other_removal_id, true);
-					PettyCashEmployeeDetails::whereIn('id', $petty_cash_other_removal_id)->delete();
-				}
-				foreach ($request->petty_cash_other as $petty_cash_data_other) {
-					$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
-					$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
-					$petty_cash_other->petty_cash_id = $petty_cash_employee_edit->id;
-					$date = date("Y-m-d", strtotime($petty_cash_data_other['date_other']));
-					$petty_cash_other->date = $date;
-					$petty_cash_other->amount = $petty_cash_data_other['amount'];
-					$petty_cash_other->tax = $petty_cash_data_other['tax'];
-					$petty_cash_other->remarks = $petty_cash_data_other['remarks'];
-					$petty_cash_other->created_by = Auth::user()->id;
-					$petty_cash_other->created_at = Carbon::now();
-					$petty_cash_other->save();
-					//STORE ATTACHMENT
-					$item_images = storage_path('petty-cash/other/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($petty_cash_data_other['attachments'])) {
-						foreach ($petty_cash_data_other['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $name);
-							$attachement_petty_other = new Attachment;
-							$attachement_petty_other->attachment_of_id = 3269;
-							$attachement_petty_other->attachment_type_id = 3200;
-							$attachement_petty_other->entity_id = $petty_cash_other->id;
-							$attachement_petty_other->name = $name;
-							$attachement_petty_other->save();
-
-						}
-					}
-				}
-			}
-			DB::commit();
-			$request->session()->flash('success', 'Petty Cash saved successfully!');
-			return response()->json(['success' => true]);
-		} catch (Exception $e) {
-			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
-		}
-	}
 
 	public function pettycashFinanceVerificationSave(Request $request) {
+		//dd($request->all());
 		try {
 			DB::beginTransaction();
-			if ($request->approve) {
-				$petty_cash_finance_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3283, 'remarks' => '', 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+			if ($request->petty_cash_id) {
+				$petty_cash_finance_approve = PettyCash::where('id', $request->petty_cash_id)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+				//Reimbursement Transaction
+				$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
+				$employee = Employee::where('id', $request->emp_id)->first();
+				//dd($employee->outlet_id);
+				// dd($previous_balance_amount);
+				if ($previous_balance_amount) {
+					$balance_amount = $previous_balance_amount - $request->amount;
+					$reimbursementtranscation = new ReimbursementTranscation;
+					$reimbursementtranscation->outlet_id = $employee->outlet_id;
+					$reimbursementtranscation->company_id = Auth::user()->company_id;
+					if ($request->type_id == 1) {
+						$reimbursementtranscation->transcation_id = 3270;
+						$reimbursementtranscation->transcation_type = 3270;
+					} else {
+						$reimbursementtranscation->transcation_id = 3272;
+						$reimbursementtranscation->transcation_type = 3272;
+					}
+					$reimbursementtranscation->transaction_date = Carbon::now();
+
+					$reimbursementtranscation->petty_cash_id = $request->petty_cash_id;
+					$reimbursementtranscation->amount = $request->amount;
+					$reimbursementtranscation->balance_amount = $balance_amount;
+					$reimbursementtranscation->save();
+					$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
+
+					//Outlet
+					$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
+				} else {
+					//dd(Auth::user()->entity->outlet_id);
+					$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
+					//dd($outlet->reimbursement_amount);
+					if ($outlet->reimbursement_amount >= 0) {
+						$balance_amount = $outlet->reimbursement_amount - $request->amount;
+						$reimbursementtranscation = new ReimbursementTranscation;
+						$reimbursementtranscation->outlet_id = $employee->outlet_id;
+						$reimbursementtranscation->company_id = Auth::user()->company_id;
+						if ($request->type_id == 1) {
+							$reimbursementtranscation->transcation_id = 3270;
+							$reimbursementtranscation->transcation_type = 3270;
+						} else {
+							$reimbursementtranscation->transcation_id = 3272;
+							$reimbursementtranscation->transcation_type = 3272;
+						}
+						$reimbursementtranscation->transaction_date = Carbon::now();
+						$reimbursementtranscation->transcation_type = 3272;
+						$reimbursementtranscation->petty_cash_id = $request->petty_cash_id;
+						$reimbursementtranscation->amount = $request->amount;
+						$reimbursementtranscation->balance_amount = $balance_amount;
+						$reimbursementtranscation->save();
+						$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
+
+					} else {
+						return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
+					}
+				}
+				//PAYMENT SAVE
+				if ($request->type_id == 1) {
+					$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3253, 'payment_mode_id' => $request->payment_mode_id]);
+					$payment->fill($request->all());
+					$payment->date = date('Y-m-d', strtotime($request->date));
+					$payment->payment_of_id = 3253;
+					// $payment->payment_mode_id = $agent_claim->id;
+					$payment->created_by = Auth::user()->id;
+					$payment->save();
+					$activity['entity_id'] = $request->petty_cash_id;
+					$activity['entity_type'] = 'Local Conveyance';
+					$activity['details'] = "Claim is paid by Financier";
+					$activity['activity'] = "paid";
+					$activity_log = ActivityLog::saveLog($activity);
+				} elseif ($request->type_id == 2) {
+					$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
+					$payment->fill($request->all());
+					$payment->date = date('Y-m-d', strtotime($request->date));
+					$payment->payment_of_id = 3254;
+					// $payment->payment_mode_id = $agent_claim->id;
+					$payment->created_by = Auth::user()->id;
+					$payment->save();
+					$activity['entity_id'] = $request->petty_cash_id;
+					$activity['entity_type'] = 'Other Expense';
+					$activity['details'] = "Claim is paid by Financier";
+					$activity['activity'] = "paid";
+					$activity_log = ActivityLog::saveLog($activity);
+				}
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
@@ -293,8 +292,9 @@ class PettyCashFinanceVerificationController extends Controller {
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
-			$request->session()->flash('success', 'Petty Cash Finance Verification successfully!');
-			return response()->json(['success' => true]);
+			// }
+			// $request->session()->flash('success', 'Petty Cash Finance Verification successfully!');
+			// return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);

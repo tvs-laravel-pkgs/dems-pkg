@@ -4,6 +4,8 @@ app.component('eyatraStates', {
         // alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-state-add');
+        
         var dataTable = $('#eyatra_state_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -48,11 +50,13 @@ app.component('eyatraStates', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#eyatra_state_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         //Filter
         $http.get(
             state_filter_url
         ).then(function(response) {
+
             self.country_list = response.data.country_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -83,19 +87,31 @@ app.component('eyatraStates', {
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'State Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'State not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 }
             });
         }
@@ -118,17 +134,23 @@ app.component('eyatraStateForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
-            if (!response.data.success) {
-                new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: response.data.error,
-                }).show();
-                $location.path('/eyatra/states')
-                $scope.$apply()
-                return;
-            }
-
+            // if (!response.data.success) {
+            //     $noty = new Noty({
+            //         type: 'error',
+            //         layout: 'topRight',
+            //         text: response.data.error,
+            //         animation: {
+            //             speed: 500 // unavailable - no need
+            //         },
+            //     }).show();
+            //     setTimeout(function() {
+            //         $noty.close();
+            //     }, 5000);
+            //     $location.path('/eyatra/states')
+            //     $scope.$apply()
+            //     return;
+            // }
+            console.log(response);
             self.state = response.data.state;
             self.country_list = response.data.country_list;
             self.status = response.data.status;
@@ -155,6 +177,7 @@ app.component('eyatraStateForm', {
                 $mdSelect.hide();
             }
         });
+        $('#on_focus').focus();
         // self.searchAgent = function(query) {
         //     if (query) {
         //         return new Promise(function(resolve, reject) {
@@ -173,7 +196,6 @@ app.component('eyatraStateForm', {
         //         return [];
         //     }
         // }
-
 
         $('#travel_mode').on('click', function() {
             if (event.target.checked == true) {
@@ -203,14 +225,14 @@ app.component('eyatraStateForm', {
                 $("#sc_" + id).removeClass("ng-hide");
                 $("#sc_" + id).prop('required', true);
                 $("#sc_" + id).prop('min', 1);
-                $(".agent_select").removeClass("ng-hide");
-                $(".agent_select").prop('required', true);
+                $(".agent_").removeClass("ng-hide");
+                $(".agent_").prop('required', true);
                 //alert('fsdghgf');
             } else {
                 $("#sc_" + id).addClass("ng-hide");
                 $("#sc_" + id).prop('required', false);
-                $(".agent_select").addClass("ng-hide");
-                $(".agent_select").prop('required', false);
+                $(".agent_").addClass("ng-hide");
+                $(".agent_").prop('required', false);
             }
 
         }
@@ -221,7 +243,7 @@ app.component('eyatraStateForm', {
                 $(".sc_" + id).prop('required', true);
                 $(".sc_" + id).prop('number', true);
                 $(".sc_" + id).prop('min', 1);
-                $(".agent_select_" + id).prop('required', true);
+                $(".agent_" + id).prop('required', true);
             } else {
                 // $(".error").css("display", "none");
                 $(".sc_" + id).prop('required', false);
@@ -301,11 +323,18 @@ app.component('eyatraStateForm', {
                 }
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+
             },
             ignore: '',
             rules: {
@@ -371,13 +400,19 @@ app.component('eyatraStateForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'State saved successfully',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/states')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $location.path('/states')
                             $scope.$apply()
                         }
                     })

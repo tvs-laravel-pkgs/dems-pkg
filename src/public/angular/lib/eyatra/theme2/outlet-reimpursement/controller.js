@@ -1,6 +1,6 @@
 app.component('eyatraOutletReimbursement', {
     templateUrl: eyatra_outlet_reimpursement_list_template_url,
-    controller: function(HelperService, $http, $rootScope, $scope, $routeParams) {
+    controller: function(HelperService, $http, $rootScope, $scope, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#outlet_reimpursement_table').DataTable({
@@ -31,7 +31,7 @@ app.component('eyatraOutletReimbursement', {
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'outlet_name', name: 'outlets.name', searchable: true },
                 { data: 'outlet_code', name: 'outlets.code', searchable: true },
-                { data: 'cashier_name', name: 'employees.name', searchable: true },
+                { data: 'cashier_name', name: 'users.name', searchable: true },
                 { data: 'cashier_code', name: 'employees.code', searchable: true },
                 { data: 'amount', searchable: false },
             ],
@@ -48,7 +48,7 @@ app.component('eyatraOutletReimbursement', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        var add_url = '#!/eyatra/entity/add/' + self.id;
+        var add_url = '#!/entity/add/' + self.id;
         if (self.id) {
             $('.add_new_button').html(
                 '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
@@ -68,23 +68,114 @@ app.component('eyatraOutletReimbursement', {
                 console.log(response.data);
                 if (response.data.success) {
 
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Entity Detail Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+
                 }
                 dataTable.ajax.reload(function(json) {});
 
             });
         }
+
+        $scope.outletCashTopup = function(id, code, cashier, amount) {
+            $('#outlet_id').val(id);
+            $('#outlet').val(code);
+            $('#cashier').val(cashier);
+            $('#outlet_balance').val(amount);
+        }
+        $scope.confirmOutletCashTopup = function() {
+            var cash_form_id = '#cash_topup';
+            let formData1 = new FormData($(cash_form_id)[0]);
+            var id = $('#outlet_id').val();
+            var topup_amount = $('#topup_amount').val();
+            var transaction_date = $('#transaction_date').val();
+            //alert(transaction_date);
+            var v = jQuery(cash_form_id).validate({
+                ignore: '',
+                errorPlacement: function(error, element) {
+                    if (element.attr('name') == 'transaction_date') {
+                        error.appendTo($('.transaction_date_error'));
+                    } else {
+                        error.insertAfter(element);
+                    }
+                },
+
+                rules: {
+                    'transaction_date': {
+                        required: true,
+                    },
+                    'topup_amount': {
+                        required: true,
+                    },
+                },
+                messages: {
+
+                    'transaction_date': {
+                        required: 'Date is required',
+                    },
+                    'topup_amount': {
+                        required: 'Amount is required',
+                    },
+                }
+            });
+            if ($("#cash_topup").valid()) {
+                $('#submit').button('loading');
+                $http.post(
+                    eyatra_outlet_reimpursement_cash_topup_url, {
+                        id: id,
+                        topup_amount: topup_amount,
+                        transaction_date: transaction_date
+                    }
+                ).then(function(response) {
+                    $('#submit').button('reset');
+                    console.log(response.data.success);
+                    if (response.data.success) {
+                        $('#transaction_date').val('');
+                        $('#topup_amount').val('');
+                        $('#outlet_reimpursement_modal').modal('hide');
+                        //$('#outlet_reimpursement_modal').attr("data-dismiss", 'modal');
+                        $noty = new Noty({
+                            type: 'success',
+                            layout: 'topRight',
+                            text: 'Outlet Cash TopUp Sucessfully Completed!!!',
+                        }).show();
+                        dataTable.ajax.reload(function(json) {});
+                        //$location.path('/eyatra/outlet-reimbursement');
+                        //$scope.$apply();
+                        /*setTimeout(function() {
+                            $noty.close();
+                            // $location.path('/eyatra/outlet-reimbursement')
+                            //$scope.$apply()
+                        }, 3000);*/
+
+                    } else {
+                        $noty = new Noty({
+                            type: 'error',
+                            layout: 'topRight',
+                            text: response.data.error,
+                        }).show();
+                        setTimeout(function() {
+                            $noty.close();
+                        }, 3000);
+                    }
+                });
+            }
+        }
+
         $rootScope.loading = false;
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------
-
-
 app.component('eyatraEntityForm1', {
     templateUrl: eyatra_entity_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
@@ -97,12 +188,18 @@ app.component('eyatraEntityForm1', {
         ).then(function(response) {
             //console.log(response.data);
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
             }
@@ -169,13 +266,16 @@ app.component('eyatraEntityForm1', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Entity Details Added Successfully',
                                 text: res.message,
                             }).show();
-                            $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
                     })
@@ -187,7 +287,9 @@ app.component('eyatraEntityForm1', {
         });
     }
 });
-
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
+//Admin Outlet reimbursement view
 app.component('eyatraOutletReimbursementView', {
     templateUrl: eyatra_outlet_reimpursement_view_template_url,
 
@@ -199,11 +301,29 @@ app.component('eyatraOutletReimbursementView', {
         ).then(function(response) {
             console.log(response.data);
             self.reimpurseimpurse_outlet_data = response.data.reimpurseimpurse_outlet_data;
+            self.reimbursement_amount = response.data.reimbursement_amount;
             self.reimpurseimpurse_transactions = response.data.reimpurseimpurse_transactions;
         });
     }
 });
+//------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------
+//Cashier Outlet reimbursement view
+// app.component('eyatraCashierOutletReimbursementView', {
+//     templateUrl: eyatra_outlet_reimpursement_view_template_url,
 
-
+//     controller: function($http, $location, $routeParams, HelperService, $scope) {
+//         var self = this;
+//         self.hasPermission = HelperService.hasPermission;
+//         $http.get(
+//             eyatra_outlet_reimpursement_view_url + '/' + 'cashier',
+//         ).then(function(response) {
+//             console.log(response.data);
+//             self.reimpurseimpurse_outlet_data = response.data.reimpurseimpurse_outlet_data;
+//             self.reimbursement_amount = response.data.reimbursement_amount;
+//             self.reimpurseimpurse_transactions = response.data.reimpurseimpurse_transactions;
+//         });
+//     }
+// });
 //------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------

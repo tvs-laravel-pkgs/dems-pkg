@@ -4,40 +4,41 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
-use Entrust;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Uitoux\EYatra\Boarding;
-use Uitoux\EYatra\EmployeeClaim;
-use Uitoux\EYatra\LocalTravel;
-use Uitoux\EYatra\Lodging;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use Uitoux\EYatra\VisitBooking;
 use Yajra\Datatables\Datatables;
 
 class TripClaimController extends Controller {
 	public function listEYatraTripClaimList(Request $r) {
+		//dd('test');
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('ey_employee_claims as claims', 'claims.trip_id', 'trips.id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
 			->select(
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'users.name as ename',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				'trips.status_id',
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				'trips.advance_received',
+				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-			->where('trips.status_id', 3023)
+
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -48,12 +49,36 @@ class TripClaimController extends Controller {
 					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
 				}
 			})
+			->where(function ($query) use ($r) {
+				if ($r->from_date) {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("trips.start_date", $date)->orWhere(DB::raw("-1"), $r->from_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->to_date) {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("trips.end_date", $date)->orWhere(DB::raw("-1"), $r->to_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('trip_id')) {
+					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id')) {
+					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				}
+			})
+			->where('trips.employee_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+		// ->orderBy('trips.created_at', 'desc');
+			->orderBy('trips.id', 'desc');
 
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
+		// if (!Entrust::can('view-all-trips')) {
+		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
+		// }
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
@@ -63,13 +88,22 @@ class TripClaimController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/trip/claim/edit/' . $trip->id . '">
+				if ($trip->status_id == 3024) {
+
+					return '
+				<a href="#!/trip/claim/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
-				<a href="#!/eyatra/trip/claim/view/' . $trip->id . '">
+				<a href="#!/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
+				} else {
+					return '
+
+				<a href="#!/trip/claim/view/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
+				}
 
 			})
 			->make(true);
@@ -83,174 +117,7 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
-		// dd($request->all());
-		//validation
-		try {
-			// $validator = Validator::make($request->all(), [
-			// 	'purpose_id' => [
-			// 		'required',
-			// 	],
-			// ]);
-			// if ($validator->fails()) {
-			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			// }
-
-			DB::beginTransaction();
-
-			if (empty($request->trip_id)) {
-				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-			}
-			//UPDATE TRIP STATUS
-			$trip = Trip::find($request->trip_id);
-			$trip->status_id = 3023; //claimed
-			$trip->claim_amount = $request->claim_total_amount; //claimed
-			$trip->save();
-
-			//SAVE EMPLOYEE CLAIMS
-			$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
-			$employee_claim->fill($request->all());
-			$employee_claim->trip_id = $trip->id;
-			$employee_claim->total_amount = $request->claim_total_amount;
-			$employee_claim->status_id = 3222;
-			$employee_claim->created_by = Auth::user()->id;
-			$employee_claim->save();
-			//SAVING VISITS
-			if ($request->visits) {
-				foreach ($request->visits as $visit_data) {
-					if (!empty($visit_data['id'])) {
-						$visit = Visit::find($visit_data['id']);
-						$visit->departure_date = date('Y-m-d H:i:s', strtotime($visit_data['departure_date']));
-						$visit->arrival_date = date('Y-m-d H:i:s', strtotime($visit_data['arrival_date']));
-						$visit->save();
-						// dd($visit_data['id']);
-						//UPDATE VISIT BOOKING STATUS
-						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
-						$visit_booking->visit_id = $visit_data['id'];
-						$visit_booking->type_id = 3100;
-						$visit_booking->travel_mode_id = $visit_data['travel_mode_id'];
-						$visit_booking->reference_number = $visit_data['reference_number'];
-						$visit_booking->remarks = $visit_data['remarks'];
-						$visit_booking->amount = $visit_data['amount'];
-						$visit_booking->tax = $visit_data['tax'];
-						$visit_booking->service_charge = '0.00';
-						$visit_booking->total = $visit_data['total'];
-						$visit_booking->paid_amount = $visit_data['total'];
-						$visit_booking->created_by = Auth::user()->entity_id;
-						$visit_booking->status_id = 3241; //Claimed
-						$visit_booking->save();
-					}
-				}
-			}
-
-			//SAVING LODGINGS
-			if ($request->lodgings) {
-				if (!empty($request->lodgings_removal_id)) {
-					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
-					Lodging::whereIn('id', $lodgings_removal_id)->delete();
-				}
-				foreach ($request->lodgings as $lodging_data) {
-					$lodging = Lodging::firstOrNew([
-						'id' => $lodging_data['id'],
-					]);
-					$lodging->fill($lodging_data);
-					$lodging->trip_id = $request->trip_id;
-					$lodging->check_in_date = date('Y-m-d H:i:s', strtotime($lodging_data['check_in_date']));
-					$lodging->checkout_date = date('Y-m-d H:i:s', strtotime($lodging_data['checkout_date']));
-					$lodging->created_by = Auth::user()->id;
-					$lodging->save();
-
-					//STORE ATTACHMENT
-					$item_images = storage_path('app/public/trip/lodgings/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($lodging_data['attachments'])) {
-						foreach ($lodging_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/trip/lodgings/attachments/'), $name);
-							$attachement_lodge = new Attachment;
-							$attachement_lodge->attachment_of_id = 3181;
-							$attachement_lodge->attachment_type_id = 3200;
-							$attachement_lodge->entity_id = $lodging->id;
-							$attachement_lodge->name = $name;
-							$attachement_lodge->save();
-						}
-					}
-				}
-			}
-			//SAVING BOARDINGS
-			if ($request->boardings) {
-				if (!empty($request->boardings_removal_id)) {
-					$boardings_removal_id = json_decode($request->boardings_removal_id, true);
-					Boarding::whereIn('id', $boardings_removal_id)->delete();
-				}
-				foreach ($request->boardings as $boarding_data) {
-					$boarding = Boarding::firstOrNew([
-						'id' => $boarding_data['id'],
-					]);
-					$boarding->fill($boarding_data);
-					$boarding->trip_id = $request->trip_id;
-					$boarding->date = date('Y-m-d', strtotime($boarding_data['date']));
-					$boarding->created_by = Auth::user()->id;
-					$boarding->save();
-
-					//STORE ATTACHMENT
-					$item_images = storage_path('app/public/trip/boarding/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($boarding_data['attachments'])) {
-						foreach ($boarding_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/trip/boarding/attachments/'), $name);
-							$attachement_board = new Attachment;
-							$attachement_board->attachment_of_id = 3182;
-							$attachement_board->attachment_type_id = 3200;
-							$attachement_board->entity_id = $boarding->id;
-							$attachement_board->name = $name;
-							$attachement_board->save();
-						}
-					}
-				}
-			}
-
-			//SAVING LOCAL TRAVELS
-			if ($request->local_travels) {
-				if (!empty($request->local_travels_removal_id)) {
-					$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
-					LocalTravel::whereIn('id', $local_travels_removal_id)->delete();
-				}
-				foreach ($request->local_travels as $local_travel_data) {
-					$local_travel = LocalTravel::firstOrNew([
-						'id' => $local_travel_data['id'],
-					]);
-					$local_travel->fill($local_travel_data);
-					$local_travel->trip_id = $request->trip_id;
-					$local_travel->date = date('Y-m-d', strtotime($local_travel_data['date']));
-					$local_travel->created_by = Auth::user()->id;
-					$local_travel->save();
-
-					//STORE ATTACHMENT
-					$item_images = storage_path('app/public/trip/local_travels/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($local_travel_data['attachments'])) {
-						foreach ($local_travel_data['attachments'] as $key => $attachement) {
-							$name = $attachement->getClientOriginalName();
-							$attachement->move(storage_path('app/public/trip/local_travels/attachments/'), $name);
-							$attachement_local_travel = new Attachment;
-							$attachement_local_travel->attachment_of_id = 3183;
-							$attachement_local_travel->attachment_type_id = 3200;
-							$attachement_local_travel->entity_id = $local_travel->id;
-							$attachement_local_travel->name = $name;
-							$attachement_local_travel->save();
-						}
-					}
-				}
-			}
-
-			DB::commit();
-			$request->session()->flash('success', 'Trip saved successfully!');
-			return response()->json(['success' => true]);
-		} catch (Exception $e) {
-			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
-		}
+		return Trip::saveEYatraTripClaim($request);
 	}
 
 	public function viewEYatraTripClaim($trip_id) {
@@ -272,11 +139,16 @@ class TripClaimController extends Controller {
 
 	public function getEligibleAmtBasedonCitycategoryGrade(Request $request) {
 		if (!empty($request->city_id) && !empty($request->grade_id) && !empty($request->expense_type_id)) {
-			$city_category_id = NCity::where('id', $request->city_id)->first();
-			$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
-			if (!$grade_expense_type) {
+			$city_category_id = NCity::where('id', $request->city_id)->where('company_id', Auth::user()->company_id)->first();
+			if ($city_category_id) {
+				$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
+				if (!$grade_expense_type) {
+					$grade_expense_type = '';
+				}
+			} else {
 				$grade_expense_type = '';
 			}
+
 		} else {
 			$grade_expense_type = '';
 		}
@@ -285,16 +157,32 @@ class TripClaimController extends Controller {
 
 	public function getEligibleAmtBasedonCitycategoryGradeStaytype(Request $request) {
 		if (!empty($request->city_id) && !empty($request->grade_id) && !empty($request->expense_type_id) && !empty($request->stay_type_id)) {
-			$city_category_id = NCity::where('id', $request->city_id)->first();
-			$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
-			if ($grade_expense_type) {
-				if ($request->stay_type_id == 3341) {
-					//STAY TYPE HOME
-					$percentage = 25;
-					$totalWidth = $grade_expense_type->eligible_amount;
-					$eligible_amount = ($percentage / 100) * $totalWidth;
+			$city_category_id = NCity::where('id', $request->city_id)->where('company_id', Auth::user()->company_id)->first();
+			if ($city_category_id) {
+				$grade_expense_type = DB::table('grade_expense_type')->where('grade_id', $request->grade_id)->where('expense_type_id', $request->expense_type_id)->where('city_category_id', $city_category_id->category_id)->first();
+				if ($grade_expense_type) {
+					if ($request->stay_type_id == 3341) {
+						//STAY TYPE HOME
+
+						//GET GRADE STAY TYPE
+						$grade_stay_type = DB::table('grade_advanced_eligibility')->where('grade_id', $request->grade_id)->first();
+						if ($grade_stay_type) {
+							if ($grade_stay_type->stay_type_disc) {
+								$percentage = (int) $grade_stay_type->stay_type_disc;
+								$totalWidth = $grade_expense_type->eligible_amount;
+								$eligible_amount = ($percentage / 100) * $totalWidth;
+							} else {
+								$eligible_amount = $grade_expense_type->eligible_amount;
+							}
+						} else {
+							$eligible_amount = $grade_expense_type->eligible_amount;
+						}
+
+					} else {
+						$eligible_amount = $grade_expense_type->eligible_amount;
+					}
 				} else {
-					$eligible_amount = $grade_expense_type->eligible_amount;
+					$eligible_amount = '0.00';
 				}
 			} else {
 				$eligible_amount = '0.00';
@@ -307,6 +195,29 @@ class TripClaimController extends Controller {
 		return response()->json(['eligible_amount' => $eligible_amount]);
 	}
 
+	//GET TRAVEL MODE CATEGORY STATUS TO CHECK IF IT IS NO VEHICLE CLAIM
+	public function getVisitTrnasportModeClaimStatus(Request $request) {
+		return Trip::getVisitTrnasportModeClaimStatus($request);
+	}
+
+	// Function to get all the dates in given range
+	public static function getDatesFromRange($start, $end, $format = 'd-m-Y') {
+		// Declare an empty array
+		$array = array();
+		// Variable that store the date interval
+		// of period 1 day
+		$interval = new DateInterval('P1D');
+		$realEnd = new DateTime($end);
+		$realEnd->add($interval);
+		$period = new DatePeriod(new DateTime($start), $interval, $realEnd);
+		// Use loop to store date into array
+		foreach ($period as $date) {
+			$array[] = $date->format($format);
+		}
+		// Return the array elements
+		return $array;
+	}
+
 	public function eyatraTripExpenseData(Request $request) {
 		// $lodgings = array();
 		$travelled_cities_with_dates = array();
@@ -314,10 +225,12 @@ class TripClaimController extends Controller {
 		// $boarding_to_date = '';
 		if (!empty($request->visits)) {
 			foreach ($request->visits as $visit_key => $visit) {
-				$city_category_id = NCity::where('id', $visit['to_city_id'])->first();
-				$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
-				$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
-				$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+				$city_category_id = NCity::where('id', $visit['to_city_id'])->where('company_id', Auth::user()->company_id)->first();
+				if ($city_category_id) {
+					$lodging_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3001)->where('city_category_id', $city_category_id->category_id)->first();
+					$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+					$local_travel_expense_type = DB::table('grade_expense_type')->where('grade_id', $visit['grade_id'])->where('expense_type_id', 3003)->where('city_category_id', $city_category_id->category_id)->first();
+				}
 				$loadge_eligible_amount = $lodging_expense_type ? $lodging_expense_type->eligible_amount : '0.00';
 				$board_eligible_amount = $board_expense_type ? $board_expense_type->eligible_amount : '0.00';
 				$local_travel_eligible_amount = $local_travel_expense_type ? $local_travel_expense_type->eligible_amount : '0.00';

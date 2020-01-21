@@ -48,21 +48,28 @@ app.component('entityDataList', {
             }
 
         });
+
+        $rootScope.title = 'Rejection Reasons';
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Rejection Reasons' + '</p><h3 class="title">' + 'Rejection Reasons' + '</h3>');
-        var add_url = '#!/eyatra/rejection-reason/add/';
-        $('.add_new_button').html(
-            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
-            'Add New' +
-            '</a>'
-        );
+        var add_url = '#!/rejection-reason/add/';
+        self.trip_add_permission = self.hasPermission('eyatra-rejection-add');
+        if (self.trip_add_permission) {
+            $('.add_new_button').html(
+                '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                'Add New' +
+                '</a>'
+            );
+        }
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('entity_data_table');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
-        }, 500);
 
+        }, 500);
+        $('#entity_data_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $scope.deleteEntityData = function($id) {
             $('#del').val($id);
         }
@@ -75,11 +82,18 @@ app.component('entityDataList', {
                 console.log(response.data);
                 if (response.data.success) {
 
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Entity Detail Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+
                 }
                 dataTable.ajax.reload(function(json) {});
 
@@ -102,12 +116,18 @@ app.component('entityDataForm', {
         ).then(function(response) {
 
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/rejection-reason/list')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/rejection-reason/list')
                 $scope.$apply()
                 return;
             }
@@ -119,6 +139,7 @@ app.component('entityDataForm', {
 
         });
 
+        $('#on_focus').focus();
         var form_id = form_ids = '#entity_form';
         var v = jQuery(form_ids).validate({
             errorPlacement: function(error, element) {
@@ -163,12 +184,18 @@ app.component('entityDataForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/rejection-reason/list')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/rejection-reason/list')
                             $scope.$apply()
                         }
                     })

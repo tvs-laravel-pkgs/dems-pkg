@@ -4,6 +4,7 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Entity;
 use Validator;
@@ -44,13 +45,28 @@ class CoaController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/coa-sub-master/edit/' . $entity->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_coa_modal" onclick="angular.element(this).scope().deleteCoaData(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
 
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-coa-categories-edit')) {
+					$edit_class = "";
+				}
+
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-coa-categories-delete')) {
+					$delete_class = "";
+				}
+
+				$action = '';
+
+				$action .= '<a style="' . $edit_class . '" href="#!/coa-sub-master/edit/' . $entity->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+
+				$action .= '<a style="' . $delete_class . '" href="javascript:;"  data-toggle="modal" data-target="#delete_coa_modal" onclick="angular.element(this).scope().deleteCoaData(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
+
+				return $action;
 			})
+
 			->addColumn('status', function ($entity) {
 				if ($entity->status == 'Inactive') {
 					return '<span style="color:#ea4335;">Inactive</span>';
@@ -79,7 +95,8 @@ class CoaController extends Controller {
 			$this->data['action'] = 'Edit';
 		}
 		$entity_type_ids = [513, 514, 515, 516, 517];
-		$this->data['reject_type_list'] = DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get();
+
+		$this->data['reject_type_list'] = collect(DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get()->prepend(['id' => '', 'name' => 'Select Sub Master Type']));
 
 		$this->data['entity'] = $entity;
 		$this->data['success'] = true;
@@ -136,7 +153,15 @@ class CoaController extends Controller {
 				$entity->deleted_at = NULL;
 			}
 			$entity->save();
+			//$e_name = DB::table('entity_types')->where('id', $entity->entity_type_id)->first();
+			//dd($e_name->name);
+			$activity['entity_id'] = $entity->id;
+			$activity['entity_type'] = "COA Sub Groups";
+			$activity['details'] = empty($request->id) ? "COA Sub Group is added" : "COA Sub Group is updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
+			//dd($activity);
 
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Coa added successfully']);
@@ -150,8 +175,13 @@ class CoaController extends Controller {
 	}
 
 	public function deleteEYatraCoaNg($entity_id) {
-		$entity = Entity::withTrashed()->where('id', $entity_id)->forceDelete();
-
+		$entity = Entity::withTrashed()->where('id', $entity_id)->first();
+		$activity['entity_id'] = $entity->id;
+		$activity['entity_type'] = "COA Sub Groups";
+		$activity['details'] = "COA Sub Group is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$entity->forceDelete();
 		if (!$entity) {
 			return response()->json(['success' => false, 'errors' => ['Entity not found']]);
 		}

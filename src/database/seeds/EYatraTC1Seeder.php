@@ -15,6 +15,7 @@ use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
@@ -30,6 +31,8 @@ class EYatraTC1Seeder extends Seeder {
 	 * @return void
 	 */
 	public function run() {
+		// $this->call(EYatraConfigSeeder::class);
+
 		$faker = Faker::create();
 
 		$company_id = $this->command->ask("Enter company id", '4');
@@ -41,8 +44,6 @@ class EYatraTC1Seeder extends Seeder {
 
 		$number_of_items = $this->command->ask("How many records do you want to create?", '1');
 		$create_dummy_records = $this->command->ask("Do you want to create dummy records", 'n');
-
-		$this->call(EYatraSeeder::class);
 
 		$base_telephone_number = $company_id;
 		$company = Company::firstOrNew([
@@ -70,6 +71,9 @@ class EYatraTC1Seeder extends Seeder {
 		$admin->name = $company->name . ' / Admin 1';
 		$admin->password = 'Test@123';
 		$admin->save();
+
+		$this->call(EYatraSeeder::class);
+
 		$admin->roles()->sync(500);
 		$country = NCountry::find(5);
 		if ($country) {
@@ -145,7 +149,6 @@ class EYatraTC1Seeder extends Seeder {
 
 		NCountry::create($countries, $admin, $company);
 		//NCountry::createDummies($admin);
-
 		//DUMMY ENTITY CREATION
 		$dummy_entities = [
 		];
@@ -180,12 +183,16 @@ class EYatraTC1Seeder extends Seeder {
 				'Bus',
 				'Train',
 				'Air',
+				'Two Wheeler',
+				'Four Wheeler',
+				'Office Vehicle',
 			],
 			503 => [
 				'A/C Taxi',
 				'Non A/C Taxi',
 				'Auto Ricksaw',
 				'Bus',
+				'Toll Fee',
 			],
 			504 => [
 				'Normal',
@@ -250,8 +257,14 @@ class EYatraTC1Seeder extends Seeder {
 				'Inventory',
 				'Test Sub Group',
 			],
+			518 => [
+				'General Ticket',
+				'Tatkal',
+				'Premimum Tatkal',
+			],
 
 		];
+
 		Entity::create($sample_entities, $admin, $company);
 		Designation::create($company, $admin);
 		foreach ($company->designations as $designation) {
@@ -260,7 +273,7 @@ class EYatraTC1Seeder extends Seeder {
 			$designation->save();
 		}
 
-		foreach (NCity::get() as $city) {
+		foreach (NCity::where('company_id', $company->id)->get() as $city) {
 			$city->category_id = $company->cityCategories()->inRandomOrder()->first()->id;
 			$city->save();
 		}
@@ -284,7 +297,7 @@ class EYatraTC1Seeder extends Seeder {
 
 			//OUTLET ADDRESS
 			$address_of_id = 3160;
-			$address = Address::create($address_of_id, $outlet, $faker);
+			$address = Address::create($address_of_id, $outlet, $faker, $company->id);
 			dump($outlet, $address);
 
 			$this->command->info('------------------');
@@ -366,7 +379,7 @@ class EYatraTC1Seeder extends Seeder {
 
 			//AGENT ADDRESS
 			$address_of_id = 3161;
-			$address = Address::create($address_of_id, $agent, $faker);
+			$address = Address::create($address_of_id, $agent, $faker, $company->id);
 
 			$travel_modes = [];
 			if ($i <= 10) {
@@ -443,7 +456,12 @@ class EYatraTC1Seeder extends Seeder {
 
 			//GRADE ADVANCE ELIGIBILITY
 			$advance_eligibility = $faker->randomElement([0, 1]);
-			$grade->gradeEligibility()->sync($advance_eligibility);
+			$deviation_eligiblity = $faker->randomElement([1, 2]);
+			$grade_details = GradeAdvancedEligiblity::firstOrNew(['grade_id' => $grade->id]);
+			$grade_details->advanced_eligibility = $advance_eligibility;
+			$grade_details->deviation_eligiblity = $deviation_eligiblity;
+			$grade_details->save();
+			// $grade->gradeEligibility()->sync($advance_eligibility);
 		}
 
 		if ($create_dummy_records == 'y') {

@@ -9,7 +9,7 @@ class Lodging extends Model {
 	use SoftDeletes;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'trip_id',
 		'city_id',
 		// 'check_in_date',
@@ -18,6 +18,7 @@ class Lodging extends Model {
 		'stay_type_id',
 		'amount',
 		'tax',
+		'gstin',
 		'total',
 		'reference_number',
 		'description',
@@ -28,6 +29,9 @@ class Lodging extends Model {
 		'updated_by',
 		'deleted_by',
 	];
+	// protected $attributes = ['check_in_time', 'checkout_time'];
+
+	protected $appends = ['check_in_time', 'checkout_time'];
 
 	public function trip() {
 		return $this->belongsTo('Uitoux\EYatra\Trip');
@@ -37,8 +41,16 @@ class Lodging extends Model {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
 	}
 
+	public function getCheckInTimeAttribute() {
+		return $this->attributes['check_in_time'] = date('g:i A', strtotime($this->attributes['check_in_date']));
+	}
+
 	public function getCheckoutDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
+	public function getCheckoutTimeAttribute() {
+		return $this->attributes['checkout_time'] = date('g:i A', strtotime($this->attributes['checkout_date']));
 	}
 
 	public function city() {

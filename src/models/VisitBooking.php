@@ -13,6 +13,7 @@ class VisitBooking extends Model {
 		'type_id',
 		'travel_mode_id',
 		'reference_number',
+		'booking_type_id',
 		'amount',
 		'tax',
 		'service_charge',
@@ -25,7 +26,25 @@ class VisitBooking extends Model {
 		'updated_by',
 		'deleted_by',
 	];
-
+	// public function getAmountAttribute($value) {
+	// 	return '₹ ' . IND_money_format($value);
+	// }
+	// public function getTaxAttribute($value) {
+	// 	return '₹ ' . IND_money_format($value);
+	// }
+	public function getServiceChargeAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getTotalAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	public function getPaidAmountAttribute($value) {
+		return '₹ ' . IND_money_format($value);
+	}
+	/*public function setAmountAttribute($value) {
+	$this->attributes['amount'] = IND_money_format($value);
+	dd();
+	}*/
 	public function visit() {
 		return $this->belongsTo('Uitoux\EYatra\Visit');
 	}
@@ -38,12 +57,20 @@ class VisitBooking extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Entity', 'travel_mode_id');
 	}
 
+	public function bookingMode() {
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'booking_type_id');
+	}
+
 	public function paymentStatus() {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'payment_status_id');
 	}
 
 	public function payment() {
 		return $this->belongsTo('Uitoux\EYatra\Payment');
+	}
+
+	public function attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3180)->where('attachment_type_id', 3200);
 	}
 
 	public static function create($visit, $faker, $booking_detail_status_id, $employee) {

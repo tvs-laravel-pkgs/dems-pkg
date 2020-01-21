@@ -7,13 +7,14 @@ use Auth;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\ActivityLog;
+use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 
 class TripController extends Controller {
 	public function listTrip(Request $r) {
+
 		$trips = Trip::from('trips')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')
@@ -26,15 +27,15 @@ class TripController extends Controller {
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
-				'users.name as ename',
+				'users.name as ename', 'trips.status_id',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 
 				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
 				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
-				DB::raw('CONCAT(DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y"), " to ", DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y")) as travel_period'),
-				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y") as created_date'),
+				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
+				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				DB::raw('CONCAT("₹",FORMAT(trips.advance_received,2,"en_IN")) as advance_received'),
+				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
@@ -50,35 +51,74 @@ class TripController extends Controller {
 				}
 			})
 			->where(function ($query) use ($r) {
+				if ($r->from_date) {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->to_date) {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('trip_id')) {
+					$query->where("trips.id", $r->get('trip_id'))->orWhere(DB::raw("-1"), $r->get('trip_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
 				if ($r->get('status_id')) {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
+			->whereIN('trips.status_id', [3021, 3022, 3028, 3032])
+			->where('trips.employee_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 		// ->orderBy('trips.created_at', 'desc');
 			->orderBy('trips.id', 'desc');
 
-		if (!Entrust::can('view-all-trips')) {
-			$trips->where('trips.employee_id', Auth::user()->entity_id);
-		}
+		// if (!Entrust::can('view-all-trips')) {
+		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
+		// }
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 
-				// $img1 = asset('public/img/content/table/edit-yellow.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/view.svg');
-				// $img1_active = asset('public/img/content/yatra/table/view.svg');
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
 
-				<a href="#!/eyatra/trip/view/' . $trip->id . '">
+				$action = '';
+
+				if ($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
+					$edit_class = "visibility:hidden";
+					if (Entrust::can('trip-edit')) {
+						$edit_class = "";
+					}
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('trip-delete')) {
+						$delete_class = "";
+					}
+				} else {
+					$edit_class = "visibility:hidden";
+					$delete_class = "visibility:hidden";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/trip/edit/' . $trip->id . '">
+					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+				</a> ';
+				$action .= '<a href="#!/trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_trip"
+				</a> ';
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_trip"
 				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
+
+				return $action;
 			})
 			->make(true);
 	}
@@ -105,6 +145,64 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
+
+		if ($request->advance_received) {
+			$get_previous_entry = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.employee_id', Auth::user()->entity_id)->where('ey_employee_claims.status_id', 3031)->orderBy('ey_employee_claims.id', 'DESC')->select('ey_employee_claims.balance_amount')->first();
+			if ($get_previous_entry) {
+				$previous_amount = $get_previous_entry->balance_amount;
+				if ($request->advance_received > $previous_amount) {
+					return response()->json(['success' => false, 'errors' => ['Your Previous Trip Claim Amount is Pending.Pay previous trip balance Amount']]);
+				} else {
+
+				}
+			}
+
+			// $check_trip_amount_eligible = Employee::select('gae.travel_advance_limit')
+			// 	->leftJoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')->first();
+			// if ($check_trip_amount_eligible->travel_advance_limit < $request->advance_received) {
+			// 	return response()->json(['success' => false, 'errors' => ['Maximum Eligibility Advance Amount is ' . $check_trip_amount_eligible->travel_advance_limit]]);
+			// }
+		}
+		// dd($request->all());
+
+		if ($request->id) {
+			// $trip_start_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->where('id', '!=', $request->id)->first();
+			// $trip_end_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('employee_id', Auth::user()->entity_id)->where('id', '!=', $request->id)->first();
+			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
+				->where('id', '!=', $request->id)
+				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->first();
+		} else {
+			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
+				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+				->first();
+		}
+
+		// dd($trip_start_date_data);
+		// dd($trip_start_date_data, $trip_end_date_data);
+		if ($trip_start_date_data) {
+			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
+		}
+
+		$size = sizeof($request->visits);
+		for ($i = 0; $i < $size; $i++) {
+			if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {
+				return response()->json(['success' => false, 'errors' => "Departure date should be within Trip Period"]);
+
+			}
+
+			$next_key = $i + 1;
+			if (!($next_key >= $size)) {
+				//dump($next_key);
+				if ($request->visits[$next_key]['date'] < $request->visits[$i]['date']) {
+					return response()->json(['success' => false, 'errors' => "Return Date Should Be Greater Than Or Equal To Departure Date"]);
+				}
+			}
+
+		}
+		//dd('ss');
 		return Trip::saveTrip($request);
 	}
 
@@ -117,50 +215,14 @@ class TripController extends Controller {
 	}
 
 	public function deleteTrip($trip_id) {
-		//CHECK IF AGENT BOOKED TRIP VISITS
-		//dump($trip_id);
-		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
-		if ($agent_visits_booked) {
-			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
-		}
-		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
-		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022])->first();
-		if (!$status_exist) {
-			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
-		}
-		$trip = Trip::where('id', $trip_id)->first();
 
-		$activity['entity_id'] = $trip->id;
-		$trip = $trip->forceDelete();
+		return Trip::deleteTrip($trip_id);
 
-		//$trip = Trip::where('id', $trip_id)->forceDelete();
-		$activity['entity_type'] = 'trip';
-		$activity['details'] = NULL;
-		$activity['activity'] = "delete";
-		//dd($activity);
-		$activity_log = ActivityLog::saveLog($activity);
-
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		return response()->json(['success' => true]);
 	}
 
 	public function cancelTrip($trip_id) {
 
-		$trip = Trip::where('id', $trip_id)->update(['status_id' => 3062]);
-		if (!$trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
-		}
-		$activity['entity_id'] = $trip->id;
-		$activity['entity_type'] = 'trip';
-		$activity['details'] = NULL;
-		$activity['activity'] = "cancel";
-		//dd($activity);
-		$activity_log = ActivityLog::saveLog($activity);
-		$visit = Visit::where('trip_id', $trip_id)->update(['status_id' => 3221]);
-
-		return response()->json(['success' => true]);
+		return Trip::cancelTrip($trip_id);
 	}
 
 	public function tripVerificationRequest($trip_id) {
@@ -176,25 +238,7 @@ class TripController extends Controller {
 	}
 
 	public function cancelTripVisitBooking($visit_id) {
-		if ($visit_id) {
-			//CHECK IF AGENT BOOKED VISIT
-			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
-			if ($agent_visits_booked) {
-				return response()->json(['success' => false, 'errors' => ['Visit cannot be deleted']]);
-			}
-			$visit = Visit::where('id', $visit_id)->first();
-			$visit->booking_status_id = 3062; // Booking cancelled
-			$visit->save();
-			/*$activity['entity_id'] = $visit->id;
-				$activity['entity_type'] = 'visit';
-				$activity['details'] = NULL;
-				$activity['activity'] = "cancel";
-				//dd($activity);
-			*/
-			return response()->json(['success' => true]);
-		} else {
-			return response()->json(['success' => false, 'errors' => ['Bookings not cancelled']]);
-		}
+		return Trip::cancelTripVisitBooking($visit_id);
 	}
 
 	public function visitFormData($visit_id) {
@@ -212,6 +256,7 @@ class TripController extends Controller {
 			'bookingMethod',
 			'bookingStatus',
 			'agent',
+			'agent.user',
 			'status',
 			'attachments',
 			'managerVerificationStatus',
@@ -237,6 +282,7 @@ class TripController extends Controller {
 
 		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$relations[] = 'bookings';
+			$relations[] = 'bookings.attachments';
 			$relations[] = 'bookings.type';
 			$relations[] = 'bookings.travelMode';
 			$relations[] = 'bookings.paymentStatus';
@@ -249,29 +295,20 @@ class TripController extends Controller {
 		$this->data['trip'] = $visit->trip;
 		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
 			$this->data['bookings'] = $visit->bookings;
+			//dd($this->data['bookings'][0]->total, IND_money_format($this->data['bookings'][0]->total));
 		} else {
 			$this->data['bookings'] = [];
 		}
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
 	public function requestCancelVisitBooking($visit_id) {
-
-		$visit = Visit::where('id', $visit_id)->update(['status_id' => 3221]);
-
-		if (!$visit) {
-			return response()->json(['success' => false, 'errors' => ['Booking Details not Found']]);
-		}
-
-		/*$activity['entity_id'] = $visit->id;
-			$activity['entity_type'] = 'visit';
-			$activity['details'] = NULL;
-			$activity['activity'] = "cancel";
-			//dd($activity);
-		*/
-
-		return response()->json(['success' => true]);
+		return Trip::requestCancelVisitBooking($visit_id);
+	}
+	public function deleteVisit($visit_id) {
+		return Trip::deleteVisit($visit_id);
 	}
 
 }

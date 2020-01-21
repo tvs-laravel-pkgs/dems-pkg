@@ -51,19 +51,24 @@ app.component('coaDataList', {
 
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'COA Sub Masters' + '</p><h3 class="title">' + 'COA Sub Masters' + '</h3>');
-        var add_url = '#!/eyatra/coa-sub-master/add/';
-        $('.add_new_button').html(
-            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
-            'Add New' +
-            '</a>'
-        );
+        var add_url = '#!/coa-sub-master/add/';
+        self.trip_add_permission = self.hasPermission('eyatra-coa-categories-add');
+        if (self.trip_add_permission) {
+            $('.add_new_button').html(
+                '<a href=' + add_url + ' type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'eyatra-coa-sub-groups-add\')">' +
+                'Add New' +
+                '</a>'
+            );
+        }
+
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('coa_data_table');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#coa_data_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $scope.deleteCoaData = function($id) {
             $('#del').val($id);
         }
@@ -76,11 +81,17 @@ app.component('coaDataList', {
                 console.log(response.data);
                 if (response.data.success) {
 
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Entity Detail Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 }
                 dataTable.ajax.reload(function(json) {});
 
@@ -103,12 +114,19 @@ app.component('coaDataForm', {
         ).then(function(response) {
 
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/coa-sub-master/list')
+
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/coa-sub-master/list')
                 $scope.$apply()
                 return;
             }
@@ -119,7 +137,7 @@ app.component('coaDataForm', {
             $rootScope.loading = false;
 
         });
-
+        $('#on_focus').focus();
         var form_id = form_ids = '#entity_form';
         var v = jQuery(form_ids).validate({
             errorPlacement: function(error, element) {
@@ -164,12 +182,18 @@ app.component('coaDataForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/coa-sub-master/list')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $location.path('/coa-sub-master/list')
                             $scope.$apply()
                         }
                     })

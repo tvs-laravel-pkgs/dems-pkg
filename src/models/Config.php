@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Config extends Model {
 	protected $fillable = [
-		'id',
+		// 'id',
 		'config_type_id',
 		'name',
 	];
@@ -18,6 +18,13 @@ class Config extends Model {
 
 	public static function expenseList() {
 		return Config::where('config_type_id', 500)->select('id', 'name')->get()->keyBy('id');
+	}
+	public static function categoryList() {
+		return Config::where('config_type_id', 525)->select('id', 'name')->get()->keyBy('id');
+	}
+
+	public static function amountCategoryList() {
+		return Config::where('config_type_id', 532)->select('id', 'name')->get()->keyBy('id');
 	}
 
 	public static function paymentModeList() {
@@ -35,4 +42,17 @@ class Config extends Model {
 	public static function getLodgeStayTypeList() {
 		return Config::where('config_type_id', 521)->select('id', 'name')->get();
 	}
+
+	public static function managerType() {
+		return Config::where('config_type_id', 529)->select('id', 'name')->get();
+	}
+	public static function pettycashStatus() {
+		return Config::where('config_type_id', 518)->select('id', 'name')->get();
+	}
+	public static function ExpenseVoucherAdvanceStatus() {
+		return Config::where('config_type_id', 528)->select('id', 'name')->get()->toArray();
+	}
+	// public static function ExpenseVoucherAdvanceStatusList() {
+	// 	return Config::whereIn('id', [3281, 3282])->select('id', 'name')->get()->toArray();
+	// }
 }

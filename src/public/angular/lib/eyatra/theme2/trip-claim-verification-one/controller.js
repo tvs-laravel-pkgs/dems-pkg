@@ -38,6 +38,8 @@ app.component('eyatraTripClaimVerificationOneList', {
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
                     d.status_id = $('#status_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                 }
             },
             columns: [
@@ -45,9 +47,9 @@ app.component('eyatraTripClaimVerificationOneList', {
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: false },
-                { data: 'start_date', name: 'v.departure_date', searchable: true },
-                { data: 'end_date', name: 'v.departure_date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
+                { data: 'start_date', name: 'trips.start_date', searchable: false },
+                { data: 'end_date', name: 'trips.end_date', searchable: false },
+                // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
@@ -65,6 +67,13 @@ app.component('eyatraTripClaimVerificationOneList', {
             d.style.left = x.left + 'px';
         }, 500);
 
+        setTimeout(function() {
+            $('div[data-provide = "datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
+
         $scope.getEmployeeData = function(query) {
             $('#employee_id').val(query);
             dataTable.draw();
@@ -77,11 +86,22 @@ app.component('eyatraTripClaimVerificationOneList', {
             $('#status_id').val(query);
             dataTable.draw();
         }
+        $scope.getFromDateData = function(query) {
 
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+
+            $('#to_date').val(query);
+            dataTable.draw();
+        }
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
             $('#status_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             dataTable.draw();
         }
         // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification One</h3>');
@@ -107,48 +127,77 @@ app.component('eyatraTripClaimVerificationOneView', {
         self.eyatra_trip_claim_verification_one_lodging_attachment_url = eyatra_trip_claim_verification_one_lodging_attachment_url;
         self.eyatra_trip_claim_verification_one_boarding_attachment_url = eyatra_trip_claim_verification_one_boarding_attachment_url;
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url = eyatra_trip_claim_verification_one_local_travel_attachment_url;
+        self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
+        
         $http.get(
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/trip/claim/verification1/list')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/trip/claim/verification1/list')
                 $scope.$apply()
                 return;
             }
-            console.log(response.data.trip.lodgings.city);
             self.trip = response.data.trip;
+            self.gender = (response.data.trip.employee.gender).toLowerCase();
             self.travel_cities = response.data.travel_cities;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.travel_dates = response.data.travel_dates;
-            self.transport_total_amount = response.data.transport_total_amount;
-            self.lodging_total_amount = response.data.lodging_total_amount;
-            self.boardings_total_amount = response.data.boardings_total_amount;
-            self.local_travels_total_amount = response.data.local_travels_total_amount;
-            self.total_amount = response.data.total_amount;
+            // self.transport_total_amount = response.data.transport_total_amount;
+            // self.lodging_total_amount = response.data.lodging_total_amount;
+            // self.boardings_total_amount = response.data.boardings_total_amount;
+            // self.local_travels_total_amount = response.data.local_travels_total_amount;
+            self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
+            self.trip_justify = response.data.trip_justify;
             if (self.trip.advance_received) {
-                if (self.total_amount > self.trip.advance_received) {
-                    self.pay_to_employee = (self.total_amount - self.trip.advance_received);
+                if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {
+                    self.pay_to_employee = (parseInt(self.total_amount) - parseInt(self.trip.advance_received)).toFixed(2);
                     self.pay_to_company = '0.00';
-                } else if (self.total_amount < self.trip.advance_received) {
+                } else if (parseInt(self.total_amount) < parseInt(self.trip.advance_received)) {
                     self.pay_to_employee = '0.00';
-                    self.pay_to_company = (self.total_amount - self.trip.advance_received);
+                    self.pay_to_company = (parseInt(self.trip.advance_received) - parseInt(self.total_amount)).toFixed(2);
                 } else {
                     self.pay_to_employee = '0.00';
                     self.pay_to_company = '0.00';
                 }
             } else {
-                self.pay_to_employee = self.total_amount;
+                self.pay_to_employee = parseInt(self.total_amount).toFixed(2);
                 self.pay_to_company = '0.00';
             }
             $rootScope.loading = false;
 
         });
 
+        //TOOLTIP MOUSEOVER
+        // $(document).on('mouseover', ".attachment_tooltip", function() {
+        //     var $this = $(this);
+        //     $this.tooltip({
+        //         title: $this.attr('data-title'),
+        //         placement: "top"
+        //     });
+        //     $this.tooltip('show');
+        // });
+        $(document).on('mouseover', ".separate-file-attachment", function() {
+            var $this = $(this);
+
+            if (this.offsetWidth <= this.scrollWidth && !$this.attr('title')) {
+                $this.tooltip({
+                    title: $this.children().children(".attachment-file-name").text(),
+                    placement: "top"
+                });
+                $this.tooltip('show');
+            }
+        });
 
         $scope.searchRejectedReason;
         $scope.clearSearchRejectedReason = function() {
@@ -168,20 +217,35 @@ app.component('eyatraTripClaimVerificationOneView', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trips Claim Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#trip-claim-modal-approve-one').modal('hide');
-                    $location.path('/eyatra/trip/claim/verification1/list')
-                    $scope.$apply()
+                    setTimeout(function() {
+                        $location.path('/trip/claim/verification1/list')
+                        $scope.$apply()
+                    }, 500);
+
                 }
 
             });
@@ -215,17 +279,22 @@ app.component('eyatraTripClaimVerificationOneView', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                new Noty({
+                                $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
                                     text: 'Trips Claim Rejected successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
                                 }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
                                 $('#trip-claim-modal-reject-one').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/trip/claim/verification1/list')
+                                    $location.path('/trip/claim/verification1/list')
                                     $scope.$apply()
                                 }, 500);
-
                             }
                         })
                         .fail(function(xhr) {
@@ -235,6 +304,9 @@ app.component('eyatraTripClaimVerificationOneView', {
                 },
             });
         });
+
+        /* Tooltip */
+        $('[data-toggle="tooltip"]').tooltip();
 
 
         /* Pane Next Button */

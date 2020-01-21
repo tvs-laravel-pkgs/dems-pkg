@@ -12,18 +12,20 @@ class PettyCashEmployeeDetails extends Model {
 	public $timestamps = false;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'petty_cash_id',
 		'expence_type',
+		'petty_cash_type',
 		'date',
 		'purpose_id',
 		'travel_mode_id',
 		'from_place',
 		'to_place',
-		'from_KM_reading',
-		'to_KM_reading',
+		'from_km',
+		'to_km',
 		'amount',
 		'tax',
+		'remarks',
 		'details',
 		'created_by',
 	];

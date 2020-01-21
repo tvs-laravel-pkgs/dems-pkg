@@ -3,8 +3,9 @@
 app.component('eyatraAgentRequestForm', {
     templateUrl: agent_request_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
+        //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/agent/requests')
+            $location.path('/agent/requests')
             $scope.$apply()
             return;
         }
@@ -15,29 +16,45 @@ app.component('eyatraAgentRequestForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
+
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/agent/requests')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/agent/requests')
                 $scope.$apply()
                 return;
             }
             if (!response.data.trip.visits || response.data.trip.visits.length == 0) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/agent/requests')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/agent/requests')
                 $scope.$apply()
                 return;
             }
+            // console.log(response.data.trip);
             self.trip = response.data.trip;
 
             self.travel_mode_list = response.data.travel_mode_list;
+            self.attachments = response.data.attachments;
+            //console.log(response.data.attachments);
             self.action = response.data.action;
             $rootScope.loading = false;
 
@@ -82,20 +99,32 @@ app.component('eyatraAgentRequestForm', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trip Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#approval_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -118,20 +147,32 @@ app.component('eyatraAgentRequestForm', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trip Rejected Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#reject_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -174,7 +215,7 @@ app.component('eyatraAgentRequestForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -183,12 +224,18 @@ app.component('eyatraAgentRequestForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Trip saves successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/trips')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/trips')
                             $scope.$apply()
                         }
                     })

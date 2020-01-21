@@ -3,6 +3,7 @@ app.component('eyatraAgents', {
     controller: function(HelperService, $rootScope, $scope, $http, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-agent-add');
         var dataTable = $('#agent_list').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -51,7 +52,8 @@ app.component('eyatraAgents', {
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#agent_list_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $http.get(
             agents_filter_url
         ).then(function(response) {
@@ -95,20 +97,32 @@ app.component('eyatraAgents', {
                 agent_delete_url + '/' + id,
             ).then(function(response) {
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Agent Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                     $('#agent_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('/eyatra/agents');
+                    $location.path('/agents');
                     // $scope.$apply();
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Agent not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 }
             });
         }
@@ -125,27 +139,34 @@ app.component('eyatraAgentForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $('#on_focus').focus();
         $http.get(
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/agents')
-                $scope.$apply()
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/agents');
+                $scope.$apply();
                 return;
             }
             self.agent = response.data.agent;
             self.address = response.data.address;
+
             self.user = response.data.user;
             self.extras = response.data.extras;
             travel_list = response.data.travel_list;
             self.action = response.data.action;
-            console.log(response.data.agent);
-            //console.log(response.data.agent.code);
+
             if (response.data.agent.payment_mode_id == null || !response.data.agent.payment_mode_id) {
                 self.agent.payment_mode_id = 3244;
             }
@@ -157,19 +178,23 @@ app.component('eyatraAgentForm', {
                 } else {
                     self.switch_value = 'Inactive';
                 }
-                if (self.user.force_password_change == 1) {
+
+                self.switch_password = 'No';
+                $("#hide_password").hide();
+
+                /*if (self.user.force_password_change == 1) {
                     self.switch_password = 'Yes';
                     $("#hide_password").show();
                     $("#password").prop('disabled', false);
                 } else {
                     self.switch_password = 'No';
-                }
+                    $("#hide_password").hide();
+                }*/
 
                 //$scope.selectPaymentMode(self.agent.payment_mode_id);
 
-                if($('.travelcheckbox:checked').length == $('.travelcheckbox').length)
-                {
-                  $('#travel_mode').prop('checked', true);
+                if ($('.travelcheckbox:checked').length == $('.travelcheckbox').length) {
+                    $('#travel_mode').prop('checked', true);
                 }
 
             } else {
@@ -198,7 +223,19 @@ app.component('eyatraAgentForm', {
                 $('.travelcheckbox').prop('checked', false);
             }
         });
-        
+
+        $(document).on('click', '.travelcheckbox', function() {
+            var cheked_count = 0;
+            $.each($('.travelcheckbox'), function() {
+                cheked_count = $('.travelcheckbox:checked').length;
+            });
+            if (cheked_count > 0) {
+                $('#travel_mode').prop('checked', true);
+            } else {
+                $('#travel_mode').prop('checked', false);
+            }
+
+        });
         //SELECT PAYMENT MODE
         // $scope.selectPaymentMode = function(payment_id) {
         //     if (payment_id == 3244) { //BANK
@@ -293,6 +330,8 @@ app.component('eyatraAgentForm', {
             errorPlacement: function(error, element) {
                 if (element.attr('name') == 'travel_mode[]') {
                     error.appendTo($('.travel_mode_error'));
+                } else if (element.hasClass('agent_password_check')) {
+                    error.appendTo($('.password_error'));
                 } else {
                     error.insertAfter(element)
                 }
@@ -390,6 +429,7 @@ app.component('eyatraAgentForm', {
                     maxlength: 50,
                     minlength: 3,
                 },
+
                 'account_number': {
                     required: function(element) {
                         if ($("#bank").is(':checked')) {
@@ -400,8 +440,11 @@ app.component('eyatraAgentForm', {
                     },
                     maxlength: 20,
                     minlength: 3,
-                    positiveNumber: true,
+                    min: 1,
+                    number: true,
+                    // positiveNumber: true,
                 },
+
                 'ifsc_code': {
                     required: function(element) {
                         if ($("#bank").is(':checked')) {
@@ -410,7 +453,7 @@ app.component('eyatraAgentForm', {
                             return false;
                         }
                     },
-                    maxlength: 10,
+                    maxlength: 15,
                     minlength: 3,
                 },
                 'check_favour': {
@@ -492,11 +535,14 @@ app.component('eyatraAgentForm', {
 
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: 'You have errors,Please check all tabs'
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
             },
             submitHandler: function(form) {
 
@@ -519,13 +565,19 @@ app.component('eyatraAgentForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/agents')
-                            $scope.$apply()
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $location.path('/agents');
+                            $scope.$apply();
                         }
                     })
                     .fail(function(xhr) {

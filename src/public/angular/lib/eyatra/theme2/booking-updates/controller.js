@@ -55,7 +55,7 @@ app.component('eyatraTripBookingUpdatesForm', {
     templateUrl: booking_updates_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         if (typeof($routeParams.visit_id) == 'undefined') {
-            $location.path('/eyatra/trip/booking-updates')
+            $location.path('/trip/booking-updates')
             $scope.$apply()
             return;
         }
@@ -67,12 +67,18 @@ app.component('eyatraTripBookingUpdatesForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/trips')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/trips')
                 $scope.$apply()
                 return;
             }
@@ -82,11 +88,17 @@ app.component('eyatraTripBookingUpdatesForm', {
             $rootScope.loading = false;
         });
 
+        $('input[type="file"]').imageuploadify();
+
 
         var form_id = '#visit-booking-update-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
-                error.insertAfter(element)
+                if (element.attr('name') == 'attachment') {
+                    error.appendTo($('.attachment_error'));
+                } else {
+                    error.insertAfter(element)
+                }
             },
             ignore: '',
             rules: {
@@ -103,9 +115,11 @@ app.component('eyatraTripBookingUpdatesForm', {
                     number: true,
                 },
                 'tax': {
-                    required: true,
                     maxlength: 10,
                     number: true,
+                },
+                'attachment': {
+                    required: true,
                 },
             },
             submitHandler: function(form) {
@@ -130,12 +144,18 @@ app.component('eyatraTripBookingUpdatesForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Booking details updated successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/trip/view/' + trip_id)
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/trip/view/' + trip_id)
                             $scope.$apply()
                         }
                     })

@@ -9,7 +9,7 @@ class LocalTravel extends Model {
 	use SoftDeletes;
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'trip_id',
 		'mode_id',
 		'city_id',

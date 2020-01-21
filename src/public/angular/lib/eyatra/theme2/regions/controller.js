@@ -3,11 +3,12 @@ app.component('eyatraRegions', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-region-add');
 
         $http.get(
             region_filter_data_url
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.state_list = response.data.state_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -52,12 +53,9 @@ app.component('eyatraRegions', {
             }
         });
         $('.dataTables_length select').select2();
-        /*$('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Regions</p><h3 class="title">Regions</h3>');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/region/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-region\')">' +
-            'Add New' +
-            '</a>'
-        );*/
+
+        $('#eyatra_region_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('eyatra_region_table_filter');
@@ -94,17 +92,29 @@ app.component('eyatraRegions', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Region Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                     $('#delete_region').modal('hide');
                     dataTable.ajax.reload(function(json) {});
                 }
@@ -131,12 +141,18 @@ app.component('eyatraRegionForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/regions')
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/regions')
                 $scope.$apply()
                 return;
             }
@@ -151,23 +167,22 @@ app.component('eyatraRegionForm', {
             $rootScope.loading = false;
 
         });
-
+        $('#on_focus').focus();
         $scope.getStateByCountry = function(country_id) {
-            if (country_id) {
-                $.ajax({
-                        url: region_get_state_by_country,
-                        method: "POST",
-                        data: { country_id: country_id },
-                    })
-                    .done(function(res) {
-                        self.extras.state_list = [];
-                        self.extras.state_list = res.state_list;
-                        $scope.$apply()
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr);
-                    });
-            }
+            $.ajax({
+                    url: region_get_state_by_country,
+                    method: "POST",
+                    data: { country_id: country_id },
+                })
+                .done(function(res) {
+                    self.extras.state_list = [];
+                    self.extras.state_list = res.state_list;
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+
         }
 
 
@@ -216,7 +231,7 @@ app.component('eyatraRegionForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -225,12 +240,18 @@ app.component('eyatraRegionForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/regions')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/regions')
                             $scope.$apply()
                         }
                     })

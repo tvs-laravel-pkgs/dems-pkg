@@ -15,11 +15,17 @@ app.component('eyatraAgentBookingUpdateForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path(fall_back_url)
                 $scope.$apply()
                 return;
@@ -77,12 +83,18 @@ app.component('eyatraAgentBookingUpdateForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Booking details updated successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/trips/booking-requests/view/' + $routeParams.visit_id)
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/trips/booking-requests')
                             $scope.$apply()
                         }
                     })

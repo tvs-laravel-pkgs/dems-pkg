@@ -17,7 +17,7 @@ use Yajra\Datatables\Datatables;
 class AgentClaimController extends Controller {
 	public function listEYatraAgentClaimList(Request $r) {
 
-		$agent_claim_list = Agentclaim::select(
+		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
 			'ey_agent_claims.status_id as claim_status',
@@ -46,18 +46,18 @@ class AgentClaimController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 
-				if ($agent_claim_list->claim_status == '3024') {
+				if ($agent_claim_list->claim_status == '3522') {
 					return '
-						<a href="#!/eyatra/agent/claim/edit/' . $agent_claim_list->id . '">
+						<a href="#!/agent/claim/edit/' . $agent_claim_list->id . '">
 							<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 						</a>
-						<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
+						<a href="#!/agent/claim/view/' . $agent_claim_list->id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
 				} else {
 					return '
-						<a href="#!/eyatra/agent/claim/view/' . $agent_claim_list->id . '">
+						<a href="#!/agent/claim/view/' . $agent_claim_list->id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>';
 				}
@@ -97,7 +97,9 @@ class AgentClaimController extends Controller {
 
 			$this->data['attachment'] = [];
 
-			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'), 'trips.id as trip_id', 'visits.id as visit_id', 'visit_bookings.paid_amount', 'employees.code as employee_code',
+			$this->data['booking_list'] = $booking_list = VisitBooking::select(
+				DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.paid_amount) as total_amount'),
+				'trips.id as trip_id', 'visits.id as visit_id', 'employees.code as employee_code',
 				'users.name as employee_name', 'configs.name as status')
 				->join('visits', 'visits.id', 'visit_bookings.visit_id')
 				->join('trips', 'trips.id', 'visits.trip_id')
@@ -112,6 +114,7 @@ class AgentClaimController extends Controller {
 			$date = date('d-m-Y');
 		}
 
+		// dd($booking_list);
 		// $this->data['booking_list'] = $booking_list = VisitBooking::select(
 		// 	'visit_bookings.id',
 		// 	'type.name as type_id',
@@ -153,7 +156,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function saveEYatraAgentClaim(Request $request) {
-		// dd($request->booking_list);
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -167,13 +170,21 @@ class AgentClaimController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'invoice_number' => [
 					'required:true',
-					'unique:ey_agent_claims,invoice_number,' . $request->id . ',id,agent_id,' . Auth::user()->id,
+					'unique:ey_agent_claims,invoice_number,' . $request->id . ',id,agent_id,' . Auth::user()->entity_id,
 				],
 				'date' => "required",
 				'net_amount' => "required",
 				// 'tax' => "required",
 				// 'invoice_amount' => "required",
 			]);
+			// if ($request->invoice_number) {
+			// 	//dd($request->invoice_number);
+			// 	$agent_claim_number = AgentClaim::where('invoice_number', 'LIKE', '%' . $request->invoice_number . '%')->first();
+			// 	//dd($agent_claim_number);
+			// 	if ($agent_claim_number) {
+			// 		return response()->json(['success' => false, 'errors' => ['Invoice number already exists']]);
+			// 	}
+			// }
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
@@ -195,13 +206,13 @@ class AgentClaimController extends Controller {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$agentClaim = new Agentclaim;
+				$agentClaim = new AgentClaim;
 				$agentClaim->created_by = Auth::user()->id;
 				$agentClaim->created_at = Carbon::now();
 				$agentClaim->updated_at = NULL;
 
 			} else {
-				$agentClaim = Agentclaim::find($request->id);
+				$agentClaim = AgentClaim::find($request->id);
 				$agentClaim->updated_by = Auth::user()->id;
 				$agentClaim->updated_at = Carbon::now();
 			}
@@ -212,7 +223,7 @@ class AgentClaimController extends Controller {
 			$agentClaim->tax = $request->tax;
 			// dd($invoice_amount);
 			$agentClaim->invoice_amount = $request->invoice_amount;
-			$agentClaim->status_id = 3222;
+			$agentClaim->status_id = 3520;
 			$agentClaim->fill($request->all());
 			if ($request->invoice_amount == '' || $request->invoice_amount == null) {
 				$agentClaim->invoice_amount = $request->net_amount;
@@ -233,12 +244,12 @@ class AgentClaimController extends Controller {
 			// $visit_book = VisitBooking::whereIn('id', $request->booking_list)->update(['status_id' => 3222, 'agent_claim_id' => $agentClaim->id]);
 
 			//STORE ATTACHMENT
-			$item_images = 'agent_claim/attachments/';
+			$item_images = 'agent-claim/attachments/';
 			Storage::makeDirectory($item_images, 0777);
 			if (!empty($request->invoice_attachmet)) {
 				$attachement = $request->invoice_attachmet;
 				$name = $attachement->getClientOriginalName();
-				$attachement->move(storage_path('app/public/agent_claim/attachments/'), $name);
+				$attachement->move(storage_path('app/public/agent-claim/attachments/'), $name);
 				$attachement_vendor_claim = new Attachment;
 				$attachement_vendor_claim->attachment_of_id = 3161; //agent id from configs
 				$attachement_vendor_claim->attachment_type_id = 3200;
@@ -262,21 +273,24 @@ class AgentClaimController extends Controller {
 	}
 
 	public function viewEYatraAgentClaim($agent_claim_id) {
-		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
+		//dd('in');
+		$this->data['agent_claim_view'] = $agent_claim_view = AgentClaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')->select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
 			'ey_agent_claims.tax',
+			'configs.name as status',
 			'users.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),
 			'ey_agent_claims.invoice_amount')
 			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
+			->join('configs', 'configs.id', 'ey_agent_claims.status_id')
 			->where('users.user_type_id', 3122)
 			->where('ey_agent_claims.id', $agent_claim_id)->first();
 
-		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'),
 			'visit_bookings.id',
-			'visit_bookings.paid_amount',
+			// 'visit_bookings.paid_amount',
 			'configs.name as status',
 			'trips.number as trip',
 			'trips.id as trip_id',
@@ -299,7 +313,7 @@ class AgentClaimController extends Controller {
 	}
 
 	public function deleteEYatraAgentClaim($agent_claim_id) {
-		$agent_claim = Agentclaim::where('id', $agent_claim_id)->forceDelete();
+		$agent_claim = AgentClaim::where('id', $agent_claim_id)->forceDelete();
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim not found']]);
 		}
@@ -310,9 +324,12 @@ class AgentClaimController extends Controller {
 
 		$created_date_filter = date('Y-m-d', strtotime($r->created_date));
 		$invoice_date_filter = date('Y-m-d', strtotime($r->invoice_date));
-		$Agent_name = $r->Agent_name;
-		$Agent_status = $r->Agent_status;
-		$agent_claim_list = Agentclaim::select(
+		$agent_name = $r->Agent_name;
+		$agent_status = $r->Agent_status;
+		if (!$agent_status) {
+			$agent_status = 3520;
+		}
+		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
 			'ey_agent_claims.invoice_date',
@@ -332,14 +349,14 @@ class AgentClaimController extends Controller {
 					$query->whereDate('ey_agent_claims.created_at', '=', $created_date_filter);
 				}
 			})
-			->where(function ($query) use ($Agent_name) {
-				if ($Agent_name != Null) {
-					$query->where('ey_agent_claims.agent_id', '=', $Agent_name);
+			->where(function ($query) use ($agent_name) {
+				if ($agent_name != Null) {
+					$query->where('ey_agent_claims.agent_id', '=', $agent_name);
 				}
 			})
-			->where(function ($query) use ($Agent_status) {
-				if ($Agent_status != Null) {
-					$query->where('ey_agent_claims.status_id', '=', $Agent_status);
+			->where(function ($query) use ($agent_status) {
+				if ($agent_status != Null) {
+					$query->where('ey_agent_claims.status_id', '=', $agent_status);
 				}
 			})
 			->where(function ($query) use ($invoice_date_filter) {
@@ -360,7 +377,7 @@ class AgentClaimController extends Controller {
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/finance/agent/claim/view/' . $agent_claim_list->id . '">
+				<a href="#!/finance/agent/claim/view/' . $agent_claim_list->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
 
@@ -368,9 +385,9 @@ class AgentClaimController extends Controller {
 			->make(true);
 	}
 
-	public function filter_data() {
+	public function filterData() {
 
-		$this->data['agent_claim_data'] = $agent_claim_data = Agentclaim::select('agents.code', 'users.name', 'agents.id')
+		$this->data['agent_claim_data'] = $agent_claim_data = AgentClaim::select('agents.code', 'users.name', 'agents.id')
 			->leftJoin('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
 			->where('users.user_type_id', 3122)
@@ -378,13 +395,14 @@ class AgentClaimController extends Controller {
 			->orderBy('ey_agent_claims.id', 'desc')
 			->get();
 		$this->data['status'] = $status = Config::select('name', 'id')
-			->where('config_type_id', '=', 512)
+			->where('config_type_id', '=', 530)
 			->get();
 
 		return response()->json($this->data);
 	}
 	public function viewEYatraFinanceAgentClaim($agent_claim_id) {
-		$this->data['agent_claim_view'] = $agent_claim_view = Agentclaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')
+		//dd('test');
+		$this->data['agent_claim_view'] = $agent_claim_view = AgentClaim::join('agents', 'agents.id', 'ey_agent_claims.agent_id')
 			->join('configs', 'configs.id', 'ey_agent_claims.status_id')->select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.invoice_number',
@@ -398,9 +416,9 @@ class AgentClaimController extends Controller {
 			->leftJoin('users', 'users.entity_id', 'ey_agent_claims.agent_id')
 			->where('users.user_type_id', 3122)->first();
 
-		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
+		$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)as paid_amount'),
 			'visit_bookings.id',
-			'visit_bookings.paid_amount',
+			//'visit_bookings.paid_amount',
 			'configs.name as status',
 			'trips.number as trip',
 			'trips.id as trip_id',
@@ -431,7 +449,6 @@ class AgentClaimController extends Controller {
 		return response()->json($this->data);
 	}
 	public function payAgentClaimRequest(Request $r) {
-
 		$agent_claim = AgentClaim::find($r->agent_claim_id);
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim Request not found']]);
@@ -447,14 +464,100 @@ class AgentClaimController extends Controller {
 		// $payment->payment_mode_id = $agent_claim->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
+
+		$agent_claim->payment_id = $payment->id;
+		$agent_claim->save();
+
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
-		$activity['details'] = NULL;
+		$activity['details'] = "Claim is paid by Cashier";
 		$activity['activity'] = "paid";
 		$activity_log = ActivityLog::saveLog($activity);
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);
 	}
+
+	//Booking View
+	public function bookingViewFormData($trip_id) {
+		$trip = Trip::with([
+			'agentVisits',
+			'agentVisits.fromCity',
+			'agentVisits.toCity',
+			'agentVisits.travelMode',
+			'agentVisits.bookingMethod',
+			'agentVisits.bookingStatus',
+			'agentVisits.bookings',
+			'agentVisits.bookings.attachments',
+			'agentVisits.bookings.travelMode',
+			'agentVisits.bookings.bookingMode',
+			'agentVisits.agent',
+			'agentVisits.status',
+			'agentVisits.managerVerificationStatus',
+			'employee',
+			'employee.user',
+			'employee.grade',
+			'employee.designation',
+			'purpose',
+			'status',
+		])
+			->find($trip_id);
+
+		if (!$trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+
+		$age = '--';
+		// dd(date('Y', strtotime($trip->employee->date_of_birth)));
+		if ($trip->employee) {
+			$age = date('Y') - date('Y', strtotime($trip->employee->date_of_birth));
+		}
+		$visits = $trip->visits;
+		$trip_status = 'not_booked';
+		$ticket_amount = 0;
+		$service_charge = 0;
+		$total_amount = 0;
+		foreach ($visits as $key => $value) {
+			if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062) {
+				$trip_status = 'booked';
+			}
+		}
+		if ($trip_status == 'booked') {
+			$visits = Trip::select(DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.service_charge) as service_charge'))
+				->join('visits', 'trips.id', 'visits.trip_id')
+				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+				->where('visits.booking_method_id', 3042)
+			// ->where('visit_bookings.created_by', Auth::user()->id)
+				->where('visits.trip_id', $trip_id)
+				->groupBy('visits.trip_id')
+				->first();
+
+			if ($visits) {
+				$ticket_amount = $visits->amount + $visits->tax;
+				$service_charge = $visits->service_charge;
+				$total_amount = $visits->paid_amount;
+			}
+
+		}
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
+		$trip->start_date = $start_date->start_date;
+		$trip->end_date = $end_date->end_date;
+		$trip->days = $days->days;
+		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::agentTravelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
+		$this->data['booking_mode_list'] = $booking_mode_list = collect(Entity::bookingModeList())->prepend(['id' => '', 'name' => 'Select Booking Method']);
+		$this->data['trip'] = $trip;
+		$this->data['age'] = $age;
+		$this->data['trip_status'] = $trip_status;
+		$this->data['total_amount'] = $total_amount;
+		$this->data['ticket_amount'] = $ticket_amount;
+		$this->data['service_charge'] = $service_charge;
+		$this->data['attach_path'] = url('storage/app/public/visit/booking-updates/attachments/');
+		$this->data['success'] = true;
+		return response()->json($this->data);
+	}
+	//End
+
 	public function rejectAgentClaimRequest(Request $r) {
 
 		$agent_claim = AgentClaim::find($r->agent_claim_view_id);
@@ -463,11 +566,11 @@ class AgentClaimController extends Controller {
 		}
 		$agent_claim->rejection_id = $r->reject_id;
 		$agent_claim->rejection_remarks = $r->remarks;
-		$agent_claim->status_id = 3024;
+		$agent_claim->status_id = 3522;
 		$agent_claim->save();
 		$activity['entity_id'] = $agent_claim->id;
 		$activity['entity_type'] = 'Agent';
-		$activity['details'] = NULL;
+		$activity['details'] = "Agent claim is rejected by Cashier";
 		$activity['activity'] = "reject";
 		$activity_log = ActivityLog::saveLog($activity);
 

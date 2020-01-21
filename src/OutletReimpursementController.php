@@ -3,29 +3,33 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
-use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCountry;
-use Uitoux\EYatra\ReimbursementTranscations;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
-use Validator;
+use Uitoux\EYatra\ReimbursementTranscation;
 use Yajra\Datatables\Datatables;
 
 class OutletReimpursementController extends Controller {
 	public function listOutletReimpursement(Request $r) {
-		$outlets = Outlet::withTrashed()->join('employees', 'employees.id', 'outlets.cashier_id')
+		$outlets = Outlet::withTrashed()
 			->select(
 				'outlets.id as outlet_id',
 				'outlets.code as outlet_code',
 				'outlets.name as outlet_name',
-				'outlets.reimbursement_amount as amount',
-				'employees.name as cashier_name',
+				DB::raw('IF((outlets.reimbursement_amount) IS NULL,"---",outlets.reimbursement_amount) as amount'),
+				'users.name as cashier_name',
 				'employees.code as cashier_code'
 			)
+			->join('employees', 'employees.id', 'outlets.cashier_id')
+			->leftjoin('users', function ($join) {
+				$join->on('users.entity_id', '=', 'employees.id')
+					->where('users.user_type_id', 3121);
+			})
+			->where('outlets.company_id', Auth::user()->company_id)
 			->orderBy('outlets.name', 'asc');
 
 		return Datatables::of($outlets)
@@ -37,10 +41,17 @@ class OutletReimpursementController extends Controller {
 				$img2_active = asset('public/img/content/table/eye-active.svg');
 				$img3 = asset('public/img/content/table/delete-default.svg');
 				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$outlet_code_name = $outlets->outlet_code . " / " . $outlets->outlet_name;
+				$outlet_cashier_name = $outlets->cashier_code . " / " . $outlets->cashier_name;
+				$outlet_amount = $outlets->amount;
 				return '
-				<a href="#!/eyatra/outlet-reimbursement/view/' . $outlets->outlet_id . '">
+				<a href="#!/outlet-reimbursement/view/' . $outlets->outlet_id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
-				</a>';
+				</a>
+				<a href="javascript:;" data-toggle="modal" data-target="#outlet_reimpursement_modal"
+                onclick="angular.element(this).scope().outletCashTopup(' . $outlets->outlet_id . ',' . "'" . $outlet_code_name . "'" . ',' . "'" . $outlet_cashier_name . "'" . ',' . "'" . $outlet_amount . "'" . ')" dusk = "delete-btn" title="cash_topup">
+                <img src="./public/img/content/yatra/table/ico-rupee.svg"  alt="cash_topup" class="img-responsive" onmouseover=this.src="./public/img/content/yatra/table/ico-rupee-hover.svg" onmouseout=this.src="./public/img/content/yatra/table/ico-rupee.svg" >
+                </a>';
 
 			})
 			->make(true);
@@ -91,115 +102,46 @@ class OutletReimpursementController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function saveEYatraState(Request $request) {
-		//validation
-		//dd($request->all());
-		try {
-			$error_messages = [
-				'code.required' => 'State Code is required',
-				'code.unique' => 'State Code has already been taken',
-				'name.required' => 'State Name is required',
-				'name.unique' => 'State Name has already been taken',
+	public function viewEYatraOutletReimpursement($outlet_id) {
+		//dd($outlet_id);
+		/*if ($outlet_id = 'cashier') {
+			$outlet_details = Outlet::where('cashier_id', Auth::user()->entity_id)->select('id')->first();
+			$outlet_id = $outlet_details->id;
 
-			];
-
-			$validator = Validator::make($request->all(), [
-				'code' => [
-					'required',
-					'unique:nstates,code,' . $request->id . ',id,country_id,' . $request->country_id,
-					'max:2',
-				],
-				'name' => [
-					'required',
-					'unique:nstates,name,' . $request->id . ',id,country_id,' . $request->country_id,
-					'max:191',
-				],
-
-			], $error_messages);
-			if ($validator->fails()) {
-				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			}
-
-			DB::beginTransaction();
-			if (!$request->id) {
-				$state = new NState;
-				$state->created_by = Auth::user()->id;
-				$state->created_at = Carbon::now();
-				$state->updated_at = NULL;
-
-			} else {
-				$state = NState::withTrashed()->where('id', $request->id)->first();
-
-				$state->updated_by = Auth::user()->id;
-				$state->updated_at = Carbon::now();
-
-				$state->travelModes()->sync([]);
-			}
-			if ($request->status == 'Active') {
-				$state->deleted_at = NULL;
-				$state->deleted_by = NULL;
-			} else {
-				$state->deleted_at = date('Y-m-d H:i:s');
-				$state->deleted_by = Auth::user()->id;
-
-			}
-
-			$state->fill($request->all());
-			$state->save();
-
-			//SAVING state_agent_travel_mode
-			if (count($request->travel_modes) > 0) {
-				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
-					if (!isset($pivot_data['agent_id'])) {
-						continue;
-					}
-					if (!isset($pivot_data['service_charge'])) {
-						continue;
-					}
-					$state->travelModes()->attach($travel_mode, $pivot_data);
-				}
-			}
-
-			DB::commit();
-			$request->session()->flash('success', 'State saved successfully!');
-			if (empty($request->id)) {
-				return response()->json(['success' => true, 'message' => 'State Added successfully']);
-			} else {
-				return response()->json(['success' => true, 'message' => 'State Updated Successfully']);
-			}
-			return response()->json(['success' => true]);
-		} catch (Exception $e) {
-			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
-		}
-	}
-
-		public function viewEYatraOutletReimpursement($outlet_id) {
-			//dd($outlet_id);
-			$reimpurseimpurse_transactions=ReimbursementTranscations::select(
+		}*/
+		$reimpurseimpurse_transactions = ReimbursementTranscation::select(
 			DB::raw('DATE_FORMAT(transaction_date,"%d/%m/%Y") as date'),
 			'amount',
 			'balance_amount',
-			'configs.name as description'
-			)
-			->join('configs','configs.id','reimbursement_transcations.transcation_id')
-			->where('outlet_id',$outlet_id)
+			'configs.name as description',
+			'transcation_id',
+			DB::raw('IF(petty_cash_id IS NULL,"NULL",petty_cash_id) as petty_cash_id')
+		)
+			->join('configs', 'configs.id', 'reimbursement_transcations.transcation_id')
+			->where('reimbursement_transcations.outlet_id', $outlet_id)
+			->orderBy('reimbursement_transcations.id', 'DESC')
 			->get();
-			//dd($reimpurseimpurse_transactions);
-			$reimpurseimpurse_outlet_data=Outlet::select(
+		// dd($reimpurseimpurse_transactions);
+		$reimpurseimpurse_outlet_data = Outlet::select(
 			'outlets.name as outlet_name',
 			'outlets.code as outlet_code',
-			'employees.name as cashier_name',
+			'users.name as cashier_name',
+			'employees.code as cashier_code',
 			'outlets.reimbursement_amount as reimbursement_amount'
-			)
-			->join('employees','employees.id','outlets.cashier_id')
-			->where('outlets.id',$outlet_id)
+		)
+			->join('employees', 'employees.id', 'outlets.cashier_id')
+			->join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('outlets.id', $outlet_id)
 			->first();
-			$this->data['reimpurseimpurse_transactions'] = $reimpurseimpurse_transactions;
-			$this->data['reimpurseimpurse_outlet_data'] = $reimpurseimpurse_outlet_data;
-			$this->data['success'] = true;
-			return response()->json($this->data);
-		}
+		// dd($reimpurseimpurse_outlet_data);
+		$this->data['reimpurseimpurse_transactions'] = $reimpurseimpurse_transactions;
+		$this->data['reimpurseimpurse_outlet_data'] = $reimpurseimpurse_outlet_data;
+		$this->data['reimbursement_amount'] = '₹ ' . IND_money_format($reimpurseimpurse_outlet_data->reimbursement_amount);
+
+		$this->data['success'] = true;
+		return response()->json($this->data);
+	}
 
 	public function deleteEYatraState($state_id) {
 		$state = Nstate::withTrashed()->where('id', $state_id)->first();
@@ -209,8 +151,77 @@ class OutletReimpursementController extends Controller {
 		}
 		return response()->json(['success' => true]);
 	}
+	public function cashTopUp(Request $request) {
+		//dd($request->all());
+		DB::beginTransaction();
+		if (isset($request->id)) {
+			$outlet = Outlet::Where('id', $request->id)->first();
+			$reimbursement_amount = $outlet->reimbursement_amount;
+			$outlet->reimbursement_amount = $reimbursement_amount + $request->topup_amount;
+			$outlet->save();
+			$reimbursement_transaction = new ReimbursementTranscation;
+			$reimbursement_transaction->company_id = Auth::user()->company_id;
+			$reimbursement_transaction->outlet_id = $outlet->id;
+			$reimbursement_transaction->transcation_id = 3271;
+			$reimbursement_transaction->transaction_date = date('Y-m-d', strtotime($request->transaction_date));
+			$reimbursement_transaction->transcation_type = 3271;
+			$reimbursement_transaction->amount = $request->topup_amount;
+			$reimbursement_transaction->balance_amount = $reimbursement_amount + $request->topup_amount;
+			$reimbursement_transaction->save();
+
+		}
+		DB::commit();
+
+		if (!$request->id) {
+			return response()->json(['success' => false, 'error' => ['Outlet not found']]);
+		}
+		return response()->json(['success' => true]);
+	}
 	public function getStateList(Request $request) {
 		return NState::getList($request->country_id);
+	}
+
+	//CASHIER
+	public function listCashierOutletReimpursement(Request $r) {
+		$outlets = Outlet::withTrashed()
+			->select(
+				'outlets.id as outlet_id',
+				'outlets.code as outlet_code',
+				'outlets.name as outlet_name',
+				DB::raw('IF((outlets.reimbursement_amount) IS NULL,"---",outlets.reimbursement_amount) as amount'),
+				'users.name as cashier_name',
+				'employees.code as cashier_code'
+			)
+			->join('employees', 'employees.id', 'outlets.cashier_id')
+			->leftjoin('users', function ($join) {
+				$join->on('users.entity_id', '=', 'employees.id')
+					->where('users.user_type_id', 3121);
+			})
+
+			->where('outlets.cashier_id', Auth::user()->entity_id)
+			->where('outlets.company_id', Auth::user()->company_id)
+		// ->groupby('outlets.id')
+			->orderBy('outlets.name', 'asc');
+
+		return Datatables::of($outlets)
+			->addColumn('action', function ($outlets) {
+
+				$img1 = asset('public/img/content/table/edit-yellow.svg');
+				$img2 = asset('public/img/content/table/eye.svg');
+				$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
+				$img2_active = asset('public/img/content/table/eye-active.svg');
+				$img3 = asset('public/img/content/table/delete-default.svg');
+				$img3_active = asset('public/img/content/table/delete-active.svg');
+				$outlet_code_name = $outlets->outlet_code . " / " . $outlets->outlet_name;
+				$outlet_cashier_name = $outlets->cashier_code;
+				$outlet_amount = $outlets->amount;
+				return '
+				<a href="#!/outlet-reimbursement/view/' . $outlets->outlet_id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive action" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '">
+				</a>';
+
+			})
+			->make(true);
 	}
 
 }

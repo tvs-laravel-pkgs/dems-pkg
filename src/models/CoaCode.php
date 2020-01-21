@@ -10,7 +10,7 @@ class CoaCode extends Model {
 	protected $table = 'coa_codes';
 
 	protected $fillable = [
-		'id',
+		// 'id',
 		'number',
 		'account_description',
 		'account_types',

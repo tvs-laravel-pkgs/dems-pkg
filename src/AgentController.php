@@ -6,9 +6,11 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Address;
 use Uitoux\EYatra\Agent;
+use Uitoux\EYatra\ChequeDetail;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\NCountry;
@@ -49,11 +51,12 @@ class AgentController extends Controller {
 		} else {
 			$tm = null;
 		}
-		if (!empty($r->status)) {
-			$status = $r->status;
+		if (!empty($r->status_id)) {
+			$status = $r->status_id;
 		} else {
 			$status = null;
 		}
+		// dd($status);
 
 		$agent_list = Agent::withTrashed()->select(
 			'agents.id',
@@ -97,18 +100,23 @@ class AgentController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/agent/edit/' . $agent->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/agent/view/' . $agent->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#agent_confirm_box"
-				onclick="angular.element(this).scope().deleteAgentConfirm(' . $agent->id . ')" dusk = "delete-btn" title="Delete">
-		              <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-		              </a>';
 
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-agent-edit')) {
+					$edit_class = "";
+				}
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-agent-delete')) {
+					$delete_class = "";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/agent/edit/' . $agent->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+				$action .= '<a href="#!/agent/view/' . $agent->id . '"><img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a> ';
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#agent_confirm_box"
+				onclick="angular.element(this).scope().deleteAgentConfirm(' . $agent->id . ')" dusk = "delete-btn" title="Delete"><img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" ></a>';
+
+				return $action;
 			})
 			->addColumn('status', function ($agent) {
 				if ($agent->status == 'In-Active') {
@@ -132,7 +140,7 @@ class AgentController extends Controller {
 			$this->data['travel_list'] = [];
 		} else {
 			$this->data['action'] = 'Edit';
-			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state', 'user')->find($agent_id);
+			$agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state', 'user', 'chequeDetail')->find($agent_id);
 
 			$user = User::where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
 			// dd($user);
@@ -149,7 +157,7 @@ class AgentController extends Controller {
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Type']);
 
 		$this->data['extras'] = [
-			'travel_mode_list' => Entity::travelModeList(),
+			'travel_mode_list' => Entity::travelModeListClaim(),
 			'country_list' => NCountry::getList(),
 
 			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($agent->address->city->state->country_id),
@@ -241,7 +249,12 @@ class AgentController extends Controller {
 				$agent->deleted_at = Carbon::now();
 			}
 			$agent->save();
-
+			//$e_name = EntityType::where('id', $request->type_id)->first();
+			$activity['entity_id'] = $agent->id;
+			$activity['entity_type'] = "Agent";
+			$activity['details'] = empty($request->id) ? "Agent is  Added" : "Agent is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//ADD ADDRESS
 			$address->address_of_id = 3161;
 			$address->entity_id = $agent->id;
@@ -281,17 +294,27 @@ class AgentController extends Controller {
 			if ($request->bank_name) {
 				$bank_detail = BankDetail::firstOrNew(['entity_id' => $agent->id]);
 				$bank_detail->fill($request->all());
-				$bank_detail->detail_of_id = 3243;
+				$bank_detail->detail_of_id = 3122;
 				$bank_detail->entity_id = $agent->id;
 				$bank_detail->account_type_id = 3243;
 				$bank_detail->save();
 			}
-
+			//CHEQUE DETAIL SAVE
+			if ($request->check_favour) {
+				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $agent->id]);
+				// $cheque_detail->fill($request->all());
+				$cheque_detail->detail_of_id = 3122;
+				$cheque_detail->entity_id = $agent->id;
+				$cheque_detail->account_type_id = 3243;
+				$cheque_detail->cheque_favour = $request->check_favour;
+				$cheque_detail->save();
+				// dd($cheque_detail);
+			}
 			//WALLET SAVE
 			if ($request->type_id) {
 				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $agent->id]);
 				$wallet_detail->fill($request->all());
-				$wallet_detail->wallet_of_id = 3243;
+				$wallet_detail->wallet_of_id = 3122;
 				$wallet_detail->save();
 			}
 
@@ -311,10 +334,10 @@ class AgentController extends Controller {
 	public function viewEYatraAgent($agent_id) {
 
 		// $this->data['agent'] = $agent = Agent::find($agent_id);
-		$this->data['agent'] = $agent = Agent::withTrashed()->with('bankDetail', 'walletDetail', 'address', 'address.city', 'address.city.state')->find($agent_id);
+		$this->data['agent'] = $agent = Agent::withTrashed()->with('chequeDetail', 'bankDetail', 'walletDetail', 'walletDetail.type', 'address', 'address.city', 'address.city.state')->find($agent_id);
 		$this->data['address'] = $address = Address::join('ncities', 'ncities.id', 'ey_addresses.city_id')
 			->join('nstates', 'nstates.id', 'ncities.state_id')
-			->join('country as c', 'c.id', 'nstates.country_id')
+			->join('countries as c', 'c.id', 'nstates.country_id')
 			->where('entity_id', $agent_id)->where('address_of_id', 3161)
 			->select('ey_addresses.*', 'ncities.name as city_name', 'nstates.name as state_name', 'c.name as country_name')
 			->first();
@@ -328,7 +351,14 @@ class AgentController extends Controller {
 	}
 
 	public function deleteEYatraAgent($agent_id) {
-		$agent = Agent::where('id', $agent_id)->forceDelete();
+
+		$agent = Agent::where('id', $agent_id)->first();
+		$activity['entity_id'] = $agent->id;
+		$activity['entity_type'] = "Agent";
+		$activity['details'] = "Agent is Deleted";
+		$activity['activity'] = "delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$agent->forceDelete();
 		if (!$agent) {
 			return response()->json(['success' => false, 'errors' => ['Agent not found']]);
 		}

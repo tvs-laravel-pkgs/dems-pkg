@@ -3,6 +3,7 @@ app.component('eyatraGrades', {
     controller: function($http, HelperService, $rootScope, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-grade-add');
         var dataTable = $('#eyatra_grade_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -31,7 +32,7 @@ app.component('eyatraGrades', {
             },
 
             columns: [
-                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'action', searchable: false, class: 'text-left' },
                 { data: 'grade_name', name: 'entities.name', searchable: true },
                 { data: 'grade_eligiblity', searchable: false },
                 { data: 'expense_count', searchable: false },
@@ -45,25 +46,19 @@ app.component('eyatraGrades', {
             }
         });
         $('.dataTables_length select').select2();
-        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Grades</p><h3 class="title">Grades</h3>');
-        // $('.add_new_button').html(
-        //     '<a href="#!/eyatra/grade/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-grade\')">' +
-        //     'Add New' +
-        //     '</a>'
-        // );
-
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
             var d = document.getElementById('eyatra_grade_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
-
+        $('#eyatra_grade_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         //Filter
         $http.get(
             grade_filter_url
         ).then(function(response) {
-            console.log(response);
+            // console.log(response);
             self.advanced_eligibility_list = response.data.advanced_eligibility_list;
             self.status_list = response.data.status_list;
             $rootScope.loading = false;
@@ -93,20 +88,32 @@ app.component('eyatraGrades', {
             $http.get(
                 grade_delete_url + '/' + $id,
             ).then(function(response) {
-                console.log(response.data);
+                // console.log(response.data);
                 if (response.data.success) {
 
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Grade Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Grade not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 }
                 $('#delete_grade').modal('hide');
                 dataTable.ajax.reload(function(json) {});
@@ -127,37 +134,62 @@ app.component('eyatraGradeForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $('#on_focus').focus();
         $http.get(
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/grades')
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/grades')
                 // $scope.$apply()
                 return;
             }
+
             self.entity = response.data.grade;
             self.extras = response.data.extras;
             self.action = response.data.action;
-            self.grade_advanced = response.data.grade_advanced;
+            self.grade_details = response.data.grade_details;
+            console.log(response.data.grade_details);
             $rootScope.loading = false;
 
             if (self.action == 'Edit') {
-                if (self.grade_advanced[0] == 1) {
-                    self.grade_advanced_value = 'Yes';
-                    // $(".grade_advanced").prop('checked', true);
-                } else {
-                    self.grade_advanced_value = 'No';
-                    // $(".grade_advanced").prop('checked', false);
+                
+                if (self.grade_details)
+                {
+                    if (self.grade_details.advanced_eligibility == 1) {
+                        self.grade_advanced_value = 'Yes';
+                        // $(".grade_advanced").prop('checked', true);
+                    } else {
+                        self.grade_advanced_value = 'No';
+                        // $(".grade_advanced").prop('checked', false);
+                    }
+                    if (self.entity.deleted_at == null) {
+                        self.switch_value = 'Active';
+                    } else {
+                        self.switch_value = 'Inactive';
+                    }
+
+                    if (self.grade_details.deviation_eligiblity == 1) {
+                        self.deviation_eligiblity = 'Yes';
+                    } else {
+                        self.deviation_eligiblity = 'No';
+                    }
                 }
-                if (self.entity.deleted_at == null) {
-                    self.switch_value = 'Active';
-                } else {
+                else
+                {
+                    self.grade_advanced_value = 'No';
                     self.switch_value = 'Inactive';
+                    self.deviation_eligiblity = 'No';
                 }
 
                 $timeout(function() {
@@ -167,11 +199,18 @@ app.component('eyatraGradeForm', {
                         $(".sub_class_" + id).addClass("required");
                         $(".sub_class_" + id).prop('required', true);
                     });
+                    // expenseCb();
+                    purposeType();
+                    travelType();
+                    localTravelType();
                 }, 500);
+
+
 
             } else {
                 self.switch_value = 'Active';
                 self.grade_advanced_value = 'Yes';
+                self.deviation_eligiblity = 'No';
             }
         });
 
@@ -182,8 +221,111 @@ app.component('eyatraGradeForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
+        /*
+        function expenseCb(){
+            
+            var cheked_count = 0;
+            $.each($('.expense_cb'), function() {
+                 cheked_count = $('.expense_cb:checked').length;
+            });
+        
+            if(cheked_count > 0){
+                $('#select_all_expense').prop('checked', true);
+            }else{
+                $('#select_all_expense').prop('checked', false);
+            } 
+        }
 
+        $(document).on('click', '.expense_cb', function() {
+            expenseCb();   
+        });
+        */
 
+        function purposeType() {
+            var cheked_count = 0;
+            $.each($('.purpose_type'), function() {
+                cheked_count = $('.purpose_type:checked').length;
+            });
+            if (cheked_count > 0) {
+                $('#select_all_purpose_type').prop('checked', true);
+            } else {
+                $('#select_all_purpose_type').prop('checked', false);
+            }
+        }
+
+        $(document).on('click', '.purpose_type', function() {
+            purposeType();
+        });
+
+        function travelType() {
+            var cheked_count = 0;
+            $.each($('.travel_type'), function() {
+                cheked_count = $('.travel_type:checked').length;
+            });
+            if (cheked_count > 0) {
+                $('#select_all_travel_type').prop('checked', true);
+            } else {
+                $('#select_all_travel_type').prop('checked', false);
+            }
+        }
+
+        $(document).on('click', '.travel_type', function() {
+            travelType();
+        });
+
+        function localTravelType() {
+            var cheked_count = 0;
+            $.each($('.local_travel_type'), function() {
+                cheked_count = $('.local_travel_type:checked').length;
+            });
+            if (cheked_count > 0) {
+                $('#select_all_local_travel_type').prop('checked', true);
+            } else {
+                $('#select_all_local_travel_type').prop('checked', false);
+            }
+
+        }
+        $(document).on('click', '.local_travel_type', function() {
+            localTravelType();
+        });
+
+        $(document).on('keypress', '.validate_decimal', function(e) {
+            var character = String.fromCharCode(e.keyCode)
+            var newValue = this.value + character;
+            if (isNaN(newValue) || hasDecimalPlace(newValue, 5)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        function hasDecimalPlace(value, x) {
+            var pointIndex = value.indexOf('.');
+            return pointIndex >= 0 && pointIndex < value.length - x;
+        }
+
+        $('.toggle_cb').on('click', function() {
+            var class_name = $(this).data('class');
+            if (event.target.checked == true) {
+                $('.' + class_name).prop('checked', true);
+            } else {
+                $('.' + class_name).prop('checked', false);
+            }
+        });
+
+        jQuery.extend(jQuery.validator.messages, {
+            min: jQuery.validator.format("Amount should be greater than 100")
+        });
+        $(document).on('keydown keyup change', '.amount_check', function(e) {
+            var keys_ids = $(this).data("eligible");
+            key_id = keys_ids.split("_");
+            if ($(this).val() < 100) {
+                $('#eligible_amount_data_' + key_id[0] + '_' + key_id[1]).attr({
+                    "min": 100
+                });
+            }
+        });
+
+        /*
         $('.toggle_cb').on('click', function() {
             var class_name = $(this).data('class');
             if (event.target.checked == true) {
@@ -200,10 +342,13 @@ app.component('eyatraGradeForm', {
                     $.each($('.' + class_name), function() {
                         $scope.getexpense_type($(this).val());
                     });
+
                 }
             }
         });
+        */
 
+        /*
         $scope.getexpense_type = function(id) {
             if (event.target.checked == true) {
                 $(".sub_class_" + id).removeClass("ng-hide");
@@ -212,16 +357,18 @@ app.component('eyatraGradeForm', {
                 $(".sub_class_" + id).prop("disabled", false);
             } else {
                 $(".sub_class_" + id).addClass("ng-hide");
-                $(".sub_class_" + id).removeClass("required");
+                $(".sub_class_" + id).removeClass("required");  
                 $(".sub_class_" + id).prop('required', false);
                 $(".sub_class_" + id).prop("disabled", true);
+                $('.sub_class_' + id).removeClass('error');
+                $('.sub_class_' + id).closest('.form-group').find('label.error').remove();
             }
         }
 
         $(document).on('click', '.expense_cb', function() {
             var id = $(this).val();
             $scope.getexpense_type(id);
-        });
+        });*/
 
         var form_id = '#grade-form';
         var v = jQuery(form_id).validate({
@@ -229,11 +376,17 @@ app.component('eyatraGradeForm', {
                 error.insertAfter(element)
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
             },
             ignore: '',
             rules: {
@@ -242,6 +395,7 @@ app.component('eyatraGradeForm', {
                     minlength: 2,
                     maxlength: 191,
                 },
+
                 'discount_percentage': {
                     required: true,
                     min: 1,
@@ -261,7 +415,7 @@ app.component('eyatraGradeForm', {
                         contentType: false,
                     })
                     .done(function(res) {
-                        console.log(res.success);
+                        // console.log(res.success);
                         if (!res.success) {
                             $('#submit').button('reset');
                             var errors = '';
@@ -270,12 +424,18 @@ app.component('eyatraGradeForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Grade Updated successfully',
+                                text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/grades')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $location.path('/grades')
                             $scope.$apply()
                         }
                     })
@@ -299,12 +459,19 @@ app.component('eyatraGradeView', {
         ).then(function(response) {
             self.entity = response.data.grade;
             self.extras = response.data.extras;
+            self.grade_details = response.data.grade_details;
             self.action = response.data.action;
             self.grade_advanced = response.data.grade_advanced;
             if (response.data.grade.deleted_at == null) {
                 self.status = 'Active';
             } else {
                 self.status = 'Inactive';
+            }
+
+            if (self.grade_details.deviation_eligiblity == 1) {
+                self.deviation_eligiblity = 'Yes';
+            } else {
+                self.deviation_eligiblity = 'No';
             }
         });
         $('.btn-nxt').on("click", function() {

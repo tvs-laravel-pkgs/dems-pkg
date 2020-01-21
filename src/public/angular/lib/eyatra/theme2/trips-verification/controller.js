@@ -38,6 +38,8 @@ app.component('eyatraTripVerifications', {
                     d.purpose_id = $('#purpose_id').val();
                     d.status_id = $('#status_id').val();
                     d.period = $('#period').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                 }
             },
 
@@ -46,9 +48,9 @@ app.component('eyatraTripVerifications', {
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
-                { data: 'start_date', name: 'v.date', searchable: true },
-                { data: 'end_date', name: 'v.date', searchable: true },
-                { data: 'cities', name: 'c.name', searchable: true },
+                { data: 'start_date', name: 'trips.start_date', searchable: true },
+                { data: 'end_date', name: 'trips.end_date', searchable: true },
+                // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'created_at', name: 'trips.created_at', searchable: true },
@@ -67,7 +69,12 @@ app.component('eyatraTripVerifications', {
             d.style.left = x.left + 'px';
         }, 500);
 
-
+        setTimeout(function() {
+            $('div[data-provide = "datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
+        }, 1000);
         $scope.getEmployeeData = function(query) {
             //alert(query);
             $('#employee_id').val(query);
@@ -81,10 +88,22 @@ app.component('eyatraTripVerifications', {
             $('#status_id').val(query);
             dataTable.draw();
         }
+        $scope.getFromDateData = function(query) {
+            // console.log(query);
+            $('#from_date').val(query);
+            dataTable.draw();
+        }
+        $scope.getToDateData = function(query) {
+            // console.log(query);
+            $('#to_date').val(query);
+            dataTable.draw();
+        }
         $scope.reset_filter = function(query) {
             $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
             $('#status_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
             dataTable.draw();
         }
         /*$('#period').on('apply.daterangepicker', function(ev, picker) {
@@ -132,7 +151,7 @@ app.component('eyatraTripVerificationForm', {
     templateUrl: trip_verification_form_template_url,
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
         if (typeof($routeParams.trip_id) == 'undefined') {
-            $location.path('/eyatra/trip/verifications')
+            $location.path('/trip/verifications')
             $scope.$apply()
             return;
         }
@@ -144,16 +163,28 @@ app.component('eyatraTripVerificationForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/trips')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $location.path('/trips')
                 $scope.$apply()
                 return;
             }
             self.trip = response.data.trip;
+            console.log(response);
+            self.advance_received = Number(response.data.trip.advance_received).toLocaleString('en-IN', {
+                maximumFractionDigits: 2,
+                style: 'currency',
+                currency: 'INR'
+            });
             self.trip_reject_reasons = response.data.trip_reject_reasons;
             self.extras = response.data.extras;
             self.action = response.data.action;
@@ -187,20 +218,32 @@ app.component('eyatraTripVerificationForm', {
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trip Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#alert-approval_modal').modal('hide');
                     $timeout(function() {
-                        $location.path('/eyatra/trip/verifications')
+                        $location.path('/trip/verifications')
                         $scope.$apply()
                     }, 500);
                 }
@@ -235,14 +278,20 @@ app.component('eyatraTripVerificationForm', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                new Noty({
+                                $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
                                     text: res.message,
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
                                 }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
                                 $('#alert-modal-approve').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/trip/verifications')
+                                    $location.path('/trip/verifications')
                                     $scope.$apply()
                                 }, 500);
 
@@ -284,14 +333,20 @@ app.component('eyatraTripVerificationForm', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                new Noty({
+                                $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
                                     text: 'Manager Rejected successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
                                 }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/eyatra/trip/verifications')
+                                    $location.path('/trip/verifications')
                                     $scope.$apply()
                                 }, 500);
 

@@ -32,11 +32,22 @@ class EYatraConfigSeeder extends Seeder {
 			515 => 'Payment of - EYatra',
 			516 => 'Advance Request Approval Statuses - EYatra',
 			517 => 'Reimbursement status - EYatra',
-			518 => 'Petty Cash - EYatra',
+			518 => 'Petty Cash Status - EYatra',
 			519 => 'Activity Log Entity Types - EYatra',
 			520 => 'Activity Log Activities - EYatra',
 			521 => 'Lodging Stay',
 			522 => 'Agent Payment Mode - EYatra',
+			523 => 'Import Type - EYatra',
+			524 => 'Import Status - EYatra',
+			525 => 'Trave Mode Category Types - EYatra',
+			526 => 'Account Type',
+			527 => 'Petty Cash Type',
+			528 => 'Advance Expense Voucher',
+			529 => 'Alternate Approver Type',
+			530 => 'Agent Claim Status',
+			531 => 'Local Trip Statuses',
+			532 => 'Local Trave Mode Category Types - EYatra',
+
 		];
 
 		$configs = [
@@ -53,10 +64,12 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Boarding Expenses',
 				'config_type_id' => 500,
 			],
-			3003 => [
-				'name' => 'Local Travel Expenses',
-				'config_type_id' => 500,
-			],
+
+			//Don't Enable - Parthi (If enable this config, it will be displayed in grade form. so i need to hide this config.Client dont want in grade form )
+			// 3003 => [
+			// 	'name' => 'Local Travel Expenses',
+			// 	'config_type_id' => 500,
+			// ],
 
 			//TRIP STATUSES
 			3020 => [
@@ -72,7 +85,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 501,
 			],
 			3023 => [
-				'name' => 'Claimed',
+				'name' => 'Claim Requested',
 				'config_type_id' => 501,
 			],
 			3024 => [
@@ -80,7 +93,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 501,
 			],
 			3025 => [
-				'name' => 'Payment Pending',
+				'name' => 'Payment Pending for Financier',
 				'config_type_id' => 501,
 			],
 			3026 => [
@@ -97,6 +110,30 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3029 => [
 				'name' => 'Senior Manager Claim Approval Pending',
+				'config_type_id' => 501,
+			],
+			3030 => [
+				'name' => 'Financier Payment Hold',
+				'config_type_id' => 501,
+			],
+			3031 => [
+				'name' => 'Payment Pending from Employee',
+				'config_type_id' => 501,
+			],
+			3032 => [
+				'name' => 'Cancelled',
+				'config_type_id' => 501,
+			],
+			3033 => [
+				'name' => 'Claim Inprogress',
+				'config_type_id' => 501,
+			],
+			3034 => [
+				'name' => 'Payment Pending',
+				'config_type_id' => 501,
+			],
+			3035 => [
+				'name' => 'Claim Approved',
 				'config_type_id' => 501,
 			],
 
@@ -121,6 +158,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3062 => [
 				'name' => 'Cancelled',
+				'config_type_id' => 503,
+			],
+			3063 => [
+				'name' => 'Tatkal',
 				'config_type_id' => 503,
 			],
 
@@ -148,7 +189,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//VISIT BOOKING TYPE
 			3100 => [
-				'name' => 'Fresh Booking',
+				'name' => 'Booking',
 				'config_type_id' => 505,
 			],
 			3101 => [
@@ -227,6 +268,18 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Agent Invoice Attachment',
 				'config_type_id' => 510,
 			],
+			3185 => [
+				'name' => 'Google Attachment',
+				'config_type_id' => 510,
+			],
+			3186 => [
+				'name' => 'Local Trip Expense',
+				'config_type_id' => 510,
+			],
+			3187 => [
+				'name' => 'Local Trip Google Attachment',
+				'config_type_id' => 510,
+			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [
@@ -236,7 +289,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//VISIT STATUSES
 			3220 => [
-				'name' => 'New',
+				'name' => 'New Requested',
 				'config_type_id' => 512,
 			],
 			3221 => [
@@ -261,6 +314,14 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3226 => [
 				'name' => 'Claim Rejected',
+				'config_type_id' => 512,
+			],
+			3227 => [
+				'name' => 'Financier Payment Hold',
+				'config_type_id' => 512,
+			],
+			3228 => [
+				'name' => 'Claim Inprogress',
 				'config_type_id' => 512,
 			],
 
@@ -310,7 +371,15 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 515,
 			],
 			3253 => [
-				'name' => 'Employee Petty Cash Claim',
+				'name' => 'Employee Petty Cash Local Conveyance Claim',
+				'config_type_id' => 515,
+			],
+			3254 => [
+				'name' => 'Employee Petty Cash Other Expense Claim',
+				'config_type_id' => 515,
+			],
+			3255 => [
+				'name' => 'Local Trip Expense Claim',
 				'config_type_id' => 515,
 			],
 
@@ -327,16 +396,24 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Rejected',
 				'config_type_id' => 516,
 			],
+			3263 => [
+				'name' => 'Export',
+				'config_type_id' => 516,
+			],
 
 			//REIMBURSEMENT HISTORY STATUS
 			3270 => [
-				'name' => 'Reimbursement Claim',
+				'name' => 'Local Conveyance Claim',
 				'config_type_id' => 517,
 			],
-			// 3271 => [
-			// 	'name' => 'Cash Topup',
-			// 	'config_type_id' => 517,
-			// ],
+			3271 => [
+				'name' => 'Cash Topup',
+				'config_type_id' => 517,
+			],
+			3272 => [
+				'name' => 'Other Expense Claim',
+				'config_type_id' => 517,
+			],
 
 			//PETTY CASH
 			3280 => [
@@ -344,7 +421,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 518,
 			],
 			3281 => [
-				'name' => 'Manager Approved',
+				'name' => 'Manager Approved', // PETTY CASH CLAIM GOES TO CASHIER
 				'config_type_id' => 518,
 			],
 			3282 => [
@@ -359,8 +436,12 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Claim Rejected',
 				'config_type_id' => 518,
 			],
+			3285 => [
+				'name' => 'Manager  Approved', // PETTY CASH CLAIM GOES TO FINANCIER
+				'config_type_id' => 518,
+			],
 
-			//ACTIVITY LOG ENTITY TYPES
+			//ACTIVITY LOG ENTITY TYPES - I
 			3300 => [
 				'name' => 'Trip',
 				'config_type_id' => 519,
@@ -402,7 +483,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 519,
 			],
 			3310 => [
-				'name' => 'City Categories',
+				'name' => 'City Category',
 				'config_type_id' => 519,
 			],
 			3311 => [
@@ -415,6 +496,33 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3313 => [
 				'name' => 'Agent Claims',
+				'config_type_id' => 519,
+			],
+			3314 => [
+				'name' => 'Rejection Reasons',
+				'config_type_id' => 519,
+			],
+
+			3315 => [
+				'name' => 'Trip Purposes',
+				'config_type_id' => 519,
+			],
+			3316 => [
+				'name' => 'COA Sub Groups',
+				'config_type_id' => 519,
+			],
+
+			3317 => [
+				'name' => 'Local Conveyance',
+				'config_type_id' => 519,
+			],
+
+			3318 => [
+				'name' => 'Other Expense',
+				'config_type_id' => 519,
+			],
+			3319 => [
+				'name' => 'Visit',
 				'config_type_id' => 519,
 			],
 
@@ -482,6 +590,226 @@ class EYatraConfigSeeder extends Seeder {
 			3341 => [
 				'name' => 'Home',
 				'config_type_id' => 521,
+			],
+
+			//IMPORT STATUS
+			3361 => [
+				'name' => 'Pending',
+				'config_type_id' => 524,
+			],
+			3362 => [
+				'name' => 'Calculating Total Records',
+				'config_type_id' => 524,
+			],
+			3363 => [
+				'name' => 'Inprogress',
+				'config_type_id' => 524,
+			],
+			3364 => [
+				'name' => 'Completed',
+				'config_type_id' => 524,
+			],
+			3365 => [
+				'name' => 'Cancelled',
+				'config_type_id' => 524,
+			],
+			3366 => [
+				'name' => 'Server Error',
+				'config_type_id' => 524,
+			],
+			3367 => [
+				'name' => 'Error',
+				'config_type_id' => 524,
+			],
+
+			//IMPORT TYPE
+			3380 => [
+				'name' => 'Employee',
+				'config_type_id' => 523,
+			],
+			3381 => [
+				'name' => 'Outlet',
+				'config_type_id' => 523,
+			],
+			3382 => [
+				'name' => 'City',
+				'config_type_id' => 523,
+			],
+			3383 => [
+				'name' => 'Grade',
+				'config_type_id' => 523,
+			],
+
+			//TRAVEL MODE CATEGORY TYPE
+			3400 => [
+				'name' => 'Own Vehicle',
+				'config_type_id' => 525,
+			],
+			// 3401 => [
+			// 	'name' => 'Own Vehicle',
+			// 	'config_type_id' => 525,
+			// ],
+			3402 => [
+				'name' => 'Not Claimable',
+				'config_type_id' => 525,
+			],
+			3403 => [
+				'name' => 'Claimable',
+				'config_type_id' => 525,
+			],
+
+			//ACCOUNT TYPE
+			3420 => [
+				'name' => 'Savings',
+				'config_type_id' => 526,
+			],
+			3421 => [
+				'name' => 'Current',
+				'config_type_id' => 526,
+			],
+
+			//PETTY CASH TYPE
+			3440 => [
+				'name' => 'Local Conveyance',
+				'config_type_id' => 527,
+			],
+			3441 => [
+				'name' => 'Other Expense',
+				'config_type_id' => 527,
+			],
+			3442 => [
+				'name' => 'Advance Expense',
+				'config_type_id' => 527,
+			],
+
+			//ADVANCE EXPENSE VOUCHER
+			//ADVANCE REQUEST
+			3460 => [
+				'name' => 'Waiting for Manager Approval',
+				'config_type_id' => 528,
+			],
+			3461 => [
+				'name' => 'Manager Approved', //ADVANCE APPROVE ID GOES TO CASHIER
+				'config_type_id' => 528,
+			],
+			3462 => [
+				'name' => 'Manager  Approved', //ADVANCE APPROVE ID GOES TO FINACIER
+				'config_type_id' => 528,
+			],
+			3463 => [
+				'name' => 'Manager Rejected',
+				'config_type_id' => 528,
+			],
+			3464 => [
+				'name' => 'Advance Amount Approved',
+				'config_type_id' => 528,
+			],
+			3465 => [
+				'name' => 'Advance Amount Rejected',
+				'config_type_id' => 528,
+			],
+			//EXPENSE
+			3466 => [
+				'name' => 'Manager Approval Pending',
+				'config_type_id' => 528,
+			],
+			3467 => [
+				'name' => 'Expense Manager Approved', //EXPENSE APPROVE ID GOES TO CASHIER
+				'config_type_id' => 528,
+			],
+			3468 => [
+				'name' => 'Expense Manager  Approved', //EXPENSE APPROVE ID GOES TO FINANCIER
+				'config_type_id' => 528,
+			],
+			3469 => [
+				'name' => 'Expense Manager Rejected',
+				'config_type_id' => 528,
+			],
+			3470 => [
+				'name' => 'Expense Claim Approved',
+				'config_type_id' => 528,
+			],
+			3471 => [
+				'name' => 'Expense Claim Rejected',
+				'config_type_id' => 528,
+			],
+
+			//ALTERNATE APPROVER TYPE
+			3480 => [
+				'name' => 'Temporary',
+				'config_type_id' => 529,
+			],
+			3481 => [
+				'name' => 'Permanent',
+				'config_type_id' => 529,
+			],
+
+			//ACTIVITY LOG ENTITY TYPES - II
+			3500 => [
+				'name' => 'Petty Cash Expense types',
+				'config_type_id' => 519,
+			],
+
+			//AGENT CLAIM STATUS
+			3520 => [
+				'name' => 'Claim Requested',
+				'config_type_id' => 530,
+			],
+			3521 => [
+				'name' => 'Paid',
+				'config_type_id' => 530,
+			],
+			3522 => [
+				'name' => 'Claim Rejected',
+				'config_type_id' => 530,
+			],
+
+			// //LOCAL TRIP STATUS
+			// 3540 => [
+			// 	'name' => 'Approval Pending',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3541 => [
+			// 	'name' => 'Manager Rejected',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3542 => [
+			// 	'name' => 'Manager Approved',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3543 => [
+			// 	'name' => 'Trip Claim Requested',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3544 => [
+			// 	'name' => 'Claim Approved by Manager',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3545 => [
+			// 	'name' => 'Claim Rejected by Manager',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3546 => [
+			// 	'name' => 'Financier Hold',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3547 => [
+			// 	'name' => 'Financier Rejected',
+			// 	'config_type_id' => 531,
+			// ],
+			// 3548 => [
+			// 	'name' => 'Paid',
+			// 	'config_type_id' => 531,
+			// ],
+
+			//TRAVEL MODE CATEGORY TYPE
+			3560 => [
+				'name' => 'Other Amount Not Eligible',
+				'config_type_id' => 532,
+			],
+			3561 => [
+				'name' => 'Other Amount Eligible',
+				'config_type_id' => 532,
 			],
 		];
 

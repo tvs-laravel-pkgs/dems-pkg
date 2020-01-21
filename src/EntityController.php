@@ -5,7 +5,9 @@ use App\EntityType;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\Entity;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -33,7 +35,7 @@ class EntityController extends Controller {
 				//'entities.updated_at',
 				DB::raw('IF(entities.updated_at IS NULL,"---",entities.updated_at) as updated_at1'),
 				DB::raw('IF(entities.deleted_at IS NULL,"---",entities.deleted_at) as deleted_at'),
-				DB::raw('IF(entities.deleted_at IS NULL,"ACTIVE","INACTIVE") as status')
+				DB::raw('IF(entities.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 
 			->join('users', 'users.id', '=', 'entities.created_by')
@@ -48,11 +50,60 @@ class EntityController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2 = asset('public/img/content/yatra/table/delete.svg');
 				$img2_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				 <a href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a>';
+				$action = '';
+
+				if ($entity->entity_type_id == 501) {
+					$edit_class = "visibility:hidden";
+					if (Entrust::can('eyatra-travel-purposes-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-travel-purposes-delete')) {
+						$delete_class = "";
+					}
+				} elseif ($entity->entity_type_id == 503) {
+					if (Entrust::can('eyatra-local-travel-modes-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-local-travel-modes-delete')) {
+						$delete_class = "";
+					}
+				} elseif ($entity->entity_type_id == 512) {
+					if (Entrust::can('eyatra-pettycash-expense-types-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-pettycash-expense-types-delete')) {
+						$delete_class = "";
+					}
+
+				} elseif ($entity->entity_type_id == 506) {
+					if (Entrust::can('eyatra-category-edit')) {
+						$edit_class = "";
+					}
+
+					$delete_class = "visibility:hidden";
+					if (Entrust::can('eyatra-category-delete')) {
+						$delete_class = "";
+					}
+
+				}
+
+				if ($entity->name == 'Local Conveyance') {
+					$edit_class = "visibility:hidden";
+					$delete_class = "visibility:hidden";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/entity/edit/' . $entity->entity_type_id . '/' . $entity->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+
+				$action .= '<a style="' . $delete_class . '" href="javascript:;"  data-toggle="modal" data-target="#delete_entity" onclick="angular.element(this).scope().deleteEntityDetail(' . $entity->id . ')" title="Delete"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
+
+				return $action;
 
 			})
 			->addColumn('status', function ($entity) {
@@ -136,10 +187,11 @@ class EntityController extends Controller {
 			}
 			$entity->save();
 			$e_name = EntityType::where('id', $request->type_id)->first();
-			//dd($e_name);
+			// dd($e_name);
 			$activity['entity_id'] = $entity->id;
 			$activity['entity_type'] = $e_name->name;
-			$activity['details'] = empty($request->id) ? $e_name->name . " Added" : $e_name->name . " updated";
+			// dd();
+			$activity['details'] = empty($request->id) ? $e_name->name . " is Added" : $e_name->name . " is updated";
 			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
 			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
@@ -155,9 +207,8 @@ class EntityController extends Controller {
 	}
 
 	public function deleteEYatraEntity($entity_id) {
-		dd('ss');
 		$entity = Entity::withTrashed()->where('id', $entity_id)->first();
-		$e_name = EntityType::where('id', $request->type_id)->first();
+		$e_name = EntityType::where('id', $entity->entity_type_id)->first();
 		$activity['entity_id'] = $entity->id;
 		$activity['entity_type'] = $e_name->name;
 		$activity['details'] = $e_name->name . " is deleted";

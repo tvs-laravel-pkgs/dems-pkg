@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra;
 
 use Auth;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -16,6 +17,7 @@ class Outlet extends Model {
 		'sbu_id',
 		'cashier_id',
 		'amount_eligible',
+		'expense_voucher_limit',
 		'amount_limit',
 		'created_by',
 
@@ -32,6 +34,9 @@ class Outlet extends Model {
 	}
 	public static function getList() {
 		return Outlet::select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
+	}
+	public static function getOutletList() {
+		return Outlet::select('id', DB::raw('CONCAT(outlets.name," / ",outlets.code)as name'))->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public function address() {

@@ -3,6 +3,8 @@ app.component('eyatraCoaCode', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-coa-codes-add');
+
         var dataTable = $('#eyatra_coa_code_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -54,8 +56,10 @@ app.component('eyatraCoaCode', {
             var d = document.getElementById('eyatra_coa_code_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
-        }, 500);
 
+        }, 500);
+        $('#eyatra_coa_code_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         //Filter
         $http.get(
             coa_code_filter_url
@@ -102,19 +106,31 @@ app.component('eyatraCoaCode', {
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Coa Code Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Coa Code not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -136,12 +152,19 @@ app.component('eyatraCoaCodeForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/coa-codes')
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+
+                $location.path('/coa-codes')
                 $scope.$apply()
                 return;
             }
@@ -154,7 +177,7 @@ app.component('eyatraCoaCodeForm', {
 
         });
 
-
+        $('#on_focus').focus();
 
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
@@ -176,11 +199,15 @@ app.component('eyatraCoaCodeForm', {
                 }
             },
             // invalidHandler: function(event, validator) {
-            //     new Noty({
-            //         type: 'error',
-            //         layout: 'topRight',
-            //         text: 'You have errors,Please check all tabs'
-            //     }).show();
+            /* $noty = //     new Noty({
+     //         type: 'error',
+     //         layout: 'topRight',
+     //         text: 'You have errors,Please check all tabs',
+
+     //     }).show();
+     setTimeout(function() {
+         $noty.close();
+     }, 1000);*/
             // },
             ignore: '',
             rules: {
@@ -231,13 +258,21 @@ app.component('eyatraCoaCodeForm', {
                 }
 
             },
-            invalidHandler: function(event, validator) {
-                new Noty({
+            /*invalidHandler: function(event, validator) {
+                $noty = new Noty({
                     type: 'error',
-                    layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    layout: 'topRight', 
+                    text: 'You have errors, Please check',
+
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    }
+
                 }).show();
-            },
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+            },*/
             submitHandler: function(form) {
 
                 let formData = new FormData($(form_id)[0]);
@@ -259,13 +294,19 @@ app.component('eyatraCoaCodeForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Coa Code saved successfully',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/coa-codes')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
+                            $location.path('/coa-codes')
                             $scope.$apply()
                         }
                     })

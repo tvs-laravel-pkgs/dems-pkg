@@ -23,7 +23,7 @@ class TripVerificationController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/trip/verification/form/' . $trip->id . '">
+				<a href="#!/trip/verification/form/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				';
@@ -50,6 +50,9 @@ class TripVerificationController extends Controller {
 			'employee',
 			'employee.user',
 			'employee.designation',
+			'employee.grade',
+			'employee.manager',
+			'employee.manager.user',
 			'purpose',
 			'status',
 		])
@@ -63,8 +66,8 @@ class TripVerificationController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
 		}
 
-		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
-		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$start_date = $trip->visits()->select(DB::raw('MIN(visits.departure_date) as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('MAX(visits.departure_date) as end_date'))->first();
 		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
 		$trip->start_date = $start_date->start_date;
 		$trip->end_date = $end_date->end_date;
@@ -80,12 +83,16 @@ class TripVerificationController extends Controller {
 	// }
 
 	public function eyatraTripVerificationFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->where('users.user_type_id', 3122)
-			->where('company_id', Auth::user()->company_id)->get();
-		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
-		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+
+		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.reporting_to_id', Auth::user()->entity_id)
+				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+
+		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);

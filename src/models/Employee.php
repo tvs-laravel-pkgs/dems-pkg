@@ -2,6 +2,8 @@
 
 namespace Uitoux\EYatra;
 use App\User;
+use Auth;
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -9,7 +11,8 @@ class Employee extends Model {
 	use SoftDeletes;
 
 	protected $fillable = [
-		'id',
+		// 'id',
+		'company_id',
 		'code',
 		'outlet_id',
 		'reporting_to_id',
@@ -20,6 +23,7 @@ class Employee extends Model {
 		'date_of_joining',
 		'aadhar_no',
 		'pan_no',
+		'self_approve',
 		'gender',
 		'date_of_birth',
 		'created_by',
@@ -47,6 +51,10 @@ class Employee extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Entity', 'grade_id');
 	}
 
+	public function grade_details() {
+		return $this->belongsTo('Uitoux\EYatra\GradeAdvancedEligiblity', 'grade_id');
+	}
+
 	public function designation() {
 		return $this->belongsTo('Uitoux\EYatra\Designation');
 	}
@@ -56,11 +64,13 @@ class Employee extends Model {
 	}
 
 	public function bankDetail() {
-		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id');
+		return $this->hasOne('Uitoux\EYatra\BankDetail', 'entity_id')->where('detail_of_id', 3121);
 	}
-
+	public function chequeDetail() {
+		return $this->hasOne('Uitoux\EYatra\ChequeDetail', 'entity_id')->where('detail_of_id', 3121);
+	}
 	public function walletDetail() {
-		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id');
+		return $this->hasOne('Uitoux\EYatra\WalletDetail', 'entity_id')->where('wallet_of_id', 3121);
 	}
 
 	public function reportingTo() {
@@ -85,6 +95,43 @@ class Employee extends Model {
 			->where('users.user_type_id', 3121)
 			->get();
 	}
+	public static function getEmployeeListBasedCompany() {
+		return Employee::select(
+			DB::raw('CONCAT(users.name," / ",employees.code) as name')
+			, 'employees.id')
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('users.company_id', Auth::user()->company_id)
+			->get();
+	}
+
+	public static function create2($company, $outlet, $admin, $faker, $manager_id = null) {
+		$emp_code = Employee::withTrashed()->select('id')->orderBy('id', 'desc')->limit(1)->first();
+		if ($emp_code) {
+			$employee_code = $emp_code->id + 1;
+			$code = "EMP" . $employee_code;
+		} else {
+			$code = 'EMP1';
+		}
+		$employee = Employee::firstOrNew([
+			'company_id' => $company->id,
+			'code' => $code,
+		]);
+		$employee->outlet_id = $outlet->id;
+		$employee->grade_id = $company->employeeGrades()->inRandomOrder()->first()->id;
+		$lob = $company->lobs()->inRandomOrder()->first();
+		$employee->sbu_id = $lob->sbus()->inRandomOrder()->first()->id;
+		$employee->designation_id = $company->designations()->inRandomOrder()->first()->id;
+		$employee->aadhar_no = $faker->creditCardNumber;
+		$employee->pan_no = $faker->swiftBicNumber;
+		$employee->gender = $faker->randomElement(['Male', 'Female']);
+		$employee->reporting_to_id = $manager_id;
+		$employee->payment_mode_id = Config::where('config_type_id', 514)->inRandomOrder()->first()->id;
+		$employee->created_by = $admin->id;
+		$employee->save();
+
+		return $employee;
+	}
 
 	public static function create($company, $code, $outlet, $admin, $faker, $manager_id = null) {
 		$employee = Employee::firstOrNew([
@@ -98,6 +145,7 @@ class Employee extends Model {
 		$employee->designation_id = $company->designations()->inRandomOrder()->first()->id;
 		$employee->aadhar_no = $faker->creditCardNumber;
 		$employee->pan_no = $faker->swiftBicNumber;
+		$employee->gender = $faker->randomElement(['Male', 'Female']);
 		$employee->reporting_to_id = $manager_id;
 		$employee->payment_mode_id = Config::where('config_type_id', 514)->inRandomOrder()->first()->id;
 		$employee->created_by = $admin->id;
@@ -130,7 +178,6 @@ class Employee extends Model {
 		return date('d-m-Y', strtotime($value));
 	}
 
-
 	public function setDateOfBirthAttribute($value) {
 		return $this->attributes['date_of_birth'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
 	}
@@ -138,7 +185,5 @@ class Employee extends Model {
 	public function getDateOfBirthAttribute($value) {
 		return date('d-m-Y', strtotime($value));
 	}
-
-
 
 }

@@ -5,6 +5,7 @@ app.component('eyatraEntityList', {
         self.hasPermission = HelperService.hasPermission;
         var dataTable;
         var id = '';
+        var add_url = '#!/entity/add/' + self.id;
         var title = '';
         $http.get(
             eyatra_entity_list_data_url + '/' + $routeParams.entity_type_id
@@ -40,10 +41,10 @@ app.component('eyatraEntityList', {
                 },
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
-                    { data: 'name', name: 'entities.name' },
-                    { data: 'created_by', name: 'users.username' },
-                    { data: 'updated_by', name: 'updater.username' },
-                    { data: 'deleted_by', name: 'deactivator.username' },
+                    { data: 'name', name: 'entities.name', searchable: true },
+                    { data: 'created_by', name: 'users.username', searchable: false },
+                    { data: 'updated_by', name: 'updater.username', searchable: false },
+                    { data: 'deleted_by', name: 'deactivator.username', searchable: false },
                     { data: 'created_at', name: 'entities.created_at', searchable: false },
                     { data: 'updated_at1', name: 'entities.updated_at', searchable: false },
                     { data: 'deleted_at', name: 'entities.deleted_at', searchable: false },
@@ -56,13 +57,57 @@ app.component('eyatraEntityList', {
             });
             $('.dataTables_length select').select2();
             $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + response.data.entity_type.name + '</p><h3 class="title">' + response.data.entity_type.name + '</h3>');
-            var add_url = '#!/eyatra/entity/add/' + self.id;
+            var add_url = '#!/entity/add/' + self.id;
             if (self.id) {
-                $('.add_new_button').html(
-                    '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
-                    'Add New' +
-                    '</a>'
-                );
+                if ($routeParams.entity_type_id == '501') {
+                    $rootScope.title = 'Trip Purpose';
+                    self.trip_add_permission = self.hasPermission('eyatra-travel-purposes-add');
+                    console.log(self.trip_add_permission);
+                    if (self.trip_add_permission) {
+                        //alert('test');
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New' +
+                            '</a>'
+                        );
+                    }
+                } else if ($routeParams.entity_type_id == '503') {
+                    $rootScope.title = 'Other Expense';
+                    self.other_add_permission = self.hasPermission('eyatra-local-travel-modes-add');
+                    console.log(self.other_add_permission);
+                    if (self.other_add_permission) {
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New' +
+                            '</a>'
+                        );
+                    }
+                } else if ($routeParams.entity_type_id == '506') {
+                    $rootScope.title = 'City Category';
+                    self.city_category_add_permission = self.hasPermission('eyatra-category-add');
+                    if (self.city_category_add_permission) {
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New' +
+                            '</a>'
+                        );
+                    }
+                } else if ($routeParams.entity_type_id == '512') {
+                    $rootScope.title = 'Petty Cash Expense Types';
+                    self.petty_cash_expense_add_permission = self.hasPermission('eyatra-pettycash-expense-types');
+                    if (self.petty_cash_expense_add_permission) {
+                        $('.add_new_button').html(
+                            '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                            'Add New' +
+                            '</a>'
+                        );
+                    }
+                }
+                /*   $('.add_new_button').html(
+                '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
+                'Add New' +
+                '</a>'
+                );*/
             }
 
             setTimeout(function() {
@@ -84,17 +129,24 @@ app.component('eyatraEntityList', {
                     console.log(response.data);
                     if (response.data.success) {
 
-                        new Noty({
+                        $noty = new Noty({
                             type: 'success',
                             layout: 'topRight',
                             text: 'Entity Detail Deleted Successfully',
+                            animation: {
+                                speed: 500 // unavailable - no need
+                            },
                         }).show();
+                        setTimeout(function() {
+                            $noty.close();
+                        }, 5000);
                     }
                     dataTable.ajax.reload(function(json) {});
 
                 });
             }
         });
+
 
         $rootScope.loading = false;
     }
@@ -114,12 +166,18 @@ app.component('eyatraEntityForm', {
         ).then(function(response) {
             //console.log(response.data);
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                 $scope.$apply()
                 return;
             }
@@ -164,14 +222,14 @@ app.component('eyatraEntityForm', {
             rules: {
                 'name': {
                     required: true,
-                    minlength: 1,
+                    minlength: 3,
                     maxlength: 191,
                 },
 
             },
             messages: {
                 'name': {
-                    minlength: 'Please enter minimum of 1 characters',
+                    minlength: 'Please enter minimum of 3 characters',
                     maxlength: 'Please enter maximum of 191 characters',
                 },
             },
@@ -196,13 +254,19 @@ app.component('eyatraEntityForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Entity Details Added Successfully',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
-                            $location.path('/eyatra/entity/list' + '/' + $routeParams.entity_type_id)
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $location.path('/entity/list' + '/' + $routeParams.entity_type_id)
                             $scope.$apply()
                         }
                     })

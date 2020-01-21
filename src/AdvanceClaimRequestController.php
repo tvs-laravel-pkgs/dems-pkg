@@ -17,18 +17,22 @@ class AdvanceClaimRequestController extends Controller {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('outlets', 'outlets.id', 'e.outlet_id')
 			->select(
 				'trips.id',
 				'trips.number',
 				'e.code as ecode',
+				'trips.start_date as start_date',
+				'trips.end_date as end_date',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
-				DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
-				DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
+				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
+				// DB::raw('DATE_FORMAT(MAX(v.departure_date),"%d/%m/%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
 				'trips.created_at',
 				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
-				'status.name as status'
+				'status.name as status',
+				'outlets.name as outlet'
 
 			)
 		// ->whereNotNull('trips.advance_received')
@@ -50,6 +54,11 @@ class AdvanceClaimRequestController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet')) {
+					$query->where("outlets.id", $r->get('outlet'))->orWhere(DB::raw("-1"), $r->get('outlet'));
+				}
+			})
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
@@ -69,7 +78,7 @@ class AdvanceClaimRequestController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-				<a href="#!/eyatra/advance-claim/request/form/' . $trip->id . '">
+				<a href="#!/advance-claim/request/form/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>
 				';
@@ -79,7 +88,6 @@ class AdvanceClaimRequestController extends Controller {
 	}
 
 	public function advanceClaimRequestFormData($trip_id) {
-
 		$trip = Trip::with([
 			'advanceRequestPayment',
 			'visits',
@@ -92,8 +100,11 @@ class AdvanceClaimRequestController extends Controller {
 			'visits.status',
 			'visits.managerVerificationStatus',
 			'employee',
-			'employee.bankDetail',
-			'employee.walletDetail',
+			'employee.user',
+			'employee.designation',
+			'employee.grade',
+			'employee.manager',
+			'employee.manager.user',
 			'purpose',
 			'status',
 		])
@@ -108,9 +119,9 @@ class AdvanceClaimRequestController extends Controller {
 
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $end_date->end_date;
+		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
+		// $trip->start_date = $start_date->start_date;
+		// $trip->end_date = $end_date->end_date;
 		$trip->days = $days->days + 1;
 		$this->data['payment_mode_list'] = $payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['wallet_mode_list'] = $wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
@@ -137,25 +148,6 @@ class AdvanceClaimRequestController extends Controller {
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
 
-		//BANK DETAIL SAVE
-		if ($r->bank_name) {
-			$bank_detail = BankDetail::firstOrNew(['entity_id' => $trip->id]);
-			$bank_detail->fill($r->all());
-			$bank_detail->detail_of_id = 3243;
-			$bank_detail->entity_id = $trip->id;
-			$bank_detail->account_type_id = 3243;
-			$bank_detail->save();
-		}
-
-		//WALLET SAVE
-		if ($r->type_id) {
-			$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $trip->id]);
-			$wallet_detail->fill($r->all());
-			$wallet_detail->wallet_of_id = 3243;
-			$wallet_detail->entity_id = $trip->id;
-			$wallet_detail->save();
-		}
-
 		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
 		return response()->json(['success' => true]);
 	}
@@ -173,12 +165,24 @@ class AdvanceClaimRequestController extends Controller {
 	}
 
 	public function eyatraAdvanceClaimFilterData() {
-		$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->where('users.user_type_id', 3121)
-			->where('employees.company_id', Auth::user()->company_id)->get();
-		$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
-		$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		/*
+			$this->data['employee_list'] = Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)->get();
+			$this->data['purpose_list'] = Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get();
+			$this->data['trip_status_list'] = Config::select('name', 'id')->where('config_type_id', 501)->get();
+		*/
+
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Purpose']);
+
+		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '', 'name' => 'Select Status']);
+
+		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Employee Code/Name']);
+
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
@@ -197,8 +201,8 @@ class AdvanceClaimRequestController extends Controller {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 		return response()->json(['success' => true]);
 	}
-	public function AdvanceClaimRequestExport(request $request) {
-		//dd($request->all());
+	public function AdvanceClaimRequestApprove(request $request) {
+
 		DB::beginTransaction();
 		try {
 			if ($request->export_ids) {
@@ -206,15 +210,29 @@ class AdvanceClaimRequestController extends Controller {
 			} else {
 				return back()->with('error', 'Trips not found');
 			}
+			$trips_status_update = Trip::whereIn('id', $trip_ids)->update(['advance_request_approval_status_id' => 3263]);
+			DB::commit();
+			return response()->json(['success' => true]);
+
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
+	}
+	public function AdvanceClaimRequestExport() {
+
+		DB::beginTransaction();
+		try {
+
 			$trips = Trip::select('users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->leftjoin('bank_details', 'bank_details.entity_id', 'employees.id')
-				->whereIn('trips.id', $trip_ids)
 				->where('users.user_type_id', 3121)
+				->leftjoin('bank_details', 'bank_details.entity_id', 'employees.id')
+				->where('trips.advance_request_approval_status_id', 3263)
 				->get();
 
-			$trips_status_update = Trip::whereIn('id', $trip_ids)->update(['advance_request_approval_status_id' => 3261]);
+			$trips_status_update = Trip::where('advance_request_approval_status_id', 3263)->update(['advance_request_approval_status_id' => 3261]);
 			DB::commit();
 			//dd($trips);
 			$trips_header = ['Employee Name', 'Employee Code', 'Account Number', 'Ifsc code', 'Amount'];

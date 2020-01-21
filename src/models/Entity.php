@@ -10,7 +10,7 @@ class Entity extends Model {
 	use SoftDeletes;
 	protected $table = 'entities';
 	protected $fillable = [
-		'id',
+		// 'id',
 		'company_id',
 		'entity_type_id',
 		'name',
@@ -32,9 +32,21 @@ class Entity extends Model {
 	public function travelModes() {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_travel_mode', 'grade_id', 'travel_mode_id');
 	}
+	public function categories() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'travel_mode_category_type', 'travel_mode_id', 'category_id');
+	}
 
+	public function local_travel_mode_categories() {
+		return $this->belongsToMany('Uitoux\EYatra\Entity', 'local_travel_mode_category_type', 'travel_mode_id', 'category_id');
+	}
+	// public function gradeEligibility() {
+	// 	return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_advanced_eligibility', 'grade_id', 'advanced_eligibility');
+	// }
+	public function travelModeCategory() {
+		return $this->hasOne('Uitoux\EYatra\Config', 'entity_id')->where('address_of_id', 3160);
+	}
 	public function gradeEligibility() {
-		return $this->belongsToMany('Uitoux\EYatra\Entity', 'grade_advanced_eligibility', 'grade_id', 'advanced_eligibility');
+		return $this->hasOne('Uitoux\EYatra\GradeAdvancedEligiblity', 'grade_id');
 	}
 
 	public static function purposeList() {
@@ -43,6 +55,20 @@ class Entity extends Model {
 
 	public static function travelModeList() {
 		return Entity::where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
+	}
+	public static function travelModeListClaim() {
+		return Entity::leftJoin('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')->where('entity_type_id', 502)->where('travel_mode_category_type.category_id', 3403)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get()->keyBy('id');
+	}
+
+	public static function agentTravelModeList() {
+		return Entity::where('entity_type_id', 502)
+			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
+			->where('travel_mode_category_type.category_id', 3403)
+			->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+	}
+
+	public static function bookingModeList() {
+		return Entity::where('entity_type_id', 518)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 
 	public static function localTravelModeList() {
@@ -56,15 +82,41 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 	public static function uiExpenceTypeListBasedPettyCash() {
-		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->where('name', 'NOT LIKE', '%Local Conveyance%')->get();
+		return Entity::where('entity_type_id', 512)->select('id', 'name')->where('company_id', Auth::user()->company_id)->where('name', 'NOT LIKE', '%Local Conveyance%')->get()->prepend(['id' => '', 'name' => 'Select Expense Type']);
+	}
+
+	public static function PettyCashTravelModeList() {
+		return Entity::where('entity_type_id', 502)
+			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
+			->where('travel_mode_category_type.category_id', 3400)
+			->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
 
 	public static function uiTravelModeList() {
 		return Entity::where('entity_type_id', 502)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}
+	public static function uiClaimTravelModeList() {
+		//$employee=Employee::where('id',Auth::user()->entity_id)->first();
+		return Entity::select('entities.id', 'entities.name')
+			->join('grade_travel_mode', 'grade_travel_mode.travel_mode_id', 'entities.id')
+			->join('employees', 'employees.grade_id', 'grade_travel_mode.grade_id')
+			->where('entities.entity_type_id', 502)
+			->where('employees.id', Auth::user()->entity_id)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
+	}
 
 	public static function uiLocaTravelModeList() {
 		return Entity::where('entity_type_id', 503)->select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
+	}
+	public static function uiClaimLocaTravelModeList() {
+		return Entity::select('entities.id', 'entities.name')
+			->join('grade_local_travel_mode', 'grade_local_travel_mode.local_travel_mode_id', 'entities.id')
+			->join('employees', 'employees.grade_id', 'grade_local_travel_mode.grade_id')
+			->where('entities.entity_type_id', 503)
+			->where('employees.id', Auth::user()->entity_id)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
 	}
 
 	public static function getGradeList() {
@@ -78,7 +130,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 505)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 	public static function cityCategoryList() {
-		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
+		return Entity::where('entity_type_id', 506)->where('company_id', Auth::user()->company_id)->select('id', 'name')->orderBy('id', 'asc')->get();
 	}
 
 	public static function accountTypeList() {
@@ -123,15 +175,40 @@ class Entity extends Model {
 
 	public static function create($sample_entities, $admin, $company) {
 		foreach ($sample_entities as $entity_type_id => $entities) {
-			foreach ($entities as $entity_name) {
-				$record = Entity::firstOrNew([
-					'entity_type_id' => $entity_type_id,
-					'company_id' => $company->id,
-					'name' => $entity_name,
-				]);
-				$record->created_by = $admin->id;
-				$record->save();
+			if ($entity_type_id == 502) {
+				foreach ($entities as $entity_name) {
+
+					$record = Entity::firstOrNew([
+						'entity_type_id' => $entity_type_id,
+						'company_id' => $company->id,
+						'name' => $entity_name,
+					]);
+					$record->created_by = $admin->id;
+					$record->save();
+
+					if ($entity_name == 'Two Wheeler') {
+						$record->categories()->sync(3400);
+					} elseif ($entity_name == 'Four Wheeler') {
+						$record->categories()->sync(3400);
+					} elseif ($entity_name == 'Office Vehicle') {
+						$record->categories()->sync(3402);
+					} else {
+						$record->categories()->sync(3403);
+					}
+				}
+
+			} else {
+				foreach ($entities as $entity_name) {
+					$record = Entity::firstOrNew([
+						'entity_type_id' => $entity_type_id,
+						'company_id' => $company->id,
+						'name' => $entity_name,
+					]);
+					$record->created_by = $admin->id;
+					$record->save();
+				}
 			}
+
 		}
 
 	}

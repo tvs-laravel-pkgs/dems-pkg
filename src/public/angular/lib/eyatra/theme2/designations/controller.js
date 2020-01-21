@@ -4,6 +4,7 @@ app.component('eyatraDesignation', {
         //alert(2)
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.permission = self.hasPermission('eyatra-designation-add');
         var dataTable = $('#eyatra_designation_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate,
@@ -37,14 +38,19 @@ app.component('eyatraDesignation', {
                 $(row).addClass('highlight-row');
             }
         });
+        $('#eyatra_designation_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $('.dataTables_length select').select2();
         $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / Designations</p><h3 class="title">Designations</h3>');
         //$('.page-header-content .display-inline-block .data-table-title').html('Designations');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/designation/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-designation\')">' +
-            'Add New' +
-            '</a>'
-        );
+        if (self.permission == true) {
+            $('.add_new_button').html(
+                '<a href="#!/designation/add" type="button" class="btn btn-secondary">' +
+                'Add New' +
+                '</a>'
+            );
+        }
+
         $scope.deleteDesignationConfirm = function(designation_id) {
             $("#delete_designation_id").val(designation_id);
         }
@@ -58,19 +64,31 @@ app.component('eyatraDesignation', {
             ).then(function(response) {
                 console.log(response.data);
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Designation Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                     dataTable.ajax.reload(function(json) {});
 
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Designation not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
                 }
             });
         }
@@ -88,16 +106,23 @@ app.component('eyatraDesignationForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        $('#on_focus').focus();
         $http.get(
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/designations')
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+                $location.path('/designations')
                 $scope.$apply()
                 return;
             }
@@ -129,7 +154,7 @@ app.component('eyatraDesignationForm', {
             messages: {
 
                 'name': {
-                    required: 'Designation name is required',
+                    // required: 'Designation name is required',
                     minlength: 'Please enter minimum of 3 letters',
                     maxlength: 'Please enter maximum of 191 letters',
                 },
@@ -156,13 +181,19 @@ app.component('eyatraDesignationForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: 'Designation saved successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                                 text: res.message,
                             }).show();
-                            $location.path('/eyatra/designations')
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $location.path('/designations')
                             $scope.$apply()
                         }
                     })

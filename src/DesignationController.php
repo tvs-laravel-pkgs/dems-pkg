@@ -5,8 +5,8 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Uitoux\EYatra\Designation;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -22,6 +22,7 @@ class DesignationController extends Controller {
 				'designations.deleted_at',
 				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
 			)
+			->where('designations.company_id', Auth::user()->company_id)
 			->orderBy('designations.id', 'asc');
 
 		return Datatables::of($designations)
@@ -32,16 +33,27 @@ class DesignationController extends Controller {
 
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/designation/edit/' . $designations->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
 
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-designation-edit')) {
+					$edit_class = "";
+				}
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-designation-delete')) {
+					$delete_class = "";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/designation/edit/' . $designations->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
+				</a> ';
+
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_state"
 				onclick="angular.element(this).scope().deleteDesignationConfirm(' . $designations->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
+				return $action;
 			})
 			->addColumn('status', function ($designations) {
 				if ($designations->deleted_at) {
@@ -76,7 +88,10 @@ class DesignationController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-		$this->data['grade_list'] = $grade_list = Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get();
+		// $this->data['grade_list'] = $grade_list = Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get();
+
+		$this->data['grade_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Grade']);
+
 		$this->data['success'] = true;
 		$this->data['designation'] = $designation;
 
@@ -97,7 +112,8 @@ class DesignationController extends Controller {
 
 				'name' => [
 					'required:true',
-					Rule::unique('designations')->ignore($request->id),
+					'unique:designations,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',grade_id,' . $request->grade_id,
+					// Rule::unique('designations')->ignore($request->id),
 				],
 			], $error_messages);
 			if ($validator->fails()) {
@@ -128,7 +144,11 @@ class DesignationController extends Controller {
 			$designation->company_id = Auth::user()->company_id;
 			$designation->fill($request->all());
 			$designation->save();
-
+			$activity['entity_id'] = $designation->id;
+			$activity['entity_type'] = "Employee Designations";
+			$activity['details'] = empty($request->id) ? "Employee Designation is  Added" : "Employee Designation is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 			$request->session()->flash('success', 'Designation saved successfully!');
 			if (empty($request->id)) {
@@ -145,6 +165,12 @@ class DesignationController extends Controller {
 
 	public function deleteEYatraDesignation($designation_id) {
 		$designation = Designation::withTrashed()->where('id', $designation_id)->first();
+		$activity['entity_id'] = $designation->id;
+		$activity['entity_type'] = "Employee Designations";
+		$activity['details'] = "Employee Designation is  deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		//$entity->forceDelete();
 		$designation->forceDelete();
 		if (!$designation) {
 			return response()->json(['success' => false, 'errors' => ['Designation not found']]);

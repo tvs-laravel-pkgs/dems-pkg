@@ -6,6 +6,7 @@ use App\Permission;
 use App\Role;
 use Auth;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Validator;
@@ -19,10 +20,14 @@ class RoleController extends Controller {
 		return Datatables::of($roles)
 			->addColumn('action', function ($roles) {
 				if ($roles->fixed_roles == 0) {
-					$img1 = asset('public/img/content/table/edit-yellow.svg');
-					$img1_active = asset('public/img/content/table/edit-yellow-active.svg');
+					$img1 = asset('public/img/content/yatra/table/edit.svg');
+					$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 
-					return '<a href="#!/eyatra/master/roles/edit/' . $roles->id . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
+					$edit_class = "visibility:hidden";
+					if (Entrust::can('eyatra-role-edit')) {
+						$edit_class = "";
+					}
+					return '<a style="' . $edit_class . '" href="#!/roles/edit/' . $roles->id . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
 					// return '<a href="' . route('editRolesAngular', ['role_id' => $roles->id]) . '" id = "" ><img src="' . $img1 . '" alt="Account Management" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a>';
 				} else {
 					return '-';
@@ -80,13 +85,13 @@ class RoleController extends Controller {
 
 	}
 	public function saveRolesAngular(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			$error_messages = [
 				'display_name.required' => 'Role name is required',
 				'display_name.unique' => 'Role name has already been taken',
 				'display_name.max' => 'Maximum length of Role name is 255',
-				'permission_id.required' => 'select atleast one page to set permission',
+				// 'permission_ids.required' => 'select atleast one page to set permission',
 			];
 			$validator = Validator::make($request->all(), [
 				'display_name' => [
@@ -94,7 +99,9 @@ class RoleController extends Controller {
 					Rule::unique('roles')->ignore($request->id),
 					'max:191',
 				],
+				// 'permission_ids' => 'required|array',
 			]);
+
 			DB::beginTransaction();
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
@@ -113,7 +120,14 @@ class RoleController extends Controller {
 			$roles->display_name = $request->display_name;
 			$roles->name = $request->display_name;
 			$roles->description = $request->description;
-			if ($request->deleted_at == "Active") {
+			/*
+				if ($request->deleted_at == "Active") {
+					$roles->deleted_at = null;
+				} else {
+					$roles->deleted_at = date('Y-m-d');
+				}
+			*/
+			if ($request->status == "Active") {
 				$roles->deleted_at = null;
 			} else {
 				$roles->deleted_at = date('Y-m-d');
@@ -122,7 +136,12 @@ class RoleController extends Controller {
 			$roles->permissions()->attach($request->permission_ids);
 			//dd($request->permission_ids);
 			DB::commit();
-			$request->session()->flash('success', 'Roles is saved successfully');
+			// $request->session()->flash('success', 'Roles is saved successfully');
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => ['Role Added Successfully']]);
+			} else {
+				return response()->json(['success' => true, 'message' => ['Role Updated Successfully']]);
+			}
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();

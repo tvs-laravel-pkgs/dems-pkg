@@ -9,7 +9,6 @@ class Visit extends Model {
 	public $timestamps = false;
 
 	protected $fillable = [
-		'id',
 		'trip_id',
 		'from_city_id',
 		'to_city_id',
@@ -18,13 +17,19 @@ class Visit extends Model {
 		'booking_status_id',
 		'agent_id',
 		'notes_to_agent',
+		// 'departure_date',
+		// 'arrival_date',
 		'status_id',
+		'prefered_departure_time',
 		'manager_verification_status_id',
 	];
 
 	protected $dates = [
 		// 'date',
 	];
+	// protected $attributes = ['departure_time', 'arrival_time'];
+
+	protected $appends = ['departure_time', 'arrival_time'];
 
 	// public function setDateAttribute($v) {
 	// 	$this->attributes['date'] = $v ? date('Y-m-d', strtotime($v)) : NULL;
@@ -34,12 +39,25 @@ class Visit extends Model {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
 	}
 
+	public function getPreferedDepartureTimeAttribute($value) {
+		return empty($value) ? '' : date('h:i A', strtotime($value));
+	}
+
 	public function getDepartureDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
 	}
 
 	public function getArrivalDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+
+	public function getDepartureTimeAttribute() {
+
+		return isset($this->attributes['departure_date']) ? date('g:i A', strtotime($this->attributes['departure_date'])) : '';
+	}
+
+	public function getArrivalTimeAttribute() {
+		return isset($this->attributes['arrival_date']) ? date('g:i A', strtotime($this->attributes['arrival_date'])) : '';
 	}
 
 	public function fromCity() {
@@ -101,7 +119,9 @@ class Visit extends Model {
 	public function attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3180)->where('attachment_type_id', 3200);
 	}
-
+	public function changeIndianMoneyFormat($value) {
+		return IND_money_format($value);
+	}
 	public static function create($trip, $src_city, $dest_city, $visit1_date, $company, $booking_method_id, $booking_status_id, $trip_status_id, $manager_verification_status_id, $employee, $faker) {
 		$visit = new Visit();
 		$visit->trip_id = $trip->id;

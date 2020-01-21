@@ -16,7 +16,7 @@ class EYatraETSeeder extends Seeder {
 			500 => 'Employee Grades',
 			501 => 'Trip Purposes',
 			502 => 'Travel Modes',
-			503 => 'Local Travel Modes',
+			503 => 'Other Expense',
 			504 => 'Lodging Stay',
 			505 => 'Employee Wallet Mode',
 			506 => 'City Category',
@@ -31,6 +31,7 @@ class EYatraETSeeder extends Seeder {
 			515 => 'COA Final Statement',
 			516 => 'COA Groups',
 			517 => 'COA Sub Groups',
+			518 => 'Railway Ticket Types',
 
 		];
 

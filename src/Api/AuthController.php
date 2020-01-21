@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
+// use Mail;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,8 +26,28 @@ class AuthController extends Controller {
 		}
 
 		if (Auth::attempt(['mobile_number' => request('username'), 'password' => request('password')])) {
-			$user = Auth::user();
 
+			$user = User::with([
+				'employee_details',
+				'employee_details.reportingTo',
+				'employee_details.reportingTo.user',
+				'employee_details.paymentMode',
+				'employee_details.grade',
+				'employee_details.designation',
+				'employee_details.bankDetail',
+				'employee_details.chequeDetail',
+				'employee_details.walletDetail',
+				'employee_details.walletDetail.type',
+				'employee_details.sbu',
+				'employee_details.sbu.lob',
+				'roles',
+			])
+				->find(Auth::user()->id);
+			// $user = Auth::user();
+
+			// $user->employee_details;
+
+			// dd($user);
 			// if (!$user->imei) {
 			// 	$user->otp = generateOtp($user->mobile);
 			// 	$user->imei = request('imei');
@@ -53,6 +74,51 @@ class AuthController extends Controller {
 		} else {
 			return response()->json(['success' => false, 'message' => 'Invalid username/password'], $this->successStatus);
 		}
+	}
+
+	public function forgotPassword(Request $request) {
+		if ($request->mobile == '') {
+			return response()->json(['status' => 'false', 'msg' => 'Enter mobile number'], $this->successStatus);
+		}
+
+		if ($request->emp_code == '') {
+			return response()->json(['status' => 'false', 'msg' => 'Enter Employee Code'], $this->successStatus);
+		}
+
+		$user = User::join('employees', 'employees.id', 'users.entity_id')->where('users.mobile_number', $request->input('mobile'))->where('users.user_type_id', 3121)->where('employees.code', $request->input('emp_code'))->select('users.*')->first();
+
+		if ($user) {
+			$sender_id = config('custom.sms_sender_id');
+			$mobile_number = $user->mobile_number;
+			$otp_no = mt_rand(100000, 999999);
+			$user->otp = $otp_no;
+			$user->save();
+			$message = "Your OTP is " . $otp_no . " to reset password in DEMS Application. Please enter OTP to verify your mobile number.";
+			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
+			$result = 1;
+			$user_id = $user->id;
+			return response()->json(['status' => 'true', 'data' => $user], $this->successStatus);
+		} else {
+			return response()->json(['status' => 'false', 'error' => 'Incorrect mobile number'], $this->successStatus);
+		}
+
+	}
+	public function changePassword(Request $request) {
+		// dump($request->all());
+		if ($request->user_id) {
+			// $user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->first();
+			$user = User::find($request->user_id);
+			// dd($user);
+			if ($user) {
+				// $user = User::where('users.entity_id', $request->input('emp_id'))->where('users.user_type_id', 3121)->update(array('password' => $request->input('password')));
+				$user->password = $request->password;
+				$user->save();
+				return response()->json(['status' => 'true', 'data' => $user], $this->successStatus);
+			} else {
+				return response()->json(['status' => 'false', 'error' => 'Invalid user name'], $this->successStatus);
+			}
+		}
+
 	}
 
 }

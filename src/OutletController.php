@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Address;
 use Uitoux\EYatra\Employee;
@@ -18,23 +19,41 @@ use Yajra\Datatables\Datatables;
 class OutletController extends Controller {
 	public function listEYatraOutlet(Request $r) {
 		$outlets = Outlet::withTrashed()
-			->join('ey_addresses as a', 'a.entity_id', 'outlets.id')
-			->join('ncities as city', 'city.id', 'a.city_id')
-			->join('nstates as s', 's.id', 'city.state_id')
+			->leftJoin('ey_addresses as a', function ($join) {
+				$join->on('a.entity_id', '=', 'outlets.id')
+					->where('a.address_of_id', 3160);
+			})
+			->leftJoin('ncities as city', 'city.id', 'a.city_id')
+			->leftJoin('nstates as s', 's.id', 'city.state_id')
 			->leftjoin('regions as r', 'r.state_id', 's.id')
-			->join('country as c', 'c.id', 's.country_id')
+			->leftJoin('countries as c', 'c.id', 's.country_id')
+			->leftJoin('employees', 'employees.id', 'outlets.cashier_id')
+			->leftJoin('users', function ($join) {
+				$join->on('users.entity_id', 'employees.id')
+					->where('users.user_type_id', 3121);
+			})
 			->select(
 				'outlets.id',
 				'outlets.code',
 				'outlets.name',
-				'city.name as city_name',
-				's.name as state_name',
+				DB::raw('IF(city.name IS NULL,"---",city.name) as city_name'),
+				// 'city.name as city_name',
+				DB::raw('IF(s.name IS NULL,"---",s.name) as state_name'),
+				// 's.name as state_name',
 				DB::raw('IF(r.name IS NULL,"---",r.name) as region_name'),
-				'c.name as country_name',
-				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status')
+				DB::raw('IF(c.name IS NULL,"---",c.name) as country_name'),
+				// 'c.name as country_name',
+				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'),
+				'employees.code as emp_code',
+				'users.name as emp_name'
 			)
 			->where('outlets.company_id', Auth::user()->company_id)
-			->where('a.address_of_id', 3160)
+		// ->where('a.address_of_id', 3160)
+			->where(function ($query) use ($r) {
+				if ($r->get('cashier_id')) {
+					$query->where("outlets.cashier_id", $r->get('cashier_id'))->orWhere(DB::raw("-1"), $r->get('cashier_id'));
+				}
+			})
 			->where(function ($query) use ($r) {
 				if ($r->get('region_id')) {
 					$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
@@ -67,17 +86,22 @@ class OutletController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-        <a href="#!/eyatra/outlet/edit/' . $outlet->id . '">
-          <img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-        </a>
-        <a href="#!/eyatra/outlet/view/' . $outlet->id . '">
-          <img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-        </a>
-        <a href="javascript:;" data-toggle="modal" data-target="#delete_outlet"
-        onclick="angular.element(this).scope().deleteOutletConfirm(' . $outlet->id . ')" dusk = "delete-btn" title="Delete">
-        <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-        </a>';
+
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-outlet-edit')) {
+					$edit_class = "";
+				}
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-outlet-delete')) {
+					$delete_class = "";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/outlet/edit/' . $outlet->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+				$action .= '<a href="#!/outlet/view/' . $outlet->id . '"><img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a> ';
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_outlet" onclick="angular.element(this).scope().deleteOutletConfirm(' . $outlet->id . ')" dusk = "delete-btn" title="Delete"><img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" ></a>';
+
+				return $action;
 			})
 			->addColumn('status', function ($outlet) {
 				if ($outlet->status == 'Inactive') {
@@ -95,11 +119,15 @@ class OutletController extends Controller {
 			$outlet = new Outlet;
 			$address = new Address;
 			$this->data['status'] = 'Active';
+			$this->data['amount_eligiblity'] = 'No';
+			$this->data['amount_approver'] = 'Cashier';
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
 			$outlet = Outlet::with('sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
-			$outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
+			$outlet->cashier = $outlet->employee->user;
+			// $outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
+			// dd($outlet->cashier);
 			// $this->data['cashier'] = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
 			// dd($outlet->employee->id);
 			if (!$outlet) {
@@ -112,9 +140,14 @@ class OutletController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 			if ($outlet->amount_eligible == 1) {
-				$outlet->amount_eligible = 1;
+				$this->data['amount_eligiblity'] = 'Yes';
 			} else {
-				$outlet->amount_eligible = 0;
+				$this->data['amount_eligiblity'] = 'No';
+			}
+			if ($outlet->claim_req_approver == 1) {
+				$this->data['amount_approver'] = 'Cashier';
+			} else {
+				$this->data['amount_approver'] = 'Financier';
 			}
 			// dd($outlet->outletBudgets);
 			// $this->data['sbu_outlet'] = Sbu::select(
@@ -146,7 +179,6 @@ class OutletController extends Controller {
 			'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
-		// $this->data['lob_outlet'] = $lob_outlet = Lob::select('name', 'id')->get();
 		$this->data['sbu_outlet'] = [];
 		// foreach ($lob_outlet->sbus as $lob_sbu) {
 		// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;
@@ -154,49 +186,86 @@ class OutletController extends Controller {
 		$this->data['outlet'] = $outlet;
 		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
+		//dd($outlet);
 		return response()->json($this->data);
 	}
 	public function eyatraOutletFilterData() {
 		$this->data['region_list'] = Region::getList();
 		$this->data['city_list'] = NCity::getList();
-		$this->data['state_list'] = NState::getList();
-		$this->data['country_list'] = NCountry::getList();
+		$this->data['country_list'] = $country = NCountry::getList();
+		$option = new NState;
+		$option->name = 'Select State';
+		$option->id = null;
+		$this->data['state_list'] = $state_list = collect(NState::select('name', 'id')
+				->get())->prepend($option);
+		$option = new Employee;
+		$option->name = 'Select Cashier';
+		$option->id = null;
+		// $this->data['cashier_list'] = $cashier_list = collect(Employee::select('name', 'id')
+		$this->data['cashier_list'] = $cashier_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('role_user', 'role_user.user_id', 'users.id')->where('role_user.role_id', 504)->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
+			DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
+				->get())->prepend($option);
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
+	}
+
+	public function stateFilterList($id = NULL) {
+
+		$option = new NState;
+		$option->name = 'Select State';
+		$option->id = null;
+		$state_list = NState::select('name', 'id')->where('country_id', $id)->get();
+		$this->data['state_list'] = $state_list->prepend($option);
+		return response()->json($this->data);
+
+	}
+
+	public function cityFilterList($id = NULL) {
+
+		$option = new NCity;
+		$option->name = 'Select City';
+		$option->id = null;
+		$city_list = NCity::select('name', 'id')->where('state_id', $id)->get();
+		$this->data['city_list'] = $city_list->prepend($option);
+		return response()->json($this->data);
+
 	}
 
 //SEARCH CASHIER
 	public function searchCashier(Request $r) {
 		$key = $r->key;
 		$cashier_list = Employee::select(
+
 			'name',
 			'code',
-			'id'
+			'employees.id'
 		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
-				$q->where('name', 'like', '%' . $key . '%')
-					->orWhere('code', 'like', '%' . $key . '%')
+				$q->where('code', 'like', '%' . $key . '%')
+					->orWhere('name', 'like', '%' . $key . '%')
 				;
 			})
+
 			->get();
 		return response()->json($cashier_list);
 	}
 	public function saveEYatraOutlet(Request $request) {
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
 				'code.required' => 'Outlet Code is Required',
 				'outlet_name.required' => 'Outlet Name is Required',
 				'line_1.required' => 'Address Line1 is Required',
-				// 'country_id.required' => 'Country is Required',
-				// 'state_id.required' => 'State is Required',
 				'city_id.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
 				'cashier_id.required' => "Cashier Name is Required",
-				// 'amount_eligible.required' => "Amount Eligible is Required",
 			];
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
@@ -236,37 +305,49 @@ class OutletController extends Controller {
 				$outlet->deleted_at = date('Y-m-d H:i:s');
 				$outlet->deleted_by = Auth::user()->id;
 			}
-			if ($request->amount_eligible == 1) {
-				$outlet->amount_eligible = 1;
-				$outlet->amount_limit = $request->amount_limit;
-			} else {
+			if ($request->amount_eligiblity == 'No') {
 				$outlet->amount_eligible = 0;
 				$outlet->amount_limit = NULL;
+			} else {
+				$outlet->amount_eligible = 1;
+			}
+			if ($request->amount_approver == 'Cashier') {
+				$outlet->claim_req_approver = 1;
+			} else {
+				$outlet->claim_req_approver = 0;
 			}
 			$outlet->name = $request->outlet_name;
+			$outlet->minimum_threshold_balance = $request->minimum_threshold_balance;
 			$outlet->company_id = Auth::user()->company_id;
 			$outlet->fill($request->all());
 			$outlet->save();
+			//dd('s');
+			$activity['entity_id'] = $outlet->id;
+			$activity['entity_type'] = "Outlet";
+			$activity['details'] = empty($request->id) ? "Outlet is  Added" : "Outlet is  updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING ADDRESS
 			$address->address_of_id = 3160;
 			$address->entity_id = $outlet->id;
 			$address->name = 'Primary';
 			$address->fill($request->all());
 			$address->save();
-			// dd($address);
+
 			//SAVING OUTLET BUDGET
-			$sbu_ids = array_column($request->sbus, 'sbu_id');
-			// dd($sbu_ids);
-			if (count($request->sbus) > 0) {
-				foreach ($request->sbus as $sbu) {
-					if (!isset($sbu['sbu_id'])) {
-						continue;
-					}
-					$outlet->outletBudgets()->attach($sbu['sbu_id'], [
-						'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
-					]);
-				}
-			}
+			// $sbu_ids = array_column($request->sbus, 'sbu_id');
+
+			// if (count($request->sbus) > 0) {
+			// 	foreach ($request->sbus as $sbu) {
+			// 		if (!isset($sbu['sbu_id'])) {
+			// 			continue;
+			// 		}
+			// 		$outlet->outletBudgets()->attach($sbu['sbu_id'], [
+			// 			'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
+			// 		]);
+			// 	}
+			// }
+
 			DB::commit();
 			$request->session()->flash('success', 'outlet saved successfully!');
 			if (empty($request->id)) {
@@ -289,10 +370,12 @@ class OutletController extends Controller {
 			'Sbu',
 			'Sbu.lob',
 			'employee',
-		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
+
+			'employee.user',
+		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
-		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', 'amount')->where('outlet_id', $outlet_id)
+		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(amount,2,"en_IN") as amount'))->where('outlet_budget.outlet_id', $outlet_id)
 
 			->leftJoin('sbus', 'sbus.id', 'outlet_budget.sbu_id')
 			->leftJoin('lobs', 'lobs.id', 'sbus.lob_id')
@@ -309,10 +392,18 @@ class OutletController extends Controller {
 		$this->data['action'] = 'View';
 		$this->data['outlet'] = $outlet;
 		$this->data['success'] = true;
+		//dd($this->data);
+
 		return response()->json($this->data);
 	}
 	public function deleteEYatraOutlet($outlet_id) {
-		$outlet = Outlet::where('id', $outlet_id)->forceDelete();
+		$outlet = Outlet::where('id', $outlet_id)->first();
+		$activity['entity_id'] = $outlet->id;
+		$activity['entity_type'] = "outlet";
+		$activity['details'] = "Outlet is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$outlet->forceDelete();
 		if (!$outlet) {
 			return response()->json(['success' => false, 'errors' => ['Outlet not found']]);
 		}

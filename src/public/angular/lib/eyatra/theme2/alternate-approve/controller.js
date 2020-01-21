@@ -1,6 +1,7 @@
 app.component('eyatraAlternateApproveList', {
     templateUrl: eyatra_alternate_approve_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http) {
+        //alert();
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         var dataTable = $('#alternate_approve_list').DataTable({
@@ -29,11 +30,11 @@ app.component('eyatraAlternateApproveList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'empname', name: 'employees.name', searchable: true },
                 { data: 'empcode', name: 'employees.code', searchable: true },
-                { data: 'altempname', name: 'alternateemp.name', searchable: true },
+                { data: 'empname', name: 'emp_user.name', searchable: true },
                 { data: 'altempcode', name: 'alternateemp.code', searchable: true },
-                { data: 'type', name: 'alternative_approvers.type', searchable: true },
+                { data: 'altempname', name: 'alter_user.name', searchable: true },
+                { data: 'type', name: 'configs.name', searchable: true },
                 { data: 'fromdate', name: 'alternative_approvers.from', searchable: false },
                 { data: 'todate', name: 'alternative_approvers.to', searchable: true },
                 { data: 'status', name: 'status', searchable: false },
@@ -42,13 +43,15 @@ app.component('eyatraAlternateApproveList', {
                 $(row).addClass('highlight-row');
             }
         });
+        $('#alternate_approve_list_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Master / Alternate Approvers</p><h3 class="title">Alternate Approvers</h3>');
-        $('.add_new_button').html(
-            '<a href="#!/eyatra/alternate-approve/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\' \')">' +
-            'Add New' +
-            '</a>'
-        );
+        $('.separate-page-header-content .data-table-title').html('<a href="#!/alternate-approve"><p class="breadcrumb">Alternate Approvers / List</p></a><h3 class="title">Alternate Approve List</h3>');
+        // $('.add_new_button').html(
+        //     '<a href="#!/eyatra/alternate-approve/add" type="button" class="btn btn-blue" ng-show="$ctrl.hasPermission(\' \')">' +
+        //     'Add New' +
+        //     '</a>'
+        // );
         $scope.deleteAlternateapprove = function(id) {
             $('#deletealterapprove_id').val(id);
         }
@@ -57,22 +60,35 @@ app.component('eyatraAlternateApproveList', {
             $http.get(
                 alternate_approve_cash_delete_url + '/' + id,
             ).then(function(res) {
+                console.log(res.data.errors);
                 if (!res.data.success) {
                     var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                    for (var i in res.data.errors) {
+                        errors += '<li>' + res.data.errors[i] + '</li>';
                     }
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
-                        text: errors
+                        text: errors,
+                        animation: {
+                            speed: 1000 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 3000);
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Alternate Approve Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 3000);
                     dataTable.ajax.reload(function(json) {});
                 }
             });
@@ -90,57 +106,97 @@ app.component('eyatraAlternateApproveForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+
         $http.get(
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
-                $location.path('/eyatra/alternate-approve')
+                setTimeout(function() {
+                    $noty.close();
+                }, 3000);
+                $location.path('/alternate-approve');
                 return;
             }
-
+            // console.log(response);
             self.alternate_approve = response.data.alternate_approve;
-            /*self.selectedItem = self.alternate_approve.emp_name;
-            self.selectedItem1 = self.alternate_approve.alt_emp_name;
-            $(".employee_id").val(self.alternate_approve.employee_id);
-            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);*/
+            self.action = response.data.action;
+            // console.log(response.data.alternate_approve);
+            // self.selectedItem = self.alternate_approve.emp_name;
+            // self.selectedItem1 = self.alternate_approve.alt_emp_name;
+            // $(".employee_id").val(self.alternate_approve.employee_id);
+            $(".alt_employee_id").val(self.alternate_approve.alternate_employee_id);
             self.extras = response.data.extras;
-            if ($routeParams.alternate_id != undefined) {
+            if (self.action == 'Edit') {
+
+                setTimeout(function() {
+                    $scope.daterange();
+                }, 500);
+
+                self.action = 'Edit';
+                self.alternate_approve.alt_employee = response.data.alternate_approve.alt_employee.user.name;
+            } else {
+                self.action = 'Add';
+                // self.alternate_approve.alt_employee = "";
+            }
+            if (response.data.alternate_approve.from != undefined) {
                 self.date = self.alternate_approve.from + ' to ' + self.alternate_approve.to;
+                $('.daterange').daterangepicker({
+                    autoUpdateInput: false,
+                    startDate: self.alternate_approve.from,
+                    endDate: self.alternate_approve.to,
+                    "opens": "left",
+                    locale: {
+                        cancelLabel: 'Clear',
+                        format: "DD-MM-YYYY",
+                    }
+                });
+                $('.daterange').on('apply.daterangepicker', function(ev, picker) {
+                    $(this).val(picker.startDate.format('DD-MM-YYYY') + ' to ' + picker.endDate.format('DD-MM-YYYY'));
+                });
+                $('.daterange').on('cancel.daterangepicker', function(ev, picker) {
+                    $(this).val('');
+                });
             } else {
                 self.date = '';
             }
 
         });
-        $('.daterange').daterangepicker({
-            autoUpdateInput: false,
-            /* "opens": "right", */
-            locale: {
-                cancelLabel: 'Clear',
-                format: "DD-MM-YYYY"
-            }
-        });
 
-        $('.align-left.daterange').daterangepicker({
-            autoUpdateInput: false,
-            "opens": "left",
-            locale: {
-                cancelLabel: 'Clear',
-                format: "DD-MM-YYYY"
-            }
-        });
+        $scope.daterange = function() {
+            $('.daterange').daterangepicker({
+                autoUpdateInput: false,
+                /* "opens": "right", */
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: "DD-MM-YYYY"
+                }
+            });
 
-        $('.daterange').on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('DD-MM-YYYY') + ' to ' + picker.endDate.format('DD-MM-YYYY'));
-        });
+            $('.align-left.daterange').daterangepicker({
+                autoUpdateInput: false,
+                "opens": "left",
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: "DD-MM-YYYY"
+                }
+            });
 
-        $('.daterange').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
-        });
+            $('.daterange').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('DD-MM-YYYY') + ' to ' + picker.endDate.format('DD-MM-YYYY'));
+            });
+
+            $('.daterange').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
+        }
 
         //SEARCH EMPLOYEE
         self.searchEmployee = function(query) {
@@ -204,6 +260,24 @@ app.component('eyatraAlternateApproveForm', {
              }
          }*/
 
+        $scope.alter_type = function(type) {
+            if (type == 3481) {
+
+                self.show_type = 'hide';
+
+                // $('#date').hide();
+            } else {
+                self.show_type = 'show';
+                setTimeout(function() {
+                    $scope.daterange();
+                }, 500);
+
+                // $('#date').show();
+            }
+            // $('#cancel_booking_visit_id').val(visit_id);
+        }
+
+
         $(document).on('click', '#submit', function(e) {
 
             var form_id = '#alternate-approve';
@@ -258,13 +332,19 @@ app.component('eyatraAlternateApproveForm', {
                                 }
                                 custom_noty('error', errors);
                             } else {
-                                new Noty({
+                                $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
                                     text: 'Alternate Approve saves successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
                                 }).show();
-                                $location.path('/eyatra/alternate-approve')
-                                $scope.$apply()
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $location.path('/alternate-approve');
+                                $scope.$apply();
                             }
                         })
                         .fail(function(xhr) {

@@ -42,7 +42,7 @@ app.component('eyatraAgents', {
         $('.dataTables_length select').select2();
         $('.page-header-content .display-inline-block .data-table-title').html('Agents');
         $('.add_new_button').html(
-            '<a href="#!/eyatra/agent/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-agent\')">' +
+            '<a href="#!/agent/add" type="button" class="btn btn-secondary" ng-show="$ctrl.hasPermission(\'add-agent\')">' +
             'Add New' +
             '</a>'
         );
@@ -56,20 +56,32 @@ app.component('eyatraAgents', {
                 agent_delete_url + '/' + id,
             ).then(function(response) {
                 if (response.data.success) {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'success',
                         layout: 'topRight',
                         text: 'Agent Deleted Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                     $('#agent_list').DataTable().ajax.reload(function(json) {});
                     $location.path('/eyatra/agents');
                     // $scope.$apply();
                 } else {
-                    new Noty({
+                    $noty = new Noty({
                         type: 'error',
                         layout: 'topRight',
                         text: 'Agent not Deleted',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
                     }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
                 }
             });
         }
@@ -90,11 +102,17 @@ app.component('eyatraAgentForm', {
             $form_data_url
         ).then(function(response) {
             if (!response.data.success) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
                     text: response.data.error,
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $location.path('/eyatra/agents')
                 $scope.$apply()
                 return;
@@ -124,6 +142,9 @@ app.component('eyatraAgentForm', {
             } else {
                 self.switch_value = 'Active';
                 $("#hide_password").show();
+                /*setTimeout(function() {
+    $noty.close();
+}, 1000);*/
                 $("#password").prop('disabled', false);
                 self.switch_password = 'Yes';
             }
@@ -168,6 +189,9 @@ app.component('eyatraAgentForm', {
                 $("#password").prop('disabled', true);
             } else {
                 $("#hide_password").show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
                 $("#password").prop('disabled', false);
             }
         }
@@ -390,11 +414,17 @@ app.component('eyatraAgentForm', {
                 }
             },
             invalidHandler: function(event, validator) {
-                new Noty({
+                $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'You have errors,Please check all tabs'
+                    text: 'You have errors,Please check all tabs',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
                 }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
             },
             submitHandler: function(form) {
 
@@ -417,11 +447,17 @@ app.component('eyatraAgentForm', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            new Noty({
+                            $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
                                 text: res.message,
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
                             }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 1000);
                             $location.path('/eyatra/agents')
                             $scope.$apply()
                         }

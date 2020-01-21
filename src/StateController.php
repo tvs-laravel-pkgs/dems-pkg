@@ -6,6 +6,7 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
@@ -20,7 +21,9 @@ class StateController extends Controller {
 		$option = new NCountry;
 		$option->name = 'Select Country';
 		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
+
+		// dd($country_list);
 		$this->data['status_list'] = array(
 			array('name' => "Select Status", 'id' => null),
 			array('name' => "All", 'id' => "-1"),
@@ -42,7 +45,7 @@ class StateController extends Controller {
 			$status = null;
 		}
 		$states = NState::withTrashed()->from('nstates')
-			->join('country as c', 'c.id', 'nstates.country_id')
+			->join('countries as c', 'c.id', 'nstates.country_id')
 			->select(
 				'nstates.id',
 				'nstates.code',
@@ -50,6 +53,7 @@ class StateController extends Controller {
 				'c.name as country',
 				DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status')
 			)
+			->where('company_id', Auth::user()->company_id)
 			->where(function ($query) use ($r, $country) {
 				if (!empty($country)) {
 					$query->where('c.id', $country);
@@ -73,17 +77,34 @@ class StateController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/state/edit/' . $state->id . '">
+
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-state-edit')) {
+					$edit_class = "";
+				}
+
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-state-delete')) {
+					$delete_class = "";
+				}
+
+				$action = '';
+
+				$action .= '<a style="' . $edit_class . '" href="#!/state/edit/' . $state->id . '">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/state/view/' . $state->id . '">
+				</a> ';
+
+				$action .= '<a href="#!/state/view/' . $state->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_state"
+				</a> ';
+
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_state"
 				onclick="angular.element(this).scope().deleteStateConfirm(' . $state->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-                </a>';
+                </a> ';
+
+				return $action;
 
 			})
 			->addColumn('status', function ($state) {
@@ -98,12 +119,29 @@ class StateController extends Controller {
 	}
 
 	public function eyatraStateFormData($state_id = NULL) {
+		$option = new NCountry;
+		$option->name = 'Select Country';
+		$option->id = null;
+		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->where('company_id', Auth::user()->company_id)->get()->prepend($option);
+		$this->data['travel_mode_list'] = $travel_modes = Entity::select('entities.name', 'entities.id')
+			->join('travel_mode_category_type as tm', 'tm.travel_mode_id', '=', 'entities.id')
+			->leftjoin('configs as c', 'c.id', '=', 'tm.category_id')
+			->where('entities.entity_type_id', 502)
+			->where('c.config_type_id', 525)
+			->where('tm.category_id', 3403)
+			->where('entities.company_id', Auth::user()->company_id)->get()->keyBy('id');
+
+		$option = new Agent;
+		$option->name = 'Select Agent';
+		$option->id = null;
+
 		if (!$state_id) {
 			$this->data['action'] = 'Add';
 			$state = new NState;
 			$this->data['status'] = 'Active';
 
 			$this->data['success'] = true;
+
 		} else {
 			$this->data['action'] = 'Edit';
 			$state = NState::withTrashed()->find($state_id);
@@ -118,24 +156,25 @@ class StateController extends Controller {
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
+			foreach ($state->travelModes as $travel_mode) {
+				if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
+					continue;
+				}
+				$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
+				$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
+			}
 		}
-		$option = new NCountry;
-		$option->name = 'Select Country';
-		$option->id = null;
-		$this->data['country_list'] = $country_list = NCountry::select('name', 'id')->get()->prepend($option);
-		$this->data['travel_mode_list'] = $travel_modes = Entity::select('name', 'id')->where('entity_type_id', 502)->where('company_id', Auth::user()->company_id)->get()->keyBy('id');
-		$option = new Agent;
-		$option->name = 'Select Agent';
-		$option->id = null;
-		$this->data['agents_list'] = $agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
-				->leftJoin('users', 'users.entity_id', 'agents.id')
-				->where('users.user_type_id', 3122)
-				->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
-		// dd($state->travelModes()->withPivot()->get());
-		foreach ($state->travelModes->where('company_id', Auth::user()->company_id) as $travel_mode) {
-			$this->data['travel_mode_list'][$travel_mode->id]->checked = true;
-			$this->data['travel_mode_list'][$travel_mode->id]->agent_id = $travel_mode->pivot->agent_id;
-			$this->data['travel_mode_list'][$travel_mode->id]->service_charge = $travel_mode->pivot->service_charge;
+
+		foreach ($travel_modes as $travel_mode) {
+			if (!isset($this->data['travel_mode_list'][$travel_mode->id])) {
+				continue;
+			}
+			$this->data['travel_mode_list'][$travel_mode->id]->agents_list = collect(Agent::select(DB::raw('CONCAT(users.name ," / ",agents.code) as name, agents.id'))
+					->leftJoin('users', 'users.entity_id', 'agents.id')
+					->leftJoin('agent_travel_mode', 'agent_travel_mode.agent_id', 'agents.id')
+					->where('users.user_type_id', 3122)
+					->where('agent_travel_mode.travel_mode_id', $travel_mode->id)
+					->where('agents.company_id', Auth::user()->company_id)->get())->prepend($option);
 		}
 
 		$this->data['state'] = $state;
@@ -199,17 +238,30 @@ class StateController extends Controller {
 
 			$state->fill($request->all());
 			$state->save();
-
+			$activity['entity_id'] = $state->id;
+			$activity['entity_type'] = "State";
+			$activity['details'] = empty($request->id) ? "State is added" : "State is updated";
+			$activity['activity'] = empty($request->id) ? "add" : "edit";
+			$activity_log = ActivityLog::saveLog($activity);
 			//SAVING state_agent_travel_mode
+			// $travel_mode_ids = array_column($request->travel_modes, 'id');
+			// dd($request->travel_modes);
 			if (count($request->travel_modes) > 0) {
 				foreach ($request->travel_modes as $travel_mode => $pivot_data) {
 					if (!isset($pivot_data['agent_id'])) {
 						continue;
 					}
+
 					if (!isset($pivot_data['service_charge'])) {
 						continue;
 					}
+					// dd($pivot_data['service_charge']);
 					$state->travelModes()->attach($travel_mode, $pivot_data);
+					// $state->travelModes()->attach($pivot_data['agent_id'], [
+					// 	'service_charge' => $pivot_data['service_charge'],
+					// ]);
+					// dd($state->travelModes()->attach($travel_mode, $pivot_data));
+
 				}
 			}
 
@@ -274,6 +326,11 @@ class StateController extends Controller {
 	// }
 	public function deleteEYatraState($state_id) {
 		$state = Nstate::withTrashed()->where('id', $state_id)->first();
+		$activity['entity_id'] = $state->id;
+		$activity['entity_type'] = "State";
+		$activity['details'] = empty($request->id) ? "State is added" : "State is updated";
+		$activity['activity'] = empty($request->id) ? "add" : "edit";
+		$activity_log = ActivityLog::saveLog($activity);
 		$state->forceDelete();
 		if (!$state) {
 			return response()->json(['success' => false, 'errors' => ['State not found']]);

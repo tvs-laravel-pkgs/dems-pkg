@@ -5,9 +5,11 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -30,8 +32,8 @@ class GradeController extends Controller {
 		return response()->json($this->data);
 	}
 	public function listEYatraGrade(Request $r) {
-		if (!empty($r->advanced_eligibility)) {
-			// dd($r->advanced_eligibility);
+
+		if (isset($r->advanced_eligibility)) {
 
 			$advanced_eligibility = $r->advanced_eligibility;
 		} else {
@@ -91,19 +93,29 @@ class GradeController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
-				<a href="#!/eyatra/grade/edit/' . $grade_list->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/eyatra/grade/view/' . $grade_list->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
 
-				<a href="javascript:;" data-toggle="modal" data-target="#delete_grade"
+				$action = '';
+				$edit_class = "visibility:hidden";
+				if (Entrust::can('eyatra-grade-edit')) {
+					$edit_class = "";
+				}
+				$delete_class = "visibility:hidden";
+				if (Entrust::can('eyatra-grade-delete')) {
+					$delete_class = "";
+				}
+
+				$action .= '<a style="' . $edit_class . '" href="#!/grade/edit/' . $grade_list->id . '">
+					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
+				</a> ';
+				$action .= '<a href="#!/grade/view/' . $grade_list->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a> ';
+				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_grade"
 				onclick="angular.element(this).scope().deleteGrade(' . $grade_list->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 
+				return $action;
 			})
 
 			->make(true);
@@ -147,8 +159,7 @@ class GradeController extends Controller {
 					$local_travel_types_list[$local_travel_type->id]->checked = true;
 				}
 			}
-
-			$this->data['grade_advanced'] = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
+			$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit', 'two_wheeler_per_km', 'four_wheeler_per_km', 'local_trip_amount')->first();
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
@@ -183,17 +194,21 @@ class GradeController extends Controller {
 
 			if (!$request->id) {
 				$grade = new Entity;
+				$grade_details = new GradeAdvancedEligiblity;
+				// $grade_eligiblity = new GradeAdvancedEligiblity;
 				$grade->created_by = Auth::user()->id;
 				$grade->created_at = Carbon::now();
 				$grade->updated_at = NULL;
 
 			} else {
 				$grade = Entity::withTrashed()->find($request->id);
+				$grade_details = GradeAdvancedEligiblity::firstOrNew(['grade_id' => $request->id]);
+				// $grade_eligiblity = GradeAdvancedEligiblity::find($request->id);
 				$grade->expenseTypes()->sync([]);
 				$grade->tripPurposes()->sync([]);
 				$grade->travelModes()->sync([]);
 				$grade->localTravelModes()->sync([]);
-				$grade->gradeEligibility()->sync([]);
+				// $grade->gradeEligibility()->sync([]);
 				$grade->updated_by = Auth::user()->id;
 				$grade->updated_at = Carbon::now();
 
@@ -210,19 +225,47 @@ class GradeController extends Controller {
 			$grade->entity_type_id = 500;
 			$grade->save();
 
-			if ($request->grade_advanced == 'Yes') {
-				$request->grade_advanced = 1;
-			} else {
-				$request->grade_advanced = 0;
-			}
+			$activity['entity_id'] = $grade->id;
+			$activity['entity_type'] = "Employee Grade";
+			$activity['details'] = empty($request->id) ? "Employee Grade is  Added" : "Employee Grade is updated";
+			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
+			$activity_log = ActivityLog::saveLog($activity);
 
-			$grade->gradeEligibility()->sync($request->grade_advanced);
+			// if ($request->grade_advanced == 'Yes') {
+			// 	$request->grade_advanced = 1;
+			// } else {
+			// 	$request->grade_advanced = 0;
+			// }
+
+			//Update Grade Details
+			$grade_details->grade_id = $grade->id;
+			if ($request->grade_advanced == 'Yes') {
+				$grade_details->advanced_eligibility = 1;
+			} else {
+				$grade_details->advanced_eligibility = 0;
+			}
+			$grade_details->stay_type_disc = $request->discount_percentage;
+			if ($request->deviation_eligiblity == 'Yes') {
+				$grade_details->deviation_eligiblity = 1;
+			} else {
+				$grade_details->deviation_eligiblity = 2;
+			}
+			$grade_details->claim_active_days = $request->claim_active_days;
+			$grade_details->travel_advance_limit = $request->travel_advance_limit;
+			$grade_details->two_wheeler_limit = $request->two_wheeler_limit;
+			$grade_details->four_wheeler_limit = $request->four_wheeler_limit;
+			$grade_details->four_wheeler_per_km = $request->four_wheeler_per_km;
+			$grade_details->two_wheeler_per_km = $request->two_wheeler_per_km;
+			$grade_details->local_trip_amount = $request->local_trip_amount;
+			$grade_details->save();
+
+			// $grade->gradeEligibility()->sync($request->grade_advanced);
 
 			//Save Expense Mode
 			if (count($request->expense_types) > 0) {
 				foreach ($request->expense_types as $expense_type_id => $pivot_data) {
 					unset($pivot_data['id']);
-
+					// dd($pivot_data);
 					foreach ($pivot_data as $city_id => $eligible_amount) {
 						if (!empty($eligible_amount['eligible_amount'])) {
 							$data = [$expense_type_id => ['eligible_amount' => $eligible_amount['eligible_amount'], 'city_category_id' => $city_id]];
@@ -244,7 +287,13 @@ class GradeController extends Controller {
 			}
 
 			DB::commit();
-			$request->session()->flash('success', 'Grade Updated successfully!');
+			// $request->session()->flash('success', 'Grade Updated successfully!');
+			if (empty($request->id)) {
+				return response()->json(['success' => true, 'message' => ['Grade Added Successfully']]);
+			} else {
+				return response()->json(['success' => true, 'message' => ['Grade Updated Successfully']]);
+			}
+
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -278,12 +327,21 @@ class GradeController extends Controller {
 		$grade_advanced = $grade->gradeEligibility()->where('grade_id', $grade_id)->pluck('advanced_eligibility');
 		$this->data['grade_advanced'] = count($grade_advanced) ? 'Yes' : 'No';
 		$this->data['action'] = 'View';
+
+		$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit', 'two_wheeler_per_km', 'four_wheeler_per_km', 'local_trip_amount')->first();
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
 
 	public function deleteEYatraGrade($grade_id) {
-		$grade = Entity::where('id', $grade_id)->forceDelete();
+		$grade = Entity::withTrashed()->where('id', $grade_id)->first();
+		$activity['entity_id'] = $grade->id;
+		$activity['entity_type'] = "Employee Grade";
+		$activity['details'] = "Employee Grade is deleted";
+		$activity['activity'] = "Delete";
+		$activity_log = ActivityLog::saveLog($activity);
+		$grade->forceDelete();
 		if (!$grade) {
 			return response()->json(['success' => false, 'errors' => ['Grade Not Found']]);
 		}
