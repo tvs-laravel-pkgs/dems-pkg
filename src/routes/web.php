@@ -53,7 +53,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('trip/rejection/reasons', 'Uitoux\EYatra\Api\TripVerificationController@getRejectionData');
 
 		//DASHBOARD
-		Route::get('eyatra/dashboard', 'Uitoux\EYatra\Api\TripController@getDashboard');
+		Route::get('eyatra/dashboard', 'Uitoux\EYatra\Api\DashboardController@getDashboard');
 
 		//DIGITAL SIGNATURE
 		Route::post('petty-cash/digital-signature-attachments', 'Uitoux\EYatra\Api\TripClaimController@getdigitalsignatureAttachments');
