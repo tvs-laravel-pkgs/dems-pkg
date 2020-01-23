@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use DB;
 use Illuminate\Http\Request;

@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
