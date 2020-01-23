@@ -5,11 +5,20 @@ use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
 use DB;
+use Uitoux\EYatra\MobileNotificationDetail;
 use Uitoux\EYatra\Trip;
 
 class DashboardController extends Controller {
 	public $successStatus = 200;
 
+	public function saveNotification($id) {
+		$notification_details = MobileNotificationDetail::where('id', $id)->update(['is_seen' => 1]);
+		return response()->json(['success' => true]);
+	}
+	public function getNotification() {
+		$notification_details = MobileNotificationDetail::where('user_id', Auth::user()->id)->get();
+		return response()->json(['success' => true, 'notification_details' => $notification_details]);
+	}
 	public function getDashboard() {
 		$total_trips = Trip::where('status_id', '!=', '3032')->where('employee_id', Auth::user()->entity_id)
 			->count();

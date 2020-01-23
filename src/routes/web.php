@@ -66,6 +66,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('local-trip/cancel/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@cancelTrip');
 		Route::get('local-trip/delete/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@deleteTrip');
 		Route::post('local-trip/save/attachments', 'Uitoux\EYatra\Api\LocalTripController@saveAttachments');
+
 		//LOCAL TRIP VERIFICATION
 		Route::post('local-trip/verification/get-list', 'Uitoux\EYatra\Api\LocalTripController@listTripVerification');
 
@@ -75,6 +76,11 @@ Route::group(['middleware' => ['api']], function () {
 		//Profile Image Save
 		Route::post('/profile/save/image', 'Uitoux\EYatra\Api\ProfileController@saveImage')->name('profileSaveImage');
 
+		//NOTIFICATION
+		Route::post('notification/get-list', 'Uitoux\EYatra\Api\DashboardController@getNotification');
+
+		//SEEN NOTIFICATION
+		Route::get('seen-notification/{id}', 'Uitoux\EYatra\Api\DashboardController@saveNotification');
 	});
 });
 
