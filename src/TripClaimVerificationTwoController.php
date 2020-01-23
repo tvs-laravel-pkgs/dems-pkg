@@ -141,7 +141,7 @@ class TripClaimVerificationTwoController extends Controller {
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 6, $trip, $user);
+		$notification = sendnotification($type = 6, $trip, $user,$trip_type="Outstation Trip");
 
 		return response()->json(['success' => true]);
 	}
@@ -170,7 +170,7 @@ class TripClaimVerificationTwoController extends Controller {
 		$activity_log = ActivityLog::saveLog($activity);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 7, $trip, $user);
+		$notification = sendnotification($type = 7, $trip, $user$trip_type="Outstation Trip");
 
 		return response()->json(['success' => true]);
 	}

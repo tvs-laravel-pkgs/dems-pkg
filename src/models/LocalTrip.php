@@ -353,7 +353,7 @@ class LocalTrip extends Model {
 
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-			$notification = sendnotification($type = 1, $trip, $user);
+			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Local Trip");
 
 			DB::commit();
 
@@ -485,7 +485,7 @@ class LocalTrip extends Model {
 		$activity_log = ActivityLog::saveLog($activity);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type, $trip, $user);
+		$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip");
 
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
@@ -514,7 +514,7 @@ class LocalTrip extends Model {
 		$activity_log = ActivityLog::saveLog($activity);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type, $trip, $user);
+		$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip");
 
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}

@@ -255,7 +255,7 @@ class Trip extends Model {
 
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-			$notification = sendnotification($type = 1, $trip, $user);
+			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip");
 			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 
@@ -880,7 +880,7 @@ class Trip extends Model {
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 2, $trip, $user);
+		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip");
 
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
@@ -904,7 +904,7 @@ class Trip extends Model {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 3, $trip, $user);
+		$notification = sendnotification($type = 3, $trip, $user, $trip_type = "Outstation Trip");
 
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
@@ -2084,7 +2084,7 @@ class Trip extends Model {
 
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-				$notification = sendnotification($type = 5, $trip, $user);
+				$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip");
 
 				DB::commit();
 				return response()->json(['success' => true]);
