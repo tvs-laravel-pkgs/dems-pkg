@@ -239,7 +239,6 @@ class Trip extends Model {
 						$state = $trip->employee->outlet->address->city->state;
 
 						$agent = $state->agents()->where('company_id', Auth::user()->company_id)->withPivot('travel_mode_id')->where('travel_mode_id', $visit_data['travel_mode_id'])->first();
-
 						if (!$agent) {
 							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count], 'message' => 'No agent found for visit - ' . $visit_count]);
 						}
@@ -249,16 +248,17 @@ class Trip extends Model {
 					$i++;
 				}
 			}
-			if (!$request->id) {
-				// self::sendTripNotificationMail($trip);
-			}
+
+			DB::commit();
+
+			// if (!$request->id) {
+			self::sendTripNotificationMail($trip);
+			// }
 
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
 			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip");
 			// $activity_log = ActivityLog::saveLog($activity);
-			DB::commit();
-
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Trip added successfully!', 'trip' => $trip]);
 			} else {
@@ -1324,9 +1324,8 @@ class Trip extends Model {
 			$trip_id = $trip->id;
 			$trip = Trip::findorFail($trip->id);
 
-			$from_mail = env('MAIL_FROM_ADDRESS');
-			$from_name = env('MAIL_USERNAME');
-			//dd($from_mail);
+			$from_mail = env('MAIL_FROM_ADDRESS', 'sprint@tvs.in');
+			$from_name = env('MAIL_FROM_NAME', 'Tvsnsons');
 			$employee_details = Employee::select(
 				'employees.code',
 				'users.name',
@@ -1362,7 +1361,7 @@ class Trip extends Model {
 						'fromcity.name as fromcity_name',
 						'tocity.name as tocity_name',
 						'travel_modes.name as travel_mode_name',
-						'booking_modes.name as booking_method_name'
+						'booking_modes.name as booking_method_name', 'visits.notes_to_agent', 'visits.prefered_departure_time'
 					)
 						->join('trips', 'trips.id', 'visits.trip_id')
 						->leftjoin('users', 'trips.employee_id', 'users.id')
@@ -1389,7 +1388,6 @@ class Trip extends Model {
 							if ($agent_user->email) {
 								$arr['to_email'] = $agent_user->email;
 								$arr['to_name'] = $agent_user->name;
-								$arr['to_email'] = 'saravanan@uitoux.in';
 								$arr['subject'] = 'Ticket booking request';
 								$arr['body'] = 'Employee ticket booking notification';
 								$arr['visits'] = $visit_agents;
@@ -1414,7 +1412,7 @@ class Trip extends Model {
 					'fromcity.name as fromcity_name',
 					'tocity.name as tocity_name',
 					'travel_modes.name as travel_mode_name',
-					'booking_modes.name as booking_method_name'
+					'booking_modes.name as booking_method_name', 'visits.notes_to_agent', 'visits.prefered_departure_time'
 				)
 					->join('trips', 'trips.id', 'visits.trip_id')
 					->leftjoin('users', 'trips.employee_id', 'users.id')
@@ -1460,7 +1458,7 @@ class Trip extends Model {
 					'fromcity.name as fromcity_name',
 					'tocity.name as tocity_name',
 					'travel_modes.name as travel_mode_name',
-					'booking_modes.name as booking_method_name'
+					'booking_modes.name as booking_method_name', 'visits.notes_to_agent', 'visits.prefered_departure_time'
 				)
 					->join('trips', 'trips.id', 'visits.trip_id')
 					->leftjoin('users', 'trips.employee_id', 'users.id')
@@ -1508,7 +1506,7 @@ class Trip extends Model {
 					'fromcity.name as fromcity_name',
 					'tocity.name as tocity_name',
 					'travel_modes.name as travel_mode_name',
-					'booking_modes.name as booking_method_name'
+					'booking_modes.name as booking_method_name', 'visits.notes_to_agent', 'visits.prefered_departure_time'
 				)
 					->join('trips', 'trips.id', 'visits.trip_id')
 					->leftjoin('users', 'trips.employee_id', 'users.id')
