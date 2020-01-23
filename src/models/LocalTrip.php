@@ -464,7 +464,7 @@ class LocalTrip extends Model {
 		}
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
-			$trip->status_id = 3035;
+			$trip->status_id = 3034;
 		} else {
 			$trip->status_id = 3028;
 		}

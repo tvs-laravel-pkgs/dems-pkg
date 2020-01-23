@@ -20,13 +20,19 @@ class AuthController extends Controller {
 		$validator = Validator::make($request->all(), [
 			'username' => 'required|string',
 			'password' => 'required|string',
+			'device_token' => 'required|string',
 		]);
+
 		if ($validator->fails()) {
 			return response()->json(['success' => false, 'message' => 'Reuired parameters missing', 'errors' => $validator->errors()], $this->successStatus);
 		}
 
 		if (Auth::attempt(['mobile_number' => request('username'), 'password' => request('password')])) {
 
+			//Save Device Token
+			$user = User::where('id', Auth::user()->id)->update(['device_token' => request('device_token')]);
+
+			//Get User Information
 			$user = User::with([
 				'employee_details',
 				'employee_details.reportingTo',

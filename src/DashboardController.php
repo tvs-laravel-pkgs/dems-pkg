@@ -223,7 +223,7 @@ class DashboardController extends Controller {
 		//TOTAL OUTSTATION TRIP PAID
 		$total_outstation_trip_claim = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', 3026)->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP PAYMENT REQUESTED
-		$total_outstation_claim_requested = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', '!=', 3026)->where('ey_employee_claims.status_id', '!=', 3033)->whereIN('ey_employee_claims.status_id', [3023, 3024, 3025, 3029, 3030, 3031, 3034, 3035])->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
+		$total_outstation_claim_requested = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', '!=', 3026)->where('ey_employee_claims.status_id', '!=', 3033)->whereIN('ey_employee_claims.status_id', [3023, 3024, 3025, 3029, 3030, 3031, 3034])->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP READY FOR CLAIM
 		$total_outstation_ready_for_claim = Trip::where('trips.status_id', '=', '3028')->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->where('trips.end_date', '<', $current_date);
 		//TOTAL UPCOMING OUTSTATION TRIPS
@@ -235,7 +235,7 @@ class DashboardController extends Controller {
 		//TOTAL LOCAL TRIP PAID
 		$total_local_trip_claim = LocalTrip::where('local_trips.status_id', 3026)->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date);
 		//TOTAL LOCAL TRIP PAYMENT REQUESTED
-		$total_local_trip_claim_requested = LocalTrip::whereIN('local_trips.status_id', [3023, 3035, 3030, 3024])->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date);
+		$total_local_trip_claim_requested = LocalTrip::whereIN('local_trips.status_id', [3023, 3034, 3035, 3030, 3024])->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date);
 		//TOTAL LOCAL TRIP READY FOR CLAIM
 		$total_local_trip_ready_for_claim = LocalTrip::where('local_trips.status_id', '=', '3028')->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date)->where('local_trips.end_date', '<', $current_date);
 		//TOTAL UPCOMING LOCAL TRIPS

@@ -98,11 +98,6 @@ class TripController extends Controller {
 
 	}
 
-	public function getDashboard() {
-		return Trip::getDashboardData();
-
-	}
-
 	public function deleteTrip($trip_id) {
 		return Trip::deleteTrip($trip_id);
 	}

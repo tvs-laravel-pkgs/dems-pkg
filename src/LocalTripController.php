@@ -174,7 +174,7 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->whereIN('local_trips.status_id', [3023, 3024, 3026, 3029, 3035])
+			->whereIN('local_trips.status_id', [3023, 3024, 3026, 3029, 3034, 3035])
 			->where('local_trips.employee_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')
 		// ->orderBy('trips.created_at', 'desc');
@@ -194,7 +194,7 @@ class LocalTripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id != '3026' || $trip->status_id != '3035' || $trip->status_id == '3023' || $trip->status_id == '3024') {
+				if ($trip->status_id != '3026' || $trip->status_id != '3034' || $trip->status_id != '3035' || $trip->status_id == '3023' || $trip->status_id == '3024') {
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('local-trip-edit')) {
 						$edit_class = "";
@@ -442,7 +442,7 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->whereIN('local_trips.status_id', [3030, 3035])
+			->whereIN('local_trips.status_id', [3030, 3034, 3035])
 			->groupBy('local_trips.id')
 		// ->orderBy('trips.created_at', 'desc');
 			->orderBy('local_trips.id', 'desc')

@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
@@ -138,6 +139,10 @@ class TripClaimVerificationTwoController extends Controller {
 		$employee_claim->save();
 		$trip->status_id = 3034; // Payment Pending
 		$trip->save();
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 6, $trip, $user);
+
 		return response()->json(['success' => true]);
 	}
 
@@ -163,6 +168,10 @@ class TripClaimVerificationTwoController extends Controller {
 		$activity['details'] = "Employee Claims V2 Rejected";
 		$activity['activity'] = "reject";
 		$activity_log = ActivityLog::saveLog($activity);
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 7, $trip, $user);
+
 		return response()->json(['success' => true]);
 	}
 

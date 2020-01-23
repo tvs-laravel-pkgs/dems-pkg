@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Mail;
 use Session;
+use Uitoux\EYatra\Employee;
 use Validator;
 
 class Trip extends Model {
@@ -250,6 +251,9 @@ class Trip extends Model {
 			}
 			if (!$request->id) {
 				// self::sendTripNotificationMail($trip);
+				$employee = Employee::where('id', $trip->employee_id)->first();
+				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+				$notification = sendnotification($type = 1, $trip, $user);
 			}
 			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
@@ -781,6 +785,7 @@ class Trip extends Model {
 		$activity['details'] = 'Trip is Deleted';
 		$activity['activity'] = "delete";
 		//dd($activity);
+
 		$activity_log = ActivityLog::saveLog($activity);
 
 		if (!$trip) {
@@ -858,32 +863,6 @@ class Trip extends Model {
 		}
 	}
 
-	public static function getDashboardData() {
-		$total_trips = Trip::where('status_id', '!=', '3032')->where('employee_id', Auth::user()->entity_id)
-			->count();
-
-		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', '!=', '3032')->where('status_id', '!=', '3026')->count();
-
-		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', '!=', '3032')->where('start_date', '>', date('Y-m-d'))->count();
-
-		$dashboard_details['total_trips'] = $total_trips;
-		$dashboard_details['total_claims_pending'] = $total_claims_pending;
-		$dashboard_details['total_upcoming_trips'] = $total_upcoming_trips;
-
-		$getversion_code = DB::table('version_control')->where('project_name', 'dems')->orderBy('id', 'DESC')->first();
-		if ($getversion_code != NULL) {
-			$version_code = $getversion_code->version_code;
-			$version_name = $getversion_code->version_name;
-		} else {
-			$version_code = 0;
-			$version_name = 0;
-		}
-
-		$dashboard_details['version_code'] = $version_code;
-		$dashboard_details['version_name'] = $version_name;
-
-		return response()->json(['success' => true, 'dashboard_details' => $dashboard_details]);
-	}
 	public static function approveTrip($r) {
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
@@ -898,6 +877,10 @@ class Trip extends Model {
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 2, $trip, $user);
+
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
 
@@ -918,6 +901,10 @@ class Trip extends Model {
 		$activity_log = ActivityLog::saveLog($activity);
 
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 3, $trip, $user);
+
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
 
@@ -2093,6 +2080,10 @@ class Trip extends Model {
 					$employee_claim->local_travel_total = $local_total_amount;
 					$employee_claim->save();
 				}
+
+				$employee = Employee::where('id', $trip->employee_id)->first();
+				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+				$notification = sendnotification($type = 5, $trip, $user);
 
 				DB::commit();
 				return response()->json(['success' => true]);
