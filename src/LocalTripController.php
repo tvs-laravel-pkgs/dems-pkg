@@ -510,6 +510,9 @@ class LocalTripController extends Controller {
 			$trip->claim_approval_datetime = date('Y-m-d H:i:s');
 			$trip->save();
 
+			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+			$notification = sendnotification($type = 9, $trip, $user);
+
 			DB::commit();
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {
@@ -525,6 +528,10 @@ class LocalTripController extends Controller {
 		}
 		$trip->status_id = 3030;
 		$trip->save();
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 8, $trip, $user);
+
 		return response()->json(['success' => true, 'message' => 'Trip Hold successfully!']);
 	}
 
@@ -537,6 +544,10 @@ class LocalTripController extends Controller {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024;
 		$trip->save();
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 7, $trip, $user);
+
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
 

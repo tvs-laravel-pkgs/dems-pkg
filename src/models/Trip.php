@@ -251,10 +251,11 @@ class Trip extends Model {
 			}
 			if (!$request->id) {
 				// self::sendTripNotificationMail($trip);
-				$employee = Employee::where('id', $trip->employee_id)->first();
-				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-				$notification = sendnotification($type = 1, $trip, $user);
 			}
+
+			$employee = Employee::where('id', $trip->employee_id)->first();
+			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+			$notification = sendnotification($type = 1, $trip, $user);
 			// $activity_log = ActivityLog::saveLog($activity);
 			DB::commit();
 

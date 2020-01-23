@@ -350,6 +350,10 @@ class LocalTrip extends Model {
 				}
 			}
 
+			$employee = Employee::where('id', $trip->employee_id)->first();
+			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+			$notification = sendnotification($type = 1, $trip, $user);
+
 			DB::commit();
 
 			if (empty($request->id)) {
@@ -465,8 +469,10 @@ class LocalTrip extends Model {
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
 			$trip->status_id = 3034;
+			$type = 6;
 		} else {
 			$trip->status_id = 3028;
+			$type = 2;
 		}
 
 		$trip->save();
@@ -476,6 +482,10 @@ class LocalTrip extends Model {
 		$activity['activity'] = "approve";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type, $trip, $user);
+
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
 
@@ -489,8 +499,10 @@ class LocalTrip extends Model {
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $r->trip_id)->count();
 		if ($trip_visit_details > 0) {
 			$trip->status_id = 3024;
+			$type = 7;
 		} else {
 			$trip->status_id = 3022;
+			$type = 3;
 		}
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
@@ -499,6 +511,9 @@ class LocalTrip extends Model {
 		$activity['details'] = 'Trip is Rejected by Manager';
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type, $trip, $user);
 
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
