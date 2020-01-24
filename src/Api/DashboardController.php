@@ -12,7 +12,11 @@ class DashboardController extends Controller {
 	public $successStatus = 200;
 
 	public function saveNotification($id) {
-		$notification_details = MobileNotificationDetail::where('id', $id)->forceDelete();
+		if ($id == 'All') {
+			$notification_details = MobileNotificationDetail::where('user_id', Auth::user()->id)->forceDelete();
+		} else {
+			$notification_details = MobileNotificationDetail::where('id', $id)->forceDelete();
+		}
 		return response()->json(['success' => true]);
 	}
 	public function getNotification() {
