@@ -252,13 +252,15 @@ class Trip extends Model {
 			DB::commit();
 
 			// if (!$request->id) {
-			self::sendTripNotificationMail($trip);
+			// self::sendTripNotificationMail($trip);
 			// }
 
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip");
+			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
 			// $activity_log = ActivityLog::saveLog($activity);
+
+			dd();
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Trip added successfully!', 'trip' => $trip]);
 			} else {
@@ -880,7 +882,7 @@ class Trip extends Model {
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip");
+		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
 	}
@@ -904,7 +906,7 @@ class Trip extends Model {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 3, $trip, $user, $trip_type = "Outstation Trip");
+		$notification = sendnotification($type = 3, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Rejected');
 
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
@@ -1351,7 +1353,6 @@ class Trip extends Model {
 					->groupby('agent_id')
 					->get();
 				//dd($agents_visit);
-				//dd($agents_visit);
 				foreach ($agents_visit as $key => $agent) {
 					$visit_agents = Visit::select(
 						'visits.id',
@@ -1426,15 +1427,13 @@ class Trip extends Model {
 					$arr['from_mail'] = $from_mail;
 					//$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Manager';
-					$to_employee = Employee::select('users.email as email', 'users.name as name')
+					$to_employee = Employee::select('users.mobile_number', 'employees.id', 'users.email as email', 'users.name as name')
 						->join('users', 'users.entity_id', 'employees.reporting_to_id')
 						->where('users.user_type_id', 3121)
 						->where('employees.id', Auth::user()->entity_id)
 						->first();
 					if ($to_employee->email) {
 						$arr['to_email'] = $to_employee->email;
-						//$arr['to_email'] = 'saravanan@uitoux.in';
-						//$arr['to_name'] = 'parthiban';
 						$arr['to_name'] = $to_employee->name;
 						$arr['subject'] = 'Trip Approval Request';
 						$arr['body'] = 'Employee ticket booking notification';
@@ -1446,6 +1445,13 @@ class Trip extends Model {
 						$Mail = Mail::send($MailInstance);
 					}
 
+					$mobile_number = '9965098134';
+					// $mobile_number = $to_employee->mobile_number;
+					// $message = config('custom.SMS_TEMPLATES.TRIP_REQUEST');
+					$message = "Your OTP is " . $trip_id . " to reset password in PIAS Application. Please enter OTP to verify your mobile number.";
+					if ($mobile_number) {
+						sendNotificationTxtMsg($to_employee->id, $message, $mobile_number);
+					}
 				}
 				// Financier mail trigger
 				$visit_financier = Visit::select(
@@ -1474,7 +1480,7 @@ class Trip extends Model {
 					$arr['from_mail'] = $from_mail;
 					//$arr['from_mail'] = 'saravanan@uitoux.in';
 					$arr['from_name'] = 'Financier';
-					$financier = User::select('name', 'email')
+					$financier = User::select('users.mobile_number', 'users.entity_id', 'name', 'email')
 						->join('role_user', 'role_user.user_id', 'users.id')
 						->where('role_user.role_id', 505)
 						->where('users.company_id', Auth::user()->company_id)
@@ -1482,9 +1488,6 @@ class Trip extends Model {
 					if ($financier->email) {
 						$arr['to_email'] = $financier->email;
 						$arr['to_name'] = $financier->name;
-						//$arr['to_email'] = 'saravanan@uitoux.in';
-						//$arr['to_name'] = 'parthiban';
-						//dd($user_details_cc['email']);
 						$arr['subject'] = 'Trip Advance Request';
 						$arr['body'] = 'Employee ticket booking notification';
 						$arr['employee_details'] = $employee_details;
@@ -1494,50 +1497,58 @@ class Trip extends Model {
 						$MailInstance = new TripNotificationMail($arr);
 						$Mail = Mail::send($MailInstance);
 					}
-				}
 
-				// Employee Mail trigger
-				$visit_employee = Visit::select(
-					'visits.id',
-					'visits.notes_to_agent',
-					'trips.id as trip_id',
-					'users.name as employee_name',
-					DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
-					'fromcity.name as fromcity_name',
-					'tocity.name as tocity_name',
-					'travel_modes.name as travel_mode_name',
-					'booking_modes.name as booking_method_name', 'visits.notes_to_agent', 'visits.prefered_departure_time'
-				)
-					->join('trips', 'trips.id', 'visits.trip_id')
-					->leftjoin('users', 'trips.employee_id', 'users.id')
-					->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
-					->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-					->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
-					->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
-					->where('visits.trip_id', $trip_id)
-					->get();
-				if ($visit_employee) {
-					$arr['from_mail'] = $from_mail;
-					//$arr['from_mail'] = 'saravanan@uitoux.in';
-					$arr['from_name'] = 'Employee';
-					$to_employee = Employee::select('users.email as email', 'users.name as name')
-						->join('users', 'users.entity_id', 'employees.id')
-						->where('users.user_type_id', 3121)
-						->where('employees.id', Auth::user()->entity_id)
-						->first();
-					if ($to_employee->email) {
-						$arr['to_email'] = $to_employee->email;
-						$arr['to_name'] = $to_employee->name;
-						$arr['subject'] = 'Trip Approval Request';
-						$arr['body'] = 'Employee ticket booking notification';
-						$arr['employee_details'] = $employee_details;
-						$arr['visits'] = $visit_manager;
-						$arr['trip'] = $trip;
-						$arr['type'] = 4;
-						$MailInstance = new TripNotificationMail($arr);
-						$Mail = Mail::send($MailInstance);
+					$mobile_number = '9965098134';
+					// $mobile_number = $to_employee->mobile_number;
+					// $message = config('custom.SMS_TEMPLATES.TRIP_ADVANCE_REQUEST');
+					$message = "Your OTP is " . $trip_id . " to reset password in PIAS Application. Please enter OTP to verify your mobile number.";
+					if ($mobile_number) {
+						sendNotificationTxtMsg($to_employee->id, $message, $mobile_number);
 					}
 				}
+
+				// // Employee Mail trigger
+				// $visit_employee = Visit::select(
+				// 	'visits.id',
+				// 	'visits.notes_to_agent',
+				// 	'trips.id as trip_id',
+				// 	'users.name as employee_name',
+				// 	DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
+				// 	'fromcity.name as fromcity_name',
+				// 	'tocity.name as tocity_name',
+				// 	'travel_modes.name as travel_mode_name',
+				// 	'booking_modes.name as booking_method_name', 'visits.notes_to_agent', 'visits.prefered_departure_time'
+				// )
+				// 	->join('trips', 'trips.id', 'visits.trip_id')
+				// 	->leftjoin('users', 'trips.employee_id', 'users.id')
+				// 	->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+				// 	->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+				// 	->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
+				// 	->join('configs as booking_modes', 'booking_modes.id', 'visits.booking_method_id')
+				// 	->where('visits.trip_id', $trip_id)
+				// 	->get();
+				// if ($visit_employee) {
+				// 	$arr['from_mail'] = $from_mail;
+				// 	//$arr['from_mail'] = 'saravanan@uitoux.in';
+				// 	$arr['from_name'] = 'Employee';
+				// 	$to_employee = Employee::select('users.email as email', 'users.name as name')
+				// 		->join('users', 'users.entity_id', 'employees.id')
+				// 		->where('users.user_type_id', 3121)
+				// 		->where('employees.id', Auth::user()->entity_id)
+				// 		->first();
+				// 	if ($to_employee->email) {
+				// 		$arr['to_email'] = $to_employee->email;
+				// 		$arr['to_name'] = $to_employee->name;
+				// 		$arr['subject'] = 'Trip Approval Request';
+				// 		$arr['body'] = 'Employee ticket booking notification';
+				// 		$arr['employee_details'] = $employee_details;
+				// 		$arr['visits'] = $visit_manager;
+				// 		$arr['trip'] = $trip;
+				// 		$arr['type'] = 4;
+				// 		$MailInstance = new TripNotificationMail($arr);
+				// 		$Mail = Mail::send($MailInstance);
+				// 	}
+				// }
 			}
 		} catch (Exception $e) {
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
