@@ -1537,7 +1537,6 @@ class Trip extends Model {
 						$MailInstance = new TripNotificationMail($arr);
 						$Mail = Mail::send($MailInstance);
 					}
-
 				}
 			}
 		} catch (Exception $e) {
