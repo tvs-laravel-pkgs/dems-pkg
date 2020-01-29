@@ -20,7 +20,7 @@ class Visit extends Model {
 		// 'departure_date',
 		// 'arrival_date',
 		'status_id',
-		'prefered_departure_time',
+		// 'prefered_departure_time',
 		'manager_verification_status_id',
 	];
 

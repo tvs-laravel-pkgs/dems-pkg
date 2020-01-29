@@ -511,7 +511,7 @@ class LocalTripController extends Controller {
 			$trip->save();
 
 			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-			$notification = sendnotification($type = 9, $trip, $user, $trip_type = "Local Trip");
+			// $notification = sendnotification($type = 9, $trip, $user, $trip_type = "Local Trip");
 
 			DB::commit();
 			return response()->json(['success' => true]);
@@ -530,7 +530,7 @@ class LocalTripController extends Controller {
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 8, $trip, $user, $trip_type = "Local Trip");
+		// $notification = sendnotification($type = 8, $trip, $user, $trip_type = "Local Trip");
 
 		return response()->json(['success' => true, 'message' => 'Trip Hold successfully!']);
 	}
@@ -546,7 +546,7 @@ class LocalTripController extends Controller {
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Local Trip");
+		// $notification = sendnotification($type = 7, $trip, $user, $trip_type = "Local Trip");
 
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
 	}
