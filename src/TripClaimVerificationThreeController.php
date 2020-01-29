@@ -103,7 +103,7 @@ class TripClaimVerificationThreeController extends Controller {
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		// $notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Paid');
+		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Payment Pending');
 
 		return response()->json(['success' => true]);
 	}
@@ -156,7 +156,7 @@ class TripClaimVerificationThreeController extends Controller {
 			$employee_claim->save();
 
 			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-			// $notification = sendnotification($type = 9, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
+			$notification = sendnotification($type = 9, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Paid');
 
 			DB::commit();
 			return response()->json(['success' => true]);
@@ -185,7 +185,7 @@ class TripClaimVerificationThreeController extends Controller {
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		// $notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
+		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
 
 		return response()->json(['success' => true]);
 	}
