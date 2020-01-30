@@ -177,7 +177,7 @@ class Trip extends Model {
 			}
 			$employee = Employee::where('id', Auth::user()->entity->id)->first();
 
-			if ($request->advance_received) {
+			if ($request->advance_received >= 1) {
 				// $trip->advance_received = $request->advance_received;
 				// if ($employee->self_approve == 1) {
 				// 	$trip->advance_request_approval_status_id = 3261;
@@ -248,7 +248,7 @@ class Trip extends Model {
 
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-			// $notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
+			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
 			$activity_log = ActivityLog::saveLog($activity);
 
 			if (empty($request->id)) {

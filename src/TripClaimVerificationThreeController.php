@@ -206,7 +206,7 @@ class TripClaimVerificationThreeController extends Controller {
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		// $notification = sendnotification($type = 8, $trip, $user . $trip_type = "Outstation Trip", $notification_type = 'Claim Hold');
+		$notification = sendnotification($type = 8, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Hold');
 
 		return response()->json(['success' => true]);
 	}

@@ -155,12 +155,14 @@ app.component('eyatraLocalTripVerificationView', {
             $scope.search = '';
         };
 
-        $(document).on('click', '.approve_btn', function() {
+        $(document).on('click', '.local_approve_btn', function() {
             $id = $('#trip_id').val();
+            $('#local_approve_btn').button('loading');
             $http.get(
                 local_trip_verification_approve_url + '/' + $id,
             ).then(function(response) {
                 console.log(response);
+                 $('#local_approve_btn').button('reset');
                 if (!response.data.success) {
                     var errors = '';
                     for (var i in res.errors) {
@@ -176,7 +178,7 @@ app.component('eyatraLocalTripVerificationView', {
                     }, 1000);
                 } else {
                     custom_noty('success', 'Local Trip Approved Successfully');
-                    $('#alert-modal-approve').modal('hide');
+                    $('#alert-local-modal-approve').modal('hide');
                     setTimeout(function() {
                         $location.path('/local-trip/verification/list')
                         $scope.$apply()
@@ -187,15 +189,16 @@ app.component('eyatraLocalTripVerificationView', {
         });
 
         //Reject
-        $(document).on('click', '.reject_btn', function() {
+        $(document).on('click', '.local_reject_btn', function() {
             var form_id = '#trip-reject-form';
+
             var v = jQuery(form_id).validate({
                 ignore: '',
 
                 submitHandler: function(form) {
 
                     let formData = new FormData($(form_id)[0]);
-                    $('#reject_btn').button('loading');
+                    $('#local_reject_btn').button('loading');
                     $.ajax({
                             url: laravel_routes['rejectLocalTrip'],
                             method: "POST",
@@ -206,7 +209,7 @@ app.component('eyatraLocalTripVerificationView', {
                         .done(function(res) {
                             console.log(res.success);
                             if (!res.success) {
-                                $('#reject_btn').button('reset');
+                                $('#local_reject_btn').button('reset');
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
@@ -214,7 +217,7 @@ app.component('eyatraLocalTripVerificationView', {
                                 custom_noty('error', errors);
                             } else {
                                 custom_noty('success', 'Local Trip Rejected Successfully');
-                                $('#alert-modal-reject').modal('hide');
+                                $('#alert-local-modal-reject').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/local-trip/verification/list')
                                     $scope.$apply()
@@ -290,12 +293,14 @@ app.component('eyatraLocalTripVerificationDetailView', {
             $scope.search = '';
         };
 
-        $(document).on('click', '.claim_approve_btn', function() {
+        $(document).on('click', '.claim_local_approve_btn', function() {
             $id = $('#trip_id').val();
+            $('#claim_local_approve_btn').button('loading');
             $http.get(
                 local_trip_verification_approve_url + '/' + $id,
             ).then(function(response) {
                 console.log(response);
+                $('#claim_local_approve_btn').button('reset');
                 if (!response.data.success) {
                     var errors = '';
                     for (var i in res.errors) {
@@ -311,7 +316,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
                     }, 1000);
                 } else {
                     custom_noty('success', 'Local Trip Claim Approved Successfully');
-                    $('#alert-modal-approve').modal('hide');
+                    $('#alert-local-claim-modal-approve').modal('hide');
                     setTimeout(function() {
                         $location.path('/local-trip/verification/list')
                         $scope.$apply()
@@ -322,7 +327,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
         });
 
         //Reject
-        $(document).on('click', '.claim_reject_btn', function() {
+        $(document).on('click', '.claim_local_reject_btn', function() {
             var form_id = '#trip-reject-form';
             var v = jQuery(form_id).validate({
                 ignore: '',
@@ -330,7 +335,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
                 submitHandler: function(form) {
 
                     let formData = new FormData($(form_id)[0]);
-                    $('#reject_btn').button('loading');
+                    $('#claim_local_reject_btn').button('loading');
                     $.ajax({
                             url: laravel_routes['rejectLocalTrip'],
                             method: "POST",
@@ -341,7 +346,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
                         .done(function(res) {
                             console.log(res.success);
                             if (!res.success) {
-                                $('#reject_btn').button('reset');
+                                $('#claim_local_reject_btn').button('reset');
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
@@ -349,7 +354,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
                                 custom_noty('error', errors);
                             } else {
                                 custom_noty('success', 'Local Trip Claim Rejected Successfully');
-                                $('#alert-modal-reject').modal('hide');
+                                $('#alert-local-claim-modal-reject').modal('hide');
                                 setTimeout(function() {
                                     $location.path('/local-trip/verification/list')
                                     $scope.$apply()

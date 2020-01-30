@@ -199,7 +199,8 @@ app.component('eyatraAdvanceClaimRequests', {
 
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
                     
-                    $location.path('/trip/claim/payment-pending/list');
+                     // location.reload();
+                    $location.path('/advance-claim/requests');
                     $scope.$apply();
 
 

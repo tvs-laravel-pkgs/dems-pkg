@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use DB;
 use Excel;
@@ -148,7 +149,8 @@ class AdvanceClaimRequestController extends Controller {
 		$payment->created_by = Auth::user()->id;
 		$payment->save();
 
-		// $trip->visits()->update(['manager_verification_status_id' => 3080]);
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 10, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Request Approved');
 		return response()->json(['success' => true]);
 	}
 
@@ -160,7 +162,6 @@ class AdvanceClaimRequestController extends Controller {
 		$trip->status_id = 3028;
 		$trip->save();
 
-		$trip->visits()->update(['manager_verification_status_id' => 3081]);
 		return response()->json(['success' => true]);
 	}
 
@@ -193,12 +194,12 @@ class AdvanceClaimRequestController extends Controller {
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$trip->rejection_id = $r->reject_id;
-		$trip->rejection_remarks = $r->remarks;
-		$trip->status_id = 3022;
+		$trip->advance_request_approval_status_id = 3262;
 		$trip->save();
 
-		$trip->visits()->update(['manager_verification_status_id' => 3082]);
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type = 10, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Request Rejected');
+
 		return response()->json(['success' => true]);
 	}
 	public function AdvanceClaimRequestApprove(request $request) {
@@ -224,7 +225,7 @@ class AdvanceClaimRequestController extends Controller {
 		DB::beginTransaction();
 		try {
 
-			$trips = Trip::select('users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id')
+			$trips = Trip::select('users.email', 'users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
@@ -234,7 +235,13 @@ class AdvanceClaimRequestController extends Controller {
 
 			$trips_status_update = Trip::where('advance_request_approval_status_id', 3263)->update(['advance_request_approval_status_id' => 3261]);
 			DB::commit();
-			//dd($trips);
+
+			foreach ($trips as $key => $emp_details) {
+				$user = User::where('entity_id', $emp_details->id)->where('user_type_id', 3121)->first();
+				$trip = Trip::find($emp_details->id);
+				$notification = sendnotification($type = 10, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Request Approved');
+			}
+
 			$trips_header = ['Employee Name', 'Employee Code', 'Account Number', 'Ifsc code', 'Amount'];
 			$logs_details = array();
 			if (count($trips) > 0) {
