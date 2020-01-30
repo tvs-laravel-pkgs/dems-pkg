@@ -216,7 +216,9 @@ class EmployeeController extends Controller {
 			'designation_list' => $designation_list,
 		];
 
-		// dd($this->data['extras']);
+		$is_grade_active = Entity::where('entity_type_id', 500)->where('id', $employee->grade_id)->first();
+		$is_grade_active = $is_grade_active ? '1' : '0';
+		$this->data['is_grade_active'] = $is_grade_active;
 		$this->data['employee'] = $employee;
 
 		return response()->json($this->data);
@@ -419,6 +421,11 @@ class EmployeeController extends Controller {
 		}
 		$employee->roles = $employee->user->roles()->pluck('name')->toArray();
 		$this->data['employee'] = $employee;
+
+		$is_grade_active = Entity::where('entity_type_id', 500)->where('id', $employee->grade_id)->first();
+		$is_grade_active = $is_grade_active ? '1' : '0';
+		$this->data['is_grade_active'] = $is_grade_active;
+
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}

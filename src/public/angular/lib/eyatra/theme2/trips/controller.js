@@ -339,7 +339,7 @@ app.component('eyatraTripForm', {
             }).show();
             setTimeout(function() {
                 $noty.close();
-            }, 100000);
+            }, 5000);
         }
 
 
@@ -378,15 +378,26 @@ app.component('eyatraTripForm', {
             }
             var error_details = 0;
             var leng = self.trip.visits.length;
+            // for (j = 0; j < leng; j++) {
+            //     if (self.trip.visits[j].to_city_details) {
+            //         from_id = self.trip.visits[j].from_city_details ? self.trip.visits[j].from_city_details.id : self.trip.visits[j].from_city_id;
+            //         if (self.trip.visits[j].to_city_details.id == self.trip.visits[j].from_city_details.id) {
+            //             error_details = 1;
+            //             sameFromTo();
+            //         }
+            //     }
+            // }
             for (j = 0; j < leng; j++) {
-                if (self.trip.visits[j].to_city_details) {
-                    from_id = self.trip.visits[j].from_city_details ? self.trip.visits[j].from_city_details.id : self.trip.visits[j].from_city_id;
-                    if (self.trip.visits[j].to_city_details.id == self.trip.visits[j].from_city_details.id) {
+                var from_city_id = $('#from_city_id_' + j).val();
+                var to_city_id = $('#to_city_id_' + j).val();
+                if (to_city_id) {
+                    if (from_city_id == to_city_id) {
                         error_details = 1;
                         sameFromTo();
                     }
                 }
             }
+
             if (error_details == 1) {
                 $('.btn-submit').prop('disabled', true);
             } else {
@@ -803,7 +814,7 @@ app.component('eyatraTripView', {
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
-                    $('#cancel_trip').modal('hide');    
+                    $('#cancel_trip').modal('hide');
                     setTimeout(function() {
                         $location.path('/trips')
                         $scope.$apply()

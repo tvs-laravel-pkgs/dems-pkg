@@ -189,6 +189,10 @@ app.component('eyatraEmployeeForm', {
             }
 
             if (self.action == 'Edit') {
+                if (response.data.is_grade_active == '0') {
+                    self.employee.grade_id = '';
+                    self.employee.designation_id = '';
+                }
                 self.switch_password = 'No';
                 $("#hide_password").hide();
                 $("#password").prop('disabled', true);
@@ -559,6 +563,10 @@ app.component('eyatraEmployeeView', {
             self.roles = self.employee.roles ? self.employee.roles.join() : '';
             $scope.selectPaymentMode(self.employee.payment_mode_id);
 
+            if (response.data.is_grade_active == '0') {
+                self.employee.grade = [];
+                self.employee.designation = [];
+            }
         });
         //SELECT PAYMENT MODE
         $scope.selectPaymentMode = function(payment_id) {

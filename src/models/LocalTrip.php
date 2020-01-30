@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra;
 
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -350,7 +351,15 @@ class LocalTrip extends Model {
 				}
 			}
 
+			$employee = Employee::where('id', $trip->employee_id)->first();
+			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+
 			DB::commit();
+			$notification_type = 'Trip Requested';
+			if ($trip->status_id == 3023) {
+				$notification_type = 'Claim Requested';
+			}
+			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Local Trip", $notification_type = $notification_type);
 
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Trip added successfully!', 'trip' => $trip]);
@@ -464,9 +473,11 @@ class LocalTrip extends Model {
 		}
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
-			$trip->status_id = 3035;
+			$trip->status_id = 3034;
+			$type = 6;
 		} else {
 			$trip->status_id = 3028;
+			$type = 2;
 		}
 
 		$trip->save();
@@ -476,7 +487,18 @@ class LocalTrip extends Model {
 		$activity['activity'] = "approve";
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
-		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
+
+		$notification_type = 'Trip Approved';
+		$message = "Trip approved successfully!";
+		if ($trip->status_id == 3034) {
+			$notification_type = 'Claim Approved';
+			$message = "Claim approved successfully!";
+		}
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip", $notification_type = $notification_type);
+
+		return response()->json(['success' => true, 'message' => $message]);
 	}
 
 	public static function rejectTrip($r) {
@@ -489,8 +511,10 @@ class LocalTrip extends Model {
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $r->trip_id)->count();
 		if ($trip_visit_details > 0) {
 			$trip->status_id = 3024;
+			$type = 7;
 		} else {
 			$trip->status_id = 3022;
+			$type = 3;
 		}
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
@@ -500,7 +524,17 @@ class LocalTrip extends Model {
 		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
 
-		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
+		$notification_type = 'Trip Rejected';
+		$message = "Trip rejected successfully!";
+		if ($trip->status_id == 3024) {
+			$notification_type = 'Claim Rejected';
+			$message = "Claim rejected successfully!";
+		}
+
+		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip", $notification_type = $notification_type);
+
+		return response()->json(['success' => true, 'message' => $message]);
 	}
 
 	public static function cancelTrip($trip_id) {
