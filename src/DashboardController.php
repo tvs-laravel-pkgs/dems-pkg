@@ -66,25 +66,25 @@ class DashboardController extends Controller {
 
 		$selected_year = explode('-', $fyc_year_session);
 
-		if ($fyc_month_session && $fyc_month_session != '-1') {
+		// if ($fyc_month_session && $fyc_month_session != '-1') {
 
-			$split_year = explode('-', $fyc_year_session);
-			$first_year = $split_year[0];
-			$second_year = $split_year[1];
+		// 	$split_year = explode('-', $fyc_year_session);
+		// 	$first_year = $split_year[0];
+		// 	$second_year = $split_year[1];
 
-			if ($fyc_month_session <= 3) {
-				$start_date = date($second_year . '-' . $fyc_month_session . '-01');
-			} else {
-				$start_date = date($first_year . '-' . $fyc_month_session . '-01');
-			}
+		// 	if ($fyc_month_session <= 3) {
+		// 		$start_date = date($second_year . '-' . $fyc_month_session . '-01');
+		// 	} else {
+		// 		$start_date = date($first_year . '-' . $fyc_month_session . '-01');
+		// 	}
 
-			$end_date = date('Y-m-t', strtotime($start_date));
+		// 	$end_date = date('Y-m-t', strtotime($start_date));
 
-		} else {
-			$start_date = $selected_year[0] . '-04-01';
-			$end_date = $selected_year[1] . '-03-31';
+		// } else {
+		$start_date = $selected_year[0] . '-04-01';
+		$end_date = $selected_year[1] . '-03-31';
 
-		}
+		// }
 
 		$result = $this->trip_details($start_date, $end_date, $outlet_id);
 
@@ -225,7 +225,7 @@ class DashboardController extends Controller {
 		//TOTAL OUTSTATION TRIP PAYMENT REQUESTED
 		$total_outstation_claim_requested = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', '!=', 3026)->where('ey_employee_claims.status_id', '!=', 3033)->whereIN('ey_employee_claims.status_id', [3023, 3024, 3025, 3029, 3030, 3031, 3034])->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP READY FOR CLAIM
-		$total_outstation_ready_for_claim = Trip::where('trips.status_id', '=', '3028')->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->where('trips.end_date', '<', $current_date);
+		$total_outstation_ready_for_claim = Trip::where('trips.status_id', '=', '3028')->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->where('trips.end_date', '<=', $current_date);
 		//TOTAL UPCOMING OUTSTATION TRIPS
 		$total_upcoming_outstation_trips = Trip::where('trips.status_id', '=', '3028')->where('trips.status_id', '!=', 3026)->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->where('trips.start_date', '>=', $current_date);
 
@@ -237,7 +237,7 @@ class DashboardController extends Controller {
 		//TOTAL LOCAL TRIP PAYMENT REQUESTED
 		$total_local_trip_claim_requested = LocalTrip::whereIN('local_trips.status_id', [3023, 3034, 3035, 3030, 3024])->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date);
 		//TOTAL LOCAL TRIP READY FOR CLAIM
-		$total_local_trip_ready_for_claim = LocalTrip::where('local_trips.status_id', '=', '3028')->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date)->where('local_trips.end_date', '<', $current_date);
+		$total_local_trip_ready_for_claim = LocalTrip::where('local_trips.status_id', '=', '3028')->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date)->where('local_trips.end_date', '<=', $current_date);
 		//TOTAL UPCOMING LOCAL TRIPS
 		$total_upcoming_local_trips = LocalTrip::where('local_trips.status_id', '=', '3028')->where('local_trips.status_id', '!=', 3026)->where('local_trips.start_date', '>=', $start_date)->where('local_trips.end_date', '<=', $end_date)->where('local_trips.start_date', '>=', $current_date);
 
