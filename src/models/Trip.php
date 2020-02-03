@@ -1557,6 +1557,10 @@ class Trip extends Model {
 						$employee_claim->amount_to_pay = 1;
 					}
 					$employee_claim->save();
+				} else {
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->lodging_total = 0;
+					$employee_claim->save();
 				}
 
 				//GET SAVED LODGINGS
@@ -1690,6 +1694,10 @@ class Trip extends Model {
 					} else {
 						$employee_claim->amount_to_pay = 1;
 					}
+					$employee_claim->save();
+				} else {
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->boarding_total = 0;
 					$employee_claim->save();
 				}
 
@@ -1847,6 +1855,10 @@ class Trip extends Model {
 						// }
 					}
 					$employee_claim->local_travel_total = $local_total_amount;
+					$employee_claim->save();
+				} else {
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->local_travel_total = 0;
 					$employee_claim->save();
 				}
 
