@@ -53,7 +53,7 @@ app.component('eyatraTripVerifications', {
                 // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'created_at', name: 'trips.created_at', searchable: true },
+                { data: 'date', name: 'trips.created_at', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
