@@ -1726,6 +1726,8 @@ class Trip extends Model {
 				}
 				$trip->claim_amount = $request->claim_total_amount; //claimed
 				$trip->claimed_date = date('Y-m-d H:i:s');
+				$trip->rejection_id = NULL;
+				$trip->rejection_remarks = NULL;
 				$trip->save();
 
 				//SAVE EMPLOYEE CLAIMS

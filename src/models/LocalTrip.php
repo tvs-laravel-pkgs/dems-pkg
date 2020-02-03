@@ -270,6 +270,8 @@ class LocalTrip extends Model {
 			$trip->claimed_date = date('Y-m-d');
 			$trip->save();
 			$trip->number = 'TRP' . $trip->id;
+			$trip->rejection_id = NULL;
+			$trip->rejection_remarks = NULL;
 			$trip->save();
 
 			if ($request->is_justify_my_trip) {
