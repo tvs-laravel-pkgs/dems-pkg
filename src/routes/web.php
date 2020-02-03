@@ -24,12 +24,6 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('trip/visit/booking-cancel/{visit_id}', 'Uitoux\EYatra\Api\TripController@cancelTripVisitBooking');
 		Route::get('trips/visit/delete/{visit_id}', 'Uitoux\EYatra\Api\TripController@deleteVisit');
 
-		//TRIP VERIFICATION
-		Route::get('trip/verification/get-list', 'Uitoux\EYatra\Api\TripVerificationController@listTripVerification');
-
-		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
-		Route::post('trip/verification/reject', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
-
 		// TRIP CLAIM
 		// Route::get('trip/cliam/list', 'Uitoux\EYatra\Api\TripVerificationController@listClaimList');
 		Route::post('trip/claim/list', 'Uitoux\EYatra\Api\TripClaimController@listClaimList');
@@ -42,6 +36,11 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/claim/get-visit-transport-mode-claim-status', 'Uitoux\EYatra\Api\TripClaimController@getVisitTrnasportModeClaimStatus');
 
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
+
+		//TRIP VERIFICATION
+		Route::get('trip/verification/get-list', 'Uitoux\EYatra\Api\TripVerificationController@listTripVerification');
+		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
+		Route::post('trip/verification/reject', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
 
 		//TRIP CLAIM VERIFICATION LEVEL
 		Route::get('trip/claim/verification/one/get-list', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@listTripClaimVerificationOneList');
@@ -73,7 +72,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('local-trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@approveTrip');
 		Route::post('local-trip/verification/reject', 'Uitoux\EYatra\Api\LocalTripController@rejectTrip');
 
-		//Profile Image Save
+		//PROFILE IMAGE SAVE
 		Route::post('/profile/save/image', 'Uitoux\EYatra\Api\ProfileController@saveImage')->name('profileSaveImage');
 
 		//NOTIFICATION

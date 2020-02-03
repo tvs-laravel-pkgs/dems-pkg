@@ -195,6 +195,8 @@ class Trip extends Model {
 			} else {
 				$trip->status_id = 3021; //Manager Approval Pending
 			}
+			$trip->rejection_id = NULL;
+			$trip->rejection_remarks = NULL;
 			$trip->save();
 
 			$trip->number = 'TRP' . $trip->id;
