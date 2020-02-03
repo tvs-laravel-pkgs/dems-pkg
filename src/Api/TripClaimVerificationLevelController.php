@@ -39,8 +39,8 @@ class TripClaimVerificationLevelController extends Controller {
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(ey_employee_claims.total_amount,2,"en_IN") as claim_amount'),
-				'trips.created_at',
-
+				// 'trips.created_at',
+				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date'),
 				'status.name as status'
 			)
 
