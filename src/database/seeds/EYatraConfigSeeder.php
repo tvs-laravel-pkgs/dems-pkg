@@ -746,7 +746,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//ACTIVITY LOG ENTITY TYPES - II
 			3500 => [
-				'name' => 'Petty Cash Expense types',
+				'name' => 'Expense types',
 				'config_type_id' => 519,
 			],
 

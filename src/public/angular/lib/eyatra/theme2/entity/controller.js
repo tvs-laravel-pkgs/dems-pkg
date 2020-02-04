@@ -124,7 +124,7 @@ app.component('eyatraEntityList', {
 
                 $id = $('#del').val();
                 $http.get(
-                    delete_entity_component_url + '/' + $id,
+                    eyatra_entity_delete_url + '/' + $id,
                 ).then(function(response) {
                     console.log(response.data);
                     if (response.data.success) {
