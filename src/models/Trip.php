@@ -222,13 +222,14 @@ class Trip extends Model {
 						return response()->json(['success' => false, 'errors' => "From City and To City should not be same,please choose another To city"]);
 					}
 					$visit = new Visit;
-					$visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
+					// $visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
 					$visit->fill($visit_data);
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					$visit->from_city_id = $from_city_id;
 					$visit->trip_id = $trip->id;
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
+					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : date('H:i:s', strtotime($visit_data['prefered_departure_time']));
 					$visit->booking_status_id = 3060; //PENDING
 					$visit->status_id = 3220; //NEW
 					$visit->manager_verification_status_id = 3080; //NEW
