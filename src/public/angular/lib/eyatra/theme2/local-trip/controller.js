@@ -193,6 +193,7 @@ app.component('eyatraTripLocalForm', {
             self.trip = response.data.trip;
             self.trip.trip_periods = '';
             self.eligible_date = response.data.eligible_date;
+            self.max_eligible_date = response.data.max_eligible_date;
 
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
@@ -204,6 +205,7 @@ app.component('eyatraTripLocalForm', {
                 $(".daterange").daterangepicker({
                     autoclose: true,
                     // minDate: new Date(self.eligible_date),
+                    maxDate: new Date(self.max_eligible_date),
                     locale: {
                         cancelLabel: 'Clear',
                         format: "DD-MM-YYYY",
@@ -219,6 +221,7 @@ app.component('eyatraTripLocalForm', {
                     $(".daterange").daterangepicker({
                         autoclose: true,
                         // minDate: new Date(self.eligible_date),
+                        maxDate: new Date(self.max_eligible_date),
                         locale: {
                             cancelLabel: 'Clear',
                             format: "DD-MM-YYYY",

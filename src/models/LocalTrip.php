@@ -196,6 +196,7 @@ class LocalTrip extends Model {
 
 		$data['success'] = true;
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
+		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+30 days"));
 
 		return response()->json($data);
 	}
