@@ -275,6 +275,7 @@ class Trip extends Model {
 			'visits.fromCity',
 			'visits.toCity',
 			'visits.travelMode',
+			'visits.travelMode.travelModesCategories',
 			'visits.bookingMethod',
 			'visits.bookingStatus',
 			'visits.agent',
@@ -293,7 +294,7 @@ class Trip extends Model {
 			'status',
 		])
 			->find($trip_id);
-		// dd($trip->employee->grade_details->claim_active_days);
+		// dd($trip);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -377,10 +378,12 @@ class Trip extends Model {
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility', 'travel_advance_limit')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
+			$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
+
 		} else {
 			$data['advance_eligibility'] = '';
+			$data['grade_advance_eligibility_amount'] = 0;
 		}
-		$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
 		//dd(Auth::user()->entity->outlet->address);
 
 		$data['extras'] = [
@@ -391,6 +394,7 @@ class Trip extends Model {
 			'city_list' => NCity::getList(),
 			'employee_city' => Auth::user()->entity->outlet->address->city,
 			'frequently_travelled' => Visit::join('ncities', 'ncities.id', 'visits.to_city_id')->where('ncities.company_id', Auth::user()->company_id)->select('ncities.id', 'ncities.name')->distinct()->limit(10)->get(),
+			'claimable_travel_mode_list' => DB::table('travel_mode_category_type')->where('category_id', 3403)->pluck('travel_mode_id'),
 		];
 		$data['trip'] = $trip;
 
