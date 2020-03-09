@@ -138,7 +138,7 @@ app.component('eyatraPettyCashList', {
                         $noty.close();
                     }, 5000);
                     $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('eyatra/petty-cash/');
+                    $location.path('petty-cash/');
                     $scope.$apply();
                 }
             });

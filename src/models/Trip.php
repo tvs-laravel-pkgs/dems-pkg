@@ -1727,6 +1727,8 @@ class Trip extends Model {
 				//UPDATE TRIP STATUS
 				$trip = Trip::find($request->trip_id);
 
+				$trip->rejection_remarks = NULL;
+				$trip->save();
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
 					// if ($trip->advance_received > $request->claim_total_amount) {

@@ -202,8 +202,12 @@ class OutletController extends Controller {
 		$option->name = 'Select Cashier';
 		$option->id = null;
 		// $this->data['cashier_list'] = $cashier_list = collect(Employee::select('name', 'id')
-		$this->data['cashier_list'] = $cashier_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('role_user', 'role_user.user_id', 'users.id')->where('role_user.role_id', 504)->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
+		// $this->data['cashier_list'] = $cashier_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('role_user', 'role_user.user_id', 'users.id')->where('role_user.role_id', 504)->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
+		// 	DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
+		// 		->get())->prepend($option);
+		$this->data['cashier_list'] = $cashier_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('outlets', 'outlets.cashier_id', 'employees.id')->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
 			DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
+				->groupBy('employees.id')
 				->get())->prepend($option);
 		$this->data['success'] = true;
 		//dd($this->data);
@@ -239,7 +243,7 @@ class OutletController extends Controller {
 
 			'name',
 			'code',
-			'employees.id'
+			'employees.id as entity_id'
 		)
 			->join('users', 'users.entity_id', 'employees.id')
 			->where('users.user_type_id', 3121)
