@@ -77,10 +77,21 @@ app.component('eyatraTrips', {
         }, 1000);
 
         setTimeout(function() {
-            var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_trip_table_filter');
-            x.left = x.left + 15;
-            d.style.left = x.left + 'px';
+            
+            if ($(window).width() > 466) {
+                var x = $('.separate-page-header-inner.search .custom-filter').position();
+                var d = document.getElementById('eyatra_trip_table_filter');
+                x.left = x.left + 15;
+                d.style.left = x.left + 'px';
+                //alert(x.top + ' , ' + x.left);
+            } else {
+                var x = $('.separate-page-header-inner.search .custom-filter').position();
+                var d = document.getElementById('eyatra_trip_table_filter');
+                x.top = x.top + 15;
+                d.style.top = x.top + 'px';
+                d.style.left = x.left + 'px';
+                //alert(x.top + ' , ' + x.left);
+            }
         }, 500);
 
 
