@@ -174,6 +174,10 @@ app.component('eyatraTripClaimForm', {
         var arrival_date_error_flag = 0;
         var arrival_from_to_km_error_flag = 0;
         $('.testt1').imageuploadify();
+        var transport_save = 0;
+        var lodging_save = 0;
+        var boarding_save = 0;
+        var other_expense_save = 0;
         $scope.searchTravelMode;
         $scope.clearSearchTravelMode = function() {
             $scope.searchTravelMode = '';
@@ -1570,6 +1574,10 @@ app.component('eyatraTripClaimForm', {
             var active_tab_type = $('.tab_li.active .tab_nav_expense').attr('data-nav_form');
             var selected_tab_type = $(this).attr('data-nav_tab');
             if (active_tab_type) { //EXCEPT LOCAL TRAVEL NAV
+                transport_save = 1;
+                lodging_save = 1;
+                boarding_save = 1;
+                other_expense_save = 1;
                 $('#claim_' + active_tab_type + '_expense_form').submit();
             } else {
                 self.enable_switch_tab = true;
@@ -1592,6 +1600,11 @@ app.component('eyatraTripClaimForm', {
             self.enable_switch_tab = false;
             //GET ACTIVE FORM 
             //alert();
+            transport_save = 1;
+            lodging_save = 1;
+            boarding_save = 1;
+            other_expense_save = 1;
+
             var current_form = $(this).attr('data-submit_type');
             var next_form = $(this).attr('data-next_submit_type');
             $('#claim_' + current_form + '_expense_form').submit();
@@ -1622,64 +1635,55 @@ app.component('eyatraTripClaimForm', {
                 error.insertAfter(element.parent())
             },
             submitHandler: function(form) {
-                //alert('123');
                 if (arrival_date_error_flag == 0 && arrival_from_to_km_error_flag == 0) {
-
-                    let formData = new FormData($(form_transport_id)[0]);
-                    $('#transport_submit').html('loading');
-                    $("#transport_submit").attr("disabled", true);
-                    self.enable_switch_tab = false;
-                    $.ajax({
-                            url: eyatra_trip_claim_save_url,
-                            method: "POST",
-                            data: formData,
-                            processData: false,
-                            contentType: false,
-                            async: false,
-                        })
-                        .done(function(res) {
-                            console.log(res);
-                            if (!res.success) {
-                                $('#transport_submit').html('Save & Next');
-                                $("#transport_submit").attr("disabled", false);
-                                var errors = '';
-                                for (var i in res.errors) {
-                                    errors += '<li>' + res.errors[i] + '</li>';
+                    if (transport_save) {
+                        transport_save = 0;
+                        let formData = new FormData($(form_transport_id)[0]);
+                        $('#transport_submit').html('loading');
+                        $("#transport_submit").attr("disabled", true);
+                        self.enable_switch_tab = false;
+                        $.ajax({
+                                url: eyatra_trip_claim_save_url,
+                                method: "POST",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                async: false,
+                            })
+                            .done(function(res) {
+                                console.log(res);
+                                if (!res.success) {
+                                    $('#transport_submit').html('Save & Next');
+                                    $("#transport_submit").attr("disabled", false);
+                                    var errors = '';
+                                    for (var i in res.errors) {
+                                        errors += '<li>' + res.errors[i] + '</li>';
+                                    }
+                                    custom_noty('error', errors);
+                                    self.enable_switch_tab = false;
+                                    $scope.$apply()
+                                } else {
+                                    
+                                    custom_noty('success', 'Transport expenses saved successfully!');
+                                    // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
+                                    //     self.trip.lodgings[key].date_range_list = val;
+                                    // });// $scope.$apply()
+                                    // $('.tab_li').removeClass('active');
+                                    // $('.tab_lodging').addClass('active');
+                                    // $('.tab-pane').removeClass('in active');
+                                    // $('#lodging-expenses').addClass('in active');
+                                    self.enable_switch_tab = true;
+                                    $scope.$apply()
+                                    $('#transport_submit').html('Save & Next');
+                                    $("#transport_submit").attr("disabled", false);
                                 }
-                                custom_noty('error', errors);
-                                self.enable_switch_tab = false;
-                                $scope.$apply()
-                            } else {
-                                // $noty = new Noty({
-                                //     type: 'success',
-                                //     layout: 'topRight',
-                                //     text: 'Transport expenses saved successfully!!',
-                                //     animation: {
-                                //         speed: 500 // unavailable - no need
-                                //     },
-                                // }).show();
-                                // setTimeout(function() {
-                                //     $noty.close();
-                                // }, 4000);
-                                custom_noty('success', 'Transport expenses saved successfully!');
-                                // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
-                                //     self.trip.lodgings[key].date_range_list = val;
-                                // });// $scope.$apply()
-                                // $('.tab_li').removeClass('active');
-                                // $('.tab_lodging').addClass('active');
-                                // $('.tab-pane').removeClass('in active');
-                                // $('#lodging-expenses').addClass('in active');
-                                self.enable_switch_tab = true;
-                                $scope.$apply()
+                            })
+                            .fail(function(xhr) {
                                 $('#transport_submit').html('Save & Next');
                                 $("#transport_submit").attr("disabled", false);
-                            }
-                        })
-                        .fail(function(xhr) {
-                            $('#transport_submit').html('Save & Next');
-                            $("#transport_submit").attr("disabled", false);
-                            custom_noty('error', 'Something went wrong at server');
-                        });
+                                custom_noty('error', 'Something went wrong at server');
+                            });
+                    }
                 } else {
                     if (arrival_date_error_flag == 1) {
                         $noty = new Noty({
@@ -1718,80 +1722,72 @@ app.component('eyatraTripClaimForm', {
             rules: {},
             submitHandler: function(form) {
                 //console.log(self.item);
-                let formData = new FormData($(form_lodge_id)[0]);
-                $('#lodge_submit').html('loading');
-                $("#lodge_submit").attr("disabled", true);
-                self.enable_switch_tab = false;
-                $.ajax({
-                        url: eyatra_trip_claim_save_url,
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        async: false,
-                    })
-                    .done(function(res) {
-                        if (!res.success) {
-                            $('#lodge_submit').html('Save & Next');
-                            $("#lodge_submit").attr("disabled", false);
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
+                if (lodging_save) {
+                    lodging_save = 0;
+                    let formData = new FormData($(form_lodge_id)[0]);
+                    $('#lodge_submit').html('loading');
+                    $("#lodge_submit").attr("disabled", true);
+                    self.enable_switch_tab = false;
+                    $.ajax({
+                            url: eyatra_trip_claim_save_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            async: false,
+                        })
+                        .done(function(res) {
+                            if (!res.success) {
+                                $('#lodge_submit').html('Save & Next');
+                                $("#lodge_submit").attr("disabled", false);
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                                self.enable_switch_tab = false;
+                                $scope.$apply()
+                            } else {
+                                
+                                custom_noty('success', 'Lodging expenses saved successfully!');
+                                // self.boarding_dates_list = res.boarding_dates_list;
+                                // self.local_travel_dates_list = res.boarding_dates_list;
+                                // if (!self.trip.boardings.length) {
+                                //     self.addNewBoardings();
+                                // } else {
+                                //     $(self.trip.boardings).each(function(key, val) {
+                                //         self.trip.boardings[key].date_range_list = self.boarding_dates_list;
+                                //     });
+                                // }
+                                // if (!self.trip.local_travels.length) {
+                                //     self.addNewLocalTralvels();
+                                // } else {
+                                //     $(self.trip.local_travels).each(function(key, val) {
+                                //         self.trip.local_travels[key].date_range_list = self.local_travel_dates_list;
+                                //     });
+                                // }
+
+                                //REFRESH LODGINGS
+                                self.trip.lodgings = res.saved_lodgings.lodgings;
+                                self.lodgings_removal_id = [];
+                                self.lodgings_attachment_removal_ids = [];
+                                $('#lodgings_attach_removal_ids').val('');
+                                self.enable_switch_tab = true;
+                                $scope.$apply()
+                                // $('.tab_li').removeClass('active');
+                                // $('.tab_boarding').addClass('active');
+                                // $('.tab-pane').removeClass('in active');
+                                // $('#boarding-expenses').addClass('in active');
+                                $('#lodge_submit').html('Save & Next');
+                                $("#lodge_submit").attr("disabled", false);
                             }
-                            custom_noty('error', errors);
-                            self.enable_switch_tab = false;
-                            $scope.$apply()
-                        } else {
-                            // $noty = new Noty({
-                            //     type: 'success',
-                            //     layout: 'topRight',
-                            //     text: 'Lodge expenses saved successfully!!',
-                            //     animation: {
-                            //         speed: 500 // unavailable - no need
-                            //     },
-                            // }).show();
-                            // setTimeout(function() {
-                            //     $noty.close();
-                            // }, 4000);
-                            custom_noty('success', 'Lodging expenses saved successfully!');
-                            // self.boarding_dates_list = res.boarding_dates_list;
-                            // self.local_travel_dates_list = res.boarding_dates_list;
-                            // if (!self.trip.boardings.length) {
-                            //     self.addNewBoardings();
-                            // } else {
-                            //     $(self.trip.boardings).each(function(key, val) {
-                            //         self.trip.boardings[key].date_range_list = self.boarding_dates_list;
-                            //     });
-                            // }
-                            // if (!self.trip.local_travels.length) {
-                            //     self.addNewLocalTralvels();
-                            // } else {
-                            //     $(self.trip.local_travels).each(function(key, val) {
-                            //         self.trip.local_travels[key].date_range_list = self.local_travel_dates_list;
-                            //     });
-                            // }
-
-                            //REFRESH LODGINGS
-                            self.trip.lodgings = res.saved_lodgings.lodgings;
-                            self.lodgings_removal_id = [];
-                            self.lodgings_attachment_removal_ids = [];
-                            $('#lodgings_attach_removal_ids').val('');
-                            self.enable_switch_tab = true;
-                            $scope.$apply()
-                            // $('.tab_li').removeClass('active');
-                            // $('.tab_boarding').addClass('active');
-                            // $('.tab-pane').removeClass('in active');
-                            // $('#boarding-expenses').addClass('in active');
+                        })
+                        .fail(function(xhr) {
                             $('#lodge_submit').html('Save & Next');
                             $("#lodge_submit").attr("disabled", false);
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#lodge_submit').html('Save & Next');
-                        $("#lodge_submit").attr("disabled", false);
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
             },
         });
 
@@ -1806,66 +1802,58 @@ app.component('eyatraTripClaimForm', {
             },
             submitHandler: function(form) {
                 //console.log(self.item);
-                let formData = new FormData($(form_board_id)[0]);
-                $('#board_submit').html('loading');
-                $("#board_submit").attr("disabled", true);
-                self.enable_switch_tab = false;
-                $.ajax({
-                        url: eyatra_trip_claim_save_url,
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        async: false,
-                    })
-                    .done(function(res) {
-                        console.log(res);
-                        if (!res.success) {
-                            $('#board_submit').html('Save & Next');
-                            $("#board_submit").attr("disabled", false);
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
+                if (boarding_save) {
+                    boarding_save = 0;
+                    let formData = new FormData($(form_board_id)[0]);
+                    $('#board_submit').html('loading');
+                    $("#board_submit").attr("disabled", true);
+                    self.enable_switch_tab = false;
+                    $.ajax({
+                            url: eyatra_trip_claim_save_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            async: false,
+                        })
+                        .done(function(res) {
+                            console.log(res);
+                            if (!res.success) {
+                                $('#board_submit').html('Save & Next');
+                                $("#board_submit").attr("disabled", false);
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                                self.enable_switch_tab = false;
+                                $scope.$apply()
+                            } else {
+                                
+                                custom_noty('success', 'Boarding expenses saved successfully!');
+                                // $('.tab_li').removeClass('active');
+                                // $('.tab_local_travel').addClass('active');
+                                // $('.tab-pane').removeClass('in active');
+                                // $('#local_travel-expenses').addClass('in active');
+
+                                //REFRESH BOARDINGS
+                                self.trip.boardings = res.saved_boardings.boardings;
+                                self.boardings_removal_id = [];
+                                self.boardings_attachment_removal_ids = [];
+                                $('#boardings_attach_removal_ids').val('');
+
+                                self.enable_switch_tab = true;
+                                $scope.$apply()
+                                $('#board_submit').html('Save & Next');
+                                $("#board_submit").attr("disabled", false);
                             }
-                            custom_noty('error', errors);
-                            self.enable_switch_tab = false;
-                            $scope.$apply()
-                        } else {
-                            // $noty = new Noty({
-                            //     type: 'success',
-                            //     layout: 'topRight',
-                            //     text: 'Boarding expenses saved successfully!!',
-                            //     animation: {
-                            //         speed: 500 // unavailable - no need
-                            //     },
-                            // }).show();
-                            // setTimeout(function() {
-                            //     $noty.close();
-                            // }, 4000);
-                            custom_noty('success', 'Boarding expenses saved successfully!');
-                            // $('.tab_li').removeClass('active');
-                            // $('.tab_local_travel').addClass('active');
-                            // $('.tab-pane').removeClass('in active');
-                            // $('#local_travel-expenses').addClass('in active');
-
-                            //REFRESH BOARDINGS
-                            self.trip.boardings = res.saved_boardings.boardings;
-                            self.boardings_removal_id = [];
-                            self.boardings_attachment_removal_ids = [];
-                            $('#boardings_attach_removal_ids').val('');
-
-                            self.enable_switch_tab = true;
-                            $scope.$apply()
+                        })
+                        .fail(function(xhr) {
                             $('#board_submit').html('Save & Next');
                             $("#board_submit").attr("disabled", false);
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#board_submit').html('Save & Next');
-                        $("#board_submit").attr("disabled", false);
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
             },
         });
 
@@ -1891,19 +1879,6 @@ app.component('eyatraTripClaimForm', {
         });
 
         var v = jQuery(form_id).validate({
-            // invalidHandler: function(event, validator) {
-            //     $noty = new Noty({
-            //         type: 'error',
-            //         layout: 'topRight',
-            //         text: 'Kindly check in each tab to fix errors',
-            //         animation: {
-            //             speed: 500 // unavailable - no need
-            //         },
-            //     }).show();
-            //     setTimeout(function() {
-            //         $noty.close();
-            //     }, 1000);
-            // },
             ignore: "",
             rules: {},
             errorElement: "div", // default is 'label'
@@ -1912,49 +1887,51 @@ app.component('eyatraTripClaimForm', {
             },
             submitHandler: function(form) {
                 //console.log(self.item);
-                let formData = new FormData($(form_id)[0]);
-                $('#local_travel_submit').html('loading');
-                $("#local_travel_submit").attr("disabled", true);
-                $.ajax({
-                        url: eyatra_trip_claim_save_url,
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                    })
-                    .done(function(res) {
-                        //console.log(res.success);
-                        if (!res.success) {
+                if (other_expense_save) {
+                    other_expense_save = 0;
+                    let formData = new FormData($(form_id)[0]);
+                    $('#local_travel_submit').html('loading');
+                    $("#local_travel_submit").attr("disabled", true);
+                    $.ajax({
+                            url: eyatra_trip_claim_save_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            //console.log(res.success);
+                            if (!res.success) {
+                                $('#local_travel_submit').html('Submit');
+                                $("#local_travel_submit").attr("disabled", false);
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Claim Requested successfully!!',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                $('#trip-claim-modal-justify-one').modal('hide');
+                                setTimeout(function() {
+                                    $noty.close();
+                                    $location.path('/trip/claim/list')
+                                    $scope.$apply()
+                                }, 1000);
+                            }
+                        })
+                        .fail(function(xhr) {
                             $('#local_travel_submit').html('Submit');
                             $("#local_travel_submit").attr("disabled", false);
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
-                            }
-                            custom_noty('error', errors);
-                        } else {
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Claim Requested successfully!!',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            $('#trip-claim-modal-justify-one').modal('hide');
-                            setTimeout(function() {
-                                $noty.close();
-                                $location.path('/trip/claim/list')
-                                $scope.$apply()
-                            }, 1000);
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#local_travel_submit').html('Submit');
-                        $("#local_travel_submit").attr("disabled", false);
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
             },
         });
     }

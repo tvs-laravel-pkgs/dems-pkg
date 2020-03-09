@@ -350,9 +350,6 @@ app.component('eyatraTripForm', {
                 type: 'error',
                 layout: 'topRight',
                 text: 'From City and To City should not be same,please choose another To city',
-                animation: {
-                    speed: 50 // unavailable - no need
-                },
             }).show();
             setTimeout(function() {
                 $noty.close();

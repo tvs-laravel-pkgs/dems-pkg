@@ -203,7 +203,9 @@ app.component('eyatraLocalTripClaimForm', {
                     var end_date = response.data.trip.end_date;
                     trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
                     self.trip.trip_periods = trip_periods;
-                    $scope.onChange(start_date, end_date);
+                     setTimeout(function() {
+                        $scope.onChange(start_date, end_date);
+                    }, 800);
                 }
 
                 $(".daterange").daterangepicker({
