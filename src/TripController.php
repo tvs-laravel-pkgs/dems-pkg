@@ -16,8 +16,8 @@ class TripController extends Controller {
 	public function listTrip(Request $r) {
 
 		$trips = Trip::from('trips')
-			->join('visits as v', 'v.trip_id', 'trips.id')
-			->join('ncities as c', 'c.id', 'v.from_city_id')
+			->leftjoin('visits as v', 'v.trip_id', 'trips.id')
+			->leftjoin('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
