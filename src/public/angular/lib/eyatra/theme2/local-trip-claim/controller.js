@@ -302,7 +302,7 @@ app.component('eyatraLocalTripClaimForm', {
         }
 
         //REMOVE VISIT 
-        self.removelocaltrip = function(index, local_trip_detail_id) {
+        self.removeLocalTrip = function(index, local_trip_detail_id) {
             if (local_trip_detail_id) {
                 trip_detail_removal_id.push(local_trip_detail_id);
                 $('#trip_detail_removal_id').val(JSON.stringify(trip_detail_removal_id));
@@ -507,6 +507,7 @@ app.component('eyatraLocalTripClaimView', {
             self.trip = response.data.trip;
             console.log(self.trip);
             self.claim_status = response.data.claim_status;
+            self.gender = (response.data.trip.employee.gender).toLowerCase();
         });
 
         /* Pane Next Button */

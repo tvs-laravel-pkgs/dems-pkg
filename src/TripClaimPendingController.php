@@ -112,7 +112,7 @@ class TripClaimPendingController extends Controller {
 		return Trip::getClaimFormData($trip_id);
 	}
 	public function eyatraTripClaimFilterData() {
-		return Trip::getFilterData();
+		return Trip::getFilterData($type = 3);
 	}
 
 	public function saveEYatraTripClaim(Request $request) {

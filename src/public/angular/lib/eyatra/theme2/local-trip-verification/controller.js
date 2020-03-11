@@ -252,6 +252,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
             self.trip = response.data.trip;
             self.claim_status = response.data.claim_status;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
+            self.gender = (response.data.trip.employee.gender).toLowerCase();
             console.log(self.trip_reject_reasons);
         });
 

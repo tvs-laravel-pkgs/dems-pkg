@@ -252,10 +252,10 @@ class LocalTripController extends Controller {
 			for ($i = 0; $i < $size; $i++) {
 				if (!(($request->trip_detail[$i]['travel_date'] >= $request->start_date) && ($request->trip_detail[$i]['travel_date'] <= $request->end_date))) {
 					return response()->json(['success' => false, 'errors' => "Visit date should be within Trip Period"]);
-
 				}
-
 			}
+		} else {
+			return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
 		}
 
 		return LocalTrip::saveTrip($request);

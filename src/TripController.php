@@ -211,7 +211,7 @@ class TripController extends Controller {
 	}
 
 	public function eyatraTripFilterData() {
-		return Trip::getFilterData();
+		return Trip::getFilterData($type = 1);
 	}
 
 	public function deleteTrip($trip_id) {

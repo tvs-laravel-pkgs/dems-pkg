@@ -47,7 +47,9 @@ class EYatraConfigSeeder extends Seeder {
 			530 => 'Agent Claim Status',
 			531 => 'Local Trip Statuses',
 			532 => 'Local Trave Mode Category Types - EYatra',
-
+			533 => 'Trip / Expense Types',
+			534 => 'Trip / Expense Approval Types',
+			535 => 'Claim Statuses',
 		];
 
 		$configs = [
@@ -84,22 +86,6 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Manager Rejected',
 				'config_type_id' => 501,
 			],
-			3023 => [
-				'name' => 'Claim Requested',
-				'config_type_id' => 501,
-			],
-			3024 => [
-				'name' => 'Claim Rejected',
-				'config_type_id' => 501,
-			],
-			3025 => [
-				'name' => 'Payment Pending for Financier',
-				'config_type_id' => 501,
-			],
-			3026 => [
-				'name' => 'Paid',
-				'config_type_id' => 501,
-			],
 			3027 => [
 				'name' => 'Resolved',
 				'config_type_id' => 501,
@@ -108,33 +94,55 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Manager Approved',
 				'config_type_id' => 501,
 			],
-			3029 => [
-				'name' => 'Senior Manager Claim Approval Pending',
-				'config_type_id' => 501,
-			],
-			3030 => [
-				'name' => 'Financier Payment Hold',
-				'config_type_id' => 501,
-			],
-			3031 => [
-				'name' => 'Payment Pending from Employee',
-				'config_type_id' => 501,
-			],
 			3032 => [
 				'name' => 'Cancelled',
 				'config_type_id' => 501,
 			],
+
+			//CLAIM STATUS
+			3023 => [
+				'name' => 'Claim Requested',
+				'config_type_id' => 535,
+			],
+			3024 => [
+				'name' => 'Claim Rejected',
+				'config_type_id' => 535,
+			],
+			3025 => [
+				'name' => 'Payment Pending form Financier',
+				'config_type_id' => 535,
+			],
+			3026 => [
+				'name' => 'Paid',
+				'config_type_id' => 535,
+			],
+			3027 => [
+				'name' => 'Resolved',
+				'config_type_id' => 535,
+			],
+			3029 => [
+				'name' => 'Senior Manager Claim Approval Pending',
+				'config_type_id' => 535,
+			],
+			3030 => [
+				'name' => 'Financier Payment Hold',
+				'config_type_id' => 535,
+			],
+			3031 => [
+				'name' => 'Payment Pending from Employee',
+				'config_type_id' => 535,
+			],
 			3033 => [
 				'name' => 'Claim Inprogress',
-				'config_type_id' => 501,
+				'config_type_id' => 535,
 			],
 			3034 => [
 				'name' => 'Payment Pending',
-				'config_type_id' => 501,
+				'config_type_id' => 535,
 			],
 			3035 => [
 				'name' => 'Claim Approved',
-				'config_type_id' => 501,
+				'config_type_id' => 535,
 			],
 
 			//TRIP BOOKING METHOD
@@ -811,6 +819,111 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Other Amount Eligible',
 				'config_type_id' => 532,
 			],
+
+			//TRIP / EXPENSE TYPES
+			3581 => [
+				'name' => 'Outstation Trip',
+				'config_type_id' => 533,
+			],
+			3582 => [
+				'name' => 'Local Trip',
+				'config_type_id' => 533,
+			],
+			3583 => [
+				'name' => 'Local Conveyance',
+				'config_type_id' => 533,
+			],
+			3583 => [
+				'name' => 'Other Expenses',
+				'config_type_id' => 533,
+			],
+			3583 => [
+				'name' => 'Advance Expenses',
+				'config_type_id' => 533,
+			],
+
+			//TRIP / EXPENSE APPROVAL TYPES
+			3600 => [
+				'name' => 'Outstation Trip - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3601 => [
+				'name' => 'Outstation Trip Claim - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3602 => [
+				'name' => 'Outstation Trip Claim - Sr Manager Approved',
+				'config_type_id' => 534,
+			],
+			3603 => [
+				'name' => 'Outstation Trip Claim - Financier Approved',
+				'config_type_id' => 534,
+			],
+			3604 => [
+				'name' => 'Outstation Trip Claim - Financier Paid',
+				'config_type_id' => 534,
+			],
+			3605 => [
+				'name' => 'Outstation Trip Claim - Employee Paid',
+				'config_type_id' => 534,
+			],
+			3606 => [
+				'name' => 'Local Trip - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3607 => [
+				'name' => 'Local Trip Claim - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3608 => [
+				'name' => 'Local Trip Claim - Financier Approved',
+				'config_type_id' => 534,
+			],
+			3609 => [
+				'name' => 'Local Conveyance - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3610 => [
+				'name' => 'Local Conveyance - Cashier Approved',
+				'config_type_id' => 534,
+			],
+			3611 => [
+				'name' => 'Local Conveyance - Financier Approved',
+				'config_type_id' => 534,
+			],
+			3612 => [
+				'name' => 'Other Expenses - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3613 => [
+				'name' => 'Other Expenses - Financier Approved',
+				'config_type_id' => 534,
+			],
+			3614 => [
+				'name' => 'Advance Expenses Request - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3615 => [
+				'name' => 'Advance Expenses Request - Cashier Approved',
+				'config_type_id' => 534,
+			],
+			3616 => [
+				'name' => 'Advance Expenses Request - Financier Approved',
+				'config_type_id' => 534,
+			],
+			3617 => [
+				'name' => 'Advance Expenses Claim - Manager Approved',
+				'config_type_id' => 534,
+			],
+			3618 => [
+				'name' => 'Advance Expenses Claim - Cashier Approved',
+				'config_type_id' => 534,
+			],
+			3619 => [
+				'name' => 'Advance Expenses Claim - Financier Approved',
+				'config_type_id' => 534,
+			],
+
 		];
 
 		//SAVING CONFIG TYPES
