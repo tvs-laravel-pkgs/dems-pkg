@@ -742,5 +742,43 @@ app.component('eyatraTripLocalView', {
 
             });
         }
+
+        //DELETE TRIP
+        $scope.confirmDeleteLocalTrip = function() {
+            $id = $('#trip_id').val();
+            $http.get(
+                local_trip_delete_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                } else {
+                    $('#delete_local_trip').modal('hide');
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trip Deleted Successfully',
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                    setTimeout(function() {
+                        $location.path('/local-trip/list')
+                        $scope.$apply()
+                    }, 1000);
+                }
+
+            });
+        }
     }
 });
