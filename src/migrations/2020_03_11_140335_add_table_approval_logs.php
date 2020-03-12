@@ -13,12 +13,12 @@ class AddTableApprovalLogs extends Migration {
 	public function up() {
 		Schema::create('approval_logs', function (Blueprint $table) {
 			$table->increments('id');
-			$table->unsignedInteger('trip_type_id');
+			$table->unsignedInteger('type_id');
 			$table->unsignedInteger('entity_id');
 			$table->unsignedInteger('approval_type_id');
 			$table->unsignedInteger('approved_by_id');
 			$table->timestamp('approved_at');
-			$table->foreign('trip_type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
+			$table->foreign('type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('approval_type_id')->references('id')->on('configs')->onDelete('cascade')->onUpdate('cascade');
 			$table->foreign('approved_by_id')->references('id')->on('employees')->onDelete('cascade')->onUpdate('cascade');
 
