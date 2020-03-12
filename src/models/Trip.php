@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Session;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Validator;
 
@@ -875,11 +876,11 @@ class Trip extends Model {
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = 'Trip is Approved by Manager';
 		$activity['activity'] = "approve";
-		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
-
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		//Approval Log
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, Auth::user()->entity_id, Carbon::now());
 		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);

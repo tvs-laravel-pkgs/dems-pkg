@@ -4,8 +4,10 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Trip;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -101,7 +103,8 @@ class TripClaimVerificationThreeController extends Controller {
 
 		$trip->status_id = 3031; //Payment pending for Employee
 		$trip->save();
-
+		//Approval Log
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $r->trip_id, 3603, Auth::user()->entity_id, Carbon::now());
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Payment Pending');
 
@@ -156,6 +159,8 @@ class TripClaimVerificationThreeController extends Controller {
 			$employee_claim->save();
 
 			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+			//Approval Log
+			$approval_log = ApprovalLog::saveApprovalLog(3581, $r->trip_id, 3604, Auth::user()->entity_id, Carbon::now());
 			$notification = sendnotification($type = 9, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Paid');
 
 			DB::commit();
