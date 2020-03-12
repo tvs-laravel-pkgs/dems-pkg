@@ -84,7 +84,7 @@ class LocalTripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3024') {
+				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3024' || $trip->status_id == '3032') {
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('local-trip-edit')) {
 						$edit_class = "";
@@ -98,15 +98,9 @@ class LocalTripController extends Controller {
 					$delete_class = "visibility:hidden";
 				}
 
-				if ($trip->status_id == '3028' || $trip->status_id == '3024') {
-					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/claim/add/' . $trip->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/local-trip/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 					</a> ';
-				} else {
-					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/edit/' . $trip->id . '">
-					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
-					</a> ';
-				}
 
 				$action .= '<a href="#!/local-trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
@@ -231,7 +225,7 @@ class LocalTripController extends Controller {
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->first();
 			$trip = LocalTrip::find($request->id);
-			if ($trip->status_id >= 3028) {
+			if ($trip->status_id != 3032 && $trip->status_id >= 3028) {
 				if ($request->trip_detail == '') {
 					return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
 				}
@@ -254,9 +248,10 @@ class LocalTripController extends Controller {
 					return response()->json(['success' => false, 'errors' => "Visit date should be within Trip Period"]);
 				}
 			}
-		} else {
-			return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
 		}
+		// elseif ($request->id != NULL) {
+		// 	return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
+		// }
 
 		return LocalTrip::saveTrip($request);
 	}
