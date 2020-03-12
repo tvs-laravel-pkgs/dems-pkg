@@ -4,10 +4,12 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\AlternateApprove;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
@@ -277,7 +279,8 @@ class TripClaimVerificationOneController extends Controller {
 		$activity['details'] = "Employee Claims V1 Approved";
 		$activity['activity'] = "approve";
 		$activity_log = ActivityLog::saveLog($activity);
-
+		//Approval Log
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3601, Auth::user()->entity_id, Carbon::now());
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
 
