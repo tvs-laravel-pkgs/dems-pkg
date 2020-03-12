@@ -127,4 +127,19 @@ class AuthController extends Controller {
 
 	}
 
+	public function logout(Request $request) {
+		// dd($request->all());
+		if ($request->user_id) {
+			$user = User::find($request->user_id);
+			if ($user) {
+				$user->device_token = NULL;
+				$user->save();
+				return response()->json(['status' => 'true'], $this->successStatus);
+			} else {
+				return response()->json(['status' => 'false', 'error' => 'Invalid user'], $this->successStatus);
+			}
+		}
+
+	}
+
 }
