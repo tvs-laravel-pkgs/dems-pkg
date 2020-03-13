@@ -225,7 +225,7 @@ class LocalTripController extends Controller {
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->first();
 			$trip = LocalTrip::find($request->id);
-			if ($trip->status_id != 3032 && $trip->status_id >= 3028) {
+			if ($request->local_trip_claim) {
 				if ($request->trip_detail == '') {
 					return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
 				}

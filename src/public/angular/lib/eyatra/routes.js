@@ -613,11 +613,11 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/local-trip/claim/add/:trip_id', {
         template: '<eyatra-local-trip-claim-form></eyatra-local-trip-claim-form>',
-        title: 'Local Trip Calim Form',
+        title: 'Local Trip Claim Form',
     }).
     when('/local-trip/claim/edit/:trip_id', {
         template: '<eyatra-local-trip-claim-form></eyatra-local-trip-claim-form>',
-        title: 'Local Trip Calim Form',
+        title: 'Local Trip Claim Form',
     }).
     when('/local-trip/claim/view/:trip_id', {
         template: '<eyatra-local-trip-claim-view></eyatra-local-trip-claim-view>',
