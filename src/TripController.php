@@ -215,13 +215,10 @@ class TripController extends Controller {
 	}
 
 	public function deleteTrip($trip_id) {
-
 		return Trip::deleteTrip($trip_id);
-
 	}
 
 	public function cancelTrip($trip_id) {
-
 		return Trip::cancelTrip($trip_id);
 	}
 

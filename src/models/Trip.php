@@ -226,44 +226,46 @@ class Trip extends Model {
 					if ($from_city_id == $visit_data['to_city_id']) {
 						return response()->json(['success' => false, 'errors' => "From City and To City should not be same,please choose another To city"]);
 					}
-					if($visit_data['id']){
-						$old_visit=Visit::find($visit_data['id']);
+					if ($visit_data['id']) {
+						$old_visit = Visit::find($visit_data['id']);
 						//dump('old_visit id :'.$old_visit->id);
-						if($visit_data['booking_method_name'] =='Agent'){ //Booking Method Agent
+						if ($visit_data['booking_method_name'] == 'Agent') {
+							//Booking Method Agent
 							//dump('agent');
 							//visit booked
-							$old_visit_booked =Visit::where('id',$visit_data['id'])
-							->where('booking_status_id',3061)//Booked
-							->first();
+							$old_visit_booked = Visit::where('id', $visit_data['id'])
+								->where('booking_status_id', 3061) //Booked
+								->first();
 
 							//dump('old_visit_booked :'.$old_visit_booked->id);
-							if($old_visit_booked){
-								$old_visit_detail_check=Visit::where('id',$visit_data['id'])
-								->where('from_city_id',$visit_data['from_city_id'])
-								->where('to_city_id',$visit_data['to_city_id'])
-								->where('travel_mode_id',$visit_data['travel_mode_id'])
-								->whereDate('departure_date',$visit_data['date'])
-								->first();
+							if ($old_visit_booked) {
+								$old_visit_detail_check = Visit::where('id', $visit_data['id'])
+									->where('from_city_id', $visit_data['from_city_id'])
+									->where('to_city_id', $visit_data['to_city_id'])
+									->where('travel_mode_id', $visit_data['travel_mode_id'])
+									->whereDate('departure_date', $visit_data['date'])
+									->first();
 								//dump('old_visit_detail_check: '.$old_visit_detail_check);
-								if($old_visit_detail_check){
-									$visit=$old_visit;
-								}else{
+								if ($old_visit_detail_check) {
+									$visit = $old_visit;
+								} else {
 									//dump('new');
-									$old_visit->booking_status_id=3064;//Visit Rescheduled
+									$old_visit->booking_status_id = 3064; //Visit Rescheduled
 									$old_visit->save();
-									$visit=new Visit;
+									$visit = new Visit;
 									//dump('fff');
 								}
-							}else{
+							} else {
 								//dd('in');
-								$visit=$old_visit;
+								$visit = $old_visit;
 							}
-						}else{//Booking Method Self
+						} else {
+//Booking Method Self
 							//dump('self');
-							$visit=$old_visit;
+							$visit = $old_visit;
 						}
 						//dd($visit);
-					}else{
+					} else {
 						//dd('inwww');
 						$visit = new Visit;
 					}
@@ -867,19 +869,28 @@ class Trip extends Model {
 
 	public static function deleteVisit($visit_id) {
 		if ($visit_id) {
-			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
-			if ($agent_visits_booked) {
-				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
-			}
 			$visit = Visit::where('id', $visit_id)->first();
-			$activity['entity_id'] = $visit_id;
-			$visit = $visit->forceDelete();
-			$activity['entity_type'] = 'visit';
-			$activity['details'] = 'Visit is Deleted';
-			$activity['activity'] = "delete";
 
-			$activity_log = ActivityLog::saveLog($activity);
-			return response()->json(['success' => true]);
+			//Total Visit on this Trip
+			$total_visits = Visit::where('trip_id', $visit->trip_id)->count();
+			if ($total_visits > 1) {
+				//Check Agent booking or not
+				$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+				if ($agent_visits_booked) {
+					return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
+				}
+				$activity['entity_id'] = $visit_id;
+				$visit = $visit->forceDelete();
+				$activity['entity_type'] = 'visit';
+				$activity['details'] = 'Visit is Deleted';
+				$activity['activity'] = "delete";
+
+				$activity_log = ActivityLog::saveLog($activity);
+				return response()->json(['success' => true, 'message' => 'Visit Deleted successfully!']);
+			} else {
+				$trip = Trip::where('id', $visit->trip_id)->forceDelete();
+				return response()->json(['success' => true, 'message' => 'Trip Deleted successfully!']);
+			}
 		} else {
 			return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
 		}

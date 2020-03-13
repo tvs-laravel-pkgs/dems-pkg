@@ -77,7 +77,7 @@ app.component('eyatraTrips', {
         }, 1000);
 
         setTimeout(function() {
-            
+
             if ($(window).width() > 466) {
                 var x = $('.separate-page-header-inner.search .custom-filter').position();
                 var d = document.getElementById('eyatra_trip_table_filter');
@@ -719,10 +719,7 @@ app.component('eyatraTripView', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Booking cancelled successfully',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
+                                text: 'Visit cancelled successfully',
                             }).show();
                             $('#visit-booking-cancel-modal').modal('hide');
                             setTimeout(function() {
@@ -869,7 +866,8 @@ app.component('eyatraTripView', {
             $('#delete_booking_visit_id').val(visit_id);
         }
 
-        $scope.deleteBooking = function() {
+        $scope.deleteVisit = function() {
+
             var delete_booking_visit_id = $('#delete_booking_visit_id').val();
             if (delete_booking_visit_id) {
                 $.ajax({
@@ -878,6 +876,7 @@ app.component('eyatraTripView', {
                     })
                     .done(function(res) {
                         // console.log(res);
+                        // console.log(res.message);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -888,15 +887,17 @@ app.component('eyatraTripView', {
                             $noty = new Noty({
                                 type: 'success',
                                 layout: 'topRight',
-                                text: 'Visit Deleted successfully',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
+                                text: res.message,
                             }).show();
                             $('#delete_visit').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                                $route.reload();
+                                if (res.message == 'Visit Deleted successfully!') {
+                                    $route.reload();
+                                } else {
+                                    $location.path('/trips')
+                                    $scope.$apply()
+                                }
                             }, 1000);
                         }
                     })
