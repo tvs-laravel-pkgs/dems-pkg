@@ -6,6 +6,9 @@ Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
 Route::post('eyatra/api/forgotPassword', 'Uitoux\EYatra\Api\AuthController@forgotPassword');
 Route::post('eyatra/api/changePassword', 'Uitoux\EYatra\Api\AuthController@changePassword');
 
+//LOGOUT
+Route::post('eyatra/api/logout', 'Uitoux\EYatra\Api\AuthController@logout');
+
 Route::group(['middleware' => ['api']], function () {
 	Route::group(['middleware' => ['auth:api'], 'prefix' => 'eyatra/api'], function () {
 		//HELPERS
@@ -416,6 +419,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/view/{trip_id}', 'Uitoux\EYatra\LocalTripController@viewLocalTrip')->name('viewLocalTrip');
 		Route::get('eyatra/local-trip/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFilterData')->name('eyatraLocalTripFilterData');
 		Route::get('eyatra/local-trip/delete/{trip_id}', 'Uitoux\EYatra\LocalTripController@deleteTrip')->name('deleteTrip');
+		Route::get('eyatra/local-trip/cancel/{trip_id?}', 'Uitoux\EYatra\Api\LocalTripController@cancelTrip');
 
 		//LOCAL TRIP CLAIM
 		Route::get('eyatra/local-trip/claim/get-list', 'Uitoux\EYatra\LocalTripController@listClaimedLocalTrip')->name('listClaimedLocalTrip');
