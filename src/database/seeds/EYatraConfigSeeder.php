@@ -172,6 +172,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Tatkal',
 				'config_type_id' => 503,
 			],
+			3064 => [
+				'name' => 'Visit Rescheduled',
+				'config_type_id' => 503,
+			],
 
 			//MANAGER VERIFICATION STATUSES
 			3080 => [

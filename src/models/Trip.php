@@ -172,7 +172,7 @@ class Trip extends Model {
 
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
-				$trip->visits()->delete();
+				//$trip->visits()->delete();
 				$activity['activity'] = "edit";
 
 			}
@@ -206,10 +206,14 @@ class Trip extends Model {
 			$activity['entity_type'] = 'trip';
 			$activity['details'] = 'Trip is Added';
 			//SAVING VISITS
+			//dd($trip);
+			//dump($request->visits);
 			if ($request->visits) {
 				$visit_count = count($request->visits);
 				$i = 0;
 				foreach ($request->visits as $key => $visit_data) {
+					//dump($visit_data);
+
 					//if no agent found display visit count
 					// dd(Auth::user()->entity->outlet->address);
 					$visit_count = $i + 1;
@@ -222,7 +226,48 @@ class Trip extends Model {
 					if ($from_city_id == $visit_data['to_city_id']) {
 						return response()->json(['success' => false, 'errors' => "From City and To City should not be same,please choose another To city"]);
 					}
-					$visit = new Visit;
+					if($visit_data['id']){
+						$old_visit=Visit::find($visit_data['id']);
+						//dump('old_visit id :'.$old_visit->id);
+						if($visit_data['booking_method_name'] =='Agent'){ //Booking Method Agent
+							//dump('agent');
+							//visit booked
+							$old_visit_booked =Visit::where('id',$visit_data['id'])
+							->where('booking_status_id',3061)//Booked
+							->first();
+
+							//dump('old_visit_booked :'.$old_visit_booked->id);
+							if($old_visit_booked){
+								$old_visit_detail_check=Visit::where('id',$visit_data['id'])
+								->where('from_city_id',$visit_data['from_city_id'])
+								->where('to_city_id',$visit_data['to_city_id'])
+								->where('travel_mode_id',$visit_data['travel_mode_id'])
+								->whereDate('departure_date',$visit_data['date'])
+								->first();
+								//dump('old_visit_detail_check: '.$old_visit_detail_check);
+								if($old_visit_detail_check){
+									$visit=$old_visit;
+								}else{
+									//dump('new');
+									$old_visit->booking_status_id=3064;//Visit Rescheduled
+									$old_visit->save();
+									$visit=new Visit;
+									//dump('fff');
+								}
+							}else{
+								//dd('in');
+								$visit=$old_visit;
+							}
+						}else{//Booking Method Self
+							//dump('self');
+							$visit=$old_visit;
+						}
+						//dd($visit);
+					}else{
+						//dd('inwww');
+						$visit = new Visit;
+					}
+					//dump($visit);
 					// $visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
 					$visit->fill($visit_data);
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
@@ -243,6 +288,7 @@ class Trip extends Model {
 						}
 						$visit->agent_id = $agent->id;
 					}
+					//dd('save');
 					$visit->save();
 					$i++;
 				}
