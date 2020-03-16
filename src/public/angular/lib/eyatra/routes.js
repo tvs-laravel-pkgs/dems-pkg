@@ -659,6 +659,22 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/report/local-trip/list', {
         template: '<eyatra-local-trip></eyatra-local-trip>',
         title: 'Local Trip Reports',
+    }).
+
+    //OUTSTATION TRIP
+    when('/outstation-trip/list', {
+        template: '<eyatra-outstation-trip-list></eyatra-outstation-trip-list>',
+        title: 'Outstation Trip',
+    }).
+    //TRIP VIEW
+    when('/eyatra/outstation-trip/view/:trip_id', {
+        template: '<eyatra-outstation-trip-view></eyatra-outstation-trip-view>',
+        title: 'Outstation Trip View',
+    }).
+    //CLAIM VIEW
+    when('/eyatra/outstation-claim/view/:claim_id', {
+        template: '<eyatra-outstation-claim-view></eyatra-outstation-claim-view>',
+        title: 'Outstation Claim View',
     });
     
 }]);
