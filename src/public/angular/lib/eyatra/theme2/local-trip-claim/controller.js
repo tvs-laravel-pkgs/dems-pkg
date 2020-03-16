@@ -5,7 +5,7 @@ app.component('eyatraClaimedLocalTrips', {
         self.hasPermission = HelperService.hasPermission;
         self.permission = self.hasPermission('local-trip-add');
         $http.get(
-            local_trip_filter_data_url
+            local_trip_claim_filter_data_url
         ).then(function(response) {
             console.log(response.data);
             self.employee_list = response.data.employee_list;

@@ -401,6 +401,9 @@ class LocalTrip extends Model {
 					->where('employees.reporting_to_id', Auth::user()->entity_id)
 					->where('employees.company_id', Auth::user()->company_id)
 					->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		} elseif ($type == 4) {
+			$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+			$data['trip_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3023, 3024, 3026, 3030, 3034])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		} else {
 			$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 					->leftJoin('users', 'users.entity_id', 'employees.id')

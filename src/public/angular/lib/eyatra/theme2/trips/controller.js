@@ -697,18 +697,17 @@ app.component('eyatraTripView', {
 
         //CANCEL VISIT BOOKING
         $scope.cancelVisitBookingPopup = function(visit_id) {
-            $('#cancel_booking_visit_id').val(visit_id);
+            $('#cancel_visit_id').val(visit_id);
         }
 
         $scope.cancelVisitBooking = function() {
-            var cancel_booking_visit_id = $('#cancel_booking_visit_id').val();
-            if (cancel_booking_visit_id) {
+            var cancel_visit_id = $('#cancel_visit_id').val();
+            if (cancel_visit_id) {
                 $.ajax({
-                        url: trip_visit_cancel_booking_url + '/' + cancel_booking_visit_id,
+                        url: trip_visit_cancel_url + '/' + cancel_visit_id,
                         method: "GET",
                     })
                     .done(function(res) {
-                        // console.log(res);
                         if (!res.success) {
                             var errors = '';
                             for (var i in res.errors) {
@@ -724,7 +723,12 @@ app.component('eyatraTripView', {
                             $('#visit-booking-cancel-modal').modal('hide');
                             setTimeout(function() {
                                 $noty.close();
-                                $route.reload();
+                                if (res.message == 'Visit Cancelled successfully!') {
+                                    $route.reload();
+                                } else {
+                                    $location.path('/trips')
+                                    $scope.$apply()
+                                }
                             }, 1000);
                         }
                     })
@@ -764,9 +768,6 @@ app.component('eyatraTripView', {
                         type: 'success',
                         layout: 'topRight',
                         text: 'Trip Deleted Successfully',
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
                     }).show();
                     setTimeout(function() {
                         $noty.close();
@@ -861,7 +862,7 @@ app.component('eyatraTripView', {
             });
         }
 
-        //DELETE VISIT BOOKING
+        //DELETE VISIT
         $scope.deleteVisitBookingPopup = function(visit_id) {
             $('#delete_booking_visit_id').val(visit_id);
         }

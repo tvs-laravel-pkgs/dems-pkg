@@ -264,6 +264,10 @@ class LocalTripController extends Controller {
 		return LocalTrip::getFilterData($type = 1);
 	}
 
+	public function eyatraLocalTripClaimFilterData() {
+		return LocalTrip::getFilterData($type = 4);
+	}
+
 	public function eyatraLocalTripVerificationFilterData() {
 		return LocalTrip::getFilterData($type = 2);
 	}
