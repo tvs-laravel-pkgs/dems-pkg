@@ -1,13 +1,13 @@
 app.component('entityDataList', {
     templateUrl: entity_data_list_template_url,
-    controller: function(HelperService, $http, $rootScope, $scope, $routeParams) {
+    controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        var dataTable;
+        self.permission = self.hasPermission('eyatra-rejection-add');
 
-        var dataTable = $('#entity_data_table').DataTable({
+        var dataTable = $('#rejected_reasons_data_table').DataTable({
             stateSave: true,
-            "dom": dom_structure_separate,
+            "dom": dom_structure_separate_2,
             "language": {
                 "search": "",
                 "searchPlaceholder": "Search",
@@ -22,14 +22,13 @@ app.component('entityDataList', {
             serverSide: true,
             paging: true,
             ordering: false,
-
             ajax: {
                 url: entity_data_list_data_url,
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-
-                },
+                    d.reject_type_id = $('#reject_type_id').val();
+                }
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
@@ -46,30 +45,39 @@ app.component('entityDataList', {
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
             }
-
         });
-
-        $rootScope.title = 'Rejection Reasons';
         $('.dataTables_length select').select2();
-        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / ' + 'Rejection Reasons' + '</p><h3 class="title">' + 'Rejection Reasons' + '</h3>');
-        var add_url = '#!/rejection-reason/add/';
-        self.trip_add_permission = self.hasPermission('eyatra-rejection-add');
-        if (self.trip_add_permission) {
-            $('.add_new_button').html(
-                '<a href=' + add_url + ' type="button" class="btn btn-secondary ">' +
-                'Add New' +
-                '</a>'
-            );
-        }
+
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('entity_data_table');
+            var d = document.getElementById('rejected_reasons_data_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
 
         }, 500);
-        $('#entity_data_table_filter').find('input').addClass("on_focus");
+
+        $('#rejected_reasons_data_table_filter').find('input').addClass("on_focus");
         $('.on_focus').focus();
+        
+        $http.get(
+            rejected_reasons_filter_url
+        ).then(function(response) {
+            self.reject_type_list = response.data.reject_type_list;
+            $rootScope.loading = false;
+        });
+
+        var dataTableFilter = $('#rejected_reasons_data_table').dataTable();
+        $scope.onselectRejectType = function(id) {
+            $('#reject_type_id').val(id);
+            dataTableFilter.fnFilter();
+        }
+
+        $scope.resetForm = function() {
+            $('#reject_type_id').val('-1');
+            self.reject_type_id = -1
+            dataTableFilter.fnFilter();
+        }
+
         $scope.deleteEntityData = function($id) {
             $('#del').val($id);
         }
@@ -99,9 +107,8 @@ app.component('entityDataList', {
 
             });
         }
-
-
         $rootScope.loading = false;
+
     }
 });
 app.component('entityDataForm', {

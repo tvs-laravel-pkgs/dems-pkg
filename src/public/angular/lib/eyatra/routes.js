@@ -48,15 +48,15 @@ app.config(['$routeProvider', function($routeProvider) {
     //REJECTION REASON
     when('/rejection-reason/list', {
         template: '<entity-data-list></entity-data-list>',
-        title: 'Entity list',
+        title: 'Rejection Reasons List',
     }).
     when('/rejection-reason/add', {
         template: '<entity-data-form></entity-data-form>',
-        title: 'Add Entity',
+        title: 'Add Rejection Reason',
     }).
     when('/rejection-reason/edit/:entity_id', {
         template: '<entity-data-form></entity-data-form>',
-        title: 'Edit Entity',
+        title: 'Edit Rejection Reason',
     }).
 
     //COA SUB MASTERS
