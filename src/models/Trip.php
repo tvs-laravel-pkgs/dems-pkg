@@ -815,14 +815,14 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
 		}
 		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
-		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022])->first();
+		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022, 3032])->first();
 		if (!$status_exist) {
 			return response()->json(['success' => false, 'errors' => ['Manager Approved so this trip cannot be deleted']]);
 		}
 
 		$status_exist = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
 		if ($status_exist) {
-			return response()->json(['success' => false, 'errors' => ['Advance Request Approved so this trip cannot be deleted']]);
+			return response()->json(['success' => false, 'errors' => ['Trip advance amount request approved so this trip cannot be deleted']]);
 		}
 
 		$trip = Trip::where('id', $trip_id)->first();

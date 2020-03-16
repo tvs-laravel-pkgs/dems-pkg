@@ -77,9 +77,10 @@ app.component('eyatraAgentClaimVerificationList', {
             }
             $('#reset_values').click(function() {
                 $('#Agent_id').val('');
-                $('#Status_id').val('');
+                $('#Status_id').val('-1');
                 $('#invoice_date_filter').val('');
                 $('#created_date_filter').val('');
+                self.status.id = '-1';
                 dataTable.draw();
             });
 
