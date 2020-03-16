@@ -301,7 +301,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//VISIT STATUSES
 			3220 => [
-				'name' => 'New Requested',
+				'name' => 'New Request',
 				'config_type_id' => 512,
 			],
 			3221 => [

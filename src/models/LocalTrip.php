@@ -9,6 +9,7 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\LocalTripVisitDetail;
 use Validator;
@@ -509,9 +510,16 @@ class LocalTrip extends Model {
 		if ($trip->status_id == 3034) {
 			$notification_type = 'Claim Approved';
 			$message = "Claim approved successfully!";
+
+			//Claim Approval Log
+			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3607, Auth::user()->entity_id, Carbon::now());
+		} else {
+			//Trip Approval Log
+			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3606, Auth::user()->entity_id, Carbon::now());
 		}
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+
 		$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip", $notification_type = $notification_type);
 
 		return response()->json(['success' => true, 'message' => $message]);

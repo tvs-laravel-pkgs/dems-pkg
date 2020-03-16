@@ -8,6 +8,7 @@ use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\LocalTrip;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -511,6 +512,9 @@ class LocalTripController extends Controller {
 
 			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 			$notification = sendnotification($type = 9, $trip, $user, $trip_type = "Local Trip", $notification_type = 'Paid');
+
+			//Claim Approval Log
+			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3608, Auth::user()->entity_id, Carbon::now());
 
 			DB::commit();
 			return response()->json(['success' => true]);
