@@ -815,14 +815,14 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
 		}
 		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
-		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022])->first();
+		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022, 3032])->first();
 		if (!$status_exist) {
 			return response()->json(['success' => false, 'errors' => ['Manager Approved so this trip cannot be deleted']]);
 		}
 
 		$status_exist = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
 		if ($status_exist) {
-			return response()->json(['success' => false, 'errors' => ['Advance Request Approved so this trip cannot be deleted']]);
+			return response()->json(['success' => false, 'errors' => ['Trip advance amount request approved so this trip cannot be deleted']]);
 		}
 
 		$trip = Trip::where('id', $trip_id)->first();
@@ -890,6 +890,36 @@ class Trip extends Model {
 			} else {
 				$trip = Trip::where('id', $visit->trip_id)->forceDelete();
 				return response()->json(['success' => true, 'message' => 'Trip Deleted successfully!']);
+			}
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
+		}
+	}
+
+	public static function cancelTripVisit($visit_id) {
+		if ($visit_id) {
+			$visit = Visit::where('id', $visit_id)->first();
+
+			//Total Visit on this Trip
+			$total_visits = Visit::where('trip_id', $visit->trip_id)->count();
+			if ($total_visits > 1) {
+				//Check Agent booking or not
+				$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+				if ($agent_visits_booked) {
+					return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
+				}
+				$activity['entity_id'] = $visit_id;
+				$visit->booking_status_id = 3062; // Booking cancelled
+				$visit->save();
+				$activity['entity_type'] = 'visit';
+				$activity['details'] = 'Visit is Cancelled';
+				$activity['activity'] = "cancel";
+
+				$activity_log = ActivityLog::saveLog($activity);
+				return response()->json(['success' => true, 'message' => 'Visit Cancelled successfully!']);
+			} else {
+				$trip = Trip::where('id', $visit->trip_id)->update(['status_id' => 3032]);
+				return response()->json(['success' => true, 'message' => 'Trip Cancelled successfully!']);
 			}
 		} else {
 			return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);

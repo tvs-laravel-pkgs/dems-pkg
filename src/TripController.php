@@ -156,18 +156,9 @@ class TripController extends Controller {
 
 				}
 			}
-
-			// $check_trip_amount_eligible = Employee::select('gae.travel_advance_limit')
-			// 	->leftJoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')->first();
-			// if ($check_trip_amount_eligible->travel_advance_limit < $request->advance_received) {
-			// 	return response()->json(['success' => false, 'errors' => ['Maximum Eligibility Advance Amount is ' . $check_trip_amount_eligible->travel_advance_limit]]);
-			// }
 		}
-		// dd($request->all());
 
 		if ($request->id) {
-			// $trip_start_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->start_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))->where('employee_id', Auth::user()->entity_id)->where('id', '!=', $request->id)->first();
-			// $trip_end_date_data = Trip::where('start_date', '<=', date("Y-m-d", strtotime($request->end_date)))->where('end_date', '>=', date("Y-m-d", strtotime($request->end_date)))->where('employee_id', Auth::user()->entity_id)->where('id', '!=', $request->id)->first();
 			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
 				->where('id', '!=', $request->id)
 				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
@@ -178,10 +169,14 @@ class TripController extends Controller {
 				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->first();
+
+			//Total Trips Pending
+			$total_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3021)->count();
+			if ($total_trips >= 5) {
+				return response()->json(['success' => false, 'errors' => "Your previous trips waiting for approval!"]);
+			}
 		}
 
-		// dd($trip_start_date_data);
-		// dd($trip_start_date_data, $trip_end_date_data);
 		if ($trip_start_date_data) {
 			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
 		}
@@ -195,14 +190,12 @@ class TripController extends Controller {
 
 			$next_key = $i + 1;
 			if (!($next_key >= $size)) {
-				//dump($next_key);
 				if ($request->visits[$next_key]['date'] < $request->visits[$i]['date']) {
 					return response()->json(['success' => false, 'errors' => "Return Date Should Be Greater Than Or Equal To Departure Date"]);
 				}
 			}
 
 		}
-		//dd('ss');
 		return Trip::saveTrip($request);
 	}
 
@@ -236,6 +229,10 @@ class TripController extends Controller {
 
 	public function cancelTripVisitBooking($visit_id) {
 		return Trip::cancelTripVisitBooking($visit_id);
+	}
+
+	public function cancelTripVisit($visit_id) {
+		return Trip::cancelTripVisit($visit_id);
 	}
 
 	public function visitFormData($visit_id) {

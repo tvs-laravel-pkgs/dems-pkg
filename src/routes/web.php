@@ -261,6 +261,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/cancel/{trip_id}', 'Uitoux\EYatra\TripController@cancelTrip')->name('cancelTrip');
 		Route::get('eyatra/trip/verification-request/{trip_id}', 'Uitoux\EYatra\TripController@tripVerificationRequest')->name('tripVerificationRequest');
 		Route::get('/eyatra/trip/visit/booking-cancel/{visit_id}', 'Uitoux\EYatra\TripController@cancelTripVisitBooking')->name('cancelTripVisitBooking');
+		Route::get('/eyatra/trip/visit/cancel/{visit_id}', 'Uitoux\EYatra\TripController@cancelTripVisit')->name('cancelTripVisit');
 		Route::get('eyatra/trips/visit/get-form-data/{trip_id}', 'Uitoux\EYatra\TripController@visitFormData')->name('visitFormData');
 		Route::get('/eyatra/trip/visit/request-booking-cancel/{visit_id}', 'Uitoux\EYatra\TripController@requestCancelVisitBooking')->name('requestCancelVisitBooking');
 		Route::get('eyatra/trips/visit/delete/{visit_id}', 'Uitoux\EYatra\TripController@deleteVisit')->name('deleteVisit');
@@ -423,6 +424,7 @@ Route::group(['middleware' => ['web']], function () {
 
 		//LOCAL TRIP CLAIM
 		Route::get('eyatra/local-trip/claim/get-list', 'Uitoux\EYatra\LocalTripController@listClaimedLocalTrip')->name('listClaimedLocalTrip');
+		Route::get('eyatra/local-trip/claim/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripClaimFilterData')->name('eyatraLocalTripClaimFilterData');
 
 		//LOCAL TRIP MANAGER VERIFICATION
 		Route::get('eyatra/local-trip/verification/get-list', 'Uitoux\EYatra\LocalTripController@listLocalTripVerification')->name('listLocalTripVerification');
