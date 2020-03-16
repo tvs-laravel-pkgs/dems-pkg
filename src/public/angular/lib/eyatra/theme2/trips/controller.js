@@ -254,7 +254,13 @@ app.component('eyatraTripForm', {
                     endDate: end_date,
                     autoApply: true,
                 });
-
+                // Booking Preference Conditions
+                $.each(self.trip.visits, function(key, value) {
+                    setTimeout(function() {
+                        $scope.onChangeTravelMode(value.travel_mode_id, key);
+                        $scope.onChangeBookingPreference(value.booking_method_name, key);
+                    }, 800);
+                });
             } else {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
@@ -334,7 +340,9 @@ app.component('eyatraTripForm', {
 
         $('body').on('click', "#datepicker", function() {
             var id = $(this).data('picker');
-            datecall(startdate, enddate, id);
+            var periods = $("#trip_periods").val();
+            var period = periods.split(" to ");
+            datecall(period[0], period[1], id);
         });
 
         function datecall(startdate, enddate, id) {
