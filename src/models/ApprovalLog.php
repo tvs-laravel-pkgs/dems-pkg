@@ -135,7 +135,7 @@ class ApprovalLog extends Model {
 				DB::raw('DATE_FORMAT(local_trips.start_date,"%d-%m-%Y") as start_date'),
 				DB::raw('DATE_FORMAT(local_trips.end_date,"%d-%m-%Y") as end_date'),
 				'purpose.name as purpose', 'status.name as status_name',
-				DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %H-%i-%s") as date'),
+				DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as date'),
 				'approval_logs.approval_type_id as type_id'
 			)
 			->where('users.user_type_id', 3121)

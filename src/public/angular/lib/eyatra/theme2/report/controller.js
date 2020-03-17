@@ -384,17 +384,17 @@ app.component('eyatraOutstationTripList', {
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
             self.type_id_value = response.data.type_id
-            
-            self.type_id = response.data.type_id;
+
             setTimeout(function() {
+                self.type_id = response.data.type_id;
                 $("#type_id").val(self.type_id);
                 $('#select').trigger('change');
                 dataTable.draw();
             }, 1500);
-            
+
             $rootScope.loading = false;
         });
-        
+
         var dataTable = $('#eyatra_trip_verification_table').DataTable({
             stateSave: true,
             "dom": dom_structure,
@@ -430,7 +430,7 @@ app.component('eyatraOutstationTripList', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'type',  searchable: false },
+                { data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -562,7 +562,7 @@ app.component('eyatraOutstationClaimView', {
         self.eyatra_trip_claim_verification_one_boarding_attachment_url = eyatra_trip_claim_verification_one_boarding_attachment_url;
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url = eyatra_trip_claim_verification_one_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
-        
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -632,36 +632,36 @@ app.component('eyatraOutstationClaimView', {
         });
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
-        });   
+        });
     }
 });
 
 
 //LOCAL TRIP
 app.component('eyatraReportsLocalTripList', {
-    templateUrl: eyatra_local_trip_list_template_url,
+    templateUrl: eyatra_report_local_trip_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            local_trip_filter_data_url
+            local_trip_report_filter_data_url
         ).then(function(response) {
             self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
             self.type_id_value = response.data.type_id
-            
+
             self.type_id = response.data.type_id;
             setTimeout(function() {
                 $("#type_id").val(self.type_id);
                 $('#select').trigger('change');
                 dataTable.draw();
             }, 1500);
-            
+
             $rootScope.loading = false;
         });
-        
+
         var dataTable = $('#eyatra_local_trip_report_table').DataTable({
             stateSave: true,
             "dom": dom_structure,
@@ -697,7 +697,7 @@ app.component('eyatraReportsLocalTripList', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'type',  searchable: false },
+                { data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -862,6 +862,6 @@ app.component('eyatraReportsLocalTripClaimView', {
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
-  
+
     }
 });
