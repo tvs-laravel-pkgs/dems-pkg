@@ -212,34 +212,19 @@ app.component('eyatraTripForm', {
             self.eligible_date = response.data.eligible_date;
             self.max_eligible_date = response.data.max_eligible_date;
             self.claimable_travel_mode_list = response.data.extras.claimable_travel_mode_list;
+            self.trip_advance_amount_edit = response.data.trip_advance_amount_edit;
             console.log(self.claimable_travel_mode_list)
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
                     var start_date = response.data.trip.start_date;
                     var end_date = response.data.trip.end_date;
-
-                    //  $('.daterange').val(start_date.format('DD-MM-YYYY') + ' to ' + end_date.format('DD-MM-YYYY'));
-                    /* $('.daterange').on('show.daterangepicker', function(ev, picker) {
-     $('.daterange').val(picker.start_date.format('DD-MM-YYYY') + ' to ' + picker.end_date.format('DD-MM-YYYY'));
- });*/
                     trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
                     self.trip.trip_periods = trip_periods;
                     setTimeout(function() {
                         $scope.onChange(start_date, end_date);
                     }, 800);
-                    // $('#trip_periods').data('daterangepicker').setStartDate(start_date);
-                    // $('#trip_periods').data('daterangepicker').setEndDate(end_date);
                 }
-                // $scope.options = {
-                //     locale: {
-                //         cancelLabel: 'Clear',
-                //         format: "DD-MM-YYYY",
-                //         separator: " to ",
-                //     },
-                //     showDropdowns: false,
-                //     autoApply: true,
-                // };
-
+             
                 $(".daterange").daterangepicker({
                     autoclose: true,
                     // minDate: new Date(self.eligible_date),
@@ -283,6 +268,12 @@ app.component('eyatraTripForm', {
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }
+
+            if (self.trip_advance_amount_edit == 0) {
+                $("#advance_amount").prop('readonly', true);
+            }
+
+
             self.extras = response.data.extras;
             self.action = response.data.action;
             // console.log(self.trip);

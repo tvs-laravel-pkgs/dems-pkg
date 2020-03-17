@@ -29,7 +29,6 @@ class Trip extends Model {
 		'purpose_id',
 		'description',
 		'status_id',
-		'advance_received',
 		'claim_amount',
 		'claimed_date',
 		'paid_amount',
@@ -167,9 +166,20 @@ class Trip extends Model {
 				$trip->created_at = Carbon::now();
 				$trip->updated_at = NULL;
 				$activity['activity'] = "add";
+				$trip->advance_received = $request->advance_received;
+				if ($request->advance_received >= 1) {
+					$trip->advance_request_approval_status_id = 3260;
+				}
 			} else {
 				$trip = Trip::find($request->id);
 
+				//Check Financier Approve Advance amount
+				if ($trip->advance_request_approval_status_id != 3261) {
+					$trip->advance_received = $request->advance_received;
+					if ($request->advance_received >= 1) {
+						$trip->advance_request_approval_status_id = 3260;
+					}
+				}
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
 				//$trip->visits()->delete();
@@ -178,14 +188,6 @@ class Trip extends Model {
 			}
 			$employee = Employee::where('id', Auth::user()->entity->id)->first();
 
-			if ($request->advance_received >= 1) {
-				// $trip->advance_received = $request->advance_received;
-				// if ($employee->self_approve == 1) {
-				// 	$trip->advance_request_approval_status_id = 3261;
-				// } else {
-				$trip->advance_request_approval_status_id = 3260;
-				// }
-			}
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
@@ -410,7 +412,7 @@ class Trip extends Model {
 			$trip->visits = [$visit];
 			$trip->trip_type = '';
 			$trip->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', Auth::user()->entity->outlet->address->city_id)->first();
-
+			$trip_advance_amount_edit = 1;
 			$data['success'] = true;
 		} else {
 			$data['action'] = 'Edit';
@@ -433,6 +435,16 @@ class Trip extends Model {
 				$data['success'] = false;
 				$data['message'] = 'Trip not found';
 			}
+			if ($trip->advance_request_approval_status_id) {
+				if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
+					$trip_advance_amount_edit = 1;
+				} else {
+					$trip_advance_amount_edit = 0;
+				}
+			} else {
+				$trip_advance_amount_edit = 1;
+			}
+
 		}
 
 		$grade = Auth::user()->entity;
@@ -459,6 +471,8 @@ class Trip extends Model {
 			'claimable_travel_mode_list' => DB::table('travel_mode_category_type')->where('category_id', 3403)->pluck('travel_mode_id'),
 		];
 		$data['trip'] = $trip;
+
+		$data['trip_advance_amount_edit'] = $trip_advance_amount_edit;
 
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
