@@ -65,7 +65,7 @@ class Trip extends Model {
 	}
 
 	public function visits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->orderBy('id');
+		return $this->hasMany('Uitoux\EYatra\Visit')->whereNotIn('booking_status_id',[3062,3064])->orderBy('id');
 	}
 
 	public function selfVisits() {
@@ -225,7 +225,7 @@ class Trip extends Model {
 						$previous_value = $request->visits[$key - 1];
 						$from_city_id = $previous_value['to_city_id'];
 					}
-					if ($from_city_id == $visit_data['to_city_id']) {
+					if ($visit_data['from_city_id'] == $visit_data['to_city_id']) {
 						return response()->json(['success' => false, 'errors' => "From City and To City should not be same,please choose another To city"]);
 					}
 					if ($visit_data['id']) {
@@ -420,7 +420,7 @@ class Trip extends Model {
 
 			$trip = Trip::find($trip_id);
 			$trip->visits = $t_visits = $trip->visits;
-			//dd($trip->visits->get);
+			//dd($trip->visits);
 			foreach ($t_visits as $key => $t_visit) {
 				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
 				$trip->visits[$key]->booking_method_name = $b_name->name;

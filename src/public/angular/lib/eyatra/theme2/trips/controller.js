@@ -224,7 +224,7 @@ app.component('eyatraTripForm', {
                         $scope.onChange(start_date, end_date);
                     }, 800);
                 }
-             
+
                 $(".daterange").daterangepicker({
                     autoclose: true,
                     // minDate: new Date(self.eligible_date),
@@ -403,6 +403,8 @@ app.component('eyatraTripForm', {
             for (j = 0; j < leng; j++) {
                 var from_city_id = $('#from_city_id_' + j).val();
                 var to_city_id = $('#to_city_id_' + j).val();
+                // alert(from_city_id);
+                //alert(to_city_id);
                 if (to_city_id) {
                     if (from_city_id == to_city_id) {
                         error_details = 1;
