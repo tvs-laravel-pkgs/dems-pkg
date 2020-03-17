@@ -174,7 +174,7 @@ app.component('eyatraTripVerificationForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/trips')
+                $location.path('/trip/verifications')
                 $scope.$apply()
                 return;
             }
@@ -186,6 +186,7 @@ app.component('eyatraTripVerificationForm', {
                 currency: 'INR'
             });
             self.trip_reject_reasons = response.data.trip_reject_reasons;
+            self.trip_reject = response.data.trip_reject;
             self.extras = response.data.extras;
             self.action = response.data.action;
             $rootScope.loading = false;

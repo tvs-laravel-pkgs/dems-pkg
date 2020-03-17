@@ -4,9 +4,9 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
-use Uitoux\EYatra\ApprovalLog;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
@@ -74,6 +74,19 @@ class TripVerificationController extends Controller {
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
 		$this->data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();
+
+		if ($trip->advance_request_approval_status_id) {
+			if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
+				$trip_reject = 1;
+			} else {
+				$trip_reject = 0;
+			}
+		} else {
+			$trip_reject = 1;
+		}
+
+		$this->data['trip_reject'] = $trip_reject;
+
 		return response()->json($this->data);
 	}
 
@@ -109,12 +122,12 @@ class TripVerificationController extends Controller {
 	//OUTSTATION TRIP
 	public function eyatraOutstationTripVerificationFilterData() {
 		$this->data['type_list'] = collect(Config::select('name', 'id')
-						->where('config_type_id', 534)
-						->whereIn('id',[3600,3601])
-						->get());
+				->where('config_type_id', 534)
+				->whereIn('id', [3600, 3601])
+				->get());
 		// dd(session('type_id'));
 		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
-		
+
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
@@ -128,9 +141,9 @@ class TripVerificationController extends Controller {
 		//dd($this->data);
 		return response()->json($this->data);
 	}
-	public function eyatraOutstationTripData(Request $r){
-		
-		if($r->type_id){
+	public function eyatraOutstationTripData(Request $r) {
+
+		if ($r->type_id) {
 			session(['type_id' => $r->type_id]);
 		}
 
@@ -145,20 +158,19 @@ class TripVerificationController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				if($list->type_id == 3600){
+				if ($list->type_id == 3600) {
 					return '
 						<a href="#!/eyatra/outstation-trip/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
-				}else{
+				} else {
 					return '
 						<a href="#!/eyatra/outstation-claim/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
 				}
-				
 
 			})
 			->make(true);

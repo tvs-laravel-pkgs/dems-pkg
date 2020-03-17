@@ -4,9 +4,11 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
@@ -37,8 +39,8 @@ class AdvanceClaimRequestController extends Controller {
 
 			)
 		// ->whereNotNull('trips.advance_received')
-		// ->where('trips.status_id', 3028) //MANAGER APPROVED
 		// ->where('trips.status_id', '!=', 3261) //ADVANCE REQUEST APPROVED
+			->whereIn('trips.status_id', [3021, 3028]) //MANAGER APPROVED or WAITING FOR MANAGER APPROVAL
 			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
@@ -149,6 +151,10 @@ class AdvanceClaimRequestController extends Controller {
 		$payment->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+
+		//Approval Log
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3620, Auth::user()->entity_id, Carbon::now());
+
 		$notification = sendnotification($type = 10, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Request Approved');
 		return response()->json(['success' => true]);
 	}
@@ -238,6 +244,10 @@ class AdvanceClaimRequestController extends Controller {
 			foreach ($trips as $key => $emp_details) {
 				$user = User::where('entity_id', $emp_details->id)->where('user_type_id', 3121)->first();
 				$trip = Trip::find($emp_details->id);
+
+				//Approval Log
+				$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3620, Auth::user()->entity_id, Carbon::now());
+
 				$notification = sendnotification($type = 10, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Request Approved');
 			}
 

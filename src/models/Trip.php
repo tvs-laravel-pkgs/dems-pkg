@@ -260,7 +260,7 @@ class Trip extends Model {
 								$visit = $old_visit;
 							}
 						} else {
-//Booking Method Self
+							//Booking Method Self
 							//dump('self');
 							$visit = $old_visit;
 						}
@@ -381,6 +381,19 @@ class Trip extends Model {
 			}
 		}
 		$data['trip'] = $trip;
+
+		if ($trip->advance_request_approval_status_id) {
+			if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
+				$trip_reject = 1;
+			} else {
+				$trip_reject = 0;
+			}
+		} else {
+			$trip_reject = 1;
+		}
+
+		$data['trip_reject'] = $trip_reject;
+
 		$data['success'] = true;
 		return response()->json($data);
 

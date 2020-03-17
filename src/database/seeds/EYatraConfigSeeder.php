@@ -927,6 +927,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Advance Expenses Claim - Financier Approved',
 				'config_type_id' => 534,
 			],
+			3620 => [
+				'name' => 'Trip Advance Request - Financier Approved',
+				'config_type_id' => 534,
+			],
 
 		];
 
