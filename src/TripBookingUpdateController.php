@@ -99,7 +99,7 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		// dd($r->all());
+		 //dd($r->all());
 		// DB::beginTransaction();
 		try {
 			$error_messages = [
