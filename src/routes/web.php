@@ -448,13 +448,18 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/report/outstation-trip/export', 'Uitoux\EYatra\ReportController@outstationTripExport')->name('outstationTripExport');
 		Route::post('eyatra/employee/get-list', 'Uitoux\EYatra\ReportController@getEmployeeByOutlet')->name('getEmployeeByOutlet');
 
-		//OUTSTATION TRIP
-		Route::get('eyatra/trip/outstation-trip/get-filter-data', 'Uitoux\EYatra\TripVerificationController@eyatraOutstationTripVerificationFilterData')->name('eyatraOutstationTripVerificationFilterData');
-		Route::get('eyatra/report/outstation-trip/get-outstation-data', 'Uitoux\EYatra\TripVerificationController@eyatraOutstationTripData')->name('eyatraOutstationTripData');
-
 		//LOCAL TRIP REPORT
 		Route::get('eyatra/report/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraLocalFilterData')->name('eyatraLocalFilterData');
 		Route::get('eyatra/report/local-trip/get-list', 'Uitoux\EYatra\ReportController@listLocalTripReport')->name('listLocalTripReport');
 		Route::get('eyatra/report/local-trip/export', 'Uitoux\EYatra\ReportController@localTripExport')->name('localTripExport');
+
+		//APPROVAL LOGS
+		//OUTSTATION TRIP
+		Route::get('report/trip/outstation-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripVerificationFilterData')->name('eyatraOutstationTripVerificationFilterData');
+		Route::get('report/outstation-trip/get-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripData')->name('eyatraOutstationTripData');
+
+		//LOCAL TRIP
+		Route::get('report/trip/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraReportLocalTripFilterData')->name('eyatraReportLocalTripFilterData');
+		Route::get('report/outstation-trip/get-local-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripData')->name('eyatraLocalTripData');
 	});
 });
