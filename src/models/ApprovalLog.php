@@ -3,20 +3,9 @@
 namespace Uitoux\EYatra;
 use App\User;
 use Auth;
-use Carbon\Carbon;
-use DateInterval;
-use DatePeriod;
-use DateTime;
 use DB;
-use Entrust;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
-use Session;
 use Uitoux\EYatra\ApprovalLog;
-use Uitoux\EYatra\Employee;
-use Validator;
-
 
 class ApprovalLog extends Model {
 	protected $table = 'approval_logs';
@@ -77,13 +66,14 @@ class ApprovalLog extends Model {
 				'approval_logs.approval_type_id as type_id'
 			)
 			->where('users.user_type_id', 3121)
+			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
 			->where(function ($query) use ($r) {
 				if ($r->get('type_id')) {
 					$query->where("approval_logs.approval_type_id", $r->get('type_id'))->orWhere(DB::raw("-1"), $r->get('type_id'));
-				}else{
+				} else {
 					$query->where("approval_logs.approval_type_id", 3600)->orWhere(DB::raw("-1"), $r->get('type_id'));
 				}
 			})
@@ -114,23 +104,6 @@ class ApprovalLog extends Model {
 				}
 			})
 		;
-		$now = date('Y-m-d');
-		$sub_employee_id = AlternateApprove::select('employee_id')
-			->where('from', '<=', $now)
-			->where('to', '>=', $now)
-			->where('alternate_employee_id', Auth::user()->entity_id)
-			->get()
-			->toArray();
-		//dd($sub_employee_id);
-		$ids = array_column($sub_employee_id, 'employee_id');
-		array_push($ids, Auth::user()->entity_id);
-		if (count($sub_employee_id) > 0) {
-			$lists->whereIn('trips.manager_id', $ids); //Alternate MANAGER
-		} else {
-			$lists->where('trips.manager_id', Auth::user()->entity_id); //MANAGER
-		}
-
-
 		return $lists;
 	}
 }

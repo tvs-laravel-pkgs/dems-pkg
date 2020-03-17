@@ -376,7 +376,7 @@ app.component('eyatraOutstationTripList', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            outstation_trip_verification_filter_data_url
+            outstation_trip_filter_data_url
         ).then(function(response) {
             self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
@@ -429,6 +429,7 @@ app.component('eyatraOutstationTripList', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'type',  searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },

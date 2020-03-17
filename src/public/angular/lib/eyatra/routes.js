@@ -662,17 +662,17 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
     //OUTSTATION TRIP
-    when('/outstation-trip/list', {
+    when('/reports/outstation-trip', {
         template: '<eyatra-outstation-trip-list></eyatra-outstation-trip-list>',
         title: 'Outstation Trip',
     }).
-    //TRIP VIEW
-    when('/eyatra/outstation-trip/view/:trip_id', {
+    //REPORTS >> OUTSTATION TRIP VIEW
+    when('/outstation-trip/view/:trip_id', {
         template: '<eyatra-outstation-trip-view></eyatra-outstation-trip-view>',
         title: 'Outstation Trip View',
     }).
-    //CLAIM VIEW
-    when('/eyatra/outstation-claim/view/:claim_id', {
+    //REPORTS >> OUTSTATION TRIP CLAIM VIEW
+    when('/outstation-claim/view/:claim_id', {
         template: '<eyatra-outstation-claim-view></eyatra-outstation-claim-view>',
         title: 'Outstation Claim View',
     });
