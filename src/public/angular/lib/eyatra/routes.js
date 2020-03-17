@@ -661,20 +661,36 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Local Trip Reports',
     }).
 
-    //OUTSTATION TRIP
+    //APPROVAL LOGS >> OUTSTATION TRIP
     when('/reports/outstation-trip', {
         template: '<eyatra-outstation-trip-list></eyatra-outstation-trip-list>',
         title: 'Outstation Trip',
     }).
-    //REPORTS >> OUTSTATION TRIP VIEW
+    //APPROVAL LOGS >> OUTSTATION TRIP VIEW
     when('/outstation-trip/view/:trip_id', {
         template: '<eyatra-outstation-trip-view></eyatra-outstation-trip-view>',
         title: 'Outstation Trip View',
     }).
-    //REPORTS >> OUTSTATION TRIP CLAIM VIEW
+    //APPROVAL LOGS >> OUTSTATION TRIP CLAIM VIEW
     when('/outstation-claim/view/:claim_id', {
         template: '<eyatra-outstation-claim-view></eyatra-outstation-claim-view>',
         title: 'Outstation Claim View',
+    }).
+
+    //APPROVAL LOGS >> LOCAL TRIP
+    when('/reports/local-trip', {
+        template: '<eyatra-reports-local-trip-list></eyatra-reports-local-trip-list>',
+        title: 'Local Trip',
+    }).
+    //APPROVAL LOGS >> LOCAL TRIP VIEW
+    when('/report/local-trip/view/:trip_id', {
+        template: '<eyatra-reports-local-trip-view></eyatra-reports-local-trip-view>',
+        title: 'Local Trip View',
+    }).
+    //APPROVAL LOGS >> LOCAL TRIP CLAIM VIEW
+    when('/report/local-trip-claim/view/:trip_id', {
+        template: '<eyatra-reports-local-trip-claim-view></eyatra-reports-local-trip-claim-view>',
+        title: 'Local Trip Claim View',
     });
     
 }]);

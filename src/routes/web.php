@@ -455,8 +455,11 @@ Route::group(['middleware' => ['web']], function () {
 
 		//APPROVAL LOGS
 		//OUTSTATION TRIP
-		Route::get('eyatra/trip/outstation-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripVerificationFilterData')->name('eyatraOutstationTripVerificationFilterData');
-		Route::get('eyatra/report/outstation-trip/get-outstation-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripData')->name('eyatraOutstationTripData');
+		Route::get('report/trip/outstation-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripVerificationFilterData')->name('eyatraOutstationTripVerificationFilterData');
+		Route::get('report/outstation-trip/get-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripData')->name('eyatraOutstationTripData');
+
 		//LOCAL TRIP
+		Route::get('report/trip/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraReportLocalTripFilterData')->name('eyatraReportLocalTripFilterData');
+		Route::get('report/outstation-trip/get-local-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripData')->name('eyatraLocalTripData');
 	});
 });

@@ -522,4 +522,66 @@ class ReportController extends Controller {
 			->make(true);
 	}
 
+	//LOCAL TRIP
+	public function eyatraReportLocalTripFilterData() {
+		$this->data['type_list'] = collect(Config::select('name', 'id')
+				->where('config_type_id', 534)
+				->whereIn('id', [3606, 3607])
+				->get());
+		// dd(session('type_id'));
+		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3606;
+
+		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.reporting_to_id', Auth::user()->entity_id)
+				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+
+		$this->data['success'] = true;
+		//dd($this->data);
+		return response()->json($this->data);
+	}
+
+	public function eyatraLocalTripData(Request $r) {
+
+		if ($r->type_id) {
+			session(['type_id' => $r->type_id]);
+		}
+
+		$lists = ApprovalLog::getLocalTripList($r);
+		return Datatables::of($lists)
+			->addColumn('type', function ($list) {
+				if ($list->type_id == 3606) {
+					return "Trip";
+				} else {
+					return "Claim";
+				}
+			})
+			->addColumn('action', function ($list) {
+
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
+				if ($list->type_id == 3606) {
+					return '
+						<a href="#!/report/local-trip/view/' . $list->entity_id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>
+						';
+				} else {
+					return '
+						<a href="#!/report/local-trip-claim/view/' . $list->entity_id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>
+						';
+				}
+
+			})
+			->make(true);
+	}
 }
