@@ -24,7 +24,8 @@ class ProfileController extends Controller {
 
 				$user->profile_image = $name;
 				$user->save();
-				return response()->json(['success' => true, 'message' => 'Profile Image saved successfully!']);
+				// $path = url('') . '/storage/app/public/profile/' . $name;
+				return response()->json(['success' => true, 'message' => 'Profile Image saved successfully!', 'path' => $name]);
 			}
 		} else {
 			return response()->json(['success' => false, 'message' => 'User Not Found!']);
