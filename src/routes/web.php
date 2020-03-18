@@ -461,5 +461,12 @@ Route::group(['middleware' => ['web']], function () {
 		//LOCAL TRIP
 		Route::get('report/trip/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraReportLocalTripFilterData')->name('eyatraReportLocalTripFilterData');
 		Route::get('report/outstation-trip/get-local-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripData')->name('eyatraLocalTripData');
+
+		//TRIP ADVANCE REQUEST
+		Route::get('report/trip-advance-request/get-data', 'Uitoux\EYatra\ReportController@eyatraTripAdvanceRequestData')->name('eyatraTripAdvanceRequestData');
+		Route::get('report/trip/trip-advance-request/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripAdvanceRequestFilterData')->name('eyatraTripAdvanceRequestFilterData');
+
+		
+
 	});
 });

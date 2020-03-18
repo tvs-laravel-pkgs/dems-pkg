@@ -57,14 +57,16 @@ class TripVerificationController extends Controller {
 			'status',
 		])
 			->find($trip_id);
+			//dd($trip);
 
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
 		if (!Entrust::can('verify-all-trips') && $trip->manager_id != Auth::user()->entity_id) {
-			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
+			return response()->json(['success' => false, 'errors' => ['You are not authorized to view this trip']]);
 		}
+
 
 		$start_date = $trip->visits()->select(DB::raw('MIN(visits.departure_date) as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('MAX(visits.departure_date) as end_date'))->first();

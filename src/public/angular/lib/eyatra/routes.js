@@ -73,7 +73,7 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit COA',
     }).
 
-     //ROLES
+    //ROLES
     when('/roles/list', {
         template: '<eyatra-role-list></eyatra-role-list>',
         title: 'Roles',
@@ -600,12 +600,12 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-local-form></eyatra-trip-local-form>',
         title: 'Edit Local Trip',
     }).
-   
+
     when('/local-trip/view/:trip_id', {
         template: '<eyatra-trip-local-view></eyatra-trip-local-view>',
         title: 'View Local Trip',
     }).
-    
+
     //LOCAL TRIP CLAIM
     when('/local-trip/claim/list', {
         template: '<eyatra-claimed-local-trips></eyatra-claimed-local-trips>',
@@ -623,7 +623,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-local-trip-claim-view></eyatra-local-trip-claim-view>',
         title: 'View Local Trip Claim',
     }).
-  
+
 
     //LOCAL TRIP MANAGER VERIFICATION
     when('/local-trip/verification/list', {
@@ -691,6 +691,11 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/report/local-trip-claim/view/:trip_id', {
         template: '<eyatra-reports-local-trip-claim-view></eyatra-reports-local-trip-claim-view>',
         title: 'Local Trip Claim View',
+    }).
+    //APPROVAL LOGS >> TRIP ADVANCE REQUEST
+    when('/reports/trip-advance-request', {
+        template: '<eyatra-reports-trip-advance-request></eyatra-reports-trip-advance-request>',
+        title: 'Local Trip',
     });
-    
+
 }]);
