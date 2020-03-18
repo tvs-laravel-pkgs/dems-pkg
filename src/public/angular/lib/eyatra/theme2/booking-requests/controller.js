@@ -37,9 +37,9 @@ app.component('eyatraTripBookingRequests', {
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'tickets_count', searchable: false },
-                // { data: 'booking_status', searchable: false },
                 { data: 'created_on', searchable: false },
-                { data: 'status', name: 'status.name', searchable: true },
+                { data: 'booking_status', searchable: false },
+                //{ data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
