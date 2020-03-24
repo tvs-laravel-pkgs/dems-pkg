@@ -841,11 +841,11 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Local Conveyance',
 				'config_type_id' => 533,
 			],
-			3583 => [
+			3584 => [
 				'name' => 'Other Expenses',
 				'config_type_id' => 533,
 			],
-			3583 => [
+			3585 => [
 				'name' => 'Advance Expenses',
 				'config_type_id' => 533,
 			],
@@ -933,6 +933,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3620 => [
 				'name' => 'Trip Advance Request - Financier Approved',
+				'config_type_id' => 534,
+			],
+			3621 => [
+				'name' => 'Other Expenses - Cashier Approved',
 				'config_type_id' => 534,
 			],
 

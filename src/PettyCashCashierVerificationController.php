@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\BankDetail;
 use Uitoux\EYatra\ChequeDetail;
 use Uitoux\EYatra\Employee;
@@ -291,6 +292,17 @@ class PettyCashCashierVerificationController extends Controller {
 						$activity['activity'] = "paid";
 						$activity_log = ActivityLog::saveLog($activity);
 					}
+
+					//Approval Log
+					if ($request->type_id == 1) {
+						$type = 3583;
+						$approval_type_id = 3610;
+					} else {
+						$type = 3584;
+						$approval_type_id = 3621;
+					}
+					$approval_log = ApprovalLog::saveApprovalLog($type, $request->petty_cash_id, $approval_type_id, Auth::user()->entity_id, Carbon::now());
+
 					DB::commit();
 					return response()->json(['success' => true]);
 				} else {
