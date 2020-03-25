@@ -46,6 +46,8 @@ class EmployeeController extends Controller {
 				->whereIn('employees.id', $employee_ids)
 				->select('employees.id', 'users.name')
 				->get())->prepend(['id' => '', 'name' => 'Select Manager']);
+		$this->data['filter_manager_id'] = '';
+		$this->data['filter_outlet_id']='-1';
 		return response()->json($this->data);
 	}
 
@@ -222,6 +224,45 @@ class EmployeeController extends Controller {
 		$this->data['employee'] = $employee;
 
 		return response()->json($this->data);
+	}
+
+public function getManagerByOutlet(Request $r) {
+	$employees = Employee::select('reporting_to_id')
+			->distinct()
+			->whereNotNull('reporting_to_id')
+			->where('employees.company_id', Auth::user()->company_id)
+			->get()->toArray();
+		$employee_ids = array_column($employees, 'reporting_to_id');
+		//dump(count($employee_ids));
+		//dump($r->outlet_id);
+		/*$manager_list = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->whereIn('employees.id', $employee_ids)
+				->where(function ($query) use ($r) {
+					if ($r->outlet_id != '-1') {
+						$query->where('employees.outlet_id', $r->outlet_id);
+
+					}
+				})
+				->where('employees.company_id', Auth::user()->company_id)
+				->get())->prepend(['id' => '-1', 'name' => 'Select Manager Code/Name']);*/
+		$manager_list = collect(Employee::select('employees.id', 'users.name')
+				->join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('users.company_id', Auth::user()->company_id)
+				->whereIn('employees.id', $employee_ids)
+				->where(function ($query) use ($r) {
+					if ($r->outlet_id != '-1') {
+						$query->where('employees.outlet_id', $r->outlet_id);
+
+					}
+				})
+				->get())->prepend(['id' => '', 'name' => 'Select Manager']);
+
+		$data['manager_list'] = $manager_list;
+		$data['success'] = true;
+		return response()->json($data);
 	}
 
 	public function saveEYatraEmployee(Request $request) {

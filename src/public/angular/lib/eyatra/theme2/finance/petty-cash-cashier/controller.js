@@ -168,10 +168,7 @@ app.component('eyatraPettyCashCashierView', {
                 'date': {
                     required: true,
                 },
-                <<
-                <<
-                <<
-                < HEAD 'bank_name': {
+                'bank_name': {
                     required: function(element) {
                         if ($('#payment_mode_id').val() == 3244) {
                             return true;

@@ -7,6 +7,7 @@ app.component('eyatraEmployees', {
         self.permissionadd = self.hasPermission('eyatra-employee-add');
         self.permissionimport = self.hasPermission('eyatra-import-employee');
 
+
         var dataTable = $('#eyatra_employee_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -62,17 +63,31 @@ app.component('eyatraEmployees', {
         $http.get(
             employee_filter_url
         ).then(function(response) {
-            // console.log(response);
+            console.log(response);
             self.grade_list = response.data.grade_list;
             self.outlet_list = response.data.outlet_list;
             self.manager_list = response.data.manager_list;
+            console.log(self.manager_list);
+            self.manager_id = response.data.filter_manager_id;
             self.role_list = response.data.role_list;
+            console.log(response.data.filter_outlet_id);
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+            setTimeout(function() {
+                //alert('in');
+                get_managers(self.filter_outlet_id, status = 0);
+            }, 1500);
             $rootScope.loading = false;
         });
         var dataTableFilter = $('#eyatra_employee_table').dataTable();
         $scope.onselectOutlet = function(id) {
             $('#outlet_id').val(id);
             dataTableFilter.fnFilter();
+            get_managers(id, status = 1);
+            //alert('out');
         }
         $scope.onselectManager = function(id) {
             $('#manager_id').val(id);
@@ -91,11 +106,31 @@ app.component('eyatraEmployees', {
             $('#manager_id').val(null);
             $('#grade_id').val(null);
             $('#role_id').val(null);
+            self.manager_id = '';
             dataTableFilter.fnFilter();
         }
         $scope.resetForm();
         $scope.deleteEmployee = function(id) {
             $('#del').val(id);
+        }
+
+        function get_managers(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getManagerByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.manager_list = [];
+                    if (status == 1) {
+                        self.manager_id = '';
+                    }
+                    self.manager_list = res.manager_list;
+                    console.log(self.manager_list);
+                    $scope.$apply()
+                });
         }
         $scope.confirmDeleteEmployee = function() {
             $id = $('#del').val();
