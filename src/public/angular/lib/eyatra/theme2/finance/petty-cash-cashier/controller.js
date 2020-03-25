@@ -161,27 +161,61 @@ app.component('eyatraPettyCashCashierView', {
                     number: true,
                     required: true,
                 },
+                'reference_number': {
+                    required: true,
+                },
+
                 'date': {
                     required: true,
                 },
                 'bank_name': {
-                    required: true,
+                    required: function(element) {
+                        if ($('#payment_mode_id').val() == 3244) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 100,
                     minlength: 3,
                 },
                 'branch_name': {
-                    required: true,
+                    required: function(element) {
+                        if ($('#payment_mode_id').val() == 3244) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 50,
                     minlength: 3,
                 },
                 'account_number': {
-                    required: true,
+                    required: function(element) {
+                        if ($('#payment_mode_id').val() == 3244) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 20,
                     minlength: 3,
-                    positiveNumber: true,
+                    positiveNumber: function(element) {
+                        if ($('#payment_mode_id').val() == 3244) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                 },
                 'ifsc_code': {
-                    required: true,
+                    required: function(element) {
+                        if ($('#payment_mode_id').val() == 3244) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
                     maxlength: 10,
                     minlength: 3,
                 },
