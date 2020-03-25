@@ -65,7 +65,7 @@ class Trip extends Model {
 	}
 
 	public function visits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->whereNotIn('booking_status_id',[3062,3064])->orderBy('id');
+		return $this->hasMany('Uitoux\EYatra\Visit')->whereNotIn('booking_status_id', [3062, 3064])->orderBy('id');
 	}
 
 	public function selfVisits() {
@@ -253,6 +253,7 @@ class Trip extends Model {
 								} else {
 									//dump('new');
 									$old_visit->booking_status_id = 3064; //Visit Rescheduled
+									$old_visit->status_id = 3229; //Visit Rescheduled
 									$old_visit->save();
 									$visit = new Visit;
 									//dump('fff');
@@ -279,7 +280,7 @@ class Trip extends Model {
 					$visit->trip_id = $trip->id;
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
-					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : date('H:i:s', strtotime($visit_data['prefered_departure_time']));
+					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
 					$visit->booking_status_id = 3060; //PENDING
 					$visit->status_id = 3220; //NEW
 					$visit->manager_verification_status_id = 3080; //NEW

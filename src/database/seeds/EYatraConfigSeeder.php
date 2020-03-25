@@ -336,6 +336,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Claim Inprogress',
 				'config_type_id' => 512,
 			],
+			3229 => [
+				'name' => 'Visit Rescheduled',
+				'config_type_id' => 512,
+			],
 
 			//VISIT BOOKING STATUSES
 			3240 => [
@@ -577,10 +581,6 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			//AGENT PAYMENT MODES
-			3229 => [
-				'name' => 'DD',
-				'config_type_id' => 522,
-			],
 			3230 => [
 				'name' => 'NEFT',
 				'config_type_id' => 522,
@@ -591,6 +591,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3232 => [
 				'name' => 'IMPS',
+				'config_type_id' => 522,
+			],
+			3233 => [
+				'name' => 'DD',
 				'config_type_id' => 522,
 			],
 
@@ -837,11 +841,11 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Local Conveyance',
 				'config_type_id' => 533,
 			],
-			3583 => [
+			3584 => [
 				'name' => 'Other Expenses',
 				'config_type_id' => 533,
 			],
-			3583 => [
+			3585 => [
 				'name' => 'Advance Expenses',
 				'config_type_id' => 533,
 			],
@@ -929,6 +933,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3620 => [
 				'name' => 'Trip Advance Request - Financier Approved',
+				'config_type_id' => 534,
+			],
+			3621 => [
+				'name' => 'Other Expenses - Cashier Approved',
 				'config_type_id' => 534,
 			],
 
