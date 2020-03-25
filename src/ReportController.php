@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
 use DB;
+use URL;
+use Redirect;
 use Excel;
 use Illuminate\Http\Request;
 use Session;
@@ -212,20 +214,21 @@ class ReportController extends Controller {
 
 		$trips = $trips->get();
 
+	if(count($trips) > 0){
 		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
 		$trips_details = array();
 		if ($trips) {
 			foreach ($trips as $key => $trip) {
 				$trips_details[] = [
-					$trip->number,
-					$trip->ecode,
-					$trip->ename,
-					$trip->outlet_name,
-					$trip->travel_period,
-					$trip->purpose,
-					$trip->total_amount,
-					$trip->status,
-					$trip->claim_approval_datetime,
+				$trip->number,
+				$trip->ecode,
+				$trip->ename,
+				$trip->outlet_name,
+				$trip->travel_period,
+				$trip->purpose,
+				$trip->total_amount,
+				$trip->status,
+				$trip->claim_approval_datetime,
 				];
 			}
 		}
@@ -240,6 +243,10 @@ class ReportController extends Controller {
 				});
 			});
 		})->export('xls');
+	}else{
+		Session()->flash('error', 'No Data Found');
+		return Redirect::to('/#!/report/outstation-trip/list');
+	}
 
 	}
 
@@ -425,35 +432,39 @@ class ReportController extends Controller {
 		}
 
 		$trips = $trips->get();
-
-		// dd($trips);
-		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
-		$trips_details = array();
-		if ($trips) {
-			foreach ($trips as $key => $trip) {
-				$trips_details[] = [
-					$trip->number,
-					$trip->ecode,
-					$trip->ename,
-					$trip->outlet_name,
-					$trip->travel_period,
-					$trip->purpose,
-					$trip->total_amount,
-					$trip->status,
-					$trip->claim_approval_datetime,
-				];
+		if(count($trips) > 0){
+			// dd($trips);
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
+			$trips_details = array();
+			if ($trips) {
+				foreach ($trips as $key => $trip) {
+					$trips_details[] = [
+						$trip->number,
+						$trip->ecode,
+						$trip->ename,
+						$trip->outlet_name,
+						$trip->travel_period,
+						$trip->purpose,
+						$trip->total_amount,
+						$trip->status,
+						$trip->claim_approval_datetime,
+					];
+				}
 			}
-		}
 
-		Excel::create('Local Trip Report', function ($excel) use ($trips_header, $trips_details) {
-			$excel->sheet('Local Trip Report', function ($sheet) use ($trips_header, $trips_details) {
-				$sheet->fromArray($trips_details, NULL, 'A1');
-				$sheet->row(1, $trips_header);
-				$sheet->row(1, function ($row) {
-					$row->setBackground('#07c63a');
+			Excel::create('Local Trip Report', function ($excel) use ($trips_header, $trips_details) {
+				$excel->sheet('Local Trip Report', function ($sheet) use ($trips_header, $trips_details) {
+					$sheet->fromArray($trips_details, NULL, 'A1');
+					$sheet->row(1, $trips_header);
+					$sheet->row(1, function ($row) {
+						$row->setBackground('#07c63a');
+					});
 				});
-			});
-		})->export('xls');
+			})->export('xls');
+		}else{
+			Session()->flash('error', 'No Data Found');
+			return Redirect::to('/#!/report/local-trip/list');
+		}
 
 	}
 
