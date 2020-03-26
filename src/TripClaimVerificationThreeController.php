@@ -104,7 +104,7 @@ class TripClaimVerificationThreeController extends Controller {
 		$trip->status_id = 3031; //Payment pending for Employee
 		$trip->save();
 		//Approval Log
-		$approval_log = ApprovalLog::saveApprovalLog(3581, $r->trip_id, 3603, Auth::user()->entity_id, Carbon::now());
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3603, Auth::user()->entity_id, Carbon::now());
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Payment Pending');
 

@@ -696,6 +696,26 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/reports/trip-advance-request', {
         template: '<eyatra-reports-trip-advance-request></eyatra-reports-trip-advance-request>',
         title: 'Local Trip',
+    }).
+    //APPROVAL LOGS >> SR MANAGER APPROVAL
+    when('/reports/sr-manager-approval', {
+        template: '<eyatra-reports-trip-sr-manager-approval></eyatra-reports-trip-sr-manager-approval>',
+        title: 'Trip Report',
+    }).
+    //APPROVAL LOGS >>  FINANCIER APPROVAL
+    when('/reports/financier-approval', {
+        template: '<eyatra-reports-trip-financier-approval></eyatra-reports-trip-financier-approval>',
+        title: 'Trip Report',
+    }).
+    //APPROVAL LOGS >>  FINANCIER PAID
+    when('/reports/financier-paid', {
+        template: '<eyatra-reports-trip-financier-paid></eyatra-reports-trip-financier-paid>',
+        title: 'Trip Report',
+    }).
+    //APPROVAL LOGS >>  EMPLOYEE PAID
+    when('/reports/employee-paid', {
+        template: '<eyatra-reports-trip-employee-paid></eyatra-reports-trip-employee-paid>',
+        title: 'Trip Report',
     });
 
 }]);

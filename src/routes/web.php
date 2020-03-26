@@ -468,6 +468,21 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('report/trip-advance-request/get-data', 'Uitoux\EYatra\ReportController@eyatraTripAdvanceRequestData')->name('eyatraTripAdvanceRequestData');
 		Route::get('report/trip/trip-advance-request/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripAdvanceRequestFilterData')->name('eyatraTripAdvanceRequestFilterData');
 
+		//SR MANAGER APPROVAL
+		Route::get('report/trip-sr-manager-approval/get-data', 'Uitoux\EYatra\ReportController@eyatraTripSrManagerApprovalData')->name('eyatraTripSrManagerApprovalData');
+		Route::get('report/trip/trip-sr-manager-approval/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripSrManagerApprovalFilterData')->name('eyatraTripSrManagerApprovalFilterData');
+
+		//FINANCIER MANAGER APPROVAL
+		Route::get('report/trip-financier-approval/get-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierApprovalData')->name('eyatraTripFinancierApprovalData');
+		Route::get('report/trip/trip-financier-approval/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierApprovalFilterData')->name('eyatraTripFinancierApprovalFilterData');
+
+		//FINANCIER PAID
+		Route::get('report/trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidData')->name('eyatraTripFinancierPaidData');
+		Route::get('report/trip/trip-financier-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidFilterData')->name('eyatraTripFinancierPaidFilterData');
+
+		//EMPLOYEE PAID
+		Route::get('report/trip-employee-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidData')->name('eyatraTripEmployeePaidData');
+		Route::get('report/trip/trip-employee-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidFilterData')->name('eyatraTripEmployeePaidFilterData');
 		
 
 	});
