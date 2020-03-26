@@ -233,20 +233,6 @@ public function getManagerByOutlet(Request $r) {
 			->where('employees.company_id', Auth::user()->company_id)
 			->get()->toArray();
 		$employee_ids = array_column($employees, 'reporting_to_id');
-		//dump(count($employee_ids));
-		//dump($r->outlet_id);
-		/*$manager_list = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->whereIn('employees.id', $employee_ids)
-				->where(function ($query) use ($r) {
-					if ($r->outlet_id != '-1') {
-						$query->where('employees.outlet_id', $r->outlet_id);
-
-					}
-				})
-				->where('employees.company_id', Auth::user()->company_id)
-				->get())->prepend(['id' => '-1', 'name' => 'Select Manager Code/Name']);*/
 		$manager_list = collect(Employee::select('employees.id', 'users.name')
 				->join('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)

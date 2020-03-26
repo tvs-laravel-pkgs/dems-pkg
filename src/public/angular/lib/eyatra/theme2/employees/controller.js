@@ -108,6 +108,7 @@ app.component('eyatraEmployees', {
             $('#role_id').val(null);
             self.manager_id = '';
             dataTableFilter.fnFilter();
+            get_managers(-1, status = 1);
         }
         $scope.resetForm();
         $scope.deleteEmployee = function(id) {
