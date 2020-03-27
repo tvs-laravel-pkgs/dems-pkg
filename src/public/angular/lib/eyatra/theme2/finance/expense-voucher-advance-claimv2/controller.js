@@ -77,7 +77,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification2List', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraExpenseVoucherAdvanceVerification2View', {
     templateUrl: expense_voucher_advance_verification2_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -92,6 +92,28 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
+            console.log(self.expense_voucher_view);
+            $scope.showApproveLayout = false;
+            $scope.showApproveModal = false;
+            if (self.expense_voucher_view.status_id == '3461') {
+                self.type_id = 1;
+                $scope.showApproveLayout = true;
+            } else if (self.expense_voucher_view.status_id == '3467') {
+
+                if (parseInt(self.expense_voucher_view.expense_amount) <= parseInt(self.expense_voucher_view.advance_amount)) {
+                    $scope.showApproveLayout = false;
+                    $scope.showApproveModal = true;
+                    self.type_id = 0;
+                } else {
+                    self.type_id = 2;
+                    $scope.showApproveLayout = true;
+                }
+            } else {
+                self.type_id = 0;
+            }
+            console.log($scope.showApproveLayout);
+            console.log($scope.showApproveModal);
+
         });
 
         // $(".bottom-expand-btn").on('click', function() {
@@ -110,13 +132,59 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
         //         $(".separate-bottom-fixed-layer").addClass("in");
         //     }
         // });
+
+        $(".bottom-expand-btn").on('click', function() {
+            console.log(' click ==');
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                console.log(' has ==');
+
+                $(".separate-bottom-fixed-layer").removeClass("in");
+            } else {
+                console.log(' has not ==');
+
+                $(".separate-bottom-fixed-layer").addClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'none' });
+            }
+        });
+        $(".btn_close").on('click', function() {
+            if ($(".separate-bottom-fixed-layer").hasClass("in")) {
+                $(".separate-bottom-fixed-layer").removeClass("in");
+                $(".bottom-expand-btn").css({ 'display': 'inline-block' });
+            } else {
+                $(".separate-bottom-fixed-layer").addClass("in");
+            }
+        });
+
         var d = new Date();
         var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
         $("#cuttent_date").val(val);
+        $('div[data-provide = "datepicker"]').datepicker({
+            todayHighlight: true,
+            autoclose: true,
+            endDate: '+0d',
+        });
 
         var form_id = '#approve';
         var v = jQuery(form_id).validate({
+            errorPlacement: function(error, element) {
+                error.insertAfter(element)
+            },
             ignore: '',
+            rules: {
+                'amount': {
+                    min: 1,
+                    number: true,
+                    required: true,
+                },
+                'date': {
+                    required: true,
+                },
+                'reference_number': {
+                    required: true,
+                    maxlength: 100,
+                    minlength: 3,
+                },
+            },
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
                 $('#accept_button').button('loading');
@@ -159,6 +227,55 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
                     });
             },
         });
+        var approve_modal_from = '#approve_modal_from';
+        var v = jQuery(approve_modal_from).validate({
+            errorPlacement: function(error, element) {
+                error.insertAfter(element)
+            },
+            ignore: '',
+            submitHandler: function(form) {
+                let formData = new FormData($(approve_modal_from)[0]);
+                $('#accept_button').button('loading');
+                $.ajax({
+                        url: laravel_routes['expenseVoucherVerification2Save'],
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                    .done(function(res) {
+                        if (!res.success) {
+                            $('#accept_button').button('reset');
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            $noty = new Noty({
+                                type: 'success',
+                                layout: 'topRight',
+                                text: 'Expense Voucher Advance Approved successfully',
+                                animation: {
+                                    speed: 500 // unavailable - no need
+                                },
+                            }).show();
+                            setTimeout(function() {
+                                $noty.close();
+                            }, 5000);
+                            $("#alert-modal-approve").modal('hide');
+                            $timeout(function() {
+                                $location.path('/expense/voucher-advance/verification2/')
+                            }, 500);
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $('#accept_button').button('reset');
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+            },
+        });
+
         var form_id1 = '#reject';
         var v = jQuery(form_id1).validate({
             ignore: '',

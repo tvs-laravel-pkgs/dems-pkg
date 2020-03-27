@@ -71,7 +71,8 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			'expense_voucher_advance_requests.description',
 			'expense_voucher_advance_requests.expense_description',
 			'configs.name as status',
-			'employees.payment_mode_id'
+			'employees.payment_mode_id',
+			'expense_voucher_advance_requests.status_id'
 		)
 			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
 			->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -94,29 +95,121 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 	}
 
 	public function expenseVoucherVerification2Save(Request $request) {
-		// dd($request->all());
+		 //dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
 				if ($request->expense_amount) {
+					//Expense Claim Approve
 					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3470, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				} else {
+					//Advance Amount Approve
 					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3464, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				}
+				if(isset($request->type_id) && $request->type_id > 0){
+					if($expence_voucher_cashier_approve){
+						$employee = Employee::where('id', $request->employee_id)->first();
+								//Check Outlet have reimpursement amount or not
+						$outlet_reimbursement_amount = Outlet::where('id', $employee->outlet_id)->pluck('reimbursement_amount')->first();
+						if ($outlet_reimbursement_amount > 0) {
+							//Reimbursement Transaction
+							$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
+							// dd($previous_balance_amount);
+							if ($previous_balance_amount) {
+								$balance_amount = $previous_balance_amount - $request->amount;
+								$reimbursementtranscation = new ReimbursementTranscation;
+								$reimbursementtranscation->outlet_id = $employee->outlet_id;
+								$reimbursementtranscation->company_id = Auth::user()->company_id;
+								if ($request->type_id == 1) {
+									$reimbursementtranscation->transcation_id = 3273;
+									$reimbursementtranscation->transcation_type = 3273;
+								} else {
+									$reimbursementtranscation->transcation_id = 3274;
+									$reimbursementtranscation->transcation_type = 3274;
+								}
+								$reimbursementtranscation->transaction_date = Carbon::now();
 
-				// //PAYMENT SAVE
-				// $payment = Payment::firstOrNew(['entity_id' => $request->approve, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
-				// $payment->fill($request->all());
-				// $payment->date = date('Y-m-d', strtotime($request->date));
-				// $payment->payment_of_id = 3254;
-				// // $payment->payment_mode_id = $agent_claim->id;
-				// $payment->created_by = Auth::user()->id;
-				// $payment->save();
-				// $activity['entity_id'] = $request->approve;
-				// $activity['entity_type'] = 'Expence Voucher';
-				// $activity['details'] = "Claim is paid by Cashier";
-				// $activity['activity'] = "paid";
-				// $activity_log = ActivityLog::saveLog($activity);
+								$reimbursementtranscation->petty_cash_id = $request->id;
+								$reimbursementtranscation->amount = $request->amount;
+								$reimbursementtranscation->balance_amount = $balance_amount;
+								$reimbursementtranscation->save();
+								$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
+								//doubt
+								//Outlet
+								$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
+							} else {
+								//dd(Auth::user()->entity->outlet_id);
+								$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
+								//dd($outlet->reimbursement_amount);
+								if ($outlet->reimbursement_amount >= 0) {
+									$balance_amount = $outlet->reimbursement_amount - $request->amount;
+									$reimbursementtranscation = new ReimbursementTranscation;
+									$reimbursementtranscation->outlet_id = $employee->outlet_id;
+									$reimbursementtranscation->company_id = Auth::user()->company_id;
+									if ($request->type_id == 1) {
+										$reimbursementtranscation->transcation_id = 3273;
+										$reimbursementtranscation->transcation_type = 3273;
+									} else {
+										$reimbursementtranscation->transcation_id = 3274;
+										$reimbursementtranscation->transcation_type = 3274;
+									}
+									$reimbursementtranscation->transaction_date = Carbon::now();
+									$reimbursementtranscation->petty_cash_id = $request->id;
+									$reimbursementtranscation->amount = $request->amount;
+									$reimbursementtranscation->balance_amount = $balance_amount;
+									$reimbursementtranscation->save();
+									$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
+
+								} else {
+									return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
+								}
+							}
+							//PAYMENT SAVE
+							if ($request->type_id == 1) {//Advance Approval
+								$payment = Payment::firstOrNew(['entity_id' => $request->id, 'payment_of_id' => 3256, 'payment_mode_id' => $request->payment_mode_id]);
+								$payment->fill($request->all());
+								$payment->date = date('Y-m-d', strtotime($request->date));
+								$payment->payment_of_id = 3256;//Employee Petty Cash Advance Expense Request
+								$payment->payment_mode_id = 3244;//BANK
+								$payment->created_by = Auth::user()->id;
+								$payment->save();
+								$activity['entity_id'] = $request->id;
+								$activity['entity_type'] = 'Advance Expense';
+								$activity['details'] = "Advance Expense Approved";
+								$activity['activity'] = "claim";
+								$activity_log = ActivityLog::saveLog($activity);
+							} elseif ($request->type_id == 2) {//Expense Approval
+								$payment = Payment::firstOrNew(['entity_id' => $request->id, 'payment_of_id' => 3257, 'payment_mode_id' => $request->payment_mode_id]);
+								$payment->fill($request->all());
+								$payment->date = date('Y-m-d', strtotime($request->date));
+								$payment->payment_of_id = 3257;//Employee Petty Cash Advance Expense Claim
+								$payment->payment_mode_id = 3244;//BANK
+								$payment->created_by = Auth::user()->id;
+								$payment->save();
+								$activity['entity_id'] = $request->id;
+								$activity['entity_type'] = 'Advance Expense';
+								$activity['details'] = "Advance Expense Paid";
+								$activity['activity'] = "paid";
+								$activity_log = ActivityLog::saveLog($activity);
+							}
+							//Approval Log
+							if ($request->type_id == 1) {
+								$type = 3585;
+								$approval_type_id = 3256;
+							} else {
+								$type = 3585;
+								$approval_type_id = 3257;
+							}
+							$approval_log = ApprovalLog::saveApprovalLog($type, $request->id, $approval_type_id, Auth::user()->entity_id, Carbon::now());
+							DB::commit();
+							return response()->json(['success' => true]);
+						} else {
+							return response()->json(['success' => false, 'errors' => ['This outlet has no reimbursement amount']]);
+						}
+
+					}
+				}
+				
 			} else {
 				if ($request->expense_amount) {
 					$expence_voucher_cashier_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3471, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);

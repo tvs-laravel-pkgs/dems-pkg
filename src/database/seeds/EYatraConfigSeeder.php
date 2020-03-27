@@ -398,6 +398,19 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Local Trip Expense Claim',
 				'config_type_id' => 515,
 			],
+			3256 => [
+				'name' => 'Employee Petty Cash Advance Expense Request',
+				'config_type_id' => 515,
+			],
+			3257 => [
+				'name' => 'Employee Petty Cash Advance Expense Claim',
+				'config_type_id' => 515,
+			],
+			3258 => [
+				'name' => 'Employee Petty Cash Employee Advance Re-paid',
+				'config_type_id' => 515,
+			],
+
 
 			//ADVANCE REQUEST APPROVAL STATUSES
 			3260 => [
@@ -428,6 +441,18 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3272 => [
 				'name' => 'Other Expense Claim',
+				'config_type_id' => 517,
+			],
+			3273 => [
+				'name' => 'Employee Advance Approval',
+				'config_type_id' => 517,
+			],
+			3274 => [
+				'name' => 'Employee Advance Claim',
+				'config_type_id' => 517,
+			],
+			3275 => [
+				'name' => 'Employee Advance Re-paid',
 				'config_type_id' => 517,
 			],
 
@@ -763,6 +788,14 @@ class EYatraConfigSeeder extends Seeder {
 			//ACTIVITY LOG ENTITY TYPES - II
 			3500 => [
 				'name' => 'Expense types',
+				'config_type_id' => 519,
+			],
+			3500 => [
+				'name' => 'Expense types',
+				'config_type_id' => 519,
+			],
+			3501 => [
+				'name' => 'Advance Expense',
 				'config_type_id' => 519,
 			],
 
