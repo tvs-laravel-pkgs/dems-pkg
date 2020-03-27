@@ -1591,7 +1591,7 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
                 { data: 'end_date', name: 'local_trips.end_date', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'total_amount',  searchable: false },
-                { data: 'date', searchable: true },
+                { data: 'date', searchable: false },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
