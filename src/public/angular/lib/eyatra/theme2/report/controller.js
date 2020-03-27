@@ -396,7 +396,7 @@ app.component('eyatraOutstationTripList', {
             $rootScope.loading = false;
         });
 
-        var dataTable = $('#eyatra_trip_verification_table').DataTable({
+        var dataTable = $('#eyatra_trip_approval_table').DataTable({
             stateSave: true,
             "dom": dom_structure,
             "language": {
@@ -448,7 +448,7 @@ app.component('eyatraOutstationTripList', {
 
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_trip_verification_table_filter');
+            var d = document.getElementById('eyatra_trip_approval_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
@@ -512,7 +512,7 @@ app.component('eyatraOutstationTripView', {
             $scope.$apply()
             return;
         }
-        $form_data_url = trip_view_url + '/' + $routeParams.trip_id;
+        $form_data_url = report_trip_view_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
@@ -636,7 +636,6 @@ app.component('eyatraOutstationClaimView', {
         });
     }
 });
-
 
 //LOCAL TRIP
 app.component('eyatraReportsLocalTripList', {
@@ -806,7 +805,6 @@ app.component('eyatraReportsLocalTripView', {
         });
     }
 });
-
 
 //LOCAL TRIP CLAIM VIEW
 app.component('eyatraReportsLocalTripClaimView', {

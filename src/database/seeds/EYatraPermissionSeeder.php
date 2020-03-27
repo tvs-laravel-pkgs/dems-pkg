@@ -1041,19 +1041,70 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Reports',
 			],
 
-			//MASTERS > TRAVEL PURPOSES
+			//REPORTS > FINANCIER > TRIP ADVANCE REQUEST
 			5681 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'outstation-trip-advance-report',
+				'display_name' => 'Trip Advance Request Report',
+			],
+			//REPORTS > ADMIN > OUTSTATION TRIP
+			5682 => [
 				'display_order' => 1,
 				'parent_id' => 5680,
 				'name' => 'eyatra-outstation-trip-report',
 				'display_name' => 'Outstation Trip Report',
 			],
-			5682 => [
+			//REPORTS > ADMIN > LOCAL TRIP
+			5683 => [
 				'display_order' => 1,
 				'parent_id' => 5680,
 				'name' => 'eyatra-local-trip-report',
 				'display_name' => 'Local Trip Report',
 			],
+			//REPORTS > MANAGER > OUTSTATION TRIP
+			5684 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-outstation-trip-manager-report',
+				'display_name' => 'Outstation Trip - Manager Report',
+			],
+			//REPORTS > MANAGER > LOCAL TRIP
+			5685 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-local-trip-manager-report',
+				'display_name' => 'Local Trip - Manager Report',
+			],
+			//REPORTS > MANAGER > PETTY CASH
+			5686 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-petty-cash-manager-report',
+				'display_name' => 'Petty Cash- Manager Report',
+			],
+			//REPORTS > CASHIER > PETTY CASH
+			5687 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-petty-cash-cashier-report',
+				'display_name' => 'Petty Cash - Cashier Report',
+			],
+			//REPORTS > FINANCIER > PETTY CASH
+			5688 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-petty-cash-financier-report',
+				'display_name' => 'Petty Cash - Financier Report',
+			],
+			//REPORTS > ADMIN > PETTY CASH
+			5689 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-petty-cash-admin-report',
+				'display_name' => 'Petty Cash Report',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

@@ -5,12 +5,13 @@ use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
 use DB;
-use URL;
-use Redirect;
 use Excel;
 use Illuminate\Http\Request;
+use Redirect;
 use Session;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\LocalTrip;
+use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
 
 class ReportController extends Controller {
@@ -214,39 +215,39 @@ class ReportController extends Controller {
 
 		$trips = $trips->get();
 
-	if(count($trips) > 0){
-		$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
-		$trips_details = array();
-		if ($trips) {
-			foreach ($trips as $key => $trip) {
-				$trips_details[] = [
-				$trip->number,
-				$trip->ecode,
-				$trip->ename,
-				$trip->outlet_name,
-				$trip->travel_period,
-				$trip->purpose,
-				$trip->total_amount,
-				$trip->status,
-				$trip->claim_approval_datetime,
-				];
+		if (count($trips) > 0) {
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
+			$trips_details = array();
+			if ($trips) {
+				foreach ($trips as $key => $trip) {
+					$trips_details[] = [
+						$trip->number,
+						$trip->ecode,
+						$trip->ename,
+						$trip->outlet_name,
+						$trip->travel_period,
+						$trip->purpose,
+						$trip->total_amount,
+						$trip->status,
+						$trip->claim_approval_datetime,
+					];
+				}
 			}
-		}
 
-		// dd($trips_header, $trips_details);
-		Excel::create('Outstation Trip Report', function ($excel) use ($trips_header, $trips_details) {
-			$excel->sheet('Outstation Trip Report', function ($sheet) use ($trips_header, $trips_details) {
-				$sheet->fromArray($trips_details, NULL, 'A1');
-				$sheet->row(1, $trips_header);
-				$sheet->row(1, function ($row) {
-					$row->setBackground('#07c63a');
+			// dd($trips_header, $trips_details);
+			Excel::create('Outstation Trip Report', function ($excel) use ($trips_header, $trips_details) {
+				$excel->sheet('Outstation Trip Report', function ($sheet) use ($trips_header, $trips_details) {
+					$sheet->fromArray($trips_details, NULL, 'A1');
+					$sheet->row(1, $trips_header);
+					$sheet->row(1, function ($row) {
+						$row->setBackground('#07c63a');
+					});
 				});
-			});
-		})->export('xls');
-	}else{
-		Session()->flash('error', 'No Data Found');
-		return Redirect::to('/#!/report/outstation-trip/list');
-	}
+			})->export('xls');
+		} else {
+			Session()->flash('error', 'No Data Found');
+			return Redirect::to('/#!/report/outstation-trip/list');
+		}
 
 	}
 
@@ -432,7 +433,7 @@ class ReportController extends Controller {
 		}
 
 		$trips = $trips->get();
-		if(count($trips) > 0){
+		if (count($trips) > 0) {
 			// dd($trips);
 			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
 			$trips_details = array();
@@ -461,11 +462,74 @@ class ReportController extends Controller {
 					});
 				});
 			})->export('xls');
-		}else{
+		} else {
 			Session()->flash('error', 'No Data Found');
 			return Redirect::to('/#!/report/local-trip/list');
 		}
 
+	}
+
+	public function viewTripData($trip_id) {
+		$data = [];
+		$trip = Trip::with([
+			'visits' => function ($q) {
+				$q->orderBy('visits.id');
+			},
+			'visits.fromCity',
+			'visits.toCity',
+			'visits.travelMode',
+			'visits.travelMode.travelModesCategories',
+			'visits.bookingMethod',
+			'visits.bookingStatus',
+			'visits.agent',
+			'visits.agent.user',
+			'visits.status',
+			'visits.managerVerificationStatus',
+			'employee',
+			'employee.user',
+			'employee.manager',
+			'employee.manager.user',
+			'employee.user',
+			'employee.designation',
+			'employee.grade',
+			'employee.grade.gradeEligibility',
+			'purpose',
+			'status',
+		])
+			->find($trip_id);
+		// dd($trip);
+		if (!$trip) {
+			$data['success'] = false;
+			$data['message'] = 'Trip not found';
+			$data['errors'] = ['Trip not found'];
+			return response()->json($data);
+		}
+
+		$check_user = ApprovalLog::where('type_id', 3581)->where('approved_by_id', Auth::user()->entity_id)->where('entity_id', $trip_id)->first();
+		if (!$check_user) {
+			$data['success'] = false;
+			$data['message'] = 'Trip belongs to you';
+			$data['errors'] = ['Trip belongs to you'];
+			return response()->json($data);
+		}
+
+		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
+		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
+		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
+		$trip->days = $days->days;
+		$trip->purpose_name = $trip->purpose->name;
+		$trip->status_name = $trip->status->name;
+		$current_date = strtotime(date('d-m-Y'));
+		$claim_date = $trip->employee->grade ? $trip->employee->grade->gradeEligibility->claim_active_days : 5;
+
+		$claim_last_date = strtotime("+" . $claim_date . " day", strtotime($trip->end_date));
+
+		$trip_end_date = strtotime($trip->end_date);
+
+		$data['trip'] = $trip;
+
+		$data['success'] = true;
+		return response()->json($data);
 	}
 
 	//APPROVAL LOGS
@@ -491,8 +555,6 @@ class ReportController extends Controller {
 		//dd($this->data);
 		return response()->json($this->data);
 	}
-	
-
 
 	public function eyatraOutstationTripData(Request $r) {
 
@@ -543,7 +605,7 @@ class ReportController extends Controller {
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-				//->where('employees.reporting_to_id', Auth::user()->entity_id)
+			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
@@ -553,8 +615,6 @@ class ReportController extends Controller {
 		//dd($this->data);
 		return response()->json($this->data);
 	}
-
-
 
 	public function eyatraTripAdvanceRequestData(Request $r) {
 		//dd($r->all());
@@ -568,7 +628,7 @@ class ReportController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-					return '
+				return '
 						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
@@ -586,7 +646,7 @@ class ReportController extends Controller {
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-				//->where('employees.reporting_to_id', Auth::user()->entity_id)
+			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
@@ -596,12 +656,11 @@ class ReportController extends Controller {
 		//dd($this->data);
 		return response()->json($this->data);
 	}
-	
 
 	public function eyatraTripSrManagerApprovalData(Request $r) {
 		//dd($r->all());
-		$approval_type_id=3602;
-		$lists = ApprovalLog::getTripList($r,$approval_type_id);
+		$approval_type_id = 3602;
+		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 		return Datatables::of($lists)
 			->addColumn('action', function ($list) {
 
@@ -611,8 +670,8 @@ class ReportController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-					return '
-						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
+				return '
+						<a href="#!/outstation-claim/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
@@ -628,7 +687,7 @@ class ReportController extends Controller {
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-				//->where('employees.reporting_to_id', Auth::user()->entity_id)
+			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
@@ -638,12 +697,11 @@ class ReportController extends Controller {
 		//dd($this->data);
 		return response()->json($this->data);
 	}
-	
 
 	public function eyatraTripFinancierApprovalData(Request $r) {
 		//dd($r->all());
-		$approval_type_id=3603;
-		$lists = ApprovalLog::getTripList($r,$approval_type_id);
+		$approval_type_id = 3603;
+		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 
 		//$lists = ApprovalLog::getTripAdvanceList($r);
 		return Datatables::of($lists)
@@ -655,7 +713,7 @@ class ReportController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-					return '
+				return '
 						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
@@ -673,7 +731,7 @@ class ReportController extends Controller {
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-				//->where('employees.reporting_to_id', Auth::user()->entity_id)
+			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
@@ -683,12 +741,11 @@ class ReportController extends Controller {
 		//dd($this->data);
 		return response()->json($this->data);
 	}
-	
 
 	public function eyatraTripFinancierPaidData(Request $r) {
 		//dd($r->all());
-		$approval_type_id=3604;
-		$lists = ApprovalLog::getTripList($r,$approval_type_id);
+		$approval_type_id = 3604;
+		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 
 		//$lists = ApprovalLog::getTripAdvanceList($r);
 		return Datatables::of($lists)
@@ -700,7 +757,7 @@ class ReportController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-					return '
+				return '
 						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
@@ -717,7 +774,7 @@ class ReportController extends Controller {
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-				//->where('employees.reporting_to_id', Auth::user()->entity_id)
+			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
@@ -727,12 +784,11 @@ class ReportController extends Controller {
 		//dd($this->data);
 		return response()->json($this->data);
 	}
-	
 
 	public function eyatraTripEmployeePaidData(Request $r) {
 		//dd($r->all());
-		$approval_type_id=3605;
-		$lists = ApprovalLog::getTripList($r,$approval_type_id);
+		$approval_type_id = 3605;
+		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 		return Datatables::of($lists)
 			->addColumn('action', function ($list) {
 
@@ -742,7 +798,7 @@ class ReportController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-					return '
+				return '
 						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
@@ -751,7 +807,6 @@ class ReportController extends Controller {
 			})
 			->make(true);
 	}
-
 
 	//LOCAL TRIP
 	public function eyatraReportLocalTripFilterData() {

@@ -208,7 +208,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
 		Route::post('eyatra/manager/get-list', 'Uitoux\EYatra\EmployeeController@getManagerByOutlet')->name('getManagerByOutlet');
 
-
 		//EMPLOYEES IMPORT
 		Route::get('import-employee/list', 'Uitoux\EYatra\EmployeeController@getImportJobsList')->name('getImportJobsList');
 		Route::post('/import-job/update-job-status', 'Uitoux\EYatra\EmployeeController@update_import_jobs_status')->name('updateImportJobsStatus');
@@ -449,7 +448,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/report/outstation-trip/get-list', 'Uitoux\EYatra\ReportController@listOutstationTripReport')->name('listOutstationTripReport');
 		Route::get('eyatra/report/outstation-trip/export', 'Uitoux\EYatra\ReportController@outstationTripExport')->name('outstationTripExport');
 		Route::post('eyatra/employee/get-list', 'Uitoux\EYatra\ReportController@getEmployeeByOutlet')->name('getEmployeeByOutlet');
-
+		Route::get('eyatra/reports/trip/view/{trip_id}', 'Uitoux\EYatra\ReportController@viewTripData')->name('viewTripData');
 		//LOCAL TRIP REPORT
 		Route::get('eyatra/report/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraLocalFilterData')->name('eyatraLocalFilterData');
 		Route::get('eyatra/report/local-trip/get-list', 'Uitoux\EYatra\ReportController@listLocalTripReport')->name('listLocalTripReport');
@@ -483,7 +482,6 @@ Route::group(['middleware' => ['web']], function () {
 		//EMPLOYEE PAID
 		Route::get('report/trip-employee-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidData')->name('eyatraTripEmployeePaidData');
 		Route::get('report/trip/trip-employee-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidFilterData')->name('eyatraTripEmployeePaidFilterData');
-		
 
 	});
 });

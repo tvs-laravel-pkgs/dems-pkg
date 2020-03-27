@@ -67,11 +67,14 @@ class LocalTripController extends Controller {
 				}
 			})
 			->whereIN('local_trips.status_id', [3021, 3022, 3028, 3032])
-			->where('local_trips.employee_id', Auth::user()->entity_id)
+		// ->where('local_trips.employee_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')
 			->orderBy('local_trips.id', 'desc')
 		// ->get()
 		;
+		if (!Entrust::can('local-view-all-trips')) {
+			$trips->where('local_trips.employee_id', Auth::user()->entity_id);
+		}
 
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
