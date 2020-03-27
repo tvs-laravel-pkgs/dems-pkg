@@ -479,6 +479,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('report/trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidData')->name('eyatraTripFinancierPaidData');
 		Route::get('report/trip/trip-financier-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidFilterData')->name('eyatraTripFinancierPaidFilterData');
 
+		//FINANCIER LOCAL TRIP PAID
+		Route::get('report/local-trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripFinancierPaidData')->name('eyatraLocalTripFinancierPaidData');
 		//EMPLOYEE PAID
 		Route::get('report/trip-employee-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidData')->name('eyatraTripEmployeePaidData');
 		Route::get('report/trip/trip-employee-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidFilterData')->name('eyatraTripEmployeePaidFilterData');

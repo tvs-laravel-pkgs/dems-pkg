@@ -714,7 +714,7 @@ class ReportController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
+						<a href="#!/outstation-claim/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
@@ -723,9 +723,8 @@ class ReportController extends Controller {
 			->make(true);
 	}
 
-	// FINANCIER PAID
+	//OUTSTATION TRIP  FINANCIER PAID
 	public function eyatraTripFinancierPaidFilterData() {
-		// dd(session('type_id'));
 		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
@@ -743,7 +742,7 @@ class ReportController extends Controller {
 	}
 
 	public function eyatraTripFinancierPaidData(Request $r) {
-		//dd($r->all());
+		// dd($r->all());
 		$approval_type_id = 3604;
 		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 
@@ -766,7 +765,33 @@ class ReportController extends Controller {
 			})
 			->make(true);
 	}
-	//EMPLOYEE PAID
+
+	//LOCAL TRIP FINANCIER PAID
+	public function eyatraLocalTripFinancierPaidData(Request $r) {
+		// dd($r->all());
+		$approval_type_id = 3608;
+		$lists = ApprovalLog::getFinancierLocalTripList($r, $approval_type_id);
+
+		//$lists = ApprovalLog::getTripAdvanceList($r);
+		return Datatables::of($lists)
+			->addColumn('action', function ($list) {
+
+				$img1 = asset('public/img/content/yatra/table/edit.svg');
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				$img3 = asset('public/img/content/yatra/table/delete.svg');
+				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
+				return '
+						<a href="#!/report/local-trip-claim/view/' . $list->entity_id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>
+						';
+
+			})
+			->make(true);
+	}
+	//OUTSTATION TRIP EMPLOYEE PAID
 	public function eyatraTripEmployeePaidFilterData() {
 		// dd(session('type_id'));
 		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;

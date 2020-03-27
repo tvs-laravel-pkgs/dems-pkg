@@ -1104,6 +1104,20 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-petty-cash-admin-report',
 				'display_name' => 'Petty Cash Report',
 			],
+			//REPORTS > FINANCIER > OUTSTATION TRIP
+			5690 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-outstation-trip-financier-report',
+				'display_name' => 'Outstation Trip - Financier Report',
+			],
+			//REPORTS > FINANCIER > LOCAL TRIP
+			5691 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-local-trip-financier-report',
+				'display_name' => 'Local Trip - Financier Report',
+			],
 
 		];
 
