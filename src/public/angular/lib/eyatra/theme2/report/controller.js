@@ -1286,7 +1286,7 @@ app.component('eyatraReportsTripFinancierPaid', {
             $rootScope.loading = false;
         });
 
-        var dataTable = $('#eyatra_trip_verification_table').DataTable({
+        var dataTable = $('#outstation_trip_financier_paid_table').DataTable({
             stateSave: true,
             "dom": dom_structure,
             "language": {
@@ -1339,7 +1339,7 @@ app.component('eyatraReportsTripFinancierPaid', {
 
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_trip_verification_table_filter');
+            var d = document.getElementById('outstation_trip_financier_paid_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);
@@ -1418,7 +1418,7 @@ app.component('eyatraReportsTripEmployeePaid', {
             $rootScope.loading = false;
         });
 
-        var dataTable = $('#eyatra_trip_verification_table').DataTable({
+        var dataTable = $('#outstation_trip_employee_paid_table').DataTable({
             stateSave: true,
             "dom": dom_structure,
             "language": {
@@ -1471,7 +1471,7 @@ app.component('eyatraReportsTripEmployeePaid', {
 
         setTimeout(function() {
             var x = $('.separate-page-header-inner.search .custom-filter').position();
-            var d = document.getElementById('eyatra_trip_verification_table_filter');
+            var d = document.getElementById('outstation_trip_employee_paid_table_filter');
             x.left = x.left + 15;
             d.style.left = x.left + 'px';
         }, 500);

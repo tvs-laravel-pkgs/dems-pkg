@@ -4,6 +4,7 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;

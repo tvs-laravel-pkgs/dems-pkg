@@ -295,7 +295,7 @@ class EYatraRoleSeeder extends Seeder {
 					5680, 5681, 5682,
 
 					//REPORTS
-					5680, 5681, 5688,
+					5680, 5681, 5688, 5682, 5683,
 
 				],
 			],
