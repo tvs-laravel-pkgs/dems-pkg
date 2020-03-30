@@ -10,12 +10,11 @@ app.component('eyatraOutstationTrip', {
             console.log(response.data);
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
+            self.status_list = response.data.trip_status_list;
             self.outlet_list = response.data.outlet_list;
             self.start_date = response.data.outstation_start_date;
             self.end_date = response.data.outstation_end_date;
             self.filter_purpose_id = response.data.filter_purpose_id;
-            self.filter_status_id = response.data.filter_status_id;
             var trip_periods = response.data.outstation_start_date + ' to ' + response.data.outstation_end_date;
             self.trip_periods = trip_periods;
             if (response.data.filter_outlet_id == '-1') {
@@ -23,7 +22,13 @@ app.component('eyatraOutstationTrip', {
             } else {
                 self.filter_outlet_id = response.data.filter_outlet_id;
             }
+            if (response.data.filter_status_id == '-1') {
+                self.filter_status_id = '-1';
+            } else {
+                self.filter_status_id = response.data.filter_status_id;
+            }
             setTimeout(function() {
+                // self.filter_status_id = response.data.filter_status_id;
                 $('#from_date').val(self.start_date);
                 $('#to_date').val(self.end_date);
                 $('#outlet_id').val(self.filter_outlet_id);
@@ -200,9 +205,9 @@ app.component('eyatraLocalTrip', {
             self.outlet_list = response.data.outlet_list;
             self.start_date = response.data.local_trip_start_date;
             self.end_date = response.data.local_trip_end_date;
+            self.status_list = response.data.trip_status_list;
             self.filter_employee_id = response.data.filter_employee_id;
             self.filter_purpose_id = response.data.filter_purpose_id;
-            self.filter_status_id = response.data.filter_status_id;
             var trip_periods = response.data.local_trip_start_date + ' to ' + response.data.local_trip_end_date;
             self.trip_periods = trip_periods;
             if (response.data.filter_outlet_id == '-1') {
@@ -210,7 +215,13 @@ app.component('eyatraLocalTrip', {
             } else {
                 self.filter_outlet_id = response.data.filter_outlet_id;
             }
+            if (response.data.filter_status_id == '-1') {
+                self.filter_status_id = '-1';
+            } else {
+                self.filter_status_id = response.data.filter_status_id;
+            }
             setTimeout(function() {
+                // self.filter_status_id = response.data.filter_status_id;
                 $('#from_date').val(self.start_date);
                 $('#to_date').val(self.end_date);
                 $('#outlet_id').val(self.filter_outlet_id);
@@ -1063,7 +1074,7 @@ app.component('eyatraReportsTripSrManagerApproval', {
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
                 { data: 'end_date', name: 'trips.end_date', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'total_amount',  searchable: false },
+                { data: 'total_amount', searchable: false },
                 { data: 'date', name: 'trips.created_at', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -1195,7 +1206,7 @@ app.component('eyatraReportsTripFinancierApproval', {
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
                 { data: 'end_date', name: 'trips.end_date', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'total_amount',  searchable: false },
+                { data: 'total_amount', searchable: false },
                 { data: 'date', name: 'trips.created_at', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -1459,7 +1470,7 @@ app.component('eyatraReportsTripEmployeePaid', {
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
                 { data: 'end_date', name: 'trips.end_date', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'total_amount',  searchable: false },
+                { data: 'total_amount', searchable: false },
                 { data: 'date', name: 'trips.created_at', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -1590,7 +1601,7 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
                 { data: 'start_date', name: 'local_trips.start_date', searchable: true },
                 { data: 'end_date', name: 'local_trips.end_date', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
-                { data: 'total_amount',  searchable: false },
+                { data: 'total_amount', searchable: false },
                 { data: 'date', searchable: false },
             ],
             rowCallback: function(row, data) {

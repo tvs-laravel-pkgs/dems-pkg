@@ -21,6 +21,8 @@ class ReportController extends Controller {
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
+		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->where('id', '!=', 3027)->where('id', '!=', 3033)->where('id', '!=', 3035)->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+
 		$outstation_start_date = session('outstation_start_date');
 		$outstation_end_date = session('outstation_end_date');
 		$filter_employee_id = session('outstation_employee_id') ? intval(session('outstation_employee_id')) : '';
@@ -127,8 +129,6 @@ class ReportController extends Controller {
 			->where(function ($query) use ($r) {
 				if ($r->get('status_id') && (($r->get('status_id') != '<%$ctrl.filter_status_id%>') && ($r->get('status_id') != -1))) {
 					$query->where("ey_employee_claims.status_id", $r->get('status_id'));
-				} else {
-					$query->whereIn('ey_employee_claims.status_id', [3023, 3030, 3026]);
 				}
 			})
 			->groupBy('trips.id')
@@ -180,7 +180,7 @@ class ReportController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				'purpose.name as purpose',
 				'ey_employee_claims.total_amount',
-				'status.name as status',
+				'status.name as status', 'trips.advance_received', 'ey_employee_claims.amount_to_pay', 'ey_employee_claims.balance_amount',
 				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
 				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
 			)
@@ -195,7 +195,7 @@ class ReportController extends Controller {
 		if ($outstation_status_id && $outstation_status_id != '-1') {
 			$trips = $trips->where("ey_employee_claims.status_id", $outstation_status_id);
 		} else {
-			$trips = $trips->whereIn('ey_employee_claims.status_id', [3023, 3030, 3026]);
+			$trips = $trips->whereIn('ey_employee_claims.status_id', [3023, 3024, 3025, 3026, 3029, 3030, 3031, 3034]);
 		}
 
 		if ($employee_id && $employee_id != '-1') {
@@ -216,10 +216,27 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 
 		if (count($trips) > 0) {
-			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Expense Amount', 'Advance Received', 'Total Claim Amount', 'Payment pending from', 'Status', 'Claim Approved Date & Time'];
 			$trips_details = array();
 			if ($trips) {
 				foreach ($trips as $key => $trip) {
+					if ($trip->amount_to_pay == 1) {
+						$pending_from = 'Company';
+					} else {
+						$pending_from = 'Employee';
+					}
+					if ($trip->advance_received > 0) {
+						if ($trip->total_amount > $trip->advance_received) {
+							$claim_amount = $trip->total_amount - $trip->advance_received;
+						} elseif ($trip->total_amount < $trip->advance_received) {
+							$claim_amount = $trip->advance_received - $trip->total_amount;
+						} else {
+							$claim_amount = 0;
+						}
+					} else {
+						$claim_amount = $trip->total_amount;
+					}
+
 					$trips_details[] = [
 						$trip->number,
 						$trip->ecode,
@@ -228,6 +245,9 @@ class ReportController extends Controller {
 						$trip->travel_period,
 						$trip->purpose,
 						$trip->total_amount,
+						$trip->advance_received ? $trip->advance_received : '0',
+						floatval($claim_amount),
+						$pending_from,
 						$trip->status,
 						$trip->claim_approval_datetime,
 					];
@@ -235,7 +255,8 @@ class ReportController extends Controller {
 			}
 
 			// dd($trips_header, $trips_details);
-			Excel::create('Outstation Trip Report', function ($excel) use ($trips_header, $trips_details) {
+			$time_stamp = date('Y_m_d_h_i_s');
+			Excel::create('Outstation Trip Report' . $time_stamp, function ($excel) use ($trips_header, $trips_details) {
 				$excel->sheet('Outstation Trip Report', function ($sheet) use ($trips_header, $trips_details) {
 					$sheet->fromArray($trips_details, NULL, 'A1');
 					$sheet->row(1, $trips_header);
@@ -319,7 +340,7 @@ class ReportController extends Controller {
 				if ($r->get('status_id') && (($r->get('status_id') != '<%$ctrl.filter_status_id%>') && ($r->get('status_id') != -1))) {
 					$query->where("local_trips.status_id", $r->get('status_id'));
 				} else {
-					$query->whereIn('local_trips.status_id', [3023, 3030, 3026]);
+					$query->whereIn('local_trips.status_id', [3023, 3024, 3026, 3030, 3034]);
 				}
 			})
 		// ->where('local_trips.status_id', 3026)
@@ -354,6 +375,8 @@ class ReportController extends Controller {
 		$data['filter_employee_id'] = ($filter_employee_id == '-1') ? '' : $filter_employee_id;
 		$filter_purpose_id = session('local_purpose_id') ? intval(session('local_purpose_id')) : '';
 		$data['filter_purpose_id'] = ($filter_purpose_id == '-1') ? '' : $filter_purpose_id;
+
+		$data['trip_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3023, 3024, 3026, 3030, 3034])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 
 		if (!$local_start_date) {
 			$local_start_date = date('01-m-Y');
@@ -397,7 +420,7 @@ class ReportController extends Controller {
 				'e.code as ecode',
 				'users.name as ename',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
-				'purpose.name as purpose',
+				'purpose.name as purpose', 'local_trips.beta_amount', 'local_trips.other_amount',
 				'local_trips.claim_amount as total_amount', 'status.name as status',
 				DB::raw('DATE_FORMAT(local_trips.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
 				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
@@ -414,7 +437,7 @@ class ReportController extends Controller {
 		if ($local_status_id && $local_status_id != '-1') {
 			$trips = $trips->where("local_trips.status_id", $local_status_id);
 		} else {
-			$trips = $trips->whereIn('local_trips.status_id', [3023, 3030, 3026]);
+			$trips = $trips->whereIn('local_trips.status_id', [3023, 3024, 3026, 3030, 3034]);
 		}
 
 		if ($employee_id && $employee_id != '-1') {
@@ -435,7 +458,7 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 		if (count($trips) > 0) {
 			// dd($trips);
-			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Beta Amount', 'Other Amount', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
 			$trips_details = array();
 			if ($trips) {
 				foreach ($trips as $key => $trip) {
@@ -446,14 +469,16 @@ class ReportController extends Controller {
 						$trip->outlet_name,
 						$trip->travel_period,
 						$trip->purpose,
-						$trip->total_amount,
+						$trip->beta_amount,
+						$trip->other_amount,
+						floatval($trip->total_amount),
 						$trip->status,
 						$trip->claim_approval_datetime,
 					];
 				}
 			}
-
-			Excel::create('Local Trip Report', function ($excel) use ($trips_header, $trips_details) {
+			$time_stamp = date('Y_m_d_h_i_s');
+			Excel::create('Local Trip Report' . $time_stamp, function ($excel) use ($trips_header, $trips_details) {
 				$excel->sheet('Local Trip Report', function ($sheet) use ($trips_header, $trips_details) {
 					$sheet->fromArray($trips_details, NULL, 'A1');
 					$sheet->row(1, $trips_header);
@@ -540,7 +565,7 @@ class ReportController extends Controller {
 				->whereIn('id', [3600, 3601])
 				->get());
 		// dd(session('type_id'));
-		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
+		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -596,11 +621,12 @@ class ReportController extends Controller {
 			})
 			->make(true);
 	}
+
 	//APPROVAL LOGS
 	//TRIP ADVANCE REQUEST
 	public function eyatraTripAdvanceRequestFilterData() {
 		// dd(session('type_id'));
-		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
+		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -641,7 +667,7 @@ class ReportController extends Controller {
 	// SR MANAGER APPROVAL
 	public function eyatraTripSrManagerApprovalFilterData() {
 		// dd(session('type_id'));
-		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
+		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -682,7 +708,7 @@ class ReportController extends Controller {
 	// FINANCIER APPROVAL
 	public function eyatraTripFinancierApprovalFilterData() {
 		// dd(session('type_id'));
-		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
+		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -725,7 +751,7 @@ class ReportController extends Controller {
 
 	//OUTSTATION TRIP  FINANCIER PAID
 	public function eyatraTripFinancierPaidFilterData() {
-		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
+		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -794,7 +820,7 @@ class ReportController extends Controller {
 	//OUTSTATION TRIP EMPLOYEE PAID
 	public function eyatraTripEmployeePaidFilterData() {
 		// dd(session('type_id'));
-		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
+		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -840,7 +866,7 @@ class ReportController extends Controller {
 				->whereIn('id', [3606, 3607])
 				->get());
 		// dd(session('type_id'));
-		$this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3606;
+		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3606;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
