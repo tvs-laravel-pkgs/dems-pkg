@@ -20,10 +20,14 @@ class ApprovalLog extends Model {
 
 	public static function saveApprovalLog($type_id, $entity_id, $approval_type_id, $approved_by_id, $approved_at) {
 		//dd('in');
-		$approvalLog = new self();
-		$approvalLog->type_id = $type_id;
-		$approvalLog->entity_id = $entity_id;
-		$approvalLog->approval_type_id = $approval_type_id;
+		$approvalLog = ApprovalLog::firstOrNew([
+			'type_id' => $type_id,
+			'entity_id' => $entity_id,
+			'approval_type_id' => $approval_type_id,
+		]);
+		// $approvalLog->type_id = $type_id;
+		// $approvalLog->entity_id = $entity_id;
+		// $approvalLog->approval_type_id = $approval_type_id;
 		$approvalLog->approved_by_id = $approved_by_id;
 		$approvalLog->approved_at = $approved_at;
 		$approvalLog->save();

@@ -1718,6 +1718,7 @@ app.component('eyatraReportsPettyCashManager', {
             self.trip_periods = trip_periods;
 
             setTimeout(function() {
+                get_employees(self.filter_outlet_id, status = 0);
                 $('#from_date').val(self.start_date);
                 $('#to_date').val(self.end_date);
                 dataTable.draw();
@@ -1824,7 +1825,7 @@ app.component('eyatraReportsPettyCashManager', {
             $('#from_date').val('');
             $('#to_date').val('');
             if (self.type_id == 3) {
-                get_employees(self.filter_outlet_id, status = 0);
+                get_employees(self.filter_outlet_id, status = 1);
             }
             self.filter_type_id = '-1';
             self.filter_employee_id = '-1';
