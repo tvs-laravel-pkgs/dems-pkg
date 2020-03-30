@@ -724,7 +724,7 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
     //APPROVAL LOGS >> PETTY CASH MANAGER APPROVED
-    when('/reports/manager/expense-voucher', {
+    when('/reports/expense-voucher/:type_id', {
         template: '<eyatra-reports-petty-cash-manager></eyatra-reports-petty-cash-manager>',
         title: 'Expense Voucher',
     });

@@ -442,11 +442,11 @@ class ApprovalLog extends Model {
 					$query->where("employees.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
 				}
 			})
-		// ->where(function ($query) use ($r) {
-		// 	if ($r->get('status_id')) {
-		// 		$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
-		// 	}
-		// })
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet_id')) {
+					$query->where("employees.outlet_id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
+				}
+			})
 
 			->where(function ($query) use ($from_date) {
 				if (!empty($from_date)) {

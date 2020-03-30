@@ -1671,15 +1671,37 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
 //Petty Cash Manager Approved
 app.component('eyatraReportsPettyCashManager', {
     templateUrl: eyatra_petty_cash_manager_report_list_template_url,
-    controller: function(HelperService, $rootScope, $http, $scope) {
+    controller: function(HelperService, $rootScope, $http, $scope, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.type_id = $routeParams.type_id;
+
+        // Type ID 1 -> Manager
+        // Type ID 2 -> Cashier
+        // Type ID 3 -> Financier
+        if (self.type_id == 1) {
+            self.permission = self.hasPermission('eyatra-petty-cash-manager-report');
+        } else if (self.type_id == 2) {
+            self.permission = self.hasPermission('eyatra-petty-cash-cashier-report');
+        } else if (self.type_id == 3) {
+            self.permission = self.hasPermission('eyatra-petty-cash-financier-report');
+        } else {
+            $location.path('/permission-denied')
+            return;
+        }
+        if (self.permission == false) {
+            $location.path('/permission-denied')
+            return;
+        }
+
         $http.get(
-            eyatra_petty_cash_report_filter_data_url  + '/1'
+            eyatra_petty_cash_report_filter_data_url + '/' + self.type_id
         ).then(function(response) {
             console.log(response.data);
             self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
             self.filter_type_id = response.data.filter_type_id;
+            self.filter_outlet_id = response.data.filter_outlet_id;
             self.start_date = response.data.petty_cash_start_date;
             self.end_date = response.data.petty_cash_end_date;
             if (response.data.filter_type_id == '-1') {
@@ -1727,16 +1749,17 @@ app.component('eyatraReportsPettyCashManager', {
                 data: function(d) {
                     d.type_id = $('#type_id').val();
                     d.employee_id = $('#employee_id').val();
-                    d.list_type = 1; //Manager List Data
+                    d.list_type = self.type_id;
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
+                    d.outlet_id = $('#outlet_id').val();
                 }
             },
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
-                { data: 'date',  searchable: false },
+                { data: 'date', searchable: false },
                 { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'outlet_name', name: 'outlets.name', searchable: true },
@@ -1767,6 +1790,12 @@ app.component('eyatraReportsPettyCashManager', {
             dataTable.draw();
         }
 
+        $scope.getOutletData = function(outlet_id) {
+             $('#outlet_id').val(outlet_id)
+            dataTable.draw();
+            get_employees(outlet_id, status = 1);
+        }
+
         $(".daterange").daterangepicker({
             autoclose: true,
             locale: {
@@ -1791,13 +1820,36 @@ app.component('eyatraReportsPettyCashManager', {
         $scope.reset_filter = function(query) {
             $('#type_id').val(-1);
             $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 0);
+            }
             self.filter_type_id = '-1';
             self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
             setTimeout(function() {
                 dataTable.draw();
             }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
         }
 
         $rootScope.loading = false;

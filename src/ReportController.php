@@ -11,6 +11,7 @@ use Redirect;
 use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\LocalTrip;
+use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
 
@@ -933,8 +934,25 @@ class ReportController extends Controller {
 					->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		}
+		if ($id == 2) {
+			$outlet_id = Employee::where('id', Auth::user()->entity_id)->pluck('outlet_id')->first();
+			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+					->leftJoin('users', 'users.entity_id', 'employees.id')
+					->where('users.user_type_id', 3121)
+					->where('employees.outlet_id', $outlet_id)
+					->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
+		}
+		if ($id == 3) {
+			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+					->leftJoin('users', 'users.entity_id', 'employees.id')
+					->where('users.user_type_id', 3121)
+					->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+			$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+		}
 		$this->data['filter_employee_id'] = $filter_employee_id = session('petty_cash_employee_id') ? intval(session('petty_cash_employee_id')) : '-1';
 		$this->data['filter_type_id'] = $filter_employee_id = session('petty_cash_type_id') ? intval(session('petty_cash_type_id')) : '-1';
+		$this->data['filter_outlet_id'] = $filter_outlet_id = session('petty_cash_outlet_id') ? intval(session('petty_cash_outlet_id')) : '-1';
 
 		$petty_cash_start_date = session('petty_cash_start_date');
 		$petty_cash_end_date = session('petty_cash_end_date');
@@ -958,6 +976,9 @@ class ReportController extends Controller {
 		if ($r->type_id && $r->type_id != '<%$ctrl.filter_type_id%>') {
 			session(['petty_cash_type_id' => $r->type_id]);
 		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['petty_cash_outlet_id' => $r->outlet_id]);
+		}
 		if ($r->from_date != '<%$ctrl.start_date%>') {
 			Session::put('petty_cash_start_date', $r->from_date);
 			Session::put('petty_cash_end_date', $r->to_date);
@@ -965,6 +986,10 @@ class ReportController extends Controller {
 
 		if ($r->list_type == 1) {
 			$approval_type_id = [3609, 3612];
+		} elseif ($r->list_type == 2) {
+			$approval_type_id = [3610, 3621];
+		} elseif ($r->list_type == 3) {
+			$approval_type_id = [3611, 3613];
 		}
 
 		// dd($approval_type_id);
