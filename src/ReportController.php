@@ -921,4 +921,67 @@ class ReportController extends Controller {
 			})
 			->make(true);
 	}
+
+	//PETTY CASH FILTER DATA
+	public function eyatraPettyCashFilterData($id) {
+		//Manager Filter Data
+		if ($id == 1) {
+			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+					->leftJoin('users', 'users.entity_id', 'employees.id')
+					->where('users.user_type_id', 3121)
+					->where('employees.reporting_to_id', Auth::user()->entity_id)
+					->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
+		}
+		$this->data['filter_employee_id'] = $filter_employee_id = session('petty_cash_employee_id') ? intval(session('petty_cash_employee_id')) : '-1';
+		$this->data['filter_type_id'] = $filter_employee_id = session('petty_cash_type_id') ? intval(session('petty_cash_type_id')) : '-1';
+
+		$petty_cash_start_date = session('petty_cash_start_date');
+		$petty_cash_end_date = session('petty_cash_end_date');
+		if (!$petty_cash_start_date) {
+			$petty_cash_start_date = date('01-m-Y');
+			$petty_cash_end_date = date('t-m-Y');
+		}
+
+		$this->data['petty_cash_start_date'] = $petty_cash_start_date;
+		$this->data['petty_cash_end_date'] = $petty_cash_end_date;
+
+		$this->data['success'] = true;
+		return response()->json($this->data);
+	}
+
+	public function eyatraPettyCashData(Request $r) {
+
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['petty_cash_employee_id' => $r->employee_id]);
+		}
+		if ($r->type_id && $r->type_id != '<%$ctrl.filter_type_id%>') {
+			session(['petty_cash_type_id' => $r->type_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('petty_cash_start_date', $r->from_date);
+			Session::put('petty_cash_end_date', $r->to_date);
+		}
+
+		if ($r->list_type == 1) {
+			$approval_type_id = [3609, 3612];
+		}
+
+		// dd($approval_type_id);
+		$lists = ApprovalLog::getPettyCashList($r, $approval_type_id);
+		return Datatables::of($lists)
+			->addColumn('action', function ($list) {
+				$type_id = $list->petty_cash_type_id == '3440' ? 1 : 2;
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+				return '
+						<a href="#!/petty-cash/view/' . $type_id . '/' . $list->id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>
+						';
+			})
+			->make(true);
+
+	}
+
 }

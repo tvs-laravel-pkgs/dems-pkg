@@ -721,6 +721,12 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/reports/local-trip-financier-paid', {
         template: '<eyatra-reports-local-trip-financier-paid></eyatra-reports-local-trip-financier-paid>',
         title: 'Local Trip Claim List',
+    }).
+
+    //APPROVAL LOGS >> PETTY CASH MANAGER APPROVED
+    when('/reports/manager/expense-voucher', {
+        template: '<eyatra-reports-petty-cash-manager></eyatra-reports-petty-cash-manager>',
+        title: 'Expense Voucher',
     });
 
 }]);

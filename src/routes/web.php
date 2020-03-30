@@ -485,5 +485,11 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('report/trip-employee-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidData')->name('eyatraTripEmployeePaidData');
 		Route::get('report/trip/trip-employee-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidFilterData')->name('eyatraTripEmployeePaidFilterData');
 
+		//REPORT >> PETTY CASH FILTER DATA
+		Route::get('report/petty-cash/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraPettyCashFilterData')->name('eyatraPettyCashFilterData');
+
+		//REPORT >> MANAGER
+		Route::get('report/petty-cash/get-data', 'Uitoux\EYatra\ReportController@eyatraPettyCashData')->name('eyatraPettyCashData');
+
 	});
 });

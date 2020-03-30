@@ -385,12 +385,77 @@ class ApprovalLog extends Model {
 
 			->where(function ($query) use ($from_date) {
 				if (!empty($from_date)) {
-					$query->where('local_trips.start_date', $from_date);
+					$query->where('local_trips.start_date', '>=', $from_date);
 				}
 			})
 			->where(function ($query) use ($to_date) {
 				if (!empty($to_date)) {
-					$query->where('local_trips.end_date', $to_date);
+					$query->where('local_trips.end_date', '<=', $to_date);
+				}
+			})
+		;
+		return $lists;
+	}
+
+	public static function getPettyCashList($r, $approval_type_id) {
+		// dd($r->all());
+		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
+			$from_date = date('Y-m-d', strtotime($r->from_date));
+		} else {
+			$from_date = null;
+		}
+
+		if (!empty($r->to_date) && $r->from_date != '<%$ctrl.end_date%>') {
+			$to_date = date('Y-m-d', strtotime($r->to_date));
+		} else {
+			$to_date = null;
+		}
+
+		$lists = ApprovalLog::join('petty_cash', 'petty_cash.id', 'approval_logs.entity_id')
+			->select(
+				'petty_cash.id',
+				DB::raw('DATE_FORMAT(petty_cash.date , "%d-%m-%Y")as date'),
+				'petty_cash.total',
+				'users.name as ename',
+				'outlets.name as outlet_name',
+				'employees.code as ecode',
+				'petty_cash_type.name as petty_cash_type', DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as approval_date'), 'petty_cash_type.id as petty_cash_type_id'
+			)
+			->leftJoin('configs', 'configs.id', 'petty_cash.status_id')
+			->leftJoin('configs as petty_cash_type', 'petty_cash_type.id', 'petty_cash.petty_cash_type_id')
+			->join('employees', 'employees.id', 'petty_cash.employee_id')
+			->join('users', 'users.entity_id', 'employees.id')
+			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
+			->whereIn('approval_logs.approval_type_id', $approval_type_id)
+			->where('users.user_type_id', 3121)
+			->orderBy('approval_logs.id', 'desc')
+			->where(function ($query) use ($r) {
+				if ($r->get('type_id') && $r->get('type_id') != '<%$ctrl.filter_type_id%>') {
+					$query->where("approval_logs.type_id", $r->get('type_id'))->orWhere(DB::raw("-1"), $r->get('type_id'));
+				} else {
+					$query->whereIn("approval_logs.type_id", [3583, 3584]);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id') && $r->get('employee_id') != '<%$ctrl.filter_employee_id%>') {
+					$query->where("employees.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+		// ->where(function ($query) use ($r) {
+		// 	if ($r->get('status_id')) {
+		// 		$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+		// 	}
+		// })
+
+			->where(function ($query) use ($from_date) {
+				if (!empty($from_date)) {
+					$query->where('petty_cash.date', '>=', $from_date);
+				}
+			})
+			->where(function ($query) use ($to_date) {
+				if (!empty($to_date)) {
+					$query->where('petty_cash.date', '<=', $to_date);
 				}
 			})
 		;

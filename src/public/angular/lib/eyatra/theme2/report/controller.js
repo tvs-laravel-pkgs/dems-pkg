@@ -1667,3 +1667,139 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
 
     }
 });
+
+//Petty Cash Manager Approved
+app.component('eyatraReportsPettyCashManager', {
+    templateUrl: eyatra_petty_cash_manager_report_list_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            eyatra_petty_cash_report_filter_data_url  + '/1'
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.filter_type_id = response.data.filter_type_id;
+            self.start_date = response.data.petty_cash_start_date;
+            self.end_date = response.data.petty_cash_end_date;
+            if (response.data.filter_type_id == '-1') {
+                self.filter_type_id = '-1';
+            } else {
+                self.filter_type_id = response.data.filter_type_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.petty_cash_start_date + ' to ' + response.data.petty_cash_end_date;
+            self.trip_periods = trip_periods;
+
+            setTimeout(function() {
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
+                dataTable.draw();
+            }, 1500);
+            $rootScope.loading = false;
+        });
+
+        var dataTable = $('#eyatra_petty_cash_filter_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate_2,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            ajax: {
+                url: laravel_routes['eyatraPettyCashData'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.type_id = $('#type_id').val();
+                    d.employee_id = $('#employee_id').val();
+                    d.list_type = 1; //Manager List Data
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                }
+            },
+
+            columns: [
+                { data: 'action', searchable: false, class: 'action' },
+                { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
+                { data: 'date',  searchable: false },
+                { data: 'ecode', name: 'employees.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'outlet_name', name: 'outlets.name', searchable: true },
+                { data: 'total', searchable: false },
+                { data: 'approval_date', searchable: false },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+        $('.dataTables_length select').select2();
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_petty_cash_filter_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getType = function(query) {
+            $('#type_id').val(query);
+            dataTable.draw();
+        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
+        $scope.reset_filter = function(query) {
+            $('#type_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
+            self.filter_type_id = '-1';
+            self.filter_employee_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        $rootScope.loading = false;
+    }
+});
