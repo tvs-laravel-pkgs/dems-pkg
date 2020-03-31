@@ -209,12 +209,15 @@ class ExpenseVoucherAdvanceController extends Controller {
 			}
 			DB::beginTransaction();
 			$employee_cash_check = Employee::select(
-				'outlets.amount_eligible',
-				'outlets.amount_limit'
+				'outlets.expense_voucher_limit'
 			)
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->where('employees.id', $request->employee_id)->first();
 
+				//CHECK VALIDATION FOR MAXIMUM ELEGIBILITY AMOUNT LIMIT
+			if ($request->advance_amount > $employee_cash_check->expense_voucher_limit) {
+				return response()->json(['success' => false, 'errors' => ['The maximum amount limit is ' . $employee_cash_check->expense_voucher_limit]]);
+			}
 			if (!empty($request->expense_voucher_attach_removal_ids)) {
 				$attachment_remove = json_decode($request->expense_voucher_attach_removal_ids, true);
 				Attachment::whereIn('id', $attachment_remove)->where('attachment_of_id', 3442)->delete();

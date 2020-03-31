@@ -194,11 +194,11 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 							}
 							//Approval Log
 							if ($request->type_id == 1) {
-								$type = 3585;
-								$approval_type_id = 3256;
+								$type = 3585;//Advance Expenses
+								$approval_type_id = 3615;//Advance Expenses Request - Cashier Approved
 							} else {
 								$type = 3585;
-								$approval_type_id = 3257;
+								$approval_type_id = 3618; //Advance Expenses Claim - Cashier Approved
 							}
 							$approval_log = ApprovalLog::saveApprovalLog($type, $request->id, $approval_type_id, Auth::user()->entity_id, Carbon::now());
 							DB::commit();

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Yajra\Datatables\Datatables;
 
@@ -110,6 +111,9 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 					} else {
 						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3468, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 					}
+					$type = 3585;//Advance Expenses
+					$approval_type_id = 3617;//Advance Expenses Claim - Manager Approved
+					$approval_log = ApprovalLog::saveApprovalLog($type, $request->approve, $approval_type_id, Auth::user()->entity_id, Carbon::now());
 				} else {
 					if ($employee_cash_check->amount_eligible != 0) {
 						if ($employee_cash_check->amount_limit >= $request->advance_amount) {
@@ -120,6 +124,9 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 					} else {
 						$expense_voucher_manager_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3462, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 					}
+					$type = 3585;//Advance Expenses
+					$approval_type_id = 3614;//Advance Expenses Request - Manager Approved
+					$approval_log = ApprovalLog::saveApprovalLog($type, $request->approve, $approval_type_id, Auth::user()->entity_id, Carbon::now());
 				}
 
 				DB::commit();
@@ -131,6 +138,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 					$expense_voucher_manager_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3463, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 
 				}
+				
 				DB::commit();
 				return response()->json(['success' => true]);
 			}

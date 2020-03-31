@@ -1792,7 +1792,378 @@ app.component('eyatraReportsPettyCashManager', {
         }
 
         $scope.getOutletData = function(outlet_id) {
-             $('#outlet_id').val(outlet_id)
+            $('#outlet_id').val(outlet_id)
+            dataTable.draw();
+            get_employees(outlet_id, status = 1);
+        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
+        $scope.reset_filter = function(query) {
+            $('#type_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_type_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
+        }
+
+        $rootScope.loading = false;
+    }
+});
+
+//Expense Voucher Advance Manager Approved
+app.component('eyatraReportsExpenseVoucherAdvance', {
+    templateUrl: eyatra_expense_voucher_advance_manager_report_list_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope, $routeParams, $location) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.type_id = $routeParams.type_id;
+
+        // Type ID 1 -> Manager
+        // Type ID 2 -> Cashier
+        // Type ID 3 -> Financier
+        if (self.type_id == 1) {
+            self.permission = self.hasPermission('eyatra-petty-cash-manager-report');
+        } else if (self.type_id == 2) {
+            self.permission = self.hasPermission('eyatra-petty-cash-cashier-report');
+        } else if (self.type_id == 3) {
+            self.permission = self.hasPermission('eyatra-petty-cash-financier-report');
+        } else {
+            $location.path('/permission-denied')
+            return;
+        }
+        if (self.permission == false) {
+            $location.path('/permission-denied')
+            return;
+        }
+
+        $http.get(
+            eyatra_expense_voucher_advance_manager_report_filter_data_url + '/' + self.type_id
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.eva_start_date;
+            self.end_date = response.data.eva_end_date;
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.eva_start_date + ' to ' + response.data.eva_end_date;
+            self.trip_periods = trip_periods;
+
+            setTimeout(function() {
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
+                dataTable.draw();
+            }, 1500);
+            $rootScope.loading = false;
+        });
+
+        var dataTable = $('#eyatra_expense_voucher_advance_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate_2,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            //retrieve: true,
+            // searching: false,
+            ajax: {
+                url: laravel_routes['eyatraExpenseVoucherAdvanceData'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.type_id = $('#type_id').val();
+                    d.employee_id = $('#employee_id').val();
+                    d.list_type = self.type_id;
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                    d.outlet_id = $('#outlet_id').val();
+                }
+            },
+
+            columns: [
+                { data: 'action', searchable: false, class: 'action' },
+                { data: 'ecode', name: 'employees.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'outlet_name', name: 'outlets.name', searchable: true },
+                { data: 'date', searchable: false },
+                { data: 'advance_amount', searchable: false },
+                { data: 'expense_amount', searchable: false },
+                { data: 'balance_amount', searchable: false },
+                { data: 'approval_date', searchable: false },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+        $('.dataTables_length select').select2();
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_expense_voucher_advance_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getType = function(query) {
+            $('#type_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
+            dataTable.draw();
+            get_employees(outlet_id, status = 1);
+        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
+        $scope.reset_filter = function(query) {
+            $('#type_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_type_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
+        }
+
+        $rootScope.loading = false;
+    }
+});
+//Expense Voucher Advance Manager Approved
+app.component('eyatraReportsExpenseVoucherAdvanceRepaid', {
+    templateUrl: eyatra_expense_voucher_advance_repaid_report_list_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope, $routeParams, $location) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.type_id = $routeParams.type_id;
+
+        // Type ID 1 -> Manager
+        // Type ID 2 -> Cashier
+        // Type ID 3 -> Financier
+        if (self.type_id == 1) {
+            self.permission = self.hasPermission('eyatra-petty-cash-manager-report');
+        } else if (self.type_id == 2) {
+            self.permission = self.hasPermission('eyatra-petty-cash-cashier-report');
+        } else if (self.type_id == 3) {
+            self.permission = self.hasPermission('eyatra-petty-cash-financier-report');
+        } else {
+            $location.path('/permission-denied')
+            return;
+        }
+        if (self.permission == false) {
+            $location.path('/permission-denied')
+            return;
+        }
+
+        $http.get(
+            eyatra_expense_voucher_advance_repaid_report_filter_data_url + '/' + self.type_id
+        ).then(function(response) {
+            console.log(response.data);
+            self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.eva_repaid_start_date;
+            self.end_date = response.data.eva_repaid_end_date;
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.eva_repaid_start_date + ' to ' + response.data.eva_repaid_end_date;
+            self.trip_periods = trip_periods;
+
+            setTimeout(function() {
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
+                dataTable.draw();
+            }, 1500);
+            $rootScope.loading = false;
+        });
+
+        var dataTable = $('#eyatra_expense_voucher_advance_repaid_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate_2,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            //retrieve: true,
+            // searching: false,
+            ajax: {
+                url: laravel_routes['eyatraExpenseVoucherAdvanceRepaidData'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.type_id = $('#type_id').val();
+                    d.employee_id = $('#employee_id').val();
+                    d.list_type = self.type_id;
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                    d.outlet_id = $('#outlet_id').val();
+                }
+            },
+
+            columns: [
+                { data: 'action', searchable: false, class: 'action' },
+                { data: 'ecode', name: 'employees.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'outlet_name', name: 'outlets.name', searchable: true },
+                { data: 'date', searchable: false },
+                { data: 'advance_amount', searchable: false },
+                { data: 'expense_amount', searchable: false },
+                { data: 'balance_amount', searchable: false },
+                { data: 'approval_date', searchable: false },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+        $('.dataTables_length select').select2();
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('eyatra_expense_voucher_advance_repaid_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getType = function(query) {
+            $('#type_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
             dataTable.draw();
             get_employees(outlet_id, status = 1);
         }

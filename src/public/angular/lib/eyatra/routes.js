@@ -746,6 +746,17 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/reports/expense-voucher/:type_id', {
         template: '<eyatra-reports-petty-cash-manager></eyatra-reports-petty-cash-manager>',
         title: 'Expense Voucher',
+    }).
+    //APPROVAL LOGS >> EXPENSE VOUCHER ADVANCE APPROVED
+    when('/reports/expense-voucher-advances/:type_id', {
+        template: '<eyatra-reports-expense-voucher-advance></eyatra-reports-expense-voucher-advance>',
+        title: 'Expense Voucher Advance',
+    }).
+    //APPROVAL LOGS >> EXPENSE VOUCHER ADVANCE RE-PAID
+    when('/reports/expense-voucher-advances-repaid/:type_id', {
+        template: '<eyatra-reports-expense-voucher-advance-repaid></eyatra-reports-expense-voucher-advance>',
+        title: 'Expense Voucher Advance Repaid',
     });
+
 
 }]);

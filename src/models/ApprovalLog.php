@@ -465,4 +465,126 @@ class ApprovalLog extends Model {
 		;
 		return $lists;
 	}
+	public static function getExpenseVoucherAdvanceList($r, $approval_type_id) {
+		// dd($r->all());
+		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
+			$from_date = date('Y-m-d', strtotime($r->from_date));
+		} else {
+			$from_date = null;
+		}
+
+		if (!empty($r->to_date) && $r->from_date != '<%$ctrl.end_date%>') {
+			$to_date = date('Y-m-d', strtotime($r->to_date));
+		} else {
+			$to_date = null;
+		}
+
+		$lists = ApprovalLog::join('expense_voucher_advance_requests', 'expense_voucher_advance_requests.id', 'approval_logs.entity_id')
+			->select(
+				'expense_voucher_advance_requests.id',
+				'expense_voucher_advance_requests.expense_amount',
+				DB::raw('DATE_FORMAT(expense_voucher_advance_requests.date,"%d-%m-%Y") as date'),
+				'expense_voucher_advance_requests.advance_amount as advance_amount',
+				DB::raw('IF(expense_voucher_advance_requests.balance_amount IS NULL,"--",expense_voucher_advance_requests.balance_amount) as balance_amount'),
+				'expense_voucher_advance_requests.status_id as status_id',
+				'configs.name as status',
+				'users.name as ename',
+				'outlets.name as outlet_name',
+				'employees.code as ecode',
+				 DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as approval_date')
+			)
+			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
+			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
+			->join('users', 'users.entity_id', 'employees.id')
+			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
+			->whereIn('approval_logs.approval_type_id', $approval_type_id)
+			->where('users.user_type_id', 3121)
+			->orderBy('approval_logs.id', 'desc')
+			->whereIn("approval_logs.type_id", [3585])
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id') && $r->get('employee_id') != '<%$ctrl.filter_employee_id%>') {
+					$query->where("employees.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet_id')) {
+					$query->where("employees.outlet_id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
+				}
+			})
+
+			->where(function ($query) use ($from_date) {
+				if (!empty($from_date)) {
+					$query->where('expense_voucher_advance_requests.date', '>=', $from_date);
+				}
+			})
+			->where(function ($query) use ($to_date) {
+				if (!empty($to_date)) {
+					$query->where('expense_voucher_advance_requests.date', '<=', $to_date);
+				}
+			})
+		;
+		return $lists;
+	}
+	public static function getExpenseVoucherAdvanceRepaidList($r, $approval_type_id) {
+		// dd($r->all());
+		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
+			$from_date = date('Y-m-d', strtotime($r->from_date));
+		} else {
+			$from_date = null;
+		}
+
+		if (!empty($r->to_date) && $r->from_date != '<%$ctrl.end_date%>') {
+			$to_date = date('Y-m-d', strtotime($r->to_date));
+		} else {
+			$to_date = null;
+		}
+
+		$lists = ApprovalLog::join('expense_voucher_advance_requests', 'expense_voucher_advance_requests.id', 'approval_logs.entity_id')
+			->select(
+				'expense_voucher_advance_requests.id',
+				'expense_voucher_advance_requests.expense_amount',
+				DB::raw('DATE_FORMAT(expense_voucher_advance_requests.date,"%d-%m-%Y") as date'),
+				'expense_voucher_advance_requests.advance_amount as advance_amount',
+				DB::raw('IF(expense_voucher_advance_requests.balance_amount IS NULL,"--",expense_voucher_advance_requests.balance_amount) as balance_amount'),
+				'expense_voucher_advance_requests.status_id as status_id',
+				'configs.name as status',
+				'users.name as ename',
+				'outlets.name as outlet_name',
+				'employees.code as ecode',
+				 DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as approval_date')
+			)
+			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
+			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
+			->join('users', 'users.entity_id', 'employees.id')
+			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
+			->whereIn('approval_logs.approval_type_id', $approval_type_id)
+			->where('users.user_type_id', 3121)
+			->orderBy('approval_logs.id', 'desc')
+			->whereIn("approval_logs.type_id", [3585])
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id') && $r->get('employee_id') != '<%$ctrl.filter_employee_id%>') {
+					$query->where("employees.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet_id')) {
+					$query->where("employees.outlet_id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
+				}
+			})
+
+			->where(function ($query) use ($from_date) {
+				if (!empty($from_date)) {
+					$query->where('expense_voucher_advance_requests.date', '>=', $from_date);
+				}
+			})
+			->where(function ($query) use ($to_date) {
+				if (!empty($to_date)) {
+					$query->where('expense_voucher_advance_requests.date', '<=', $to_date);
+				}
+			})
+		;
+		return $lists;
+	}
 }

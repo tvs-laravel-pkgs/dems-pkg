@@ -34,6 +34,8 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
 			->whereIn('expense_voucher_advance_requests.status_id', [3470])
+			->where('expense_voucher_advance_requests.balance_amount', '>',0)
+			->whereNotNull('expense_voucher_advance_requests.balance_amount')
 			->where('users.user_type_id', 3121)
 			->where('employees.outlet_id', Auth::user()->entity->outlet->id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')

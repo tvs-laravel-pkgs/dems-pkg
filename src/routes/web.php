@@ -507,5 +507,16 @@ Route::group(['middleware' => ['web']], function () {
 		//REPORT >> MANAGER
 		Route::get('report/petty-cash/get-data', 'Uitoux\EYatra\ReportController@eyatraPettyCashData')->name('eyatraPettyCashData');
 
+		//REPORT >> EXPENSE VOUCHER ADVANCE FILTER DATA
+		Route::get('report/expense-voucher-advance/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceFilterData')->name('eyatraExpenseVoucherAdvanceFilterData');
+
+		//REPORT >> EXPENSE VOUCHER ADVANCE MANAGER
+		Route::get('report/expense-voucher-advance/get-data', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceData')->name('eyatraExpenseVoucherAdvanceData');
+
+		//REPORT >> EXPENSE VOUCHER ADVANCE REPAID FILTER DATA
+		Route::get('report/expense-voucher-advance-repaid/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceRepaidFilterData')->name('eyatraExpenseVoucherAdvanceRepaidFilterData');
+
+		//REPORT >> EXPENSE VOUCHER ADVANCE REPAID MANAGER
+		Route::get('report/expense-voucher-advance-repaid/get-data', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceRepaidData')->name('eyatraExpenseVoucherAdvanceRepaidData');
 	});
 });

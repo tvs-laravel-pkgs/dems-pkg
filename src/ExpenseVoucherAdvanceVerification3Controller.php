@@ -189,11 +189,11 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 							}
 							//Approval Log
 							if ($request->type_id == 1) {
-								$type = 3585;
-								$approval_type_id = 3256;//Employee Petty Cash Advance Expense Request
+								$type = 3585;//Advance Expenses
+								$approval_type_id = 3616;//Advance Expenses Request - Financier Approved
 							} else {
 								$type = 3585;
-								$approval_type_id = 3257;//Employee Petty Cash Advance Expense Claim
+								$approval_type_id = 3619;//Advance Expenses Claim - Financier Approved
 							}
 							$approval_log = ApprovalLog::saveApprovalLog($type, $request->id, $approval_type_id, Auth::user()->entity_id, Carbon::now());
 							DB::commit();
