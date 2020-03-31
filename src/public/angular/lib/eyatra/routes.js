@@ -714,27 +714,38 @@ app.config(['$routeProvider', function($routeProvider) {
     //APPROVAL LOGS >> TRIP ADVANCE REQUEST
     when('/reports/trip-advance-request', {
         template: '<eyatra-reports-trip-advance-request></eyatra-reports-trip-advance-request>',
-        title: 'Local Trip',
+        title: 'Trip Advance Request',
     }).
     //APPROVAL LOGS >> SR MANAGER APPROVAL
     when('/reports/sr-manager-approval', {
         template: '<eyatra-reports-trip-sr-manager-approval></eyatra-reports-trip-sr-manager-approval>',
-        title: 'Trip Report',
+        title: 'Claim Report',
     }).
     //APPROVAL LOGS >>  FINANCIER APPROVAL
     when('/reports/financier-approval', {
         template: '<eyatra-reports-trip-financier-approval></eyatra-reports-trip-financier-approval>',
-        title: 'Trip Report',
+        title: 'Financier Approval Report',
     }).
-    //APPROVAL LOGS >>  FINANCIER PAID
+    //APPROVAL LOGS >>  FINANCIER PAID OUTSTATION TRIP
     when('/reports/financier-paid', {
         template: '<eyatra-reports-trip-financier-paid></eyatra-reports-trip-financier-paid>',
-        title: 'Trip Report',
+        title: 'Financier Paid Report',
     }).
     //APPROVAL LOGS >>  EMPLOYEE PAID
     when('/reports/employee-paid', {
         template: '<eyatra-reports-trip-employee-paid></eyatra-reports-trip-employee-paid>',
-        title: 'Trip Report',
+        title: 'Employee Paid Report',
+    }).
+    //APPROVAL LOGS >>  FINANCIER PAID LOCAL TRIP
+    when('/reports/local-trip-financier-paid', {
+        template: '<eyatra-reports-local-trip-financier-paid></eyatra-reports-local-trip-financier-paid>',
+        title: 'Local Trip Claim List',
+    }).
+
+    //APPROVAL LOGS >> PETTY CASH MANAGER APPROVED
+    when('/reports/expense-voucher/:type_id', {
+        template: '<eyatra-reports-petty-cash-manager></eyatra-reports-petty-cash-manager>',
+        title: 'Expense Voucher',
     });
 
 }]);

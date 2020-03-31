@@ -232,47 +232,43 @@ class Trip extends Model {
 						$old_visit = Visit::find($visit_data['id']);
 						//dump('old_visit id :'.$old_visit->id);
 						if ($visit_data['booking_method_name'] == 'Agent') {
-							//Booking Method Agent
-							//dump('agent');
-							//visit booked
+
+							//check visit booked or not
 							$old_visit_booked = Visit::where('id', $visit_data['id'])
 								->where('booking_status_id', 3061) //Booked
 								->first();
 
+							// dd($old_visit_booked);
 							//dump('old_visit_booked :'.$old_visit_booked->id);
 							if ($old_visit_booked) {
 								$old_visit_detail_check = Visit::where('id', $visit_data['id'])
 									->where('from_city_id', $visit_data['from_city_id'])
 									->where('to_city_id', $visit_data['to_city_id'])
 									->where('travel_mode_id', $visit_data['travel_mode_id'])
-									->whereDate('departure_date', $visit_data['date'])
+									->whereDate('departure_date', date('Y-m-d', strtotime($visit_data['date'])))
 									->first();
-								//dump('old_visit_detail_check: '.$old_visit_detail_check);
 								if ($old_visit_detail_check) {
 									$visit = $old_visit;
 								} else {
-									//dump('new');
 									$old_visit->booking_status_id = 3064; //Visit Rescheduled
 									$old_visit->status_id = 3229; //Visit Rescheduled
 									$old_visit->save();
 									$visit = new Visit;
-									//dump('fff');
 								}
 							} else {
-								//dd('in');
 								$visit = $old_visit;
 							}
 						} else {
 							//Booking Method Self
-							//dump('self');
 							$visit = $old_visit;
 						}
 						//dd($visit);
 					} else {
-						//dd('inwww');
 						$visit = new Visit;
+						$visit->booking_status_id = 3060; //PENDING
+						$visit->status_id = 3220; //NEW
+						$visit->manager_verification_status_id = 3080; //NEW
 					}
-					//dump($visit);
 					// $visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
 					$visit->fill($visit_data);
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
@@ -281,9 +277,6 @@ class Trip extends Model {
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
 					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3220; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
 					if ($visit_data['booking_method_name'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
 
@@ -1594,6 +1587,7 @@ class Trip extends Model {
 					// Attachment::whereIn('entity_id', $lodgings_removal_id)->delete();
 				}
 
+				// dd($request->lodgings);
 				//SAVE
 				if ($request->lodgings) {
 					// dd($request->lodgings);
@@ -1643,7 +1637,9 @@ class Trip extends Model {
 						// 		$attachement_lodge->save();
 						// 	}
 						// }
+						// dump($lodging_data);
 					}
+					// dd();
 					// dd('1');
 					//SAVE LODGING ATTACHMENT
 					$item_images = storage_path('app/public/trip/lodgings/attachments/');

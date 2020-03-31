@@ -73,14 +73,14 @@ class TripController extends Controller {
 				}
 			})
 			->whereIN('trips.status_id', [3021, 3022, 3028, 3032])
-			->where('trips.employee_id', Auth::user()->entity_id)
+		// ->where('trips.employee_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 		// ->orderBy('trips.created_at', 'desc');
 			->orderBy('trips.id', 'desc');
 
-		// if (!Entrust::can('view-all-trips')) {
-		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
-		// }
+		if (!Entrust::can('view-all-trips')) {
+			$trips->where('trips.employee_id', Auth::user()->entity_id);
+		}
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 

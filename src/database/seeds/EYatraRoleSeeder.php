@@ -35,7 +35,10 @@ class EYatraRoleSeeder extends Seeder {
 					5240,
 
 					//TRIPS
-					// 5001, 5002, 5003, 5004, 5005, 5480,
+					5500, 5502, 5503, 5504, 5505,
+
+					//LOCAL TRIPS
+					5660, 5662, 5663, 5664, 5665,
 
 					// //TRIPS VERIFICATION
 					// 5060, 5061, 5482,
@@ -148,6 +151,9 @@ class EYatraRoleSeeder extends Seeder {
 					//EXPENSE VOUCHERS
 					// 5580,
 
+					//REPORTS
+					5680, 5681, 5682, 5683, 5689,
+
 				],
 			],
 
@@ -164,13 +170,13 @@ class EYatraRoleSeeder extends Seeder {
 					// 5000,
 
 					//TRIPS
-					5500, 5501, 5502, 5503, 5504, 5505, 5506,
+					5500, 5501, 5502, 5503, 5505, 5506,
 
 					//MOBILE PERMISSIONS
 					//TRIPS
 					9000, 9001, 9002, 9003, 9004, 9005,
 					//LOCAL TRIPS
-					5660, 5661, 5662, 5663, 5664, 5665, 5666,
+					5660, 5661, 5662, 5663, 5665, 5666,
 
 					//EXPENSE VOUCHERS
 					5560,
@@ -191,10 +197,10 @@ class EYatraRoleSeeder extends Seeder {
 					// 5000,
 
 					//TRIPS
-					5500, 5501, 5502, 5503, 5504, 5505, 5506,
+					5500, 5501, 5502, 5503, 5505, 5506,
 
 					//LOCAL TRIPS
-					5660, 5661, 5662, 5663, 5664, 5665, 5666,
+					5660, 5661, 5662, 5663, 5665, 5666,
 
 					//EXPENSE VOUCHERS
 					5560,
@@ -211,6 +217,9 @@ class EYatraRoleSeeder extends Seeder {
 
 					//CLAIM VERIFICATION
 					9007,
+
+					//REPORTS
+					5680, 5684, 5685, 5686,
 				],
 			],
 
@@ -248,10 +257,10 @@ class EYatraRoleSeeder extends Seeder {
 					// 5000,
 
 					//TRIPS
-					5500, 5501, 5502, 5503, 5504, 5505, 5506,
+					5500, 5501, 5502, 5503, 5505, 5506,
 
 					//LOCAL TRIPS
-					5660, 5661, 5662, 5663, 5664, 5665, 5666,
+					5660, 5661, 5662, 5663, 5665, 5666,
 
 					//EXPENSE VOUCHERS
 					5560,
@@ -262,6 +271,8 @@ class EYatraRoleSeeder extends Seeder {
 					//OUTLET REIMBURSEMENT
 					5580,
 
+					//REPORTS
+					5680, 5687,
 				],
 			],
 
@@ -283,6 +294,9 @@ class EYatraRoleSeeder extends Seeder {
 					//REPORTS
 					5680, 5681, 5682,
 
+					//REPORTS
+					5680, 5681, 5688, 5682, 5683, 5690, 5691,
+
 				],
 			],
 
@@ -299,10 +313,10 @@ class EYatraRoleSeeder extends Seeder {
 					// 5000,
 
 					//TRIPS
-					5500, 5501, 5502, 5503, 5504, 5505, 5506,
+					5500, 5501, 5502, 5503, 5505, 5506,
 
 					//LOCAL TRIPS
-					5660, 5661, 5662, 5663, 5664, 5665, 5666,
+					5660, 5661, 5662, 5663, 5665, 5666,
 
 					//EXPENSE VOUCHERS
 					5560,
@@ -319,6 +333,9 @@ class EYatraRoleSeeder extends Seeder {
 
 					//CLAIM VERIFICATION
 					9007,
+
+					//REPORTS
+					5680, 5684, 5685, 5686,
 
 				],
 			],
