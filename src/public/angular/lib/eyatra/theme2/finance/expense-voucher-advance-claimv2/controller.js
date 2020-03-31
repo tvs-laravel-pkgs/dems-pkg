@@ -116,23 +116,6 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
 
         });
 
-        // $(".bottom-expand-btn").on('click', function() {
-        //     if ($(".separate-bottom-fixed-layer").hasClass("in")) {
-        //         $(".separate-bottom-fixed-layer").removeClass("in");
-        //     } else {
-        //         $(".separate-bottom-fixed-layer").addClass("in");
-        //         $(".bottom-expand-btn").css({ 'display': 'none' });
-        //     }
-        // });
-        // $(".approve-close").on('click', function() {
-        //     if ($(".separate-bottom-fixed-layer").hasClass("in")) {
-        //         $(".separate-bottom-fixed-layer").removeClass("in");
-        //         $(".bottom-expand-btn").css({ 'display': 'inline-block' });
-        //     } else {
-        //         $(".separate-bottom-fixed-layer").addClass("in");
-        //     }
-        // });
-
         $(".bottom-expand-btn").on('click', function() {
             console.log(' click ==');
             if ($(".separate-bottom-fixed-layer").hasClass("in")) {
@@ -204,17 +187,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
                             }
                             custom_noty('error', errors);
                         } else {
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: 'Expense Voucher Advance Approved successfully',
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            setTimeout(function() {
-                                $noty.close();
-                            }, 5000);
+                            custom_noty('success', 'Expense Voucher Advance Approved successfully');
                             $("#alert-modal-approve").modal('hide');
                             $timeout(function() {
                                 $location.path('/expense/voucher-advance/verification2/')

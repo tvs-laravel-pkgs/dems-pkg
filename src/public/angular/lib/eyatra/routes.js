@@ -310,6 +310,25 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
 
 
+    //EXPENSE VOUCHER ADVANCE RE-PAID CASHIER
+    when('/expense/voucher-advance/cashier/repaid/list', {
+        template: '<eyatra-expense-voucher-advance-cashier-repaid-list></eyatra-expense-voucher-advance-cashier-repaid-list>',
+        title: 'Expense Voucher Advance Repaid',
+    }).
+    when('/expense/voucher-advance/cashier/repaid/view/:id', {
+        template: '<eyatra-expense-voucher-advance-cashier-repaid-view></eyatra-expense-voucher-advance-cashier-repaid-view>',
+        title: 'view Expense Voucher Advance Repaid',
+    }).
+    //EXPENSE VOUCHER ADVANCE RE-PAID FINANCIER
+    when('/expense/voucher-advance/financier/repaid/list', {
+        template: '<eyatra-expense-voucher-advance-financier-repaid-list></eyatra-expense-voucher-advance-financier-repaid-list>',
+        title: 'Expense Voucher Advance Repaid',
+    }).
+    when('/expense/voucher-advance/financier/repaid/view/:id', {
+        template: '<eyatra-expense-voucher-advance-financier-repaid-view></eyatra-expense-voucher-advance-financier-repaid-view>',
+        title: 'view Expense Voucher Advance Repaid',
+    }).
+
     //TRIP
     when('/trips', {
         template: '<eyatra-trips></eyatra-trips>',

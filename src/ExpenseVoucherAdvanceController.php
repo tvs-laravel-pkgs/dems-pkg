@@ -164,6 +164,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 
 	}
 	public function expenseVoucherSingleRepaidApprove(Request $request){
+		//dd($request->all());
 		DB::beginTransaction();
 		try {
 			if ($request->id) {
@@ -172,8 +173,10 @@ class ExpenseVoucherAdvanceController extends Controller {
 				return back()->with('error', 'Expense Voucher Advance not found');
 			}
 			$expense_voucher_advance = ExpenseVoucherAdvanceRequest::where('id', $employee_expense_voucher_id)->update(['status_id' => 3275]);
-			//Approval Log Save
-			ApprovalLog::saveApprovalLog(3585, $expense_voucher_advance->id, 3258, Auth::user()->entity_id, Carbon::now());
+			if($expense_voucher_advance){
+				//Approval Log Save
+				ApprovalLog::saveApprovalLog(3585, $employee_expense_voucher_id, 3258, Auth::user()->entity_id, Carbon::now());
+			}
 			DB::commit();
 			return response()->json(['success' => true]);
 		} catch (Exception $e) {

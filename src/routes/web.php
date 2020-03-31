@@ -224,7 +224,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/expense/voucher-advance/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherView')->name('expenseVoucherView');
 		Route::get('eyatra/expense/voucher-advance/delete/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherDelete')->name('expenseVoucherDelete');
 		Route::get('eyatra/expense/voucher-advance/filter-data', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@ExpenseVoucherAdvanceFilterData')->name('ExpenseVoucherAdvanceFilterData');
-		Route::post('eyatra/expense/voucher-advance/single/repaid-approve', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherSingleRepaidApprove')->name('expenseVoucherSingleRepaidApprove');
+
+
+
 		//EXPENSE VOUCHER ADVANCE VERIFICATION MANAGER
 		Route::get('eyatra/expense/voucher-advance/verification/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@listExpenseVoucherverificationRequest')->name('listExpenseVoucherverificationRequest');
 		Route::post('eyatra/expense/voucher-advance/verification/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationSave')->name('expenseVoucherVerificationSave');
@@ -235,10 +237,24 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/expense/voucher-advance/verification2/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@expenseVoucherVerification2Save')->name('expenseVoucherVerification2Save');
 		Route::get('eyatra/expense/voucher-advance/verification2/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@expenseVoucherVerification2View')->name('expenseVoucherVerification2View');
 
+		//EXPENSE VOUCHER ADVANCE RE-PAID CASHIER
+		Route::get('eyatra/expense/voucher-advance/cashier-repaid/list', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@listExpenseVoucherCashierRepaidList')->name('listExpenseVoucherCashierRepaidList');
+		Route::post('eyatra/expense/voucher-advance/cashier/single/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@expenseVoucherCashierSingleRepaidApprove')->name('expenseVoucherCashierSingleRepaidApprove');
+		Route::post('eyatra/expense/voucher-advance/cashier/multiple/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@expenseVoucherCashierMultipleRepaidApprove')->name('expenseVoucherCashierMultipleRepaidApprove');
+		Route::get('eyatra/expense/voucher-advance/cashier-repaid/filter-data', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@ExpenseVoucherAdvanceCashierRepaidFilterData')->name('ExpenseVoucherAdvanceCashierRepaidFilterData');
+		Route::get('eyatra/expense/voucher-advance/cashier-repaid/view/{id}', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@ExpenseVoucherAdvanceCashierRepaidView')->name('ExpenseVoucherAdvanceCashierRepaidView');
+
 		//EXPENSE VOUCHER ADVANCE VERIFICATION FINANCIER
 		Route::get('eyatra/expense/voucher-advance/verification3/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@listExpenseVoucherverification3Request')->name('listExpenseVoucherverification3Request');
 		Route::post('eyatra/expense/voucher-advance/verification3/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@expenseVoucherVerification3Save')->name('expenseVoucherVerification3Save');
 		Route::get('eyatra/expense/voucher-advance/verification3/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@expenseVoucherVerification3View')->name('expenseVoucherVerification3View');
+		//EXPENSE VOUCHER ADVANCE RE-PAID FINANCIER
+		Route::get('eyatra/expense/voucher-advance/financer-repaid/list', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@listExpenseVoucherFinancierRepaidList')->name('listExpenseVoucherFinancierRepaidList');
+		
+		Route::post('eyatra/expense/voucher-advance/financier/single/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@expenseVoucherFinancierSingleRepaidApprove')->name('expenseVoucherFinancierSingleRepaidApprove');
+		Route::post('eyatra/expense/voucher-advance/financier/multiple/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@expenseVoucherFinancierMultipleRepaidApprove')->name('expenseVoucherFinancierMultipleRepaidApprove');
+		Route::get('eyatra/expense/voucher-advance/financier-repaid/filter-data', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@ExpenseVoucherAdvanceFinancierRepaidFilterData')->name('ExpenseVoucherAdvanceFinancierRepaidFilterData');
+		Route::get('eyatra/expense/voucher-advance/financier-repaid/view/{id}', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@ExpenseVoucherAdvanceFinancierRepaidView')->name('ExpenseVoucherAdvanceFinancierRepaidView');
 
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
