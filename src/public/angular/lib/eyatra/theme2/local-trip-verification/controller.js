@@ -302,7 +302,6 @@ app.component('eyatraLocalTripVerificationDetailView', {
         $scope.confirmApproveLocalTripClaim = function() {
             $id = $('#trip_id').val();
             $('#claim_local_approve_btn').button('loading');
-            alert(local_trip_approve);
             if (local_trip_approve == 0) {
                 local_trip_approve = 1;
                 $http.get(

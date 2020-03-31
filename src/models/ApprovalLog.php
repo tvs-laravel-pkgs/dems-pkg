@@ -276,6 +276,7 @@ class ApprovalLog extends Model {
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->leftJoin('users', 'users.entity_id', 'e.id')
+			->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'approval_logs.entity_id')
@@ -315,8 +316,8 @@ class ApprovalLog extends Model {
 				}
 			})
 			->where(function ($query) use ($r) {
-				if ($r->get('status_id')) {
-					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				if ($r->get('outlet_id') && $r->get('outlet_id') != '<%$ctrl.filter_outlet_id%>') {
+					$query->where("outlets.id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
 				}
 			})
 

@@ -872,7 +872,7 @@ class ReportController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
+						<a href="#!/outstation-claim/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
@@ -1002,7 +1002,7 @@ class ReportController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
+						<a href="#!/outstation-claim/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
