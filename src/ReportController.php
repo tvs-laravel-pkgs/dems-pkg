@@ -61,6 +61,7 @@ class ReportController extends Controller {
 		$data['success'] = true;
 		return response()->json($data);
 	}
+
 	public function listOutstationTripReport(Request $r) {
 
 		if ($r->from_date != '<%$ctrl.start_date%>') {
@@ -565,8 +566,6 @@ class ReportController extends Controller {
 				->where('config_type_id', 534)
 				->whereIn('id', [3600, 3601])
 				->get());
-		// dd(session('type_id'));
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -576,16 +575,39 @@ class ReportController extends Controller {
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('manager_filter_employee_id') ? intval(session('manager_filter_employee_id')) : '-1';
+		$this->data['filter_type_id'] = $filter_type_id = session('manager_filter_type_id') ? intval(session('manager_filter_type_id')) : '3600';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('manager_filter_purpose_id') ? intval(session('manager_filter_purpose_id')) : '-1';
+
+		$manager_filter_start_date = session('manager_filter_start_date');
+		$manager_filter_end_date = session('manager_filter_end_date');
+		if (!$manager_filter_start_date) {
+			$manager_filter_start_date = date('01-m-Y');
+			$manager_filter_end_date = date('t-m-Y');
+		}
+
+		$this->data['manager_filter_start_date'] = $manager_filter_start_date;
+		$this->data['manager_filter_end_date'] = $manager_filter_end_date;
+
 		$this->data['success'] = true;
-		//dd($this->data);
+
 		return response()->json($this->data);
 	}
 
 	public function eyatraOutstationTripData(Request $r) {
-
-		if ($r->type_id) {
-			session(['type_id' => $r->type_id]);
+		// dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['manager_filter_employee_id' => $r->employee_id]);
+		}
+		if ($r->type_id && $r->type_id != '<%$ctrl.filter_type_id%>') {
+			session(['manager_filter_type_id' => $r->type_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['manager_filter_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('manager_filter_start_date', $r->from_date);
+			Session::put('manager_filter_end_date', $r->to_date);
 		}
 
 		$lists = ApprovalLog::getOutstationList($r);
@@ -818,6 +840,7 @@ class ReportController extends Controller {
 			})
 			->make(true);
 	}
+
 	//OUTSTATION TRIP EMPLOYEE PAID
 	public function eyatraTripEmployeePaidFilterData() {
 		// dd(session('type_id'));
