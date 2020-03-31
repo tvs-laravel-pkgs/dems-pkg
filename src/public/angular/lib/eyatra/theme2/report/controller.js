@@ -817,6 +817,7 @@ app.component('eyatraReportsLocalTripList', {
 
     }
 });
+
 //LOCAL TRIP VIEW
 app.component('eyatraReportsLocalTripView', {
     templateUrl: eyatra_local_trip_view_template_url,
@@ -978,7 +979,6 @@ app.component('eyatraReportsTripAdvanceRequest', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1078,6 +1078,7 @@ app.component('eyatraReportsTripAdvanceRequest', {
 
     }
 });
+
 //OUTSTATION TRIP SR MANAGER APPROVAL
 app.component('eyatraReportsTripSrManagerApproval', {
     templateUrl: eyatra_trip_sr_manager_approval_list_template_url,
@@ -1087,16 +1088,26 @@ app.component('eyatraReportsTripSrManagerApproval', {
         $http.get(
             trip_sr_manager_approval_filter_data_url
         ).then(function(response) {
-            self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.start_date = response.data.sr_mngr_filter_start_date;
+            self.end_date = response.data.sr_mngr_filter_end_date;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.sr_mngr_filter_start_date + ' to ' + response.data.sr_mngr_filter_end_date;
+            self.trip_periods = trip_periods;
 
             setTimeout(function() {
-                self.type_id = response.data.type_id;
-                $("#type_id").val(self.type_id);
-                $('#select').trigger('change');
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 dataTable.draw();
             }, 1500);
 
@@ -1125,11 +1136,8 @@ app.component('eyatraReportsTripSrManagerApproval', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.type_id = $('#type_id').val();
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
-                    d.status_id = $('#status_id').val();
-                    d.period = $('#period').val();
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
                 }
@@ -1138,7 +1146,6 @@ app.component('eyatraReportsTripSrManagerApproval', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1161,50 +1168,48 @@ app.component('eyatraReportsTripSrManagerApproval', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('div[data-provide = "datepicker"]').datepicker({
-                todayHighlight: true,
-                autoclose: true,
-            });
-        }, 1000);
-        $scope.getTypeData = function(query) {
-            // alert(query);
-            $('#type_id').val(query);
-            dataTable.draw();
-        }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
+
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
-            dataTable.draw();
-        }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
-            $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            $('#employee_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
-            dataTable.draw();
+            self.trip_periods = '';
+            self.filter_purpose_id = '-1';
+            self.filter_employee_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
         }
         $rootScope.loading = false;
 
@@ -1270,7 +1275,6 @@ app.component('eyatraReportsTripFinancierApproval', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1418,7 +1422,6 @@ app.component('eyatraReportsTripFinancierPaid', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1594,7 +1597,6 @@ app.component('eyatraReportsTripEmployeePaid', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },

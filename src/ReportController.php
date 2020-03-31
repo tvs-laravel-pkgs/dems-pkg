@@ -708,18 +708,30 @@ class ReportController extends Controller {
 
 	// SR MANAGER APPROVAL
 	public function eyatraTripSrManagerApprovalFilterData() {
-		// dd(session('type_id'));
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
-
-		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$this->data['employee_list'] = collect(Employee::join('trips', 'trips.employee_id', 'employees.id')
+				->join('approval_logs', 'approval_logs.entity_id', 'trips.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->where('users.user_type_id', 3121)
-			//->where('employees.reporting_to_id', Auth::user()->entity_id)
+				->where('approval_logs.type_id', 3581)
+				->where('approval_logs.approval_type_id', 3602)
+				->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
-		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('sr_mngr_filter_employee_id') ? intval(session('sr_mngr_filter_employee_id')) : '-1';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('sr_mngr_filter_purpose_id') ? intval(session('sr_mngr_filter_purpose_id')) : '-1';
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$sr_mngr_filter_start_date = session('sr_mngr_filter_start_date');
+		$sr_mngr_filter_end_date = session('sr_mngr_filter_end_date');
+		if (!$sr_mngr_filter_start_date) {
+			$sr_mngr_filter_start_date = date('01-m-Y');
+			$sr_mngr_filter_end_date = date('t-m-Y');
+		}
+
+		$this->data['sr_mngr_filter_start_date'] = $sr_mngr_filter_start_date;
+		$this->data['sr_mngr_filter_end_date'] = $sr_mngr_filter_end_date;
+
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
@@ -727,6 +739,16 @@ class ReportController extends Controller {
 
 	public function eyatraTripSrManagerApprovalData(Request $r) {
 		//dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['sr_mngr_filter_employee_id' => $r->employee_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['sr_mngr_filter_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('sr_mngr_filter_start_date', $r->from_date);
+			Session::put('sr_mngr_filter_end_date', $r->to_date);
+		}
 		$approval_type_id = 3602;
 		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 		return Datatables::of($lists)
