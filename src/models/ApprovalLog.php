@@ -254,17 +254,18 @@ class ApprovalLog extends Model {
 	}
 
 	public static function getTripAdvanceList($r) {
-		if (!empty($r->from_date)) {
+		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
 			$from_date = date('Y-m-d', strtotime($r->from_date));
 		} else {
 			$from_date = null;
 		}
 
-		if (!empty($r->to_date)) {
+		if (!empty($r->to_date) && $r->from_date != '<%$ctrl.end_date%>') {
 			$to_date = date('Y-m-d', strtotime($r->to_date));
 		} else {
 			$to_date = null;
 		}
+
 		$lists = ApprovalLog::join('trips', 'trips.id', 'approval_logs.entity_id')
 			->join('visits as v', 'v.trip_id', 'trips.id')
 			->join('ncities as c', 'c.id', 'v.from_city_id')

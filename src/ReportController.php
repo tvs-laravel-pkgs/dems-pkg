@@ -651,19 +651,41 @@ class ReportController extends Controller {
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('financier_advance_employee_id') ? intval(session('financier_advance_employee_id')) : '-1';
+		$this->data['filter_outlet_id'] = $filter_outlet_id = session('financier_advance_outlet_id') ? intval(session('financier_advance_outlet_id')) : '-1';
+
+		$financier_trip_start_date = session('financier_advance_start_date');
+		$financier_trip_end_date = session('financier_advance_end_date');
+		if (!$financier_trip_start_date) {
+			$financier_trip_start_date = date('01-m-Y');
+			$financier_trip_end_date = date('t-m-Y');
+		}
+
+		$this->data['financier_trip_start_date'] = $financier_trip_start_date;
+		$this->data['financier_trip_end_date'] = $financier_trip_end_date;
+
 		$this->data['success'] = true;
-		//dd($this->data);
 		return response()->json($this->data);
 	}
 
 	public function eyatraTripAdvanceRequestData(Request $r) {
 		//dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['financier_advance_employee_id' => $r->employee_id]);
+		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['financier_advance_outlet_id' => $r->outlet_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('financier_advance_start_date', $r->from_date);
+			Session::put('financier_advance_end_date', $r->to_date);
+		}
+
 		$lists = ApprovalLog::getTripAdvanceList($r);
 		return Datatables::of($lists)
 			->addColumn('action', function ($list) {
