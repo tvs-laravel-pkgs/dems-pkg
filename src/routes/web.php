@@ -224,8 +224,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/expense/voucher-advance/delete/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherDelete')->name('expenseVoucherDelete');
 		Route::get('eyatra/expense/voucher-advance/filter-data', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@ExpenseVoucherAdvanceFilterData')->name('ExpenseVoucherAdvanceFilterData');
 
-
-
 		//EXPENSE VOUCHER ADVANCE VERIFICATION MANAGER
 		Route::get('eyatra/expense/voucher-advance/verification/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@listExpenseVoucherverificationRequest')->name('listExpenseVoucherverificationRequest');
 		Route::post('eyatra/expense/voucher-advance/verification/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationSave')->name('expenseVoucherVerificationSave');
@@ -249,7 +247,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/expense/voucher-advance/verification3/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@expenseVoucherVerification3View')->name('expenseVoucherVerification3View');
 		//EXPENSE VOUCHER ADVANCE RE-PAID FINANCIER
 		Route::get('eyatra/expense/voucher-advance/financer-repaid/list', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@listExpenseVoucherFinancierRepaidList')->name('listExpenseVoucherFinancierRepaidList');
-		
+
 		Route::post('eyatra/expense/voucher-advance/financier/single/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@expenseVoucherFinancierSingleRepaidApprove')->name('expenseVoucherFinancierSingleRepaidApprove');
 		Route::post('eyatra/expense/voucher-advance/financier/multiple/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@expenseVoucherFinancierMultipleRepaidApprove')->name('expenseVoucherFinancierMultipleRepaidApprove');
 		Route::get('eyatra/expense/voucher-advance/financier-repaid/filter-data', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@ExpenseVoucherAdvanceFinancierRepaidFilterData')->name('ExpenseVoucherAdvanceFinancierRepaidFilterData');
@@ -492,8 +490,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('report/trip/trip-financier-approval/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierApprovalFilterData')->name('eyatraTripFinancierApprovalFilterData');
 
 		//FINANCIER PAID
-		Route::get('report/trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidData')->name('eyatraTripFinancierPaidData');
-		Route::get('report/trip/trip-financier-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidFilterData')->name('eyatraTripFinancierPaidFilterData');
+		Route::get('report/outstation-trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidData')->name('eyatraTripFinancierPaidData');
+		Route::get('report/outstation-trip/trip-financier-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidFilterData')->name('eyatraTripFinancierPaidFilterData');
+		Route::get('report/local-trip/trip-financier-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripFinancierPaidFilterData')->name('eyatraLocalTripFinancierPaidFilterData');
 
 		//FINANCIER LOCAL TRIP PAID
 		Route::get('report/local-trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripFinancierPaidData')->name('eyatraLocalTripFinancierPaidData');

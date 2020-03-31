@@ -231,7 +231,7 @@ class AdvanceClaimRequestController extends Controller {
 		DB::beginTransaction();
 		try {
 
-			$trips = Trip::select('users.email', 'users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id')
+			$trips = Trip::select('users.email', 'users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id', 'users.id as user_id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
@@ -243,7 +243,7 @@ class AdvanceClaimRequestController extends Controller {
 			DB::commit();
 
 			foreach ($trips as $key => $emp_details) {
-				$user = User::where('entity_id', $emp_details->id)->where('user_type_id', 3121)->first();
+				$user = User::find($emp_details->user_id);
 				$trip = Trip::find($emp_details->id);
 
 				//Approval Log

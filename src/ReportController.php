@@ -61,6 +61,7 @@ class ReportController extends Controller {
 		$data['success'] = true;
 		return response()->json($data);
 	}
+
 	public function listOutstationTripReport(Request $r) {
 
 		if ($r->from_date != '<%$ctrl.start_date%>') {
@@ -565,8 +566,6 @@ class ReportController extends Controller {
 				->where('config_type_id', 534)
 				->whereIn('id', [3600, 3601])
 				->get());
-		// dd(session('type_id'));
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -576,16 +575,39 @@ class ReportController extends Controller {
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('outstation_manager_filter_employee_id') ? intval(session('outstation_manager_filter_employee_id')) : '-1';
+		$this->data['filter_type_id'] = $filter_type_id = session('outstation_manager_filter_type_id') ? intval(session('outstation_manager_filter_type_id')) : '3600';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('outstation_manager_filter_purpose_id') ? intval(session('outstation_manager_filter_purpose_id')) : '-1';
+
+		$manager_filter_start_date = session('outstation_manager_filter_start_date');
+		$manager_filter_end_date = session('outstation_manager_filter_end_date');
+		if (!$manager_filter_start_date) {
+			$manager_filter_start_date = date('01-m-Y');
+			$manager_filter_end_date = date('t-m-Y');
+		}
+
+		$this->data['manager_filter_start_date'] = $manager_filter_start_date;
+		$this->data['manager_filter_end_date'] = $manager_filter_end_date;
+
 		$this->data['success'] = true;
-		//dd($this->data);
+
 		return response()->json($this->data);
 	}
 
 	public function eyatraOutstationTripData(Request $r) {
-
-		if ($r->type_id) {
-			session(['type_id' => $r->type_id]);
+		// dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['outstation_manager_filter_employee_id' => $r->employee_id]);
+		}
+		if ($r->type_id && $r->type_id != '<%$ctrl.filter_type_id%>') {
+			session(['outstation_manager_filter_type_id' => $r->type_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['outstation_manager_filter_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('outstation_manager_filter_start_date', $r->from_date);
+			Session::put('outstation_manager_filter_end_date', $r->to_date);
 		}
 
 		$lists = ApprovalLog::getOutstationList($r);
@@ -626,25 +648,44 @@ class ReportController extends Controller {
 	//APPROVAL LOGS
 	//TRIP ADVANCE REQUEST
 	public function eyatraTripAdvanceRequestFilterData() {
-		// dd(session('type_id'));
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
-
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('financier_advance_employee_id') ? intval(session('financier_advance_employee_id')) : '-1';
+		$this->data['filter_outlet_id'] = $filter_outlet_id = session('financier_advance_outlet_id') ? intval(session('financier_advance_outlet_id')) : '-1';
+
+		$financier_trip_start_date = session('financier_advance_start_date');
+		$financier_trip_end_date = session('financier_advance_end_date');
+		if (!$financier_trip_start_date) {
+			$financier_trip_start_date = date('01-m-Y');
+			$financier_trip_end_date = date('t-m-Y');
+		}
+
+		$this->data['financier_trip_start_date'] = $financier_trip_start_date;
+		$this->data['financier_trip_end_date'] = $financier_trip_end_date;
+
 		$this->data['success'] = true;
-		//dd($this->data);
 		return response()->json($this->data);
 	}
 
 	public function eyatraTripAdvanceRequestData(Request $r) {
 		//dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['financier_advance_employee_id' => $r->employee_id]);
+		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['financier_advance_outlet_id' => $r->outlet_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('financier_advance_start_date', $r->from_date);
+			Session::put('financier_advance_end_date', $r->to_date);
+		}
+
 		$lists = ApprovalLog::getTripAdvanceList($r);
 		return Datatables::of($lists)
 			->addColumn('action', function ($list) {
@@ -667,18 +708,30 @@ class ReportController extends Controller {
 
 	// SR MANAGER APPROVAL
 	public function eyatraTripSrManagerApprovalFilterData() {
-		// dd(session('type_id'));
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
-
-		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$this->data['employee_list'] = collect(Employee::join('trips', 'trips.employee_id', 'employees.id')
+				->join('approval_logs', 'approval_logs.entity_id', 'trips.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->where('users.user_type_id', 3121)
-			//->where('employees.reporting_to_id', Auth::user()->entity_id)
+				->where('approval_logs.type_id', 3581)
+				->where('approval_logs.approval_type_id', 3602)
+				->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
-		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('sr_mngr_filter_employee_id') ? intval(session('sr_mngr_filter_employee_id')) : '-1';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('sr_mngr_filter_purpose_id') ? intval(session('sr_mngr_filter_purpose_id')) : '-1';
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$sr_mngr_filter_start_date = session('sr_mngr_filter_start_date');
+		$sr_mngr_filter_end_date = session('sr_mngr_filter_end_date');
+		if (!$sr_mngr_filter_start_date) {
+			$sr_mngr_filter_start_date = date('01-m-Y');
+			$sr_mngr_filter_end_date = date('t-m-Y');
+		}
+
+		$this->data['sr_mngr_filter_start_date'] = $sr_mngr_filter_start_date;
+		$this->data['sr_mngr_filter_end_date'] = $sr_mngr_filter_end_date;
+
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
@@ -686,6 +739,16 @@ class ReportController extends Controller {
 
 	public function eyatraTripSrManagerApprovalData(Request $r) {
 		//dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['sr_mngr_filter_employee_id' => $r->employee_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['sr_mngr_filter_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('sr_mngr_filter_start_date', $r->from_date);
+			Session::put('sr_mngr_filter_end_date', $r->to_date);
+		}
 		$approval_type_id = 3602;
 		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 		return Datatables::of($lists)
@@ -752,17 +815,27 @@ class ReportController extends Controller {
 
 	//OUTSTATION TRIP  FINANCIER PAID
 	public function eyatraTripFinancierPaidFilterData() {
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
-
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
-		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('financier_paid_employee_id') ? intval(session('financier_paid_employee_id')) : '-1';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('financier_paid_purpose_id') ? intval(session('financier_paid_purpose_id')) : '-1';
+		$this->data['filter_outlet_id'] = $filter_outlet_id = session('financier_paid_outlet_id') ? intval(session('financier_paid_outlet_id')) : '-1';
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$financier_paid_start_date = session('financier_paid_start_date');
+		$financier_paid_end_date = session('financier_paid_end_date');
+		if (!$financier_paid_start_date) {
+			$financier_paid_start_date = date('01-m-Y');
+			$financier_paid_end_date = date('t-m-Y');
+		}
+
+		$this->data['financier_paid_start_date'] = $financier_paid_start_date;
+		$this->data['financier_paid_end_date'] = $financier_paid_end_date;
+
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
@@ -770,6 +843,21 @@ class ReportController extends Controller {
 
 	public function eyatraTripFinancierPaidData(Request $r) {
 		// dd($r->all());
+
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['financier_paid_employee_id' => $r->employee_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['financier_paid_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['financier_paid_outlet_id' => $r->outlet_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('financier_paid_start_date', $r->from_date);
+			Session::put('financier_paid_end_date', $r->to_date);
+		}
+
 		$approval_type_id = 3604;
 		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 
@@ -784,7 +872,7 @@ class ReportController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
+						<a href="#!/outstation-claim/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
@@ -794,8 +882,48 @@ class ReportController extends Controller {
 	}
 
 	//LOCAL TRIP FINANCIER PAID
+	public function eyatraLocalTripFinancierPaidFilterData() {
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+
+		$this->data['filter_employee_id'] = $filter_employee_id = session('financier_local_paid_employee_id') ? intval(session('financier_local_paid_employee_id')) : '-1';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('financier_local_paid_purpose_id') ? intval(session('financier_local_paid_purpose_id')) : '-1';
+		$this->data['filter_outlet_id'] = $filter_outlet_id = session('financier_local_paid_outlet_id') ? intval(session('financier_local_paid_outlet_id')) : '-1';
+
+		$financier_local_paid_start_date = session('financier_local_paid_start_date');
+		$financier_local_paid_end_date = session('financier_local_paid_end_date');
+		if (!$financier_local_paid_start_date) {
+			$financier_local_paid_start_date = date('01-m-Y');
+			$financier_local_paid_end_date = date('t-m-Y');
+		}
+
+		$this->data['financier_local_paid_start_date'] = $financier_local_paid_start_date;
+		$this->data['financier_local_paid_end_date'] = $financier_local_paid_end_date;
+
+		$this->data['success'] = true;
+		//dd($this->data);
+		return response()->json($this->data);
+	}
+
 	public function eyatraLocalTripFinancierPaidData(Request $r) {
 		// dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['financier_local_paid_employee_id' => $r->employee_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['financier_local_paid_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['financier_local_paid_outlet_id' => $r->outlet_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('financier_local_paid_start_date', $r->from_date);
+			Session::put('financier_local_paid_end_date', $r->to_date);
+		}
 		$approval_type_id = 3608;
 		$lists = ApprovalLog::getFinancierLocalTripList($r, $approval_type_id);
 
@@ -818,20 +946,30 @@ class ReportController extends Controller {
 			})
 			->make(true);
 	}
+
 	//OUTSTATION TRIP EMPLOYEE PAID
 	public function eyatraTripEmployeePaidFilterData() {
-		// dd(session('type_id'));
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3600;
-
+		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
-			//->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
-		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+		$this->data['filter_employee_id'] = $filter_employee_id = session('employee_paid_employee_id') ? intval(session('employee_paid_employee_id')) : '-1';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('employee_paid_purpose_id') ? intval(session('employee_paid_purpose_id')) : '-1';
+		$this->data['filter_outlet_id'] = $filter_outlet_id = session('employee_paid_outlet_id') ? intval(session('employee_paid_outlet_id')) : '-1';
 
-		$this->data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$employee_paid_start_date = session('employee_paid_start_date');
+		$employee_paid_end_date = session('employee_paid_end_date');
+		if (!$employee_paid_start_date) {
+			$employee_paid_start_date = date('01-m-Y');
+			$employee_paid_end_date = date('t-m-Y');
+		}
+
+		$this->data['employee_paid_start_date'] = $employee_paid_start_date;
+		$this->data['employee_paid_end_date'] = $employee_paid_end_date;
+
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
@@ -839,6 +977,19 @@ class ReportController extends Controller {
 
 	public function eyatraTripEmployeePaidData(Request $r) {
 		//dd($r->all());
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['employee_paid_employee_id' => $r->employee_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['employee_paid_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['employee_paid_outlet_id' => $r->outlet_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('employee_paid_start_date', $r->from_date);
+			Session::put('employee_paid_end_date', $r->to_date);
+		}
 		$approval_type_id = 3605;
 		$lists = ApprovalLog::getTripList($r, $approval_type_id);
 		return Datatables::of($lists)
@@ -851,7 +1002,7 @@ class ReportController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				return '
-						<a href="#!/outstation-trip/view/' . $list->entity_id . '">
+						<a href="#!/outstation-claim/view/' . $list->entity_id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
@@ -866,8 +1017,6 @@ class ReportController extends Controller {
 				->where('config_type_id', 534)
 				->whereIn('id', [3606, 3607])
 				->get());
-		// dd(session('type_id'));
-		// $this->data['type_id'] = (intval(session('type_id')) > 0) ? intval(session('type_id')) : 3606;
 
 		$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -877,6 +1026,20 @@ class ReportController extends Controller {
 
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 
+		$this->data['filter_employee_id'] = $filter_employee_id = session('local_manager_filter_employee_id') ? intval(session('local_manager_filter_employee_id')) : '-1';
+		$this->data['filter_type_id'] = $filter_type_id = session('local_manager_filter_type_id') ? intval(session('local_manager_filter_type_id')) : '3606';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('local_manager_filter_purpose_id') ? intval(session('local_manager_filter_purpose_id')) : '-1';
+
+		$manager_filter_start_date = session('local_manager_filter_start_date');
+		$manager_filter_end_date = session('local_manager_filter_end_date');
+		if (!$manager_filter_start_date) {
+			$manager_filter_start_date = date('01-m-Y');
+			$manager_filter_end_date = date('t-m-Y');
+		}
+
+		$this->data['manager_filter_start_date'] = $manager_filter_start_date;
+		$this->data['manager_filter_end_date'] = $manager_filter_end_date;
+
 		$this->data['success'] = true;
 		//dd($this->data);
 		return response()->json($this->data);
@@ -884,8 +1047,18 @@ class ReportController extends Controller {
 
 	public function eyatraLocalTripData(Request $r) {
 
-		if ($r->type_id) {
-			session(['type_id' => $r->type_id]);
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['local_manager_filter_employee_id' => $r->employee_id]);
+		}
+		if ($r->type_id && $r->type_id != '<%$ctrl.filter_type_id%>') {
+			session(['local_manager_filter_type_id' => $r->type_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['local_manager_filter_purpose_id' => $r->purpose_id]);
+		}
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('local_manager_filter_start_date', $r->from_date);
+			Session::put('local_manager_filter_end_date', $r->to_date);
 		}
 
 		$lists = ApprovalLog::getLocalTripList($r);

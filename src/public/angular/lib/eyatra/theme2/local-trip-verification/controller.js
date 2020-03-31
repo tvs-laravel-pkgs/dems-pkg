@@ -260,8 +260,8 @@ app.component('eyatraLocalTripVerificationDetailView', {
             self.gender = (response.data.trip.employee.gender).toLowerCase();
             console.log(self.trip_reject_reasons);
         });
-        // 
 
+        var local_trip_approve = 0;
         self.approveTrip = function() {
             self.trip.visits.push({
                 visit_date: '',
@@ -299,38 +299,42 @@ app.component('eyatraLocalTripVerificationDetailView', {
             $scope.search = '';
         };
 
-        $(document).on('click', '.claim_local_approve_btn', function() {
+        $scope.confirmApproveLocalTripClaim = function() {
             $id = $('#trip_id').val();
             $('#claim_local_approve_btn').button('loading');
-            $http.get(
-                local_trip_verification_approve_url + '/' + $id,
-            ).then(function(response) {
-                console.log(response);
-                $('#claim_local_approve_btn').button('reset');
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in response.data.errors) {
-                        errors += '<li>' + response.data.errors[i] + '</li>';
+            if (local_trip_approve == 0) {
+                local_trip_approve = 1;
+                $http.get(
+                    local_trip_verification_approve_url + '/' + $id,
+                ).then(function(response) {
+                    console.log(response);
+                    $('#claim_local_approve_btn').button('reset');
+                    if (!response.data.success) {
+                        var errors = '';
+                        for (var i in response.data.errors) {
+                            errors += '<li>' + response.data.errors[i] + '</li>';
+                        }
+                        $noty = new Noty({
+                            type: 'error',
+                            layout: 'topRight',
+                            text: errors,
+                        }).show();
+                        setTimeout(function() {
+                            $noty.close();
+                        }, 1000);
+                    } else {
+                        custom_noty('success', 'Local Trip Claim Approved Successfully');
+                        $('#alert-local-claim-modal-approve').modal('hide');
+                        setTimeout(function() {
+                            $location.path('/local-trip/verification/list')
+                            $scope.$apply()
+                        }, 500);
                     }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 1000);
-                } else {
-                    custom_noty('success', 'Local Trip Claim Approved Successfully');
-                    $('#alert-local-claim-modal-approve').modal('hide');
-                    setTimeout(function() {
-                        $location.path('/local-trip/verification/list')
-                        $scope.$apply()
-                    }, 500);
-                }
 
-            });
-        });
+                });
+                local_trip_approve = 0;
+            }
+        }
 
         //Reject
         $(document).on('click', '.claim_local_reject_btn', function() {

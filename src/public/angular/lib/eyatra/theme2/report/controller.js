@@ -391,15 +391,30 @@ app.component('eyatraOutstationTripList', {
         $http.get(
             outstation_trip_filter_data_url
         ).then(function(response) {
+            // console.log(response.data);
             self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.start_date = response.data.manager_filter_start_date;
+            self.end_date = response.data.manager_filter_end_date;
+            self.filter_type_id = response.data.filter_type_id;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.manager_filter_start_date + ' to ' + response.data.manager_filter_end_date;
+            self.trip_periods = trip_periods;
 
             setTimeout(function() {
-                self.type_id = response.data.type_id;
-                $("#type_id").val(self.type_id);
+                $("#type_id").val(self.filter_type_id);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 $('#select').trigger('change');
                 dataTable.draw();
             }, 1500);
@@ -471,12 +486,10 @@ app.component('eyatraOutstationTripList', {
             });
         }, 1000);
         $scope.getTypeData = function(query) {
-            // alert(query);
             $('#type_id').val(query);
             dataTable.draw();
         }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
@@ -484,31 +497,42 @@ app.component('eyatraOutstationTripList', {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
-            dataTable.draw();
-        }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
-            $('#employee_id').val(-1);
-            $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            self.filter_employee_id = '-1';
+            self.filter_purpose_id = '-1';
+            self.filter_type_id = 3600;
+            $('#type_id').val(3600);
+            self.trip_periods = '';
+            $('#employee_id').val('-1');
+            $('#purpose_id').val('-1');
             $('#from_date').val('');
             $('#to_date').val('');
             dataTable.draw();
         }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
+
         $rootScope.loading = false;
 
     }
@@ -660,16 +684,29 @@ app.component('eyatraReportsLocalTripList', {
             self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.start_date = response.data.manager_filter_start_date;
+            self.end_date = response.data.manager_filter_end_date;
+            self.filter_type_id = response.data.filter_type_id;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.manager_filter_start_date + ' to ' + response.data.manager_filter_end_date;
+            self.trip_periods = trip_periods;
 
-            self.type_id = response.data.type_id;
             setTimeout(function() {
-                $("#type_id").val(self.type_id);
+                $("#type_id").val(self.filter_type_id);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 $('#select').trigger('change');
                 dataTable.draw();
             }, 1500);
-
             $rootScope.loading = false;
         });
 
@@ -730,19 +767,11 @@ app.component('eyatraReportsLocalTripList', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('div[data-provide = "datepicker"]').datepicker({
-                todayHighlight: true,
-                autoclose: true,
-            });
-        }, 1000);
         $scope.getTypeData = function(query) {
-            // alert(query);
             $('#type_id').val(query);
             dataTable.draw();
         }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
@@ -750,35 +779,45 @@ app.component('eyatraReportsLocalTripList', {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
-            dataTable.draw();
-        }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
-            $('#employee_id').val(-1);
-            $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            self.filter_employee_id = '-1';
+            self.filter_purpose_id = '-1';
+            self.filter_type_id = 3606;
+            $('#type_id').val(3606);
+            self.trip_periods = '';
+            $('#employee_id').val('-1');
+            $('#purpose_id').val('-1');
             $('#from_date').val('');
             $('#to_date').val('');
             dataTable.draw();
         }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
         $rootScope.loading = false;
 
     }
 });
+
 //LOCAL TRIP VIEW
 app.component('eyatraReportsLocalTripView', {
     templateUrl: eyatra_local_trip_view_template_url,
@@ -885,16 +924,23 @@ app.component('eyatraReportsTripAdvanceRequest', {
         $http.get(
             trip_advance_request_filter_data_url
         ).then(function(response) {
-            self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
-            self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.outlet_list = response.data.outlet_list;
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.financier_trip_start_date;
+            self.end_date = response.data.financier_trip_end_date;
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.financier_trip_start_date + ' to ' + response.data.financier_trip_end_date;
+            self.trip_periods = trip_periods;
 
             setTimeout(function() {
-                self.type_id = response.data.type_id;
-                $("#type_id").val(self.type_id);
-                $('#select').trigger('change');
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 dataTable.draw();
             }, 1500);
 
@@ -923,20 +969,16 @@ app.component('eyatraReportsTripAdvanceRequest', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.type_id = $('#type_id').val();
                     d.employee_id = $('#employee_id').val();
-                    d.purpose_id = $('#purpose_id').val();
-                    d.status_id = $('#status_id').val();
-                    d.period = $('#period').val();
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
+                    d.outlet_id = $('#outlet_id').val();
                 }
             },
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -959,55 +1001,84 @@ app.component('eyatraReportsTripAdvanceRequest', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('div[data-provide = "datepicker"]').datepicker({
-                todayHighlight: true,
-                autoclose: true,
-            });
-        }, 1000);
-        $scope.getTypeData = function(query) {
-            // alert(query);
-            $('#type_id').val(query);
-            dataTable.draw();
-        }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
-        $scope.getPurposeData = function(query) {
-            $('#purpose_id').val(query);
+
+        $scope.getType = function(query) {
+            $('#type_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
             dataTable.draw();
+            get_employees(outlet_id, status = 1);
         }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
+            $('#type_id').val(-1);
             $('#employee_id').val(-1);
-            $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            $('#outlet_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
-            dataTable.draw();
+            self.trip_periods = '';
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_type_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
         }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
+        }
+
         $rootScope.loading = false;
 
     }
 });
+
 //OUTSTATION TRIP SR MANAGER APPROVAL
 app.component('eyatraReportsTripSrManagerApproval', {
     templateUrl: eyatra_trip_sr_manager_approval_list_template_url,
@@ -1017,16 +1088,26 @@ app.component('eyatraReportsTripSrManagerApproval', {
         $http.get(
             trip_sr_manager_approval_filter_data_url
         ).then(function(response) {
-            self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.start_date = response.data.sr_mngr_filter_start_date;
+            self.end_date = response.data.sr_mngr_filter_end_date;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            var trip_periods = response.data.sr_mngr_filter_start_date + ' to ' + response.data.sr_mngr_filter_end_date;
+            self.trip_periods = trip_periods;
 
             setTimeout(function() {
-                self.type_id = response.data.type_id;
-                $("#type_id").val(self.type_id);
-                $('#select').trigger('change');
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 dataTable.draw();
             }, 1500);
 
@@ -1055,11 +1136,8 @@ app.component('eyatraReportsTripSrManagerApproval', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.type_id = $('#type_id').val();
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
-                    d.status_id = $('#status_id').val();
-                    d.period = $('#period').val();
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
                 }
@@ -1068,7 +1146,6 @@ app.component('eyatraReportsTripSrManagerApproval', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1091,55 +1168,54 @@ app.component('eyatraReportsTripSrManagerApproval', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('div[data-provide = "datepicker"]').datepicker({
-                todayHighlight: true,
-                autoclose: true,
-            });
-        }, 1000);
-        $scope.getTypeData = function(query) {
-            // alert(query);
-            $('#type_id').val(query);
-            dataTable.draw();
-        }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
+
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
-            dataTable.draw();
-        }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
-            $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            $('#employee_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
-            dataTable.draw();
+            self.trip_periods = '';
+            self.filter_purpose_id = '-1';
+            self.filter_employee_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
         }
         $rootScope.loading = false;
 
     }
 });
+
 //OUTSTATION TRIP Financier Approval
 app.component('eyatraReportsTripFinancierApproval', {
     templateUrl: eyatra_trip_financier_approval_list_template_url,
@@ -1200,7 +1276,6 @@ app.component('eyatraReportsTripFinancierApproval', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1272,6 +1347,7 @@ app.component('eyatraReportsTripFinancierApproval', {
 
     }
 });
+
 //OUTSTATION TRIP Financier PAID
 app.component('eyatraReportsTripFinancierPaid', {
     templateUrl: eyatra_trip_financier_paid_list_template_url,
@@ -1281,16 +1357,34 @@ app.component('eyatraReportsTripFinancierPaid', {
         $http.get(
             trip_financier_paid_filter_data_url
         ).then(function(response) {
-            self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.financier_paid_start_date;
+            self.end_date = response.data.financier_paid_end_date;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+            var trip_periods = response.data.financier_paid_start_date + ' to ' + response.data.financier_paid_end_date;
+            self.trip_periods = trip_periods;
 
             setTimeout(function() {
-                self.type_id = response.data.type_id;
-                $("#type_id").val(self.type_id);
-                $('#select').trigger('change');
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 dataTable.draw();
             }, 1500);
 
@@ -1319,11 +1413,9 @@ app.component('eyatraReportsTripFinancierPaid', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.type_id = $('#type_id').val();
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
-                    d.status_id = $('#status_id').val();
-                    d.period = $('#period').val();
+                    d.outlet_id = $('#outlet_id').val();
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
                 }
@@ -1332,7 +1424,6 @@ app.component('eyatraReportsTripFinancierPaid', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1355,55 +1446,83 @@ app.component('eyatraReportsTripFinancierPaid', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('div[data-provide = "datepicker"]').datepicker({
-                todayHighlight: true,
-                autoclose: true,
-            });
-        }, 1000);
-        $scope.getTypeData = function(query) {
-            // alert(query);
-            $('#type_id').val(query);
-            dataTable.draw();
-        }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
+
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
             dataTable.draw();
+            get_employees(outlet_id, status = 1);
         }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
-            $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
-            dataTable.draw();
+            self.trip_periods = '';
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_purpose_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
         }
         $rootScope.loading = false;
 
     }
 });
+
 //OUTSTATION TRIP Employee PAID
 app.component('eyatraReportsTripEmployeePaid', {
     templateUrl: eyatra_employee_paid_list_template_url,
@@ -1413,18 +1532,37 @@ app.component('eyatraReportsTripEmployeePaid', {
         $http.get(
             trip_employee_paid_filter_data_url
         ).then(function(response) {
-            self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.employee_paid_start_date;
+            self.end_date = response.data.employee_paid_end_date;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+            var trip_periods = response.data.employee_paid_start_date + ' to ' + response.data.employee_paid_end_date;
+            self.trip_periods = trip_periods;
 
             setTimeout(function() {
-                self.type_id = response.data.type_id;
-                $("#type_id").val(self.type_id);
-                $('#select').trigger('change');
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 dataTable.draw();
             }, 1500);
+
 
             $rootScope.loading = false;
         });
@@ -1451,11 +1589,9 @@ app.component('eyatraReportsTripEmployeePaid', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.type_id = $('#type_id').val();
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
-                    d.status_id = $('#status_id').val();
-                    d.period = $('#period').val();
+                    d.outlet_id = $('#outlet_id').val();
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
                 }
@@ -1464,7 +1600,6 @@ app.component('eyatraReportsTripEmployeePaid', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
-                //{ data: 'type', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'start_date', name: 'trips.start_date', searchable: true },
@@ -1487,55 +1622,83 @@ app.component('eyatraReportsTripEmployeePaid', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('div[data-provide = "datepicker"]').datepicker({
-                todayHighlight: true,
-                autoclose: true,
-            });
-        }, 1000);
-        $scope.getTypeData = function(query) {
-            // alert(query);
-            $('#type_id').val(query);
-            dataTable.draw();
-        }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
+
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
             dataTable.draw();
+            get_employees(outlet_id, status = 1);
         }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
-            $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
-            dataTable.draw();
+            self.trip_periods = '';
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_purpose_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
         }
         $rootScope.loading = false;
 
     }
 });
+
 //LOCAL TRIP Financier PAID
 app.component('eyatraReportsLocalTripFinancierPaid', {
     templateUrl: eyatra_local_trip_financier_paid_list_template_url,
@@ -1543,18 +1706,36 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
-            trip_financier_paid_filter_data_url
+            trip_trip_financier_paid_filter_data_url
         ).then(function(response) {
-            self.type_list = response.data.type_list;
             self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
-            self.type_id_value = response.data.type_id
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.financier_local_paid_start_date;
+            self.end_date = response.data.financier_local_paid_end_date;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+            var trip_periods = response.data.financier_local_paid_start_date + ' to ' + response.data.financier_local_paid_end_date;
+            self.trip_periods = trip_periods;
 
             setTimeout(function() {
-                self.type_id = response.data.type_id;
-                $("#type_id").val(self.type_id);
-                $('#select').trigger('change');
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
                 dataTable.draw();
             }, 1500);
 
@@ -1583,11 +1764,9 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
                 type: "GET",
                 dataType: "json",
                 data: function(d) {
-                    d.type_id = $('#type_id').val();
                     d.employee_id = $('#employee_id').val();
                     d.purpose_id = $('#purpose_id').val();
-                    d.status_id = $('#status_id').val();
-                    d.period = $('#period').val();
+                    d.outlet_id = $('#outlet_id').val();
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
                 }
@@ -1618,50 +1797,77 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
             d.style.left = x.left + 'px';
         }, 500);
 
-        setTimeout(function() {
-            $('div[data-provide = "datepicker"]').datepicker({
-                todayHighlight: true,
-                autoclose: true,
-            });
-        }, 1000);
-        $scope.getTypeData = function(query) {
-            // alert(query);
-            $('#type_id').val(query);
-            dataTable.draw();
-        }
         $scope.getEmployeeData = function(query) {
-            //alert(query);
             $('#employee_id').val(query);
             dataTable.draw();
         }
+
         $scope.getPurposeData = function(query) {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-        $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
             dataTable.draw();
+            get_employees(outlet_id, status = 1);
         }
-        $scope.getFromDateData = function(query) {
-            // console.log(query);
-            $('#from_date').val(query);
-            dataTable.draw();
-        }
-        $scope.getToDateData = function(query) {
-            // console.log(query);
-            $('#to_date').val(query);
-            dataTable.draw();
-        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
         $scope.reset_filter = function(query) {
-            self.type_id = self.type_id_value;
-            // alert(self.type_id_value);
-            $('#type_id').val(self.type_id_value);
-            $('#employee_id').val(-1);
             $('#purpose_id').val(-1);
-            $('#status_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
-            dataTable.draw();
+            self.trip_periods = '';
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_purpose_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
         }
         $rootScope.loading = false;
 
@@ -1697,7 +1903,7 @@ app.component('eyatraReportsPettyCashManager', {
         $http.get(
             eyatra_petty_cash_report_filter_data_url + '/' + self.type_id
         ).then(function(response) {
-            console.log(response.data);
+            // console.log(response.data);
             self.employee_list = response.data.employee_list;
             self.outlet_list = response.data.outlet_list;
             self.filter_type_id = response.data.filter_type_id;
@@ -2195,6 +2401,7 @@ app.component('eyatraReportsExpenseVoucherAdvanceRepaid', {
             $('#outlet_id').val(-1);
             $('#from_date').val('');
             $('#to_date').val('');
+            self.trip_periods = '';
             if (self.type_id == 3) {
                 get_employees(self.filter_outlet_id, status = 1);
             }
