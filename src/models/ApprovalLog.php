@@ -114,13 +114,13 @@ class ApprovalLog extends Model {
 	}
 
 	public static function getTripList($r, $approval_type_id) {
-		if (!empty($r->from_date)) {
+		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
 			$from_date = date('Y-m-d', strtotime($r->from_date));
 		} else {
 			$from_date = null;
 		}
 
-		if (!empty($r->to_date)) {
+		if (!empty($r->to_date) && $r->to_date != '<%$ctrl.end_date%>') {
 			$to_date = date('Y-m-d', strtotime($r->to_date));
 		} else {
 			$to_date = null;
@@ -129,6 +129,7 @@ class ApprovalLog extends Model {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->leftJoin('users', 'users.entity_id', 'e.id')
 			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'approval_logs.entity_id')
 			->select(
@@ -152,19 +153,21 @@ class ApprovalLog extends Model {
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
+
 			->where(function ($query) use ($r) {
-				if ($r->get('employee_id')) {
+				if ($r->get('employee_id') && $r->get('employee_id') != '<%$ctrl.filter_employee_id%>') {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
 				}
 			})
 			->where(function ($query) use ($r) {
-				if ($r->get('purpose_id')) {
-					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				if ($r->get('outlet_id') && $r->get('outlet_id') != '<%$ctrl.filter_outlet_id%>') {
+					$query->where("outlets.id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
 				}
 			})
+
 			->where(function ($query) use ($r) {
-				if ($r->get('status_id')) {
-					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+				if ($r->get('purpose_id') && $r->get('purpose_id') != '<%$ctrl.filter_purpose_id%>') {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
 				}
 			})
 
