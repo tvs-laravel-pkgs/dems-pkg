@@ -100,7 +100,6 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
-				$amount = $request->amount;
 				$advance_petty_cash = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->first();
 				if ($request->expense_amount) {
 					if ($advance_petty_cash->advance_amount > $advance_petty_cash->expense_amount) {

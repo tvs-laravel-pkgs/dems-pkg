@@ -104,6 +104,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
             $scope.showApproveLayout = false;
             $scope.showApproveModal = false;
+            self.amount = 0;
             console.log(self.expense_voucher_view.status_id);
             if (self.expense_voucher_view.status_id == '3462') {
                 self.type_id = 1;
@@ -117,6 +118,13 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                 } else {
                     self.type_id = 2;
                     $scope.showApproveLayout = true;
+                }
+                if (parseInt(self.expense_voucher_view.expense_amount) > parseInt(self.expense_voucher_view.advance_amount)) {
+                    self.amount = parseInt(self.expense_voucher_view.expense_amount) - parseInt(self.expense_voucher_view.advance_amount);
+                } else if (parseInt(self.expense_voucher_view.expense_amount) < parseInt(self.expense_voucher_view.advance_amount)) {
+                    self.amount = parseInt(self.expense_voucher_view.advance_amount) - parseInt(self.expense_voucher_view.expense_amount);
+                } else {
+                    self.amount = 0;
                 }
             } else {
                 self.type_id = 0;
