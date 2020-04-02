@@ -750,8 +750,8 @@ app.component('eyatraTripView', {
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                    for (var i in response.data.errors) {
+                        errors += '<li>' + response.data.errors[i] + '</li>';
                     }
                     $noty = new Noty({
                         type: 'error',
@@ -825,8 +825,8 @@ app.component('eyatraTripView', {
             ).then(function(response) {
                 if (!response.data.success) {
                     var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
+                    for (var i in response.data.errors) {
+                        errors += '<li>' + response.data.errors[i] + '</li>';
                     }
                     $noty = new Noty({
                         type: 'error',
