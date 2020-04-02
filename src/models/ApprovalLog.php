@@ -499,7 +499,7 @@ class ApprovalLog extends Model {
 				'users.name as ename',
 				'outlets.name as outlet_name',
 				'employees.code as ecode',
-				 DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as approval_date')
+				DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as approval_date')
 			)
 			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
 			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
@@ -509,6 +509,7 @@ class ApprovalLog extends Model {
 			->whereIn('approval_logs.approval_type_id', $approval_type_id)
 			->where('users.user_type_id', 3121)
 			->orderBy('approval_logs.id', 'desc')
+			->groupBy('approval_logs.entity_id')
 			->whereIn("approval_logs.type_id", [3585])
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id') && $r->get('employee_id') != '<%$ctrl.filter_employee_id%>') {
@@ -560,7 +561,7 @@ class ApprovalLog extends Model {
 				'users.name as ename',
 				'outlets.name as outlet_name',
 				'employees.code as ecode',
-				 DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as approval_date')
+				DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as approval_date')
 			)
 			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
 			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
