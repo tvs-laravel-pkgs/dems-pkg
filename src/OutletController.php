@@ -122,9 +122,17 @@ class OutletController extends Controller {
 			$this->data['amount_eligiblity'] = 'No';
 			$this->data['amount_approver'] = 'Cashier';
 			$this->data['success'] = true;
+			$this->data['lob_outlet']=$lobs=Lob::
+			where('company_id',Auth::user()->company_id)
+			->get()
+			;
+			$this->data['sbu_outlet'] = [];
+			
+
 		} else {
 			$this->data['action'] = 'Edit';
 			$outlet = Outlet::with('sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
+			//dd($outlet);
 			$outlet->cashier = $outlet->employee->user;
 			// $outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
 			// dd($outlet->cashier);
@@ -149,22 +157,75 @@ class OutletController extends Controller {
 			} else {
 				$this->data['amount_approver'] = 'Financier';
 			}
-			// dd($outlet->outletBudgets);
-			// $this->data['sbu_outlet'] = Sbu::select(
-			// 'name',
-			// 'id',
-			// )
-			// // ->whereIn('lob_id', $outlet->Sbu)
-			// ->get()
-			// ;
-			// foreach ($lob_outlet->sbus as $lob_sbu) {
-			// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;
-			// }
-			// foreach ($outlet->outletBudgets as $outlet_sbu) {
-			// $this->data['sbu_outlet'][$outlet_sbu->id]->checked = true;
-			// $this->data['sbu_outlet'][$outlet_sbu->id]->sbu_id = $outlet_sbu->pivot->sbu_id;
-			// $this->data['sbu_outlet'][$outlet_sbu->id]->amount = $outlet_sbu->pivot->amount;
-			// }
+			//dd($outlet->outletBudgets);
+			//$sbu_ids=$outlet->outletBudgets->groupBy('pivot_sbu_id')->pluck('pivot_sbu_id');
+			//dd($sbu_ids);
+			$this->data['lob_outlet']=$lobs=Lob::
+			where('company_id',Auth::user()->company_id)
+			->get()
+			;
+			$lob_ids=Lob::
+			where('company_id',Auth::user()->company_id)
+			->pluck('id')
+			;
+			$sbus= Sbu::whereIn('lob_id', $lob_ids)
+			->orderBy('id')
+			->get();
+			//Getting checked lob ids and unique values from that
+			$checked_lob_ids=[];
+			$ckecked_lob_ids_unique=[];
+			foreach ($outlet->outletBudgets as $key => $outlet_budget) {
+				$checked_lob_ids[]=$outlet_budget->lob_id;
+			}
+			$ckecked_lob_ids_unique=array_unique($checked_lob_ids);
+
+
+			$this->data['sbu_outlet'] = Sbu::select('name','id')
+			->whereIn('lob_id', $ckecked_lob_ids_unique)
+			->orderBy('id')
+			->get()
+			;
+			//Getting checked sbu ids and unique values from that
+			$checked_sbu_ids=[];
+			$ckecked_sbu_ids_unique=[];
+			foreach ($outlet->outletBudgets as $key => $outlet_budget) {
+				$checked_sbu_ids[]=$outlet_budget->id;
+			}
+			$ckecked_sbu_ids_unique=array_unique($checked_sbu_ids);
+			foreach ($lobs as $key => $lob) {
+					if(in_array($lob->id,$ckecked_lob_ids_unique)){
+						$this->data['lob_outlet'][$key]->checked = true;
+					}else{
+						$this->data['lob_outlet'][$key]->checked = false;
+					}
+			}
+
+			foreach ($this->data['sbu_outlet'] as $key1 => $sbu) {
+					if(in_array($sbu->id,$ckecked_sbu_ids_unique)){
+						//dump('true');
+						$outlet_budget=DB::table('outlet_budget')
+						->select('sbu_id',
+							'outstation_budget_amount',
+							'local_budget_amount'
+						)
+						->where('outlet_id',$outlet->id)
+						->where('sbu_id',$sbu->id)
+						->first();
+						$this->data['sbu_outlet'][$key1]->checked = true;
+						$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
+						$this->data['sbu_outlet'][$key1]->outstation_budget_amount = $outlet_budget->outstation_budget_amount > 0 ? $outlet_budget->outstation_budget_amount : '';
+						$this->data['sbu_outlet'][$key1]->local_budget_amount = $outlet_budget->local_budget_amount > 0 ?  $outlet_budget->local_budget_amount : '';
+
+					}else{
+						//dump('false');
+						$this->data['sbu_outlet'][$key1]->checked = false;
+						$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
+						$this->data['sbu_outlet'][$key1]->outstation_budget_amount = '';
+						$this->data['sbu_outlet'][$key1]->local_budget_amount = '';
+					}
+			
+			}
+
 		}
 		// dd(Auth::user()->company_id);
 		$lob_list = collect(Lob::select('name', 'id')->where('company_id', Auth::user()->company_id)->get());
@@ -179,13 +240,14 @@ class OutletController extends Controller {
 			'cashier_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
-		$this->data['sbu_outlet'] = [];
+		//$this->data['sbu_outlet'] = [];
 		// foreach ($lob_outlet->sbus as $lob_sbu) {
 		// $this->data['lob_outlet'][$lob_sbu->id]->checked = true;
 		// }
 		$this->data['outlet'] = $outlet;
 		$this->data['address'] = $outlet->address;
 		$this->data['success'] = true;
+		//dd($this->data);
 		//dd($outlet);
 		return response()->json($this->data);
 	}
@@ -258,7 +320,7 @@ class OutletController extends Controller {
 		return response()->json($cashier_list);
 	}
 	public function saveEYatraOutlet(Request $request) {
-		// dd($request->all());
+		//dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -339,21 +401,23 @@ class OutletController extends Controller {
 			$address->save();
 
 			//SAVING OUTLET BUDGET
-			// $sbu_ids = array_column($request->sbus, 'sbu_id');
+			$sbu_ids = array_column($request->sbus, 'sbu_id');
 
-			// if (count($request->sbus) > 0) {
-			// 	foreach ($request->sbus as $sbu) {
-			// 		if (!isset($sbu['sbu_id'])) {
-			// 			continue;
-			// 		}
-			// 		$outlet->outletBudgets()->attach($sbu['sbu_id'], [
-			// 			'amount' => isset($sbu['amount']) ? $sbu['amount'] : NULL,
-			// 		]);
-			// 	}
-			// }
+			if (count($request->sbus) > 0) {
+				$outlet->outletBudgets()->sync([]);
+				foreach ($request->sbus as $sbu) {
+					if (!isset($sbu['sbu_id'])) {
+						continue;
+					}
+					$outlet->outletBudgets()->attach(
+						$sbu['sbu_id'],
+					 ['outstation_budget_amount' => isset($sbu['outstation_budget_amount']) ? $sbu['outstation_budget_amount'] : 0,'local_budget_amount' => isset($sbu['local_budget_amount']) ? $sbu['local_budget_amount'] : 0]
+					);
+				}
+			}
 
 			DB::commit();
-			$request->session()->flash('success', 'outlet saved successfully!');
+			$request->session()->flash('success', 'Outlet saved successfully!');
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Outlet Added successfully']);
 			} else {

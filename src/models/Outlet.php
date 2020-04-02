@@ -43,6 +43,6 @@ class Outlet extends Model {
 		return $this->hasOne('Uitoux\EYatra\Address', 'entity_id')->where('address_of_id', 3160);
 	}
 	public function outletBudgets() {
-		return $this->belongsToMany('Uitoux\EYatra\Sbu', 'outlet_budget', 'outlet_id', 'sbu_id')->withPivot('amount');
+		return $this->belongsToMany('Uitoux\EYatra\Sbu', 'outlet_budget', 'outlet_id', 'sbu_id')->withPivot('outstation_budget_amount','local_budget_amount');
 	}
 }
