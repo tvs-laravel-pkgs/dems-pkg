@@ -769,6 +769,7 @@ class ReportController extends Controller {
 			})
 			->make(true);
 	}
+
 	// FINANCIER APPROVAL
 	public function eyatraTripFinancierApprovalFilterData() {
 		// dd(session('type_id'));
@@ -1181,10 +1182,12 @@ class ReportController extends Controller {
 			->make(true);
 
 	}
-		//EXPENSE VOUCHER ADVANCE FILTER DATA
+
+	//EXPENSE VOUCHER ADVANCE FILTER DATA
 	public function eyatraExpenseVoucherAdvanceFilterData($id) {
 		//dd($id);
-		if ($id == 1) { //Manager Filter Data
+		if ($id == 1) {
+			//Manager Filter Data
 			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 					->leftJoin('users', 'users.entity_id', 'employees.id')
 					->where('users.user_type_id', 3121)
@@ -1192,7 +1195,8 @@ class ReportController extends Controller {
 					->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		}
-		if ($id == 2) { //Cashier Filter Data
+		if ($id == 2) {
+			//Cashier Filter Data
 			$outlet_id = Employee::where('id', Auth::user()->entity_id)->pluck('outlet_id')->first();
 			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 					->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -1201,7 +1205,8 @@ class ReportController extends Controller {
 					->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		}
-		if ($id == 3) {	//Financier Filter Data
+		if ($id == 3) {
+			//Financier Filter Data
 			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 					->leftJoin('users', 'users.entity_id', 'employees.id')
 					->where('users.user_type_id', 3121)
@@ -1224,9 +1229,9 @@ class ReportController extends Controller {
 		$this->data['success'] = true;
 		return response()->json($this->data);
 	}
-//EXPENSE VOUCHER ADVANCE MANAGER
+	//EXPENSE VOUCHER ADVANCE MANAGER
 	public function eyatraExpenseVoucherAdvanceData(Request $r) {
-	//dd($r->all());
+		//dd($r->all());
 		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
 			session(['eva_employee_id' => $r->employee_id]);
 		}
@@ -1238,7 +1243,7 @@ class ReportController extends Controller {
 			Session::put('eva_end_date', $r->to_date);
 		}
 
-		if ($r->list_type == 1) {//manager
+		if ($r->list_type == 1) {
 			$approval_type_id = [3614, 3617];
 		} elseif ($r->list_type == 2) {
 			$approval_type_id = [3615, 3618];
@@ -1250,11 +1255,10 @@ class ReportController extends Controller {
 		$lists = ApprovalLog::getExpenseVoucherAdvanceList($r, $approval_type_id);
 		return Datatables::of($lists)
 			->addColumn('action', function ($list) {
-				 $type_id=1;
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				return '
-						<a href="#!/petty-cash/view/' . $type_id . '/' . $list->id . '">
+						<a href="#!/expense/voucher-advance/view/' . $list->id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
@@ -1262,10 +1266,11 @@ class ReportController extends Controller {
 			->make(true);
 
 	}
-		//EXPENSE VOUCHER ADVANCE REPAID FILTER DATA
+	//EXPENSE VOUCHER ADVANCE REPAID FILTER DATA
 	public function eyatraExpenseVoucherAdvanceRepaidFilterData($id) {
 		//dd($id);
-		if ($id == 1) { //Cashier Filter Data
+		if ($id == 1) {
+			//Cashier Filter Data
 			$outlet_id = Employee::where('id', Auth::user()->entity_id)->pluck('outlet_id')->first();
 			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 					->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -1274,7 +1279,8 @@ class ReportController extends Controller {
 					->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		}
-		if ($id == 2) {	//Financier Filter Data
+		if ($id == 2) {
+			//Financier Filter Data
 			$this->data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(employees.code, " / ", users.name) as name'), 'employees.id')
 					->leftJoin('users', 'users.entity_id', 'employees.id')
 					->where('users.user_type_id', 3121)
@@ -1299,7 +1305,7 @@ class ReportController extends Controller {
 	}
 	//EXPENSE VOUCHER ADVANCE REPAID
 	public function eyatraExpenseVoucherAdvanceRepaidData(Request $r) {
-	//dd($r->all());
+		//dd($r->all());
 		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
 			session(['eva_repaid_employee_id' => $r->employee_id]);
 		}
@@ -1310,16 +1316,18 @@ class ReportController extends Controller {
 			Session::put('eva_repaid_start_date', $r->from_date);
 			Session::put('eva_repaid_end_date', $r->to_date);
 		}
-		if ($r->list_type == 1) {//Cashier
+		if ($r->list_type == 1) {
+//Cashier
 			$approval_type_id = [3258];
-		} elseif ($r->list_type == 2) {//Financier
+		} elseif ($r->list_type == 2) {
+//Financier
 			$approval_type_id = [3258];
 		}
 		//dd($approval_type_id);
 		$lists = ApprovalLog::getExpenseVoucherAdvanceRepaidList($r, $approval_type_id);
 		return Datatables::of($lists)
 			->addColumn('action', function ($list) {
-				 $type_id=1;
+				$type_id = 1;
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				return '

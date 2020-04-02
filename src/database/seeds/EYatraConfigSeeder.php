@@ -411,7 +411,6 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 515,
 			],
 
-
 			//ADVANCE REQUEST APPROVAL STATUSES
 			3260 => [
 				'name' => 'Requested',
@@ -444,15 +443,15 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 517,
 			],
 			3273 => [
-				'name' => 'Employee Advance Approval',
+				'name' => 'Employee Advance Expense Request',
 				'config_type_id' => 517,
 			],
 			3274 => [
-				'name' => 'Employee Advance Claim',
+				'name' => 'Employee Advance Expense Claim',
 				'config_type_id' => 517,
 			],
 			3275 => [
-				'name' => 'Employee Advance Re-paid',
+				'name' => 'Employee Return Expense Amount',
 				'config_type_id' => 517,
 			],
 
@@ -730,11 +729,11 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 528,
 			],
 			3461 => [
-				'name' => 'Manager Approved', //ADVANCE APPROVE ID GOES TO CASHIER
+				'name' => 'Advance Payment pending from Cashier', //ADVANCE APPROVE ID GOES TO CASHIER
 				'config_type_id' => 528,
 			],
 			3462 => [
-				'name' => 'Manager  Approved', //ADVANCE APPROVE ID GOES TO FINACIER
+				'name' => 'Advance Payment pending from Financier', //ADVANCE APPROVE ID GOES TO FINACIER
 				'config_type_id' => 528,
 			],
 			3463 => [
@@ -755,11 +754,11 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 528,
 			],
 			3467 => [
-				'name' => 'Expense Manager Approved', //EXPENSE APPROVE ID GOES TO CASHIER
+				'name' => 'Waiting for Cashier Approval', //EXPENSE APPROVE ID GOES TO CASHIER
 				'config_type_id' => 528,
 			],
 			3468 => [
-				'name' => 'Expense Manager  Approved', //EXPENSE APPROVE ID GOES TO FINANCIER
+				'name' => 'Waiting for Financier Approval', //EXPENSE APPROVE ID GOES TO FINANCIER
 				'config_type_id' => 528,
 			],
 			3469 => [
@@ -767,11 +766,19 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 528,
 			],
 			3470 => [
-				'name' => 'Expense Claim Approved',
+				'name' => 'Paid',
 				'config_type_id' => 528,
 			],
 			3471 => [
 				'name' => 'Expense Claim Rejected',
+				'config_type_id' => 528,
+			],
+			3472 => [
+				'name' => 'Payment Pending from Employee',
+				'config_type_id' => 528,
+			],
+			3473 => [
+				'name' => 'Employee Return Expense Amount',
 				'config_type_id' => 528,
 			],
 

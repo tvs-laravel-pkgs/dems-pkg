@@ -65,7 +65,7 @@ class Trip extends Model {
 	}
 
 	public function visits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->whereNotIn('booking_status_id', [3062, 3064])->orderBy('id');
+		return $this->hasMany('Uitoux\EYatra\Visit')->whereNotIn('booking_status_id', [3064])->whereNotIn('status_id', [3229])->orderBy('id');
 	}
 
 	public function selfVisits() {
@@ -231,38 +231,45 @@ class Trip extends Model {
 					if ($visit_data['id']) {
 						$old_visit = Visit::find($visit_data['id']);
 						//dump('old_visit id :'.$old_visit->id);
-						if ($visit_data['booking_method_name'] == 'Agent') {
+						// if ($visit_data['booking_method_name'] == 'Agent') {
 
-							//check visit booked or not
-							$old_visit_booked = Visit::where('id', $visit_data['id'])
-								->where('booking_status_id', 3061) //Booked
+						//check visit booked or not
+						$old_visit_booked = Visit::where('id', $visit_data['id'])
+							->where('booking_status_id', 3061) //Booked
+							->first();
+
+						// dd($old_visit_booked);
+						//dump('old_visit_booked :'.$old_visit_booked->id);
+						if ($old_visit_booked) {
+							$old_visit_detail_check = Visit::where('id', $visit_data['id'])
+								->where('from_city_id', $visit_data['from_city_id'])
+								->where('to_city_id', $visit_data['to_city_id'])
+								->where('travel_mode_id', $visit_data['travel_mode_id'])
+								->where('booking_method_id', $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042)
+								->whereDate('departure_date', date('Y-m-d', strtotime($visit_data['date'])))
 								->first();
-
-							// dd($old_visit_booked);
-							//dump('old_visit_booked :'.$old_visit_booked->id);
-							if ($old_visit_booked) {
-								$old_visit_detail_check = Visit::where('id', $visit_data['id'])
-									->where('from_city_id', $visit_data['from_city_id'])
-									->where('to_city_id', $visit_data['to_city_id'])
-									->where('travel_mode_id', $visit_data['travel_mode_id'])
-									->whereDate('departure_date', date('Y-m-d', strtotime($visit_data['date'])))
-									->first();
-								if ($old_visit_detail_check) {
-									$visit = $old_visit;
-								} else {
-									$old_visit->booking_status_id = 3064; //Visit Rescheduled
-									$old_visit->status_id = 3229; //Visit Rescheduled
-									$old_visit->save();
-									$visit = new Visit;
-								}
-							} else {
+							if ($old_visit_detail_check) {
 								$visit = $old_visit;
+							} else {
+								$old_visit->booking_status_id = 3061; //Visit Rescheduled
+								$old_visit->status_id = 3229; //Visit Rescheduled
+								$old_visit->save();
+								$visit = new Visit;
+								$visit->booking_status_id = 3060; //PENDING
+								$visit->status_id = 3220; //NEW
+								$visit->manager_verification_status_id = 3080; //NEW
 							}
 						} else {
-							//Booking Method Self
 							$visit = $old_visit;
+							$visit->booking_status_id = 3060; //PENDING
+							$visit->status_id = 3220; //NEW
+							$visit->manager_verification_status_id = 3080; //NEW
 						}
-						//dd($visit);
+						// } else {
+						// 	//Booking Method Self
+						// 	$visit = $old_visit;
+						// }
+						// dd($visit);
 					} else {
 						$visit = new Visit;
 						$visit->booking_status_id = 3060; //PENDING
@@ -829,11 +836,10 @@ class Trip extends Model {
 	// }
 
 	public static function deleteTrip($trip_id) {
-
 		//CHECK IF AGENT BOOKED TRIP VISITS
 		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
 		if ($agent_visits_booked) {
-			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted! Agent Booked visit! Request Agent for Cancelled Ticket']]);
 		}
 		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
 		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022, 3032])->first();
@@ -845,13 +851,15 @@ class Trip extends Model {
 		if ($status_exist) {
 			return response()->json(['success' => false, 'errors' => ['Trip advance amount request approved so this trip cannot be deleted']]);
 		}
-
 		$trip = Trip::where('id', $trip_id)->first();
-
 		$activity['entity_id'] = $trip->id;
-		$trip = $trip->forceDelete();
 
-		//$trip = Trip::where('id', $trip_id)->forceDelete();
+		$agent_visits = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->whereIn('booking_status_id', [3061, 3062])->first();
+		if ($agent_visits) {
+			$trip = Trip::where('id', $trip_id)->update(['status_id' => 3032]);
+		} else {
+			$trip = Trip::where('id', $trip_id)->forceDelete();
+		}
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = 'Trip is Deleted';
 		$activity['activity'] = "delete";
@@ -867,10 +875,13 @@ class Trip extends Model {
 	}
 
 	public static function cancelTrip($trip_id) {
-
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$agent_visits_booked = Visit::where('trip_id', $trip->id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+		if ($agent_visits_booked) {
+			return response()->json(['success' => false, 'errors' => ['Trip Cannot be Cancelled! Agent Booked visit! Request Agent for Cancelled Ticket']]);
 		}
 
 		$trip->status_id = 3032;
@@ -892,16 +903,23 @@ class Trip extends Model {
 		if ($visit_id) {
 			$visit = Visit::where('id', $visit_id)->first();
 
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			if ($agent_visits_booked) {
+				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
+			}
+
 			//Total Visit on this Trip
 			$total_visits = Visit::where('trip_id', $visit->trip_id)->count();
 			if ($total_visits > 1) {
 				//Check Agent booking or not
-				$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
-				if ($agent_visits_booked) {
-					return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
-				}
 				$activity['entity_id'] = $visit_id;
-				$visit = $visit->forceDelete();
+				$agent_visits = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->whereIn('booking_status_id', [3061, 3062])->first();
+				if ($agent_visits) {
+					$visit->status_id = 3062; // Visit cancelled
+					$visit->save();
+				} else {
+					$visit = $visit->forceDelete();
+				}
 				$activity['entity_type'] = 'visit';
 				$activity['details'] = 'Visit is Deleted';
 				$activity['activity'] = "delete";
@@ -909,7 +927,12 @@ class Trip extends Model {
 				$activity_log = ActivityLog::saveLog($activity);
 				return response()->json(['success' => true, 'message' => 'Visit Deleted successfully!']);
 			} else {
-				$trip = Trip::where('id', $visit->trip_id)->forceDelete();
+				$agent_visits = Visit::where('trip_id', $visit->trip_id)->where('booking_method_id', 3042)->whereIn('booking_status_id', [3061, 3062])->first();
+				if ($agent_visits) {
+					$trip = Trip::where('id', $visit->trip_id)->update(['status_id' => 3032]);
+				} else {
+					$trip = Trip::where('id', $visit->trip_id)->forceDelete();
+				}
 				return response()->json(['success' => true, 'message' => 'Trip Deleted successfully!']);
 			}
 		} else {
@@ -920,17 +943,17 @@ class Trip extends Model {
 	public static function cancelTripVisit($visit_id) {
 		if ($visit_id) {
 			$visit = Visit::where('id', $visit_id)->first();
-
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			if ($agent_visits_booked) {
+				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
+			}
 			//Total Visit on this Trip
 			$total_visits = Visit::where('trip_id', $visit->trip_id)->count();
 			if ($total_visits > 1) {
 				//Check Agent booking or not
-				$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
-				if ($agent_visits_booked) {
-					return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
-				}
 				$activity['entity_id'] = $visit_id;
 				$visit->booking_status_id = 3062; // Booking cancelled
+				$visit->status_id = 3062; // Visit cancelled
 				$visit->save();
 				$activity['entity_type'] = 'visit';
 				$activity['details'] = 'Visit is Cancelled';

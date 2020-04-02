@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
+use Validator;
 use Yajra\Datatables\Datatables;
 
 class ExpenseVoucherAdvanceVerification2Controller extends Controller {
@@ -95,25 +96,53 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 	}
 
 	public function expenseVoucherVerification2Save(Request $request) {
-		 //dd($request->all());
+		// dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
+				$advance_petty_cash = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->first();
 				if ($request->expense_amount) {
-					//Expense Claim Approve
-					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3470, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					if ($advance_petty_cash->advance_amount > $advance_petty_cash->expense_amount) {
+						$advance_petty_cash->status_id = 3472;
+					} elseif ($advance_petty_cash->advance_amount < $advance_petty_cash->expense_amount) {
+						$advance_petty_cash->status_id = 3470;
+					} else {
+						$advance_petty_cash->status_id = 3470;
+					}
 				} else {
-					//Advance Amount Approve
-					$expence_voucher_cashier_approve = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->update(['status_id' => 3464, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
+					$advance_petty_cash->status_id = 3464;
 				}
-				if(isset($request->type_id) && $request->type_id > 0){
-					if($expence_voucher_cashier_approve){
+				$advance_petty_cash->remarks = NULL;
+				$advance_petty_cash->rejection_id = NULL;
+				$advance_petty_cash->updated_at = Carbon::now();
+				$advance_petty_cash->updated_by = Auth::user()->id;
+				$advance_petty_cash->save();
+
+				if (isset($request->type_id) && $request->type_id > 0) {
+					if ($advance_petty_cash) {
+
+						$error_messages = [
+							'reference_number.unique' => "Reference Number is already taken",
+						];
+
+						$validator = Validator::make($request->all(), [
+							'reference_number' => [
+								'required:true',
+								'unique:payments,reference_number',
+
+							],
+						], $error_messages);
+
+						if ($validator->fails()) {
+							return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+						}
+
 						$employee = Employee::where('id', $request->employee_id)->first();
-								//Check Outlet have reimpursement amount or not
+						//Check Outlet have reimpursement amount or not
 						$outlet_reimbursement_amount = Outlet::where('id', $employee->outlet_id)->pluck('reimbursement_amount')->first();
 						if ($outlet_reimbursement_amount > 0) {
 							//Reimbursement Transaction
-							$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
+							$previous_balance_amount = ReimbursementTranscation::where('outlet_id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
 							// dd($previous_balance_amount);
 							if ($previous_balance_amount) {
 								$balance_amount = $previous_balance_amount - $request->amount;
@@ -133,10 +162,8 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 								$reimbursementtranscation->amount = $request->amount;
 								$reimbursementtranscation->balance_amount = $balance_amount;
 								$reimbursementtranscation->save();
-								$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
-								//doubt
 								//Outlet
-								$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
+								$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
 							} else {
 								//dd(Auth::user()->entity->outlet_id);
 								$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
@@ -165,12 +192,13 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 								}
 							}
 							//PAYMENT SAVE
-							if ($request->type_id == 1) {//Advance Approval
+							if ($request->type_id == 1) {
+								//Advance Approval
 								$payment = Payment::firstOrNew(['entity_id' => $request->id, 'payment_of_id' => 3256, 'payment_mode_id' => $request->payment_mode_id]);
 								$payment->fill($request->all());
 								$payment->date = date('Y-m-d', strtotime($request->date));
-								$payment->payment_of_id = 3256;//Employee Petty Cash Advance Expense Request
-								$payment->payment_mode_id = 3244;//BANK
+								$payment->payment_of_id = 3256; //Employee Petty Cash Advance Expense Request
+								$payment->payment_mode_id = 3244; //BANK
 								$payment->created_by = Auth::user()->id;
 								$payment->save();
 								$activity['entity_id'] = $request->id;
@@ -178,12 +206,13 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 								$activity['details'] = "Advance Expense Approved";
 								$activity['activity'] = "claim";
 								$activity_log = ActivityLog::saveLog($activity);
-							} elseif ($request->type_id == 2) {//Expense Approval
+							} elseif ($request->type_id == 2) {
+								//Expense Approval
 								$payment = Payment::firstOrNew(['entity_id' => $request->id, 'payment_of_id' => 3257, 'payment_mode_id' => $request->payment_mode_id]);
 								$payment->fill($request->all());
 								$payment->date = date('Y-m-d', strtotime($request->date));
-								$payment->payment_of_id = 3257;//Employee Petty Cash Advance Expense Claim
-								$payment->payment_mode_id = 3244;//BANK
+								$payment->payment_of_id = 3257; //Employee Petty Cash Advance Expense Claim
+								$payment->payment_mode_id = 3244; //BANK
 								$payment->created_by = Auth::user()->id;
 								$payment->save();
 								$activity['entity_id'] = $request->id;
@@ -194,8 +223,8 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 							}
 							//Approval Log
 							if ($request->type_id == 1) {
-								$type = 3585;//Advance Expenses
-								$approval_type_id = 3615;//Advance Expenses Request - Cashier Approved
+								$type = 3585; //Advance Expenses
+								$approval_type_id = 3615; //Advance Expenses Request - Cashier Approved
 							} else {
 								$type = 3585;
 								$approval_type_id = 3618; //Advance Expenses Claim - Cashier Approved
@@ -209,7 +238,7 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 
 					}
 				}
-				
+
 			} else {
 				if ($request->expense_amount) {
 					$expence_voucher_cashier_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3471, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);

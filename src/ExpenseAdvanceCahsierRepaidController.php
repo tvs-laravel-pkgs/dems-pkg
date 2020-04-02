@@ -3,18 +3,17 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Storage;
-use Carbon\Carbon;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
-use Validator;
+use Uitoux\EYatra\Outlet;
+use Uitoux\EYatra\ReimbursementTranscation;
 use Yajra\Datatables\Datatables;
 
 class ExpenseAdvanceCahsierRepaidController extends Controller {
-public function listExpenseVoucherCashierRepaidList(Request $r) {
-	//dd(Auth::user()->entity->outlet->id);
+	public function listExpenseVoucherCashierRepaidList(Request $r) {
 		$expense_voucher_requests = ExpenseVoucherAdvanceRequest::select(
 			'expense_voucher_advance_requests.id',
 			'expense_voucher_advance_requests.employee_id',
@@ -33,11 +32,11 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 			->join('users', 'users.entity_id', 'employees.id')
 			->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
-			->whereIn('expense_voucher_advance_requests.status_id', [3470])
-			->where('expense_voucher_advance_requests.balance_amount', '>',0)
+			->whereIn('expense_voucher_advance_requests.status_id', [3472])
+			->where('expense_voucher_advance_requests.balance_amount', '>', 0)
 			->whereNotNull('expense_voucher_advance_requests.balance_amount')
 			->where('users.user_type_id', 3121)
-			->where('employees.outlet_id', Auth::user()->entity->outlet->id)
+			->where('outlets.cashier_id', Auth::user()->entity_id)
 			->orderBy('expense_voucher_advance_requests.id', 'desc')
 			->where(function ($query) use ($r) {
 				if (!empty($r->employee_id)) {
@@ -52,7 +51,7 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 		;
 		// dd($expense_voucher_requests->get());
 		return Datatables::of($expense_voucher_requests)
-		->addColumn('checkbox', function ($expense_voucher_requests) {
+			->addColumn('checkbox', function ($expense_voucher_requests) {
 				return '<input id="employee_claim_' . $expense_voucher_requests->id . '" type="checkbox" class="check-bottom-layer employee_claim_list " name="employee_claim_list"  value="' . $expense_voucher_requests->id . '" data-trip_id="' . $expense_voucher_requests->trip_id . '" >
 				<label for="employee_claim_' . $expense_voucher_requests->id . '"></label>';
 			})
@@ -72,7 +71,6 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 			})
 			->make(true);
 	}
-	
 
 	public function ExpenseVoucherAdvanceCashierRepaidFilterData() {
 		//$list_of_status = array_merge(Config::ExpenseVoucherAdvanceStatus(), Config::ExpenseVoucherAdvanceStatusList());
@@ -82,7 +80,7 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 
 		return response()->json($this->data);
 	}
-	
+
 	public function ExpenseVoucherAdvanceCashierRepaidView($id) {
 		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
 			'employees.code',
@@ -109,7 +107,7 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 		return response()->json($this->data);
 
 	}
-	public function expenseVoucherCashierSingleRepaidApprove(Request $request){
+	public function expenseVoucherCashierSingleRepaidApprove(Request $request) {
 		//dd($request->all());
 		DB::beginTransaction();
 		try {
@@ -118,9 +116,33 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 			} else {
 				return back()->with('error', 'Expense Voucher Advance not found');
 			}
-			$expense_voucher_advance = ExpenseVoucherAdvanceRequest::where('id', $employee_expense_voucher_id)->update(['status_id' => 3275]);
-			if($expense_voucher_advance){
-				//Approval Log Save
+			$expense_voucher_advance = ExpenseVoucherAdvanceRequest::where('id', $employee_expense_voucher_id)->first();
+			$expense_voucher_advance->status_id = 3473;
+			$expense_voucher_advance->save();
+			$outlet_id = $expense_voucher_advance->employee->outlet_id;
+
+			$outlet = Outlet::where('id', $outlet_id)->where('company_id', Auth::user()->company_id)->first();
+
+			$reimbursement_amount = $outlet ? $outlet->reimbursement_amount > 0 ? $outlet->reimbursement_amount : 0 : 0;
+			$balance_amount = $reimbursement_amount + $expense_voucher_advance->balance_amount;
+
+			$reimbursementtranscation = new ReimbursementTranscation;
+			$reimbursementtranscation->outlet_id = $outlet->id;
+			$reimbursementtranscation->company_id = Auth::user()->company_id;
+			$reimbursementtranscation->transcation_id = 3275;
+			$reimbursementtranscation->transcation_type = 3275;
+			$reimbursementtranscation->transaction_date = Carbon::now();
+			$reimbursementtranscation->petty_cash_id = $request->id;
+			$reimbursementtranscation->amount = $expense_voucher_advance->balance_amount;
+			$reimbursementtranscation->balance_amount = $balance_amount;
+			$reimbursementtranscation->save();
+
+			$outlet->reimbursement_amount = $balance_amount;
+			$outlet->updated_at = Carbon::now();
+			$outlet->save();
+
+			//Approval Log Save
+			if ($expense_voucher_advance) {
 				ApprovalLog::saveApprovalLog(3585, $employee_expense_voucher_id, 3258, Auth::user()->entity_id, Carbon::now());
 			}
 			DB::commit();
@@ -139,11 +161,38 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 			} else {
 				return back()->with('error', 'Expense Voucher Advance not found');
 			}
-			$expense_voucher_advance = ExpenseVoucherAdvanceRequest::whereIn('id', $employee_expense_voucher_ids)->update(['status_id' => 3275]);
 			//Approval Log Save For Multiple Trips
 			if (count($employee_expense_voucher_ids) > 0) {
 				foreach ($employee_expense_voucher_ids as $key => $employee_expense_voucher_id) {
-					ApprovalLog::saveApprovalLog(3585, $employee_expense_voucher_id, 3258, Auth::user()->entity_id, Carbon::now());
+					$expense_voucher_advance = ExpenseVoucherAdvanceRequest::where('id', $employee_expense_voucher_id)->first();
+					$expense_voucher_advance->status_id = 3473;
+					$expense_voucher_advance->save();
+					$outlet_id = $expense_voucher_advance->employee->outlet_id;
+
+					$outlet = Outlet::where('id', $outlet_id)->where('company_id', Auth::user()->company_id)->first();
+
+					$reimbursement_amount = $outlet ? $outlet->reimbursement_amount > 0 ? $outlet->reimbursement_amount : 0 : 0;
+					$balance_amount = $reimbursement_amount + $expense_voucher_advance->balance_amount;
+
+					$reimbursementtranscation = new ReimbursementTranscation;
+					$reimbursementtranscation->outlet_id = $outlet->id;
+					$reimbursementtranscation->company_id = Auth::user()->company_id;
+					$reimbursementtranscation->transcation_id = 3275;
+					$reimbursementtranscation->transcation_type = 3275;
+					$reimbursementtranscation->transaction_date = Carbon::now();
+					$reimbursementtranscation->petty_cash_id = $request->id;
+					$reimbursementtranscation->amount = $expense_voucher_advance->balance_amount;
+					$reimbursementtranscation->balance_amount = $balance_amount;
+					$reimbursementtranscation->save();
+
+					$outlet->reimbursement_amount = $balance_amount;
+					$outlet->updated_at = Carbon::now();
+					$outlet->save();
+
+					//Approval Log Save
+					if ($expense_voucher_advance) {
+						ApprovalLog::saveApprovalLog(3585, $employee_expense_voucher_id, 3258, Auth::user()->entity_id, Carbon::now());
+					}
 				}
 			}
 			DB::commit();
@@ -153,5 +202,4 @@ public function listExpenseVoucherCashierRepaidList(Request $r) {
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}
 	}
-	
 }
