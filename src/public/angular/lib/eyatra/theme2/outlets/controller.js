@@ -650,7 +650,8 @@ app.component('eyatraOutletView', {
 
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
-            self.amount = response.data.amount;
+            self.local_budget_amount = response.data.local_budget_amount;
+            self.outstation_budget_amount = response.data.outstation_budget_amount;
             self.action = response.data.action;
             if (self.outlet.claim_req_approver == 0) {
                 self.claim_req_approver = 'Financier';

@@ -75,9 +75,7 @@ class OutletController extends Controller {
 				}
 			})
 			->groupBy('outlets.id');
-		// if (!Entrust::can('view-all-trips')) {
-		// $trips->where('trips.employee_id', Auth::user()->entity_id);
-		// }
+
 		return Datatables::of($outlets)
 			->addColumn('action', function ($outlet) {
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
@@ -122,12 +120,11 @@ class OutletController extends Controller {
 			$this->data['amount_eligiblity'] = 'No';
 			$this->data['amount_approver'] = 'Cashier';
 			$this->data['success'] = true;
-			$this->data['lob_outlet']=$lobs=Lob::
-			where('company_id',Auth::user()->company_id)
-			->get()
+			$this->data['lob_outlet'] = $lobs = Lob::
+				where('company_id', Auth::user()->company_id)
+				->get()
 			;
 			$this->data['sbu_outlet'] = [];
-			
 
 		} else {
 			$this->data['action'] = 'Edit';
@@ -160,70 +157,69 @@ class OutletController extends Controller {
 			//dd($outlet->outletBudgets);
 			//$sbu_ids=$outlet->outletBudgets->groupBy('pivot_sbu_id')->pluck('pivot_sbu_id');
 			//dd($sbu_ids);
-			$this->data['lob_outlet']=$lobs=Lob::
-			where('company_id',Auth::user()->company_id)
-			->get()
+			$this->data['lob_outlet'] = $lobs = Lob::
+				where('company_id', Auth::user()->company_id)
+				->get()
 			;
-			$lob_ids=Lob::
-			where('company_id',Auth::user()->company_id)
-			->pluck('id')
+			$lob_ids = Lob::
+				where('company_id', Auth::user()->company_id)
+				->pluck('id')
 			;
-			$sbus= Sbu::whereIn('lob_id', $lob_ids)
-			->orderBy('id')
-			->get();
+			$sbus = Sbu::whereIn('lob_id', $lob_ids)
+				->orderBy('id')
+				->get();
 			//Getting checked lob ids and unique values from that
-			$checked_lob_ids=[];
-			$ckecked_lob_ids_unique=[];
+			$checked_lob_ids = [];
+			$ckecked_lob_ids_unique = [];
 			foreach ($outlet->outletBudgets as $key => $outlet_budget) {
-				$checked_lob_ids[]=$outlet_budget->lob_id;
+				$checked_lob_ids[] = $outlet_budget->lob_id;
 			}
-			$ckecked_lob_ids_unique=array_unique($checked_lob_ids);
+			$ckecked_lob_ids_unique = array_unique($checked_lob_ids);
 
-
-			$this->data['sbu_outlet'] = Sbu::select('name','id')
-			->whereIn('lob_id', $ckecked_lob_ids_unique)
-			->orderBy('id')
-			->get()
+			$this->data['sbu_outlet'] = Sbu::select('name', 'id')
+				->whereIn('lob_id', $ckecked_lob_ids_unique)
+				->orderBy('id')
+				->get()
 			;
 			//Getting checked sbu ids and unique values from that
-			$checked_sbu_ids=[];
-			$ckecked_sbu_ids_unique=[];
+			$checked_sbu_ids = [];
+			$ckecked_sbu_ids_unique = [];
 			foreach ($outlet->outletBudgets as $key => $outlet_budget) {
-				$checked_sbu_ids[]=$outlet_budget->id;
+				$checked_sbu_ids[] = $outlet_budget->id;
 			}
-			$ckecked_sbu_ids_unique=array_unique($checked_sbu_ids);
+			$ckecked_sbu_ids_unique = array_unique($checked_sbu_ids);
 			foreach ($lobs as $key => $lob) {
-					if(in_array($lob->id,$ckecked_lob_ids_unique)){
-						$this->data['lob_outlet'][$key]->checked = true;
-					}else{
-						$this->data['lob_outlet'][$key]->checked = false;
-					}
+				if (in_array($lob->id, $ckecked_lob_ids_unique)) {
+					$this->data['lob_outlet'][$key]->checked = true;
+				} else {
+					$this->data['lob_outlet'][$key]->checked = false;
+				}
 			}
 
 			foreach ($this->data['sbu_outlet'] as $key1 => $sbu) {
-					if(in_array($sbu->id,$ckecked_sbu_ids_unique)){
-						//dump('true');
-						$outlet_budget=DB::table('outlet_budget')
+				if (in_array($sbu->id, $ckecked_sbu_ids_unique)) {
+					//dump('true');
+					$outlet_budget = DB::table('outlet_budget')
 						->select('sbu_id',
 							'outstation_budget_amount',
 							'local_budget_amount'
 						)
-						->where('outlet_id',$outlet->id)
-						->where('sbu_id',$sbu->id)
+						->where('outlet_id', $outlet->id)
+						->where('sbu_id', $sbu->id)
 						->first();
-						$this->data['sbu_outlet'][$key1]->checked = true;
-						$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
-						$this->data['sbu_outlet'][$key1]->outstation_budget_amount = $outlet_budget->outstation_budget_amount > 0 ? $outlet_budget->outstation_budget_amount : '';
-						$this->data['sbu_outlet'][$key1]->local_budget_amount = $outlet_budget->local_budget_amount > 0 ?  $outlet_budget->local_budget_amount : '';
+					$this->data['sbu_outlet'][$key1]->checked = true;
+					$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
+					$this->data['sbu_outlet'][$key1]->outstation_budget_amount = $outlet_budget->outstation_budget_amount > 0 ? $outlet_budget->outstation_budget_amount : '';
+					$this->data['sbu_outlet'][$key1]->local_budget_amount = $outlet_budget->local_budget_amount > 0 ? $outlet_budget->local_budget_amount : '';
 
-					}else{
-						//dump('false');
-						$this->data['sbu_outlet'][$key1]->checked = false;
-						$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
-						$this->data['sbu_outlet'][$key1]->outstation_budget_amount = '';
-						$this->data['sbu_outlet'][$key1]->local_budget_amount = '';
-					}
-			
+				} else {
+					//dump('false');
+					$this->data['sbu_outlet'][$key1]->checked = false;
+					$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
+					$this->data['sbu_outlet'][$key1]->outstation_budget_amount = '';
+					$this->data['sbu_outlet'][$key1]->local_budget_amount = '';
+				}
+
 			}
 
 		}
@@ -411,7 +407,7 @@ class OutletController extends Controller {
 					}
 					$outlet->outletBudgets()->attach(
 						$sbu['sbu_id'],
-					 ['outstation_budget_amount' => isset($sbu['outstation_budget_amount']) ? $sbu['outstation_budget_amount'] : 0,'local_budget_amount' => isset($sbu['local_budget_amount']) ? $sbu['local_budget_amount'] : 0]
+						['outstation_budget_amount' => isset($sbu['outstation_budget_amount']) ? $sbu['outstation_budget_amount'] : 0, 'local_budget_amount' => isset($sbu['local_budget_amount']) ? $sbu['local_budget_amount'] : 0]
 					);
 				}
 			}
@@ -443,14 +439,17 @@ class OutletController extends Controller {
 		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
-		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(amount,2,"en_IN") as amount'))->where('outlet_budget.outlet_id', $outlet_id)
+		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'), DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('outlet_budget.outlet_id', $outlet_id)
 
 			->leftJoin('sbus', 'sbus.id', 'outlet_budget.sbu_id')
 			->leftJoin('lobs', 'lobs.id', 'sbus.lob_id')
 			->get()->toArray();
 		$this->data['lob_name'] = $lob_name = array_column($outlet_budget, 'lob_name');
 		$this->data['sbu_name'] = $sbu_name = array_column($outlet_budget, 'sbu_name');
-		$this->data['amount'] = $amount = array_column($outlet_budget, 'amount');
+		$this->data['outstation_budget_amount'] = $outstation_budget_amount = array_column($outlet_budget, 'outstation_budget_amount');
+		$this->data['local_budget_amount'] = $local_budget_amount = array_column($outlet_budget, 'local_budget_amount');
+
+		// dd($amount);
 		if (!$outlet) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Outlet not found'];
