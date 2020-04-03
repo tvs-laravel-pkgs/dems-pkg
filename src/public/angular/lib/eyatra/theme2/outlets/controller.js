@@ -394,14 +394,28 @@ app.component('eyatraOutletForm', {
                 $('.sbucheckbox').prop('checked', true);
                 $.each($('.sbucheckbox:checked'), function() {
                     $scope.getamountonSbu($(this).val());
-                    $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).removeClass('ng-hide');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).removeClass('ng-hide');
+
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).addClass('error');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).addClass('error');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).addClass('required');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).addClass('required');
                 });
             } else {
                 $('.sbucheckbox').prop('checked', false);
                 $.each($('.sbucheckbox'), function() {
-                    $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide');
-                    $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('error');
-                    $('.sbu_table tbody tr #amount' + $(this).val()).closest('.form-group').find('label.error').remove();
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).addClass('ng-hide');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).removeClass('error');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).removeClass('required');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).closest('.form-group').find('label.error').remove();
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).val('');
+
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).addClass('ng-hide');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).removeClass('error');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).removeClass('required');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).closest('.form-group').find('label.error').remove();
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).val('');
                 });
             }
         });
@@ -418,14 +432,14 @@ app.component('eyatraOutletForm', {
                 $("#outstation_budget_amount" + id).removeClass('required');
                 $("#outstation_budget_amount" + id).removeClass('error');
                 $("#outstation_budget_amount" + id).closest('.form-group').find('label.error').remove();
+                $("#outstation_budget_amount" + id).val('');
+
 
                 $("#local_budget_amount" + id).addClass('ng-hide');
                 $("#local_budget_amount" + id).removeClass('required');
                 $("#local_budget_amount" + id).removeClass('error');
                 $("#local_budget_amount" + id).closest('.form-group').find('label.error').remove();
-
-                // $('.sbu_table tbody tr  #amount' + $(this).val()).remove(
-                // 'label');
+                $("#local_budget_amount" + id).val('');
             }
         }
 
@@ -592,7 +606,14 @@ app.component('eyatraOutletForm', {
                  }
              },*/
             submitHandler: function(form) {
-
+                var sub_business_check = $('.sbucheckbox:checked').length;
+                var business_check = $('.lobcheckbox:checked').length;
+                if (business_check > 0) {
+                    if (sub_business_check == 0) {
+                        custom_noty('error', 'Kindly select atleast one Sub Business!');
+                        return;
+                    }
+                }
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({

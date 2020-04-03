@@ -132,6 +132,11 @@ app.component('eyatraDesignationForm', {
             self.grade_list = response.data.grade_list;
             self.action = response.data.action;
 
+            if (self.action == 'Edit') {
+                if (response.data.is_grade_active == '0') {
+                    self.designation.grade_id = '';
+                }
+            }
         });
 
 

@@ -87,6 +87,10 @@ class DesignationController extends Controller {
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
+
+			$is_grade_active = Entity::where('entity_type_id', 500)->where('id', $designation->grade_id)->first();
+			$is_grade_active = $is_grade_active ? '1' : '0';
+			$this->data['is_grade_active'] = $is_grade_active;
 		}
 		// $this->data['grade_list'] = $grade_list = Entity::select('name', 'id')->where('entity_type_id', 500)->where('company_id', Auth::user()->company_id)->get();
 
