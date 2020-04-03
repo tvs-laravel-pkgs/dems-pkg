@@ -184,6 +184,14 @@ class OutletController extends Controller {
 			//Getting checked sbu ids and unique values from that
 			$checked_sbu_ids = [];
 			$ckecked_sbu_ids_unique = [];
+
+			foreach ($outlet->outletBudgets as $key => $outlet_sbu) {
+				$this->data['sbu_outlet'][$key]->checked = true;
+				$this->data['sbu_outlet'][$key]->sbu_id = $outlet_sbu->pivot->sbu_id;
+				$this->data['sbu_outlet'][$key]->outstation_budget_amount = $outlet_sbu->pivot->outstation_budget_amount;
+				$this->data['sbu_outlet'][$key]->local_budget_amount = $outlet_sbu->pivot->local_budget_amount;
+			}
+
 			foreach ($outlet->outletBudgets as $key => $outlet_budget) {
 				$checked_sbu_ids[] = $outlet_budget->id;
 			}
@@ -195,33 +203,6 @@ class OutletController extends Controller {
 					$this->data['lob_outlet'][$key]->checked = false;
 				}
 			}
-
-			foreach ($this->data['sbu_outlet'] as $key1 => $sbu) {
-				if (in_array($sbu->id, $ckecked_sbu_ids_unique)) {
-					//dump('true');
-					$outlet_budget = DB::table('outlet_budget')
-						->select('sbu_id',
-							'outstation_budget_amount',
-							'local_budget_amount'
-						)
-						->where('outlet_id', $outlet->id)
-						->where('sbu_id', $sbu->id)
-						->first();
-					$this->data['sbu_outlet'][$key1]->checked = true;
-					$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
-					$this->data['sbu_outlet'][$key1]->outstation_budget_amount = $outlet_budget->outstation_budget_amount > 0 ? $outlet_budget->outstation_budget_amount : '';
-					$this->data['sbu_outlet'][$key1]->local_budget_amount = $outlet_budget->local_budget_amount > 0 ? $outlet_budget->local_budget_amount : '';
-
-				} else {
-					//dump('false');
-					$this->data['sbu_outlet'][$key1]->checked = false;
-					$this->data['sbu_outlet'][$key1]->sbu_id = $sbu->id;
-					$this->data['sbu_outlet'][$key1]->outstation_budget_amount = '';
-					$this->data['sbu_outlet'][$key1]->local_budget_amount = '';
-				}
-
-			}
-
 		}
 		// dd(Auth::user()->company_id);
 		$lob_list = collect(Lob::select('name', 'id')->where('company_id', Auth::user()->company_id)->get());
@@ -316,7 +297,7 @@ class OutletController extends Controller {
 		return response()->json($cashier_list);
 	}
 	public function saveEYatraOutlet(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		//validation
 		try {
 			$error_messages = [
