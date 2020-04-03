@@ -378,9 +378,9 @@ class OutletController extends Controller {
 			$address->save();
 
 			//SAVING OUTLET BUDGET
-			$sbu_ids = array_column($request->sbus, 'sbu_id');
+			// $sbu_ids = array_column($request->sbus, 'sbu_id');
 
-			if (count($request->sbus) > 0) {
+			if ($request->sbus) {
 				$outlet->outletBudgets()->sync([]);
 				foreach ($request->sbus as $sbu) {
 					if (!isset($sbu['sbu_id'])) {
