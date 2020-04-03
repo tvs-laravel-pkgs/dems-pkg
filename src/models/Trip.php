@@ -836,6 +836,12 @@ class Trip extends Model {
 	// }
 
 	public static function deleteTrip($trip_id) {
+		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+		$trip = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
+		if ($trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted! Financier approved the advance amount']]);
+		}
+
 		//CHECK IF AGENT BOOKED TRIP VISITS
 		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
 		if ($agent_visits_booked) {
@@ -875,6 +881,12 @@ class Trip extends Model {
 	}
 
 	public static function cancelTrip($trip_id) {
+		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+		$trip = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
+		if ($trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be Cancelled! Financier approved the advance amount']]);
+		}
+
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -927,6 +939,12 @@ class Trip extends Model {
 				$activity_log = ActivityLog::saveLog($activity);
 				return response()->json(['success' => true, 'message' => 'Visit Deleted successfully!']);
 			} else {
+				//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+				$trip = Trip::where('id', $visit->trip_id)->where('advance_request_approval_status_id', 3261)->first();
+				if ($trip) {
+					return response()->json(['success' => false, 'errors' => ['Visit cannot be Deleted! Financier approved the advance amount']]);
+				}
+
 				$agent_visits = Visit::where('trip_id', $visit->trip_id)->where('booking_method_id', 3042)->whereIn('booking_status_id', [3061, 3062])->first();
 				if ($agent_visits) {
 					$trip = Trip::where('id', $visit->trip_id)->update(['status_id' => 3032]);
@@ -962,6 +980,11 @@ class Trip extends Model {
 				$activity_log = ActivityLog::saveLog($activity);
 				return response()->json(['success' => true, 'message' => 'Visit Cancelled successfully!']);
 			} else {
+				//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+				$trip = Trip::where('id', $visit->trip_id)->where('advance_request_approval_status_id', 3261)->first();
+				if ($trip) {
+					return response()->json(['success' => false, 'errors' => ['Visit cannot be Cancelled! Financier approved the advance amount']]);
+				}
 				$trip = Trip::where('id', $visit->trip_id)->update(['status_id' => 3032]);
 				return response()->json(['success' => true, 'message' => 'Trip Cancelled successfully!']);
 			}
