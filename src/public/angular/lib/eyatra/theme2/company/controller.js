@@ -135,6 +135,7 @@ app.component('eyatraCompanyForm', {
     controller: function($http, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.id) == 'undefined' ? company_form_data_url : company_form_data_url + '/' + $routeParams.id;
         var self = this;
+
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         $http.get(
@@ -149,15 +150,24 @@ app.component('eyatraCompanyForm', {
             self.company = response.data.company;
             self.financial_year_list = response.data.financial_year_list;
             self.status = response.data.status;
-            console.log(response.data.company);
-            console.log(response.data.company);
-            if (self.action == "Edit") {
-
-            }
             self.action = response.data.action;
+            // console.log(response.data);
+            console.log(response.data);
+            if (self.action == "Add") {
+                self.company.company_budgets = [];
+                self.company.company_budgets.push({
+                    financial_year_id: '',
+                    outstation_budget_amount: '',
+                    local_budget_amount: '',
+                });
+            }
+            //self.action = response.data.action;
             $rootScope.loading = false;
 
         });
+
+
+
 
 
         $('.btn-nxt').on("click", function() {
@@ -182,6 +192,9 @@ app.component('eyatraCompanyForm', {
                 outstation_budget_amount: '',
                 local_budget_amount: '',
             });
+        }
+        self.removeBudget = function(index, id) {
+            self.company.company_budgets.splice(index, 1);
         }
 
 
@@ -233,19 +246,6 @@ app.component('eyatraCompanyForm', {
                 'reference_code': {
                     maxlength: 10,
                 },
-                'financial_year_id': {
-                    required: true,
-                },
-                'outstation_budget_amount': {
-                    required: true,
-                    number: true,
-                    min: 1,
-                },
-                'local_budget_amount': {
-                    required: true,
-                    number: true,
-                    min: 1,
-                }
             },
             submitHandler: function(form) {
 
@@ -293,6 +293,10 @@ app.component('eyatraCompanyView', {
         ).then(function(response) {
             self.company = response.data.company;
             self.status = response.data.status;
+            self.financial_year = response.data.financial_year;
+            self.outstation_budget_amount = response.data.outstation_budget_amount;
+            self.local_budget_amount = response.data.local_budget_amount;
+
             self.action = response.data.action;
             console.log(response.data.company);
         });

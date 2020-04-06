@@ -108,6 +108,7 @@ class CompanyController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$company = Company::with('companyBudgets')->find($id);
+			//dd($company);
 			if (!$company) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Company not found';
@@ -119,6 +120,7 @@ class CompanyController extends Controller {
 			}
 		}
 		$this->data['financial_year_list']=$financial_year_list = collect(Config::select('name', 'id')->where('config_type_id', 536)->get());
+		//dd($company);
 		$this->data['company'] = $company;
 		$this->data['success'] = true;
 		
@@ -155,14 +157,19 @@ class CompanyController extends Controller {
 				'name.required' => 'Company Name is Required',
 				'code.unique' => "Company Code is already taken",
 				'name.unique' => "Company Name is already taken",
+				'company_budgets.*.financial_year_id.distinct' =>'Financial year has a duplicate value',
+
 			];
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'name' => 'required',
-				//'city_id' => 'required',
-				//'pincode' => 'required',
 				'code' => 'required|unique:companies,code,' . $request->id . ',id',
 				'name' => 'required|unique:companies,name,' . $request->id . ',id',
+				'company_budgets.*.financial_year_id' => [
+					'integer',
+					'exists:configs,id',
+					'distinct',
+				],
 			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
@@ -201,14 +208,15 @@ class CompanyController extends Controller {
 
 			
 			//SAVING COMPANY BUDGET
-			if (isset($request->financial_year_id) && !empty($request->financial_year_id)) {
+			if (count($request->company_budgets) > 0) {
 				$company->companyBudgets()->sync([]);
-				$company->companyBudgets()->attach(
-				$request->financial_year_id,
-				['outstation_budget_amount' => isset($request->outstation_budget_amount) ? $request->outstation_budget_amount : 0,'local_budget_amount' => isset($request->local_budget_amount) ?$request->local_budget_amount : 0]
-				);
+				foreach ($request->company_budgets as $company_budget) {
+					$company->companyBudgets()->attach(
+						$company_budget['financial_year_id'],
+						['outstation_budget_amount' => isset($company_budget['outstation_budget_amount']) ? $company_budget['outstation_budget_amount'] : 0, 'local_budget_amount' => isset($company_budget['local_budget_amount']) ? $company_budget['local_budget_amount'] : 0]
+					);
+				}
 			}
-
 			DB::commit();
 			$request->session()->flash('success', 'Company saved successfully!');
 			if (empty($request->id)) {
@@ -233,6 +241,13 @@ class CompanyController extends Controller {
 		$this->data['lob_name'] = $lob_name = array_column($outlet_budget, 'lob_name');
 		$this->data['sbu_name'] = $sbu_name = array_column($outlet_budget, 'sbu_name');
 		$this->data['amount'] = $amount = array_column($outlet_budget, 'amount');*/
+		$company_budget = DB::table('company_budget')->select('configs.name as financial_year', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'),DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('company_budget.company_id', $company->id)
+			->leftJoin('configs', 'configs.id', 'company_budget.financial_year_id')
+			->get()->toArray();
+		$this->data['financial_year'] = $lob_name = array_column($company_budget, 'financial_year');
+		$this->data['outstation_budget_amount'] = $amount = array_column($company_budget, 'outstation_budget_amount');
+		$this->data['local_budget_amount'] = $amount = array_column($company_budget, 'local_budget_amount');
+
 		if (!$company) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Company not found'];
