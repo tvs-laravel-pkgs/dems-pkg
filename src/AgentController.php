@@ -352,6 +352,11 @@ class AgentController extends Controller {
 
 	public function deleteEYatraAgent($agent_id) {
 
+		$user = User::withTrashed()->where('entity_id', $agent_id)->where('user_type_id', 3122)->first();
+		if (!$user) {
+			return response()->json(['success' => false, 'errors' => ['Agent not found']]);
+		}
+		$user->forceDelete();
 		$agent = Agent::where('id', $agent_id)->first();
 		$activity['entity_id'] = $agent->id;
 		$activity['entity_type'] = "Agent";
