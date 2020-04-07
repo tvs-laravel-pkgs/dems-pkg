@@ -608,10 +608,8 @@ app.component('eyatraOutletForm', {
             submitHandler: function(form) {
                 var sub_business_check = $('.sbucheckbox:checked').length;
                 var business_check = $('.lobcheckbox:checked').length;
-                if(business_check > 0)
-                {
-                    if(sub_business_check == 0)
-                    {
+                if (business_check > 0) {
+                    if (sub_business_check == 0) {
                         custom_noty('error', 'Kindly select atleast one Sub Business!');
                         return;
                     }
@@ -673,8 +671,8 @@ app.component('eyatraOutletView', {
 
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
-            self.local_budget_amount = response.data.local_budget_amount;
             self.outstation_budget_amount = response.data.outstation_budget_amount;
+            self.local_budget_amount = response.data.local_budget_amount;
             self.action = response.data.action;
             if (self.outlet.claim_req_approver == 0) {
                 self.claim_req_approver = 'Financier';

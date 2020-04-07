@@ -50,6 +50,7 @@ class EYatraConfigSeeder extends Seeder {
 			533 => 'Trip / Expense Types',
 			534 => 'Trip / Expense Approval Types',
 			535 => 'Claim Statuses',
+			536 => 'Financial Years',
 		];
 
 		$configs = [
@@ -978,6 +979,24 @@ class EYatraConfigSeeder extends Seeder {
 			3621 => [
 				'name' => 'Other Expenses - Cashier Approved',
 				'config_type_id' => 534,
+			],
+
+			//Financial Years
+			3700=> [
+				'name' => 'FY-19',
+				'config_type_id' => 536,
+			],
+			3701=> [
+				'name' => 'FY-20',
+				'config_type_id' => 536,
+			],
+			3702=> [
+				'name' => 'FY-21',
+				'config_type_id' => 536,
+			],
+			3703=> [
+				'name' => 'FY-22',
+				'config_type_id' => 536,
 			],
 
 		];

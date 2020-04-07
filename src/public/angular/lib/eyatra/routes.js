@@ -214,6 +214,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Outlet',
     }).
 
+    //COMPANY
+    when('/companies', {
+        template: '<eyatra-company></eyatra-company>',
+        title: 'Companies',
+    }).
+    when('/company/add', {
+        template: '<eyatra-company-form></eyatra-company-form>',
+        title: 'Add Company',
+    }).
+    when('/company/edit/:id', {
+        template: '<eyatra-company-form></eyatra-company-form>',
+        title: 'Edit Company',
+    }).
+    when('/company/view/:id', {
+        template: '<eyatra-company-view></eyatra-company-view>',
+        title: 'View Company',
+    }).
+
     //REGIONS
     when('/regions', {
         template: '<eyatra-regions></eyatra-regions>',

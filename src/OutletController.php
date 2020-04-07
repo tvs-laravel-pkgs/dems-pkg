@@ -420,17 +420,14 @@ class OutletController extends Controller {
 		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);
-		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'), DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('outlet_budget.outlet_id', $outlet_id)
-
+		$outlet_budget = DB::table('outlet_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'),DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('outlet_budget.outlet_id', $outlet_id)
 			->leftJoin('sbus', 'sbus.id', 'outlet_budget.sbu_id')
 			->leftJoin('lobs', 'lobs.id', 'sbus.lob_id')
 			->get()->toArray();
 		$this->data['lob_name'] = $lob_name = array_column($outlet_budget, 'lob_name');
 		$this->data['sbu_name'] = $sbu_name = array_column($outlet_budget, 'sbu_name');
-		$this->data['outstation_budget_amount'] = $outstation_budget_amount = array_column($outlet_budget, 'outstation_budget_amount');
-		$this->data['local_budget_amount'] = $local_budget_amount = array_column($outlet_budget, 'local_budget_amount');
-
-		// dd($amount);
+		$this->data['outstation_budget_amount'] = $amount = array_column($outlet_budget, 'outstation_budget_amount');
+		$this->data['local_budget_amount'] = $amount = array_column($outlet_budget, 'local_budget_amount');
 		if (!$outlet) {
 			$this->data['success'] = false;
 			$this->data['errors'] = ['Outlet not found'];
