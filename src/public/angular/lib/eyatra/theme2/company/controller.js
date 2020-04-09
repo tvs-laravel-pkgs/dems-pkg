@@ -3,20 +3,7 @@ app.component('eyatraCompany', {
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        self.permissionadd = self.hasPermission('eyatra-outlet-add');
-        self.permissionimport = self.hasPermission('eyatra-import-outlet');
-        /*$http.get(
-            outlet_filter_data_url
-        ).then(function(response) {
-            // console.log(response.data);
-            self.region_list = response.data.region_list;
-            self.cashier_list = response.data.cashier_list;
-            // self.city_list = response.data.city_list;
-            // self.state_list = response.data.state_list;
-            self.country_list = response.data.country_list;
-            $rootScope.loading = false;
-        });*/
-
+        self.permissionadd = self.hasPermission('eyatra-all-company-view');
         var dataTable = $('#eyatra_company_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -56,7 +43,6 @@ app.component('eyatraCompany', {
                 { data: 'gst_number', name: 'companies.gst_number', searchable: true },
                 { data: 'customer_care_email', name: 'companies.customer_care_email', searchable: true },
                 { data: 'customer_care_phone', name: 'companies.customer_care_phone', searchable: true },
-                { data: 'reference_code', name: 'companies.reference_code', searchable: true },
                 { data: 'created_by', name: 'users.name', searchable: true },
                 { data: 'status', name: 'companies.deleted_at', searchable: true },
             ],
@@ -138,6 +124,7 @@ app.component('eyatraCompanyForm', {
 
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.budget_tab = 0;
         $http.get(
             $form_data_url
         ).then(function(response) {

@@ -1119,6 +1119,38 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Local Trip - Financier Report',
 			],
 
+			//MASTERS > COMPANY
+			5700 => [
+				'display_order' => 1,
+				'parent_id' => 5020,
+				'name' => 'eyatra-company',
+				'display_name' => 'Company',
+			],
+			5701 => [
+				'display_order' => 1,
+				'parent_id' => 5700,
+				'name' => 'eyatra-company-add',
+				'display_name' => 'Add',
+			],
+			5702 => [
+				'display_order' => 2,
+				'parent_id' => 5700,
+				'name' => 'eyatra-company-edit',
+				'display_name' => 'Edit',
+			],
+			5703 => [
+				'display_order' => 3,
+				'parent_id' => 5700,
+				'name' => 'eyatra-company-delete',
+				'display_name' => 'Delete',
+			],
+			5704 => [
+				'display_order' => 3,
+				'parent_id' => 5700,
+				'name' => 'eyatra-all-company-view',
+				'display_name' => 'View All Companies',
+			],
+
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

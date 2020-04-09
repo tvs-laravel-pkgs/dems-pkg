@@ -6,13 +6,7 @@ use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
-use Uitoux\EYatra\Address;
-use Uitoux\EYatra\Employee;
-use Uitoux\EYatra\Lob;
-use Uitoux\EYatra\NCity;
-use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Company;
-use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\Config;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -21,48 +15,23 @@ class CompanyController extends Controller {
 
 	public function listEYatraCompany(Request $r) {
 		$companies = Company::withTrashed()->select(
-				'companies.id',
-				'companies.code',
-				'companies.name',
-				'companies.address',
-				'companies.cin_number',
-				'companies.gst_number',
-				'companies.customer_care_email',
-				'companies.customer_care_phone',
-				'companies.reference_code',
-				DB::raw('IF(companies.deleted_at IS NULL,"Active","Inactive") as status'),
-				'users.name as created_by'
-			)
-			->join('users','companies.created_by','users.id')
-			/*->where(function ($query) use ($r) {
-				if ($r->get('cashier_id')) {
-					$query->where("outlets.cashier_id", $r->get('cashier_id'))->orWhere(DB::raw("-1"), $r->get('cashier_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('region_id')) {
-					$query->where("r.id", $r->get('region_id'))->orWhere(DB::raw("-1"), $r->get('region_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('city_id')) {
-					$query->where("city.id", $r->get('city_id'))->orWhere(DB::raw("-1"), $r->get('city_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('state_id')) {
-					$query->where("s.id", $r->get('state_id'))->orWhere(DB::raw("-1"), $r->get('state_id'));
-				}
-			})
-			->where(function ($query) use ($r) {
-				if ($r->get('country_id')) {
-					$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
-				}
-			})*/
+			'companies.id',
+			'companies.code',
+			'companies.name',
+			'companies.address',
+			'companies.cin_number',
+			'companies.gst_number',
+			'companies.customer_care_email',
+			'companies.customer_care_phone',
+			DB::raw('IF(companies.deleted_at IS NULL,"Active","Inactive") as status'),
+			'users.name as created_by'
+		)
+			->join('users', 'companies.created_by', 'users.id')
 			->groupBy('companies.id');
-		// if (!Entrust::can('view-all-trips')) {
-		// $trips->where('trips.employee_id', Auth::user()->entity_id);
-		// }
+
+		if (!Entrust::can('eyatra-all-company-view')) {
+			$companies->where('companies.id', Auth::user()->company_id);
+		}
 		return Datatables::of($companies)
 			->addColumn('action', function ($companies) {
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
@@ -84,7 +53,7 @@ class CompanyController extends Controller {
 
 				$action .= '<a style="' . $edit_class . '" href="#!/company/edit/' . $companies->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 				$action .= '<a href="#!/company/view/' . $companies->id . '"><img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a> ';
-				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_company" onclick="angular.element(this).scope().deleteCompanyConfirm(' . $companies->id . ')" dusk = "delete-btn" title="Delete"><img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" ></a>';
+				// $action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_company" onclick="angular.element(this).scope().deleteCompanyConfirm(' . $companies->id . ')" dusk = "delete-btn" title="Delete"><img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" ></a>';
 
 				return $action;
 			})
@@ -119,34 +88,17 @@ class CompanyController extends Controller {
 				$this->data['status'] = 'Inactive';
 			}
 		}
-		$this->data['financial_year_list']=$financial_year_list = collect(Config::select('name', 'id')->where('config_type_id', 536)->get());
+		$this->data['financial_year_list'] = $financial_year_list = collect(Config::select('name', 'id')->where('config_type_id', 536)->get());
 		//dd($company);
 		$this->data['company'] = $company;
 		$this->data['success'] = true;
-		
+
 		return response()->json($this->data);
 	}
 	public function eyatraCompanyFilterData() {
-		$this->data['region_list'] = Region::getList();
-		$this->data['city_list'] = NCity::getList();
-		$this->data['country_list'] = $country = NCountry::getList();
-		$option = new NState;
-		$option->name = 'Select State';
-		$option->id = null;
-		$this->data['state_list'] = $state_list = collect(NState::select('name', 'id')
-				->get())->prepend($option);
-		$option = new Employee;
-		$option->name = 'Select Cashier';
-		$option->id = null;
-		$this->data['cashier_list'] = $cashier_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('outlets', 'outlets.cashier_id', 'employees.id')->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
-			DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
-				->groupBy('employees.id')
-				->get())->prepend($option);
 		$this->data['success'] = true;
-		//dd($this->data);
 		return response()->json($this->data);
 	}
-
 
 	public function saveEYatraCompany(Request $request) {
 		//dd($request->all());
@@ -157,7 +109,7 @@ class CompanyController extends Controller {
 				'name.required' => 'Company Name is Required',
 				'code.unique' => "Company Code is already taken",
 				'name.unique' => "Company Name is already taken",
-				'company_budgets.*.financial_year_id.distinct' =>'Financial year has a duplicate value',
+				'company_budgets.*.financial_year_id.distinct' => 'Same Financial year multiple times entered',
 
 			];
 			$validator = Validator::make($request->all(), [
@@ -196,27 +148,20 @@ class CompanyController extends Controller {
 			}
 			$company->fill($request->all());
 			$company->save();
+			$company->companyBudgets()->sync([]);
 
-			// Check after
-
-			/*$activity['entity_id'] = $company->id;
-			$activity['entity_type'] = "Company";
-			$activity['details'] = empty($request->id) ? "Company is  Added" : "Company is  updated";
-			$activity['activity'] = empty($request->id) ? "Add" : "Edit";
-			$activity_log = ActivityLog::saveLog($activity);*/
-
-
-			
 			//SAVING COMPANY BUDGET
-			if (count($request->company_budgets) > 0) {
-				$company->companyBudgets()->sync([]);
-				foreach ($request->company_budgets as $company_budget) {
-					$company->companyBudgets()->attach(
-						$company_budget['financial_year_id'],
-						['outstation_budget_amount' => isset($company_budget['outstation_budget_amount']) ? $company_budget['outstation_budget_amount'] : 0, 'local_budget_amount' => isset($company_budget['local_budget_amount']) ? $company_budget['local_budget_amount'] : 0]
-					);
+			if ($request->company_budgets) {
+				if (count($request->company_budgets) > 0) {
+					foreach ($request->company_budgets as $company_budget) {
+						$company->companyBudgets()->attach(
+							$company_budget['financial_year_id'],
+							['outstation_budget_amount' => isset($company_budget['outstation_budget_amount']) ? $company_budget['outstation_budget_amount'] : 0, 'local_budget_amount' => isset($company_budget['local_budget_amount']) ? $company_budget['local_budget_amount'] : 0]
+						);
+					}
 				}
 			}
+
 			DB::commit();
 			$request->session()->flash('success', 'Company saved successfully!');
 			if (empty($request->id)) {
@@ -233,15 +178,7 @@ class CompanyController extends Controller {
 	public function viewEYatraCompany($id) {
 		$company = Company::with('createdBy')->withTrashed()
 			->find($id);
-			//dd($company);
-		/*$company_budget = DB::table('company_budget')->select('lobs.name as lob_name', 'sbus.name as sbu_name', DB::raw('format(amount,2,"en_IN") as amount'))->where('company_budget.company_id', $id)
-
-			->join('config', 'config.id', 'company_budget.sbu_id')
-			->get()->toArray();
-		$this->data['lob_name'] = $lob_name = array_column($outlet_budget, 'lob_name');
-		$this->data['sbu_name'] = $sbu_name = array_column($outlet_budget, 'sbu_name');
-		$this->data['amount'] = $amount = array_column($outlet_budget, 'amount');*/
-		$company_budget = DB::table('company_budget')->select('configs.name as financial_year', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'),DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('company_budget.company_id', $company->id)
+		$company_budget = DB::table('company_budget')->select('configs.name as financial_year', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'), DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('company_budget.company_id', $company->id)
 			->leftJoin('configs', 'configs.id', 'company_budget.financial_year_id')
 			->get()->toArray();
 		$this->data['financial_year'] = $lob_name = array_column($company_budget, 'financial_year');
@@ -254,32 +191,24 @@ class CompanyController extends Controller {
 			return response()->json($this->data);
 		}
 		if ($company->deleted_at == NULL) {
-				$this->data['status'] = 'Active';
-			} else {
-				$this->data['status'] = 'Inactive';
-			}
-		
+			$this->data['status'] = 'Active';
+		} else {
+			$this->data['status'] = 'Inactive';
+		}
 
-		// dd($outlet);
 		$this->data['action'] = 'View';
 		$this->data['company'] = $company;
 		$this->data['success'] = true;
-		//dd($this->data);
 
 		return response()->json($this->data);
 	}
 	public function deleteEYatraCompany($id) {
 		$company = Company::where('id', $id)->first();
-		/*$activity['entity_id'] = $company->id;
-		$activity['entity_type'] = "outlet";
-		$activity['details'] = "Company is deleted";
-		$activity['activity'] = "Delete";
-		$activity_log = ActivityLog::saveLog($activity);*/
 		$company->forceDelete();
 		if (!$company) {
 			return response()->json(['success' => false, 'errors' => ['Company not found']]);
 		}
 		return response()->json(['success' => true]);
 	}
-	
+
 }
