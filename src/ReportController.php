@@ -1316,11 +1316,11 @@ class ReportController extends Controller {
 			Session::put('eva_repaid_start_date', $r->from_date);
 			Session::put('eva_repaid_end_date', $r->to_date);
 		}
-		if ($r->list_type == 1) {
-//Cashier
+		if ($r->list_type == 2) {
+			//Cashier
 			$approval_type_id = [3258];
-		} elseif ($r->list_type == 2) {
-//Financier
+		} elseif ($r->list_type == 3) {
+			//Financier
 			$approval_type_id = [3258];
 		}
 		//dd($approval_type_id);
@@ -1331,7 +1331,7 @@ class ReportController extends Controller {
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				return '
-						<a href="#!/petty-cash/view/' . $type_id . '/' . $list->id . '">
+						<a href="#!/expense/voucher-advance/view/' . $list->id . '">
 							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 						</a>
 						';
