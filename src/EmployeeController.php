@@ -47,7 +47,7 @@ class EmployeeController extends Controller {
 				->select('employees.id', 'users.name')
 				->get())->prepend(['id' => '', 'name' => 'Select Manager']);
 		$this->data['filter_manager_id'] = '';
-		$this->data['filter_outlet_id']='-1';
+		$this->data['filter_outlet_id'] = '-1';
 		return response()->json($this->data);
 	}
 
@@ -226,8 +226,8 @@ class EmployeeController extends Controller {
 		return response()->json($this->data);
 	}
 
-public function getManagerByOutlet(Request $r) {
-	$employees = Employee::select('reporting_to_id')
+	public function getManagerByOutlet(Request $r) {
+		$employees = Employee::select('reporting_to_id')
 			->distinct()
 			->whereNotNull('reporting_to_id')
 			->where('employees.company_id', Auth::user()->company_id)

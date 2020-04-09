@@ -277,10 +277,12 @@ class Trip extends Model {
 						$visit->manager_verification_status_id = 3080; //NEW
 					}
 					// $visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
-					$visit->fill($visit_data);
-					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
-					$visit->from_city_id = $from_city_id;
+					// $visit->fill($visit_data);
 					$visit->trip_id = $trip->id;
+					$visit->from_city_id = $from_city_id;
+					$visit->to_city_id = $visit_data['to_city_id'];
+					$visit->travel_mode_id = $visit_data['travel_mode_id'];
+					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
 					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
@@ -293,7 +295,7 @@ class Trip extends Model {
 						}
 						$visit->agent_id = $agent->id;
 					}
-					//dd('save');
+					$visit->notes_to_agent = $visit_data['notes_to_agent'];
 					$visit->save();
 					$i++;
 				}
