@@ -452,7 +452,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 517,
 			],
 			3275 => [
-				'name' => 'Employee Return Expense Amount',
+				'name' => 'Employee Return balance Expense Amount',
 				'config_type_id' => 517,
 			],
 
@@ -779,7 +779,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 528,
 			],
 			3473 => [
-				'name' => 'Employee Return Expense Amount',
+				'name' => 'Employee Return balance Expense Amount',
 				'config_type_id' => 528,
 			],
 
@@ -982,19 +982,19 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			//Financial Years
-			3700=> [
+			3700 => [
 				'name' => 'FY-19',
 				'config_type_id' => 536,
 			],
-			3701=> [
+			3701 => [
 				'name' => 'FY-20',
 				'config_type_id' => 536,
 			],
-			3702=> [
+			3702 => [
 				'name' => 'FY-21',
 				'config_type_id' => 536,
 			],
-			3703=> [
+			3703 => [
 				'name' => 'FY-22',
 				'config_type_id' => 536,
 			],

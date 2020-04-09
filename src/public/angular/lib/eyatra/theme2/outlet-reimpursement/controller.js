@@ -92,6 +92,15 @@ app.component('eyatraOutletReimbursement', {
             $('#cashier').val(cashier);
             $('#outlet_balance').val(amount);
         }
+
+        setTimeout(function() {
+            $('div[data-provide="datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+                endDate: "today",
+            });
+        }, 1000);
+        
         $scope.confirmOutletCashTopup = function() {
             var cash_form_id = '#cash_topup';
             let formData1 = new FormData($(cash_form_id)[0]);
