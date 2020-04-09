@@ -262,12 +262,20 @@ class LocalTrip extends Model {
 					$trip->status_id = 3021;
 				}
 
-				if ($request->local_trip_claim) {
-					$trip->status_id = 3023;
-				}
-
 				LocalTripVisitDetail::where('trip_id', $request->id)->forceDelete();
 				$activity['activity'] = "edit";
+			}
+
+			//SELF APPROVAL
+			$employee = Employee::where('id', Auth::user()->entity->id)->first();
+			if ($employee->self_approve == 1) {
+				$trip->status_id = 3028;
+			}
+			if ($request->local_trip_claim) {
+				$trip->status_id = 3023;
+				if ($employee->self_approve == 1) {
+					$trip->status_id = 3034;
+				}
 			}
 
 			$employee = Employee::where('id', Auth::user()->entity->id)->first();
