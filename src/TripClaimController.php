@@ -18,8 +18,8 @@ class TripClaimController extends Controller {
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
 			->join('ey_employee_claims as claims', 'claims.trip_id', 'trips.id')
+			->join('configs as status', 'status.id', 'claims.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
 			->where('users.user_type_id', 3121)
 			->select(
@@ -90,7 +90,7 @@ class TripClaimController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == 3023 || $trip->status_id == 3024) {
+				if ($trip->status_id == 3023 || $trip->status_id == 3024 || $trip->status_id == 3033) {
 					$action .= ' <a href="#!/trip/claim/edit/' . $trip->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 				}
 

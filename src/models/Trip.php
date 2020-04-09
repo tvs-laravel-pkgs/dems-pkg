@@ -294,6 +294,8 @@ class Trip extends Model {
 							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count], 'message' => 'No agent found for visit - ' . $visit_count]);
 						}
 						$visit->agent_id = $agent->id;
+					} else {
+						$visit->agent_id = NULL;
 					}
 					$visit->notes_to_agent = $visit_data['notes_to_agent'];
 					$visit->save();
