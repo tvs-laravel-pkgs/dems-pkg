@@ -138,10 +138,15 @@ class TripClaimVerificationTwoController extends Controller {
 		// 	$employee_claim->status_id = 3025; // Payment Pending for Financier
 		// }
 		// // $employee_claim->status_id = 3223; //Payment Pending
-
-		$employee_claim->status_id = 3034; //PAYMENT PENDING
+		$additional_approve = Auth::user()->company->additional_approve;
+		if ($additional_approve == '1') {
+			$employee_claim->status_id = 3036; //Claim Verification Pending
+			$trip->status_id = 3036; //Claim Verification Pending
+		} else {
+			$employee_claim->status_id = 3034; //Payment Pending
+			$trip->status_id = 3034; //Payment Pending
+		}
 		$employee_claim->save();
-		$trip->status_id = 3034; // Payment Pending
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();

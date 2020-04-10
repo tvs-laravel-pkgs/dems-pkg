@@ -491,14 +491,18 @@ class LocalTrip extends Model {
 	}
 
 	public static function approveTrip($trip_id) {
-
+		$additional_approve = Auth::user()->company->additional_approve;
 		$trip = LocalTrip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Lcoal Trip not found']]);
 		}
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
-			$trip->status_id = 3034;
+			if ($additional_approve == '1') {
+				$trip->status_id = 3036;
+			} else {
+				$trip->status_id = 3034;
+			}
 			$type = 6;
 		} else {
 			$trip->status_id = 3028;

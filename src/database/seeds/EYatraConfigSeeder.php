@@ -145,6 +145,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Claim Approved',
 				'config_type_id' => 535,
 			],
+			3036 => [
+				'name' => 'Claim Verification Pending',
+				'config_type_id' => 535,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [

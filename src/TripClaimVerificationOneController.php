@@ -254,7 +254,7 @@ class TripClaimVerificationOneController extends Controller {
 	}
 
 	public function approveTripClaimVerificationOne($trip_id) {
-
+		$additional_approve = Auth::user()->company->additional_approve;
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -265,8 +265,13 @@ class TripClaimVerificationOneController extends Controller {
 		}
 
 		if ($employee_claim->is_deviation == 0) {
-			$employee_claim->status_id = 3034; //Payment Pending
-			$trip->status_id = 3034; //Payment Pending
+			if ($additional_approve == '1') {
+				$employee_claim->status_id = 3036; //Claim Verification Pending
+				$trip->status_id = 3036; //Claim Verification Pending
+			} else {
+				$employee_claim->status_id = 3034; //Payment Pending
+				$trip->status_id = 3034; //Payment Pending
+			}
 		} else {
 			$employee_claim->status_id = 3029; //Senior Manager Approval Pending
 			$trip->status_id = 3029; //Senior Manager Approval Pending
