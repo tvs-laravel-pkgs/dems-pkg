@@ -936,6 +936,12 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-indv-financier-local-trip-claims-verification',
 				'display_name' => 'Financier Local Trip Claim Verification',
 			],
+			5612 => [
+				'display_order' => 8,
+				'parent_id' => 5600,
+				'name' => 'eYatra-claim-verifier',
+				'display_name' => 'Claim Verifier',
+			],
 
 			//ROLES
 			5620 => [

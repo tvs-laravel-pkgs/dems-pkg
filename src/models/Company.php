@@ -17,6 +17,7 @@ class Company extends Model {
 		'customer_care_email',
 		'customer_care_phone',
 		'reference_code',
+		'additional_approve',
 
 	];
 
@@ -66,7 +67,7 @@ class Company extends Model {
 	}
 
 	public function createdBy() {
-		return $this->belongsTo('App\User','created_by');
+		return $this->belongsTo('App\User', 'created_by');
 	}
 	public function outlets() {
 		return $this->hasMany('Uitoux\EYatra\Outlet');
@@ -80,7 +81,7 @@ class Company extends Model {
 		return $this->hasMany('Uitoux\EYatra\Designation');
 	}
 	public function companyBudgets() {
-		return $this->belongsToMany('Uitoux\EYatra\Config', 'company_budget', 'company_id', 'financial_year_id')->withPivot('outstation_budget_amount','local_budget_amount');
+		return $this->belongsToMany('Uitoux\EYatra\Config', 'company_budget', 'company_id', 'financial_year_id')->withPivot('outstation_budget_amount', 'local_budget_amount');
 	}
 
 	//ENDS EYATRA RELATIONSHIPS
