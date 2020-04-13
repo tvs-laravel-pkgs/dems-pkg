@@ -191,7 +191,6 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/company/delete/{id}', 'Uitoux\EYatra\CompanyController@deleteEYatraCompany')->name('deleteEYatraCompany');
 		Route::get('eyatra/company/get-filter-data', 'Uitoux\EYatra\CompanyController@eyatraCompanyFilterData')->name('eyatraCompanyFilterData');
 
-
 		//OUTLETS
 		Route::get('eyatra/outlet/get-list', 'Uitoux\EYatra\OutletController@listEYatraOutlet')->name('listEYatraOutlet');
 		Route::get('eyatra/outlet/get-form-data/{outlet_id?}', 'Uitoux\EYatra\OutletController@eyatraOutletFormData')->name('eyatraOutletFormData');
@@ -526,5 +525,12 @@ Route::group(['middleware' => ['web']], function () {
 
 		//REPORT >> EXPENSE VOUCHER ADVANCE REPAID MANAGER
 		Route::get('report/expense-voucher-advance-repaid/get-data', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceRepaidData')->name('eyatraExpenseVoucherAdvanceRepaidData');
+
+		//VERIFIER >> OUTSTATION TRIP CLAIM VERIFICATION
+		Route::get('eyatra/outstation-trip/claim/verification/get-filter-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraVerificationFilterData')->name('eyatraVerificationFilterData');
+		Route::get('eyatra/outstation-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraOutstationClaimVerificationGetData')->name('eyatraOutstationClaimVerificationGetData');
+
+		Route::post('eyatra/outstation-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectOutstationTripClaimVerification')->name('rejectOutstationTripClaimVerification');
+		Route::get('eyatra/outstation-trip/claim/verifier/approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationController@approveOutstationTripClaimVerification')->name('approveOutstationTripClaimVerification');
 	});
 });

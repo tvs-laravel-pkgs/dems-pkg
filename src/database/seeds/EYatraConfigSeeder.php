@@ -984,6 +984,14 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Other Expenses - Cashier Approved',
 				'config_type_id' => 534,
 			],
+			3622 => [
+				'name' => 'Outstation Trip Claim - Verifier Approved',
+				'config_type_id' => 534,
+			],
+			3623 => [
+				'name' => 'Local Trip Claim - Verifier Approved',
+				'config_type_id' => 534,
+			],
 
 			//Financial Years
 			3700 => [

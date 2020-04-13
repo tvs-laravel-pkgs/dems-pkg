@@ -774,6 +774,25 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/reports/expense-voucher-advances-repaid/:type_id', {
         template: '<eyatra-reports-expense-voucher-advance-repaid></eyatra-reports-expense-voucher-advance>',
         title: 'Expense Voucher Advance Repaid',
+    }).
+
+
+    //CLAIM VERIFIER - EMPLOYEE CLAIM VERIFICATION
+    when('/outstation-trip/claim/verification/list', {
+        template: '<eyatra-outstation-claim-verification-list></eyatra-outstation-claim-verification-list>',
+        title: 'Outstation Trip Claim Verification',
+    }).
+    when('/outstation-trip/claim/verification/view/:trip_id', {
+        template: '<eyatra-outstation-claim-verification-view></eyatra-outstation-claim-verification-view>',
+        title: 'View Outstation Trip Claim Verification',
+    }).
+    when('/local-trip/claim/verification/list', {
+        template: '<eyatra-local-claim-verification-list></eyatra-local-claim-verification-list>',
+        title: 'Local Trip Claim Verification',
+    }).
+    when('/local-trip/claim/verification/view/:trip_id', {
+        template: '<eyatra-local-claim-verification-view></eyatra-local-claim-verification-view>',
+        title: 'Local Trip Claim Verification',
     });
 
 
