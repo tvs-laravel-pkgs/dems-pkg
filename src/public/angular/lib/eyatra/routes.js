@@ -775,7 +775,16 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-reports-expense-voucher-advance-repaid></eyatra-reports-expense-voucher-advance>',
         title: 'Expense Voucher Advance Repaid',
     }).
-
+    //APPROVAL LOGS >> VERIFIER >> OUTSTATION TRIP
+    when('/reports/verifier/outstation-trip', {
+        template: '<eyatra-reports-verifier-outstation-trip-approval></eyatra-reports-verifier-outstation-trip-approval>',
+        title: 'Outstation Trip Claim Report',
+    }).
+    //APPROVAL LOGS >> VERIFIER >> LOCAL TRIP
+    when('/reports/verifier/local-trip', {
+        template: '<eyatra-reports-verifier-local-trip-approval></eyatra-reports-verifier-local-trip-approval>',
+        title: 'Local/ Trip Claim Report',
+    }).
 
     //CLAIM VERIFIER - EMPLOYEE CLAIM VERIFICATION
     when('/outstation-trip/claim/verification/list', {

@@ -142,7 +142,7 @@ class ApprovalLog extends Model {
 				DB::raw('DATE_FORMAT(trips.end_date,"%d-%m-%Y") as end_date'),
 				'trips.status_id',
 				'purpose.name as purpose',
-				'status.name as status', 'status.name as status_name',
+				'status.name as status', 'status.name as status_name', 'outlets.name as outlet_name',
 				DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as date'),
 				'approval_logs.approval_type_id as type_id', 'ey_employee_claims.total_amount'
 			)
@@ -216,7 +216,7 @@ class ApprovalLog extends Model {
 				DB::raw('DATE_FORMAT(local_trips.end_date,"%d-%m-%Y") as end_date'),
 				'local_trips.status_id',
 				'purpose.name as purpose',
-				'status.name as status', 'status.name as status_name',
+				'status.name as status', 'status.name as status_name', 'outlets.name as outlet_name',
 				DB::raw('DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y %h:%i:%s %p") as date'),
 				'approval_logs.approval_type_id as type_id', 'local_trips.claim_amount as total_amount'
 			)

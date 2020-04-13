@@ -526,6 +526,12 @@ Route::group(['middleware' => ['web']], function () {
 		//REPORT >> EXPENSE VOUCHER ADVANCE REPAID MANAGER
 		Route::get('report/expense-voucher-advance-repaid/get-data', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceRepaidData')->name('eyatraExpenseVoucherAdvanceRepaidData');
 
+		//REPORT >> VERIFIER >> OUTSTARION TRIP
+		Route::get('report/verifier/trip/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraVerifierFilterData')->name('eyatraVerifierFilterData');
+		Route::get('report/verifier/outstation-trip/get-data', 'Uitoux\EYatra\ReportController@eyatraVerifierOutstationData')->name('eyatraVerifierOutstationData');
+		//REPORT >> VERIFIER >> LOCAL TRIP
+		Route::get('report/verifier/local-trip/get-data', 'Uitoux\EYatra\ReportController@eyatraVerifierLocalData')->name('eyatraVerifierLocalData');
+
 		//VERIFIER >> OUTSTATION TRIP CLAIM VERIFICATION
 		Route::get('eyatra/outstation-trip/claim/verification/get-filter-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraVerificationFilterData')->name('eyatraVerificationFilterData');
 		Route::get('eyatra/outstation-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraOutstationClaimVerificationGetData')->name('eyatraOutstationClaimVerificationGetData');

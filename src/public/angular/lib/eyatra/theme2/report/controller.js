@@ -1874,6 +1874,359 @@ app.component('eyatraReportsLocalTripFinancierPaid', {
     }
 });
 
+//VERIIFER >> OUTSTATION TRIP
+app.component('eyatraReportsVerifierOutstationTripApproval', {
+    templateUrl: verifier_outstation_trip_list_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            verifier_outstation_trip_filter_data_url + '/2'
+        ).then(function(response) {
+            self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
+            self.purpose_list = response.data.purpose_list;
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.verifier_outstation_start_date;
+            self.end_date = response.data.verifier_outstation_end_date;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+            var trip_periods = response.data.verifier_outstation_start_date + ' to ' + response.data.verifier_outstation_end_date;
+            self.trip_periods = trip_periods;
+
+            setTimeout(function() {
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
+                dataTable.draw();
+            }, 1500);
+
+            $rootScope.loading = false;
+        });
+
+        var dataTable = $('#outstation_trip_verifier_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            ajax: {
+                url: laravel_routes['eyatraVerifierOutstationData'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.employee_id = $('#employee_id').val();
+                    d.purpose_id = $('#purpose_id').val();
+                    d.outlet_id = $('#outlet_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                }
+            },
+
+            columns: [
+                { data: 'action', searchable: false, class: 'action' },
+                { data: 'number', name: 'local_trips.number', searchable: true },
+                { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'outlet_name', name: 'outlets.name', searchable: true },
+                { data: 'start_date', name: 'local_trips.start_date', searchable: true },
+                { data: 'end_date', name: 'local_trips.end_date', searchable: true },
+                { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'total_amount', searchable: false },
+                { data: 'date', searchable: false },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+
+        $('.dataTables_length select').select2();
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('outstation_trip_verifier_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getPurposeData = function(query) {
+            $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
+            dataTable.draw();
+            get_employees(outlet_id, status = 1);
+        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
+        $scope.reset_filter = function(query) {
+            $('#purpose_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
+            self.trip_periods = '';
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_purpose_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
+        }
+        $rootScope.loading = false;
+
+    }
+});
+
+//VERIIFER >> Local TRIP
+app.component('eyatraReportsVerifierLocalTripApproval', {
+    templateUrl: verifier_local_trip_list_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $http.get(
+            verifier_outstation_trip_filter_data_url + '/1'
+        ).then(function(response) {
+            self.employee_list = response.data.employee_list;
+            self.outlet_list = response.data.outlet_list;
+            self.purpose_list = response.data.purpose_list;
+            self.filter_outlet_id = response.data.filter_outlet_id;
+            self.start_date = response.data.verifier_local_start_date;
+            self.end_date = response.data.verifier_local_end_date;
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+            var trip_periods = response.data.verifier_local_start_date + ' to ' + response.data.verifier_local_end_date;
+            self.trip_periods = trip_periods;
+
+            setTimeout(function() {
+                get_employees(self.filter_outlet_id, status = 0);
+                $('#from_date').val(self.start_date);
+                $('#to_date').val(self.end_date);
+                dataTable.draw();
+            }, 1500);
+
+            $rootScope.loading = false;
+        });
+
+        var dataTable = $('#outstation_trip_verifier_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            ajax: {
+                url: laravel_routes['eyatraVerifierLocalData'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.employee_id = $('#employee_id').val();
+                    d.purpose_id = $('#purpose_id').val();
+                    d.outlet_id = $('#outlet_id').val();
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                }
+            },
+
+            columns: [
+                { data: 'action', searchable: false, class: 'action' },
+                { data: 'number', name: 'local_trips.number', searchable: true },
+                { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ename', name: 'users.name', searchable: true },
+                { data: 'outlet_name', name: 'outlets.name', searchable: true },
+                { data: 'start_date', name: 'local_trips.start_date', searchable: true },
+                { data: 'end_date', name: 'local_trips.end_date', searchable: true },
+                { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'total_amount', searchable: false },
+                { data: 'date', searchable: false },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+
+        $('.dataTables_length select').select2();
+
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('outstation_trip_verifier_table_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+
+        $scope.getEmployeeData = function(query) {
+            $('#employee_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getPurposeData = function(query) {
+            $('#purpose_id').val(query);
+            dataTable.draw();
+        }
+
+        $scope.getOutletData = function(outlet_id) {
+            $('#outlet_id').val(outlet_id)
+            dataTable.draw();
+            get_employees(outlet_id, status = 1);
+        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
+
+        $scope.reset_filter = function(query) {
+            $('#purpose_id').val(-1);
+            $('#employee_id').val(-1);
+            $('#outlet_id').val(-1);
+            $('#from_date').val('');
+            $('#to_date').val('');
+            self.trip_periods = '';
+            if (self.type_id == 3) {
+                get_employees(self.filter_outlet_id, status = 1);
+            }
+            self.filter_purpose_id = '-1';
+            self.filter_employee_id = '-1';
+            self.filter_outlet_id = '-1';
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        }
+
+        function get_employees(outlet_id, status) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeByOutlet'],
+                    data: {
+                        outlet_id: outlet_id
+                    },
+                })
+                .done(function(res) {
+                    self.employee_list = [];
+                    if (status == 1) {
+                        self.filter_employee_id = '-1';
+                    }
+                    self.employee_list = res.employee_list;
+                    $scope.$apply()
+                });
+        }
+        $rootScope.loading = false;
+
+    }
+});
+
+
 //Petty Cash Manager Approved
 app.component('eyatraReportsPettyCashManager', {
     templateUrl: eyatra_petty_cash_manager_report_list_template_url,
