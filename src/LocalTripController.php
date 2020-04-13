@@ -173,7 +173,7 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->whereIN('local_trips.status_id', [3023, 3024, 3026, 3029, 3034, 3035])
+			->whereIN('local_trips.status_id', [3023, 3024, 3026, 3029, 3034, 3035, 3036])
 			->where('local_trips.employee_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')
 		// ->orderBy('trips.created_at', 'desc');

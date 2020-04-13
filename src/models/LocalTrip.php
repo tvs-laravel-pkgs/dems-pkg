@@ -519,7 +519,7 @@ class LocalTrip extends Model {
 
 		$notification_type = 'Trip Approved';
 		$message = "Trip approved successfully!";
-		if ($trip->status_id == 3034) {
+		if ($trip->status_id == 3034 || $trip->status_id == 3036) {
 			$notification_type = 'Claim Approved';
 			$message = "Claim approved successfully!";
 

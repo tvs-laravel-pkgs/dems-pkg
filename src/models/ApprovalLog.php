@@ -74,8 +74,7 @@ class ApprovalLog extends Model {
 			->where('approval_logs.type_id', 3581)
 			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc')
-			->orderBy('trips.status_id', 'desc')
+			->orderBy('trips.start_date', 'desc')
 			->where(function ($query) use ($r) {
 				if ($r->get('type_id')) {
 					$query->where("approval_logs.approval_type_id", $r->get('type_id'))->orWhere(DB::raw("-1"), $r->get('type_id'));
@@ -151,8 +150,7 @@ class ApprovalLog extends Model {
 			->where('approval_logs.approval_type_id', $approval_type_id)
 			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc')
-			->orderBy('trips.status_id', 'desc')
+			->orderBy('trips.start_date', 'desc')
 
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id') && $r->get('employee_id') != '<%$ctrl.filter_employee_id%>') {
@@ -225,8 +223,7 @@ class ApprovalLog extends Model {
 			->where('approval_logs.approval_type_id', $approval_type_id)
 			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')
-			->orderBy('local_trips.created_at', 'desc')
-			->orderBy('local_trips.status_id', 'desc')
+			->orderBy('local_trips.start_date', 'desc')
 
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id') && $r->get('employee_id') != '<%$ctrl.filter_employee_id%>') {
@@ -303,8 +300,7 @@ class ApprovalLog extends Model {
 			->where('approval_logs.approval_type_id', 3620)
 			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc')
-			->orderBy('trips.status_id', 'desc')
+			->orderBy('trips.start_date', 'desc')
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -371,7 +367,7 @@ class ApprovalLog extends Model {
 			->where('approval_logs.type_id', 3582)
 			->where('approval_logs.approved_by_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')
-			->orderBy('local_trips.id', 'desc')
+			->orderBy('local_trips.start_date', 'desc')
 			->where(function ($query) use ($r) {
 				if ($r->get('type_id')) {
 					$query->where("approval_logs.approval_type_id", $r->get('type_id'))->orWhere(DB::raw("-1"), $r->get('type_id'));

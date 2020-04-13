@@ -862,17 +862,17 @@ class ReportController extends Controller {
 		// dd($r->all());
 
 		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
-			session(['verifier_local_employee_id' => $r->employee_id]);
+			session(['verifier_outstation_employee_id' => $r->employee_id]);
 		}
 		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
-			session(['verifier_local_purpose_id' => $r->purpose_id]);
+			session(['verifier_outstation_purpose_id' => $r->purpose_id]);
 		}
 		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
-			session(['verifier_local_outlet_id' => $r->outlet_id]);
+			session(['verifier_outstation_outlet_id' => $r->outlet_id]);
 		}
 		if ($r->from_date != '<%$ctrl.start_date%>') {
-			Session::put('verifier_local_start_date', $r->from_date);
-			Session::put('verifier_local_end_date', $r->to_date);
+			Session::put('verifier_outstation_start_date', $r->from_date);
+			Session::put('verifier_outstation_end_date', $r->to_date);
 		}
 
 		$approval_type_id = 3622;
