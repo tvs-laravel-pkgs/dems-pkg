@@ -532,5 +532,9 @@ Route::group(['middleware' => ['web']], function () {
 
 		Route::post('eyatra/outstation-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectOutstationTripClaimVerification')->name('rejectOutstationTripClaimVerification');
 		Route::get('eyatra/outstation-trip/claim/verifier/approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationController@approveOutstationTripClaimVerification')->name('approveOutstationTripClaimVerification');
+		//VERIFIER >> LOCAL TRIP CLAIM VERIFICATION
+		Route::get('eyatra/local-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraLocalClaimVerificationGetData')->name('eyatraLocalClaimVerificationGetData');
+		Route::post('eyatra/local-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectLocalTripClaimVerification')->name('rejectLocalTripClaimVerification');
+		Route::get('eyatra/local-trip/claim/verifier/approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationController@approveLocalTripClaimVerification')->name('approveLocalTripClaimVerification');
 	});
 });
