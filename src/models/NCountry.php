@@ -30,7 +30,7 @@ class NCountry extends Model {
 		return $this->hasMany('Uitoux\EYatra\NState', 'country_id');
 	}
 
-	static public function create($countries, $admin, $company) {
+	static public function generate($countries, $admin, $company) {
 
 		foreach ($countries as $country_id => $country_data) {
 			$country = NCountry::firstOrNew([

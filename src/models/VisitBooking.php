@@ -42,9 +42,9 @@ class VisitBooking extends Model {
 		return '₹ ' . IND_money_format($value);
 	}
 	/*public function setAmountAttribute($value) {
-	$this->attributes['amount'] = IND_money_format($value);
-	dd();
-	}*/
+		$this->attributes['amount'] = IND_money_format($value);
+		dd();
+	*/
 	public function visit() {
 		return $this->belongsTo('Uitoux\EYatra\Visit');
 	}
@@ -73,7 +73,7 @@ class VisitBooking extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3180)->where('attachment_type_id', 3200);
 	}
 
-	public static function create($visit, $faker, $booking_detail_status_id, $employee) {
+	public static function generate($visit, $faker, $booking_detail_status_id, $employee) {
 		$booking = new VisitBooking;
 		$booking->visit_id = $visit->id;
 		$booking->type_id = 3100; // FRESH BOOKING

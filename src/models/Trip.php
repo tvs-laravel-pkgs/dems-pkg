@@ -124,7 +124,7 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3185)->where('attachment_type_id', 3200);
 	}
 
-	public static function create($employee, $trip_number, $faker, $trip_status_id, $admin) {
+	public static function generate($employee, $trip_number, $faker, $trip_status_id, $admin) {
 		$trip = new Trip();
 		$trip->employee_id = $employee->id;
 		$trip->number = 'TRP' . $trip_number++;

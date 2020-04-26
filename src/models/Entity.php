@@ -178,7 +178,7 @@ class Entity extends Model {
 		return Entity::where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->select('id', 'name')->get();
 	}
 
-	public static function create($sample_entities, $admin, $company) {
+	public static function generate($sample_entities, $admin, $company) {
 		foreach ($sample_entities as $entity_type_id => $entities) {
 			if ($entity_type_id == 502) {
 				foreach ($entities as $entity_name) {

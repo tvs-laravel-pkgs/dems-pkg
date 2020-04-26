@@ -122,7 +122,7 @@ class Visit extends Model {
 	public function changeIndianMoneyFormat($value) {
 		return IND_money_format($value);
 	}
-	public static function create($trip, $src_city, $dest_city, $visit1_date, $company, $booking_method_id, $booking_status_id, $trip_status_id, $manager_verification_status_id, $employee, $faker) {
+	public static function generate($trip, $src_city, $dest_city, $visit1_date, $company, $booking_method_id, $booking_status_id, $trip_status_id, $manager_verification_status_id, $employee, $faker) {
 		$visit = new Visit();
 		$visit->trip_id = $trip->id;
 		$visit->from_city_id = $src_city->id;

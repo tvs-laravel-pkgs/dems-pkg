@@ -133,7 +133,7 @@ class Employee extends Model {
 		return $employee;
 	}
 
-	public static function create($company, $code, $outlet, $admin, $faker, $manager_id = null) {
+	public static function generate($company, $code, $outlet, $admin, $faker, $manager_id = null) {
 		$employee = Employee::firstOrNew([
 			'company_id' => $company->id,
 			'code' => $code,

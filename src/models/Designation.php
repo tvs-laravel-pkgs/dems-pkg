@@ -18,7 +18,7 @@ class Designation extends Model {
 		return Designation::select('id', 'name')->get()->keyBy('id');
 	}
 
-	public static function create($company, $admin) {
+	public static function generate($company, $admin) {
 		for ($i = 1; $i < 15; $i++) {
 			$designation = Designation::firstOrNew([
 				'company_id' => $company->id,
