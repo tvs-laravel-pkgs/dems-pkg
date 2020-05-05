@@ -110,7 +110,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 535,
 			],
 			3025 => [
-				'name' => 'Payment Pending form Financier',
+				'name' => 'Payment Pending from Financier',
 				'config_type_id' => 535,
 			],
 			3026 => [

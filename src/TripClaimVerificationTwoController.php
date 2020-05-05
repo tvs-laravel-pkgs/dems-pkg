@@ -165,7 +165,7 @@ class TripClaimVerificationTwoController extends Controller {
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$employee_claim->status_id = 3226; //Claim Rejected
+		$employee_claim->status_id = 3024; //Claim Rejected
 		$employee_claim->save();
 
 		$trip->rejection_id = $r->reject_id;
