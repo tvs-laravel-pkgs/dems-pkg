@@ -1616,6 +1616,9 @@ class Trip extends Model {
 
 				$employee_claim->save();
 
+				$trip->status_id = 3033; //CLAIM INPROGRESS
+				$trip->save();
+
 				DB::commit();
 				// dd($employee_claim);
 				return response()->json(['success' => true]);
@@ -1766,6 +1769,9 @@ class Trip extends Model {
 				// } else {
 				// 	$boarding_dates_list = array();
 				// }
+				$trip->status_id = 3033; //CLAIM INPROGRESS
+				$trip->save();
+
 				DB::commit();
 				return response()->json(['success' => true, 'saved_lodgings' => $saved_lodgings]);
 			}
@@ -1875,6 +1881,8 @@ class Trip extends Model {
 					$employee_claim->save();
 				}
 
+				$trip->status_id = 3033; //CLAIM INPROGRESS
+				$trip->save();
 				//GET SAVED BOARDINGS
 				$saved_boardings = Trip::with([
 					'boardings',
