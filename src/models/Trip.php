@@ -358,7 +358,8 @@ class Trip extends Model {
 			return response()->json($data);
 		}
 
-		if (!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) {
+		$employee = Employee::find($trip->employee_id);
+		if ((!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) && $employee->reporting_to_id != Auth::user()->entity_id) {
 			$data['success'] = false;
 			$data['message'] = 'Trip belongs to you';
 			$data['errors'] = ['Trip belongs to you'];
