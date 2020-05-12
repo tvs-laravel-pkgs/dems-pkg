@@ -113,6 +113,8 @@ app.component('eyatraLocalTripFinancierVerificationView', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.local_travel_attachment_url = local_travel_attachment_url;
+        self.local_travel_google_attachment_url = local_travel_google_attachment_url;
+        
         $http.get(
             local_trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
