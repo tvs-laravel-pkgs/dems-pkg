@@ -88,6 +88,10 @@ class LocalTrip extends Model {
 		if ($request->purpose_ids) {
 			$trips->where('local_trips.purpose_id', $request->purpose_ids);
 		}
+		if ($request->future_trip == '1') {
+			$current_date = date('Y-m-d');
+			$trips->where('local_trips.end_date', '<=', $current_date);
+		}
 
 		return $trips;
 	}
