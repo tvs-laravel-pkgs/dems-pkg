@@ -29,6 +29,9 @@ class AuthController extends Controller {
 
 		if (Auth::attempt(['mobile_number' => request('username'), 'password' => request('password')])) {
 
+			//Check Device Token already available or not
+			User::where('device_token', request('device_token'))->update(['device_token' => NULL]);
+
 			//Save Device Token
 			$user = User::where('id', Auth::user()->id)->update(['device_token' => request('device_token')]);
 
