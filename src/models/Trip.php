@@ -571,6 +571,10 @@ class Trip extends Model {
 			$trips->where('trips.purpose_id', $request->purpose_ids);
 		}
 
+		if ($request->future_trip) {
+			$current_date = date('Y-m-d');
+			$trips->where('trips.end_date', '<=', $current_date);
+		}
 		// if ($request->get('from_date')) {
 		// 	$date = date('Y-m-d', strtotime($request->get('from_date')));
 		// 	// dd($date);
