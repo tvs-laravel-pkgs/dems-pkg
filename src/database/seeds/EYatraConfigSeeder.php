@@ -122,7 +122,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 535,
 			],
 			3029 => [
-				'name' => 'Senior Manager Claim Approval Pending',
+				'name' => 'Senior Manager Approval Pending',
 				'config_type_id' => 535,
 			],
 			3030 => [

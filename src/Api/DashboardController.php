@@ -24,12 +24,12 @@ class DashboardController extends Controller {
 		return response()->json(['success' => true, 'notification_details' => $notification_details]);
 	}
 	public function getDashboard() {
-		$total_trips = Trip::where('status_id', '!=', '3032')->where('employee_id', Auth::user()->entity_id)
+		$total_trips = Trip::where('status_id', '!=', '3032')->where('trips.status_id', '!=', '3022')->where('employee_id', Auth::user()->entity_id)
 			->count();
 
-		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', '!=', '3032')->where('status_id', '!=', '3026')->count();
+		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->whereIN('trips.status_id', [3023, 3024, 3025, 3029, 3030, 3034])->count();
 
-		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', '!=', '3032')->where('start_date', '>', date('Y-m-d'))->count();
+		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3028)->where('start_date', '>', date('Y-m-d'))->count();
 
 		$dashboard_details['total_trips'] = $total_trips;
 		$dashboard_details['total_claims_pending'] = $total_claims_pending;

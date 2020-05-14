@@ -367,17 +367,7 @@ class EYatraRoleSeeder extends Seeder {
 
 					//APPROVALS / VERIFICATION
 					5600, 5601, 5603, 5604, 5607, 5610, 5612,
-					//5612 -> This Permission only enable for Company based.If Company requires additional verification for Outstation and Local Trip claims before financier approval, enable in company master
-
-					//MOBILE PERMISSIONS
-					//TRIPS
-					9000, 9001, 9002, 9003, 9004, 9005,
-
-					//TRIPS VERIFICATION
-					9006,
-
-					//CLAIM VERIFICATION
-					9007,
+					//5612 -> This Permission only enable for Company based.If Company requires additional verification for Outstation and Local Trip claims before financier approval, enable addtion approval in company master
 
 					//REPORTS
 					5680, 5684, 5685, 5686,
