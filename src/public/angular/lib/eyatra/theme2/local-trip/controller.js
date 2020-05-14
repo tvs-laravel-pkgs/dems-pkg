@@ -193,6 +193,7 @@ app.component('eyatraTripLocalForm', {
             self.trip = response.data.trip;
             self.trip.trip_periods = '';
             self.eligible_date = response.data.eligible_date;
+            self.max_eligible_date = response.data.max_eligible_date;
 
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
@@ -204,6 +205,7 @@ app.component('eyatraTripLocalForm', {
                 $(".daterange").daterangepicker({
                     autoclose: true,
                     // minDate: new Date(self.eligible_date),
+                    maxDate: new Date(self.max_eligible_date),
                     locale: {
                         cancelLabel: 'Clear',
                         format: "DD-MM-YYYY",
@@ -219,6 +221,7 @@ app.component('eyatraTripLocalForm', {
                     $(".daterange").daterangepicker({
                         autoclose: true,
                         // minDate: new Date(self.eligible_date),
+                        maxDate: new Date(self.max_eligible_date),
                         locale: {
                             cancelLabel: 'Clear',
                             format: "DD-MM-YYYY",
@@ -699,5 +702,83 @@ app.component('eyatraTripLocalView', {
                 $this.tooltip('show');
             }
         });
+
+        //CANCEL TRIP
+        $scope.confirmCancelLocalTrip = function() {
+            $id = $('#trip_id').val();
+
+            $http.get(
+                local_trip_cancel_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                } else {
+                    $('#cancel_local_trip').modal('hide');
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trip Cancelled Successfully',
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                    setTimeout(function() {
+                        $location.path('/local-trip/list')
+                        $scope.$apply()
+                    }, 1000);
+
+                }
+
+            });
+        }
+
+        //DELETE TRIP
+        $scope.confirmDeleteLocalTrip = function() {
+            $id = $('#trip_id').val();
+            $http.get(
+                local_trip_delete_url + '/' + $id,
+            ).then(function(response) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                } else {
+                    $('#delete_local_trip').modal('hide');
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Trip Deleted Successfully',
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                    setTimeout(function() {
+                        $location.path('/local-trip/list')
+                        $scope.$apply()
+                    }, 1000);
+                }
+
+            });
+        }
     }
 });

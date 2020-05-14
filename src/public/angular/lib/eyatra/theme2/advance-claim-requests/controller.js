@@ -187,23 +187,24 @@ app.component('eyatraAdvanceClaimRequests', {
 
                     $('#employee_export').css({ 'display': 'none' });
 
-                    //var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
-
-                    //dataTableFilter.fnFilter();
-                    // var table = $('#eyatra_advance_claim_request_table').dataTable();
-
-                    // table.ajax.reload();
-
-                    var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
-                    dataTableFilter.fnFilter();
-
                     window.location.href = laravel_routes['AdvanceClaimRequestExport'];
-                    
-                     // location.reload();
-                    $location.path('/advance-claim/requests');
-                    $scope.$apply();
+
+                    setTimeout(function() {
+                        var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
+
+                        dataTableFilter.fnFilter();
+                        var table = $('#eyatra_advance_claim_request_table').dataTable();
+
+                        table.ajax.reload();
 
 
+                        var dataTableFilter = $('#eyatra_advance_claim_request_table').dataTable();
+                        dataTableFilter.fnFilter();
+
+                        // location.reload();
+                        $location.path('/advance-claim/requests');
+                        $scope.$apply();
+                    }, 5000);
                     // $timeout(function() {
                     //     $location.path('/eyatra/advance-claim/requests')
                     //     // $scope.$apply()

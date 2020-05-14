@@ -113,12 +113,15 @@ app.component('eyatraLocalTripFinancierVerificationView', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.local_travel_attachment_url = local_travel_attachment_url;
+        self.local_travel_google_attachment_url = local_travel_google_attachment_url;
+        
         $http.get(
             local_trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
             self.claim_status = response.data.claim_status;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
+            self.gender = (response.data.trip.employee.gender).toLowerCase();
             console.log(self.trip_claim_rejection_list);
         });
 

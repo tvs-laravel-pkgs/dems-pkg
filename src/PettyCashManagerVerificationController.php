@@ -6,6 +6,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
@@ -191,6 +192,18 @@ class PettyCashManagerVerificationController extends Controller {
 				} else {
 					$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3285, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				}
+
+				$petty_cash = PettyCash::where('id', $request->approve)->first();
+				//Approval Log
+				if ($petty_cash && $petty_cash->petty_cash_type_id == 3440) {
+					$type = 3583;
+					$approval_type_id = 3609;
+				} else {
+					$type = 3584;
+					$approval_type_id = 3612;
+				}
+				$approval_log = ApprovalLog::saveApprovalLog($type, $petty_cash->id, $approval_type_id, Auth::user()->entity_id, Carbon::now());
+
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {

@@ -18,8 +18,8 @@ class TripClaimController extends Controller {
 			->join('ncities as c', 'c.id', 'v.from_city_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
 			->join('ey_employee_claims as claims', 'claims.trip_id', 'trips.id')
+			->join('configs as status', 'status.id', 'claims.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
 			->where('users.user_type_id', 3121)
 			->select(
@@ -81,30 +81,21 @@ class TripClaimController extends Controller {
 		// }
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
-
 				$img1 = asset('public/img/content/yatra/table/edit.svg');
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				if ($trip->status_id == 3024) {
 
-					return '
-				<a href="#!/trip/claim/edit/' . $trip->id . '">
-					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
-				</a>
-				<a href="#!/trip/claim/view/' . $trip->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
-				} else {
-					return '
+				$action = '';
 
-				<a href="#!/trip/claim/view/' . $trip->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
+				if ($trip->status_id == 3023 || $trip->status_id == 3024 || $trip->status_id == 3033) {
+					$action .= ' <a href="#!/trip/claim/edit/' . $trip->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 				}
 
+				$action .= ' <a href="#!/trip/claim/view/' . $trip->id . '"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
+				return $action;
 			})
 			->make(true);
 	}
@@ -113,7 +104,7 @@ class TripClaimController extends Controller {
 		return Trip::getClaimFormData($trip_id);
 	}
 	public function eyatraTripClaimFilterData() {
-		return Trip::getFilterData();
+		return Trip::getFilterData($type = 2);
 	}
 
 	public function saveEYatraTripClaim(Request $request) {

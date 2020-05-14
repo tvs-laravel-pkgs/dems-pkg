@@ -3,9 +3,11 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
@@ -112,7 +114,7 @@ class TripClaimPendingController extends Controller {
 		return Trip::getClaimFormData($trip_id);
 	}
 	public function eyatraTripClaimFilterData() {
-		return Trip::getFilterData();
+		return Trip::getFilterData($type = 3);
 	}
 
 	public function saveEYatraTripClaim(Request $request) {
@@ -353,7 +355,7 @@ class TripClaimPendingController extends Controller {
 			})
 			->make(true);
 	}
-	public function EmployeeClaimPaymentPendingApprove(request $request) {
+	public function EmployeeClaimPaymentPendingApprove(Request $request) {
 
 		DB::beginTransaction();
 		try {
@@ -366,34 +368,38 @@ class TripClaimPendingController extends Controller {
 			$employee_claim_status_update = EmployeeClaim::whereIn('id', $employee_claim_ids)->update(['status_id' => 3026]);
 			$trip_ids = EmployeeClaim::whereIn('id', $employee_claim_ids)->pluck('trip_id');
 			$employee_claim_trip_status_update = Trip::whereIn('id', $trip_ids)->update(['status_id' => 3026]);
+			//Approval Log Save For Multiple Trips
+			if (count($trip_ids) > 0) {
+				foreach ($trip_ids as $key => $trip) {
+					ApprovalLog::saveApprovalLog(3581, $trip, 3605, Auth::user()->entity_id, Carbon::now());
+				}
+			}
 			DB::commit();
 			return response()->json(['success' => true]);
-
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}
 	}
-	public function EmployeeClaimPaymentPendingSingleApprove(request $request) {
+	public function EmployeeClaimPaymentPendingSingleApprove(Request $request) {
 
 		DB::beginTransaction();
 		try {
-
 			if ($request->id) {
 				$employee_claim_id = $request->id;
 			} else {
 				return back()->with('error', 'Employee claim not found');
 			}
 			$employee_claim_status_update = EmployeeClaim::where('id', $employee_claim_id)->update(['status_id' => 3026]);
-			$trip_id = EmployeeClaim::where('id', $employee_claim_id)->pluck('trip_id');
+			$trip_id = EmployeeClaim::where('id', $employee_claim_id)->first()->trip_id;
 			$employee_claim_trip_status_update = Trip::where('id', $trip_id)->update(['status_id' => 3026]);
+			//Approval Log Save
+			ApprovalLog::saveApprovalLog(3581, $trip_id, 3605, Auth::user()->entity_id, Carbon::now());
 			DB::commit();
 			return response()->json(['success' => true]);
-
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
 		}
 	}
-
 }

@@ -130,6 +130,48 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                 }
             });
         }
+
+        $(document.body).on('click', '.paid_amount', function() {
+            var id = $(this).data('expense_id');
+            $http.post(
+                expense_voucher_advance_pending_single_approve_url, { id: id },
+            ).then(function(responsse) {
+                if (!response.data.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: errors,
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 1000);
+                } else {
+                    $noty = new Noty({
+                        type: 'success',
+                        layout: 'topRight',
+                        text: 'Employee Claim Payment Pending Approved Successfully',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+
+                    $('#approve').css({ 'display': 'none' });
+
+                    var dataTableFilter = $('#payment_pending_list_table').dataTable();
+                    dataTableFilter.fnFilter();
+                    $location.path('/trip/claim/payment-pending/list');
+                    $scope.$apply();
+                    // window.location.href = laravel_routes['listEYatraTripClaimPaymentPendingList'];
+                }
+            });
+        });
         // $rootScope.loading = false;
     }
 });

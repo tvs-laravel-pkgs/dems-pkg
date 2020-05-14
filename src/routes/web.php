@@ -6,6 +6,9 @@ Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
 Route::post('eyatra/api/forgotPassword', 'Uitoux\EYatra\Api\AuthController@forgotPassword');
 Route::post('eyatra/api/changePassword', 'Uitoux\EYatra\Api\AuthController@changePassword');
 
+//LOGOUT
+Route::post('eyatra/api/logout', 'Uitoux\EYatra\Api\AuthController@logout');
+
 Route::group(['middleware' => ['api']], function () {
 	Route::group(['middleware' => ['auth:api'], 'prefix' => 'eyatra/api'], function () {
 		//HELPERS
@@ -24,12 +27,6 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('trip/visit/booking-cancel/{visit_id}', 'Uitoux\EYatra\Api\TripController@cancelTripVisitBooking');
 		Route::get('trips/visit/delete/{visit_id}', 'Uitoux\EYatra\Api\TripController@deleteVisit');
 
-		//TRIP VERIFICATION
-		Route::get('trip/verification/get-list', 'Uitoux\EYatra\Api\TripVerificationController@listTripVerification');
-
-		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
-		Route::post('trip/verification/reject', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
-
 		// TRIP CLAIM
 		// Route::get('trip/cliam/list', 'Uitoux\EYatra\Api\TripVerificationController@listClaimList');
 		Route::post('trip/claim/list', 'Uitoux\EYatra\Api\TripClaimController@listClaimList');
@@ -42,6 +39,11 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/claim/get-visit-transport-mode-claim-status', 'Uitoux\EYatra\Api\TripClaimController@getVisitTrnasportModeClaimStatus');
 
 		Route::post('trip/claim/save', 'Uitoux\EYatra\Api\TripClaimController@saveClaim');
+
+		//TRIP VERIFICATION
+		Route::get('trip/verification/get-list', 'Uitoux\EYatra\Api\TripVerificationController@listTripVerification');
+		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
+		Route::post('trip/verification/reject', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
 
 		//TRIP CLAIM VERIFICATION LEVEL
 		Route::get('trip/claim/verification/one/get-list', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@listTripClaimVerificationOneList');
@@ -73,7 +75,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::get('local-trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@approveTrip');
 		Route::post('local-trip/verification/reject', 'Uitoux\EYatra\Api\LocalTripController@rejectTrip');
 
-		//Profile Image Save
+		//PROFILE IMAGE SAVE
 		Route::post('/profile/save/image', 'Uitoux\EYatra\Api\ProfileController@saveImage')->name('profileSaveImage');
 
 		//NOTIFICATION
@@ -99,12 +101,14 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/entity/view/{entity_id}', 'Uitoux\EYatra\EntityController@viewEYatraEntity')->name('viewEYatraEntity');
 		Route::get('eyatra/entity/delete/{entity_id}', 'Uitoux\EYatra\EntityController@deleteEYatraEntity')->name('deleteEYatraEntity');
 
-		//ENTITIES NG
+		//REJECTED REASONS
 		Route::get('entity/get-form-data-ng/{entity_id?}', 'Uitoux\EYatra\RejectionController@eyatraEntityFormDataNg')->name('eyatraEntityFormDataNg');
 
 		Route::get('entity/get-data-list', 'Uitoux\EYatra\RejectionController@listEYatraEntityNg')->name('listEYatraEntityNg');
 		Route::post('entity/save/ng', 'Uitoux\EYatra\RejectionController@saveEYatraEntityNg')->name('saveEYatraEntityNg');
 		Route::get('entity/delete/ng/{entity_id}', 'Uitoux\EYatra\RejectionController@deleteEYatraEntityNg')->name('deleteEYatraEntityNg');
+		Route::get('eyatra/rejected-reasons/filter', 'Uitoux\EYatra\RejectionController@eyatraRejectedReasonFilter')->name('eyatraRejectedReasonFilter');
+
 		//END
 		//TRAVEL MODE
 		Route::get('eyatra/travel-mode/get-list', 'Uitoux\EYatra\TravelModeController@listEYatraTravelMode')->name('listEYatraTravelMode');
@@ -179,6 +183,14 @@ Route::group(['middleware' => ['web']], function () {
 		// Route::get('eyatra/masters/role/edit/{id}', 'Uitoux\EYatra\OutletController@edit')->name('editRoles');
 		// Route::post('eyatra/masters/role/save', 'Uitoux\EYatra\OutletController@save')->name('saveRoles');
 
+		//COMPANY
+		Route::get('eyatra/company/get-list', 'Uitoux\EYatra\CompanyController@listEYatraCompany')->name('listEYatraCompany');
+		Route::get('eyatra/company/get-form-data/{id?}', 'Uitoux\EYatra\CompanyController@eyatraCompanyFormData')->name('eyatraCompanyFormData');
+		Route::post('eyatra/company/save', 'Uitoux\EYatra\CompanyController@saveEYatraCompany')->name('saveEYatraCompany');
+		Route::get('eyatra/company/view/{id}', 'Uitoux\EYatra\CompanyController@viewEYatraCompany')->name('viewEYatraCompany');
+		Route::get('eyatra/company/delete/{id}', 'Uitoux\EYatra\CompanyController@deleteEYatraCompany')->name('deleteEYatraCompany');
+		Route::get('eyatra/company/get-filter-data', 'Uitoux\EYatra\CompanyController@eyatraCompanyFilterData')->name('eyatraCompanyFilterData');
+
 		//OUTLETS
 		Route::get('eyatra/outlet/get-list', 'Uitoux\EYatra\OutletController@listEYatraOutlet')->name('listEYatraOutlet');
 		Route::get('eyatra/outlet/get-form-data/{outlet_id?}', 'Uitoux\EYatra\OutletController@eyatraOutletFormData')->name('eyatraOutletFormData');
@@ -202,6 +214,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
 		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
 		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
+		Route::post('eyatra/manager/get-list', 'Uitoux\EYatra\EmployeeController@getManagerByOutlet')->name('getManagerByOutlet');
 
 		//EMPLOYEES IMPORT
 		Route::get('import-employee/list', 'Uitoux\EYatra\EmployeeController@getImportJobsList')->name('getImportJobsList');
@@ -229,10 +242,24 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/expense/voucher-advance/verification2/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@expenseVoucherVerification2Save')->name('expenseVoucherVerification2Save');
 		Route::get('eyatra/expense/voucher-advance/verification2/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@expenseVoucherVerification2View')->name('expenseVoucherVerification2View');
 
+		//EXPENSE VOUCHER ADVANCE RE-PAID CASHIER
+		Route::get('eyatra/expense/voucher-advance/cashier-repaid/list', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@listExpenseVoucherCashierRepaidList')->name('listExpenseVoucherCashierRepaidList');
+		Route::post('eyatra/expense/voucher-advance/cashier/single/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@expenseVoucherCashierSingleRepaidApprove')->name('expenseVoucherCashierSingleRepaidApprove');
+		Route::post('eyatra/expense/voucher-advance/cashier/multiple/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@expenseVoucherCashierMultipleRepaidApprove')->name('expenseVoucherCashierMultipleRepaidApprove');
+		Route::get('eyatra/expense/voucher-advance/cashier-repaid/filter-data', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@ExpenseVoucherAdvanceCashierRepaidFilterData')->name('ExpenseVoucherAdvanceCashierRepaidFilterData');
+		Route::get('eyatra/expense/voucher-advance/cashier-repaid/view/{id}', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@ExpenseVoucherAdvanceCashierRepaidView')->name('ExpenseVoucherAdvanceCashierRepaidView');
+
 		//EXPENSE VOUCHER ADVANCE VERIFICATION FINANCIER
 		Route::get('eyatra/expense/voucher-advance/verification3/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@listExpenseVoucherverification3Request')->name('listExpenseVoucherverification3Request');
 		Route::post('eyatra/expense/voucher-advance/verification3/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@expenseVoucherVerification3Save')->name('expenseVoucherVerification3Save');
 		Route::get('eyatra/expense/voucher-advance/verification3/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@expenseVoucherVerification3View')->name('expenseVoucherVerification3View');
+		//EXPENSE VOUCHER ADVANCE RE-PAID FINANCIER
+		Route::get('eyatra/expense/voucher-advance/financer-repaid/list', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@listExpenseVoucherFinancierRepaidList')->name('listExpenseVoucherFinancierRepaidList');
+
+		Route::post('eyatra/expense/voucher-advance/financier/single/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@expenseVoucherFinancierSingleRepaidApprove')->name('expenseVoucherFinancierSingleRepaidApprove');
+		Route::post('eyatra/expense/voucher-advance/financier/multiple/repaid-approve', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@expenseVoucherFinancierMultipleRepaidApprove')->name('expenseVoucherFinancierMultipleRepaidApprove');
+		Route::get('eyatra/expense/voucher-advance/financier-repaid/filter-data', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@ExpenseVoucherAdvanceFinancierRepaidFilterData')->name('ExpenseVoucherAdvanceFinancierRepaidFilterData');
+		Route::get('eyatra/expense/voucher-advance/financier-repaid/view/{id}', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@ExpenseVoucherAdvanceFinancierRepaidView')->name('ExpenseVoucherAdvanceFinancierRepaidView');
 
 		//DESIGNATIONS
 		Route::get('eyatra/designations/get-list', 'Uitoux\EYatra\DesignationController@listEYatraDesignation')->name('listEYatraDesignations');
@@ -259,6 +286,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/cancel/{trip_id}', 'Uitoux\EYatra\TripController@cancelTrip')->name('cancelTrip');
 		Route::get('eyatra/trip/verification-request/{trip_id}', 'Uitoux\EYatra\TripController@tripVerificationRequest')->name('tripVerificationRequest');
 		Route::get('/eyatra/trip/visit/booking-cancel/{visit_id}', 'Uitoux\EYatra\TripController@cancelTripVisitBooking')->name('cancelTripVisitBooking');
+		Route::get('/eyatra/trip/visit/cancel/{visit_id}', 'Uitoux\EYatra\TripController@cancelTripVisit')->name('cancelTripVisit');
 		Route::get('eyatra/trips/visit/get-form-data/{trip_id}', 'Uitoux\EYatra\TripController@visitFormData')->name('visitFormData');
 		Route::get('/eyatra/trip/visit/request-booking-cancel/{visit_id}', 'Uitoux\EYatra\TripController@requestCancelVisitBooking')->name('requestCancelVisitBooking');
 		Route::get('eyatra/trips/visit/delete/{visit_id}', 'Uitoux\EYatra\TripController@deleteVisit')->name('deleteVisit');
@@ -417,9 +445,11 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/view/{trip_id}', 'Uitoux\EYatra\LocalTripController@viewLocalTrip')->name('viewLocalTrip');
 		Route::get('eyatra/local-trip/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFilterData')->name('eyatraLocalTripFilterData');
 		Route::get('eyatra/local-trip/delete/{trip_id}', 'Uitoux\EYatra\LocalTripController@deleteTrip')->name('deleteTrip');
+		Route::get('eyatra/local-trip/cancel/{trip_id?}', 'Uitoux\EYatra\Api\LocalTripController@cancelTrip');
 
 		//LOCAL TRIP CLAIM
 		Route::get('eyatra/local-trip/claim/get-list', 'Uitoux\EYatra\LocalTripController@listClaimedLocalTrip')->name('listClaimedLocalTrip');
+		Route::get('eyatra/local-trip/claim/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripClaimFilterData')->name('eyatraLocalTripClaimFilterData');
 
 		//LOCAL TRIP MANAGER VERIFICATION
 		Route::get('eyatra/local-trip/verification/get-list', 'Uitoux\EYatra\LocalTripController@listLocalTripVerification')->name('listLocalTripVerification');
@@ -440,10 +470,77 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/report/outstation-trip/get-list', 'Uitoux\EYatra\ReportController@listOutstationTripReport')->name('listOutstationTripReport');
 		Route::get('eyatra/report/outstation-trip/export', 'Uitoux\EYatra\ReportController@outstationTripExport')->name('outstationTripExport');
 		Route::post('eyatra/employee/get-list', 'Uitoux\EYatra\ReportController@getEmployeeByOutlet')->name('getEmployeeByOutlet');
-
+		Route::get('eyatra/reports/trip/view/{trip_id}', 'Uitoux\EYatra\ReportController@viewTripData')->name('viewTripData');
 		//LOCAL TRIP REPORT
 		Route::get('eyatra/report/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraLocalFilterData')->name('eyatraLocalFilterData');
 		Route::get('eyatra/report/local-trip/get-list', 'Uitoux\EYatra\ReportController@listLocalTripReport')->name('listLocalTripReport');
 		Route::get('eyatra/report/local-trip/export', 'Uitoux\EYatra\ReportController@localTripExport')->name('localTripExport');
+
+		//APPROVAL LOGS
+		//OUTSTATION TRIP
+		Route::get('report/trip/outstation-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripVerificationFilterData')->name('eyatraOutstationTripVerificationFilterData');
+		Route::get('report/outstation-trip/get-data', 'Uitoux\EYatra\ReportController@eyatraOutstationTripData')->name('eyatraOutstationTripData');
+
+		//LOCAL TRIP
+		Route::get('report/trip/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraReportLocalTripFilterData')->name('eyatraReportLocalTripFilterData');
+		Route::get('report/outstation-trip/get-local-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripData')->name('eyatraLocalTripData');
+
+		//TRIP ADVANCE REQUEST
+		Route::get('report/trip-advance-request/get-data', 'Uitoux\EYatra\ReportController@eyatraTripAdvanceRequestData')->name('eyatraTripAdvanceRequestData');
+		Route::get('report/trip/trip-advance-request/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripAdvanceRequestFilterData')->name('eyatraTripAdvanceRequestFilterData');
+
+		//SR MANAGER APPROVAL
+		Route::get('report/trip-sr-manager-approval/get-data', 'Uitoux\EYatra\ReportController@eyatraTripSrManagerApprovalData')->name('eyatraTripSrManagerApprovalData');
+		Route::get('report/trip/trip-sr-manager-approval/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripSrManagerApprovalFilterData')->name('eyatraTripSrManagerApprovalFilterData');
+
+		//FINANCIER MANAGER APPROVAL
+		Route::get('report/trip-financier-approval/get-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierApprovalData')->name('eyatraTripFinancierApprovalData');
+		Route::get('report/trip/trip-financier-approval/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierApprovalFilterData')->name('eyatraTripFinancierApprovalFilterData');
+
+		//FINANCIER PAID
+		Route::get('report/outstation-trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidData')->name('eyatraTripFinancierPaidData');
+		Route::get('report/outstation-trip/trip-financier-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripFinancierPaidFilterData')->name('eyatraTripFinancierPaidFilterData');
+		Route::get('report/local-trip/trip-financier-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripFinancierPaidFilterData')->name('eyatraLocalTripFinancierPaidFilterData');
+
+		//FINANCIER LOCAL TRIP PAID
+		Route::get('report/local-trip-financier-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraLocalTripFinancierPaidData')->name('eyatraLocalTripFinancierPaidData');
+		//EMPLOYEE PAID
+		Route::get('report/trip-employee-paid/get-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidData')->name('eyatraTripEmployeePaidData');
+		Route::get('report/trip/trip-employee-paid/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraTripEmployeePaidFilterData')->name('eyatraTripEmployeePaidFilterData');
+
+		//REPORT >> PETTY CASH FILTER DATA
+		Route::get('report/petty-cash/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraPettyCashFilterData')->name('eyatraPettyCashFilterData');
+
+		//REPORT >> MANAGER
+		Route::get('report/petty-cash/get-data', 'Uitoux\EYatra\ReportController@eyatraPettyCashData')->name('eyatraPettyCashData');
+
+		//REPORT >> EXPENSE VOUCHER ADVANCE FILTER DATA
+		Route::get('report/expense-voucher-advance/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceFilterData')->name('eyatraExpenseVoucherAdvanceFilterData');
+
+		//REPORT >> EXPENSE VOUCHER ADVANCE MANAGER
+		Route::get('report/expense-voucher-advance/get-data', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceData')->name('eyatraExpenseVoucherAdvanceData');
+
+		//REPORT >> EXPENSE VOUCHER ADVANCE REPAID FILTER DATA
+		Route::get('report/expense-voucher-advance-repaid/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceRepaidFilterData')->name('eyatraExpenseVoucherAdvanceRepaidFilterData');
+
+		//REPORT >> EXPENSE VOUCHER ADVANCE REPAID MANAGER
+		Route::get('report/expense-voucher-advance-repaid/get-data', 'Uitoux\EYatra\ReportController@eyatraExpenseVoucherAdvanceRepaidData')->name('eyatraExpenseVoucherAdvanceRepaidData');
+
+		//REPORT >> VERIFIER >> OUTSTARION TRIP
+		Route::get('report/verifier/trip/get-filter-data/{id?}', 'Uitoux\EYatra\ReportController@eyatraVerifierFilterData')->name('eyatraVerifierFilterData');
+		Route::get('report/verifier/outstation-trip/get-data', 'Uitoux\EYatra\ReportController@eyatraVerifierOutstationData')->name('eyatraVerifierOutstationData');
+		//REPORT >> VERIFIER >> LOCAL TRIP
+		Route::get('report/verifier/local-trip/get-data', 'Uitoux\EYatra\ReportController@eyatraVerifierLocalData')->name('eyatraVerifierLocalData');
+
+		//VERIFIER >> OUTSTATION TRIP CLAIM VERIFICATION
+		Route::get('eyatra/outstation-trip/claim/verification/get-filter-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraVerificationFilterData')->name('eyatraVerificationFilterData');
+		Route::get('eyatra/outstation-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraOutstationClaimVerificationGetData')->name('eyatraOutstationClaimVerificationGetData');
+
+		Route::post('eyatra/outstation-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectOutstationTripClaimVerification')->name('rejectOutstationTripClaimVerification');
+		Route::get('eyatra/outstation-trip/claim/verifier/approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationController@approveOutstationTripClaimVerification')->name('approveOutstationTripClaimVerification');
+		//VERIFIER >> LOCAL TRIP CLAIM VERIFICATION
+		Route::get('eyatra/local-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraLocalClaimVerificationGetData')->name('eyatraLocalClaimVerificationGetData');
+		Route::post('eyatra/local-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectLocalTripClaimVerification')->name('rejectLocalTripClaimVerification');
+		Route::get('eyatra/local-trip/claim/verifier/approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationController@approveLocalTripClaimVerification')->name('approveLocalTripClaimVerification');
 	});
 });

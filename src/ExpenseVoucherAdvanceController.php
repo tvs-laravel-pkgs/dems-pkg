@@ -65,13 +65,14 @@ class ExpenseVoucherAdvanceController extends Controller {
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>';
 				} elseif ($expense_voucher_requests->status_id == 3464 || $expense_voucher_requests->status_id == 3466 || $expense_voucher_requests->status_id == 3469 || $expense_voucher_requests->status_id == 3471) {
-					return '
+					$action = '
 				<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 				</a>
 				<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a>';
+					return $action;
 				} else {
 					return '<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
@@ -158,7 +159,28 @@ class ExpenseVoucherAdvanceController extends Controller {
 		return response()->json($this->data);
 
 	}
+	public function expenseVoucherSingleRepaidApprove(Request $request){
+		//dd($request->all());
+		DB::beginTransaction();
+		try {
+			if ($request->id) {
+				$employee_expense_voucher_id = $request->id;
+			} else {
+				return back()->with('error', 'Expense Voucher Advance not found');
+			}
+			$expense_voucher_advance = ExpenseVoucherAdvanceRequest::where('id', $employee_expense_voucher_id)->update(['status_id' => 3275]);
+			if($expense_voucher_advance){
+				//Approval Log Save
+				ApprovalLog::saveApprovalLog(3585, $employee_expense_voucher_id, 3258, Auth::user()->entity_id, Carbon::now());
+			}
+			DB::commit();
+			return response()->json(['success' => true]);
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Error_Message' => $e->getMessage()]]);
+		}
 
+	}
 	public function expenseVoucherSave(Request $request) {
 		// dd($request->all());
 		try {
@@ -187,12 +209,15 @@ class ExpenseVoucherAdvanceController extends Controller {
 			}
 			DB::beginTransaction();
 			$employee_cash_check = Employee::select(
-				'outlets.amount_eligible',
-				'outlets.amount_limit'
+				'outlets.expense_voucher_limit'
 			)
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->where('employees.id', $request->employee_id)->first();
 
+				//CHECK VALIDATION FOR MAXIMUM ELEGIBILITY AMOUNT LIMIT
+			if ($request->advance_amount > $employee_cash_check->expense_voucher_limit) {
+				return response()->json(['success' => false, 'errors' => ['The maximum amount limit is ' . $employee_cash_check->expense_voucher_limit]]);
+			}
 			if (!empty($request->expense_voucher_attach_removal_ids)) {
 				$attachment_remove = json_decode($request->expense_voucher_attach_removal_ids, true);
 				Attachment::whereIn('id', $attachment_remove)->where('attachment_of_id', 3442)->delete();

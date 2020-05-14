@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Session;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Validator;
 
@@ -28,7 +29,6 @@ class Trip extends Model {
 		'purpose_id',
 		'description',
 		'status_id',
-		'advance_received',
 		'claim_amount',
 		'claimed_date',
 		'paid_amount',
@@ -65,7 +65,7 @@ class Trip extends Model {
 	}
 
 	public function visits() {
-		return $this->hasMany('Uitoux\EYatra\Visit')->orderBy('id');
+		return $this->hasMany('Uitoux\EYatra\Visit')->whereNotIn('booking_status_id', [3064])->whereNotIn('status_id', [3229])->orderBy('id');
 	}
 
 	public function selfVisits() {
@@ -166,25 +166,28 @@ class Trip extends Model {
 				$trip->created_at = Carbon::now();
 				$trip->updated_at = NULL;
 				$activity['activity'] = "add";
+				$trip->advance_received = $request->advance_received;
+				if ($request->advance_received >= 1) {
+					$trip->advance_request_approval_status_id = 3260;
+				}
 			} else {
 				$trip = Trip::find($request->id);
 
+				//Check Financier Approve Advance amount
+				if ($trip->advance_request_approval_status_id != 3261) {
+					$trip->advance_received = $request->advance_received;
+					if ($request->advance_received >= 1) {
+						$trip->advance_request_approval_status_id = 3260;
+					}
+				}
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
-				$trip->visits()->delete();
+				//$trip->visits()->delete();
 				$activity['activity'] = "edit";
 
 			}
 			$employee = Employee::where('id', Auth::user()->entity->id)->first();
 
-			if ($request->advance_received >= 1) {
-				// $trip->advance_received = $request->advance_received;
-				// if ($employee->self_approve == 1) {
-				// 	$trip->advance_request_approval_status_id = 3261;
-				// } else {
-				$trip->advance_request_approval_status_id = 3260;
-				// }
-			}
 			$trip->fill($request->all());
 			$trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
@@ -195,6 +198,8 @@ class Trip extends Model {
 			} else {
 				$trip->status_id = 3021; //Manager Approval Pending
 			}
+			$trip->rejection_id = NULL;
+			$trip->rejection_remarks = NULL;
 			$trip->save();
 
 			$trip->number = 'TRP' . $trip->id;
@@ -203,10 +208,14 @@ class Trip extends Model {
 			$activity['entity_type'] = 'trip';
 			$activity['details'] = 'Trip is Added';
 			//SAVING VISITS
+			//dd($trip);
+			//dump($request->visits);
 			if ($request->visits) {
 				$visit_count = count($request->visits);
 				$i = 0;
 				foreach ($request->visits as $key => $visit_data) {
+					//dump($visit_data);
+
 					//if no agent found display visit count
 					// dd(Auth::user()->entity->outlet->address);
 					$visit_count = $i + 1;
@@ -216,20 +225,67 @@ class Trip extends Model {
 						$previous_value = $request->visits[$key - 1];
 						$from_city_id = $previous_value['to_city_id'];
 					}
-					if ($from_city_id == $visit_data['to_city_id']) {
+					if ($visit_data['from_city_id'] == $visit_data['to_city_id']) {
 						return response()->json(['success' => false, 'errors' => "From City and To City should not be same,please choose another To city"]);
 					}
-					$visit = new Visit;
-					$visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
-					$visit->fill($visit_data);
-					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
-					$visit->from_city_id = $from_city_id;
+					if ($visit_data['id']) {
+						$old_visit = Visit::find($visit_data['id']);
+						//dump('old_visit id :'.$old_visit->id);
+						// if ($visit_data['booking_method_name'] == 'Agent') {
+
+						//check visit booked or not
+						$old_visit_booked = Visit::where('id', $visit_data['id'])
+							->where('booking_status_id', 3061) //Booked
+							->first();
+
+						// dd($old_visit_booked);
+						//dump('old_visit_booked :'.$old_visit_booked->id);
+						if ($old_visit_booked) {
+							$old_visit_detail_check = Visit::where('id', $visit_data['id'])
+								->where('from_city_id', $visit_data['from_city_id'])
+								->where('to_city_id', $visit_data['to_city_id'])
+								->where('travel_mode_id', $visit_data['travel_mode_id'])
+								->where('booking_method_id', $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042)
+								->whereDate('departure_date', date('Y-m-d', strtotime($visit_data['date'])))
+								->first();
+							if ($old_visit_detail_check) {
+								$visit = $old_visit;
+							} else {
+								$old_visit->booking_status_id = 3061; //Visit Rescheduled
+								$old_visit->status_id = 3229; //Visit Rescheduled
+								$old_visit->save();
+								$visit = new Visit;
+								$visit->booking_status_id = 3060; //PENDING
+								$visit->status_id = 3220; //NEW
+								$visit->manager_verification_status_id = 3080; //NEW
+							}
+						} else {
+							$visit = $old_visit;
+							$visit->booking_status_id = 3060; //PENDING
+							$visit->status_id = 3220; //NEW
+							$visit->manager_verification_status_id = 3080; //NEW
+						}
+						// } else {
+						// 	//Booking Method Self
+						// 	$visit = $old_visit;
+						// }
+						// dd($visit);
+					} else {
+						$visit = new Visit;
+						$visit->booking_status_id = 3060; //PENDING
+						$visit->status_id = 3220; //NEW
+						$visit->manager_verification_status_id = 3080; //NEW
+					}
+					// $visit->prefered_departure_time = date('H:i:s', strtotime($visit_data['prefered_departure_time']));
+					// $visit->fill($visit_data);
 					$visit->trip_id = $trip->id;
+					$visit->from_city_id = $from_city_id;
+					$visit->to_city_id = $visit_data['to_city_id'];
+					$visit->travel_mode_id = $visit_data['travel_mode_id'];
+					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
-					$visit->booking_status_id = 3060; //PENDING
-					$visit->status_id = 3220; //NEW
-					$visit->manager_verification_status_id = 3080; //NEW
+					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
 					if ($visit_data['booking_method_name'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
 
@@ -238,7 +294,10 @@ class Trip extends Model {
 							return response()->json(['success' => false, 'errors' => ['No agent found for visit - ' . $visit_count], 'message' => 'No agent found for visit - ' . $visit_count]);
 						}
 						$visit->agent_id = $agent->id;
+					} else {
+						$visit->agent_id = NULL;
 					}
+					$visit->notes_to_agent = $visit_data['notes_to_agent'];
 					$visit->save();
 					$i++;
 				}
@@ -272,6 +331,7 @@ class Trip extends Model {
 			'visits.fromCity',
 			'visits.toCity',
 			'visits.travelMode',
+			'visits.travelMode.travelModesCategories',
 			'visits.bookingMethod',
 			'visits.bookingStatus',
 			'visits.agent',
@@ -290,7 +350,7 @@ class Trip extends Model {
 			'status',
 		])
 			->find($trip_id);
-		// dd($trip->employee->grade_details->claim_active_days);
+		// dd($trip);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -298,7 +358,8 @@ class Trip extends Model {
 			return response()->json($data);
 		}
 
-		if (!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) {
+		$employee = Employee::find($trip->employee_id);
+		if ((!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) && $employee->reporting_to_id != Auth::user()->entity_id) {
 			$data['success'] = false;
 			$data['message'] = 'Trip belongs to you';
 			$data['errors'] = ['Trip belongs to you'];
@@ -328,6 +389,19 @@ class Trip extends Model {
 			}
 		}
 		$data['trip'] = $trip;
+
+		if ($trip->advance_request_approval_status_id) {
+			if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
+				$trip_reject = 1;
+			} else {
+				$trip_reject = 0;
+			}
+		} else {
+			$trip_reject = 1;
+		}
+
+		$data['trip_reject'] = $trip_reject;
+
 		$data['success'] = true;
 		return response()->json($data);
 
@@ -344,7 +418,7 @@ class Trip extends Model {
 			$trip->visits = [$visit];
 			$trip->trip_type = '';
 			$trip->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', Auth::user()->entity->outlet->address->city_id)->first();
-
+			$trip_advance_amount_edit = 1;
 			$data['success'] = true;
 		} else {
 			$data['action'] = 'Edit';
@@ -352,7 +426,7 @@ class Trip extends Model {
 
 			$trip = Trip::find($trip_id);
 			$trip->visits = $t_visits = $trip->visits;
-			//dd($trip->visits->get);
+			//dd($trip->visits);
 			foreach ($t_visits as $key => $t_visit) {
 				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
 				$trip->visits[$key]->booking_method_name = $b_name->name;
@@ -367,6 +441,16 @@ class Trip extends Model {
 				$data['success'] = false;
 				$data['message'] = 'Trip not found';
 			}
+			if ($trip->advance_request_approval_status_id) {
+				if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
+					$trip_advance_amount_edit = 1;
+				} else {
+					$trip_advance_amount_edit = 0;
+				}
+			} else {
+				$trip_advance_amount_edit = 1;
+			}
+
 		}
 
 		$grade = Auth::user()->entity;
@@ -374,10 +458,12 @@ class Trip extends Model {
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility', 'travel_advance_limit')->where('grade_id', $grade->grade_id)->first();
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
+			$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
+
 		} else {
 			$data['advance_eligibility'] = '';
+			$data['grade_advance_eligibility_amount'] = 0;
 		}
-		$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
 		//dd(Auth::user()->entity->outlet->address);
 
 		$data['extras'] = [
@@ -388,10 +474,14 @@ class Trip extends Model {
 			'city_list' => NCity::getList(),
 			'employee_city' => Auth::user()->entity->outlet->address->city,
 			'frequently_travelled' => Visit::join('ncities', 'ncities.id', 'visits.to_city_id')->where('ncities.company_id', Auth::user()->company_id)->select('ncities.id', 'ncities.name')->distinct()->limit(10)->get(),
+			'claimable_travel_mode_list' => DB::table('travel_mode_category_type')->where('category_id', 3403)->pluck('travel_mode_id'),
 		];
 		$data['trip'] = $trip;
 
+		$data['trip_advance_amount_edit'] = $trip_advance_amount_edit;
+
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
+		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
 
 		return response()->json($data);
 	}
@@ -481,6 +571,10 @@ class Trip extends Model {
 			$trips->where('trips.purpose_id', $request->purpose_ids);
 		}
 
+		if ($request->future_trip) {
+			$current_date = date('Y-m-d');
+			$trips->where('trips.end_date', '<=', $current_date);
+		}
 		// if ($request->get('from_date')) {
 		// 	$date = date('Y-m-d', strtotime($request->get('from_date')));
 		// 	// dd($date);
@@ -666,8 +760,8 @@ class Trip extends Model {
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 				'purpose.name as purpose',
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,2,"en_IN")) as advance_received'),
-				'trips.created_at',
-				//DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
+				// 'trips.created_at',
+				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date'),
 				'status.name as status', 'status.name as status_name'
 
 			)
@@ -751,29 +845,36 @@ class Trip extends Model {
 	// }
 
 	public static function deleteTrip($trip_id) {
+		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+		$trip = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
+		if ($trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted! Financier approved the advance amount']]);
+		}
 
 		//CHECK IF AGENT BOOKED TRIP VISITS
 		$agent_visits_booked = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
 		if ($agent_visits_booked) {
-			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted']]);
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be deleted! Agent Booked visit! Request Agent for Cancelled Ticket']]);
 		}
 		//CHECK IF STATUS IS NEW OR MANAGER REJECTED OR MANAGER APPROVAL PENDING
-		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022])->first();
+		$status_exist = Trip::where('id', $trip_id)->whereIn('status_id', [3020, 3021, 3022, 3032])->first();
 		if (!$status_exist) {
 			return response()->json(['success' => false, 'errors' => ['Manager Approved so this trip cannot be deleted']]);
 		}
 
 		$status_exist = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
 		if ($status_exist) {
-			return response()->json(['success' => false, 'errors' => ['Advance Request Approved so this trip cannot be deleted']]);
+			return response()->json(['success' => false, 'errors' => ['Trip advance amount request approved so this trip cannot be deleted']]);
 		}
-
 		$trip = Trip::where('id', $trip_id)->first();
-
 		$activity['entity_id'] = $trip->id;
-		$trip = $trip->forceDelete();
 
-		//$trip = Trip::where('id', $trip_id)->forceDelete();
+		$agent_visits = Visit::where('trip_id', $trip_id)->where('booking_method_id', 3042)->whereIn('booking_status_id', [3061, 3062])->first();
+		if ($agent_visits) {
+			$trip = Trip::where('id', $trip_id)->update(['status_id' => 3032]);
+		} else {
+			$trip = Trip::where('id', $trip_id)->forceDelete();
+		}
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = 'Trip is Deleted';
 		$activity['activity'] = "delete";
@@ -789,10 +890,19 @@ class Trip extends Model {
 	}
 
 	public static function cancelTrip($trip_id) {
+		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+		$trip = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
+		if ($trip) {
+			return response()->json(['success' => false, 'errors' => ['Trip cannot be Cancelled! Financier approved the advance amount']]);
+		}
 
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+		}
+		$agent_visits_booked = Visit::where('trip_id', $trip->id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+		if ($agent_visits_booked) {
+			return response()->json(['success' => false, 'errors' => ['Trip Cannot be Cancelled! Agent Booked visit! Request Agent for Cancelled Ticket']]);
 		}
 
 		$trip->status_id = 3032;
@@ -812,19 +922,81 @@ class Trip extends Model {
 
 	public static function deleteVisit($visit_id) {
 		if ($visit_id) {
+			$visit = Visit::where('id', $visit_id)->first();
+
 			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
 			if ($agent_visits_booked) {
-				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
+				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
 			}
-			$visit = Visit::where('id', $visit_id)->first();
-			$activity['entity_id'] = $visit_id;
-			$visit = $visit->forceDelete();
-			$activity['entity_type'] = 'visit';
-			$activity['details'] = 'Visit is Deleted';
-			$activity['activity'] = "delete";
 
-			$activity_log = ActivityLog::saveLog($activity);
-			return response()->json(['success' => true]);
+			//Total Visit on this Trip
+			$total_visits = Visit::where('trip_id', $visit->trip_id)->count();
+			if ($total_visits > 1) {
+				//Check Agent booking or not
+				$activity['entity_id'] = $visit_id;
+				$agent_visits = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->whereIn('booking_status_id', [3061, 3062])->first();
+				if ($agent_visits) {
+					$visit->status_id = 3062; // Visit cancelled
+					$visit->save();
+				} else {
+					$visit = $visit->forceDelete();
+				}
+				$activity['entity_type'] = 'visit';
+				$activity['details'] = 'Visit is Deleted';
+				$activity['activity'] = "delete";
+
+				$activity_log = ActivityLog::saveLog($activity);
+				return response()->json(['success' => true, 'message' => 'Visit Deleted successfully!']);
+			} else {
+				//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+				$trip = Trip::where('id', $visit->trip_id)->where('advance_request_approval_status_id', 3261)->first();
+				if ($trip) {
+					return response()->json(['success' => false, 'errors' => ['Visit cannot be Deleted! Financier approved the advance amount']]);
+				}
+
+				$agent_visits = Visit::where('trip_id', $visit->trip_id)->where('booking_method_id', 3042)->whereIn('booking_status_id', [3061, 3062])->first();
+				if ($agent_visits) {
+					$trip = Trip::where('id', $visit->trip_id)->update(['status_id' => 3032]);
+				} else {
+					$trip = Trip::where('id', $visit->trip_id)->forceDelete();
+				}
+				return response()->json(['success' => true, 'message' => 'Trip Deleted successfully!']);
+			}
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
+		}
+	}
+
+	public static function cancelTripVisit($visit_id) {
+		if ($visit_id) {
+			$visit = Visit::where('id', $visit_id)->first();
+			$agent_visits_booked = Visit::where('id', $visit_id)->where('booking_method_id', 3042)->where('booking_status_id', 3061)->first();
+			if ($agent_visits_booked) {
+				return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted! Agent Booked this visit! Request Agent for Cancelled Ticket']]);
+			}
+			//Total Visit on this Trip
+			$total_visits = Visit::where('trip_id', $visit->trip_id)->count();
+			if ($total_visits > 1) {
+				//Check Agent booking or not
+				$activity['entity_id'] = $visit_id;
+				$visit->booking_status_id = 3062; // Booking cancelled
+				$visit->status_id = 3062; // Visit cancelled
+				$visit->save();
+				$activity['entity_type'] = 'visit';
+				$activity['details'] = 'Visit is Cancelled';
+				$activity['activity'] = "cancel";
+
+				$activity_log = ActivityLog::saveLog($activity);
+				return response()->json(['success' => true, 'message' => 'Visit Cancelled successfully!']);
+			} else {
+				//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
+				$trip = Trip::where('id', $visit->trip_id)->where('advance_request_approval_status_id', 3261)->first();
+				if ($trip) {
+					return response()->json(['success' => false, 'errors' => ['Visit cannot be Cancelled! Financier approved the advance amount']]);
+				}
+				$trip = Trip::where('id', $visit->trip_id)->update(['status_id' => 3032]);
+				return response()->json(['success' => true, 'message' => 'Trip Cancelled successfully!']);
+			}
 		} else {
 			return response()->json(['success' => false, 'errors' => ['Visit Cannot be Deleted']]);
 		}
@@ -867,11 +1039,11 @@ class Trip extends Model {
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = 'Trip is Approved by Manager';
 		$activity['activity'] = "approve";
-		//dd($activity);
 		$activity_log = ActivityLog::saveLog($activity);
 		$trip->visits()->update(['manager_verification_status_id' => 3081]);
-
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		//Approval Log
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, Auth::user()->entity_id, Carbon::now());
 		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
@@ -1126,8 +1298,7 @@ class Trip extends Model {
 		return response()->json($data);
 	}
 
-	public static function getFilterData() {
-
+	public static function getFilterData($type = NULL) {
 		$data = [];
 		$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -1136,7 +1307,14 @@ class Trip extends Model {
 				->where('employees.company_id', Auth::user()->company_id)
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
-		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+
+		if ($type == 1) {
+			$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		} elseif ($type == 2) {
+			$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		} else {
+			$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		}
 
 		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
@@ -1420,15 +1598,24 @@ class Trip extends Model {
 				//SAVE EMPLOYEE CLAIMS
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				$employee_claim->trip_id = $trip->id;
-				$employee_claim->total_amount = $request->claim_total_amount;
 				$employee_claim->transport_total = $transport_total_amount;
 				$employee_claim->employee_id = Auth::user()->entity_id;
 				$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 				$employee_claim->created_by = Auth::user()->id;
+				$employee_claim->total_amount = 0;
+				$employee_claim->save();
+
+				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+				$employee_claim->total_amount = $total_amount;
+
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {
-					if ($trip->advance_received > $request->claim_total_amount) {
-						$balance_amount = $trip->advance_received - $request->claim_total_amount;
+					if ($trip->advance_received > $total_amount) {
+						$balance_amount = $trip->advance_received - $total_amount;
 						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
 						$employee_claim->amount_to_pay = 2;
 					} else {
@@ -1442,6 +1629,9 @@ class Trip extends Model {
 				// dump($request->claim_total_amount);
 
 				$employee_claim->save();
+
+				$trip->status_id = 3033; //CLAIM INPROGRESS
+				$trip->save();
 
 				DB::commit();
 				// dd($employee_claim);
@@ -1464,6 +1654,7 @@ class Trip extends Model {
 					// Attachment::whereIn('entity_id', $lodgings_removal_id)->delete();
 				}
 
+				// dd($request->lodgings);
 				//SAVE
 				if ($request->lodgings) {
 					// dd($request->lodgings);
@@ -1513,7 +1704,9 @@ class Trip extends Model {
 						// 		$attachement_lodge->save();
 						// 	}
 						// }
+						// dump($lodging_data);
 					}
+					// dd();
 					// dd('1');
 					//SAVE LODGING ATTACHMENT
 					$item_images = storage_path('app/public/trip/lodgings/attachments/');
@@ -1536,26 +1729,39 @@ class Trip extends Model {
 
 					//SAVE EMPLOYEE CLAIMS
 					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
-					$employee_claim->trip_id = $trip->id;
-					$employee_claim->total_amount = $request->claim_total_amount;
 					$employee_claim->lodging_total = $lodging_total_amount;
 					$employee_claim->employee_id = Auth::user()->entity_id;
 					$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 					$employee_claim->created_by = Auth::user()->id;
-					//To Find Amount to Pay Financier or Employee
-					if ($trip->advance_received) {
-						if ($trip->advance_received > $request->claim_total_amount) {
-							$balance_amount = $trip->advance_received - $request->claim_total_amount;
-							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-							$employee_claim->amount_to_pay = 2;
-						} else {
-							$employee_claim->amount_to_pay = 1;
-						}
+
+					$employee_claim->save();
+				} else {
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->lodging_total = 0;
+					$employee_claim->save();
+				}
+
+				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+				$employee_claim->total_amount = $total_amount;
+
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $total_amount) {
+						$balance_amount = $trip->advance_received - $total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
 					} else {
 						$employee_claim->amount_to_pay = 1;
 					}
-					$employee_claim->save();
+				} else {
+					$employee_claim->amount_to_pay = 1;
 				}
+
+				$employee_claim->save();
 
 				//GET SAVED LODGINGS
 				$saved_lodgings = Trip::with([
@@ -1586,6 +1792,9 @@ class Trip extends Model {
 				// } else {
 				// 	$boarding_dates_list = array();
 				// }
+				$trip->status_id = 3033; //CLAIM INPROGRESS
+				$trip->save();
+
 				DB::commit();
 				return response()->json(['success' => true, 'saved_lodgings' => $saved_lodgings]);
 			}
@@ -1670,27 +1879,41 @@ class Trip extends Model {
 
 					//SAVE EMPLOYEE CLAIMS
 					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
-					$employee_claim->trip_id = $trip->id;
-					$employee_claim->total_amount = $request->claim_total_amount;
 					$employee_claim->boarding_total = $boarding_total_amount;
 					$employee_claim->employee_id = Auth::user()->entity_id;
 					$employee_claim->status_id = 3033; //CLAIM INPROGRESS
 					$employee_claim->created_by = Auth::user()->id;
-					//To Find Amount to Pay Financier or Employee
-					if ($trip->advance_received) {
-						if ($trip->advance_received > $request->claim_total_amount) {
-							$balance_amount = $trip->advance_received - $request->claim_total_amount;
-							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-							$employee_claim->amount_to_pay = 2;
-						} else {
-							$employee_claim->amount_to_pay = 1;
-						}
-					} else {
-						$employee_claim->amount_to_pay = 1;
-					}
+					$employee_claim->save();
+				} else {
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->boarding_total = 0;
 					$employee_claim->save();
 				}
 
+				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+				$employee_claim->total_amount = $total_amount;
+
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $total_amount) {
+						$balance_amount = $trip->advance_received - $total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->amount_to_pay = 1;
+				}
+
+				$employee_claim->save();
+
+				$trip->status_id = 3033; //CLAIM INPROGRESS
+				$trip->save();
 				//GET SAVED BOARDINGS
 				$saved_boardings = Trip::with([
 					'boardings',
@@ -1707,63 +1930,32 @@ class Trip extends Model {
 				// dd($request->all());
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
-
+				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 				//UPDATE TRIP STATUS
 				$trip = Trip::find($request->trip_id);
+				$trip->rejection_remarks = NULL;
+				$trip->save();
 
 				//CHECK IF EMPLOYEE SELF APPROVE
 				if ($employee->self_approve == 1) {
-					// if ($trip->advance_received > $request->claim_total_amount) {
-					// 	$trip->status_id = 3031; // Payment Pending for Employee
-					// } else {
-					// 	$trip->status_id = 3025; // Payment Pending for Financier
-					// }
 					$trip->status_id = 3034; // Payment Pending
+					$employee_claim->status_id = 3034; //PAYMENT PENDING
 				} else {
 					$trip->status_id = 3023; //Claim requested
+					$employee_claim->status_id = 3023; //CLAIM REQUESTED
 				}
+
 				$trip->claim_amount = $request->claim_total_amount; //claimed
 				$trip->claimed_date = date('Y-m-d H:i:s');
+				$trip->rejection_id = NULL;
+				$trip->rejection_remarks = NULL;
 				$trip->save();
-
-				//SAVE EMPLOYEE CLAIMS
-				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
-				$employee_claim->fill($request->all());
-				$employee_claim->trip_id = $trip->id;
-				$employee_claim->total_amount = $request->claim_total_amount;
-				$employee_claim->remarks = $request->remarks;
-
-				//To Find Amount to Pay Financier or Employee
-				if ($trip->advance_received) {
-					if ($trip->advance_received > $request->claim_total_amount) {
-						$balance_amount = $trip->advance_received - $request->claim_total_amount;
-						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-						$employee_claim->amount_to_pay = 2;
-					} else {
-						$employee_claim->amount_to_pay = 1;
-					}
-				} else {
-					$employee_claim->amount_to_pay = 1;
-				}
-
-				// dd($trip->advance_received);
 
 				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
 				if ($request->is_justify_my_trip) {
 					$employee_claim->is_justify_my_trip = 1;
 				} else {
 					$employee_claim->is_justify_my_trip = 0;
-				}
-				//CHECK IF EMPLOYEE SELF APPROVE
-				if ($employee->self_approve == 1) {
-					// if ($trip->advance_received > $request->claim_total_amount) {
-					// 	$employee_claim->status_id = 3031; // Payment Pending for Employee
-					// } else {
-					// 	$employee_claim->status_id = 3025; // Payment Pending for Financier
-					// }
-					$employee_claim->status_id = 3034; //PAYMENT PENDING
-				} else {
-					$employee_claim->status_id = 3023; //CLAIM REQUESTED
 				}
 
 				//CHECK EMPLOYEE GRADE HAS DEVIATION ELIGIBILITY ==> IF DEVIATION ELIGIBILITY IS 2-NO MEANS THERE IS NO DEVIATION, 1-YES MEANS NEED TO CHECK IN REQUEST
@@ -1775,6 +1967,7 @@ class Trip extends Model {
 				}
 
 				$employee_claim->created_by = Auth::user()->id;
+				$employee_claim->remarks = $request->remarks;
 				$employee_claim->save();
 
 				//STORE GOOGLE ATTACHMENT
@@ -1844,7 +2037,33 @@ class Trip extends Model {
 					}
 					$employee_claim->local_travel_total = $local_total_amount;
 					$employee_claim->save();
+				} else {
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+					$employee_claim->local_travel_total = 0;
+					$employee_claim->save();
 				}
+
+				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+				$employee_claim->total_amount = $total_amount;
+
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $total_amount) {
+						$balance_amount = $trip->advance_received - $total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->amount_to_pay = 1;
+				}
+
+				$employee_claim->save();
 
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();

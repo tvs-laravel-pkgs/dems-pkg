@@ -9,6 +9,7 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\LocalTripVisitDetail;
 use Validator;
@@ -196,6 +197,7 @@ class LocalTrip extends Model {
 
 		$data['success'] = true;
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
+		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+30 days"));
 
 		return response()->json($data);
 	}
@@ -229,6 +231,11 @@ class LocalTrip extends Model {
 				Attachment::whereIn('id', $attachment_removal_ids)->delete();
 			}
 
+			if (!empty($request->trip_detail_removal_id)) {
+				$local_removal_ids = json_decode($request->trip_detail_removal_id, true);
+				LocalTrip::whereIn('id', $local_removal_ids)->forceDelete();
+			}
+
 			DB::beginTransaction();
 			if (!$request->id) {
 				$trip = new LocalTrip;
@@ -242,20 +249,33 @@ class LocalTrip extends Model {
 				$trip->updated_by = Auth::user()->id;
 				$trip->updated_at = Carbon::now();
 				$trip_visit_details = LocalTripVisitDetail::where('trip_id', $request->id)->count();
-				if ($trip->status_id == 3028) {
-					$trip->status_id = 3023;
-				} elseif ($trip->status_id == 3022) {
+				// if ($trip->status_id == 3028) {
+				// 	$trip->status_id = 3023;
+				// } else
+				if ($trip->status_id == 3022) {
 					$trip->status_id = 3021;
 				} elseif ($trip->status_id == 3024) {
 					$trip->status_id = 3023;
 				} elseif ($trip->status_id == 3032) {
 					$trip->status_id = 3021;
+				} else {
+					$trip->status_id = 3021;
 				}
-				// else {
-				// 	$trip->status_id = 3021;
-				// }
+
 				LocalTripVisitDetail::where('trip_id', $request->id)->forceDelete();
 				$activity['activity'] = "edit";
+			}
+
+			//SELF APPROVAL
+			$employee = Employee::where('id', Auth::user()->entity->id)->first();
+			if ($employee->self_approve == 1) {
+				$trip->status_id = 3028;
+			}
+			if ($request->local_trip_claim) {
+				$trip->status_id = 3023;
+				if ($employee->self_approve == 1) {
+					$trip->status_id = 3034;
+				}
 			}
 
 			$employee = Employee::where('id', Auth::user()->entity->id)->first();
@@ -270,6 +290,8 @@ class LocalTrip extends Model {
 			$trip->claimed_date = date('Y-m-d');
 			$trip->save();
 			$trip->number = 'TRP' . $trip->id;
+			$trip->rejection_id = NULL;
+			$trip->rejection_remarks = NULL;
 			$trip->save();
 
 			if ($request->is_justify_my_trip) {
@@ -379,7 +401,7 @@ class LocalTrip extends Model {
 		if ($type == 1) {
 			$grade = Auth::user()->entity;
 			$data['purpose_list'] = DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']);
-			$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 531)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+			$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 501)->where(DB::raw('LOWER(name)'), '!=', strtolower("New"))->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		} elseif ($type == 2) {
 			$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 			$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
@@ -388,6 +410,9 @@ class LocalTrip extends Model {
 					->where('employees.reporting_to_id', Auth::user()->entity_id)
 					->where('employees.company_id', Auth::user()->company_id)
 					->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		} elseif ($type == 4) {
+			$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
+			$data['trip_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3023, 3024, 3026, 3030, 3034])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		} else {
 			$data['employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
 					->leftJoin('users', 'users.entity_id', 'employees.id')
@@ -466,14 +491,18 @@ class LocalTrip extends Model {
 	}
 
 	public static function approveTrip($trip_id) {
-
+		$additional_approve = Auth::user()->company->additional_approve;
 		$trip = LocalTrip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Lcoal Trip not found']]);
 		}
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
-			$trip->status_id = 3034;
+			if ($additional_approve == '1') {
+				$trip->status_id = 3036;
+			} else {
+				$trip->status_id = 3034;
+			}
 			$type = 6;
 		} else {
 			$trip->status_id = 3028;
@@ -490,12 +519,19 @@ class LocalTrip extends Model {
 
 		$notification_type = 'Trip Approved';
 		$message = "Trip approved successfully!";
-		if ($trip->status_id == 3034) {
+		if ($trip->status_id == 3034 || $trip->status_id == 3036) {
 			$notification_type = 'Claim Approved';
 			$message = "Claim approved successfully!";
+
+			//Claim Approval Log
+			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3607, Auth::user()->entity_id, Carbon::now());
+		} else {
+			//Trip Approval Log
+			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3606, Auth::user()->entity_id, Carbon::now());
 		}
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+
 		$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip", $notification_type = $notification_type);
 
 		return response()->json(['success' => true, 'message' => $message]);

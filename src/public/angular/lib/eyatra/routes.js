@@ -48,15 +48,15 @@ app.config(['$routeProvider', function($routeProvider) {
     //REJECTION REASON
     when('/rejection-reason/list', {
         template: '<entity-data-list></entity-data-list>',
-        title: 'Entity list',
+        title: 'Rejection Reasons List',
     }).
     when('/rejection-reason/add', {
         template: '<entity-data-form></entity-data-form>',
-        title: 'Add Entity',
+        title: 'Add Rejection Reason',
     }).
     when('/rejection-reason/edit/:entity_id', {
         template: '<entity-data-form></entity-data-form>',
-        title: 'Edit Entity',
+        title: 'Edit Rejection Reason',
     }).
 
     //COA SUB MASTERS
@@ -73,7 +73,7 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'Edit COA',
     }).
 
-     //ROLES
+    //ROLES
     when('/roles/list', {
         template: '<eyatra-role-list></eyatra-role-list>',
         title: 'Roles',
@@ -214,6 +214,24 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Outlet',
     }).
 
+    //COMPANY
+    when('/companies', {
+        template: '<eyatra-company></eyatra-company>',
+        title: 'Companies',
+    }).
+    when('/company/add', {
+        template: '<eyatra-company-form></eyatra-company-form>',
+        title: 'Add Company',
+    }).
+    when('/company/edit/:id', {
+        template: '<eyatra-company-form></eyatra-company-form>',
+        title: 'Edit Company',
+    }).
+    when('/company/view/:id', {
+        template: '<eyatra-company-view></eyatra-company-view>',
+        title: 'View Company',
+    }).
+
     //REGIONS
     when('/regions', {
         template: '<eyatra-regions></eyatra-regions>',
@@ -309,6 +327,25 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'view Expense Voucher Advance',
     }).
 
+
+    //EXPENSE VOUCHER ADVANCE RE-PAID CASHIER
+    when('/expense/voucher-advance/cashier/repaid/list', {
+        template: '<eyatra-expense-voucher-advance-cashier-repaid-list></eyatra-expense-voucher-advance-cashier-repaid-list>',
+        title: 'Expense Voucher Advance Repaid',
+    }).
+    when('/expense/voucher-advance/cashier/repaid/view/:id', {
+        template: '<eyatra-expense-voucher-advance-cashier-repaid-view></eyatra-expense-voucher-advance-cashier-repaid-view>',
+        title: 'view Expense Voucher Advance Repaid',
+    }).
+    //EXPENSE VOUCHER ADVANCE RE-PAID FINANCIER
+    when('/expense/voucher-advance/financier/repaid/list', {
+        template: '<eyatra-expense-voucher-advance-financier-repaid-list></eyatra-expense-voucher-advance-financier-repaid-list>',
+        title: 'Expense Voucher Advance Repaid',
+    }).
+    when('/expense/voucher-advance/financier/repaid/view/:id', {
+        template: '<eyatra-expense-voucher-advance-financier-repaid-view></eyatra-expense-voucher-advance-financier-repaid-view>',
+        title: 'view Expense Voucher Advance Repaid',
+    }).
 
     //TRIP
     when('/trips', {
@@ -600,12 +637,12 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-local-form></eyatra-trip-local-form>',
         title: 'Edit Local Trip',
     }).
-   
+
     when('/local-trip/view/:trip_id', {
         template: '<eyatra-trip-local-view></eyatra-trip-local-view>',
         title: 'View Local Trip',
     }).
-    
+
     //LOCAL TRIP CLAIM
     when('/local-trip/claim/list', {
         template: '<eyatra-claimed-local-trips></eyatra-claimed-local-trips>',
@@ -613,17 +650,17 @@ app.config(['$routeProvider', function($routeProvider) {
     }).
     when('/local-trip/claim/add/:trip_id', {
         template: '<eyatra-local-trip-claim-form></eyatra-local-trip-claim-form>',
-        title: 'Local Trip Calim Form',
+        title: 'Local Trip Claim Form',
     }).
     when('/local-trip/claim/edit/:trip_id', {
         template: '<eyatra-local-trip-claim-form></eyatra-local-trip-claim-form>',
-        title: 'Local Trip Calim Form',
+        title: 'Local Trip Claim Form',
     }).
     when('/local-trip/claim/view/:trip_id', {
         template: '<eyatra-local-trip-claim-view></eyatra-local-trip-claim-view>',
         title: 'View Local Trip Claim',
     }).
-  
+
 
     //LOCAL TRIP MANAGER VERIFICATION
     when('/local-trip/verification/list', {
@@ -659,6 +696,113 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/report/local-trip/list', {
         template: '<eyatra-local-trip></eyatra-local-trip>',
         title: 'Local Trip Reports',
+    }).
+
+    //APPROVAL LOGS >> OUTSTATION TRIP
+    when('/reports/outstation-trip', {
+        template: '<eyatra-outstation-trip-list></eyatra-outstation-trip-list>',
+        title: 'Outstation Trip',
+    }).
+    //APPROVAL LOGS >> OUTSTATION TRIP VIEW
+    when('/outstation-trip/view/:trip_id', {
+        template: '<eyatra-outstation-trip-view></eyatra-outstation-trip-view>',
+        title: 'Outstation Trip View',
+    }).
+    //APPROVAL LOGS >> OUTSTATION TRIP CLAIM VIEW
+    when('/outstation-claim/view/:claim_id', {
+        template: '<eyatra-outstation-claim-view></eyatra-outstation-claim-view>',
+        title: 'Outstation Claim View',
+    }).
+
+    //APPROVAL LOGS >> LOCAL TRIP
+    when('/reports/local-trip', {
+        template: '<eyatra-reports-local-trip-list></eyatra-reports-local-trip-list>',
+        title: 'Local Trip',
+    }).
+    //APPROVAL LOGS >> LOCAL TRIP VIEW
+    when('/report/local-trip/view/:trip_id', {
+        template: '<eyatra-reports-local-trip-view></eyatra-reports-local-trip-view>',
+        title: 'Local Trip View',
+    }).
+    //APPROVAL LOGS >> LOCAL TRIP CLAIM VIEW
+    when('/report/local-trip-claim/view/:trip_id', {
+        template: '<eyatra-reports-local-trip-claim-view></eyatra-reports-local-trip-claim-view>',
+        title: 'Local Trip Claim View',
+    }).
+    //APPROVAL LOGS >> TRIP ADVANCE REQUEST
+    when('/reports/trip-advance-request', {
+        template: '<eyatra-reports-trip-advance-request></eyatra-reports-trip-advance-request>',
+        title: 'Trip Advance Request',
+    }).
+    //APPROVAL LOGS >> SR MANAGER APPROVAL
+    when('/reports/sr-manager-approval', {
+        template: '<eyatra-reports-trip-sr-manager-approval></eyatra-reports-trip-sr-manager-approval>',
+        title: 'Claim Report',
+    }).
+    //APPROVAL LOGS >>  FINANCIER APPROVAL
+    when('/reports/financier-approval', {
+        template: '<eyatra-reports-trip-financier-approval></eyatra-reports-trip-financier-approval>',
+        title: 'Financier Approval Report',
+    }).
+    //APPROVAL LOGS >>  FINANCIER PAID OUTSTATION TRIP
+    when('/reports/financier-paid', {
+        template: '<eyatra-reports-trip-financier-paid></eyatra-reports-trip-financier-paid>',
+        title: 'Financier Paid Report',
+    }).
+    //APPROVAL LOGS >>  EMPLOYEE PAID
+    when('/reports/employee-paid', {
+        template: '<eyatra-reports-trip-employee-paid></eyatra-reports-trip-employee-paid>',
+        title: 'Employee Paid Report',
+    }).
+    //APPROVAL LOGS >>  FINANCIER PAID LOCAL TRIP
+    when('/reports/local-trip-financier-paid', {
+        template: '<eyatra-reports-local-trip-financier-paid></eyatra-reports-local-trip-financier-paid>',
+        title: 'Local Trip Claim List',
+    }).
+
+    //APPROVAL LOGS >> PETTY CASH MANAGER APPROVED
+    when('/reports/expense-voucher/:type_id', {
+        template: '<eyatra-reports-petty-cash-manager></eyatra-reports-petty-cash-manager>',
+        title: 'Expense Voucher',
+    }).
+    //APPROVAL LOGS >> EXPENSE VOUCHER ADVANCE APPROVED
+    when('/reports/expense-voucher-advances/:type_id', {
+        template: '<eyatra-reports-expense-voucher-advance></eyatra-reports-expense-voucher-advance>',
+        title: 'Expense Voucher Advance',
+    }).
+    //APPROVAL LOGS >> EXPENSE VOUCHER ADVANCE RE-PAID
+    when('/reports/expense-voucher-advances-repaid/:type_id', {
+        template: '<eyatra-reports-expense-voucher-advance-repaid></eyatra-reports-expense-voucher-advance>',
+        title: 'Expense Voucher Advance Repaid',
+    }).
+    //APPROVAL LOGS >> VERIFIER >> OUTSTATION TRIP
+    when('/reports/verifier/outstation-trip', {
+        template: '<eyatra-reports-verifier-outstation-trip-approval></eyatra-reports-verifier-outstation-trip-approval>',
+        title: 'Outstation Trip Claim Report',
+    }).
+    //APPROVAL LOGS >> VERIFIER >> LOCAL TRIP
+    when('/reports/verifier/local-trip', {
+        template: '<eyatra-reports-verifier-local-trip-approval></eyatra-reports-verifier-local-trip-approval>',
+        title: 'Local/ Trip Claim Report',
+    }).
+
+    //CLAIM VERIFIER - EMPLOYEE CLAIM VERIFICATION
+    when('/outstation-trip/claim/verification/list', {
+        template: '<eyatra-outstation-claim-verification-list></eyatra-outstation-claim-verification-list>',
+        title: 'Outstation Trip Claim Verification',
+    }).
+    when('/outstation-trip/claim/verification/view/:trip_id', {
+        template: '<eyatra-outstation-claim-verification-view></eyatra-outstation-claim-verification-view>',
+        title: 'View Outstation Trip Claim Verification',
+    }).
+    when('/local-trip/claim/verification/list', {
+        template: '<eyatra-local-claim-verification-list></eyatra-local-claim-verification-list>',
+        title: 'Local Trip Claim Verification',
+    }).
+    when('/local-trip/claim/verification/view/:trip_id', {
+        template: '<eyatra-local-claim-verification-view></eyatra-local-claim-verification-view>',
+        title: 'Local Trip Claim Verification',
     });
-    
+
+
 }]);

@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Company extends Model {
 	use SoftDeletes;
 	protected $table = 'companies';
+	protected $fillable = [
+		'code',
+		'name',
+		'address',
+		'cin_number',
+		'gst_number',
+		'customer_care_email',
+		'customer_care_phone',
+		'reference_code',
+		'additional_approve',
+
+	];
 
 	//EYATRA RELATIONSHIPS
 	public function employees() {
@@ -54,6 +66,9 @@ class Company extends Model {
 		return $this->hasMany('App\User');
 	}
 
+	public function createdBy() {
+		return $this->belongsTo('App\User', 'created_by');
+	}
 	public function outlets() {
 		return $this->hasMany('Uitoux\EYatra\Outlet');
 	}
@@ -65,6 +80,10 @@ class Company extends Model {
 	public function designations() {
 		return $this->hasMany('Uitoux\EYatra\Designation');
 	}
+	public function companyBudgets() {
+		return $this->belongsToMany('Uitoux\EYatra\Config', 'company_budget', 'company_id', 'financial_year_id')->withPivot('outstation_budget_amount', 'local_budget_amount');
+	}
+
 	//ENDS EYATRA RELATIONSHIPS
 
 }

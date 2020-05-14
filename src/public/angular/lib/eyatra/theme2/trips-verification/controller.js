@@ -53,7 +53,7 @@ app.component('eyatraTripVerifications', {
                 // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
-                { data: 'created_at', name: 'trips.created_at', searchable: true },
+                { data: 'date', name: 'trips.created_at', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -174,7 +174,7 @@ app.component('eyatraTripVerificationForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/trips')
+                $location.path('/trip/verifications')
                 $scope.$apply()
                 return;
             }
@@ -186,6 +186,7 @@ app.component('eyatraTripVerificationForm', {
                 currency: 'INR'
             });
             self.trip_reject_reasons = response.data.trip_reject_reasons;
+            self.trip_reject = response.data.trip_reject;
             self.extras = response.data.extras;
             self.action = response.data.action;
             $rootScope.loading = false;

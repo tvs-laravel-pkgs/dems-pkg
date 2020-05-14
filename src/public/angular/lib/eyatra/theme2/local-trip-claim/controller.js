@@ -5,7 +5,7 @@ app.component('eyatraClaimedLocalTrips', {
         self.hasPermission = HelperService.hasPermission;
         self.permission = self.hasPermission('local-trip-add');
         $http.get(
-            local_trip_filter_data_url
+            local_trip_claim_filter_data_url
         ).then(function(response) {
             console.log(response.data);
             self.employee_list = response.data.employee_list;
@@ -203,7 +203,9 @@ app.component('eyatraLocalTripClaimForm', {
                     var end_date = response.data.trip.end_date;
                     trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
                     self.trip.trip_periods = trip_periods;
-                    $scope.onChange(start_date, end_date);
+                     setTimeout(function() {
+                        $scope.onChange(start_date, end_date);
+                    }, 800);
                 }
 
                 $(".daterange").daterangepicker({
@@ -300,7 +302,7 @@ app.component('eyatraLocalTripClaimForm', {
         }
 
         //REMOVE VISIT 
-        self.removelocaltrip = function(index, local_trip_detail_id) {
+        self.removeLocalTrip = function(index, local_trip_detail_id) {
             if (local_trip_detail_id) {
                 trip_detail_removal_id.push(local_trip_detail_id);
                 $('#trip_detail_removal_id').val(JSON.stringify(trip_detail_removal_id));
@@ -378,7 +380,9 @@ app.component('eyatraLocalTripClaimForm', {
 
         $('body').on('click', "#datepicker", function() {
             var id = $(this).data('picker');
-            datecall(startdate, enddate, id);
+            var periods = $("#trip_periods").val();
+            var period = periods.split(" to ");
+            datecall(period[0], period[1], id);
         });
 
         function datecall(startdate, enddate, id) {
@@ -505,6 +509,7 @@ app.component('eyatraLocalTripClaimView', {
             self.trip = response.data.trip;
             console.log(self.trip);
             self.claim_status = response.data.claim_status;
+            self.gender = (response.data.trip.employee.gender).toLowerCase();
         });
 
         /* Pane Next Button */

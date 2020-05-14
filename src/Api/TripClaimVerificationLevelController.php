@@ -39,8 +39,8 @@ class TripClaimVerificationLevelController extends Controller {
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(ey_employee_claims.total_amount,2,"en_IN") as claim_amount'),
-				'trips.created_at',
-
+				// 'trips.created_at',
+				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date'),
 				'status.name as status'
 			)
 
@@ -219,7 +219,7 @@ class TripClaimVerificationLevelController extends Controller {
 	}
 
 	public function approveTripClaimVerificationOne($trip_id) {
-
+		$additional_approve = Auth::user()->company->additional_approve;
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -229,8 +229,13 @@ class TripClaimVerificationLevelController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		if ($employee_claim->is_deviation == 0) {
-			$employee_claim->status_id = 3034; //Payment Pending
-			$trip->status_id = 3034; //Payment Pending
+			if ($additional_approve == '1') {
+				$employee_claim->status_id = 3036; //Claim Verification Pending
+				$trip->status_id = 3036; //Claim Verification Pending
+			} else {
+				$employee_claim->status_id = 3034; //Payment Pending
+				$trip->status_id = 3034; //Payment Pending
+			}
 		} else {
 			$employee_claim->status_id = 3029; //Senior Manager Approval Pending
 			$trip->status_id = 3029; //Senior Manager Approval Pending

@@ -212,10 +212,15 @@ app.component('eyatraOutletForm', {
             // console.log(response.data.outlet.amount_limit);
             self.status = response.data.status;
             self.address = response.data.address;
+            //self.lob_outlet = response.data.lob_outlet;
             self.extras = response.data.extras;
             self.lob_outlet = response.data.lob_outlet;
+            self.sbu_outlet = response.data.sbu_outlet;
             self.sbu = response.data.sbu;
             self.action = response.data.action;
+            console.log(response.data.sbu);
+            console.log(response.data.lob_outlet);
+            console.log(response.data.sbu_outlet);
 
             if (self.action == 'Edit') {
                 // $scope.getSbuBasedonLob(self.outlet.sbu.lob_id);
@@ -320,16 +325,19 @@ app.component('eyatraOutletForm', {
             $.each($(".lobcheckbox:checked"), function() {
                 lob_ids.push($(this).val())
             });
+
             $.ajax({
                     url: get_sbu_by_lob_outlet,
                     method: "GET",
-                    data: { lob_ids: lob_ids },
+                    data: {
+                        lob_ids: lob_ids,
+                        outlet_id: self.outlet.id
+                    },
                 })
                 .done(function(res) {
+                    console.log(res.sbus);
                     self.sbu_list = [];
-                    self.extras.sbu_list = res.sbus;
-
-                    // console.log(self.extras.sbu_list);
+                    self.sbu_outlet = res.sbus.sbu_outlet;
                     $scope.$apply()
                 })
                 .fail(function(xhr) {
@@ -352,6 +360,7 @@ app.component('eyatraOutletForm', {
         //         });
         //     } else {
         if ($('.lobcheckbox:checked').length > 0) {
+            alert('in');
             self.sbu_list = [];
             $.each($(".lobcheckbox:checked"), function() {
                 $scope.test($(this).val())
@@ -385,30 +394,52 @@ app.component('eyatraOutletForm', {
                 $('.sbucheckbox').prop('checked', true);
                 $.each($('.sbucheckbox:checked'), function() {
                     $scope.getamountonSbu($(this).val());
-                    $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('ng-hide');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).removeClass('ng-hide');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).removeClass('ng-hide');
+
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).addClass('error');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).addClass('error');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).addClass('required');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).addClass('required');
                 });
             } else {
                 $('.sbucheckbox').prop('checked', false);
                 $.each($('.sbucheckbox'), function() {
-                    $('.sbu_table tbody tr #amount' + $(this).val()).addClass('ng-hide');
-                    $('.sbu_table tbody tr #amount' + $(this).val()).removeClass('error');
-                    $('.sbu_table tbody tr #amount' + $(this).val()).closest('.form-group').find('label.error').remove();
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).addClass('ng-hide');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).removeClass('error');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).removeClass('required');
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).closest('.form-group').find('label.error').remove();
+                    $('.sbu_table tbody tr #outstation_budget_amount' + $(this).val()).val('');
+
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).addClass('ng-hide');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).removeClass('error');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).removeClass('required');
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).closest('.form-group').find('label.error').remove();
+                    $('.sbu_table tbody tr #local_budget_amount' + $(this).val()).val('');
                 });
             }
         });
         $scope.getamountonSbu = function(id) {
-            // alert(id);
             if (event.target.checked == true) {
-                $("#amount" + id).removeClass('ng-hide');
-                $("#amount" + id).addClass('required');
-                $("#amount" + id).addClass('error');
+                $("#outstation_budget_amount" + id).removeClass('ng-hide');
+                $("#outstation_budget_amount" + id).addClass('required');
+                $("#outstation_budget_amount" + id).addClass('error');
+                $("#local_budget_amount" + id).removeClass('ng-hide');
+                $("#local_budget_amount" + id).addClass('required');
+                $("#local_budget_amount" + id).addClass('error');
             } else {
-                $("#amount" + id).addClass('ng-hide');
-                $("#amount" + id).removeClass('required');
-                $("#amount" + id).removeClass('error');
-                $("#amount" + id).closest('.form-group').find('label.error').remove();
-                // $('.sbu_table tbody tr  #amount' + $(this).val()).remove(
-                // 'label');
+                $("#outstation_budget_amount" + id).addClass('ng-hide');
+                $("#outstation_budget_amount" + id).removeClass('required');
+                $("#outstation_budget_amount" + id).removeClass('error');
+                $("#outstation_budget_amount" + id).closest('.form-group').find('label.error').remove();
+                $("#outstation_budget_amount" + id).val('');
+
+
+                $("#local_budget_amount" + id).addClass('ng-hide');
+                $("#local_budget_amount" + id).removeClass('required');
+                $("#local_budget_amount" + id).removeClass('error');
+                $("#local_budget_amount" + id).closest('.form-group').find('label.error').remove();
+                $("#local_budget_amount" + id).val('');
             }
         }
 
@@ -575,7 +606,14 @@ app.component('eyatraOutletForm', {
                  }
              },*/
             submitHandler: function(form) {
-
+                var sub_business_check = $('.sbucheckbox:checked').length;
+                var business_check = $('.lobcheckbox:checked').length;
+                if (business_check > 0) {
+                    if (sub_business_check == 0) {
+                        custom_noty('error', 'Kindly select atleast one Sub Business!');
+                        return;
+                    }
+                }
                 let formData = new FormData($(form_id)[0]);
                 $('#submit').button('loading');
                 $.ajax({
@@ -633,7 +671,8 @@ app.component('eyatraOutletView', {
 
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
-            self.amount = response.data.amount;
+            self.outstation_budget_amount = response.data.outstation_budget_amount;
+            self.local_budget_amount = response.data.local_budget_amount;
             self.action = response.data.action;
             if (self.outlet.claim_req_approver == 0) {
                 self.claim_req_approver = 'Financier';

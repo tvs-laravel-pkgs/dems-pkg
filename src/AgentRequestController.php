@@ -178,21 +178,24 @@ class AgentRequestController extends Controller {
 		$total_amount = 0;
 		if ($visits) {
 			foreach ($visits as $key => $value) {
-				if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062) {
+				if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062 || $value->booking_status_id == 3064) {
+					//3061 Booked //3062 Cancelled // 3064 Visit Reschedule
 					$trip_status = 'booked';
 				}
 			}
 		}
 
+		//dd($visits);
 		if ($trip_status == 'booked') {
 			$visits = Trip::select(DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.service_charge) as service_charge'))
 				->join('visits', 'trips.id', 'visits.trip_id')
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
-				->where('visits.booking_method_id', 3042)
+				->where('visits.booking_method_id', 3042) //Agent
 				->where('visit_bookings.created_by', Auth::user()->id)
 				->where('visits.trip_id', $trip_id)
 				->groupBy('visits.trip_id')
 				->first();
+			//dd($visits);
 
 			if ($visits) {
 				$ticket_amount = $visits->amount + $visits->tax;

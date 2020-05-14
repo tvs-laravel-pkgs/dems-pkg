@@ -13,8 +13,16 @@ use Yajra\Datatables\Datatables;
 
 class RejectionController extends Controller {
 
-	public function listEYatraEntityNg(Request $r) {
+	public function eyatraRejectedReasonFilter() {
 
+		$entity_type_ids = [507, 508, 509, 510, 511];
+		$data['reject_type_list'] = collect(DB::table('entity_types')->select('id', 'name')->whereIn('id', $entity_type_ids)->get()->prepend(['id' => -1, 'name' => 'Select a Reject Type']));
+
+		$data['success'] = true;
+		return response()->json($data);
+	}
+
+	public function listEYatraEntityNg(Request $r) {
 		$entities = Entity::withTrashed()->from('entities')
 			->select(
 				'entities.id',
@@ -35,7 +43,13 @@ class RejectionController extends Controller {
 			->leftjoin('users as updater', 'updater.id', '=', 'entities.updated_by')
 			->leftjoin('users as deactivator', 'deactivator.id', '=', 'entities.deleted_by')
 			->where('entities.company_id', Auth::user()->company_id)
-			->whereIn('entities.entity_type_id', [507, 508, 509, 510, 511])
+			->where(function ($query) use ($r) {
+				if ($r->get('reject_type_id') && $r->get('reject_type_id') != '<%$ctrl.reject_type_id%>' && $r->get('reject_type_id') != '-1') {
+					$query->where("entities.entity_type_id", $r->get('reject_type_id'));
+				} else {
+					$query->whereIn('entities.entity_type_id', [507, 508, 509, 510, 511]);
+				}
+			})
 			->orderBy('entities.id', 'desc');
 
 		// dd($entities->get());

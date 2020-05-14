@@ -4,9 +4,11 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
@@ -37,8 +39,8 @@ class AdvanceClaimRequestController extends Controller {
 
 			)
 		// ->whereNotNull('trips.advance_received')
-		// ->where('trips.status_id', 3028) //MANAGER APPROVED
 		// ->where('trips.status_id', '!=', 3261) //ADVANCE REQUEST APPROVED
+			->whereIn('trips.status_id', [3021, 3028]) //MANAGER APPROVED or WAITING FOR MANAGER APPROVAL
 			->where('trips.advance_request_approval_status_id', 3260) //NEW
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
@@ -60,6 +62,7 @@ class AdvanceClaimRequestController extends Controller {
 					$query->where("outlets.id", $r->get('outlet'))->orWhere(DB::raw("-1"), $r->get('outlet'));
 				}
 			})
+			->where('e.company_id', Auth::user()->company_id)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc')
 			->orderBy('trips.status_id', 'desc')
@@ -121,13 +124,12 @@ class AdvanceClaimRequestController extends Controller {
 		$start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
 		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
-		// $trip->start_date = $start_date->start_date;
-		// $trip->end_date = $end_date->end_date;
-		$trip->days = $days->days + 1;
+		$trip->days = $days->days;
 		$this->data['payment_mode_list'] = $payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['wallet_mode_list'] = $wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$this->data['trip'] = $trip;
 		$this->data['date'] = date('d-m-Y');
+		$this->data['start_date'] = date('d-m-Y', strtotime($trip->created_at));
 		$this->data['success'] = true;
 		$this->data['trip_advance_rejection'] = $trip_advance_rejection = Entity::trip_advance_rejection();
 		return response()->json($this->data);
@@ -150,6 +152,10 @@ class AdvanceClaimRequestController extends Controller {
 		$payment->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+
+		//Approval Log
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3620, Auth::user()->entity_id, Carbon::now());
+
 		$notification = sendnotification($type = 10, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Request Approved');
 		return response()->json(['success' => true]);
 	}
@@ -225,7 +231,7 @@ class AdvanceClaimRequestController extends Controller {
 		DB::beginTransaction();
 		try {
 
-			$trips = Trip::select('users.email', 'users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id')
+			$trips = Trip::select('users.email', 'users.name', 'employees.code', 'bank_details.account_number', 'bank_details.ifsc_code', 'trips.advance_received', 'trips.id as id', 'users.id as user_id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
@@ -237,8 +243,12 @@ class AdvanceClaimRequestController extends Controller {
 			DB::commit();
 
 			foreach ($trips as $key => $emp_details) {
-				$user = User::where('entity_id', $emp_details->id)->where('user_type_id', 3121)->first();
+				$user = User::find($emp_details->user_id);
 				$trip = Trip::find($emp_details->id);
+
+				//Approval Log
+				$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3620, Auth::user()->entity_id, Carbon::now());
+
 				$notification = sendnotification($type = 10, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Request Approved');
 			}
 

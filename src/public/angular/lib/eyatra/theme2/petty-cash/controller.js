@@ -122,23 +122,16 @@ app.component('eyatraPettyCashList', {
                             speed: 500 // unavailable - no need
                         },
                     }).show();
+                    $('#petty_cash_confirm_box').modal('hide');
                     setTimeout(function() {
                         $noty.close();
                     }, 5000);
                 } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Petty Cash Deleted Successfully',
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
+                    $('#petty_cash_confirm_box').modal('hide');
+                    custom_noty('success', 'Petty Cash Deleted Successfully');
                     $('#petty_cash_list').DataTable().ajax.reload(function(json) {});
-                    $location.path('eyatra/petty-cash/');
+                    // $location.path('petty-cash/');
+
                     $scope.$apply();
                 }
             });

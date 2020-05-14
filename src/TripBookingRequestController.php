@@ -50,7 +50,7 @@ class TripBookingRequestController extends Controller {
 			->select('trips.id as trip_id',
 				'trips.number as trip_number',
 				'e.code as ecode', 'users.name as ename',
-				'status.name as status',
+				'status.name as status', 'trips.status_id',
 				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_on'),
 				DB::raw('COUNT(v.id) as tickets_count')
 
@@ -122,6 +122,15 @@ class TripBookingRequestController extends Controller {
 				// }
 				// dd($bookings);
 				return $bookings ? "Pending" : "Booked";
+			})
+			->addColumn('trip_status', function ($visit) {
+				if ($visit->status_id == '3032') {
+					return "Trip Cancelled";
+				} elseif ($visit->status_id == '3022') {
+					return "Trip Rejected";
+				} else {
+					return "-";
+				}
 			})
 			->addColumn('action', function ($visit) {
 

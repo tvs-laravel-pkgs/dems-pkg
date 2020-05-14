@@ -76,7 +76,7 @@ class AgentClaimController extends Controller {
 				'visit_bookings.id',
 				'visit_bookings.paid_amount',
 				'configs.name as status',
-				'trips.number as trip',
+				'trips.number as trip_number',
 				'trips.id as trip_id',
 				'employees.code as employee_code',
 				'users.name as employee_name')
@@ -100,7 +100,7 @@ class AgentClaimController extends Controller {
 			$this->data['booking_list'] = $booking_list = VisitBooking::select(
 				DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.paid_amount) as total_amount'),
 				'trips.id as trip_id', 'visits.id as visit_id', 'employees.code as employee_code',
-				'users.name as employee_name', 'configs.name as status')
+				'users.name as employee_name', 'configs.name as status', 'trips.number as trip_number')
 				->join('visits', 'visits.id', 'visit_bookings.visit_id')
 				->join('trips', 'trips.id', 'visits.trip_id')
 				->join('employees', 'employees.id', 'trips.employee_id')
@@ -294,6 +294,7 @@ class AgentClaimController extends Controller {
 			'configs.name as status',
 			'trips.number as trip',
 			'trips.id as trip_id',
+			'trips.number as trip_number',
 			'employees.code as employee_code',
 			'users.name as employee_name')
 			->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
@@ -326,9 +327,9 @@ class AgentClaimController extends Controller {
 		$invoice_date_filter = date('Y-m-d', strtotime($r->invoice_date));
 		$agent_name = $r->Agent_name;
 		$agent_status = $r->Agent_status;
-		if (!$agent_status) {
-			$agent_status = 3520;
-		}
+		// if (!$agent_status) {
+		// 	$agent_status = 3520;
+		// }
 		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
@@ -355,8 +356,10 @@ class AgentClaimController extends Controller {
 				}
 			})
 			->where(function ($query) use ($agent_status) {
-				if ($agent_status != Null) {
+				if (!empty($agent_status && $agent_status != '-1')) {
 					$query->where('ey_agent_claims.status_id', '=', $agent_status);
+				} else {
+					$query->whereIn('ey_agent_claims.status_id', [3520, 3521, 3522]);
 				}
 			})
 			->where(function ($query) use ($invoice_date_filter) {
@@ -394,9 +397,7 @@ class AgentClaimController extends Controller {
 			->groupBy('users.name')
 			->orderBy('ey_agent_claims.id', 'desc')
 			->get();
-		$this->data['status'] = $status = Config::select('name', 'id')
-			->where('config_type_id', '=', 530)
-			->get();
+		$this->data['status'] = $status = collect(Config::select('name', 'id')->where('config_type_id', 530)->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 
 		return response()->json($this->data);
 	}
@@ -420,7 +421,7 @@ class AgentClaimController extends Controller {
 			'visit_bookings.id',
 			//'visit_bookings.paid_amount',
 			'configs.name as status',
-			'trips.number as trip',
+			'trips.number as trip_number',
 			'trips.id as trip_id',
 			'employees.code as employee_code',
 			'users.name as employee_name')
@@ -453,7 +454,7 @@ class AgentClaimController extends Controller {
 		if (!$agent_claim) {
 			return response()->json(['success' => false, 'errors' => ['Agent Claim Request not found']]);
 		}
-		$agent_claim->status_id = 3243;
+		$agent_claim->status_id = 3521;
 		$agent_claim->save();
 
 		//PAYMENT SAVE
@@ -576,7 +577,4 @@ class AgentClaimController extends Controller {
 
 		return response()->json(['success' => true]);
 	}
-
-	// 3252
-
 }

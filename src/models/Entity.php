@@ -36,6 +36,10 @@ class Entity extends Model {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'travel_mode_category_type', 'travel_mode_id', 'category_id');
 	}
 
+	public function travelModesCategories() {
+		return $this->belongsToMany('Uitoux\EYatra\Config', 'travel_mode_category_type', 'travel_mode_id', 'category_id');
+	}
+
 	public function local_travel_mode_categories() {
 		return $this->belongsToMany('Uitoux\EYatra\Entity', 'local_travel_mode_category_type', 'travel_mode_id', 'category_id');
 	}

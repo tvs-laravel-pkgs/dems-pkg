@@ -57,24 +57,37 @@ class TripVerificationController extends Controller {
 			'status',
 		])
 			->find($trip_id);
+			//dd($trip);
 
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
 		if (!Entrust::can('verify-all-trips') && $trip->manager_id != Auth::user()->entity_id) {
-			return response()->json(['success' => false, 'errors' => ['You are nor authorized to view this trip']]);
+			return response()->json(['success' => false, 'errors' => ['You are not authorized to view this trip']]);
 		}
+
 
 		$start_date = $trip->visits()->select(DB::raw('MIN(visits.departure_date) as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('MAX(visits.departure_date) as end_date'))->first();
 		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
-		$trip->start_date = $start_date->start_date;
-		$trip->end_date = $end_date->end_date;
 		$trip->days = $days->days + 1;
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
 		$this->data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();
+
+		if ($trip->advance_request_approval_status_id) {
+			if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
+				$trip_reject = 1;
+			} else {
+				$trip_reject = 0;
+			}
+		} else {
+			$trip_reject = 1;
+		}
+
+		$this->data['trip_reject'] = $trip_reject;
+
 		return response()->json($this->data);
 	}
 
@@ -106,5 +119,4 @@ class TripVerificationController extends Controller {
 		return Trip::rejectTrip($r);
 
 	}
-
 }

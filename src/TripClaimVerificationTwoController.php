@@ -4,9 +4,11 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\ActivityLog;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
@@ -122,6 +124,8 @@ class TripClaimVerificationTwoController extends Controller {
 		$activity['details'] = "Employee Claims V2 Approved";
 		$activity['activity'] = "approve";
 		$activity_log = ActivityLog::saveLog($activity);
+		//Approval Log
+		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3602, Auth::user()->entity_id, Carbon::now());
 		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -134,10 +138,15 @@ class TripClaimVerificationTwoController extends Controller {
 		// 	$employee_claim->status_id = 3025; // Payment Pending for Financier
 		// }
 		// // $employee_claim->status_id = 3223; //Payment Pending
-
-		$employee_claim->status_id = 3034; //PAYMENT PENDING
+		$additional_approve = Auth::user()->company->additional_approve;
+		if ($additional_approve == '1') {
+			$employee_claim->status_id = 3036; //Claim Verification Pending
+			$trip->status_id = 3036; //Claim Verification Pending
+		} else {
+			$employee_claim->status_id = 3034; //Payment Pending
+			$trip->status_id = 3034; //Payment Pending
+		}
 		$employee_claim->save();
-		$trip->status_id = 3034; // Payment Pending
 		$trip->save();
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
@@ -156,7 +165,7 @@ class TripClaimVerificationTwoController extends Controller {
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$employee_claim->status_id = 3226; //Claim Rejected
+		$employee_claim->status_id = 3024; //Claim Rejected
 		$employee_claim->save();
 
 		$trip->rejection_id = $r->reject_id;

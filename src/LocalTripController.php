@@ -4,10 +4,12 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\LocalTrip;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -66,11 +68,14 @@ class LocalTripController extends Controller {
 				}
 			})
 			->whereIN('local_trips.status_id', [3021, 3022, 3028, 3032])
-			->where('local_trips.employee_id', Auth::user()->entity_id)
+		// ->where('local_trips.employee_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')
 			->orderBy('local_trips.id', 'desc')
 		// ->get()
 		;
+		if (!Entrust::can('local-view-all-trips')) {
+			$trips->where('local_trips.employee_id', Auth::user()->entity_id);
+		}
 
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
@@ -84,7 +89,7 @@ class LocalTripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3024') {
+				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3024' || $trip->status_id == '3032') {
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('local-trip-edit')) {
 						$edit_class = "";
@@ -98,15 +103,9 @@ class LocalTripController extends Controller {
 					$delete_class = "visibility:hidden";
 				}
 
-				if ($trip->status_id == '3028' || $trip->status_id == '3024') {
-					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/claim/add/' . $trip->id . '">
+				$action .= '<a style="' . $edit_class . '" href="#!/local-trip/edit/' . $trip->id . '">
 					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
 					</a> ';
-				} else {
-					$action .= '<a style="' . $edit_class . '" href="#!/local-trip/edit/' . $trip->id . '">
-					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
-					</a> ';
-				}
 
 				$action .= '<a href="#!/local-trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
@@ -174,7 +173,7 @@ class LocalTripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->whereIN('local_trips.status_id', [3023, 3024, 3026, 3029, 3034, 3035])
+			->whereIN('local_trips.status_id', [3023, 3024, 3026, 3029, 3034, 3035, 3036])
 			->where('local_trips.employee_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')
 		// ->orderBy('trips.created_at', 'desc');
@@ -231,7 +230,7 @@ class LocalTripController extends Controller {
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->first();
 			$trip = LocalTrip::find($request->id);
-			if ($trip->status_id >= 3028) {
+			if ($request->local_trip_claim) {
 				if ($request->trip_detail == '') {
 					return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
 				}
@@ -252,11 +251,12 @@ class LocalTripController extends Controller {
 			for ($i = 0; $i < $size; $i++) {
 				if (!(($request->trip_detail[$i]['travel_date'] >= $request->start_date) && ($request->trip_detail[$i]['travel_date'] <= $request->end_date))) {
 					return response()->json(['success' => false, 'errors' => "Visit date should be within Trip Period"]);
-
 				}
-
 			}
 		}
+		// elseif ($request->id != NULL) {
+		// 	return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
+		// }
 
 		return LocalTrip::saveTrip($request);
 	}
@@ -267,6 +267,10 @@ class LocalTripController extends Controller {
 
 	public function eyatraLocalTripFilterData() {
 		return LocalTrip::getFilterData($type = 1);
+	}
+
+	public function eyatraLocalTripClaimFilterData() {
+		return LocalTrip::getFilterData($type = 4);
 	}
 
 	public function eyatraLocalTripVerificationFilterData() {
@@ -512,6 +516,9 @@ class LocalTripController extends Controller {
 
 			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 			$notification = sendnotification($type = 9, $trip, $user, $trip_type = "Local Trip", $notification_type = 'Paid');
+
+			//Claim Approval Log
+			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3608, Auth::user()->entity_id, Carbon::now());
 
 			DB::commit();
 			return response()->json(['success' => true]);
