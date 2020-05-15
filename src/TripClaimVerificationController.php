@@ -7,6 +7,7 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
+use Session;
 use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\EmployeeClaim;
@@ -23,8 +24,16 @@ class TripClaimVerificationController extends Controller {
 				->where('employees.company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
-		$start_date = date('01-m-Y');
-		$end_date = date('t-m-Y');
+		$this->data['filter_employee_id'] = $filter_employee_id = session('verifier_employee_id') ? intval(session('verifier_employee_id')) : '-1';
+		$this->data['filter_outlet_id'] = $filter_outlet_id = session('verifier_outlet_id') ? intval(session('verifier_outlet_id')) : '-1';
+		$this->data['filter_purpose_id'] = $filter_purpose_id = session('verifier_purpose_id') ? intval(session('verifier_purpose_id')) : '-1';
+
+		$start_date = session('verifier_start_date');
+		$end_date = session('verifier_end_date');
+		if (!$start_date) {
+			$start_date = date('01-m-Y');
+			$end_date = date('t-m-Y');
+		}
 
 		$this->data['start_date'] = $start_date;
 		$this->data['end_date'] = $end_date;
@@ -38,6 +47,8 @@ class TripClaimVerificationController extends Controller {
 		// dd($r->all());
 		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
 			$from_date = date('Y-m-d', strtotime($r->from_date));
+			Session::put('verifier_start_date', $r->from_date);
+			Session::put('verifier_end_date', $r->to_date);
 		} else {
 			$from_date = null;
 		}
@@ -46,6 +57,16 @@ class TripClaimVerificationController extends Controller {
 			$to_date = date('Y-m-d', strtotime($r->to_date));
 		} else {
 			$to_date = null;
+		}
+
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['verifier_employee_id' => $r->employee_id]);
+		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['verifier_outlet_id' => $r->outlet_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['verifier_purpose_id' => $r->purpose_id]);
 		}
 
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
@@ -179,6 +200,8 @@ class TripClaimVerificationController extends Controller {
 		// dd($r->all());
 		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
 			$from_date = date('Y-m-d', strtotime($r->from_date));
+			Session::put('verifier_start_date', $r->from_date);
+			Session::put('verifier_end_date', $r->to_date);
 		} else {
 			$from_date = null;
 		}
@@ -187,6 +210,16 @@ class TripClaimVerificationController extends Controller {
 			$to_date = date('Y-m-d', strtotime($r->to_date));
 		} else {
 			$to_date = null;
+		}
+
+		if ($r->employee_id && $r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			session(['verifier_employee_id' => $r->employee_id]);
+		}
+		if ($r->outlet_id && $r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			session(['verifier_outlet_id' => $r->outlet_id]);
+		}
+		if ($r->purpose_id && $r->purpose_id != '<%$ctrl.filter_purpose_id%>') {
+			session(['verifier_purpose_id' => $r->purpose_id]);
 		}
 
 		$trips = LocalTrip::join('employees as e', 'e.id', 'local_trips.employee_id')
@@ -227,7 +260,6 @@ class TripClaimVerificationController extends Controller {
 
 			->where(function ($query) use ($from_date) {
 				if (!empty($from_date)) {
-					//dd('in');
 					$query->where('local_trips.start_date', '>=', $from_date);
 				}
 			})
