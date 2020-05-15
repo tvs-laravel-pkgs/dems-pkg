@@ -9,12 +9,26 @@ app.component('eyatraOutstationClaimVerificationList', {
             self.employee_list = response.data.employee_list;
             self.outlet_list = response.data.outlet_list;
             self.purpose_list = response.data.purpose_list;
-            self.filter_outlet_id = response.data.filter_outlet_id;
             self.start_date = response.data.start_date;
             self.end_date = response.data.end_date;
-            self.filter_purpose_id = '-1';
-            self.filter_employee_id = '-1';
-            self.filter_outlet_id = '-1';
+
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
 
             var trip_periods = response.data.start_date + ' to ' + response.data.end_date;
             self.trip_periods = trip_periods;
@@ -333,16 +347,30 @@ app.component('eyatraLocalClaimVerificationList', {
             self.employee_list = response.data.employee_list;
             self.outlet_list = response.data.outlet_list;
             self.purpose_list = response.data.purpose_list;
-            self.filter_outlet_id = response.data.filter_outlet_id;
             self.start_date = response.data.start_date;
             self.end_date = response.data.end_date;
-            self.filter_purpose_id = '-1';
-            self.filter_employee_id = '-1';
-            self.filter_outlet_id = '-1';
+
+            if (response.data.filter_employee_id == '-1') {
+                self.filter_employee_id = '-1';
+            } else {
+                self.filter_employee_id = response.data.filter_employee_id;
+            }
+
+            if (response.data.filter_outlet_id == '-1') {
+                self.filter_outlet_id = '-1';
+            } else {
+                self.filter_outlet_id = response.data.filter_outlet_id;
+            }
+
+            if (response.data.filter_purpose_id == '-1') {
+                self.filter_purpose_id = '-1';
+            } else {
+                self.filter_purpose_id = response.data.filter_purpose_id;
+            }
 
             var trip_periods = response.data.start_date + ' to ' + response.data.end_date;
             self.trip_periods = trip_periods;
-
+            
             setTimeout(function() {
                 get_employees(self.filter_outlet_id, status = 0);
                 $('#from_date').val(self.start_date);
@@ -487,7 +515,7 @@ app.component('eyatraLocalClaimVerificationList', {
 
 app.component('eyatraLocalClaimVerificationView', {
     templateUrl: eyatra_local_trip_claim_verification_view_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) { 
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.local_travel_attachment_url = local_travel_attachment_url;
@@ -531,7 +559,7 @@ app.component('eyatraLocalClaimVerificationView', {
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
-        
+
         $(document).on('mouseover', ".separate-file-attachment", function() {
             var $this = $(this);
 
