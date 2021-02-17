@@ -159,7 +159,7 @@ class GradeController extends Controller {
 					$local_travel_types_list[$local_travel_type->id]->checked = true;
 				}
 			}
-			$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit', 'two_wheeler_per_km', 'four_wheeler_per_km', 'local_trip_amount')->first();
+			$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit', 'two_wheeler_per_km', 'four_wheeler_per_km', 'local_trip_amount','outstation_trip_amount')->first();
 			$this->data['success'] = true;
 		}
 		$this->data['extras'] = [
@@ -257,6 +257,7 @@ class GradeController extends Controller {
 			$grade_details->four_wheeler_per_km = $request->four_wheeler_per_km;
 			$grade_details->two_wheeler_per_km = $request->two_wheeler_per_km;
 			$grade_details->local_trip_amount = $request->local_trip_amount;
+			$grade_details->outstation_trip_amount = $request->outstation_trip_amount;
 			$grade_details->save();
 
 			// $grade->gradeEligibility()->sync($request->grade_advanced);
@@ -328,7 +329,7 @@ class GradeController extends Controller {
 		$this->data['grade_advanced'] = count($grade_advanced) ? 'Yes' : 'No';
 		$this->data['action'] = 'View';
 
-		$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit', 'two_wheeler_per_km', 'four_wheeler_per_km', 'local_trip_amount')->first();
+		$this->data['grade_details'] = GradeAdvancedEligiblity::where('grade_id', $grade_id)->select('advanced_eligibility', 'stay_type_disc', 'deviation_eligiblity', 'claim_active_days', 'travel_advance_limit', 'two_wheeler_limit', 'four_wheeler_limit', 'two_wheeler_per_km', 'four_wheeler_per_km', 'local_trip_amount','outstation_trip_amount')->first();
 
 		$this->data['success'] = true;
 		return response()->json($this->data);
