@@ -1511,6 +1511,12 @@ class Trip extends Model {
 			}
 
 			$trip = Trip::find($request->trip_id);
+			if (!$trip) {
+				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
+			}
+
+			//Get employee outstion beta amount
+			$beta_amount = Employee::join('grade_advanced_eligibility','grade_advanced_eligibility.grade_id','employees.grade_id')->where('employees.id',$trip->employee_id)->pluck('grade_advanced_eligibility.outstation_trip_amount')->first();
 
 			//SAVING VISITS
 			if ($request->visits) {
@@ -1610,6 +1616,18 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+				
+				//Check Beta Amount
+				if($lodging_amount == 0 && $boarding_amount == 0){
+					$employee_beta_amount = $beta_amount * $request->trip_total_days;
+					$total_amount += $employee_beta_amount;
+
+					$employee_claim->beta_amount = $employee_beta_amount;
+				}else{
+					$employee_claim->beta_amount = NULL;
+				}
+
+				$employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
 
 				//To Find Amount to Pay Financier or Employee
@@ -1664,6 +1682,7 @@ class Trip extends Model {
 					if ($lodge_stayed_days > $trip_total_days) {
 						return response()->json(['success' => false, 'errors' => ['Total lodging days should be less than total trip days']]);
 					}
+
 					$lodging_total_amount = 0;
 					foreach ($request->lodgings as $lodging_data) {
 
@@ -1746,6 +1765,18 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+				
+				//Check Beta Amount
+				if($lodging_amount == 0 && $boarding_amount == 0){
+					$employee_beta_amount = $beta_amount * $request->trip_total_days;
+					$total_amount += $employee_beta_amount;
+
+					$employee_claim->beta_amount = $employee_beta_amount;
+				}else{
+					$employee_claim->beta_amount = NULL;
+				}
+
+				$employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
 
 				//To Find Amount to Pay Financier or Employee
@@ -1895,6 +1926,18 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+				
+				//Check Beta Amount
+				if($lodging_amount == 0 && $boarding_amount == 0){
+					$employee_beta_amount = $beta_amount * $request->trip_total_days;
+					$total_amount += $employee_beta_amount;
+
+					$employee_claim->beta_amount = $employee_beta_amount;
+				}else{
+					$employee_claim->beta_amount = NULL;
+				}
+
+				$employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
 
 				//To Find Amount to Pay Financier or Employee
@@ -2048,8 +2091,20 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
-				$employee_claim->total_amount = $total_amount;
+				
+				//Check Beta Amount
+				if($lodging_amount == 0 && $boarding_amount == 0){
+					$employee_beta_amount = $beta_amount * $request->trip_total_days;
+					$total_amount += $employee_beta_amount;
 
+					$employee_claim->beta_amount = $employee_beta_amount;
+				}else{
+					$employee_claim->beta_amount = NULL;
+				}
+
+				$employee_claim->total_trip_days = $request->trip_total_days;
+				$employee_claim->total_amount = $total_amount;
+				
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {
 					if ($trip->advance_received > $total_amount) {

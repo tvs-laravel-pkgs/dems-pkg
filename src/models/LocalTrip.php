@@ -163,6 +163,16 @@ class LocalTrip extends Model {
 			$trip = new LocalTrip;
 			$trip->visit_details = [];
 			$data['success'] = true;
+
+			$user = Auth::user()->entity;
+			if(!$user)
+			{
+				if (!$trip) {
+					$data['success'] = false;
+					$data['message'] = 'Employee Grade not found';
+				}
+			}
+			$grade_id = $user->grade_id;
 		} else {
 			$data['action'] = 'Edit';
 			$data['success'] = true;
@@ -179,11 +189,10 @@ class LocalTrip extends Model {
 				$data['success'] = false;
 				$data['message'] = 'Trip not found';
 			}
+
+			$grade_id = Employee::where('id',$trip->employee_id)->pluck('grade_id')->first();
 		}
-
-		$grade = Auth::user()->entity;
-
-		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('local_trip_amount')->where('grade_id', $grade->grade_id)->first();
+		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('local_trip_amount')->where('grade_id', $grade_id)->first();
 
 		if ($grade_eligibility) {
 			$beta_amount = $grade_eligibility->local_trip_amount;
@@ -195,7 +204,7 @@ class LocalTrip extends Model {
 		$data['extras'] = [
 			'travel_mode_list' => Entity::join('local_travel_mode_category_type', 'local_travel_mode_category_type.travel_mode_id', 'entities.id')->select('entities.name', 'entities.id')->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 503)->get()->prepend(['id' => '', 'name' => 'Select Travel Mode']),
 			'eligible_travel_mode_list' => DB::table('local_travel_mode_category_type')->where('category_id', 3561)->pluck('travel_mode_id')->toArray(),
-			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
+			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
 		];
 		$data['trip'] = $trip;
 

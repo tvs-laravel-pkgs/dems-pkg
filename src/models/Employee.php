@@ -48,7 +48,7 @@ class Employee extends Model {
 	}
 
 	public function grade() {
-		return $this->belongsTo('Uitoux\EYatra\Entity', 'grade_id');
+		return $this->belongsTo('Uitoux\EYatra\Entity', 'grade_id')->withTrashed();
 	}
 
 	public function grade_details() {
@@ -56,11 +56,11 @@ class Employee extends Model {
 	}
 
 	public function designation() {
-		return $this->belongsTo('Uitoux\EYatra\Designation');
+		return $this->belongsTo('Uitoux\EYatra\Designation')->withTrashed();
 	}
 
 	public function outlet() {
-		return $this->belongsTo('Uitoux\EYatra\Outlet');
+		return $this->belongsTo('Uitoux\EYatra\Outlet')->withTrashed();
 	}
 
 	public function bankDetail() {
@@ -74,11 +74,11 @@ class Employee extends Model {
 	}
 
 	public function reportingTo() {
-		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id')->withTrashed();
 	}
 
 	public function manager() {
-		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id');
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id')->withTrashed();
 	}
 
 	public function paymentMode() {
