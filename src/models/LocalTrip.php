@@ -173,6 +173,7 @@ class LocalTrip extends Model {
 				}
 			}
 			$grade_id = $user->grade_id;
+			$employee_id = $user->id;
 		} else {
 			$data['action'] = 'Edit';
 			$data['success'] = true;
@@ -191,6 +192,8 @@ class LocalTrip extends Model {
 			}
 
 			$grade_id = Employee::where('id',$trip->employee_id)->pluck('grade_id')->first();
+			$employee_id = $trip->employee_id;
+
 		}
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('local_trip_amount')->where('grade_id', $grade_id)->first();
 
@@ -201,10 +204,35 @@ class LocalTrip extends Model {
 		}
 		$data['beta_amount'] = $beta_amount;
 
+		$employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km','gae.local_trip_amount')
+			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
+			->leftjoin('designations', 'designations.id', 'employees.designation_id')
+			->leftjoin('users', 'users.entity_id', 'employees.id')
+			->leftjoin('entities', 'entities.id', 'employees.grade_id')
+			->where('employees.id', $employee_id)
+			->where('users.user_type_id', 3121)->first();
+			
+		//Get Own Vehicle details
+		$vehicle_details = Entity::join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')->where('travel_mode_category_type.category_id', 3400)->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 502)->select('entities.name', 'entities.id')->get();
+		$values = [];
+		foreach ($vehicle_details as $key => $value) {
+			$stripped = strtolower(preg_replace('/\s/', '', $value->name));
+			if ($stripped == 'twowheeler') {
+				$values[$value->id] = $employee->two_wheeler_per_km;
+			} elseif ($stripped == 'fourwheeler') {
+				$values[$value->id] = $employee->four_wheeler_per_km;
+			} else {
+				$values[$value->id] = '0';
+			}
+		}
+
+		$data['travel_values'] = $values;
+
 		$data['extras'] = [
-			'travel_mode_list' => Entity::join('local_travel_mode_category_type', 'local_travel_mode_category_type.travel_mode_id', 'entities.id')->select('entities.name', 'entities.id')->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 503)->get()->prepend(['id' => '', 'name' => 'Select Travel Mode']),
+			'travel_mode_list' => collect(Entity::uiClaimTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode'])),
 			'eligible_travel_mode_list' => DB::table('local_travel_mode_category_type')->where('category_id', 3561)->pluck('travel_mode_id')->toArray(),
 			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
+			'travel_values' => $values,
 		];
 		$data['trip'] = $trip;
 
