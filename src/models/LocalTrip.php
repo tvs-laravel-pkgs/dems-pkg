@@ -22,6 +22,10 @@ class LocalTrip extends Model {
 		return $this->hasMany('Uitoux\EYatra\LocalTripVisitDetail', 'trip_id');
 	}
 
+	public function expense() {
+		return $this->hasMany('Uitoux\EYatra\LocalTripExpense', 'trip_id');
+	}
+
 	public function getStartDateAttribute($date) {
 		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
@@ -183,6 +187,7 @@ class LocalTrip extends Model {
 			$trip = LocalTrip::withTrashed()->with([
 				'purpose',
 				'visitDetails',
+				'expense',
 				'expenseAttachments',
 			])->find($trip_id);
 
@@ -304,6 +309,7 @@ class LocalTrip extends Model {
 				}
 
 				LocalTripVisitDetail::where('trip_id', $request->id)->forceDelete();
+				LocalTripExpense::where('trip_id', $request->id)->forceDelete();
 				$activity['activity'] = "edit";
 			}
 
@@ -326,7 +332,8 @@ class LocalTrip extends Model {
 			$trip->description = $request->description;
 			$trip->employee_id = Auth::user()->entity->id;
 			$trip->beta_amount = $request->total_beta_amount;
-			$trip->other_amount = $request->total_other_amount;
+			$trip->travel_amount = $request->total_travel_amount;
+			$trip->other_expense_amount = $request->total_expense_amount;
 			$trip->claim_amount = $request->total_claim_amount;
 			$trip->claimed_date = date('Y-m-d');
 			$trip->save();
@@ -383,8 +390,26 @@ class LocalTrip extends Model {
 					$visit->from_place = $visit_data['from_place'];
 					$visit->to_place = $visit_data['to_place'];
 					// $visit->amount = $visit_data['amount'];
-					$visit->extra_amount = $visit_data['extra_amount'];
+					$visit->amount = $visit_data['amount'];
 					$visit->description = $visit_data['description'];
+					$visit->from_km = $visit_data['from_km'];
+					$visit->to_km = $visit_data['to_km'];
+					$visit->created_by = Auth::user()->id;
+					$visit->created_at = Carbon::now();
+					$visit->save();
+					$i++;
+				}
+			}
+
+			if ($request->expense_detail) {
+				$visit_count = count($request->expense_detail);
+				$i = 0;
+				foreach ($request->expense_detail as $key => $expense_data) {
+					$visit = new LocalTripExpense;
+					$visit->trip_id = $trip->id;
+					$visit->expense_date = date('Y-m-d', strtotime($expense_data['expense_date']));
+					$visit->amount = $expense_data['amount'];
+					$visit->description = $expense_data['description'];
 					$visit->created_by = Auth::user()->id;
 					$visit->created_at = Carbon::now();
 					$visit->save();
@@ -475,6 +500,7 @@ class LocalTrip extends Model {
 				$q->orderBy('local_trip_visit_details.travel_date');
 			},
 			'visitDetails.travelMode',
+			'expense',
 			'employee',
 			'employee.user',
 			'employee.outlet',

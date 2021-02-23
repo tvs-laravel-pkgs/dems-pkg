@@ -313,6 +313,18 @@ app.component('eyatraLocalTripClaimForm', {
             }, 1500);
         }
 
+        //REMOVE OTHER EXPENSE 
+        self.removeExpense = function(index, local_trip_detail_id) {
+            // if (local_trip_detail_id) {
+            //     trip_detail_removal_id.push(local_trip_detail_id);
+            //     $('#trip_detail_removal_id').val(JSON.stringify(trip_detail_removal_id));
+            // }
+            self.trip.expense.splice(index, 1);
+            setTimeout(function() {
+                self.calculatetotalamount();
+            }, 1500);
+        }
+
         //REMOVE VISIT ATTACHMENT
         self.removeOtherAttachment = function(index, attachment_id) {
             console.log(attachment_id);
@@ -328,8 +340,9 @@ app.component('eyatraLocalTripClaimForm', {
         //OTHER EXPENSE AMOUNT CALCULATE
         self.calculatetotalamount = function() {
             var total_amount = 0;
-            var total_extra_amount = 0;
+            var total_expense_amount = 0;
             var total_beta_amount = 0;
+            var total_travel_amount = 0;
             var total_days = 0;
             var days = [];
 
@@ -342,24 +355,39 @@ app.component('eyatraLocalTripClaimForm', {
                     }
                 });
 
-                $('.amount_validate1').each(function() {
-                    var extra_amount = parseFloat($(this).closest('tr').find('.claim_extra_amount').val() || 0);
-                    if (!$.isNumeric(extra_amount)) {
-                        extra_amount = 0;
-                    }
-                    total_extra_amount += extra_amount;
-                });
                 total_beta_amount = total_days * self.beta_amount;
 
-                total_amount = total_extra_amount + total_beta_amount;
+                $('.km_amount_validate').each(function() {
+                    var travel_amount = parseFloat($(this).closest('tr').find('.kilo_meter_amount').val() || 0);
+                    console.log(travel_amount);
+                    if (!$.isNumeric(travel_amount)) {
+                        travel_amount = 0;
+                    }
+                    total_travel_amount += travel_amount;
+                });
+
+                $('.expense_amount_validate').each(function() {
+                    var expense_amount = parseFloat($(this).closest('tr').find('.expense_amount').val() || 0);
+                    console.log(expense_amount);
+                    if (!$.isNumeric(expense_amount)) {
+                        expense_amount = 0;
+                    }
+                    total_expense_amount += expense_amount;
+                });
+
+                total_amount = total_travel_amount + total_beta_amount + total_expense_amount;
+
+                 //Total Travel Amount
+                 $('.claim_travel_amount').val(total_travel_amount.toFixed(2));
+                 $('.claim_travel_amount').text('₹ ' + total_travel_amount.toFixed(2));
 
                 //Total Beta Amount
                 $('.claim_beta_amount').val(total_beta_amount.toFixed(2));
                 $('.claim_beta_amount').text('₹ ' + total_beta_amount.toFixed(2));
 
-                //Total Other Amount
-                $('.claim_other_amount').val(total_extra_amount.toFixed(2));
-                $('.claim_other_amount').text('₹ ' + total_extra_amount.toFixed(2));
+                //Total Expense Amount
+                $('.claim_expense_amount').val(total_expense_amount.toFixed(2));
+                $('.claim_expense_amount').text('₹ ' + total_expense_amount.toFixed(2));
 
                 //Total Amount
                 $('.claim_total_amount').val(total_amount.toFixed(2));
@@ -378,12 +406,109 @@ app.component('eyatraLocalTripClaimForm', {
             });
         }
 
+        self.addOtherExpense = function() {
+            self.trip.expense.push({
+                amount: '',
+                remarks: '',
+            });
+        }
+
         $('body').on('click', "#datepicker", function() {
             var id = $(this).data('picker');
             var periods = $("#trip_periods").val();
             var period = periods.split(" to ");
             datecall(period[0], period[1], id);
         });
+
+        $(document).on('input', '.kilo_meter', function() {
+            var index = $(this).attr("data-index");
+            // console.log(index);
+            // self.trip.visit_details[index].editable_amount.readonly = true;
+
+            var km_amount = 0;
+            var from_km = parseInt($(this).closest('tr').find('.from_km').val());
+            var to_km = parseInt($(this).closest('tr').find('.to_km').val());
+
+            var travel_mode_id =  $(".travel_mode_" + index).val();
+
+            $scope.calculateKMAmount(from_km,to_km,travel_mode_id,index);
+        });
+
+        $scope.travelMode = function(travel_mode_id,index) {
+            if(travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined'){
+                $(".km_amount_" + index).prop("readonly",true);
+                $(".from_km_" + index).prop("readonly",false);
+                $(".to_km_" + index).prop("readonly",false);
+
+                var from_km = $(".from_km_" + index).val();
+                var to_km =  $(".to_km_" + index).val();
+
+                self.trip.visit_details[index].km_amount = self.extras.travel_values[travel_mode_id];
+                $(".km_amount_label_" + index).show();
+
+                $scope.calculateKMAmount(from_km,to_km,travel_mode_id,index);
+            }else{
+                $(".km_amount_" + index).prop("readonly",false);
+                self.trip.visit_details[index].km_amount = 0;
+                self.trip.visit_details[index].from_km = '-';
+                self.trip.visit_details[index].to_km = '-';
+                $(".from_km_" + index).prop("readonly",true);
+                $(".to_km_" + index).prop("readonly",true);
+                $(".km_amount_label_" + index).hide();
+            }
+        }
+
+        $scope.calculateKMAmount = function(from_km,to_km,travel_mode_id,index) {
+            console.log(from_km, to_km, travel_mode_id, index);
+            var from_km = parseInt(from_km);
+            var to_km = parseInt(to_km);
+
+            if (from_km == to_km) {
+                $(".validation_error_" + index).text("From,To km should not be same");
+                // // $('#submit').hide();
+                // arrival_from_to_km_error_flag = 1;
+            } else if (from_km > to_km) {
+                $(".validation_error_" + index).text("To km should be greater then From km");
+                // // $('#submit').hide();
+                // arrival_from_to_km_error_flag = 1;
+            } else if (from_km == 0 || to_km == 0) {
+                $(".validation_error_" + index).text("Invalid value");
+                // arrival_from_to_km_error_flag = 1;
+            } else if (from_km && to_km) {
+                // var localConveyance_from_to_diff = localconveyance_to_km - localconveyance_from_km;
+                // $('.difference_km_' + index).val(localConveyance_from_to_diff);
+                // var localconveyance_base_per_km_amount = parseInt($(this).closest('tr').find('.base_per_km_amount').val() || 0);
+                // localConveyance_amount = localConveyance_from_to_diff * localconveyance_base_per_km_amount;
+                // $(this).closest('tr').find('.localConveyance_amount').val(localConveyance_amount.toFixed(2));
+                // self.travelCal();
+                $(".validation_error_" + index).text("");
+
+                if(travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined'){
+                    var from_to_km_diff = to_km - from_km;
+
+                    kilo_meter_amount = from_to_km_diff * self.extras.travel_values[travel_mode_id];
+                    $(".km_amount_" + index).val(kilo_meter_amount);;
+                    $(".km_amount_" + index).prop("readonly",true);
+
+                }else{
+                    $(this).closest('tr').find('.kilo_meter_amount').val('0');
+                    // self.trip.visit_details[index].editable_amount.readonly = false;
+                    $(".km_amount_" + index).prop("readonly",false);
+                }
+                // $('#submit').show();
+                // arrival_from_to_km_error_flag = 0;
+            } else {
+                $(this).closest('tr').find('.kilo_meter_amount').val('0');
+                // self.travelCal();
+                $(".validation_error_" + index).text("");
+                // $('#submit').show();
+                // arrival_from_to_km_error_flag = 0;
+            }
+
+            setTimeout(function() {
+                self.calculatetotalamount();
+            }, 1000);
+        }
 
         function datecall(startdate, enddate, id) {
             $(".datepicker_" + id).datepicker({
@@ -393,18 +518,6 @@ app.component('eyatraLocalTripClaimForm', {
             });
         }
 
-        function sameFromTo() {
-            $noty = new Noty({
-                type: 'error',
-                layout: 'topRight',
-                text: 'From City and To City should not be same,please choose another To city',
-            }).show();
-            setTimeout(function() {
-                $noty.close();
-            }, 100000);
-        }
-
-
         $("#advance").hide().prop('disabled', true);
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
@@ -412,32 +525,6 @@ app.component('eyatraLocalTripClaimForm', {
         $('.btn-prev').on("click", function() {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
-
-        self.searchCity = function(query) {
-            if (query) {
-                return new Promise(function(resolve, reject) {
-                    $http
-                        .post(
-                            laravel_routes['searchCity'], {
-                                key: query,
-                            }
-                        )
-                        .then(function(response) {
-                            resolve(response.data);
-                        });
-                });
-            } else {
-                return [];
-            }
-        }
-
-        self.removeLodging = function(index, lodging_id) {
-            if (lodging_id) {
-                lodgings_removal_id.push(lodging_id);
-                $('#lodgings_removal_id').val(JSON.stringify(lodgings_removal_id));
-            }
-            self.trip.visits.splice(index, 1);
-        }
 
         var form_id = '#local-trip-form';
         var v = jQuery(form_id).validate({
