@@ -880,10 +880,10 @@ app.component('eyatraTripClaimForm', {
                             if (!self.trip.visits[key].self_amount) {
                                 self.trip.visits[key].self_amount = {
                                     amount: '0.00',
-                                    readonly: false
+                                    readonly: true
                                 };
                             } else {
-                                self.trip.visits[key].self_amount.readonly = false;
+                                self.trip.visits[key].self_amount.readonly = true;
                                 self.trip.visits[key].self_amount.amount = self.trip.visits[key].self_amount.amount ? self.trip.visits[key].self_amount.amount : '0.00';
                             }
                             // self.trip.visits[key].self_booking.km_start = '';
@@ -1529,16 +1529,37 @@ app.component('eyatraTripClaimForm', {
 
 
         function caimTotalAmount() {
+            setTimeout(function() {
+                var total_travel_amount = parseFloat($('.total_travel_amount').val() || 0);
+                var total_lodging_amount = parseFloat($('.total_lodging_amount').val() || 0);
+                var total_boarding_amount = parseFloat($('.total_boarding_amount').val() || 0);
+                var total_local_travel_amount = parseFloat($('.total_local_travel_amount').val() || 0);
+                var total_claim_amount = total_travel_amount + total_lodging_amount + total_boarding_amount + total_local_travel_amount;
 
-            var total_travel_amount = parseFloat($('.total_travel_amount').val() || 0);
-            var total_lodging_amount = parseFloat($('.total_lodging_amount').val() || 0);
-            var total_boarding_amount = parseFloat($('.total_boarding_amount').val() || 0);
-            var total_local_travel_amount = parseFloat($('.total_local_travel_amount').val() || 0);
-            var total_claim_amount = total_travel_amount + total_lodging_amount + total_boarding_amount + total_local_travel_amount;
-            $('.claim_total_amount').val(total_claim_amount.toFixed(2));
-            $('.claim_total_amount').text('₹ ' + total_claim_amount.toFixed(2));
+                var trip_days = $('.trip_total_days').val();
+                console.log(total_lodging_amount);
+                console.log(total_boarding_amount);
+                // console.log( self.employee.outstation_trip_amount);
 
-            // console.log('total claim' + total_claim_amount);
+                //Calcualte Beta amount
+                if(total_lodging_amount == 0 && total_boarding_amount == 0 && self.employee.outstation_trip_amount >0){
+                    var total_beta_amount = trip_days * self.employee.outstation_trip_amount;
+                    if(total_beta_amount > 0){
+                        total_claim_amount += total_beta_amount;
+                        $('.beta_amount_status').show();
+                        $('.beta_amount').val(total_beta_amount.toFixed(2));
+                        $('.beta_amount').text('₹ ' + total_beta_amount.toFixed(2));
+                    }
+                }else{
+                    $('.beta_amount').val(0);
+                    $('.beta_amount').text(0);
+                    $('.beta_amount_status').hide();
+                }
+
+                $('.claim_total_amount').val(total_claim_amount.toFixed(2));
+                $('.claim_total_amount').text('₹ ' + total_claim_amount.toFixed(2));
+                // console.log('total claim' + total_claim_amount);
+            }, 1000);
         }
 
         //Form submit validation
