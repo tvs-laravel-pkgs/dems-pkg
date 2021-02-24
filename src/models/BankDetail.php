@@ -11,6 +11,7 @@ class BankDetail extends Model {
 	protected $fillable = [
 		'bank_name',
 		'branch_name',
+		'account_name',
 		'account_number',
 		'ifsc_code',
 	];

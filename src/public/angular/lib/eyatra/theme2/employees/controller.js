@@ -426,6 +426,17 @@ app.component('eyatraEmployeeForm', {
                     maxlength: 50,
                     minlength: 3,
                 },
+                'account_name': {
+                    required: function(element) {
+                        if ($("#bank").is(':checked')) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    },
+                    maxlength: 50,
+                    minlength: 3,
+                },
                 'account_number': {
                     required: function(element) {
                         if ($("#bank").is(':checked')) {
