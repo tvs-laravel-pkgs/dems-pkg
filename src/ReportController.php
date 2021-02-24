@@ -152,7 +152,7 @@ class ReportController extends Controller {
 	}
 
 	public function outstationTripExport() {
-
+		ob_end_clean();
 		ini_set('memory_limit', '-1');
 		ini_set('max_execution_time', 0);
 
@@ -171,8 +171,10 @@ class ReportController extends Controller {
 			->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'ey_employee_claims.status_id')
-			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
-			->where('users.user_type_id', 3121)
+			->join('users', 'users.entity_id', 'trips.employee_id')
+			->leftJoin('bank_details', function ($join) {
+				$join->on('bank_details.entity_id', 'e.id')->where('bank_details.detail_of_id',3121);
+			})
 			->select(
 				'trips.id',
 				'trips.number',
@@ -184,8 +186,11 @@ class ReportController extends Controller {
 				'ey_employee_claims.total_amount',
 				'status.name as status', 'trips.advance_received', 'ey_employee_claims.amount_to_pay', 'ey_employee_claims.balance_amount',
 				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
-				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
+				'outlets.code',
+				'bank_details.account_name','bank_details.account_number','bank_details.ifsc_code','bank_details.bank_name','bank_details.branch_name'
+				// DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
 			)
+			->where('users.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 		// ->where('ey_employee_claims.status_id', 3026)
 			->groupBy('trips.id');
@@ -218,7 +223,7 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 
 		if (count($trips) > 0) {
-			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Expense Amount', 'Advance Received', 'Total Claim Amount', 'Payment pending from', 'Status', 'Claim Approved Date & Time'];
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Expense Amount', 'Advance Received', 'Total Claim Amount', 'Payment pending from', 'Status', 'Claim Approved Date & Time','Account Name','Account Number','IFSC Code'];
 			$trips_details = array();
 			if ($trips) {
 				foreach ($trips as $key => $trip) {
@@ -252,6 +257,9 @@ class ReportController extends Controller {
 						$pending_from,
 						$trip->status,
 						$trip->claim_approval_datetime,
+						$trip->account_name,
+						$trip->account_number,
+						$trip->ifsc_code,
 					];
 				}
 			}
@@ -266,7 +274,7 @@ class ReportController extends Controller {
 						$row->setBackground('#07c63a');
 					});
 				});
-			})->export('xls');
+			})->export('xlsx');
 		} else {
 			Session()->flash('error', 'No Data Found');
 			return Redirect::to('/#!/report/outstation-trip/list');
@@ -412,9 +420,11 @@ class ReportController extends Controller {
 			->join('employees as e', 'e.id', 'local_trips.employee_id')
 			->join('entities as purpose', 'purpose.id', 'local_trips.purpose_id')
 			->join('configs as status', 'status.id', 'local_trips.status_id')
-			->leftJoin('users', 'users.entity_id', 'local_trips.employee_id')
-			->leftJoin('outlets', 'outlets.id', 'e.outlet_id')
-			->where('users.user_type_id', 3121)
+			->join('users', 'users.entity_id', 'local_trips.employee_id')
+			->join('outlets', 'outlets.id', 'e.outlet_id')
+			->leftJoin('bank_details', function ($join) {
+				$join->on('bank_details.entity_id', 'e.id')->where('bank_details.detail_of_id',3121);
+			})
 			->select(
 				'local_trips.id',
 				'local_trips.number',
@@ -425,8 +435,11 @@ class ReportController extends Controller {
 				'purpose.name as purpose', 'local_trips.beta_amount', 'local_trips.other_amount',
 				'local_trips.claim_amount as total_amount', 'status.name as status',
 				DB::raw('DATE_FORMAT(local_trips.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
-				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
+				'outlets.code',
+				'bank_details.account_name','bank_details.account_number','bank_details.ifsc_code','bank_details.bank_name','bank_details.branch_name'
+				// DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
 			)
+			->where('users.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 		// ->where('local_trips.status_id', 3026)
 			->groupBy('local_trips.id')
@@ -460,7 +473,7 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 		if (count($trips) > 0) {
 			// dd($trips);
-			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Beta Amount', 'Other Amount', 'Total Amount', 'Status', 'Claim Approved Date & Time'];
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Beta Amount', 'Other Amount', 'Total Amount', 'Status', 'Claim Approved Date & Time','Account Name','Account Number','IFSC Code'];
 			$trips_details = array();
 			if ($trips) {
 				foreach ($trips as $key => $trip) {
@@ -476,6 +489,9 @@ class ReportController extends Controller {
 						floatval($trip->total_amount),
 						$trip->status,
 						$trip->claim_approval_datetime,
+						$trip->account_name,
+						$trip->account_number,
+						$trip->ifsc_code,
 					];
 				}
 			}
@@ -488,7 +504,7 @@ class ReportController extends Controller {
 						$row->setBackground('#07c63a');
 					});
 				});
-			})->export('xls');
+			})->export('xlsx');
 		} else {
 			Session()->flash('error', 'No Data Found');
 			return Redirect::to('/#!/report/local-trip/list');
