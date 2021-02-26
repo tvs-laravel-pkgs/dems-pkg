@@ -52,6 +52,10 @@ class LocalTrip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3186)->where('attachment_type_id', 3200);
 	}
 
+	public function otherExpenseAttachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3188)->where('attachment_type_id', 3200);
+	}
+
 	public static function getLocalTripList($request) {
 		$trips = LocalTrip::from('local_trips')
 			->join('employees as e', 'e.id', 'local_trips.employee_id')
@@ -189,6 +193,7 @@ class LocalTrip extends Model {
 				'visitDetails',
 				'expense',
 				'expenseAttachments',
+				'otherExpenseAttachments'
 			])->find($trip_id);
 
 			if (!$trip) {
@@ -417,7 +422,7 @@ class LocalTrip extends Model {
 				}
 			}
 
-			//SAVE EXPENSE ATTACHMENT
+			//SAVE TRAVEL EXPENSE ATTACHMENT
 			$item_images = storage_path('app/public/trip/local-trip/attachments/');
 			Storage::makeDirectory($item_images, 0777);
 			if (!empty($request->expense_attachments)) {
@@ -428,10 +433,32 @@ class LocalTrip extends Model {
 					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
 					$value = rand(1, 100);
 					$extension = $image->getClientOriginalExtension();
-					$name = $value . '-' . $file_name;
+					$name = $value . '-Travel-expense-' . $file_name;
 					$image->move(storage_path('app/public/trip/local-trip/attachments/'), $name);
 					$attachement_file = new Attachment;
 					$attachement_file->attachment_of_id = 3186;
+					$attachement_file->attachment_type_id = 3200;
+					$attachement_file->entity_id = $trip->id;
+					$attachement_file->name = $name;
+					$attachement_file->save();
+				}
+			}
+
+			//SAVE OTHER EXPENSE ATTACHMENT
+			$item_images = storage_path('app/public/trip/local-trip/attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if (!empty($request->other_expense_attachments)) {
+				foreach ($request->other_expense_attachments as $key => $attachement) {
+					$image = $attachement;
+					$extension = $image->getClientOriginalExtension();
+					$name = $image->getClientOriginalName();
+					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+					$value = rand(1, 100);
+					$extension = $image->getClientOriginalExtension();
+					$name = $value . '-Other-expense-' . $file_name;
+					$image->move(storage_path('app/public/trip/local-trip/attachments/'), $name);
+					$attachement_file = new Attachment;
+					$attachement_file->attachment_of_id = 3188;
 					$attachement_file->attachment_type_id = 3200;
 					$attachement_file->entity_id = $trip->id;
 					$attachement_file->name = $name;
@@ -515,6 +542,7 @@ class LocalTrip extends Model {
 			'purpose',
 			'status',
 			'expenseAttachments',
+			'otherExpenseAttachments',
 			'google_attachments',
 		])
 			->find($trip_id);

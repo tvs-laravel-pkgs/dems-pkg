@@ -869,6 +869,7 @@ app.component('eyatraReportsLocalTripClaimView', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.local_travel_attachment_url = local_travel_attachment_url;
         $http.get(
             $form_data_url
         ).then(function(response) {

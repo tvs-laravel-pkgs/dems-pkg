@@ -18,6 +18,6 @@ class LocalTripExpense extends Model {
 	}
 
 	public function expenseAttachments() {
-		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3186)->where('attachment_type_id', 3200);
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3188)->where('attachment_type_id', 3200);
 	}
 }

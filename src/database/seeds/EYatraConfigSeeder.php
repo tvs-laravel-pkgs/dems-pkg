@@ -290,11 +290,15 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 510,
 			],
 			3186 => [
-				'name' => 'Local Trip Expense',
+				'name' => 'Local Trip Travel Expense',
 				'config_type_id' => 510,
 			],
 			3187 => [
 				'name' => 'Local Trip Google Attachment',
+				'config_type_id' => 510,
+			],
+			3188 => [
+				'name' => 'Local Trip Other Expense',
 				'config_type_id' => 510,
 			],
 
