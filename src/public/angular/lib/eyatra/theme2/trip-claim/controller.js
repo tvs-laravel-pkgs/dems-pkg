@@ -28,8 +28,15 @@ app.component('eyatraTripClaimList', {
             pageLength: 10,
             processing: true,
             serverSide: true,
+            "bProcessing": true,
+            fixedColumns: true,
+            scrollX: true,
+            scrollCollapse: true,
             paging: true,
             ordering: false,
+            fixedColumns: {
+                leftColumns: 1,
+            },
             ajax: {
                 url: laravel_routes['listEYatraTripClaimList'],
                 type: "GET",

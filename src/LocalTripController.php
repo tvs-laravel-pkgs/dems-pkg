@@ -258,6 +258,30 @@ class LocalTripController extends Controller {
 		// 	return response()->json(['success' => false, 'errors' => "Please enter atleast one local trip expense to further proceed"]);
 		// }
 
+		//Check Local Trip Expense Amount
+		if($request->expense_detail){
+			$expense_details = array();
+			foreach($request->expense_detail as $expense_detail){
+				if($expense_detail['amount'] > 0){
+					if(isset($expense_details[$expense_detail['expense_date']])){
+						$amount = $expense_details[$expense_detail['expense_date']]['amount'] + $expense_detail['amount'];
+						$expense_details[$expense_detail['expense_date']]['amount'] = $amount;
+					}else{
+						$expense_details[$expense_detail['expense_date']]['amount'] = $expense_detail['amount'];
+					}
+				}else{
+					return response()->json(['success' => false, 'errors' => "Expense Amount required"]);
+				}
+			}
+
+			if(count($expense_details) > 0){
+				foreach($expense_details as $expense_detail){
+					if(isset($expense_detail['amount']) && $expense_detail['amount'] > 150){
+						return response()->json(['success' => false, 'errors' => "Other Expense Amount should not exceed 150"]);
+					}
+				}
+			}
+		}
 		return LocalTrip::saveTrip($request);
 	}
 

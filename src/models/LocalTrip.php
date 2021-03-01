@@ -23,7 +23,7 @@ class LocalTrip extends Model {
 	}
 
 	public function expense() {
-		return $this->hasMany('Uitoux\EYatra\LocalTripExpense', 'trip_id');
+		return $this->hasMany('Uitoux\EYatra\LocalTripExpense', 'trip_id')->orderBy('expense_date','asc');
 	}
 
 	public function getStartDateAttribute($date) {
