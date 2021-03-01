@@ -301,6 +301,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Local Trip Other Expense',
 				'config_type_id' => 510,
 			],
+			3189 => [
+				'name' => 'Transport Expense',
+				'config_type_id' => 510,
+			],
 
 			//ATTACHMENT TYPE - EYATRA
 			3200 => [

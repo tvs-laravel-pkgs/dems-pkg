@@ -112,6 +112,10 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\LocalTravel');
 	}
 
+	public function transport_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3189)->where('attachment_type_id', 3200);
+	}
+
 	public function lodging_attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3181)->where('attachment_type_id', 3200);
 	}
@@ -1122,6 +1126,7 @@ class Trip extends Model {
 				'selfVisits.agent',
 				'selfVisits.status',
 				'selfVisits.attachments',
+				'transport_attachments',
 				'lodging_attachments',
 				'boarding_attachments',
 			])->find($trip_id);
@@ -1399,6 +1404,7 @@ class Trip extends Model {
 			'selfVisits.agent',
 			'selfVisits.status',
 			'selfVisits.attachments',
+			'transport_attachments',
 			'lodging_attachments',
 			'boarding_attachments',
 			'google_attachments',
@@ -1520,6 +1526,13 @@ class Trip extends Model {
 
 			//SAVING VISITS
 			if ($request->visits) {
+
+				//REMOVE TRANSPORT ATTACHMENT
+				if (!empty($request->transport_attach_removal_ids)) {
+					$transport_attach_removal_ids = json_decode($request->transport_attach_removal_ids, true);
+					Attachment::whereIn('id', $transport_attach_removal_ids)->delete();
+				}
+
 				// dd($request->visits);
 				$transport_total_amount = 0;
 				foreach ($request->visits as $visit_data) {
@@ -1572,6 +1585,25 @@ class Trip extends Model {
 
 						// dd($visit_booking);
 
+					}
+				}
+
+				//SAVE TRANSPORT ATTACHMENT
+				$item_images = storage_path('app/public/trip/transport/attachments/');
+				Storage::makeDirectory($item_images, 0777);
+				if (!empty($request->transport_attachments)) {
+					foreach ($request->transport_attachments as $key => $attachement) {
+						$value = rand(1, 100);
+						$image = $attachement;
+						$extension = $image->getClientOriginalExtension();
+						$name = $request->trip_id . '_transport_attachment' . $value . '.' . $extension;
+						$attachement->move(storage_path('app/public/trip/transport/attachments/'), $name);
+						$attachement_transport = new Attachment;
+						$attachement_transport->attachment_of_id = 3189;
+						$attachement_transport->attachment_type_id = 3200;
+						$attachement_transport->entity_id = $request->trip_id;
+						$attachement_transport->name = $name;
+						$attachement_transport->save();
 					}
 				}
 				//CHECK NEXT VISIT EXIST

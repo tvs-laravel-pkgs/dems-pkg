@@ -200,6 +200,7 @@ app.component('eyatraTripClaimForm', {
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         self.eyatra_trip_claim_visit_attachment_url = eyatra_trip_claim_visit_attachment_url;
+        self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
         self.eyatra_trip_claim_lodging_attachment_url = eyatra_trip_claim_lodging_attachment_url;
         self.eyatra_trip_claim_boarding_attachment_url = eyatra_trip_claim_boarding_attachment_url;
         self.eyatra_trip_claim_local_travel_attachment_url = eyatra_trip_claim_local_travel_attachment_url;
@@ -231,6 +232,7 @@ app.component('eyatraTripClaimForm', {
             self.travel_dates = response.data.travel_dates;
             self.extras = response.data.extras;
             self.trip = response.data.trip;
+            self.transport_attachments = response.data.trip.transport_attachments;
             self.lodging_attachments = response.data.trip.lodging_attachments;
             self.boarding_attachments = response.data.trip.boarding_attachments;
             self.action = response.data.action;
@@ -303,6 +305,7 @@ app.component('eyatraTripClaimForm', {
                 self.is_deviation = self.trip.employee.trip_employee_claim.is_deviation;
             }
             self.lodgings_removal_id = [];
+            self.transport_attachment_removal_ids = [];
             self.lodgings_attachment_removal_ids = [];
             self.boardings_removal_id = [];
             self.boardings_attachment_removal_ids = [];
@@ -1166,6 +1169,15 @@ app.component('eyatraTripClaimForm', {
             }, 100);
         }
 
+        //REMOVE TRANSPORT ATTACHMENT
+        self.removeTransportAttachment = function(transport_attachment_index, transport_attachment_id) {
+            console.log(transport_attachment_id, transport_attachment_index);
+            if (transport_attachment_id) {
+                self.transport_attachment_removal_ids.push(transport_attachment_id);
+                $('#transport_attach_removal_ids').val(JSON.stringify(self.transport_attachment_removal_ids));
+            }
+            self.trip.transport_attachments.splice(transport_attachment_index, 1);
+        }
 
         //GET LODGE CHECKIN AND CHECKOUT DATE TO FIND STAY DAYS AND AMOUNT CALC
         $scope.lodgecheckOutInDate = function() {
@@ -1700,6 +1712,8 @@ app.component('eyatraTripClaimForm', {
                                     // $('.tab_lodging').addClass('active');
                                     // $('.tab-pane').removeClass('in active');
                                     // $('#lodging-expenses').addClass('in active');
+                                    self.transport_attachment_removal_ids = [];
+                                    $('#transport_attach_removal_ids').val('');
                                     self.enable_switch_tab = true;
                                     $scope.$apply()
                                     $('#transport_submit').html('Save & Next');
