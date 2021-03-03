@@ -7,9 +7,9 @@ app.component('eyatraTripClaimVerificationThreeList', {
             trip_filter_data_url
         ).then(function(response) {
             console.log(response.data);
-            self.employee_list = response.data.employee_list;
+            self.employee_list = response.data.all_employee_list;
             self.purpose_list = response.data.purpose_list;
-            self.trip_status_list = response.data.trip_status_list;
+            self.trip_status_list = response.data.financier_status_list;
             $rootScope.loading = false;
         });
         var dataTable = $('#eyatra_trip_claim_verification_three_list_table').DataTable({

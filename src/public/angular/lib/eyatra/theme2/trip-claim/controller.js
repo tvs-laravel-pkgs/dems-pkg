@@ -979,11 +979,14 @@ app.component('eyatraTripClaimForm', {
                         // }
 
                         $scope.$apply();
-                        self.travelCal();
                     })
                     .fail(function(xhr) {
                         console.log(xhr);
                     });
+
+                    setTimeout(function() {
+                        self.travelCal();
+                    }, 500);
             }
         }
 
