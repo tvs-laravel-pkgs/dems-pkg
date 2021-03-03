@@ -31,14 +31,16 @@ class ReportController extends Controller {
 		$filter_purpose_id = session('outstation_purpose_id') ? intval(session('outstation_purpose_id')) : '';
 		$data['filter_purpose_id'] = ($filter_purpose_id == '-1') ? '' : $filter_purpose_id;
 		if (!$outstation_start_date) {
-			$outstation_start_date = date('01-m-Y');
-			$outstation_end_date = date('t-m-Y');
+			// $outstation_start_date = date('01-m-Y');
+			// $outstation_end_date = date('t-m-Y');
+			$outstation_start_date = '';
+			$outstation_end_date = '';
 		}
 
 		$data['outstation_start_date'] = $outstation_start_date;
 		$data['outstation_end_date'] = $outstation_end_date;
 		$data['filter_outlet_id'] = $filter_outlet_id = session('outstation_outlet_id') ? intval(session('outstation_outlet_id')) : '-1';
-		$data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : '-1';
+		$data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : '3034';
 
 		$data['success'] = true;
 		return response()->json($data);
@@ -63,7 +65,7 @@ class ReportController extends Controller {
 	}
 
 	public function listOutstationTripReport(Request $r) {
-
+		
 		if ($r->from_date != '<%$ctrl.start_date%>') {
 			Session::put('outstation_start_date', $r->from_date);
 			Session::put('outstation_end_date', $r->to_date);
@@ -187,8 +189,8 @@ class ReportController extends Controller {
 				'status.name as status', 'trips.advance_received', 'ey_employee_claims.amount_to_pay', 'ey_employee_claims.balance_amount',
 				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
 				'outlets.code',
-				'bank_details.account_name','bank_details.account_number','bank_details.ifsc_code','bank_details.bank_name','bank_details.branch_name'
-				// DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
+				'bank_details.account_name','bank_details.account_number','bank_details.ifsc_code','bank_details.bank_name','bank_details.branch_name',
+				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
 			)
 			->where('users.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
@@ -223,7 +225,7 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 
 		if (count($trips) > 0) {
-			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Expense Amount', 'Advance Received', 'Total Claim Amount', 'Payment pending from', 'Status', 'Claim Approved Date & Time','Account Name','Account Number','IFSC Code'];
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Expense Amount', 'Advance Received', 'Total Claim Amount', 'Payment pending from', 'Status', 'Claim Approved Date & Time','Account Name','Account Number','IFSC Code','Transaction number','Transaction Date','Transaction Amount'];
 			$trips_details = array();
 			if ($trips) {
 				foreach ($trips as $key => $trip) {
@@ -244,7 +246,7 @@ class ReportController extends Controller {
 						$claim_amount = $trip->total_amount;
 					}
 
-					$trips_details[] = [
+					$trips_detail = [
 						$trip->number,
 						$trip->ecode,
 						$trip->ename,
@@ -261,6 +263,25 @@ class ReportController extends Controller {
 						$trip->account_number,
 						$trip->ifsc_code,
 					];
+
+					//Check Paid or not
+					$payment_detail = Payment::where('payment_of_id',3251)->where('entity_id',$trip->id)->first();
+					if($payment_detail){
+						$payment_details = [
+							$payment_detail->reference_number,
+							$payment_detail->date,
+							$payment_detail->amount,
+						];
+					}else{
+						$payment_details = [
+							'',
+							'',
+							'',
+						];
+					}
+					$trip_details = array_merge($trips_detail, $payment_details);
+
+					$trips_details[] = $trip_details;
 				}
 			}
 
@@ -432,12 +453,11 @@ class ReportController extends Controller {
 				'e.code as ecode',
 				'users.name as ename',
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
-				'purpose.name as purpose', 'local_trips.beta_amount', 'local_trips.other_amount',
-				'local_trips.claim_amount as total_amount', 'status.name as status',
+				'purpose.name as purpose', 'local_trips.beta_amount', 'local_trips.travel_amount', 'local_trips.other_expense_amount', 'local_trips.claim_amount as total_amount', 'status.name as status',
 				DB::raw('DATE_FORMAT(local_trips.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime'),
 				'outlets.code',
-				'bank_details.account_name','bank_details.account_number','bank_details.ifsc_code','bank_details.bank_name','bank_details.branch_name'
-				// DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
+				'bank_details.account_name','bank_details.account_number','bank_details.ifsc_code','bank_details.bank_name','bank_details.branch_name',
+				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
 			)
 			->where('users.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
@@ -473,19 +493,21 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 		if (count($trips) > 0) {
 			// dd($trips);
-			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Beta Amount', 'Other Amount', 'Total Amount', 'Status', 'Claim Approved Date & Time','Account Name','Account Number','IFSC Code'];
+			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Travel Amount', 'Other Expense Amount', 'Beta Amount', 'Total Amount', 'Status', 'Claim Approved Date & Time','Account Name','Account Number','IFSC Code','Transaction number','Transaction Date','Transaction Amount'];
 			$trips_details = array();
 			if ($trips) {
 				foreach ($trips as $key => $trip) {
-					$trips_details[] = [
+					
+					$trips_detail = [
 						$trip->number,
 						$trip->ecode,
 						$trip->ename,
 						$trip->outlet_name,
 						$trip->travel_period,
 						$trip->purpose,
+						$trip->travel_amount,
+						$trip->other_expense_amount,
 						$trip->beta_amount,
-						$trip->other_amount,
 						floatval($trip->total_amount),
 						$trip->status,
 						$trip->claim_approval_datetime,
@@ -493,6 +515,25 @@ class ReportController extends Controller {
 						$trip->account_number,
 						$trip->ifsc_code,
 					];
+
+					//Check Paid or not
+					$payment_detail = Payment::where('payment_of_id',3255)->where('entity_id',$trip->id)->first();
+					if($payment_detail){
+						$payment_details = [
+							$payment_detail->reference_number,
+							$payment_detail->date,
+							$payment_detail->amount,
+						];
+					}else{
+						$payment_details = [
+							'',
+							'',
+							'',
+						];
+					}
+					$trip_details = array_merge($trips_detail, $payment_details);
+
+					$trips_details[] = $trip_details;
 				}
 			}
 			$time_stamp = date('Y_m_d_h_i_s');

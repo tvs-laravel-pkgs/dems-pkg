@@ -526,12 +526,19 @@ class LocalTripController extends Controller {
 			$trip->save();
 
 			//PAYMENT SAVE
-			$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
+			$payment = Payment::firstOrNew(['payment_of_id' => 3255,'entity_id' => $trip->id]);
+			if ($payment->exists) {
+				$payment->updated_by = Auth::user()->id;
+				$payment->updated_at = Carbon::now();
+			} else {
+				$payment->created_by = Auth::user()->id;
+				$payment->created_at = Carbon::now();
+			}
 			$payment->fill($r->all());
 			$payment->date = date('Y-m-d', strtotime($r->date));
 			$payment->payment_of_id = 3255;
 			$payment->entity_id = $trip->id;
-			$payment->created_by = Auth::user()->id;
+			// $payment->created_by = Auth::user()->id;
 			$payment->save();
 
 			$trip->payment_id = $payment->id;
