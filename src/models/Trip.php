@@ -217,6 +217,10 @@ class Trip extends Model {
 			if ($request->visits) {
 				$visit_count = count($request->visits);
 				$i = 0;
+
+				//Check Visits booking status pending or booked.If Pending means remove
+				$visit = Visit::where('trip_id',$trip->id)->where('booking_status_id',3060)->forceDelete();
+
 				foreach ($request->visits as $key => $visit_data) {
 					//dump($visit_data);
 
@@ -264,7 +268,12 @@ class Trip extends Model {
 								$visit->manager_verification_status_id = 3080; //NEW
 							}
 						} else {
-							$visit = $old_visit;
+							if($old_visit){
+								$visit = $old_visit;
+							}else{
+								$visit = new Visit;	
+							}
+							
 							$visit->booking_status_id = 3060; //PENDING
 							$visit->status_id = 3220; //NEW
 							$visit->manager_verification_status_id = 3080; //NEW
@@ -1322,6 +1331,14 @@ class Trip extends Model {
 		}
 
 		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+
+		$data['all_employee_list'] = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.company_id', Auth::user()->company_id)
+				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+
+		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id',  [3034, 3030,3026,3025,3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);
 
 		$data['success'] = true;
 		//dd($data);

@@ -20,7 +20,7 @@ class TripClaimVerificationThreeController extends Controller {
 			->join('employees as e', 'e.id', 'trips.employee_id')
 		// ->join('outlets', 'outlets.id', 'e.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
-			->join('configs as status', 'status.id', 'trips.status_id')
+			->join('configs as status', 'status.id', 'ey_employee_claims.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
 			->where('users.user_type_id', 3121)
 			->select(
@@ -48,7 +48,9 @@ class TripClaimVerificationThreeController extends Controller {
 			})
 			->where(function ($query) use ($r) {
 				if ($r->get('status_id')) {
-					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
+					$query->where("status.id", $r->get('status_id'));
+				}else{
+					$query->whereIn("status.id", [3034, 3030]);
 				}
 			})
 			->where(function ($query) use ($r) {
@@ -62,7 +64,7 @@ class TripClaimVerificationThreeController extends Controller {
 				}
 			})
 		// ->whereIn('ey_employee_claims.status_id', [3031, 3025, 3030]) //PAYMENT PENDING FOR EMPLOYEE & PAYMENT PENDING FOR FINANCIER & FINANCIER PAYMENT HOLD
-			->whereIn('ey_employee_claims.status_id', [3034, 3030]) //PAYMENT PENDING & FINANCIER PAYMENT HOLD
+			// ->whereIn('ey_employee_claims.status_id', [3034, 3030]) //PAYMENT PENDING & FINANCIER PAYMENT HOLD
 		// ->where('outlets.cashier_id', Auth::user()->entity_id) //FINANCIER
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
