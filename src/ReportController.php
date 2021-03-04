@@ -225,7 +225,26 @@ class ReportController extends Controller {
 		$trips = $trips->get();
 
 		if (count($trips) > 0) {
-			$trips_header = ['Trip ID', 'Employee Code', 'Employee Name', 'Outlet', 'Travel Period', 'Purpose', 'Total Expense Amount', 'Advance Received', 'Total Claim Amount', 'Payment pending from', 'Status', 'Claim Approved Date & Time','Account Name','Account Number','IFSC Code','Transaction number','Transaction Date','Transaction Amount'];
+			$trips_header = [
+				'Trip ID', 
+				'Employee Code', 
+				'Employee Name', 
+				'Outlet', 
+				'Travel Period',
+				'Purpose', 
+				'Total Expense Amount', 
+				'Advance Received', 
+				'Total Claim Amount', 
+				'Payment pending from',
+				'Status', 
+				// 'Claim Approved Date & Time',
+				'Account Name',
+				'Account Number',
+				'IFSC Code',
+				'Transaction number',
+				'Transaction Date',
+				'Transaction Amount'
+			];
 			$trips_details = array();
 			if ($trips) {
 				foreach ($trips as $key => $trip) {
@@ -258,7 +277,7 @@ class ReportController extends Controller {
 						floatval($claim_amount),
 						$pending_from,
 						$trip->status,
-						$trip->claim_approval_datetime,
+						// $trip->claim_approval_datetime,
 						$trip->account_name,
 						$trip->account_number,
 						$trip->ifsc_code,

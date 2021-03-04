@@ -376,6 +376,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/trip/claim/verification/three/approve', 'Uitoux\EYatra\TripClaimVerificationThreeController@approveTripClaimVerificationThree')->name('approveTripClaimVerificationThree');
 		Route::post('eyatra/trip/claim/hold', 'Uitoux\EYatra\TripClaimVerificationThreeController@holdTripClaimVerificationThree')->name('holdTripClaimVerificationThree');
 		Route::get('eyatra/trip/claim/verification/three/financier-approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationThreeController@approveFinancierTripClaimVerification')->name('approveFinancierTripClaimVerification');
+		//TRIP TRANSACTION IMPORT
+		Route::post('/eyatra/trip/claim/verification/three/import', 'Uitoux\EYatra\TripClaimVerificationThreeController@import');
+		Route::post('/eyatra/trip/claim/verification/three/chunk-import', 'Uitoux\EYatra\TripClaimVerificationThreeController@chunkImport');
 
 		//TRIP CLAIM PAYMENT PENDING FOR EMPLOYEE
 		Route::get('eyatra/trip/claim/payment-pending/list', 'Uitoux\EYatra\TripClaimPendingController@listEYatraTripClaimPaymentPendingList')->name('listEYatraTripClaimPaymentPendingList');

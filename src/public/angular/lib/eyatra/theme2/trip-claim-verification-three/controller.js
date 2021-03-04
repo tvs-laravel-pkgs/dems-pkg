@@ -101,6 +101,217 @@ app.component('eyatraTripClaimVerificationThreeList', {
 
         // $('.add_new_button').html();
 
+        //Import
+        /* File Upload Function */
+        /* Main Function */
+        var img_close = $('#img-close').html();
+        var img_file = $('#img-file').html();
+        var del_arr = [];
+        $(".form-group").on('change', '.input-file', function() {
+            var html = [];
+            del_arr = [];
+            $(".insert-file").empty();
+            $(this.files).each(function(i, v) {
+                html.push("<div class='file-return-parent'>" + img_file + "<p class='file-return'>" + v.name + "</p><button type='button' onclick='angular.element(this).scope().deletefiles(this)' class='remove-hn btn' >" + img_close + "</button></div>");
+                del_arr.push(v.name);
+            });
+            $(".insert-file").append(html);
+        });
+        /* Remove Function */
+        $scope.deletefiles = function(this_parents) {
+            var del_name = $(this_parents).siblings().text();
+            var del_index = del_arr.indexOf(del_name);
+            if (del_index >= 0) {
+                del_arr.splice(del_index, 1);
+            }
+            $(this_parents).parent().remove();
+            $(".file_check").val('');
+        }
+
+        // getCTCProgressBar
+        $('.card-transition').hide();
+        //Import Progress
+        var form_id = '#outstaion_trip_import_form';
+        var v = jQuery(form_id).validate({
+            ignore: "",
+            errorPlacement: function(error, element) {
+                if (element.hasClass("input_excel")) {
+                    error.appendTo('.errors');
+                } else if (element.attr("name") == "attachment") {
+                    error.appendTo('#error_attach');
+                    return;
+                } else {
+                    error.insertAfter(element)
+                }
+            },
+            rules: {
+                // attachment: {
+                //     // required: true,
+                //     // extension: "xlsx,xls",
+                // },
+            },
+
+            submitHandler: function(form) {
+                $('#import_errors').html('');
+                $('.card-transition').show();
+                $('#import_outstion_claim').button('loading');
+                let Upl = new FormData($('#outstaion_trip_import_form')[0]);
+                $.ajax({
+                        url: eyatra_trip_claim_verification_three_import,
+                        method: "POST",
+                        headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') },
+                        enctype: 'multipart/form-data',
+                        data: Upl,
+                        processData: false,
+                        contentType: false,
+                        cache: false,
+                    })
+                    .done(function(response) {
+
+                        if (response.success) {
+                            $('.card-transition').addClass('card-transition-active');
+                            $('.card-button').addClass('card-button-active');
+                            $('.card-progress').addClass('card-progress-active');
+                            $('.btn-circle').addClass('btn-circle-active');
+                            $('.btn-over').addClass('btn-over-active');
+                            $('.card-button').hide();
+                            $('#total_count').html(response.total_records);
+                            // $('#import_status span').html('Importing records');
+                            if (response.total_records > 0) {
+                                $('#download_error_report').attr('href', response.error_report_url).hide();
+                                $('#model_download_error_report').attr('href', response.error_report_url);
+
+                                remaining_rows = response.total_records;
+                                total_rows = response.total_records;
+                                file = response.file;
+                                outputfile = response.outputfile;
+                                headings = response.headings;
+                                reference = response.reference;
+                                business_days_per_year = response.business_days_per_year;
+
+                                $('#import_errors').append('<div class="text-left text-primary">Import Reference ID: ' + response.reference + '</div>')
+                                imports();
+                            }
+                        } else {
+                            $('#import_outstion_claim').button('reset');
+                            $('#import_errors').html(response.errors)
+                            console.log(response.missing_fields);
+                            if (response.error == "Invalid File, Mandatory fields are missing.") {
+                                for (var i in response.missing_fields) {
+                                    $('#import_errors').append('<div class="text-left">' + response.missing_fields[i] + '</div>')
+                                }
+                            }
+                            $('#import_outstion_claim').button('reset');
+                        }
+                    })
+                    .fail(function(xhr, ajaxOptions, thrownError) {
+                        alert(thrownError);
+                        $('#import_outstion_claim').button('reset');
+                    })
+            }
+        });
+
+        $('#download_error_report').hide();
+
+        function getDateTime() {
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = now.getMonth() + 1;
+            var day = now.getDate();
+            var hour = now.getHours();
+            var minute = now.getMinutes();
+            var second = now.getSeconds();
+
+            var x = Math.floor((Math.random() * 1000) + 1);
+
+            var dateTime = year + '' + month + '' + day + '' + hour + '' + minute + '' + second + '' + x;
+            return dateTime;
+        }
+
+        var total_rows = 0;
+        var remaining_rows = 0;
+        var imported_rows = 0;
+        var file = '';
+        var outputfile = '';
+        var headings = '';
+        var reference = '';
+        var records_per_request = 50;
+        var import_number = getDateTime();
+
+
+        function imports() {
+            $.ajax({
+                    url: eyatra_trip_claim_verification_three_chunk_import,
+                    method: "POST",
+                    headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') },
+                    data: { skip: imported_rows, file: file, records_per_request: records_per_request, outputfile: outputfile, headings: headings, reference: reference, import_number: import_number},
+                })
+                .done(function(response) {
+                    console.log(response);
+                    if (response.success) {
+                        var new_count = parseInt($('#new_count').html()) + response.newCount;
+                        var updated_count = parseInt($('#updated_count').html()) + response.updatedCount;
+                        var error_count = parseInt($('#error_count').html()) + response.errorCount;
+                        var new_ratio = parseFloat((new_count / total_rows) * 100).toFixed(2);
+                        var updated_ratio = parseFloat((updated_count / total_rows) * 100).toFixed(2);
+                        var error_ratio = parseFloat((error_count / total_rows) * 100).toFixed(2);
+                        $('#import_progress .progress-bar-success').attr('style', 'width:' + new_ratio + '%;');
+                        $('#import_progress .progress-bar-success').html(new_ratio + '%');
+                        $('#import_progress .progress-bar-warning').attr('style', 'width:' + updated_ratio + '%;');
+                        $('#import_progress .progress-bar-warning').html(updated_ratio + '%');
+                        $('#import_progress .progress-bar-danger').attr('style', 'width:' + error_ratio + '%;');
+                        $('#import_progress .progress-bar-danger').html(error_ratio + '%');
+                        $('#import_errors').append(response.errors);
+                        $('#new_count').html(new_count);
+                        $('#updated_count').html(updated_count);
+                        $('#error_count').html(error_count);
+                        imported_rows += response.processed;
+
+                        $('#import_status span').html('Inprogress (Processed: ' + imported_rows + ' Remaining: ' + (total_rows - imported_rows) + ')')
+                        remaining_rows -= response.processed;
+
+                        $('#import_progress span').html(parseInt(new_ratio) + '% Completed')
+                        $('.skillbar').attr('style', 'width:' + parseInt(new_ratio) + '%;')
+
+                        $('#import_errors').append(response.errors)
+                        $('#new_count').html(new_count)
+                        $('#error_count').html(error_count)
+                        if (remaining_rows > 0) {
+                            imports();
+                        } else {
+                            $('#import_progress span').html(parseInt(new_ratio) + '% Completed')
+                            $('.skillbar').attr('style', 'width:' + parseInt(new_ratio) + '%;')
+                            $('#import_status span').html('Completed')
+                            $('#download_error_report').attr('href', response.error_report_url);
+                            if (error_count > 0) {
+                                $('#error_button').css('display', 'inline-block');
+                                $('#download_error_report').css('display', 'inline-block');
+                                $('#error_table').html(response.errors);
+                            } else {
+                                $('#error_button').hide();
+                                $('#download_error_report').hide();
+                                $('#error_table').html('No error Found');
+                            }
+                        }
+                    } else {
+                        $('#download_error_report').css('display', 'inline-block');
+                        // alert('Error:'+response.error )
+                        $('#import_errors').append(response.error)
+                    }
+                })
+                .fail(function(xhr, ajaxOptions, thrownError) {
+                    alert('An error occured during import')
+                })
+
+            // $('#import_outstion_claim').button('reset');
+            $("#import_outstion_claim").prop("disabled", true);
+        }
+
+        $scope.popup_close = function() {
+            // $window.location.reload();
+            location.reload();
+        };
+
         $rootScope.loading = false;
 
     }
