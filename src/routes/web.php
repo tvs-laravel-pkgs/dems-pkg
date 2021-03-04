@@ -467,6 +467,10 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/local-trip/financier/verification/reject', 'Uitoux\EYatra\LocalTripController@financierRejectLocalTrip')->name('financierRejectLocalTrip');
 		Route::get('eyatra/local-trip/financier/verification/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFinancierVerificationFilterData')->name('eyatraLocalTripFinancierVerificationFilterData');
 
+		//Local TRIP TRANSACTION IMPORT
+		Route::post('/eyatra/local-trip/financier/import', 'Uitoux\EYatra\LocalTripController@import');
+		Route::post('/eyatra/local-trip/financier/chunk-import', 'Uitoux\EYatra\LocalTripController@chunkImport');
+
 		//REPORT
 		//OUTSTATION TRIP REPORT
 		Route::get('eyatra/report/outstation-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraOutstationFilterData')->name('eyatraOutstationFilterData');

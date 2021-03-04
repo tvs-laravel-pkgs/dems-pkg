@@ -383,7 +383,7 @@ class TripClaimVerificationThreeController extends Controller {
 					$payment = Payment::where('payment_of_id',3251)->where('reference_number',$trip_detail['transaction_number'])->first();
 					if($payment){
 						if($payment->entity_id != $trip->id){
-							$errors[] = 'Transaction Number already taken- ' . $trip_detail['transaction_number'];
+							$errors[] = 'Transaction Number has already been taken- ' . $trip_detail['transaction_number'];
 							$skip = true;
 						}
 					}

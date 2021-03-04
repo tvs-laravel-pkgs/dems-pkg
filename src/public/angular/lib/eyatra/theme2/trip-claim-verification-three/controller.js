@@ -96,10 +96,6 @@ app.component('eyatraTripClaimVerificationThreeList', {
             $('#to_date').val('');
             dataTable.draw();
         }
-        // $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Claims</p><h3 class="title">Claimed Trips Verification Three</h3>');
-        //$('.page-header-content .display-inline-block .data-table-title').html('Employees');
-
-        // $('.add_new_button').html();
 
         //Import
         /* File Upload Function */
@@ -187,7 +183,6 @@ app.component('eyatraTripClaimVerificationThreeList', {
                                 outputfile = response.outputfile;
                                 headings = response.headings;
                                 reference = response.reference;
-                                business_days_per_year = response.business_days_per_year;
 
                                 $('#import_errors').append('<div class="text-left text-primary">Import Reference ID: ' + response.reference + '</div>')
                                 imports();

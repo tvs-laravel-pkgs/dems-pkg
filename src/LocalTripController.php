@@ -12,6 +12,8 @@ use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\LocalTrip;
 use Validator;
+use Excel;
+use Storage;
 use Yajra\Datatables\Datatables;
 
 class LocalTripController extends Controller {
@@ -587,6 +589,253 @@ class LocalTripController extends Controller {
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Local Trip", $notification_type = 'Claim Rejected');
 
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
+	}
+
+
+	public function import(Request $request) {
+
+		// dd($request->all());
+		ini_set('max_execution_time', 0);
+		ini_set('memory_limit', '-1');
+		$empty_rows = 0;
+		$data = $request->all();
+		$successCount = 0;
+		$errorCount = 0;
+		$errors = [];
+		$error_str = '';
+		$validation = Validator::make($request->all(), ['attachment' => 'required']);
+		if ($validation->fails()) {
+			$response = ['success' => false, 'errors' => 'Please Upload File'];
+			return response()->json($response);
+		}
+		$attachment = 'attachment';
+		$attachment_extension = $request->file($attachment)->getClientOriginalExtension();
+
+		if ($attachment_extension != "xlsx" && $attachment_extension != "xls") {
+			$response = ['success' => false, 'error' => 'Cannot Read File, Please Import Excel Format File'];
+			return response()->json($response);
+		}
+
+		$file = $request->file('attachment')->getRealPath();
+
+		$headers = Excel::selectSheetsByIndex(0)->load($file, function ($reader) {
+			$reader->takeRows(1);
+		})->toArray();
+		// dd($headers);
+		$mandatory_fields = [
+			'trip_id',
+			'transaction_number',
+			'transaction_date',
+			'transaction_amount',
+		];
+
+		$missing_fields = [];
+		foreach ($mandatory_fields as $mandatory_field) {
+			if (!array_key_exists($mandatory_field, $headers[0])) {
+				$missing_fields[] = $mandatory_field;
+			}
+		}
+		if (count($missing_fields) > 0) {
+			$response = ['success' => false, 'error' => "Invalid File, Mandatory fields are missing.", 'missing_fields' => $missing_fields];
+			return response()->json($response);
+		}
+
+		$destination = config('custom.local_trip_transcation_import_path');
+
+		$timetamp = date('Y_m_d_H_i_s');
+		$file_name = $timetamp . '_local_import_file.' . $attachment_extension;
+		Storage::makeDirectory($destination, 0777);
+		$request->file($attachment)->storeAs($destination, $file_name);
+		$output_file = $timetamp . '_local_import_error_file';
+
+		Excel::create($output_file, function ($excel) use ($headers) {
+			$excel->sheet('Import Error Report', function ($sheet) use ($headers) {
+				$headings = array_keys($headers[0]);
+				$headings[] = 'Error No';
+				$headings[] = 'Error Details';
+				$sheet->fromArray(array($headings));
+			});
+		})->store('xlsx', storage_path('app/public/trip/local/import/'));
+
+		$total_records = Excel::load(getLocalTranscationImportExcelPath($file_name), function ($reader) {
+			$reader->limitColumns(1);
+		})->get();
+		$total_records = count($total_records);
+
+		$response = [
+			'success' => true,
+			'total_records' => $total_records,
+			'file' => getLocalTranscationImportExcelPath($file_name),
+			'outputfile' => 'storage/app/public/trip/local/import/' . $output_file . '.xlsx',
+			'error_report_url' => asset(getLocalTranscationImportExcelPath($output_file . '.xlsx')),
+			'reference' => $timetamp,
+			'errorCount' => $errorCount,
+			'successCount' => $successCount,
+			'errors' => $error_str,
+		];
+
+		return response()->json($response);
+	}
+
+	public function chunkImport(Request $request) {
+		// dd($request->all());
+		$error_str = '';
+		$errors = array();
+		$status_error_msg = array();
+		$error_msg = array();
+		$error_count = 0;
+		$successCount = 0;
+		$newCount = 0;
+		$updatedCount = 0;
+		$records = 0;
+		$empty_rows = 0;
+		$file = $request->file;
+		$total_records = $request->total_records;
+		$skip = $request->skip;
+		$records = array();
+		$output_file = $request->outputfile;
+		$request_client_id = $request->client_id;
+		$records_per_request = $request->records_per_request;
+		$timetamp = $request->reference;
+
+		try {
+			$headers = Excel::selectSheetsByIndex(0)->load($file, function ($reader) use ($skip, $records_per_request) {
+				$reader->skipRows($skip)->takeRows($records_per_request);
+			})->toArray();
+		} catch (\Exception $e) {
+			$response = ['success' => false, 'error' => $e->getMessage()];
+			return response()->json($response);
+		}
+
+		// dd($headers);
+		$all_error_records = [];
+		$errorCount = 0;
+
+		$k = 0;
+		$all_error_records = [];
+
+		foreach ($headers as $key => $trip_detail) {
+			$original_record = $trip_detail;
+			$k = $skip + $k;
+			$skip = false;
+
+			$errors = [];
+
+			if (empty($trip_detail['trip_id'])) {
+				$errors[] = 'Trip ID Cannot be empty - ' . $trip_detail['trip_id'];
+				$skip = true;
+			} else {
+				$trip = LocalTrip::where('number', $trip_detail['trip_id'])->first();
+				if (!$trip) {
+					$errors[] = 'Invalid Trip ID - ' . $trip_detail['trip_id'];
+					$skip = true;
+				}
+			}
+			
+			if (empty($trip_detail['transaction_number'])) {
+				$errors[] = 'Transaction Number Cannot be empty - ' . $trip_detail['transaction_number'];
+				$skip = true;
+			}else{
+				$trip = LocalTrip::where('number', $trip_detail['trip_id'])->first();
+				if($trip){
+					//Check transcation Number unique
+					$payment = Payment::where('payment_of_id',3255)->where('reference_number',$trip_detail['transaction_number'])->first();
+					if($payment){
+						if($payment->entity_id != $trip->id){
+							$errors[] = 'Transaction Number has already been taken- ' . $trip_detail['transaction_number'];
+							$skip = true;
+						}
+					}
+				}
+			}
+
+			if (empty($trip_detail['transaction_date'])) {
+				$errors[] = 'Transaction date Cannot be empty - ' . $trip_detail['transaction_date'];
+				$skip = true;
+			}
+
+			if (empty($trip_detail['transaction_amount'])) {
+				$errors[] = 'Transaction amount Cannot be empty - ' . $trip_detail['transaction_amount'];
+				$skip = true;
+			}else{
+				if(is_numeric($trip_detail['transaction_amount'])){
+					$trip = LocalTrip::where('number', $trip_detail['trip_id'])->first();
+					if($trip){
+						if($trip->claim_amount != $trip_detail['transaction_amount']){
+							$errors[] = 'Transaction amount should be equal to the trip amount - ' . $trip_detail['transaction_amount'];
+							$skip = true;
+						}
+					}
+				}else{
+					$errors[] = 'Invalid Transaction amount - ' . $trip_detail['transaction_amount'];
+					$skip = true;
+				}
+			}
+
+			if (!$skip) {
+
+				$trip = LocalTrip::where('number', $trip_detail['trip_id'])->first();
+
+				if($trip){
+					$trip->status_id = 3026; //PAID
+					$trip->save();
+
+					//PAYMENT SAVE
+					$payment = Payment::firstOrNew(['payment_of_id' => 3255,'entity_id' => $trip->id]);
+					if ($payment->exists) {
+						$payment->updated_by = Auth::user()->id;
+						$payment->updated_at = Carbon::now();
+						$updatedCount++;
+					} else {
+						$payment->created_by = Auth::user()->id;
+						$payment->created_at = Carbon::now();
+						$newCount++;
+					}
+					$payment->reference_number = $trip_detail['transaction_number'];
+					$payment->amount = $trip_detail['transaction_amount'];
+					$payment->payment_mode_id = 3244;
+					$payment->date = date('Y-m-d', strtotime($trip_detail['transaction_date']));
+					$payment->save();
+
+					$trip->payment_id = $payment->id;
+					$trip->claim_approval_datetime = date('Y-m-d H:i:s');
+					$trip->save();
+
+					$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+					$notification = sendnotification($type = 9, $trip, $user, $trip_type = "Local Trip", $notification_type = 'Paid');
+
+					//Claim Approval Log
+					$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3608, Auth::user()->entity_id, Carbon::now());
+
+				}
+			} else {
+				$errorCount++;
+				$error_str .= '
+                 <div class="mue_errortable_line">
+                <span class="mue_ticketerror">Record No:' . ($k + 1) . '</span>
+                <span class="mue_rowerror">Reason: ' . implode(',', $errors) . '</span>
+                </div>
+                    ';
+			}
+
+			if (count($errors) > 0) {
+				$original_record['Record No'] = $k + 1;
+				$original_record['Error Details'] = implode(',', $errors);
+				$all_error_records[] = $original_record;
+			}
+		}
+
+		Excel::load($request->outputfile, function ($excel) use ($all_error_records) {
+			$excel->sheet('Import Error Report', function ($sheet) use ($all_error_records) {
+				foreach ($all_error_records as $error_record) {
+					$sheet->appendRow($error_record, null, 'A1', false, false);
+				}
+			});
+		})->store('xlsx', storage_path('app/public/trip/local/import/'));
+
+		$response = ['success' => true, 'processed' => count($headers), 'errors' => $error_str,
+			'newCount' => $newCount, 'updatedCount' => $updatedCount, 'errorCount' => $errorCount];
+		return response()->json($response);
 	}
 
 }
