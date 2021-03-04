@@ -258,6 +258,7 @@ class TripClaimVerificationThreeController extends Controller {
 		})->toArray();
 		// dd($headers);
 		$mandatory_fields = [
+			'trip_type',
 			'trip_id',
 			'transaction_number',
 			'transaction_date',
@@ -356,8 +357,18 @@ class TripClaimVerificationThreeController extends Controller {
 
 			$errors = [];
 
+			if (empty($trip_detail['trip_type'])) {
+				$errors[] = 'Trip Type Cannot be empty';
+				$skip = true;
+			}else{
+				if(strtolower($trip_detail['trip_type']) != 'outstation'){
+					$errors[] = 'Invalid Trip Type - ' . $trip_detail['trip_type'];
+					$skip = true;
+				}
+			}
+
 			if (empty($trip_detail['trip_id'])) {
-				$errors[] = 'Trip ID Cannot be empty - ' . $trip_detail['trip_id'];
+				$errors[] = 'Trip ID Cannot be empty';
 				$skip = true;
 			} else {
 				$trip = Trip::where('number', $trip_detail['trip_id'])->first();
@@ -374,7 +385,7 @@ class TripClaimVerificationThreeController extends Controller {
 			}
 			
 			if (empty($trip_detail['transaction_number'])) {
-				$errors[] = 'Transaction Number Cannot be empty - ' . $trip_detail['transaction_number'];
+				$errors[] = 'Transaction Number Cannot be empty';
 				$skip = true;
 			}else{
 				$trip = Trip::where('number', $trip_detail['trip_id'])->first();
@@ -391,12 +402,12 @@ class TripClaimVerificationThreeController extends Controller {
 			}
 
 			if (empty($trip_detail['transaction_date'])) {
-				$errors[] = 'Transaction date Cannot be empty - ' . $trip_detail['transaction_date'];
+				$errors[] = 'Transaction date Cannot be empty';
 				$skip = true;
 			}
 
 			if (empty($trip_detail['transaction_amount'])) {
-				$errors[] = 'Transaction amount Cannot be empty - ' . $trip_detail['transaction_amount'];
+				$errors[] = 'Transaction amount Cannot be empty';
 				$skip = true;
 			}else{
 				if(is_numeric($trip_detail['transaction_amount'])){

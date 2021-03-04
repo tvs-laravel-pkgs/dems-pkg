@@ -226,6 +226,7 @@ class ReportController extends Controller {
 
 		if (count($trips) > 0) {
 			$trips_header = [
+				'Trip Type',
 				'Trip ID', 
 				'Employee Code', 
 				'Employee Name', 
@@ -266,6 +267,7 @@ class ReportController extends Controller {
 					}
 
 					$trips_detail = [
+						'Outstation',
 						$trip->number,
 						$trip->ecode,
 						$trip->ename,
@@ -306,7 +308,7 @@ class ReportController extends Controller {
 
 			// dd($trips_header, $trips_details);
 			$time_stamp = date('Y_m_d_h_i_s');
-			Excel::create('Outstation Trip Report' . $time_stamp, function ($excel) use ($trips_header, $trips_details) {
+			Excel::create('Outstation Trip Report_' . $time_stamp, function ($excel) use ($trips_header, $trips_details) {
 				$excel->sheet('Outstation Trip Report', function ($sheet) use ($trips_header, $trips_details) {
 					$sheet->fromArray($trips_details, NULL, 'A1');
 					$sheet->row(1, $trips_header);
@@ -513,6 +515,7 @@ class ReportController extends Controller {
 		if (count($trips) > 0) {
 			// dd($trips);
 			$trips_header = [
+				'Trip Type',
 				'Trip ID', 
 				'Employee Code', 
 				'Employee Name', 
@@ -537,6 +540,7 @@ class ReportController extends Controller {
 				foreach ($trips as $key => $trip) {
 					
 					$trips_detail = [
+						'Local',
 						$trip->number,
 						$trip->ecode,
 						$trip->ename,
@@ -575,7 +579,7 @@ class ReportController extends Controller {
 				}
 			}
 			$time_stamp = date('Y_m_d_h_i_s');
-			Excel::create('Local Trip Report' . $time_stamp, function ($excel) use ($trips_header, $trips_details) {
+			Excel::create('Local Trip Report_' . $time_stamp, function ($excel) use ($trips_header, $trips_details) {
 				$excel->sheet('Local Trip Report', function ($sheet) use ($trips_header, $trips_details) {
 					$sheet->fromArray($trips_details, NULL, 'A1');
 					$sheet->row(1, $trips_header);

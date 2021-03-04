@@ -195,6 +195,7 @@ app.component('eyatraTripClaimVerificationThreeList', {
                                 for (var i in response.missing_fields) {
                                     $('#import_errors').append('<div class="text-left">' + response.missing_fields[i] + '</div>')
                                 }
+                                alert('Invalid File, Mandatory fields are missing');
                             }
                             $('#import_outstion_claim').button('reset');
                         }
