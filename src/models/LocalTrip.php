@@ -282,10 +282,10 @@ class LocalTrip extends Model {
 				Attachment::whereIn('id', $attachment_removal_ids)->delete();
 			}
 
-			if (!empty($request->trip_detail_removal_id)) {
-				$local_removal_ids = json_decode($request->trip_detail_removal_id, true);
-				LocalTrip::whereIn('id', $local_removal_ids)->forceDelete();
-			}
+			// if (!empty($request->trip_detail_removal_id)) {
+			// 	$local_removal_ids = json_decode($request->trip_detail_removal_id, true);
+			// 	LocalTrip::whereIn('id', $local_removal_ids)->forceDelete();
+			// }
 
 			DB::beginTransaction();
 			if (!$request->id) {

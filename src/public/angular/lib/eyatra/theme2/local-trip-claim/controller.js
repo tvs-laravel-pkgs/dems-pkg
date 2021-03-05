@@ -335,8 +335,18 @@ app.component('eyatraLocalTripClaimForm', {
             }, 1500);
         }
 
-        //REMOVE VISIT ATTACHMENT
-        self.removeOtherAttachment = function(index, attachment_id) {
+        //REMOVE Travel ATTACHMENT
+        self.removeExpenseAttachment = function(index, attachment_id) {
+            console.log(attachment_id);
+            if (attachment_id) {
+                attachment_removal_id.push(attachment_id);
+                $('#attachment_removal_ids').val(JSON.stringify(attachment_removal_id));
+            }
+            $('.travel_attachment_' + index).hide();
+        }
+
+         //REMOVE VISIT ATTACHMENT
+         self.removeOtherAttachment = function(index, attachment_id) {
             console.log(attachment_id);
             if (attachment_id) {
                 attachment_removal_id.push(attachment_id);
@@ -347,7 +357,7 @@ app.component('eyatraLocalTripClaimForm', {
 
 
 
-        //OTHER EXPENSE AMOUNT CALCULATE
+        //AMOUNT CALCULATE
         self.calculatetotalamount = function() {
             var total_amount = 0;
             var total_expense_amount = 0;
