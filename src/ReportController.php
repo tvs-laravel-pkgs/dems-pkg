@@ -214,7 +214,8 @@ class ReportController extends Controller {
 		if ($outstation_status_id && $outstation_status_id != '-1') {
 			$trips = $trips->where("ey_employee_claims.status_id", $outstation_status_id);
 		} else {
-			$trips = $trips->whereIn('ey_employee_claims.status_id', [3023, 3024, 3025, 3026, 3029, 3030, 3031, 3034, 3035, 3036, 3037]);
+			// $trips = $trips->whereIn('ey_employee_claims.status_id', [3023, 3024, 3025, 3026, 3029, 3030, 3031, 3034, 3035, 3036, 3037]);
+			$trips = $trips->whereIn('ey_employee_claims.status_id', [3030, 3034]);
 		}
 
 		if ($employee_id && $employee_id != '-1') {
@@ -516,7 +517,8 @@ class ReportController extends Controller {
 		if ($local_status_id && $local_status_id != '-1') {
 			$trips = $trips->where("local_trips.status_id", $local_status_id);
 		} else {
-			$trips = $trips->whereIn('local_trips.status_id', [3023, 3024, 3026, 3030, 3034, 3035, 3036, 3037]);
+			// $trips = $trips->whereIn('local_trips.status_id', [3023, 3024, 3026, 3030, 3034, 3035, 3036, 3037]);
+			$trips = $trips->whereIn('local_trips.status_id', [3030, 3034]);
 		}
 
 		if ($employee_id && $employee_id != '-1') {
