@@ -3,6 +3,7 @@ app.component('eyatraTripClaimVerificationThreeList', {
     controller: function(HelperService, $rootScope, $scope, $http) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.eyatra_outstation_trip_report_export_url = eyatra_outstation_trip_report_export_url;
         $http.get(
             trip_filter_data_url
         ).then(function(response) {
@@ -12,6 +13,7 @@ app.component('eyatraTripClaimVerificationThreeList', {
             self.trip_status_list = response.data.financier_status_list;
             $rootScope.loading = false;
         });
+        self.csrf = $('#csrf').val();
         var dataTable = $('#eyatra_trip_claim_verification_three_list_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -307,6 +309,27 @@ app.component('eyatraTripClaimVerificationThreeList', {
             // $window.location.reload();
             location.reload();
         };
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+
+        $(".daterange").on('change', function() {
+            var dates = $("#trip_periods").val();
+            var date = dates.split(" to ");
+            self.start_date = date[0];
+            self.end_date = date[1];
+            setTimeout(function() {
+                dataTable.draw();
+            }, 500);
+        });
 
         $rootScope.loading = false;
 

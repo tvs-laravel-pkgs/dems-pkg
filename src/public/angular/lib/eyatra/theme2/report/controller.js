@@ -41,6 +41,8 @@ app.component('eyatraOutstationTrip', {
             $rootScope.loading = false;
         });
 
+        self.csrf = $('#csrf').val();
+        
         var dataTable = $('#eyatra_outstation_trip_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,

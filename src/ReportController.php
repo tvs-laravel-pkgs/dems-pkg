@@ -153,17 +153,27 @@ class ReportController extends Controller {
 			->make(true);
 	}
 
-	public function outstationTripExport() {
+	public function outstationTripExport(Request $request) {
 		ob_end_clean();
 		ini_set('memory_limit', '-1');
 		ini_set('max_execution_time', 0);
 
-		$employee_id = session('outstation_employee_id');
-		$purpose_id = session('outstation_purpose_id');
-		$outstation_start_date = session('outstation_start_date');
-		$outstation_end_date = session('outstation_end_date');
-		$outstation_outlet_id = session('outstation_outlet_id');
-		$outstation_status_id = session('outstation_status_id');
+		if($request->export_type){
+			$employee_id = $request->export_employee_id;
+			$purpose_id = $request->export_employee_id;
+			$outstation_start_date = '';
+			$outstation_end_date = '';
+			$outstation_outlet_id = '';
+			$outstation_status_id = $request->export_status_id;
+		}else{
+			$employee_id = session('outstation_employee_id');
+			$purpose_id = session('outstation_purpose_id');
+			$outstation_start_date = session('outstation_start_date');
+			$outstation_end_date = session('outstation_end_date');
+			$outstation_outlet_id = session('outstation_outlet_id');
+			$outstation_status_id = session('outstation_status_id');
+		}
+		
 		// dd($employee_id, $purpose_id, $outstation_start_date, $outstation_end_date, $outstation_outlet_id, $outstation_status_id);
 
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
@@ -319,7 +329,11 @@ class ReportController extends Controller {
 			})->export('xlsx');
 		} else {
 			Session()->flash('error', 'No Data Found');
-			return Redirect::to('/#!/report/outstation-trip/list');
+			if($request->export_type){
+				return Redirect::to('/#!/trip/claim/verification3/list');
+			}else{
+				return Redirect::to('/#!/report/outstation-trip/list');
+			}
 		}
 
 	}
