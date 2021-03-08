@@ -446,8 +446,10 @@ class ReportController extends Controller {
 		$data['trip_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3023, 3024, 3026, 3030, 3034])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 
 		if (!$local_start_date) {
-			$local_start_date = date('01-m-Y');
-			$local_end_date = date('t-m-Y');
+			// $local_start_date = date('01-m-Y');
+			// $local_end_date = date('t-m-Y');
+			$local_start_date = '';
+			$local_end_date = '';
 		}
 
 		$data['filter_outlet_id'] = $filter_outlet_id = session('local_outlet_id') ? intval(session('local_outlet_id')) : '-1';
