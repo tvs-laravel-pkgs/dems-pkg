@@ -1,6 +1,6 @@
 app.component('eyatraTripClaimVerificationThreeList', {
     templateUrl: eyatra_trip_claim_verification_three_list_template_url,
-    controller: function(HelperService, $rootScope, $scope, $http) {
+    controller: function(HelperService, $rootScope, $scope, $http, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.eyatra_outstation_trip_report_export_url = eyatra_outstation_trip_report_export_url;
@@ -98,6 +98,13 @@ app.component('eyatraTripClaimVerificationThreeList', {
             $('#to_date').val('');
             dataTable.draw();
         }
+
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
 
         //Import
         /* File Upload Function */

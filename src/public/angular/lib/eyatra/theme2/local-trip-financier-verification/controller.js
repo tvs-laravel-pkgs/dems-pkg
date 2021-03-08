@@ -1,17 +1,20 @@
 app.component('eyatraLocalTripFinancierVerification', {
     templateUrl: eyatra_local_trip_financier_verification_list_template_url,
-    controller: function(HelperService, $rootScope, $http, $scope) {
+    controller: function(HelperService, $rootScope, $http, $scope, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.eyatra_local_trip_report_export_url = eyatra_local_trip_report_export_url;
         $http.get(
             local_trip_financier_verification_filter_data_url
         ).then(function(response) {
             console.log(response.data);
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
+            self.financier_status_list = response.data.financier_status_list;
             self.trip_status_list = response.data.trip_status_list;
             $rootScope.loading = false;
         });
+        self.csrf = $('#csrf').val();
         var dataTable = $('#eyatra_local_trip_verification_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -130,6 +133,13 @@ app.component('eyatraLocalTripFinancierVerification', {
             $(this_parents).parent().remove();
             $(".file_check").val('');
         }
+
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
 
         // getCTCProgressBar
         $('.card-transition').hide();

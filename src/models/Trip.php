@@ -1319,6 +1319,7 @@ class Trip extends Model {
 				->where('users.user_type_id', 3121)
 				->where('employees.reporting_to_id', Auth::user()->entity_id)
 				->where('employees.company_id', Auth::user()->company_id)
+				->orderBy('users.name')
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 
@@ -1336,6 +1337,7 @@ class Trip extends Model {
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
 				->where('employees.company_id', Auth::user()->company_id)
+				->orderBy('users.name')
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id',  [3034, 3030,3026,3025,3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);

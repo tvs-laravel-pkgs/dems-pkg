@@ -481,7 +481,7 @@ Route::group(['middleware' => ['web']], function () {
 		//LOCAL TRIP REPORT
 		Route::get('eyatra/report/local-trip/get-filter-data', 'Uitoux\EYatra\ReportController@eyatraLocalFilterData')->name('eyatraLocalFilterData');
 		Route::get('eyatra/report/local-trip/get-list', 'Uitoux\EYatra\ReportController@listLocalTripReport')->name('listLocalTripReport');
-		Route::get('eyatra/report/local-trip/export', 'Uitoux\EYatra\ReportController@localTripExport')->name('localTripExport');
+		Route::post('eyatra/report/local-trip/export', 'Uitoux\EYatra\ReportController@localTripExport')->name('localTripExport');
 
 		//APPROVAL LOGS
 		//OUTSTATION TRIP

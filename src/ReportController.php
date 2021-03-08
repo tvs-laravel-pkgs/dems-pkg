@@ -214,7 +214,7 @@ class ReportController extends Controller {
 		if ($outstation_status_id && $outstation_status_id != '-1') {
 			$trips = $trips->where("ey_employee_claims.status_id", $outstation_status_id);
 		} else {
-			$trips = $trips->whereIn('ey_employee_claims.status_id', [3023, 3024, 3025, 3026, 3029, 3030, 3031, 3034]);
+			$trips = $trips->whereIn('ey_employee_claims.status_id', [3023, 3024, 3025, 3026, 3029, 3030, 3031, 3034, 3035, 3036, 3037]);
 		}
 
 		if ($employee_id && $employee_id != '-1') {
@@ -458,18 +458,27 @@ class ReportController extends Controller {
 		return response()->json($data);
 	}
 
-	public function localTripExport() {
+	public function localTripExport(Request $request) {
 
 		ini_set('memory_limit', '-1');
 		ini_set('max_execution_time', 0);
 		ob_end_clean();
 
-		$employee_id = session('local_employee_id');
-		$purpose_id = session('local_purpose_id');
-		$local_start_date = session('local_start_date');
-		$local_end_date = session('local_end_date');
-		$local_outlet_id = session('local_outlet_id');
-		$local_status_id = session('local_status_id');
+		if($request->export_type){
+			$employee_id = $request->export_employee_id;
+			$purpose_id = $request->export_employee_id;
+			$local_start_date = '';
+			$local_end_date = '';
+			$local_outlet_id = '';
+			$local_status_id = $request->export_status_id;
+		}else{
+			$employee_id = session('local_employee_id');
+			$purpose_id = session('local_purpose_id');
+			$local_start_date = session('local_start_date');
+			$local_end_date = session('local_end_date');
+			$local_outlet_id = session('local_outlet_id');
+			$local_status_id = session('local_status_id');
+		}
 		// dd($employee_id, $purpose_id, $local_start_date, $local_end_date);
 
 		$trips = LocalTrip::from('local_trips')
@@ -507,7 +516,7 @@ class ReportController extends Controller {
 		if ($local_status_id && $local_status_id != '-1') {
 			$trips = $trips->where("local_trips.status_id", $local_status_id);
 		} else {
-			$trips = $trips->whereIn('local_trips.status_id', [3023, 3024, 3026, 3030, 3034]);
+			$trips = $trips->whereIn('local_trips.status_id', [3023, 3024, 3026, 3030, 3034, 3035, 3036, 3037]);
 		}
 
 		if ($employee_id && $employee_id != '-1') {
@@ -604,7 +613,11 @@ class ReportController extends Controller {
 			})->export('xlsx');
 		} else {
 			Session()->flash('error', 'No Data Found');
-			return Redirect::to('/#!/report/local-trip/list');
+			if($request->export_type){
+				return Redirect::to('/#!/local-trip/financier/verification/list');
+			}else{
+				return Redirect::to('/#!/report/local-trip/list');
+			}
 		}
 
 	}

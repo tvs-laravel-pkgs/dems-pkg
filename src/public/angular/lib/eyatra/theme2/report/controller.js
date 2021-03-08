@@ -42,7 +42,7 @@ app.component('eyatraOutstationTrip', {
         });
 
         self.csrf = $('#csrf').val();
-        
+
         var dataTable = $('#eyatra_outstation_trip_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -235,6 +235,7 @@ app.component('eyatraLocalTrip', {
             }, 1500);
             $rootScope.loading = false;
         });
+        self.csrf = $('#csrf').val();
         var dataTable = $('#eyatra_local_trip_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
