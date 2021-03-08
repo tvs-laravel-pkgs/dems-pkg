@@ -31,8 +31,10 @@ class TripClaimVerificationController extends Controller {
 		$start_date = session('verifier_start_date');
 		$end_date = session('verifier_end_date');
 		if (!$start_date) {
-			$start_date = date('01-m-Y');
-			$end_date = date('t-m-Y');
+			// $start_date = date('01-m-Y');
+			// $end_date = date('t-m-Y');
+			$start_date = '';
+			$end_date = '';
 		}
 
 		$this->data['start_date'] = $start_date;
@@ -43,7 +45,6 @@ class TripClaimVerificationController extends Controller {
 		return response()->json($this->data);
 	}
 	public function eyatraOutstationClaimVerificationGetData(Request $r) {
-
 		// dd($r->all());
 		if (!empty($r->from_date) && $r->from_date != '<%$ctrl.start_date%>') {
 			$from_date = date('Y-m-d', strtotime($r->from_date));
