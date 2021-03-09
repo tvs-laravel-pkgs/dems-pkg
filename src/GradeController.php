@@ -71,8 +71,8 @@ class GradeController extends Controller {
 			->leftjoin('grade_advanced_eligibility', 'grade_advanced_eligibility.grade_id', 'entities.id')
 			->where('entities.entity_type_id', 500)
 			->where('entities.company_id', Auth::user()->company_id)
+			->orderby('entities.name', 'asc')
 			->groupBy('entities.id')
-			->orderby('entities.id', 'desc')
 		// ->get()
 		;
 		// dd($grade_list);

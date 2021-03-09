@@ -23,7 +23,7 @@ class DesignationController extends Controller {
 				DB::raw('IF(designations.deleted_at IS NULL,"Active","Inactive") as status')
 			)
 			->where('designations.company_id', Auth::user()->company_id)
-			->orderBy('designations.id', 'asc');
+			->orderBy('designations.name', 'asc');
 
 		return Datatables::of($designations)
 			->addColumn('action', function ($designations) {

@@ -74,6 +74,7 @@ class OutletController extends Controller {
 					$query->where("c.id", $r->get('country_id'))->orWhere(DB::raw("-1"), $r->get('country_id'));
 				}
 			})
+			->orderBy('outlets.name')
 			->groupBy('outlets.id');
 
 		return Datatables::of($outlets)
@@ -210,8 +211,8 @@ class OutletController extends Controller {
 		$sbu_list = [];
 		$this->data['extras'] = [
 			'country_list' => NCountry::getList(),
-			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($outlet->address->city->state->country_id),
-			'city_list' => $this->data['action'] == 'Add' ? [] : NCity::getList($outlet->address->state_id),
+			'state_list' => $this->data['action'] == 'Add' ? [] : NState::getList($outlet->address ?$outlet->address->city->state->country_id : ''),
+			'city_list' => $this->data['action'] == 'Add' ? [] : NCity::getList($outlet->address ? $outlet->address->state_id : ''),
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
 			'cashier_list' => Employee::getList(),
