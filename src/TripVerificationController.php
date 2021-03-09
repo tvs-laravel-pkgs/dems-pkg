@@ -70,8 +70,8 @@ class TripVerificationController extends Controller {
 
 		$start_date = $trip->visits()->select(DB::raw('MIN(visits.departure_date) as start_date'))->first();
 		$end_date = $trip->visits()->select(DB::raw('MAX(visits.departure_date) as end_date'))->first();
-		$days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date)) as days'))->first();
-		$trip->days = $days->days + 1;
+		$days = Trip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
+		$trip->days = $days->days;
 		$this->data['trip'] = $trip;
 		$this->data['success'] = true;
 		$this->data['trip_reject_reasons'] = $trip_reject_reasons = Entity::trip_request_rejection();
