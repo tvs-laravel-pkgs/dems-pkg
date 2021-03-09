@@ -131,7 +131,7 @@ class OutletController extends Controller {
 			$this->data['action'] = 'Edit';
 			$outlet = Outlet::with('sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
 			//dd($outlet);
-			$outlet->cashier = $outlet->employee->user;
+			$outlet->cashier = $outlet->employee ? $outlet->employee->user : '';
 			// $outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
 			// dd($outlet->cashier);
 			// $this->data['cashier'] = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
@@ -338,6 +338,9 @@ class OutletController extends Controller {
 			} else {
 				$outlet = Outlet::withTrashed()->find($request->id);
 				$address = Address::where('entity_id', $request->id)->first();
+				if(!$address){
+					$address = new Address;
+				}
 				$outlet->updated_by = Auth::user()->id;
 				$outlet->updated_at = Carbon::now();
 				$outlet->outletBudgets()->sync([]);
