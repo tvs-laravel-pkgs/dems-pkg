@@ -105,7 +105,7 @@ class LocalTripController extends Controller {
 					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
 					$value = rand(1, 100);
 					$extension = $image->getClientOriginalExtension();
-					$name = $trip_id . $value . '-Travel-expense-' . $file_name;
+					$name = $trip_id .'-' . $value . '-Travel-expense-' . $file_name;
 					$image->move(storage_path('app/public/trip/local-trip/attachments/'), $name);
 					$attachement_file = new Attachment;
 					$attachement_file->attachment_of_id = 3186;
@@ -132,7 +132,7 @@ class LocalTripController extends Controller {
 					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
 					$value = rand(1, 100);
 					$extension = $image->getClientOriginalExtension();
-					$name = $trip_id . $value . '-Other-expense-' . $file_name;
+					$name = $trip_id .'-' . $value . '-Other-expense-' . $file_name;
 					$image->move(storage_path('app/public/trip/local-trip/attachments/'), $name);
 					$attachement_file = new Attachment;
 					$attachement_file->attachment_of_id = 3188;
