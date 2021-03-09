@@ -170,6 +170,25 @@ class TripClaimController extends Controller {
 	}
 	public function getTripClaimAttachments(Request $request) {
 		if ($request->trip_id) {
+			if ($request->is_transport == 1) {
+				$lodging_images = storage_path('app/public/trip/transport/attachments/');
+				Storage::makeDirectory($lodging_images, 0777);
+				if (!empty($request->transport_attachments)) {
+					foreach ($request->transport_attachments as $key => $attachement) {
+						$value = rand(1, 100);
+						$image = $attachement;
+						$extension = $image->getClientOriginalExtension();
+						$name = $request->trip_id . '_transport_attachment' . $value . '.' . $extension;
+						$attachement->move(storage_path('app/public/trip/transport/attachments/'), $name);
+						$attachement_lodge = new Attachment;
+						$attachement_lodge->attachment_of_id = 3189;
+						$attachement_lodge->attachment_type_id = 3200;
+						$attachement_lodge->entity_id = $request->trip_id;
+						$attachement_lodge->name = $name;
+						$attachement_lodge->save();
+					}
+				}
+			}
 			if ($request->is_lodging == 1) {
 				$lodging_images = storage_path('app/public/trip/lodgings/attachments/');
 				Storage::makeDirectory($lodging_images, 0777);
