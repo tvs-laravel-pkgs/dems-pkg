@@ -105,12 +105,39 @@ class LocalTripController extends Controller {
 					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
 					$value = rand(1, 100);
 					$extension = $image->getClientOriginalExtension();
-					$name = $value . '-' . $file_name;
+					$name = $trip_id . $value . '-Travel-expense-' . $file_name;
 					$image->move(storage_path('app/public/trip/local-trip/attachments/'), $name);
 					$attachement_file = new Attachment;
 					$attachement_file->attachment_of_id = 3186;
 					$attachement_file->attachment_type_id = 3200;
 					$attachement_file->entity_id = $trip_id;
+					$attachement_file->name = $name;
+					$attachement_file->save();
+				}
+			}
+		}
+
+		if ($request->other_expense_attachment == 1) {
+
+			$trip_id = $request->trip_id;
+
+			//SAVE OTHER EXPENSE ATTACHMENT
+			$item_images = storage_path('app/public/trip/local-trip/attachments/');
+			Storage::makeDirectory($item_images, 0777);
+			if (!empty($request->other_expense_attachments)) {
+				foreach ($request->other_expense_attachments as $key => $attachement) {
+					$image = $attachement;
+					$extension = $image->getClientOriginalExtension();
+					$name = $image->getClientOriginalName();
+					$file_name = str_replace(' ', '-', $name); // Replaces all spaces with hyphens.
+					$value = rand(1, 100);
+					$extension = $image->getClientOriginalExtension();
+					$name = $trip_id . $value . '-Other-expense-' . $file_name;
+					$image->move(storage_path('app/public/trip/local-trip/attachments/'), $name);
+					$attachement_file = new Attachment;
+					$attachement_file->attachment_of_id = 3188;
+					$attachement_file->attachment_type_id = 3200;
+					$attachement_file->entity_id = $trip->id;
 					$attachement_file->name = $name;
 					$attachement_file->save();
 				}
