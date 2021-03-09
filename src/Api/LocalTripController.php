@@ -137,7 +137,7 @@ class LocalTripController extends Controller {
 					$attachement_file = new Attachment;
 					$attachement_file->attachment_of_id = 3188;
 					$attachement_file->attachment_type_id = 3200;
-					$attachement_file->entity_id = $trip->id;
+					$attachement_file->entity_id = $trip_id;
 					$attachement_file->name = $name;
 					$attachement_file->save();
 				}
