@@ -899,6 +899,32 @@ app.component('eyatraTripClaimForm', {
                             // self.trip.visits[key].self_booking.km_start = '';
                             // self.trip.visits[key].self_booking.km_end = '';
                             // self.trip.visits[key].self_booking.toll_fee = '0.00';
+                            var travel_amount = 0;
+                            var from_km = parseInt($('.km_start_'+key).val());
+                            var to_km = parseInt($('.km_end_'+key).val());
+                            console.log(from_km, to_km,travel_mode_ids[travel_mode_id]);
+
+                            if (from_km == to_km) {
+                                $(".validation_error_" + key).text("From,To km should not be same");
+                                arrival_from_to_km_error_flag = 1;
+                            } else if (from_km > to_km) {
+                                $(".validation_error_" + key).text("To km should be greater then From km");
+                                arrival_from_to_km_error_flag = 1;
+                            } else if (from_km == 0 || to_km == 0) {
+                                $(".validation_error_" + key).text("Invalid value");
+                                arrival_from_to_km_error_flag = 1;
+                            } else if (from_km && to_km) {
+                                var from_to_diff = to_km - from_km;
+                                $('.difference_km_' + key).val(from_to_diff);
+                                travel_amount = from_to_diff * travel_mode_ids[travel_mode_id];
+                                $('.visit_amount_'+key).val(travel_amount.toFixed(2));
+                                self.travelCal();
+                                $(".validation_error_" + key).text("");
+                                arrival_from_to_km_error_flag = 0;
+                            } else {
+                                $(".validation_error_" + key).text("");
+                                arrival_from_to_km_error_flag = 0;
+                            }
                         }
                         //Vehicle has Claim
                         else {
