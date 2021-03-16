@@ -493,7 +493,7 @@ class Trip extends Model {
 
 		$data['trip_advance_amount_edit'] = $trip_advance_amount_edit;
 
-		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
+		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-60 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
 
 		return response()->json($data);
@@ -1819,7 +1819,7 @@ class Trip extends Model {
 				
 				//Check Beta Amount
 				if($lodging_amount == 0 && $boarding_amount == 0){
-					$employee_beta_amount = $beta_amount * $request->trip_total_days;
+					$employee_beta_amount = $beta_amount * $employee_claim->total_trip_days;
 					$total_amount += $employee_beta_amount;
 
 					$employee_claim->beta_amount = $employee_beta_amount;
@@ -1827,7 +1827,7 @@ class Trip extends Model {
 					$employee_claim->beta_amount = NULL;
 				}
 
-				$employee_claim->total_trip_days = $request->trip_total_days;
+				// $employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
 
 				//To Find Amount to Pay Financier or Employee
@@ -1980,7 +1980,7 @@ class Trip extends Model {
 				
 				//Check Beta Amount
 				if($lodging_amount == 0 && $boarding_amount == 0){
-					$employee_beta_amount = $beta_amount * $request->trip_total_days;
+					$employee_beta_amount = $beta_amount * $employee_claim->total_trip_days;
 					$total_amount += $employee_beta_amount;
 
 					$employee_claim->beta_amount = $employee_beta_amount;
@@ -1988,7 +1988,7 @@ class Trip extends Model {
 					$employee_claim->beta_amount = NULL;
 				}
 
-				$employee_claim->total_trip_days = $request->trip_total_days;
+				// $employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
 
 				//To Find Amount to Pay Financier or Employee
@@ -2145,7 +2145,7 @@ class Trip extends Model {
 				
 				//Check Beta Amount
 				if($lodging_amount == 0 && $boarding_amount == 0){
-					$employee_beta_amount = $beta_amount * $request->trip_total_days;
+					$employee_beta_amount = $beta_amount * $employee_claim->total_trip_days;
 					$total_amount += $employee_beta_amount;
 
 					$employee_claim->beta_amount = $employee_beta_amount;
@@ -2153,7 +2153,7 @@ class Trip extends Model {
 					$employee_claim->beta_amount = NULL;
 				}
 
-				$employee_claim->total_trip_days = $request->trip_total_days;
+				// $employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
 				
 				//To Find Amount to Pay Financier or Employee
