@@ -1734,6 +1734,9 @@ class Trip extends Model {
 						return response()->json(['success' => false, 'errors' => ['Total lodging days should be less than total trip days']]);
 					}
 
+					//Delete previous entries
+					$lodgings = Lodging::where('trip_id', $request->trip_id)->forceDelete();
+
 					$lodging_total_amount = 0;
 					foreach ($request->lodgings as $lodging_data) {
 
@@ -1910,6 +1913,9 @@ class Trip extends Model {
 					if ($boarding_days > $trip_total_days) {
 						return response()->json(['success' => false, 'errors' => ['Total boarding days should be less than total trip days']]);
 					}
+
+					//Delete previous entries
+					$boardings = Boarding::where('trip_id', $request->trip_id)->forceDelete();
 
 					$boarding_total_amount = 0;
 					foreach ($request->boardings as $boarding_data) {
@@ -2109,6 +2115,10 @@ class Trip extends Model {
 					LocalTravel::whereIn('id', $local_travels_removal_id)->delete();
 				}
 				if ($request->local_travels) {
+
+					//Delete previous entries
+					$local_travels = LocalTravel::where('trip_id', $request->trip_id)->forceDelete();
+
 					$local_total_amount = 0;
 					foreach ($request->local_travels as $local_travel_data) {
 						if(isset($local_travel_data['id'])){
