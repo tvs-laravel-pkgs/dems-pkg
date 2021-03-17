@@ -1737,9 +1737,15 @@ class Trip extends Model {
 					$lodging_total_amount = 0;
 					foreach ($request->lodgings as $lodging_data) {
 
-						$lodging = Lodging::firstOrNew([
-							'id' => $lodging_data['id'],
-						]);
+						if(isset($lodging_data['id'])){
+							$lodging = Lodging::where('id', $lodging_data['id'])->first();
+							if(!$lodging){
+								$lodging = new Lodging;
+							}
+						}else{
+							$lodging = new Lodging;
+						}
+						
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
 
@@ -1907,9 +1913,16 @@ class Trip extends Model {
 
 					$boarding_total_amount = 0;
 					foreach ($request->boardings as $boarding_data) {
-						$boarding = Boarding::firstOrNew([
-							'id' => $boarding_data['id'],
-						]);
+						
+						if(isset($boarding_data['id'])){
+							$boarding = Boarding::where('id', $boarding_data['id'])->first();
+							if(!$boarding){
+								$boarding = new Boarding;
+							}
+						}else{
+							$boarding = new Boarding;
+						}
+
 						$boarding->fill($boarding_data);
 						$boarding->trip_id = $request->trip_id;
 						$boarding->from_date = date('Y-m-d', strtotime($boarding_data['from_date']));
@@ -2098,9 +2111,15 @@ class Trip extends Model {
 				if ($request->local_travels) {
 					$local_total_amount = 0;
 					foreach ($request->local_travels as $local_travel_data) {
-						$local_travel = LocalTravel::firstOrNew([
-							'id' => $local_travel_data['id'],
-						]);
+						if(isset($local_travel_data['id'])){
+							$local_travel = LocalTravel::where('id', $local_travel_data['id'])->first();
+							if(!$local_travel){
+								$local_travel = new LocalTravel;
+							}
+						}else{
+							$local_travel = new LocalTravel;
+						}
+
 						$local_travel->fill($local_travel_data);
 						$local_travel->trip_id = $request->trip_id;
 						$local_travel->date = date('Y-m-d', strtotime($local_travel_data['date']));
