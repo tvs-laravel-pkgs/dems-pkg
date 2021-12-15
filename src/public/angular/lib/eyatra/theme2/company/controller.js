@@ -138,8 +138,15 @@ app.component('eyatraCompanyForm', {
             self.financial_year_list = response.data.financial_year_list;
             self.status = response.data.status;
             self.action = response.data.action;
-            // console.log(response.data);
             console.log(response.data);
+            $scope.Invisible = true;
+            if (self.company.additional_approve == 1) {
+                $scope.visible = true;
+                $scope.Invisible = false;
+            } else if (self.company.additional_approve == 0) {
+                $scope.Invisible = true;
+                $scope.visible = false;
+            }
             if (self.action == "Add") {
                 self.company.company_budgets = [];
                 self.company.company_budgets.push({
@@ -152,10 +159,6 @@ app.component('eyatraCompanyForm', {
             $rootScope.loading = false;
 
         });
-
-
-
-
 
         $('.btn-nxt').on("click", function() {
             $('.editDetails-tabs li.active').next().children('a').trigger("click");
@@ -183,8 +186,6 @@ app.component('eyatraCompanyForm', {
         self.removeBudget = function(index, id) {
             self.company.company_budgets.splice(index, 1);
         }
-
-
         var form_id = '#company-form';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -200,6 +201,7 @@ app.component('eyatraCompanyForm', {
                     error.insertAfter(element)
                 }
             },
+
             ignore: '',
             rules: {
                 'code': {
@@ -226,7 +228,7 @@ app.component('eyatraCompanyForm', {
                 },
                 'customer_care_phone': {
                     required: true,
-                    maxlength: 14,
+                    maxlength: 10,
                     minlength: 10,
                     number: true,
                 },
