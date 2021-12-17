@@ -18,7 +18,7 @@ use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Validator;
-use phpseclib\Crypt\RSA as Crypt_RSA;
+use App\Http\Controllers\AngularController;
 
 
 class Trip extends Model {
@@ -1594,148 +1594,20 @@ class Trip extends Model {
 							$visit_booking->paid_amount = $visit_data['total'];
 							$visit_booking->created_by = Auth::user()->id;
 							$visit_booking->status_id = 3241; //Claimed
-							$visit_booking->gstin = $visit_data['gstin'];
             
-            $gstin = $visit_data['gstin'];
-            $errors = [];
-            if (!$gstin) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'GSTIN is Empty!',
-                ]);
-            }
-            $rsa = new Crypt_RSA;
-            $encrypter = app('Illuminate\Contracts\Encryption\Encrypter');
-            $public_key = 'MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxqHazGS4OkY/bDp0oklL+Ser7EpTpxyeMop8kfBlhzc8dzWryuAECwu8i/avzL4f5XG/DdSgMz7EdZCMrcxtmGJlMo2tUqjVlIsUslMG6Cmn46w0u+pSiM9McqIvJgnntKDHg90EIWg1BNnZkJy1NcDrB4O4ea66Y6WGNdb0DxciaYRlToohv8q72YLEII/z7W/7EyDYEaoSlgYs4BUP69LF7SANDZ8ZuTpQQKGF4TJKNhJ+ocmJ8ahb2HTwH3Ol0THF+0gJmaigs8wcpWFOE2K+KxWfyX6bPBpjTzC+wQChCnGQREhaKdzawE/aRVEVnvWc43dhm0janHp29mAAVv+ngYP9tKeFMjVqbr8YuoT2InHWFKhpPN8wsk30YxyDvWkN3mUgj3Q/IUhiDh6fU8GBZ+iIoxiUfrKvC/XzXVsCE2JlGVceuZR8OzwGrxk+dvMnVHyauN1YWnJuUTYTrCw3rgpNOyTWWmlw2z5dDMpoHlY0WmTVh0CrMeQdP33D3LGsa+7JYRyoRBhUTHepxLwk8UiLbu6bGO1sQwstLTTmk+Z9ZSk9EUK03Bkgv0hOmSPKC4MLD5rOM/oaP0LLzZ49jm9yXIrgbEcn7rv82hk8ghqTfChmQV/q+94qijf+rM2XJ7QX6XBES0UvnWnV6bVjSoLuBi9TF1ttLpiT3fkCAwEAAQ=='; //PROVIDE FROM BDO COMPANY
-
-            $clientid = "61b27a26bd86cbb93c5c11be0c2856"; //LIVE
-
-            $rsa->loadKey($public_key);
-            $rsa->setEncryptionMode(2);
-            $client_encryption_key = '7dd55886594bccadb03c48eb3f448e'; // LIVE
-            
-            $ClientSecret = $rsa->encrypt($client_encryption_key);
-            $clientsecretencrypted = base64_encode($ClientSecret);
-            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            $app_secret_key = substr(str_shuffle($characters), 0, 32); // RANDOM KEY GENERATE
-            $AppSecret = $rsa->encrypt($app_secret_key);
-            $appsecretkey = base64_encode($AppSecret);
-            $bdo_login_url = 'https://sandboxeinvoiceapi.bdo.in/bdoauth/bdoauthenticate';
-            $bdo_login_url = 'https://einvoiceapi.bdo.in/bdoauth/bdoauthenticate'; //LIVE
-            
-            $ch = curl_init($bdo_login_url);
-            // Setup request to send json via POST`
-            $params = json_encode(array(
-                'clientid' => $clientid,
-                'clientsecretencrypted' => $clientsecretencrypted,
-                'appsecretkey' => $appsecretkey,
-            ));
-
-            // Attach encoded JSON string to the POST fields
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-
-            // Set the content type to application/json
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-
-            // Return response instead of outputting
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-            // Execute the POST request
-            $server_output_data = curl_exec($ch);
-
-            // Get the POST request header status
-            $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            // dd($server_output_data);
-            // If header status is not Created or not OK, return error message
-            if ($status != 200) {
-                $errors[] = 'Connection Error!';
-                return response()->json(['success' => false, 'error' => 'Connection Error!']);
-            }
-
-            curl_close($ch);
-
-            $server_output = json_decode($server_output_data);
-
-            if ($server_output->status == 0) {
-                $errors[] = 'Something went on Server.Please Try again later!!';
-                return response()->json([
-                    'success' => false,
-                    'error' => $server_output->ErrorMsg,
-                    'errors' => $errors,
-                ]);
-            }
-            $expiry = $server_output->expiry;
-            $bdo_authtoken = $server_output->bdo_authtoken;
-            $status = $server_output->status;
-            $bdo_sek = $server_output->bdo_sek;
-
-            //DECRYPT WITH APP KEY AND BDO SEK KEY
-            $decrypt_data_with_bdo_sek =self::decryptAesData($app_secret_key, $bdo_sek);
-            if (!$decrypt_data_with_bdo_sek) {
-                $errors[] = 'Decryption Error!';
-                return response()->json(['success' => false, 'error' => 'Decryption Error!']);
-            }
-            $bdo_check_gstin_url = 'https://einvoiceapi.bdo.in/bdoapi/public/syncGstinDetailsFromCP/' . $gstin; //LIVE
-            //dd($bdo_check_gstin_url);
-
-            $ch = curl_init($bdo_check_gstin_url);
-            // Setup request to send json via POST`
-
-            // Attach encoded JSON string to the POST fields
-            curl_setopt($ch, CURLOPT_URL, $bdo_check_gstin_url);
-
-            // Set the content type to application/json
-            $params = json_encode(array(
-                'Content-Type' => 'application/json',
-                'client_id' => $clientid,
-                'bdo_authtoken' => $bdo_authtoken,
-                // 'gstin: ' . $r->outlet_gstin,
-                'gstin' =>$gstin,
-            ));
-
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json',
-                'client_id:' . $clientid,
-                'bdo_authtoken:' . $bdo_authtoken,
-                // 'gstin: ' . $r->outlet_gstin,
-                'gstin:'.$gstin,
-            ));
-
-            // Return response instead of outputting
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-            // Execute the POST request
-            $get_gstin_output_data = curl_exec($ch);
-
-            $get_gstin_output = json_decode($get_gstin_output_data);
-
-            if ($get_gstin_output->Status == 0) {
-                $errors[] = 'Invalid GSTIN for this user!!';
-                return response()->json([
-                    'success' => false,
-                    'error' => $get_gstin_output->Error,
-                    'errors' => $errors,
-                ]);
-            }
-            curl_close($ch);
-            //AES DECRYPTION AFTER GENERATE IRN (DECRYPT WITH DECRYPT ENCODED DATA FROM AES DECRYPTION AND GSTIN DATA RESPONSE)
-            $gstin_decrypt_data = self::decryptAesData($decrypt_data_with_bdo_sek, $get_gstin_output->Data);
-            if (!$gstin_decrypt_data) {
-                $errors[] = 'Decryption Error!';
-                return response()->json(['success' => false, 'error' => 'Decryption Error!']);
-            }
-            $gst_validate = json_decode($gstin_decrypt_data, true);
-            if ($gst_validate) {
-                if (key($gst_validate) == 'ErrorCodes') {
-                    $errors[] = isset($gst_validate['ErrorMsg']) ? $gst_validate['ErrorMsg'] : 'Something went on Server.Please Try again later!!';
-                    return response()->json([
+                   // $gstin = $visit_data['gstin'];
+			        $response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
+			        //dd($response);
+			        if(!$response['success']){
+				    return response()->json([
                         'success' => false,
-                        'error' => 'GSTIN Validation Error!',
-                        'errors' => $errors,
+                        'errors' => [
+                          $response['error']
+                        ],
                     ]);
-                }
-            }
-							$visit_booking->save();
+			        } 
+                    $visit_booking->gstin = $response['gstin'];
+				    $visit_booking->save();
 
 							$transport_total = 0;
 							if ($visit_booking) {
@@ -1851,7 +1723,7 @@ class Trip extends Model {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
-				// dd($request->all());
+				 //dd($request->all());
 				//REMOVE LODGING ATTACHMENT
 				if (!empty($request->lodgings_attach_removal_ids)) {
 					$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
@@ -1880,7 +1752,7 @@ class Trip extends Model {
 					$lodgings = Lodging::where('trip_id', $request->trip_id)->forceDelete();
 
 					$lodging_total_amount = 0;
-					foreach ($request->lodgings as $lodging_data) {
+					 foreach ($request->lodgings as $lodging_data) {
 
 						if(isset($lodging_data['id'])){
 							$lodging = Lodging::where('id', $lodging_data['id'])->first();
@@ -1890,7 +1762,18 @@ class Trip extends Model {
 						}else{
 							$lodging = new Lodging;
 						}
-						
+						//dd($lodging_data['lodge_name']);
+						$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'],$lodging_data['lodge_name'],true);
+						if(!$response['success']){
+				       return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                      ]);
+			          } 	
+                        $lodging->lodge_name=$response['name'];
+                     	$lodging->gstin=$response['gstin'];
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
 
@@ -2357,26 +2240,7 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
-	public static function encryptAesData($encryption_key, $data) {
-		$method = 'aes-256-ecb';
-
-		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method));
-
-		$encrypted = openssl_encrypt($data, $method, $encryption_key, 0, $iv);
-
-		return $encrypted;
-	}
-
-	public static function decryptAesData($encryption_key, $data) {
-		$method = 'aes-256-ecb';
-
-		$iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method));
-
-		$decrypted = openssl_decrypt(base64_decode($data), $method, $encryption_key, OPENSSL_RAW_DATA, $iv);
-		return $decrypted;
-	}
-
-
+	
 	//GET TRAVEL MODE CATEGORY STATUS TO CHECK IF IT IS NO VEHICLE CLAIM
 	public static function getVisitTrnasportModeClaimStatus($request) {
 		// if (!empty($request->travel_mode_id)) {

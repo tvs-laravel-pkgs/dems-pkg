@@ -139,14 +139,6 @@ app.component('eyatraCompanyForm', {
             self.status = response.data.status;
             self.action = response.data.action;
             console.log(response.data);
-            $scope.Invisible = true;
-            if (self.company.additional_approve == 1) {
-                $scope.visible = true;
-                $scope.Invisible = false;
-            } else if (self.company.additional_approve == 0) {
-                $scope.Invisible = true;
-                $scope.visible = false;
-            }
             if (self.action == "Add") {
                 self.company.company_budgets = [];
                 self.company.company_budgets.push({
