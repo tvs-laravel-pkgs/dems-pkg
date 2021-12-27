@@ -191,6 +191,22 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/company/delete/{id}', 'Uitoux\EYatra\CompanyController@deleteEYatraCompany')->name('deleteEYatraCompany');
 		Route::get('eyatra/company/get-filter-data', 'Uitoux\EYatra\CompanyController@eyatraCompanyFilterData')->name('eyatraCompanyFilterData');
 
+		//BUSINESS
+		Route::get('eyatra/business/get-list', 'Uitoux\EYatra\BusinessController@listEYatraBusiness')->name('listEYatraBusiness');
+		Route::get('eyatra/business/get-form-data/{id?}', 'Uitoux\EYatra\BusinessController@eyatraBusinessFormData')->name('eyatraBusinessFormData');
+		Route::post('eyatra/business/save', 'Uitoux\EYatra\BusinessController@saveEYatraBusiness')->name('saveEYatraBusiness');
+		Route::get('eyatra/business/view/{id}', 'Uitoux\EYatra\BusinessController@viewEYatraBusiness')->name('viewEYatraBusiness');
+		Route::get('eyatra/business/delete/{id}', 'Uitoux\EYatra\BusinessController@deleteEYatraBusiness')->name('deleteEYatraBusiness');
+		Route::get('eyatra/business/get-filter-data', 'Uitoux\EYatra\BusinessController@eyatraBusinessFilterData')->name('eyatraBusinessFilterData');
+		
+		//DEPATMENT
+		Route::get('eyatra/department/get-list', 'Uitoux\EYatra\DepartmentController@listEYatraDepartment')->name('listEYatraDepartment');
+		Route::get('eyatra/department/get-form-data/{id?}', 'Uitoux\EYatra\DepartmentController@eyatraDepartmentFormData')->name('eyatraDepartmentFormData');
+		Route::post('eyatra/department/save', 'Uitoux\EYatra\DepartmentController@saveEYatraDepartment')->name('saveEYatraDepartment');
+		Route::get('eyatra/department/view/{id}', 'Uitoux\EYatra\DepartmentController@viewEYatraDepartment')->name('viewEYatraDepartment');
+		Route::get('eyatra/department/delete/{id}', 'Uitoux\EYatra\DepartmentController@deleteEYatraDepartment')->name('deleteEYatraDepartment');
+		Route::get('eyatra/department/get-filter-data', 'Uitoux\EYatra\DepartmentController@eyatraDepartmentFilterData')->name('eyatraDepartmentFilterData');
+
 		//OUTLETS
 		Route::get('eyatra/outlet/get-list', 'Uitoux\EYatra\OutletController@listEYatraOutlet')->name('listEYatraOutlet');
 		Route::get('eyatra/outlet/get-form-data/{outlet_id?}', 'Uitoux\EYatra\OutletController@eyatraOutletFormData')->name('eyatraOutletFormData');

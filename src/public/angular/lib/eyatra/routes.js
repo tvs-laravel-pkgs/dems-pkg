@@ -232,6 +232,38 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Company',
     }).
 
+    //BUSSINESS
+    when('/businesses', {
+        template: '<eyatra-business></eyatra-business>',
+        title: 'Business',
+    }).
+    when('/business/add', {
+        template: '<eyatra-business-form></eyatra-business-form>',
+        title: 'Add Business',
+    }).
+    when('/business/edit/:id', {
+        template: '<eyatra-business-form></eyatra-business-form>',
+        title: 'Edit Business',
+    }).
+
+    //DEPARTMENT
+    when('/departments', {
+        template: '<eyatra-department></eyatra-department>',
+        title: 'Departments',
+    }).
+    when('/department/add', {
+        template: '<eyatra-department-form></eyatra-department-form>',
+        title: 'Add Department',
+    }).
+    when('/department/edit/:id', {
+        template: '<eyatra-department-form></eyatra-department-form>',
+        title: 'Edit Department',
+    }).
+    when('/department/view/:id', {
+        template: '<eyatra-department-view></eyatra-department-view>',
+        title: 'View Department',
+    }).
+
     //REGIONS
     when('/regions', {
         template: '<eyatra-regions></eyatra-regions>',
