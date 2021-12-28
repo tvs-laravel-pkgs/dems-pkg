@@ -154,6 +154,8 @@ class DepartmentController extends Controller
             $department->save();
             $department->departmentFinance()->forcedelete();
             $Ids=$department->id;
+            $business_budget=BusinessFinance::select('business_finances.business_id','business_finances.budget_amount')->where('business_finances.business_id','=',$request->business_id)->pluck('budget_amount')->first();
+            //dd($business_budget);
             if (!empty($Ids)) {
                 foreach ($request->departmentFinance as $departmentFinance_data) {
                     $departmentFinance = new DepartmentFinance(['id' => $departmentFinance_data['id']]);
@@ -162,10 +164,16 @@ class DepartmentController extends Controller
                     $departmentFinance->department_id = $department->id;
                     $departmentFinance->from_date=date('Y-m-d', strtotime($departmentFinance_data['from_date']));
                     $departmentFinance->to_date=date('Y-m-d', strtotime($departmentFinance_data['to_date']));
-                    $business_budget=BusinessFinances::select('business_id','budget_amount')->get();
+                    $price=$departmentFinance_data['budget_amount'];
                     $department_budget=DepartmentFinance::select('department_finances.budget_amount')
-                    ->join('departments','departments.id','department_finances.department_id')->get();
-                    $departmentFinance->budget_amount=$departmentFinance_data['budget_amount'];
+                   ->join('departments','departments.id','department_finances.department_id')
+                   ->where('departments.business_id','=',$request->business_id)->sum('department_finances.budget_amount');
+                    $total=$department_budget + $price;
+                    if($total > $business_budget){
+                    return response()->json(['success' => false, 'errors' => ['The Allocated amount exceeds'.$business_budget]]);  
+                    }else{
+                    $departmentFinance->budget_amount=$price;
+                    }
                     $departmentFinance->created_by = Auth::id();
                     $departmentFinance->save();
              }

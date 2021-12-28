@@ -36,7 +36,7 @@ app.component('eyatraBusiness', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
-                { data: 'code', name: 'businesses.code', searchable: true },
+                { data: 'id', name: 'businesses.id', searchable: true },
                 { data: 'name', name: 'businesses.name', searchable: true },
                 { data: 'short_name', name: 'businesses.short_name', searchable: true },
                 { data: 'from_date', name: 'business_finances.from_date', searchable: true },
@@ -139,7 +139,7 @@ app.component('eyatraBusinessForm', {
             self.status = response.data.status;
             self.action = response.data.action;
             console.log(response.data.business);
-            console.log(response.data.businessFinance);
+            console.log(self.businessFinances);
             self.businessFinance_removal_id = [];
             //self.action = response.data.action;
             $rootScope.loading = false;
@@ -155,19 +155,51 @@ app.component('eyatraBusinessForm', {
         setTimeout(function() {
             $('div[data-provide="datepicker"]').datepicker({
                 todayHighlight: true,
+                format: 'dd-mm-yyyy',
                 autoclose: true,
                 endDate: "today",
             });
         }, 1000);
 
+        if (self.action == 'New') {
+            self.businessFinances = [];
+            arr_ind = 1;
+            self.addbusinessfinance = function() {
+                self.businessFinances.push({
+                    from_date: '01-04-2021',
+                    to_date: '31-03-2022',
+                    budget_amount: '',
+                });
+            }
+        }
+
+
         //ADD BUSINESS FINANCE
-        self.businessFinances = [];
-        self.addbusinessfinance = function() {
+        self.addbusinessfinance = function(businessFinance_array) {
+            var businessFinance_array = self.businessFinances;
+            var arr_length = businessFinance_array.length;
+            // console.log(trip_array);
+            arr_vol = arr_length - 1;
+            if (!(businessFinance_array[arr_vol]) || !(businessFinance_array[arr_vol].to_date.id)) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Please Select To Date',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 10000);
+            }
             self.businessFinances.push({
                 from_date: '',
-                to_date: '',
+                to_date: '31-03-2022'.id,
                 budget_amount: '',
+                read: 'false',
             });
+
         }
 
         //REMOVE LOCALCONVEYANCE 
@@ -235,8 +267,6 @@ app.component('eyatraBusinessForm', {
             messages: {
                 'name': {
                     required: 'Business Name is Required',
-                    minlength: 'Please enter minimum of 3 letters',
-                    maxlength: 'Please enter maximum of 255 letters',
                 },
                 'short_name': {
                     required: 'Business Short Name is Required',

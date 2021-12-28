@@ -148,6 +148,11 @@ app.component('eyatraDepartmentForm', {
 
         });
         if (self.action == 'Edit') {
+            $scope.isReadOnly = true;
+        } else {
+            $scope.isReadOnly = false;
+        }
+        if (self.action == 'Edit') {
             $.each(self.departmentFinances, function(index, value) {
                 setTimeout(function() {}, 500);
 
@@ -157,18 +162,50 @@ app.component('eyatraDepartmentForm', {
         setTimeout(function() {
             $('div[data-provide="datepicker"]').datepicker({
                 todayHighlight: true,
+                format: 'dd-mm-yyyy',
                 autoclose: true,
                 endDate: "today",
             });
         }, 1000);
 
         //ADD LOCALCONVEYANCE
-        self.adddepartmentfinance = function() {
+        if (self.action == 'New') {
+            self.businessFinances = [];
+            arr_ind = 1;
+            self.adddepartmentfinance = function() {
+                self.departmentFinances.push({
+                    from_date: '',
+                    to_date: '',
+                    budget_amount: '',
+                });
+            }
+        }
+
+        //ADD BUSINESS FINANCE
+        self.adddepartmentfinance = function(departmentFinance_array) {
+            var departmentFinance_array = self.departmentFinances;
+            var arr_length = departmentFinance_array.length;
+            // console.log(trip_array);
+            arr_vol = arr_length - 1;
+            if (!(departmentFinance_array[arr_vol]) || !(departmentFinance_array[arr_vol].to_date.id)) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Please Select To Date',
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 10000);
+            }
             self.departmentFinances.push({
                 from_date: '',
-                to_date: '',
+                to_date: '31-03-2022'.id,
                 budget_amount: '',
             });
+
         }
 
         //REMOVE LOCALCONVEYANCE 

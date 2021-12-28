@@ -204,8 +204,8 @@ class EmployeeController extends Controller {
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$designation_list = [];
 		// dd($designation_list);
-		$lob_list = collect(Lob::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Business']);
-		$sbu_list = [];
+		$lob_list = collect(Business::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Business']);
+		$sbu_list = collect(Department::select('name', 'id')->get());
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
