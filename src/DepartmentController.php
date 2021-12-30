@@ -95,7 +95,13 @@ class DepartmentController extends Controller
                 $this->data['status'] = 'Inactive';
             }
         }
-        $this->data['departmentFinance'] = DepartmentFinance::select('id','department_id','from_date','to_date','budget_amount')->where('department_id','=',$id)->get();
+         $finances= DepartmentFinance::select('id','department_id','from_date','to_date','budget_amount')->where('department_id','=',$id)->get();
+         if($finances->isNotEmpty()){
+         foreach($finances as $finance){
+           $finance->read=true;
+           }
+         }
+         $this->data['departmentFinance']=$finances;
         //$company_id=Company::select('id')->get();
         /*$this->data['financial_year_list'] = $financial_year_list = collect(Config::select('name', 'id')->where('config_type_id', 536)->get());*/
         //dd($company);

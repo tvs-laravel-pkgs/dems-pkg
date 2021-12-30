@@ -138,12 +138,10 @@ app.component('eyatraBusinessForm', {
             self.company_list = response.data.company_list;
             self.status = response.data.status;
             self.action = response.data.action;
+            console.log(response.data.businessFinance);
             console.log(response.data.business);
-            console.log(self.businessFinances);
             self.businessFinance_removal_id = [];
-            //self.action = response.data.action;
             $rootScope.loading = false;
-
         });
         if (self.action == 'Edit') {
             $.each(self.businessFinances, function(index, value) {
@@ -169,6 +167,7 @@ app.component('eyatraBusinessForm', {
                     from_date: '01-04-2021',
                     to_date: '31-03-2022',
                     budget_amount: '',
+                    read: 'false',
                 });
             }
         }

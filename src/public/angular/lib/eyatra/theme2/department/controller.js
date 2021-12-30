@@ -177,6 +177,7 @@ app.component('eyatraDepartmentForm', {
                     from_date: '',
                     to_date: '',
                     budget_amount: '',
+                    read: 'false',
                 });
             }
         }
@@ -204,6 +205,7 @@ app.component('eyatraDepartmentForm', {
                 from_date: '',
                 to_date: '31-03-2022'.id,
                 budget_amount: '',
+                read: 'false',
             });
 
         }

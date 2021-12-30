@@ -93,8 +93,14 @@ class BusinessController extends Controller
                 $this->data['status'] = 'Inactive';
             }
         }
-         $this->data['businessFinance']= BusinessFinance::select('id','business_id','from_date','to_date','budget_amount')->where('business_id','=',$id)->get();
-        $this->data['company_list']=Company::select('id','name')->get();
+         $finances= BusinessFinance::select('id','business_id','from_date','to_date','budget_amount')->where('business_id','=',$id)->get();
+         if($finances->isNotEmpty()){
+         foreach($finances as $finance){
+           $finance->read=true;
+           }
+         }
+         $this->data['businessFinance']=$finances;
+         $this->data['company_list']=Company::select('id','name')->get();
         //$company_id=Company::select('id')->get();
         /*$this->data['financial_year_list'] = $financial_year_list = collect(Config::select('name', 'id')->where('config_type_id', 536)->get());*/
         //dd($company);
