@@ -18,6 +18,8 @@ use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Validator;
+use App\Http\Controllers\AngularController;
+
 
 class Trip extends Model {
 	use SoftDeletes;
@@ -1584,7 +1586,6 @@ class Trip extends Model {
 							$visit_booking->remarks = $visit_data['remarks'];
 							$visit_booking->amount = $visit_data['amount'];
 							$visit_booking->tax = $visit_data['tax'];
-							$visit_booking->gstin = $visit_data['gstin'];
 							$visit_booking->km_start = $visit_data['km_start'];
 							$visit_booking->km_end = $visit_data['km_end'];
 							$visit_booking->toll_fee = $visit_data['toll_fee'];
@@ -1593,7 +1594,20 @@ class Trip extends Model {
 							$visit_booking->paid_amount = $visit_data['total'];
 							$visit_booking->created_by = Auth::user()->id;
 							$visit_booking->status_id = 3241; //Claimed
-							$visit_booking->save();
+            
+                   // $gstin = $visit_data['gstin'];
+			        $response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
+			        //dd($response);
+			        if(!$response['success']){
+				    return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			        } 
+                    $visit_booking->gstin = $response['gstin'];
+				    $visit_booking->save();
 
 							$transport_total = 0;
 							if ($visit_booking) {
@@ -1709,7 +1723,7 @@ class Trip extends Model {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
-				// dd($request->all());
+				 //dd($request->all());
 				//REMOVE LODGING ATTACHMENT
 				if (!empty($request->lodgings_attach_removal_ids)) {
 					$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
@@ -1738,7 +1752,7 @@ class Trip extends Model {
 					$lodgings = Lodging::where('trip_id', $request->trip_id)->forceDelete();
 
 					$lodging_total_amount = 0;
-					foreach ($request->lodgings as $lodging_data) {
+					 foreach ($request->lodgings as $lodging_data) {
 
 						if(isset($lodging_data['id'])){
 							$lodging = Lodging::where('id', $lodging_data['id'])->first();
@@ -1748,7 +1762,18 @@ class Trip extends Model {
 						}else{
 							$lodging = new Lodging;
 						}
-						
+						//dd($lodging_data['lodge_name']);
+						$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'],$lodging_data['lodge_name'],true);
+						if(!$response['success']){
+				       return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                      ]);
+			          } 	
+                        $lodging->lodge_name=$response['name'];
+                     	$lodging->gstin=$response['gstin'];
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
 
@@ -2215,7 +2240,7 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
-
+	
 	//GET TRAVEL MODE CATEGORY STATUS TO CHECK IF IT IS NO VEHICLE CLAIM
 	public static function getVisitTrnasportModeClaimStatus($request) {
 		// if (!empty($request->travel_mode_id)) {

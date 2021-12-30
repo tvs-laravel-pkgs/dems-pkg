@@ -17,6 +17,7 @@ use Uitoux\EYatra\NCountry;
 use Uitoux\EYatra\NState;
 use Validator;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\AngularController;
 
 class AgentController extends Controller {
 
@@ -183,6 +184,7 @@ class AgentController extends Controller {
 				'agent_code.required' => 'Agent Code is Required',
 				'agent_code.unique' => 'Agent Code is already taken',
 				'agent_name.required' => 'Agent Name is Required',
+				'gstin.required' => 'GSTIN is Required',
 				'gstin.unique' => 'GSTIN is already taken',
 				'address_line1.required' => 'Address Line1 is Required',
 				'country.required' => 'Country is Required',
@@ -200,6 +202,7 @@ class AgentController extends Controller {
 					'unique:agents,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				],
 				'gstin' => [
+					'required:true',
 					'unique:agents,gstin,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
 				],
 				'mobile_number' => [
@@ -240,7 +243,6 @@ class AgentController extends Controller {
 			}
 			$agent->company_id = $company_id;
 			$agent->code = $request->agent_code;
-			$agent->fill($request->all());
 			if ($request->status == 'Active') {
 				$agent->deleted_by = NULL;
 				$agent->deleted_at = NULL;
@@ -248,6 +250,19 @@ class AgentController extends Controller {
 				$agent->deleted_by = Auth()->user()->id;
 				$agent->deleted_at = Carbon::now();
 			}
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($request->gstin,$request->agent_name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			} 	
+			 $agent->gstin =$response['gstin'];
+             $user->name=$response['name'];
+             $user->save();
+            $agent->fill($request->all());
 			$agent->save();
 			//$e_name = EntityType::where('id', $request->type_id)->first();
 			$activity['entity_id'] = $agent->id;
@@ -282,7 +297,7 @@ class AgentController extends Controller {
 				}
 				$user->force_password_change = 1;
 			}
-
+            
 			// $user->fill($request->all());
 			$user->save();
 
@@ -330,7 +345,6 @@ class AgentController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
-
 	public function viewEYatraAgent($agent_id) {
 
 		// $this->data['agent'] = $agent = Agent::find($agent_id);

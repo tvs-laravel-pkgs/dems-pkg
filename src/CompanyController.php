@@ -10,6 +10,7 @@ use Uitoux\EYatra\Company;
 use Uitoux\EYatra\Config;
 use Validator;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\AngularController;
 
 class CompanyController extends Controller {
 
@@ -107,6 +108,8 @@ class CompanyController extends Controller {
 			$error_messages = [
 				'code.required' => 'Company Code is Required',
 				'name.required' => 'Company Name is Required',
+				'gst_number.required' => 'GSTIN is Required',
+				'gst_number.unique' => 'GSTIN is already taken',
 				'code.unique' => "Company Code is already taken",
 				'name.unique' => "Company Name is already taken",
 				'company_budgets.*.financial_year_id.distinct' => 'Same Financial year multiple times entered',
@@ -115,6 +118,10 @@ class CompanyController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'name' => 'required',
+				'gst_number' => [
+                    'required',
+                    'min:6',
+                ],
 				'code' => 'required|unique:companies,code,' . $request->id . ',id',
 				'name' => 'required|unique:companies,name,' . $request->id . ',id',
 				'company_budgets.*.financial_year_id' => [
@@ -146,7 +153,18 @@ class CompanyController extends Controller {
 				$company->deleted_at = date('Y-m-d H:i:s');
 				$company->deleted_by = Auth::user()->id;
 			}
-			$company->fill($request->all());
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($request->gst_number,$request->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			} 	
+            $company->name=$response['name'];
+            $company->gst_number =$response['gstin'];
+            $company->fill($request->all());
 			$company->save();
 			$company->companyBudgets()->sync([]);
 
@@ -161,8 +179,7 @@ class CompanyController extends Controller {
 					}
 				}
 			}
-
-			DB::commit();
+          DB::commit();
 			$request->session()->flash('success', 'Company saved successfully!');
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Company Added successfully']);
@@ -175,6 +192,7 @@ class CompanyController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
+	
 	public function viewEYatraCompany($id) {
 		$company = Company::with('createdBy')->withTrashed()
 			->find($id);
