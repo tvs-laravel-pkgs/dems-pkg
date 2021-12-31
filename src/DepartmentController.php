@@ -23,8 +23,7 @@ class DepartmentController extends Controller
             'departments.name',
             'departments.short_name',
             'departments.business_id',
-            'department_finances.from_date',
-            'department_finances.to_date',
+            'department_finances.financial_year',
             'department_finances.budget_amount',
             DB::raw('IF(departments.deleted_at IS NULL,"Active","Inactive") as status'),
             'users.name as created_by'
@@ -95,7 +94,7 @@ class DepartmentController extends Controller
                 $this->data['status'] = 'Inactive';
             }
         }
-         $finances= DepartmentFinance::select('id','department_id','from_date','to_date','budget_amount')->where('department_id','=',$id)->get();
+         $finances= DepartmentFinance::select('id','department_id','financial_year','budget_amount')->where('department_id','=',$id)->get();
          if($finances->isNotEmpty()){
          foreach($finances as $finance){
            $finance->read=true;
@@ -168,8 +167,7 @@ class DepartmentController extends Controller
                     $departmentFinance->fill($departmentFinance_data);
                     $departmentFinance->id = $departmentFinance_data['id'];
                     $departmentFinance->department_id = $department->id;
-                    $departmentFinance->from_date=date('Y-m-d', strtotime($departmentFinance_data['from_date']));
-                    $departmentFinance->to_date=date('Y-m-d', strtotime($departmentFinance_data['to_date']));
+                    $departmentFinance->financial_year=$departmentFinance_data['financial_year'];
                     $price=$departmentFinance_data['budget_amount'];
                     $department_budget=DepartmentFinance::select('department_finances.budget_amount')
                    ->join('departments','departments.id','department_finances.department_id')

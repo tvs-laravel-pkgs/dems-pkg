@@ -36,11 +36,9 @@ app.component('eyatraBusiness', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
-                { data: 'id', name: 'businesses.id', searchable: true },
                 { data: 'name', name: 'businesses.name', searchable: true },
                 { data: 'short_name', name: 'businesses.short_name', searchable: true },
-                { data: 'from_date', name: 'business_finances.from_date', searchable: true },
-                { data: 'to_date', name: 'business_finances.to_date', searchable: true },
+                { data: 'financial_year', name: 'business_finances.financial_year', searchable: true },
                 { data: 'budget_amount', name: 'business_finances.budget_amount', searchable: true },
                 { data: 'created_by', name: 'users.name', searchable: true },
                 { data: 'status', name: 'businesses.deleted_at', searchable: true },
@@ -149,23 +147,12 @@ app.component('eyatraBusinessForm', {
 
             });
         }
-        //CURRENT DATE SHOW INDATEPICKER
-        setTimeout(function() {
-            $('div[data-provide="datepicker"]').datepicker({
-                todayHighlight: true,
-                format: 'dd-mm-yyyy',
-                autoclose: true,
-                endDate: "today",
-            });
-        }, 1000);
-
         if (self.action == 'New') {
             self.businessFinances = [];
             arr_ind = 1;
             self.addbusinessfinance = function() {
                 self.businessFinances.push({
-                    from_date: '01-04-2021',
-                    to_date: '31-03-2022',
+                    financial_year: '2020-2021',
                     budget_amount: '',
                     read: 'false',
                 });
@@ -179,11 +166,11 @@ app.component('eyatraBusinessForm', {
             var arr_length = businessFinance_array.length;
             // console.log(trip_array);
             arr_vol = arr_length - 1;
-            if (!(businessFinance_array[arr_vol]) || !(businessFinance_array[arr_vol].to_date.id)) {
+            if (!(businessFinance_array[arr_vol]) || !(businessFinance_array[arr_vol].financial_year.id)) {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Please Select To Date',
+                    text: 'Please Select Financial Year',
                     animation: {
                         speed: 500 // unavailable - no need
                     },
@@ -193,8 +180,7 @@ app.component('eyatraBusinessForm', {
                 }, 10000);
             }
             self.businessFinances.push({
-                from_date: '',
-                to_date: '31-03-2022'.id,
+                financial_year: '2020-2021'.id,
                 budget_amount: '',
                 read: 'false',
             });

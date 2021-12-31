@@ -23,8 +23,7 @@ class BusinessController extends Controller
             'businesses.code',
             'businesses.name',
             'businesses.short_name',
-            'business_finances.from_date',
-            'business_finances.to_date',
+            'business_finances.financial_year',
             'business_finances.budget_amount',
             DB::raw('IF(businesses.deleted_at IS NULL,"Active","Inactive") as status'),
             'users.name as created_by'
@@ -93,7 +92,7 @@ class BusinessController extends Controller
                 $this->data['status'] = 'Inactive';
             }
         }
-         $finances= BusinessFinance::select('id','business_id','from_date','to_date','budget_amount')->where('business_id','=',$id)->get();
+         $finances= BusinessFinance::select('id','business_id','financial_year','budget_amount')->where('business_id','=',$id)->get();
          if($finances->isNotEmpty()){
          foreach($finances as $finance){
            $finance->read=true;
@@ -163,8 +162,7 @@ class BusinessController extends Controller
                     $businessFinance->fill($businessFinance_data);
                     $businessFinance->id = $businessFinance_data['id'];
                     $businessFinance->business_id = $business->id;
-                    $businessFinance->from_date=date('Y-m-d', strtotime($businessFinance_data['from_date']));
-                    $businessFinance->to_date=date('Y-m-d', strtotime($businessFinance_data['to_date']));
+                    $businessFinance->financial_year=$businessFinance_data['financial_year'];
                     $businessFinance->budget_amount=$businessFinance_data['budget_amount'];
                     $businessFinance->created_by = Auth::id();
                     $businessFinance->save();

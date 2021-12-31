@@ -36,12 +36,10 @@ app.component('eyatraDepartment', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
-                { data: 'id', name: 'departments.id', searchable: true },
                 { data: 'name', name: 'departments.name', searchable: true },
                 { data: 'short_name', name: 'departments.short_name', searchable: true },
                 { data: 'business_id', name: 'departments.business_id', searchable: true },
-                { data: 'from_date', name: 'department_finances.from_date', searchable: true },
-                { data: 'to_date', name: 'department_finances.to_date', searchable: true },
+                { data: 'financial_year', name: 'department_finances.financial_year', searchable: true },
                 { data: 'budget_amount', name: 'department_finances.budget_amount', searchable: true },
                 { data: 'created_by', name: 'users.name', searchable: true },
                 { data: 'status', name: 'departments.deleted_at', searchable: true },
@@ -142,40 +140,33 @@ app.component('eyatraDepartmentForm', {
             self.status = response.data.status;
             self.action = response.data.action;
             console.log(response.data.business_list);
+            console.log(self.departmentFinances);
             // console.log(response.data);
             //self.action = response.data.action;
             $rootScope.loading = false;
+            angular.forEach(response.data.departmentFinance, function(value, key) {
+                if (value.read == true) {
+                    $scope.readonly == true;
+                    console.log(value.read);
+                } else {
+                    $scope.readonly == false;
+                }
+            });
 
         });
-        if (self.action == 'Edit') {
-            $scope.isReadOnly = true;
-        } else {
-            $scope.isReadOnly = false;
-        }
         if (self.action == 'Edit') {
             $.each(self.departmentFinances, function(index, value) {
                 setTimeout(function() {}, 500);
 
             });
         }
-        //CURRENT DATE SHOW IN DATEPICKER
-        setTimeout(function() {
-            $('div[data-provide="datepicker"]').datepicker({
-                todayHighlight: true,
-                format: 'dd-mm-yyyy',
-                autoclose: true,
-                endDate: "today",
-            });
-        }, 1000);
-
         //ADD LOCALCONVEYANCE
         if (self.action == 'New') {
             self.businessFinances = [];
             arr_ind = 1;
             self.adddepartmentfinance = function() {
                 self.departmentFinances.push({
-                    from_date: '',
-                    to_date: '',
+                    financial_year: '2020-2021'.id,
                     budget_amount: '',
                     read: 'false',
                 });
@@ -188,11 +179,11 @@ app.component('eyatraDepartmentForm', {
             var arr_length = departmentFinance_array.length;
             // console.log(trip_array);
             arr_vol = arr_length - 1;
-            if (!(departmentFinance_array[arr_vol]) || !(departmentFinance_array[arr_vol].to_date.id)) {
+            if (!(departmentFinance_array[arr_vol]) || !(departmentFinance_array[arr_vol].financial_year.id)) {
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
-                    text: 'Please Select To Date',
+                    text: 'Please Select Financial Year',
                     animation: {
                         speed: 500 // unavailable - no need
                     },
@@ -202,8 +193,7 @@ app.component('eyatraDepartmentForm', {
                 }, 10000);
             }
             self.departmentFinances.push({
-                from_date: '',
-                to_date: '31-03-2022'.id,
+                financial_year: '2020-2021'.id,
                 budget_amount: '',
                 read: 'false',
             });
@@ -262,10 +252,7 @@ app.component('eyatraDepartmentForm', {
                 'business_id': {
                     required: true,
                 },
-                'from_date': {
-                    required: true,
-                },
-                'to_date': {
+                'financial_year': {
                     required: true,
                 },
                 'budget_amount': {
