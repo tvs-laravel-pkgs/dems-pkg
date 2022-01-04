@@ -235,11 +235,13 @@ app.component('eyatraTripClaimForm', {
             self.transport_attachments = response.data.trip.transport_attachments;
             self.lodging_attachments = response.data.trip.lodging_attachments;
             self.boarding_attachments = response.data.trip.boarding_attachments;
+            self.local_travel_attachments = response.data.trip.local_travel_attachments;
             self.action = response.data.action;
             self.travelled_cities_with_dates = response.data.travelled_cities_with_dates;
             self.lodge_cities = response.data.lodge_cities;
             self.travel_dates_list = response.data.travel_dates_list;
             self.travel_values = response.data.travel_values;
+            console.log(response.data.trip.local_travel_attachments);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
@@ -310,6 +312,7 @@ app.component('eyatraTripClaimForm', {
             self.boardings_removal_id = [];
             self.boardings_attachment_removal_ids = [];
             self.local_travels_removal_id = [];
+            self.local_travel_attachment_removal_ids = [];
 
             if (self.trip.lodgings.length == 0) {
                 self.addNewLodgings();
@@ -1482,6 +1485,17 @@ app.component('eyatraTripClaimForm', {
                 self.localTravelCal();
             }, 500);
         }
+
+        //REMOVE LOCAL TRAVEL ATTACHMENT
+        self.removeLocalTravelAttachment = function(local_travel_attachment_index, local_travel_attachment_id) {
+            console.log(local_travel_attachment_id, local_travel_attachment_index);
+            if (local_travel_attachment_id) {
+                self.local_travel_attachment_removal_ids.push(local_travel_attachment_id);
+                $('#local_travel_attach_removal_ids').val(JSON.stringify(self.local_travel_attachment_removal_ids));
+            }
+            self.trip.local_travel_attachments.splice(local_travel_attachment_index, 1);
+        }
+
         self.travelCal = function() {
             // alert();
             var total_travel_amount = 0;
@@ -1992,6 +2006,8 @@ var v = jQuery(form_lodge_id).validate({
                                 $('#trip-claim-modal-justify-one').modal('hide');
                                 setTimeout(function() {
                                     $noty.close();
+                                    self.local_travel_attachment_removal_ids = [];
+                                    $('#boardings_attach_removal_ids').val('');
                                     $location.path('/trip/claim/list')
                                     $scope.$apply()
                                 }, 1000);

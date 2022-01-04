@@ -113,10 +113,10 @@ class TripController extends Controller {
 				$action .= '<a href="#!/trip/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
-				$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_trip"
+				/*$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_trip"
 				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-                </a>';
+                </a>';*/
 
 				return $action;
 			})
@@ -211,8 +211,8 @@ class TripController extends Controller {
 		return Trip::deleteTrip($trip_id);
 	}
 
-	public function cancelTrip($trip_id) {
-		return Trip::cancelTrip($trip_id);
+	public function cancelTrip(Request $r) {
+		return Trip::cancelTrip($r);
 	}
 
 	public function tripVerificationRequest($trip_id) {

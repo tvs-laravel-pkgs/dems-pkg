@@ -299,7 +299,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/trip/save', 'Uitoux\EYatra\TripController@saveTrip')->name('saveTrip');
 		Route::get('eyatra/trip/view/{trip_id}', 'Uitoux\EYatra\TripController@viewTrip')->name('viewTrip');
 		Route::get('eyatra/trip/delete/{trip_id}', 'Uitoux\EYatra\TripController@deleteTrip')->name('deleteTrip');
-		Route::get('eyatra/trip/cancel/{trip_id}', 'Uitoux\EYatra\TripController@cancelTrip')->name('cancelTrip');
+		Route::post('eyatra/trip/cancel', 'Uitoux\EYatra\TripController@cancelTrip')->name('cancelTrip');
 		Route::get('eyatra/trip/verification-request/{trip_id}', 'Uitoux\EYatra\TripController@tripVerificationRequest')->name('tripVerificationRequest');
 		Route::get('/eyatra/trip/visit/booking-cancel/{visit_id}', 'Uitoux\EYatra\TripController@cancelTripVisitBooking')->name('cancelTripVisitBooking');
 		Route::get('/eyatra/trip/visit/cancel/{visit_id}', 'Uitoux\EYatra\TripController@cancelTripVisit')->name('cancelTripVisit');
