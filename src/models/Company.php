@@ -18,6 +18,7 @@ class Company extends Model {
 		'customer_care_phone',
 		'reference_code',
 		'additional_approve',
+		'financier_approve',
 
 	];
 
