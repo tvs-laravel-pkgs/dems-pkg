@@ -902,7 +902,9 @@ class Trip extends Model {
 
 	}
 
-	public static function cancelTrip($trip_id) {
+	public static function cancelTrip($r) {
+		$trip_id=$r->trip_id;
+		//$trip = Trip::find($r->trip_id);
 		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
 		$trip = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
 		if ($trip) {
@@ -919,6 +921,7 @@ class Trip extends Model {
 		}
 
 		$trip->status_id = 3032;
+		$trip->employee_remarks=$r->employee_remarks;
 		$trip->save();
 
 		$activity['entity_id'] = $trip_id;
@@ -1047,6 +1050,7 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		$trip->status_id = 3028;
+		$trip->approve_remarks=$r->approve_remarks;
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
@@ -2063,6 +2067,26 @@ class Trip extends Model {
 				$trip->rejection_id = NULL;
 				$trip->rejection_remarks = NULL;
 				$trip->save();
+
+
+				//SAVE LOCAL TRAVEL ATTACHMENT
+					$item_images = storage_path('app/public/trip/local_travel/attachments/');
+					Storage::makeDirectory($item_images, 0777);
+					if (!empty($request->local_travel_attachments)) {
+						foreach ($request->local_travel_attachments as $key => $attachement) {
+							$value = rand(1, 100);
+							$image = $attachement;
+							$extension = $image->getClientOriginalExtension();
+							$name = $request->trip_id . '_local_travel_attachment' . $value . '.' . $extension;
+							$attachement->move(storage_path('app/public/trip/local_travel/attachments/'), $name);
+							$attachement_lodge = new Attachment;
+							$attachement_lodge->attachment_of_id = 3183;
+							$attachement_lodge->attachment_type_id = 3200;
+							$attachement_lodge->entity_id = $request->trip_id;
+							$attachement_lodge->name = $name;
+							$attachement_lodge->save();
+						}
+					}
 
 				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
 				if ($request->is_justify_my_trip) {

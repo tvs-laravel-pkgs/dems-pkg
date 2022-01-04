@@ -235,11 +235,13 @@ app.component('eyatraTripClaimForm', {
             self.transport_attachments = response.data.trip.transport_attachments;
             self.lodging_attachments = response.data.trip.lodging_attachments;
             self.boarding_attachments = response.data.trip.boarding_attachments;
+            self.local_travel_attachments = response.data.trip.local_travel_attachments;
             self.action = response.data.action;
             self.travelled_cities_with_dates = response.data.travelled_cities_with_dates;
             self.lodge_cities = response.data.lodge_cities;
             self.travel_dates_list = response.data.travel_dates_list;
             self.travel_values = response.data.travel_values;
+            console.log(response.data.trip.local_travel_attachments);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
@@ -310,6 +312,7 @@ app.component('eyatraTripClaimForm', {
             self.boardings_removal_id = [];
             self.boardings_attachment_removal_ids = [];
             self.local_travels_removal_id = [];
+            self.local_travel_attachment_removal_ids = [];
 
             if (self.trip.lodgings.length == 0) {
                 self.addNewLodgings();
@@ -900,9 +903,9 @@ app.component('eyatraTripClaimForm', {
                             // self.trip.visits[key].self_booking.km_end = '';
                             // self.trip.visits[key].self_booking.toll_fee = '0.00';
                             var travel_amount = 0;
-                            var from_km = parseInt($('.km_start_'+key).val());
-                            var to_km = parseInt($('.km_end_'+key).val());
-                            console.log(from_km, to_km,travel_mode_ids[travel_mode_id]);
+                            var from_km = parseInt($('.km_start_' + key).val());
+                            var to_km = parseInt($('.km_end_' + key).val());
+                            console.log(from_km, to_km, travel_mode_ids[travel_mode_id]);
 
                             if (from_km == to_km) {
                                 $(".validation_error_" + key).text("From,To km should not be same");
@@ -917,7 +920,7 @@ app.component('eyatraTripClaimForm', {
                                 var from_to_diff = to_km - from_km;
                                 $('.difference_km_' + key).val(from_to_diff);
                                 travel_amount = from_to_diff * travel_mode_ids[travel_mode_id];
-                                $('.visit_amount_'+key).val(travel_amount.toFixed(2));
+                                $('.visit_amount_' + key).val(travel_amount.toFixed(2));
                                 self.travelCal();
                                 $(".validation_error_" + key).text("");
                                 arrival_from_to_km_error_flag = 0;
@@ -1010,9 +1013,9 @@ app.component('eyatraTripClaimForm', {
                         console.log(xhr);
                     });
 
-                    setTimeout(function() {
-                        self.travelCal();
-                    }, 500);
+                setTimeout(function() {
+                    self.travelCal();
+                }, 500);
             }
         }
 
@@ -1482,6 +1485,17 @@ app.component('eyatraTripClaimForm', {
                 self.localTravelCal();
             }, 500);
         }
+
+        //REMOVE LOCAL TRAVEL ATTACHMENT
+        self.removeLocalTravelAttachment = function(local_travel_attachment_index, local_travel_attachment_id) {
+            console.log(local_travel_attachment_id, local_travel_attachment_index);
+            if (local_travel_attachment_id) {
+                self.local_travel_attachment_removal_ids.push(local_travel_attachment_id);
+                $('#local_travel_attach_removal_ids').val(JSON.stringify(self.local_travel_attachment_removal_ids));
+            }
+            self.trip.local_travel_attachments.splice(local_travel_attachment_index, 1);
+        }
+
         self.travelCal = function() {
             // alert();
             var total_travel_amount = 0;
@@ -1590,15 +1604,15 @@ app.component('eyatraTripClaimForm', {
                 // console.log( self.employee.outstation_trip_amount);
 
                 //Calcualte Beta amount
-                if(total_lodging_amount == 0 && total_boarding_amount == 0 && self.employee.outstation_trip_amount >0){
+                if (total_lodging_amount == 0 && total_boarding_amount == 0 && self.employee.outstation_trip_amount > 0) {
                     var total_beta_amount = trip_days * self.employee.outstation_trip_amount;
-                    if(total_beta_amount > 0){
+                    if (total_beta_amount > 0) {
                         total_claim_amount += total_beta_amount;
                         $('.beta_amount_status').show();
                         $('.beta_amount').val(total_beta_amount.toFixed(2));
                         $('.beta_amount').text('₹ ' + total_beta_amount.toFixed(2));
                     }
-                }else{
+                } else {
                     $('.beta_amount').val(0);
                     $('.beta_amount').text(0);
                     $('.beta_amount_status').hide();
@@ -1732,7 +1746,7 @@ app.component('eyatraTripClaimForm', {
                                     self.enable_switch_tab = false;
                                     $scope.$apply()
                                 } else {
-                                    
+
                                     custom_noty('success', 'Transport expenses saved successfully!');
                                     // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
                                     //     self.trip.lodgings[key].date_range_list = val;
@@ -1819,7 +1833,7 @@ app.component('eyatraTripClaimForm', {
                                 self.enable_switch_tab = false;
                                 $scope.$apply()
                             } else {
-                                
+
                                 custom_noty('success', 'Lodging expenses saved successfully!');
                                 // self.boarding_dates_list = res.boarding_dates_list;
                                 // self.local_travel_dates_list = res.boarding_dates_list;
@@ -1900,7 +1914,7 @@ app.component('eyatraTripClaimForm', {
                                 self.enable_switch_tab = false;
                                 $scope.$apply()
                             } else {
-                                
+
                                 custom_noty('success', 'Boarding expenses saved successfully!');
                                 // $('.tab_li').removeClass('active');
                                 // $('.tab_local_travel').addClass('active');
@@ -1992,6 +2006,8 @@ app.component('eyatraTripClaimForm', {
                                 $('#trip-claim-modal-justify-one').modal('hide');
                                 setTimeout(function() {
                                     $noty.close();
+                                    self.local_travel_attachment_removal_ids = [];
+                                    $('#boardings_attach_removal_ids').val('');
                                     $location.path('/trip/claim/list')
                                     $scope.$apply()
                                 }, 1000);
