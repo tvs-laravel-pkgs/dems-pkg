@@ -125,6 +125,9 @@ class Trip extends Model {
 	public function boarding_attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3182)->where('attachment_type_id', 3200);
 	}
+	public function local_travel_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3183)->where('attachment_type_id', 3200);
+	}
 
 	public function google_attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3185)->where('attachment_type_id', 3200);
@@ -1144,8 +1147,9 @@ class Trip extends Model {
 				'transport_attachments',
 				'lodging_attachments',
 				'boarding_attachments',
+				 'local_travel_attachments',
 			])->find($trip_id);
-		// dd($trip);
+		 //dd($trip);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -1377,7 +1381,7 @@ class Trip extends Model {
 			$data['message'] = 'Trip not found';
 			return response()->json($data);
 		}
-
+        
 		$trip = Trip::with([
 			'visits' => function ($q) {
 				$q->orderBy('id', 'asc');
@@ -1420,7 +1424,6 @@ class Trip extends Model {
 			'localTravels.fromCity',
 			'localTravels.toCity',
 			'localTravels.travelMode',
-			'localTravels.attachments',
 			'selfVisits.fromCity',
 			'selfVisits.toCity',
 			'selfVisits.travelMode',
@@ -1433,8 +1436,10 @@ class Trip extends Model {
 			'lodging_attachments',
 			'boarding_attachments',
 			'google_attachments',
+			'local_travel_attachments',
 
 		])->find($trip_id);
+		//dd($trip->local_travel_attachments);
 
 		if (!$trip) {
 			$data['success'] = false;
@@ -2104,12 +2109,12 @@ class Trip extends Model {
 							$extension = $image->getClientOriginalExtension();
 							$name = $request->trip_id . '_local_travel_attachment' . $value . '.' . $extension;
 							$attachement->move(storage_path('app/public/trip/local_travel/attachments/'), $name);
-							$attachement_lodge = new Attachment;
-							$attachement_lodge->attachment_of_id = 3183;
-							$attachement_lodge->attachment_type_id = 3200;
-							$attachement_lodge->entity_id = $request->trip_id;
-							$attachement_lodge->name = $name;
-							$attachement_lodge->save();
+							$attachement_local_travel = new Attachment;
+							$attachement_local_travel->attachment_of_id = 3183;
+							$attachement_local_travel->attachment_type_id = 3200;
+							$attachement_local_travel->entity_id = $request->trip_id;
+							$attachement_local_travel->name = $name;
+							$attachement_local_travel->save();
 						}
 					}
 

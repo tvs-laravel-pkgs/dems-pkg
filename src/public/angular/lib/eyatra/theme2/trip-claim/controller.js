@@ -241,7 +241,7 @@ app.component('eyatraTripClaimForm', {
             self.lodge_cities = response.data.lodge_cities;
             self.travel_dates_list = response.data.travel_dates_list;
             self.travel_values = response.data.travel_values;
-            console.log(response.data.trip.local_travel_attachments);
+            console.log(self.local_travel_attachments);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
@@ -1710,7 +1710,7 @@ app.component('eyatraTripClaimForm', {
         maxlength: 20,
     }
 });*/
-var v = jQuery(form_transport_id).validate({
+        var v = jQuery(form_transport_id).validate({
             ignore: "",
             rules: {},
             errorElement: "div", // default is 'label'
@@ -1798,7 +1798,7 @@ var v = jQuery(form_transport_id).validate({
         maxlength: 20,
     }
 });*/
-var v = jQuery(form_lodge_id).validate({
+        var v = jQuery(form_lodge_id).validate({
             ignore: "",
             errorElement: "div", // default is 'label'
             errorPlacement: function(error, element) {
@@ -2007,7 +2007,7 @@ var v = jQuery(form_lodge_id).validate({
                                 setTimeout(function() {
                                     $noty.close();
                                     self.local_travel_attachment_removal_ids = [];
-                                    $('#boardings_attach_removal_ids').val('');
+                                    $('#local_travel_attach_removal_ids').val('');
                                     $location.path('/trip/claim/list')
                                     $scope.$apply()
                                 }, 1000);
