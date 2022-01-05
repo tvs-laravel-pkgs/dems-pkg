@@ -648,6 +648,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Home',
 				'config_type_id' => 521,
 			],
+			3342 => [
+				'name' => 'Office Guest House',
+				'config_type_id' => 521,
+			],
 
 			//IMPORT STATUS
 			3361 => [
