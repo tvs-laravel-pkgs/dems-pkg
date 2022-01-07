@@ -129,7 +129,6 @@ app.component('eyatraTripClaimVerificationOneView', {
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url = eyatra_trip_claim_verification_one_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
-        
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -160,6 +159,19 @@ app.component('eyatraTripClaimVerificationOneView', {
             // self.local_travels_total_amount = response.data.local_travels_total_amount;
             self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
+            console.log(response.data.trip.transport_attachments);
+            console.log(response.data.trip.boarding_attachments);
+            console.log(response.data.trip.lodging_attachments);
+            console.log(response.data.trip.local_travel_attachments);
+            console.log(response.data.trip.google_attachments);
+            if (response.data.trip.transport_attachments.length === 0 && response.data.trip.boarding_attachments.length === 0 && response.data.trip.lodging_attachments.length === 0 && response.data.trip.local_travel_attachments.length === 0 && response.data.trip.google_attachments.length === 0) {
+                $scope.visit = false;
+            } else {
+                $scope.visit = true;
+            }
+            $scope.doSomethingOnClick = function() {
+                $scope.visit = false;
+            }
             if (self.trip.advance_received) {
                 if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {
                     self.pay_to_employee = (parseInt(self.total_amount) - parseInt(self.trip.advance_received)).toFixed(2);
@@ -251,7 +263,6 @@ app.component('eyatraTripClaimVerificationOneView', {
 
             });
         }
-
 
         //Reject
         $(document).on('click', '.reject_btn', function() {

@@ -916,7 +916,7 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip cannot be Cancelled! Financier approved the advance amount']]);
 		}
 
-		$trip = Trip::find($r->trip_id);
+		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
