@@ -151,6 +151,13 @@ class TripClaimVerificationController extends Controller {
 
 		$employee_claim->status_id = 3034; //Payment Pending
 		$trip->status_id = 3034; //Payment Pending
+		// Send to payment completed status by Karthick T on 19-01-2021
+		$financier_approve = Auth::user()->company->financier_approve;
+		if ($financier_approve == '0') {
+			$employee_claim->status_id = 3026; // Payment Completed
+			$trip->status_id = 3026; // Payment Completed
+		}
+		// Send to payment completed status by Karthick T on 19-01-2021
 
 		$employee_claim->save();
 		$trip->save();
@@ -291,12 +298,18 @@ class TripClaimVerificationController extends Controller {
 
 	public function approveLocalTripClaimVerification($trip_id) {
 		// dd($trip_id);
+		$financier_approve = Auth::user()->company->financier_approve;
 		$trip = LocalTrip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 
 		$trip->status_id = 3034; //Payment Pending
+		// Send to payment completed status by Karthick T on 19-01-2021
+		if ($financier_approve == '0') {
+			$trip->status_id = 3026; // Payment Completed
+		}
+		// Send to payment completed status by Karthick T on 19-01-2021
 
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
