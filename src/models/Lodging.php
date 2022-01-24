@@ -64,4 +64,7 @@ class Lodging extends Model {
 	public function attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3181)->where('attachment_type_id', 3200);
 	}
+	public function pending_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3181)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
 }

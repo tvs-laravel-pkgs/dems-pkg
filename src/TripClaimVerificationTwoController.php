@@ -152,6 +152,13 @@ class TripClaimVerificationTwoController extends Controller {
 		}
 		$employee_claim->save();
 		$trip->save();
+		// Update attachment status by Karthick T on 20-01-2022
+		$update_attachment_status = Attachment::where('entity_id', $trip->id)
+				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189])
+				->where('attachment_type_id', 3200)
+				->where('view_status', 1)
+				->update(['view_status' => 0]);
+		// Update attachment status by Karthick T on 20-01-2022
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
@@ -176,6 +183,13 @@ class TripClaimVerificationTwoController extends Controller {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024; //Claim Rejected
 		$trip->save();
+		// Update attachment status by Karthick T on 20-01-2022
+		$update_attachment_status = Attachment::where('entity_id', $trip->id)
+				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189])
+				->where('attachment_type_id', 3200)
+				->where('view_status', 1)
+				->update(['view_status' => 0]);
+		// Update attachment status by Karthick T on 20-01-2022
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = "Employee Claims V2 Rejected";

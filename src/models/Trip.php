@@ -133,6 +133,24 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3185)->where('attachment_type_id', 3200);
 	}
 
+	public function pending_transport_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3189)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+	public function pending_lodging_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3181)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+
+	public function pending_boarding_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3182)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+	public function pending_local_travel_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3183)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+
+	public function pending_google_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3185)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+
 	public static function generate($employee, $trip_number, $faker, $trip_status_id, $admin) {
 		$trip = new Trip();
 		$trip->employee_id = $employee->id;
@@ -419,6 +437,7 @@ class Trip extends Model {
 		}
 
 		$data['trip_reject'] = $trip_reject;
+		$data['approval_status'] = Trip::validateAttachment($trip_id);
 
 		$data['success'] = true;
 		return response()->json($data);
@@ -1174,10 +1193,36 @@ class Trip extends Model {
 				$travel_dates_list[$range_key]['name'] = $range_val;
 			}
 		}
+		// Calculating Lodging days by Karthick T on 21-01-2022
+		$visit_start_date = $visit_end_date = null;
+		if (isset($trip->visits) && count($trip->visits) > 1) {
+			foreach($trip->visits as $visit_key => $visit) {
+				if (!$visit_start_date) {
+					$visit_start_date = date('Y-m-d', strtotime($visit->arrival_date));
+				}
+				$visit_end_date = date('Y-m-d', strtotime($visit->departure_date));
+			}
+		}
+		$lodging_dates_list = $travel_dates_list;
+		if ($visit_start_date && $visit_end_date) {
+			$date_range = Trip::getDatesFromRange($visit_start_date, $visit_end_date);
+			if (!empty($date_range)) {
+				$lodging_dates_list = [];
+				$lodging_dates_list[0]['id'] = '';
+				$lodging_dates_list[0]['name'] = 'Select Date';
+				foreach ($date_range as $range_key => $range_val) {
+					$range_key++;
+					$lodging_dates_list[$range_key]['id'] = $range_val;
+					$lodging_dates_list[$range_key]['name'] = $range_val;
+				}
+			}
+		}
+		// Calculating Lodging days by Karthick T on 21-01-2022
 
 		$data['travelled_cities_with_dates'] = $travelled_cities_with_dates;
 		$data['lodge_cities'] = $lodge_cities;
 		$data['travel_dates_list'] = $travel_dates_list;
+		$data['lodging_dates_list'] = $lodging_dates_list;
 
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
@@ -1522,6 +1567,8 @@ class Trip extends Model {
 			}
 		}
 
+		$data['approval_status'] = Trip::validateAttachment($trip_id);
+
 		return response()->json($data);
 	}
 
@@ -1748,7 +1795,9 @@ class Trip extends Model {
 
 				// dd($request->lodgings);
 				//SAVE
+				$loding_attachment_exist = true;
 				if ($request->lodgings) {
+					$loding_attachment_exist = false;
 					// dd($request->lodgings);
 					// LODGE STAY DAYS SHOULD NOT EXCEED TOTAL TRIP DAYS
 					$lodge_stayed_days = (int) array_sum(array_column($request->lodgings, 'stayed_days'));
@@ -1838,6 +1887,7 @@ class Trip extends Model {
 							$attachement_lodge->name = $name;
 							$attachement_lodge->save();
 						}
+						$loding_attachment_exist = true;
 					}
 
 					//SAVE EMPLOYEE CLAIMS
@@ -2132,6 +2182,11 @@ class Trip extends Model {
 				} else {
 					$employee_claim->is_deviation = $request->is_deviation;
 				}
+				// Changed deviation by Karthick T on 21-01-2022
+				// If lodging exist and attachment not found the claim will go to deviation
+				if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
+					$employee_claim->is_deviation = 1;
+				// Changed deviation by Karthick T on 21-01-2022
 
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->remarks = $request->remarks;
@@ -2295,5 +2350,40 @@ class Trip extends Model {
 		}
 		return response()->json(['category_type' => $category_type]);
 	}
+
+	// Checking attachment status by Karthick T on 20-01-2022
+	// Checking all the attachments are viewed or not 
+	public static function validateAttachment($trip_id) {
+		$trip_attachment = Trip::with([
+			// 'visits.pending_attachments',
+			'lodgings.pending_attachments',
+			'boardings.pending_attachments',
+			'pending_transport_attachments',
+			'pending_lodging_attachments',
+			'pending_boarding_attachments',
+			// 'pending_local_travel_attachments',
+			'pending_google_attachments',
+		])->find($trip_id);
+		$pending_count = 0;
+		if ($trip_attachment) {
+			// foreach($trip_attachment->visits as $visit) {
+			// 	$pending_count += count($visit->pending_attachments);
+			// }
+			foreach($trip_attachment->lodgings as $lodging) {
+				$pending_count += count($lodging->pending_attachments);
+			}
+			foreach($trip_attachment->boardings as $boarding) {
+				$pending_count += count($boarding->pending_attachments);
+			}
+			$pending_count += count($trip_attachment->pending_transport_attachments);
+			$pending_count += count($trip_attachment->pending_lodging_attachments);
+			$pending_count += count($trip_attachment->pending_boarding_attachments);
+			// $pending_count += count($trip_attachment->pending_local_travel_attachments);
+			$pending_count += count($trip_attachment->pending_google_attachments);
+		}
+		$approval_status = ($pending_count == 0) ? false : true;
+		return $approval_status;
+	}
+	// Checking attachment status by Karthick T on 20-01-2022
 
 }

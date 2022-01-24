@@ -120,7 +120,7 @@ app.component('eyatraTripClaimVerificationTwoView', {
         self.eyatra_trip_claim_verification_two_boarding_attachment_url = eyatra_trip_claim_verification_two_boarding_attachment_url;
         self.eyatra_trip_claim_verification_two_local_travel_attachment_url = eyatra_trip_claim_verification_two_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
-        self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
+        self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url; 
 
         $http.get(
             $form_data_url
@@ -175,9 +175,25 @@ app.component('eyatraTripClaimVerificationTwoView', {
                 self.pay_to_employee = parseInt(self.total_amount).toFixed(2);
                 self.pay_to_company = '0.00';
             }
+            $scope.visitTwo = response.data.approval_status;
             $rootScope.loading = false;
 
         });
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
+        $scope.updateAttchementStatus = function(attchement_id) {
+            if (attchement_id) {
+                $http.post(
+                    laravel_routes['updateAttachmentStatus'], {
+                        id: attchement_id,
+                    }
+                ).then(function(res) {
+                    if (res.data.success) {
+                        $scope.visitTwo = res.data.approval_status;
+                    }
+                });
+            }
+        }
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
 
         // //TOOLTIP MOUSEOVER
         // $(document).on('mouseover', ".attachment_tooltip", function() {

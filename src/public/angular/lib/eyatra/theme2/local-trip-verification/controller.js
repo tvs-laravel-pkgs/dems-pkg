@@ -259,6 +259,7 @@ app.component('eyatraLocalTripVerificationDetailView', {
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.gender = (response.data.trip.employee.gender).toLowerCase();
             console.log(self.trip_reject_reasons);
+            $scope.approval_status = response.data.approval_status;
         });
 
         var local_trip_approve = 0;
@@ -269,6 +270,21 @@ app.component('eyatraLocalTripVerificationDetailView', {
                 preferred_travel_modes: '',
             });
         }
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 21-01-2022
+        $scope.updateAttchementStatus = function(attchement_id) {
+            if (attchement_id) {
+                $http.post(
+                    laravel_routes['updateLocalTripAttachmentStatus'], {
+                        id: attchement_id,
+                    }
+                ).then(function(res) {
+                    if (res.data.success) {
+                        $scope.approval_status = res.data.approval_status;
+                    }
+                });
+            }
+        }
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 21-01-2022
 
         //TOOLTIP MOUSEOVER
         $(document).on('mouseover', ".attachment-view-list", function() {

@@ -848,5 +848,20 @@ class LocalTripController extends Controller {
 			'newCount' => $newCount, 'updatedCount' => $updatedCount, 'errorCount' => $errorCount];
 		return response()->json($response);
 	}
+	// Updating view status by Karthick T on 21-01-2022
+	public function updateAttachmentStatus(Request $r) {
+		// dd($r->all());
+		$attachment = Attachment::find($r->id);
+		if ($attachment) {
+			$attachment->view_status = 1;
+			$attachment->save();
+			$trip_id = $attachment->entity_id;
+			
+			$approval_status = LocalTrip::validateAttachment($trip_id);
+			return response()->json(['success' => true, 'approval_status' => $approval_status]);
+		}
+		return response()->json(['success' => false]);
+	}
+	// Updating view status by Karthick T on 21-01-2022
 
 }

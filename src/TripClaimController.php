@@ -257,5 +257,23 @@ class TripClaimController extends Controller {
 		}
 		return response()->json(['travelled_cities_with_dates' => $travelled_cities_with_dates, 'lodge_cities' => $lodge_cities]);
 	}
+	public function calculateLodgingDays(Request $r) {
+		// dd($r->all());
+		$visit_start_date = date('Y-m-d', strtotime($r->visit_start_date));
+		$visit_end_date = date('Y-m-d', strtotime($r->visit_end_date));
+		$date_range = Trip::getDatesFromRange($visit_start_date, $visit_end_date);
+		$lodging_dates_list = [];
+		if (!empty($date_range)) {
+			$lodging_dates_list[0]['id'] = '';
+			$lodging_dates_list[0]['name'] = 'Select Date';
+			foreach ($date_range as $range_key => $range_val) {
+				$range_key++;
+				$lodging_dates_list[$range_key]['id'] = $range_val;
+				$lodging_dates_list[$range_key]['name'] = $range_val;
+			}
+		}
+
+		return response()->json(['success' => true, 'lodging_dates_list' => $lodging_dates_list]);
+	}
 
 }

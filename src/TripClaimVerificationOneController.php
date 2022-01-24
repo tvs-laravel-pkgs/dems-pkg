@@ -12,6 +12,7 @@ use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
+use Uitoux\EYatra\Attachment;
 use Yajra\Datatables\Datatables;
 
 class TripClaimVerificationOneController extends Controller {
@@ -283,6 +284,13 @@ class TripClaimVerificationOneController extends Controller {
 
 		$employee_claim->save();
 		$trip->save();
+		// Update attachment status by Karthick T on 20-01-2022
+		$update_attachment_status = Attachment::where('entity_id', $trip->id)
+				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189])
+				->where('attachment_type_id', 3200)
+				->where('view_status', 1)
+				->update(['view_status' => 0]);
+		// Update attachment status by Karthick T on 20-01-2022
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = "Employee Claims V1 Approved";
@@ -314,6 +322,13 @@ class TripClaimVerificationOneController extends Controller {
 		$trip->rejection_remarks = $r->remarks;
 		$trip->status_id = 3024; //Claim Rejected
 		$trip->save();
+		// Update attachment status by Karthick T on 20-01-2022
+		$update_attachment_status = Attachment::where('entity_id', $trip->id)
+				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189])
+				->where('attachment_type_id', 3200)
+				->where('view_status', 1)
+				->update(['view_status' => 0]);
+		// Update attachment status by Karthick T on 20-01-2022
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = "Employee Claims V1 Rejected";
@@ -326,4 +341,19 @@ class TripClaimVerificationOneController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
+	// Updating view status by Karthick T on 20-01-2022
+	public function updateAttachmentStatus(Request $r) {
+		// dd($r->all());
+		$attachment = Attachment::find($r->id);
+		if ($attachment) {
+			$attachment->view_status = 1;
+			$attachment->save();
+			$trip_id = $attachment->entity_id;
+			
+			$approval_status = Trip::validateAttachment($trip_id);
+			return response()->json(['success' => true, 'approval_status' => $approval_status]);
+		}
+		return response()->json(['success' => false]);
+	}
+	// Updating view status by Karthick T on 20-01-2022
 }

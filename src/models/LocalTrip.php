@@ -56,6 +56,18 @@ class LocalTrip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3188)->where('attachment_type_id', 3200);
 	}
 
+	public function pending_google_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3187)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+
+	public function pending_expense_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3186)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+
+	public function pending_other_expense_attachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3188)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+
 	public static function getLocalTripList($request) {
 		$trips = LocalTrip::from('local_trips')
 			->join('employees as e', 'e.id', 'local_trips.employee_id')
@@ -585,6 +597,8 @@ class LocalTrip extends Model {
 
 		$data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
 
+		$data['approval_status'] = LocalTrip::validateAttachment($trip_id);
+
 		return response()->json($data);
 
 	}
@@ -612,6 +626,13 @@ class LocalTrip extends Model {
 		}
 
 		$trip->save();
+		// Update attachment status by Karthick T on 21-01-2022
+		$update_attachment_status = Attachment::where('entity_id', $trip->id)
+				->whereIn('attachment_of_id', [3186, 3187, 3188])
+				->where('attachment_type_id', 3200)
+				->where('view_status', 1)
+				->update(['view_status' => 0]);
+		// Update attachment status by Karthick T on 21-01-2022
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = 'Trip is Approved by Manager';
@@ -655,6 +676,13 @@ class LocalTrip extends Model {
 			$type = 3;
 		}
 		$trip->save();
+		// Update attachment status by Karthick T on 21-01-2022
+		$update_attachment_status = Attachment::where('entity_id', $trip->id)
+				->whereIn('attachment_of_id', [3186, 3187, 3188])
+				->where('attachment_type_id', 3200)
+				->where('view_status', 1)
+				->update(['view_status' => 0]);
+		// Update attachment status by Karthick T on 21-01-2022
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['activity'] = "reject";
@@ -700,6 +728,21 @@ class LocalTrip extends Model {
 
 		return response()->json(['success' => true]);
 
+	}
+	public static function validateAttachment($trip_id) {
+		$trip_attachment = LocalTrip::with([
+			'pending_expense_attachments',
+			'pending_other_expense_attachments',
+			'pending_google_attachments',
+		])->find($trip_id);
+		$pending_count = 0;
+		if ($trip_attachment) {
+			$pending_count += count($trip_attachment->pending_expense_attachments);
+			$pending_count += count($trip_attachment->pending_other_expense_attachments);
+			$pending_count += count($trip_attachment->pending_google_attachments);
+		}
+		$approval_status = ($pending_count == 0) ? false : true;
+		return $approval_status;
 	}
 
 }

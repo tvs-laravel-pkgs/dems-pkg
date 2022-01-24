@@ -187,9 +187,25 @@ app.component('eyatraTripClaimVerificationOneView', {
                 self.pay_to_employee = parseInt(self.total_amount).toFixed(2);
                 self.pay_to_company = '0.00';
             }
+            $scope.visit = response.data.approval_status;
             $rootScope.loading = false;
 
         });
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
+        $scope.updateAttchementStatus = function(attchement_id) {
+            if (attchement_id) {
+                $http.post(
+                    laravel_routes['updateAttachmentStatus'], {
+                        id: attchement_id,
+                    }
+                ).then(function(res) {
+                    if (res.data.success) {
+                        $scope.visit = res.data.approval_status;
+                    }
+                });
+            }
+        }
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
 
         //TOOLTIP MOUSEOVER
         // $(document).on('mouseover', ".attachment_tooltip", function() {
