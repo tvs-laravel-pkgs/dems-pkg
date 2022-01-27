@@ -120,7 +120,7 @@ app.component('eyatraTripClaimVerificationTwoView', {
         self.eyatra_trip_claim_verification_two_boarding_attachment_url = eyatra_trip_claim_verification_two_boarding_attachment_url;
         self.eyatra_trip_claim_verification_two_local_travel_attachment_url = eyatra_trip_claim_verification_two_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
-        self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url; 
+        self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
 
         $http.get(
             $form_data_url
@@ -219,48 +219,102 @@ app.component('eyatraTripClaimVerificationTwoView', {
         $scope.tripClaimApproveTwo = function(trip_id) {
             $('#modal_trip_id').val(trip_id);
         }
-        $scope.confirmTripClaimApproveTwo = function() {
-            $trip_id = $('#modal_trip_id').val();
-            $http.get(
-                eyatra_trip_claim_verification_two_approve_url + '/' + $trip_id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 1000);
-                } else {
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trips Claim Approved Successfully',
-                        animation: {
-                            speed: 500 // unavailable - no need
-                        },
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 1000);
-                    $('#trip-claim-modal-approve-two').modal('hide');
-                    setTimeout(function() {
-                        $location.path('/trip/claim/verification2/list')
-                        $scope.$apply()
-                    }, 500);
-                }
+        //Approve
+        //Reject
+        $(document).on('click', '.verification_two_btn', function() {
+            var form_id = '#verification-two-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
 
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#verification_two_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['approveTripClaimVerificationTwo'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#verification_two_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Trips Claim Approved Successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $('#trip-claim-modal-approve-two').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/trip/claim/verification2/list')
+                                    $scope.$apply()
+                                }, 500);
+
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#verification_two_btn').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
             });
+        });
+        /*$scope.confirmTripClaimApproveTwo = function() {
+    $trip_id = $('#modal_trip_id').val();
+    $http.get(
+        eyatra_trip_claim_verification_two_approve_url + '/' + $trip_id,
+    ).then(function(response) {
+        if (!response.data.success) {
+            var errors = '';
+            for (var i in res.errors) {
+                errors += '<li>' + res.errors[i] + '</li>';
+            }
+            $noty = new Noty({
+                type: 'error',
+                layout: 'topRight',
+                text: errors,
+                animation: {
+                    speed: 500 // unavailable - no need
+                },
+            }).show();
+            setTimeout(function() {
+                $noty.close();
+            }, 1000);
+        } else {
+            $noty = new Noty({
+                type: 'success',
+                layout: 'topRight',
+                text: 'Trips Claim Approved Successfully',
+                animation: {
+                    speed: 500 // unavailable - no need
+                },
+            }).show();
+            setTimeout(function() {
+                $noty.close();
+            }, 1000);
+            $('#trip-claim-modal-approve-two').modal('hide');
+            setTimeout(function() {
+                $location.path('/trip/claim/verification2/list')
+                $scope.$apply()
+            }, 500);
         }
+
+    });
+}*/
 
 
         //Reject

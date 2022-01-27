@@ -603,13 +603,15 @@ class LocalTrip extends Model {
 
 	}
 
-	public static function approveTrip($trip_id) {
+	public static function approveTrip($r) {
 		$additional_approve = Auth::user()->company->additional_approve;
 		$financier_approve = Auth::user()->company->financier_approve;
+		$trip_id=$r->trip_id;
 		$trip = LocalTrip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Lcoal Trip not found']]);
 		}
+		$trip->local_trip_remarks=$r->local_trip_remarks;
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
 			if ($additional_approve == '1') {
@@ -624,7 +626,6 @@ class LocalTrip extends Model {
 			$trip->status_id = 3028;
 			$type = 2;
 		}
-
 		$trip->save();
 		// Update attachment status by Karthick T on 21-01-2022
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)

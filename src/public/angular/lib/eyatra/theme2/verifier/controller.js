@@ -190,7 +190,7 @@ app.component('eyatraOutstationClaimVerificationView', {
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url = eyatra_trip_claim_verification_one_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
-        
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -241,36 +241,86 @@ app.component('eyatraOutstationClaimVerificationView', {
         $scope.tripClaimApproveOne = function(trip_id) {
             $('#modal_trip_id').val(trip_id);
         }
-        $scope.confirmTripClaimApproveOne = function() {
-            $trip_id = $('#modal_trip_id').val();
-            $http.get(
-                eyatra_outstation_trip_claim_verification_approve_url + '/' + $trip_id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 1000);
-                } else {
-                    custom_noty('success', 'Trips Claim Approved Successfully');
-                    $('#trip-claim-modal-approve-one').modal('hide');
-                    setTimeout(function() {
-                        $location.path('/outstation-trip/claim/verification/list')
-                        $scope.$apply()
-                    }, 500);
+        //Approve
 
-                }
+        $(document).on('click', '.outstation_verifier_btn', function() {
+            var form_id = '#verifier-approve-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
 
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#outstation_verifier_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['approveOutstationTripClaimVerification'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#outstation_verifier_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Trips Claim Approved Successfully',
+                                }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $('#trip-claim-modal-approve-one').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/outstation-trip/claim/verification/list')
+                                    $scope.$apply()
+                                }, 500);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#outstation_verifier_btn').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
             });
+        });
+        /*$scope.confirmTripClaimApproveOne = function() {
+    $trip_id = $('#modal_trip_id').val();
+    $http.get(
+        eyatra_outstation_trip_claim_verification_approve_url + '/' + $trip_id,
+    ).then(function(response) {
+        if (!response.data.success) {
+            var errors = '';
+            for (var i in res.errors) {
+                errors += '<li>' + res.errors[i] + '</li>';
+            }
+            $noty = new Noty({
+                type: 'error',
+                layout: 'topRight',
+                text: errors,
+            }).show();
+            setTimeout(function() {
+                $noty.close();
+            }, 1000);
+        } else {
+            custom_noty('success', 'Trips Claim Approved Successfully');
+            $('#trip-claim-modal-approve-one').modal('hide');
+            setTimeout(function() {
+                $location.path('/outstation-trip/claim/verification/list')
+                $scope.$apply()
+            }, 500);
+
         }
+
+    });
+}*/
 
         //Reject
         $(document).on('click', '.reject_btn', function() {
@@ -371,7 +421,7 @@ app.component('eyatraLocalClaimVerificationList', {
 
             var trip_periods = response.data.start_date + ' to ' + response.data.end_date;
             self.trip_periods = trip_periods;
-            
+
             setTimeout(function() {
                 get_employees(self.filter_outlet_id, status = 0);
                 $('#from_date').val(self.start_date);
@@ -587,7 +637,53 @@ app.component('eyatraLocalClaimVerificationView', {
             $scope.search = '';
         };
 
-        $scope.confirmApproveLocalTripClaim = function() {
+        $(document).on('click', '.claim_local_approve_btn', function() {
+            if (local_trip_approve == 0) {
+                local_trip_approve = 1;
+                var form_id = '#local-verifier-form';
+                var v = jQuery(form_id).validate({
+                    ignore: '',
+
+                    submitHandler: function(form) {
+
+                        let formData = new FormData($(form_id)[0]);
+                        $('#claim_local_approve_btn').button('loading');
+                        $.ajax({
+                                url: laravel_routes['approveLocalTripClaimVerification'],
+                                method: "POST",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                            })
+                            .done(function(res) {
+                                console.log(res.success);
+                                if (!res.success) {
+                                    $('#claim_local_approve_btn').button('reset');
+                                    var errors = '';
+                                    for (var i in res.errors) {
+                                        errors += '<li>' + res.errors[i] + '</li>';
+                                    }
+                                    custom_noty('error', errors);
+                                } else {
+                                    custom_noty('success', 'Local Trip Claim Approved Successfully');
+                                    $('#alert-local-claim-modal-approve').modal('hide');
+                                    setTimeout(function() {
+                                        $location.path('/local-trip/claim/verification/list')
+                                        $scope.$apply()
+                                    }, 500);
+
+                                }
+                            })
+                            .fail(function(xhr) {
+                                $('#submit').button('reset');
+                                custom_noty('error', 'Something went wrong at server');
+                            });
+                    },
+                });
+                local_trip_approve = 0;
+            }
+        });
+        /*$scope.confirmApproveLocalTripClaim = function() {
             $id = $('#trip_id').val();
             $('#claim_local_approve_btn').button('loading');
             if (local_trip_approve == 0) {
@@ -622,7 +718,7 @@ app.component('eyatraLocalClaimVerificationView', {
                 });
                 local_trip_approve = 0;
             }
-        }
+        }*/
 
         //Reject
         $(document).on('click', '.claim_local_reject_btn', function() {

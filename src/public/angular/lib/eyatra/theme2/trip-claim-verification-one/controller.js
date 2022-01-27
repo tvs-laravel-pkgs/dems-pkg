@@ -236,7 +236,7 @@ app.component('eyatraTripClaimVerificationOneView', {
         $scope.tripClaimApproveOne = function(trip_id) {
             $('#modal_trip_id').val(trip_id);
         }
-        $scope.confirmTripClaimApproveOne = function() {
+        /*$scope.confirmTripClaimApproveOne = function() {
             $trip_id = $('#modal_trip_id').val();
             $http.get(
                 eyatra_trip_claim_verification_one_approve_url + '/' + $trip_id,
@@ -279,6 +279,59 @@ app.component('eyatraTripClaimVerificationOneView', {
 
             });
         }
+*/
+        //APPROVE
+        $(document).on('click', '.verification_one_btn', function() {
+            var form_id = '#verification-one-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#verification_one_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['approveTripClaimVerificationOne'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#verification_one_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Trips Claim Approved Successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $('#trip-claim-modal-approve-one').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/trip/claim/verification1/list')
+                                    $scope.$apply()
+                                }, 500);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#reject_btn').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
 
         //Reject
         $(document).on('click', '.reject_btn', function() {
