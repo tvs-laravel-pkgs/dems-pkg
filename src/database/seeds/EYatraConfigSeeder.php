@@ -51,6 +51,7 @@ class EYatraConfigSeeder extends Seeder {
 			534 => 'Trip / Expense Approval Types',
 			535 => 'Claim Statuses',
 			536 => 'Financial Years',
+			537 => 'Serial Number Segment Types',
 		];
 
 		$configs = [
@@ -1025,6 +1026,19 @@ class EYatraConfigSeeder extends Seeder {
 			3703 => [
 				'name' => 'FY-22',
 				'config_type_id' => 536,
+			],
+			// Serial Number Segment Types
+			3711 => [
+				'name' => 'Branch Code',
+				'config_type_id' => 537,
+			],
+			3712 => [
+				'name' => 'FY Code',
+				'config_type_id' => 537,
+			],
+			3713 => [
+				'name' => 'Static Text',
+				'config_type_id' => 537,
 			],
 
 		];

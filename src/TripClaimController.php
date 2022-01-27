@@ -24,6 +24,7 @@ class TripClaimController extends Controller {
 			->where('users.user_type_id', 3121)
 			->select(
 				'trips.id',
+				'claims.number as claim_number',
 				'trips.number',
 				'e.code as ecode',
 				'users.name as ename',

@@ -79,6 +79,7 @@ class TripClaimVerificationController extends Controller {
 			->where('users.user_type_id', 3121)
 			->select(
 				'trips.id',
+				'ey_employee_claims.number as claim_number',
 				'trips.number',
 				'e.code as ecode',
 				'users.name as ename',
@@ -238,6 +239,7 @@ class TripClaimVerificationController extends Controller {
 			->where('users.user_type_id', 3121)
 			->select(
 				'local_trips.id',
+				'local_trips.claim_number',
 				'local_trips.number',
 				'e.code as ecode',
 				'users.name as ename',

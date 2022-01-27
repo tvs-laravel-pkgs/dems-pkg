@@ -133,6 +133,7 @@ class LocalTripController extends Controller {
 			->where('users.user_type_id', 3121)
 			->select(
 				'local_trips.id',
+				'local_trips.claim_number',
 				'local_trips.number',
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',
@@ -324,6 +325,7 @@ class LocalTripController extends Controller {
 			->where('users.user_type_id', 3121)
 			->select(
 				'local_trips.id',
+				'local_trips.claim_number',
 				'local_trips.number',
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',
@@ -430,6 +432,7 @@ class LocalTripController extends Controller {
 			->where('users.user_type_id', 3121)
 			->select(
 				'local_trips.id',
+				'local_trips.claim_number',
 				'local_trips.number',
 				'e.code as ecode',
 				'users.name as ename', 'local_trips.status_id',

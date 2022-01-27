@@ -45,6 +45,7 @@ app.component('eyatraLocalTripVerifications', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
+                { data: 'claim_number', name: 'local_trips.claim_number', searchable: true },
                 { data: 'number', name: 'local_trips.number', searchable: true },
                 { data: 'created_date', name: 'local_trips.created_date', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },

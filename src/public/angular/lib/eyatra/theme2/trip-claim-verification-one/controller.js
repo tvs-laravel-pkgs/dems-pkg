@@ -44,6 +44,7 @@ app.component('eyatraTripClaimVerificationOneList', {
             },
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
+                { data: 'claim_number', name: 'ey_employee_claims.number', searchable: true },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: false },

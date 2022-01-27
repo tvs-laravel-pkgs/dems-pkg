@@ -4,6 +4,7 @@ namespace Uitoux\EYatra;
 
 //use App\Mail\TripNotificationMail;
 use App\User;
+use App\{SerialNumberGroup, FinancialYear};
 use Auth;
 use Carbon\Carbon;
 use DateInterval;
@@ -188,7 +189,25 @@ class Trip extends Model {
 
 			DB::beginTransaction();
 			if (!$request->id) {
+				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+				if (!$outlet_id)
+					return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+
+				$financial_year = getFinancialYear();
+				$financial_year_id = FinancialYear::where('from', $financial_year)->pluck('id')->first();
+				if (!$financial_year_id)
+					return response()->json(['success' => false, 'errors' => ['Financial Year Not Found']]);
+
+				// Outstation Trip
+				$get_request_no = SerialNumberGroup::generateNumber(2, $financial_year_id, $outlet_id);
+				if (!$get_request_no['success'])
+					return response()->json(['success' => false, 'errors' => ['Serial Number Not Found']]);
+				$number = $get_request_no['number'];
+
 				$trip = new Trip;
+				$trip->company_id = Auth::user()->company_id;
+				$trip->outlet_id = $outlet_id;
+				$trip->number = $number;
 				$trip->created_by = Auth::user()->id;
 				$trip->created_at = Carbon::now();
 				$trip->updated_at = NULL;
@@ -216,7 +235,7 @@ class Trip extends Model {
 			$employee = Employee::where('id', Auth::user()->entity->id)->first();
 
 			$trip->fill($request->all());
-			$trip->number = 'TRP' . rand();
+			// $trip->number = 'TRP' . rand();
 			$trip->employee_id = Auth::user()->entity->id;
 			// dd(Auth::user(), );
 			$trip->manager_id = Auth::user()->entity->reporting_to_id;
@@ -229,7 +248,7 @@ class Trip extends Model {
 			$trip->rejection_remarks = NULL;
 			$trip->save();
 
-			$trip->number = 'TRP' . $trip->id;
+			// $trip->number = 'TRP' . $trip->id;
 			$trip->save();
 			$activity['entity_id'] = $trip->id;
 			$activity['entity_type'] = 'trip';
@@ -1600,6 +1619,34 @@ class Trip extends Model {
 
 			//Get employee outstion beta amount
 			$beta_amount = Employee::join('grade_advanced_eligibility','grade_advanced_eligibility.grade_id','employees.grade_id')->where('employees.id',$trip->employee_id)->pluck('grade_advanced_eligibility.outstation_trip_amount')->first();
+
+			$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+			if (!$employee_claim->number) {
+				$outlet_id = $trip->outlet_id;
+				if (!$outlet_id)
+					return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+
+				$financial_year = getFinancialYear();
+				$financial_year_id = FinancialYear::where('from', $financial_year)->pluck('id')->first();
+				if (!$financial_year_id)
+					return response()->json(['success' => false, 'errors' => ['Financial Year Not Found']]);
+
+				// Outstation Trip Claim
+				$get_request_no = SerialNumberGroup::generateNumber(4, $financial_year_id, $outlet_id);
+				if (!$get_request_no['success'])
+					return response()->json(['success' => false, 'errors' => ['Serial Number Not Found']]);
+				$number = $get_request_no['number'];
+				$employee_claim->number = $number;
+				if (!$employee_claim->employee_id)
+					$employee_claim->employee_id = Auth::user()->entity_id;
+				if (!$employee_claim->status_id)
+					$employee_claim->status_id = 3033; //CLAIM INPROGRESS
+				if (!$employee_claim->created_by)
+					$employee_claim->created_by = Auth::user()->id;
+				if (!$employee_claim->total_amount)
+					$employee_claim->total_amount = 0;
+				$employee_claim->save();
+			}
 
 			//SAVING VISITS
 			if ($request->visits) {

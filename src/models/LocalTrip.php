@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra;
 
 use App\User;
+use App\{SerialNumberGroup, FinancialYear};
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -301,7 +302,25 @@ class LocalTrip extends Model {
 
 			DB::beginTransaction();
 			if (!$request->id) {
+				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+				if (!$outlet_id)
+					return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+
+				$financial_year = getFinancialYear();
+				$financial_year_id = FinancialYear::where('from', $financial_year)->pluck('id')->first();
+				if (!$financial_year_id)
+					return response()->json(['success' => false, 'errors' => ['Financial Year Not Found']]);
+
+				// Local Trip
+				$get_request_no = SerialNumberGroup::generateNumber(1, $financial_year_id, $outlet_id);
+				if (!$get_request_no['success'])
+					return response()->json(['success' => false, 'errors' => ['Serial Number Not Found']]);
+				$number = $get_request_no['number'];
+
 				$trip = new LocalTrip;
+				$trip->company_id = Auth::user()->company_id;
+				$trip->outlet_id = $outlet_id;
+				$trip->number = $number;
 				$trip->created_by = Auth::user()->id;
 				$trip->created_at = Carbon::now();
 				$trip->updated_at = NULL;
@@ -315,6 +334,26 @@ class LocalTrip extends Model {
 				// if ($trip->status_id == 3028) {
 				// 	$trip->status_id = 3023;
 				// } else
+				if ($trip->status_id == 3028 && !$trip->claim_number) {
+					$outlet_id = $trip->outlet_id;
+					if (!$outlet_id)
+						$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+					if (!$outlet_id)
+						return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+
+					$financial_year = getFinancialYear();
+					$financial_year_id = FinancialYear::where('from', $financial_year)->pluck('id')->first();
+					if (!$financial_year_id)
+						return response()->json(['success' => false, 'errors' => ['Financial Year Not Found']]);
+
+					// Local Trip Claim
+					$get_request_no = SerialNumberGroup::generateNumber(3, $financial_year_id, $outlet_id);
+					if (!$get_request_no['success'])
+						return response()->json(['success' => false, 'errors' => ['Serial Number Not Found']]);
+					$number = $get_request_no['number'];
+
+					$trip->claim_number = $number;
+				}
 				if ($trip->status_id == 3022) {
 					$trip->status_id = 3021;
 				} elseif ($trip->status_id == 3024) {
@@ -354,7 +393,8 @@ class LocalTrip extends Model {
 			$trip->claim_amount = $request->total_claim_amount;
 			$trip->claimed_date = date('Y-m-d');
 			$trip->save();
-			$trip->number = 'TRP' . $trip->id;
+			if (!$trip->number)
+				$trip->number = 'TRP' . $trip->id;
 			$trip->rejection_id = NULL;
 			$trip->rejection_remarks = NULL;
 			$trip->save();

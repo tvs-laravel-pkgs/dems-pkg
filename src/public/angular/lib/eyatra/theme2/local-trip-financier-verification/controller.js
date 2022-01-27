@@ -48,8 +48,9 @@ app.component('eyatraLocalTripFinancierVerification', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'created_date', name: 'trips.created_date', searchable: false },
+                { data: 'claim_number', name: 'local_trips.claim_number', searchable: true },
+                { data: 'number', name: 'local_trips.number', searchable: true },
+                { data: 'created_date', name: 'local_trips.created_date', searchable: false },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },

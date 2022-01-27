@@ -75,6 +75,7 @@ app.component('eyatraOutstationClaimVerificationList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
+                { data: 'claim_number', name: 'ey_employee_claims.number', searchable: true },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
@@ -414,12 +415,13 @@ app.component('eyatraLocalClaimVerificationList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'number', name: 'trips.number', searchable: true },
+                { data: 'claim_number', name: 'local_trips.claim_number', searchable: false },
+                { data: 'number', name: 'local_trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'outlet_name', name: 'outlets.name', searchable: true },
-                { data: 'start_date', name: 'trips.start_date', searchable: true },
-                { data: 'end_date', name: 'trips.end_date', searchable: true },
+                { data: 'start_date', name: 'local_trips.start_date', searchable: true },
+                { data: 'end_date', name: 'local_trips.end_date', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'status', searchable: false },
             ],
