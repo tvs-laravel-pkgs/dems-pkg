@@ -380,13 +380,13 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/claim/verification/one/get-list', 'Uitoux\EYatra\TripClaimVerificationOneController@listEYatraTripClaimVerificationOneList')->name('listEYatraTripClaimVerificationOneList');
 		Route::get('eyatra/trip/claim/verification/one/view/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationOneController@viewEYatraTripClaimVerificationOne')->name('viewEYatraTripClaimVerificationOne');
 		Route::post('eyatra/trip/claim/verification/one/reject', 'Uitoux\EYatra\TripClaimVerificationOneController@rejectTripClaimVerificationOne')->name('rejectTripClaimVerificationOne');
-		Route::get('eyatra/trip/claim/verification/one/approve/{trip_id}', 'Uitoux\EYatra\TripClaimVerificationOneController@approveTripClaimVerificationOne')->name('approveTripClaimVerificationOne');
+		Route::post('eyatra/trip/claim/verification/one/approve', 'Uitoux\EYatra\TripClaimVerificationOneController@approveTripClaimVerificationOne')->name('approveTripClaimVerificationOne');
 
 		//TRIP CLAIM VERIFICATION TWO
 		Route::get('eyatra/trip/claim/verification/two/get-list', 'Uitoux\EYatra\TripClaimVerificationTwoController@listEYatraTripClaimVerificationTwoList')->name('listEYatraTripClaimVerificationTwoList');
 		Route::get('eyatra/trip/claim/verification/two/view/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationTwoController@viewEYatraTripClaimVerificationTwo')->name('viewEYatraTripClaimVerificationTwo');
 		Route::post('eyatra/trip/claim/verification/two/reject', 'Uitoux\EYatra\TripClaimVerificationTwoController@rejectTripClaimVerificationTwo')->name('rejectTripClaimVerificationTwo');
-		Route::get('eyatra/trip/claim/verification/two/approve/{trip_id}', 'Uitoux\EYatra\TripClaimVerificationTwoController@approveTripClaimVerificationTwo')->name('approveTripClaimVerificationTwo');
+		Route::post('eyatra/trip/claim/verification/two/approve', 'Uitoux\EYatra\TripClaimVerificationTwoController@approveTripClaimVerificationTwo')->name('approveTripClaimVerificationTwo');
 
 		//TRIP CLAIM VERIFICATION THREE
 		Route::get('eyatra/trip/claim/verification/three/get-list', 'Uitoux\EYatra\TripClaimVerificationThreeController@listEYatraTripClaimVerificationThreeList')->name('listEYatraTripClaimVerificationThreeList');
@@ -477,7 +477,7 @@ Route::group(['middleware' => ['web']], function () {
 
 		//LOCAL TRIP MANAGER VERIFICATION
 		Route::get('eyatra/local-trip/verification/get-list', 'Uitoux\EYatra\LocalTripController@listLocalTripVerification')->name('listLocalTripVerification');
-		Route::get('eyatra/local-trip/verification/approve/{trip_id?}', 'Uitoux\EYatra\LocalTripController@approveLocalTrip')->name('approveLocalTrip');
+		Route::post('eyatra/local-trip/verification/approve', 'Uitoux\EYatra\LocalTripController@approveLocalTrip')->name('approveLocalTrip');
 		Route::post('eyatra/local-trip/verification/reject', 'Uitoux\EYatra\LocalTripController@rejectLocalTrip')->name('rejectLocalTrip');
 		Route::get('eyatra/local-trip/verification/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripVerificationFilterData')->name('eyatraLocalTripVerificationFilterData');
 
@@ -565,10 +565,10 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/outstation-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraOutstationClaimVerificationGetData')->name('eyatraOutstationClaimVerificationGetData');
 
 		Route::post('eyatra/outstation-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectOutstationTripClaimVerification')->name('rejectOutstationTripClaimVerification');
-		Route::get('eyatra/outstation-trip/claim/verifier/approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationController@approveOutstationTripClaimVerification')->name('approveOutstationTripClaimVerification');
+		Route::post('eyatra/outstation-trip/claim/verifier/approve', 'Uitoux\EYatra\TripClaimVerificationController@approveOutstationTripClaimVerification')->name('approveOutstationTripClaimVerification');
 		//VERIFIER >> LOCAL TRIP CLAIM VERIFICATION
 		Route::get('eyatra/local-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraLocalClaimVerificationGetData')->name('eyatraLocalClaimVerificationGetData');
 		Route::post('eyatra/local-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectLocalTripClaimVerification')->name('rejectLocalTripClaimVerification');
-		Route::get('eyatra/local-trip/claim/verifier/approve/{trip_id?}', 'Uitoux\EYatra\TripClaimVerificationController@approveLocalTripClaimVerification')->name('approveLocalTripClaimVerification');
+		Route::post('eyatra/local-trip/claim/verifier/approve', 'Uitoux\EYatra\TripClaimVerificationController@approveLocalTripClaimVerification')->name('approveLocalTripClaimVerification');
 	});
 });

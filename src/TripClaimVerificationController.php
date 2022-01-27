@@ -139,12 +139,13 @@ class TripClaimVerificationController extends Controller {
 			->make(true);
 	}
 
-	public function approveOutstationTripClaimVerification($trip_id) {
-		// dd($trip_id);
+	public function approveOutstationTripClaimVerification(Request $r) {
+         $trip_id=$r->trip_id;
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$trip->outstation_verifier_remarks=$r->outstation_verifier_remarks;
 		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -298,14 +299,14 @@ class TripClaimVerificationController extends Controller {
 			->make(true);
 	}
 
-	public function approveLocalTripClaimVerification($trip_id) {
-		// dd($trip_id);
+	public function approveLocalTripClaimVerification(Request $r) {
+		$trip_id=$r->trip_id;
 		$financier_approve = Auth::user()->company->financier_approve;
 		$trip = LocalTrip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-
+		$trip->local_verifier_remarks=$r->local_verifier_remarks;
 		$trip->status_id = 3034; //Payment Pending
 		// Send to payment completed status by Karthick T on 19-01-2021
 		if ($financier_approve == '0') {

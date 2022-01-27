@@ -415,8 +415,8 @@ class LocalTripController extends Controller {
 			->make(true);
 	}
 
-	public function approveLocalTrip($trip_id) {
-		return LocalTrip::approveTrip($trip_id);
+	public function approveLocalTrip(Request $r) {
+		return LocalTrip::approveTrip($r);
 	}
 
 	public function rejectLocalTrip(Request $r) {

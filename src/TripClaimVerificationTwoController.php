@@ -113,13 +113,14 @@ class TripClaimVerificationTwoController extends Controller {
 		return Trip::getClaimViewData($trip_id);
 	}
 
-	public function approveTripClaimVerificationTwo($trip_id) {
-
+	public function approveTripClaimVerificationTwo(Request $r) {
+		$trip_id=$r->trip_id;
 		$trip = Trip::find($trip_id);
 
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$trip->verification_two_remarks=$r->verification_two_remarks;
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
 		$activity['details'] = "Employee Claims V2 Approved";

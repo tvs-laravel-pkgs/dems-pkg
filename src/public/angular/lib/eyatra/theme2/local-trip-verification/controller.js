@@ -156,8 +156,55 @@ app.component('eyatraLocalTripVerificationView', {
             $scope.search = '';
         };
 
-        //APPROVE
-        $scope.confirmApproveLocalTrip = function() {
+        //APPROVE WITH REMARKS
+        $(document).on('click', '.local_approve_btn', function() {
+            if (local_trip_approve == 0) {
+                local_trip_approve = 1;
+                var form_id = '#trip-approve-form';
+
+                var v = jQuery(form_id).validate({
+                    ignore: '',
+
+                    submitHandler: function(form) {
+
+                        let formData = new FormData($(form_id)[0]);
+                        $('#local_approve_btn').button('loading');
+                        $.ajax({
+                                url: laravel_routes['approveLocalTrip'],
+                                method: "POST",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                            })
+                            .done(function(res) {
+                                console.log(res.success);
+                                if (!res.success) {
+                                    $('#local_approve_btn').button('reset');
+                                    var errors = '';
+                                    for (var i in res.errors) {
+                                        errors += '<li>' + res.errors[i] + '</li>';
+                                    }
+                                    custom_noty('error', errors);
+                                } else {
+                                    custom_noty('success', 'Local Trip Approved Successfully');
+                                    $('#alert-local-modal-approve').modal('hide');
+                                    setTimeout(function() {
+                                        $location.path('/local-trip/verification/list')
+                                        $scope.$apply()
+                                    }, 1000);
+
+                                }
+                            })
+                            .fail(function(xhr) {
+                                $('#submit').button('reset');
+                                custom_noty('error', 'Something went wrong at server');
+                            });
+                    },
+                });
+                local_trip_approve = 0;
+            }
+        });
+        /*$scope.confirmApproveLocalTrip = function() {
             if (local_trip_approve == 0) {
                 local_trip_approve = 1;
                 $id = $('#trip_id').val();
@@ -192,7 +239,7 @@ app.component('eyatraLocalTripVerificationView', {
                 });
                 local_trip_approve = 0;
             }
-        }
+        }*/
 
         //Reject
         $(document).on('click', '.local_reject_btn', function() {
