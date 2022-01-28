@@ -52,6 +52,7 @@ class EYatraConfigSeeder extends Seeder {
 			535 => 'Claim Statuses',
 			536 => 'Financial Years',
 			537 => 'Serial Number Segment Types',
+			538 => 'Report Types',
 		];
 
 		$configs = [
@@ -1039,6 +1040,15 @@ class EYatraConfigSeeder extends Seeder {
 			3713 => [
 				'name' => 'Static Text',
 				'config_type_id' => 537,
+			],
+			// Report Types
+			3721 => [
+				'name' => 'Bank Statement',
+				'config_type_id' => 538,
+			],
+			3722 => [
+				'name' => 'Travel X To Ax',
+				'config_type_id' => 538,
 			],
 
 		];
