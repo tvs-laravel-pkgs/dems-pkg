@@ -3,18 +3,93 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 
+use Uitoux\EYatra\{Region,Outlet,EmployeeClaim};
+use App\{Config,ReportDetail,MailConfiguration,Employee};
 use Illuminate\Http\Request;
 use Excel;
 use Redirect;
 use DB;
 use Uitoux\EYatra\Trip;
-use App\ReportDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use Carbon\Carbon;
+use Mail;
+use Yajra\Datatables\Datatables;
 
 
 class ExportReportController extends Controller
 {
+     // Report list filter
+     public function getReportListFilter(Request $r) {
+        $this->data['type_list'] = Config::select('id', 'name')->where('config_type_id', 538)->get()->prepend(['id' => null, 'name' => 'Select Type']);
+        return response()->json($this->data);
+    }
+    // Report list datas
+    public function getReportListData(Request $r) {
+        // dd($r->all());
+		$report_details = ReportDetail::select(
+                'report_details.id',
+                'report_details.name',
+                'report_details.path',
+                DB::raw('DATE_FORMAT(report_details.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
+                'configs.name as type'
+            )->join('configs', 'configs.id', 'report_details.type_id')
+			->where(function ($query) use ($r) {
+                if ($r->type_id && $r->type_id != '<%$ctrl.filter_type_id%>') {
+					$query->where("report_details.type_id", $r->type_id);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->from_date && $r->from_date != '<%$ctrl.start_date%>') {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("report_details.created_at", '>=', $date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->to_date && $r->to_date != '<%$ctrl.end_date%>') {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("report_details.created_at", '<=', $date);
+				}
+			})
+			->groupBy('report_details.id')
+			->orderBy('report_details.created_at', 'desc');
+
+		return Datatables::of($report_details)
+			->addColumn('action', function ($report_detail) {
+				$download_img = asset('public/img/content/yatra/table/ico-download.svg');
+				$download_img_hover = asset('public/img/content/yatra/table/ico-download-hover.svg');
+				return '<a href="' . url('/' . $report_detail->path) . '" download>
+                    <img src="' . $download_img . '" alt="View" class="img-responsive" onmouseover=this.src="' . $download_img_hover . '" onmouseout=this.src="' . $download_img . '" >
+                </a>';
+			})
+			->make(true);
+    }
+    // GST Report generate form date
+    public function getForm(Request $r) {
+        $this->data['base_url'] = URL::to('/');
+        $this->data['token'] = csrf_token();
+        $this->data['region_list'] = Region::select('id', 'name')->get()->prepend(['id' => -1, 'name' => 'All Regions']);
+        return response()->json($this->data);
+    }
+    // Taking outlet based on region
+    public function getOutlet($region_ids = '') {
+        $region_ids = explode(',', $region_ids);
+        
+        $this->data['outlet_list'] = Outlet::withTrashed()
+			->leftJoin('ey_addresses as a', function ($join) {
+				$join->on('a.entity_id', '=', 'outlets.id')
+					->where('a.address_of_id', 3160);
+			})
+			->join('ncities as city', 'city.id', 'a.city_id')
+			->join('nstates as s', 's.id', 'city.state_id')
+			->join('regions as r', 'r.state_id', 's.id')
+            ->whereIn('r.id', $region_ids)
+            ->select('outlets.id', 'outlets.name')
+            ->get()
+            ->prepend(['id' => -1, 'name' => 'All Outlets']);
+        return response()->json($this->data);
+    }
     // Bank statement report
     public function bankStatement(Request $r) {
             $time_stamp = date('Y_m_d_h_i_s');
@@ -303,6 +378,174 @@ class ExportReportController extends Controller
     }
     // Gst report
     public function gst(Request $r) {
-        
+        // dd($r->all());
+        ob_end_clean();
+		$date = explode(' to ', $r->period);
+		$from_date = date('Y-m-d', strtotime($date[0]));
+		$to_date = date('Y-m-d', strtotime($date[1]));
+        $region_ids = $outlet_ids = [];
+        if ($r->regions) {
+            if (in_array('-1', json_decode($r->regions))) {
+                $region_ids = Outlet::pluck('id')->toArray();
+            } else {
+                $region_ids = json_decode($r->regions);
+            }
+        }
+        if ($r->outlets) {
+            if (in_array('-1', json_decode($r->outlets))) {
+                $outlet_ids = Outlet::pluck('id')->toArray();
+            } else {
+                $outlet_ids = json_decode($r->outlets);
+            }
+        }
+        // dd($region_ids, $outlet_ids);
+		ini_set('max_execution_time', 0);
+        $excel_headers = [
+            'LINENUM',
+            'EMPLOYEE CODE',
+            'EMPLOYEE NAME',
+            'OUTLET',
+            'SBU',
+            'CLAIM NUMBER',
+            'CLAIM DATE',
+            'GST NUMBER',
+            'SUPPLIER NAME',
+            'INVOICE NUMBER',
+            'INVOICE AMOUNT',
+            'TAX AMOUNT',
+            // 'ADDRESS',
+            'DATE',
+        ];
+        $gst_details = EmployeeClaim::select(
+                DB::raw('COALESCE(employees.code, "") as emp_code'),
+                DB::raw('COALESCE(users.name, "") as emp_name'),
+                DB::raw('COALESCE(outlets.code, "") as outlet'),
+                DB::raw('"sbu" as sbu'),
+                DB::raw('COALESCE(ey_employee_claims.number, "") as claim_number'),
+                DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as claim_date'),
+                DB::raw('COALESCE(lodgings.gstin, "") as gst_number'),
+                DB::raw('COALESCE(lodgings.lodge_name, "") as supplier_name'),
+                DB::raw('COALESCE(trips.number, "") as invoice_number'),
+                DB::raw('format(ROUND(IFNULL(lodgings.amount, 0)),2,"en_IN") as invoice_amount'),
+                DB::raw('format(ROUND(IFNULL(lodgings.tax, 0)),2,"en_IN") as tax_amount'),
+                DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as date')
+            )->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
+            ->leftJoin('users', function($user_q) {
+                $user_q->on('employees.id', 'users.entity_id')
+                    ->where('users.user_type_id', 3121);
+            })
+            ->leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
+            ->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
+            ->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
+            ->leftJoin('ey_addresses as a', function ($join) {
+				$join->on('a.entity_id', '=', 'outlets.id')
+					->where('a.address_of_id', 3160);
+			})
+			->leftJoin('ncities as city', 'city.id', 'a.city_id')
+			->leftJoin('nstates as s', 's.id', 'city.state_id')
+			->leftJoin('regions as r', 'r.state_id', 's.id')
+            ->where(function($q) use ($region_ids, $outlet_ids) {
+                if (count($outlet_ids) == 0) {
+                    $q->whereIn('r.id', $region_ids);
+                } else {
+                    $q->whereIn('outlets.id', $outlet_ids);
+                }
+            })
+            ->where('ey_employee_claims.status_id', 3026)
+            ->whereDate('ey_employee_claims.created_at', '>=', $from_date)
+			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
+            ->groupBy('ey_employee_claims.id')
+            ->get();
+        if (count($gst_details) == 0) {
+            return redirect()->back()->with(['error' => 'No Record Found!']);
+        }
+        $export_details = [];
+        $s_no = 1;
+        foreach ($gst_details as $gst_detail_key => $gst_detail) {
+            $export_data = [
+                $s_no++,
+                $gst_detail->emp_code,
+                $gst_detail->emp_name,
+                $gst_detail->outlet,
+                $gst_detail->sbu,
+                $gst_detail->claim_number,
+                $gst_detail->claim_date,
+                $gst_detail->gst_number,
+                $gst_detail->supplier_name,
+                $gst_detail->invoice_number,
+                $gst_detail->invoice_amount,
+                $gst_detail->tax_amount,
+                $gst_detail->date,
+            ];
+
+            $export_details[] = $export_data;
+        }
+        $title = 'GST_REPORT_' . Carbon::now();
+        $sheet_name = 'GST REPORT';
+        Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
+            $excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+                $sheet->fromArray($export_details, NULL, 'A1');
+                $sheet->row(1, $excel_headers);
+                $sheet->row(1, function ($row) {
+                    $row->setBackground('#c4c4c4');
+                });
+            });
+            $excel->setActiveSheetIndex(0);
+        })->download('csv');
+    }
+    // Send mail
+    public function sendMail() {
+        try {
+            $current_date = date('Y-m-d');
+            $mail_config_id = 3731;
+            $mail_config_details = MailConfiguration::select(
+                    'company_id',
+                    'to_email',
+                    'cc_email'
+                )->where('config_id', $mail_config_id)
+                ->get();
+            foreach ($mail_config_details as $key => $mail_config_detail) {
+                $to_email = explode(',', $mail_config_detail->to_email);
+                $cc_email = explode(',', $mail_config_detail->cc_email);
+
+                $mail_attachements = ReportDetail::whereIn('type_id', [3721, 3722])
+                        ->whereDate('created_at', $current_date)
+                        ->where('company_id', $mail_config_detail->company_id)
+                        ->pluck('path')
+                        ->toArray();
+
+                $content = 'Kindly find you are Bank Statement And Travek X to Ax Report Below.';
+                if (count($mail_attachements) == 0)
+                    $content = 'No reports found today.';
+                $subject = 'Mail Report';
+                $arr['content'] = $content;
+                $arr['subject'] = $subject;
+                $arr['to_email'] = $to_email;
+                $arr['cc_email'] = $cc_email;
+                $arr['base_url'] = URL::to('/');
+
+                // return view('/mail/report_mail', $arr);
+
+                $view_name = 'mail.report_mail';
+                Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $to_email, $mail_attachements) {
+                    $message->to($to_email)->subject($subject);
+                    $message->cc($cc_email)->subject($subject);
+                    $message->from('tvsfinance@tvs.in');
+                    if (count($mail_attachements) > 0) {
+                        foreach ($mail_attachements as $file) {
+                            if ($file) {
+                                $filePath = storage_path(str_replace('storage/', '', $file));
+                                $message->attach($filePath);
+                            }
+                        }
+                    }
+                });
+            }
+            return redirect('/')->with('success', 'Mail Sent');
+        } catch (\Exception $e) {
+			$error = 'Error : ' . $e->getMessage() . ' - Line Number : ' . $e->getLine();
+            \Log::info($error);
+			return redirect('/')->with('error', $error);
+		}
     }
 }
