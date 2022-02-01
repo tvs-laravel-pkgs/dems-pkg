@@ -3,8 +3,8 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 
-use Uitoux\EYatra\{Region,Outlet,EmployeeClaim};
-use App\{Config,ReportDetail,MailConfiguration,Employee};
+use Uitoux\EYatra\{Region,Outlet,EmployeeClaim,Employee};
+use App\{Config,ReportDetail,MailConfiguration};
 use Illuminate\Http\Request;
 use Excel;
 use Redirect;
@@ -322,8 +322,8 @@ class ExportReportController extends Controller
                 ];
                 $travelex_details[]=$consolidation_local;
                 $travelex_details[]=$consolidation_detail;
-            ob_end_clean();
-            ob_start();
+            // ob_end_clean();
+            // ob_start();
              $outputfile ='_travelex_report' . $time_stamp;
             $file=Excel::create('travelex_' . $time_stamp, function ($excel) use ($travelex_header,$travelex_details) {
                 $excel->sheet('travelex_', function ($sheet) use ($travelex_header,$travelex_details) {
@@ -420,7 +420,7 @@ class ExportReportController extends Controller
                 DB::raw('COALESCE(employees.code, "") as emp_code'),
                 DB::raw('COALESCE(users.name, "") as emp_name'),
                 DB::raw('COALESCE(outlets.code, "") as outlet'),
-                DB::raw('"sbu" as sbu'),
+                DB::raw('COALESCE(sbus.name, "") as sbu'),
                 DB::raw('COALESCE(ey_employee_claims.number, "") as claim_number'),
                 DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as claim_date'),
                 DB::raw('COALESCE(lodgings.gstin, "") as gst_number'),
@@ -430,6 +430,7 @@ class ExportReportController extends Controller
                 DB::raw('format(ROUND(IFNULL(lodgings.tax, 0)),2,"en_IN") as tax_amount'),
                 DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as date')
             )->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
+            ->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
             ->leftJoin('users', function($user_q) {
                 $user_q->on('employees.id', 'users.entity_id')
                     ->where('users.user_type_id', 3121);
