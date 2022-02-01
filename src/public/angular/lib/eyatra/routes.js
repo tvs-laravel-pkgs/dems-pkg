@@ -834,6 +834,14 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/local-trip/claim/verification/view/:trip_id', {
         template: '<eyatra-local-claim-verification-view></eyatra-local-claim-verification-view>',
         title: 'Local Trip Claim Verification',
+    }).
+    when('/gst/report', {
+        template: '<eyatra-gst-report></eyatra-gst-report>',
+        title: 'GST Report',
+    }).
+    when('/report/list', {
+        template: '<eyatra-report-list></eyatra-report-list>',
+        title: 'Report List',
     });
 
 

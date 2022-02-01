@@ -53,6 +53,7 @@ class EYatraConfigSeeder extends Seeder {
 			536 => 'Financial Years',
 			537 => 'Serial Number Segment Types',
 			538 => 'Report Types',
+			539 => 'Mail Config Types',
 		];
 
 		$configs = [
@@ -1049,6 +1050,11 @@ class EYatraConfigSeeder extends Seeder {
 			3722 => [
 				'name' => 'Travel X To Ax',
 				'config_type_id' => 538,
+			],
+			// Mail types
+			3731 => [
+				'name' => 'Bank and Traven x report mail',
+				'config_type_id' => 539,
 			],
 
 		];
