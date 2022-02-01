@@ -492,7 +492,7 @@ class ExportReportController extends Controller
                 });
             });
             $excel->setActiveSheetIndex(0);
-        })->download('csv');
+        })->download('xlsx');
     }
     // Send mail
     public function sendMail() {
