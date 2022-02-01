@@ -30,12 +30,14 @@ class ExportReportController extends Controller
                 'eyec.total_amount as Amount',
                 'eyec.number as documentnum',
                 'ol.code as ledgerdiamension',
+                's.name as sbuname'
             )
                 ->join('users as u','u.entity_id', 'employees.id')
                 ->join('bank_details as bd', 'bd.entity_id', 'employees.id')
                 ->join('trips as t','t.employee_id','employees.id')
                 ->join('ey_employee_claims as eyec','eyec.employee_id','employees.id')
                 ->join('outlets as ol','ol.id','employees.outlet_id')
+                ->join('sbus as s','s.id','employees.sbu_id')
                 ->where('t.status_id','=','3026')
                 ->get()->toArray();
                 //dd($outstations);
@@ -51,11 +53,13 @@ class ExportReportController extends Controller
                 'lt.claimed_date as documentdate',
                 'lt.number as documentnum',
                 'ol.code as ledgerdiamension',
+                 's.name as sbuname'
             )
                 ->join('users as u','u.entity_id', 'employees.id')
                 ->join('bank_details as bd', 'bd.entity_id', 'employees.id')
                 ->join('local_trips as lt','lt.employee_id','employees.id')
                 ->join('outlets as ol','ol.id','employees.outlet_id')
+                ->join('sbus as s','s.id','employees.sbu_id')
                 ->where('lt.status_id','=','3026')
                 ->get()->toArray();
                 //dd($claims);
@@ -155,7 +159,7 @@ class ExportReportController extends Controller
                    $soprostatus='2',
                    'EMP_'.$local['Account_Number'],
                    $company='tvs',
-                   'ALSERV-'.$local['ledgerdiamension'],
+                   $local['sbuname'].'-'.$local['ledgerdiamension'],
                    $offsetledgerdiamension='0',
                    $personnelnumber='INTG01',
                    $logisticlocation='T V Sundram Iyengar & Sons P Ltd(CEN)',
@@ -178,7 +182,7 @@ class ExportReportController extends Controller
                    $journaltype='0',
                    $journalname='TLXCHQ',
                    $soprostatus='2',
-                   '1215-'.$local['ledgerdiamension'].'-ALSERV',
+                   '1215-'.$local['ledgerdiamension'].'-'.$local['sbuname'],
                    $company='tvs',
                    'ALSERV-'.$local['ledgerdiamension'],
                    $offsetledgerdiamension='0',
@@ -188,8 +192,9 @@ class ExportReportController extends Controller
                 $local_trips[] = $local_trip;
                 $travelex_details[]=$travelex_local;
                 $travelex_details[]=$travelex_detail;
-            }
+            }  
         }
+ 
                 $consolidation_local=[
                     $s_no++,
                    'CC-'.$local['invoice'],
