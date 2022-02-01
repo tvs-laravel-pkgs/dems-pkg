@@ -1156,6 +1156,19 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'eyatra-all-company-view',
 				'display_name' => 'View All Companies',
 			],
+			// MASTERS -> GST Report
+			5705 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-gst-report',
+				'display_name' => 'GST Report',
+			],
+			5708 => [
+				'display_order' => 1,
+				'parent_id' => 5680,
+				'name' => 'eyatra-report-list',
+				'display_name' => 'Report List',
+			],
 
 		];
 
