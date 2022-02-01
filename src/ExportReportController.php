@@ -36,7 +36,7 @@ class ExportReportController extends Controller
                 ->join('bank_details as bd', 'bd.entity_id', 'employees.id')
                 ->join('trips as t','t.employee_id','employees.id')
                 ->join('ey_employee_claims as eyec','eyec.employee_id','employees.id')
-                ->join('outlets as ol','ol.id','employees.outlet_id')
+                ->leftjoin('outlets as ol','ol.id','t.outlet_id')
                 ->join('sbus as s','s.id','employees.sbu_id')
                 ->where('t.status_id','=','3026')
                 ->get()->toArray();
@@ -53,12 +53,12 @@ class ExportReportController extends Controller
                 'lt.claimed_date as documentdate',
                 'lt.number as documentnum',
                 'ol.code as ledgerdiamension',
-                 's.name as sbuname'
+                's.name as sbuname'
             )
                 ->join('users as u','u.entity_id', 'employees.id')
                 ->join('bank_details as bd', 'bd.entity_id', 'employees.id')
                 ->join('local_trips as lt','lt.employee_id','employees.id')
-                ->join('outlets as ol','ol.id','employees.outlet_id')
+                ->leftjoin('outlets as ol','ol.id','lt.outlet_id')
                 ->join('sbus as s','s.id','employees.sbu_id')
                 ->where('lt.status_id','=','3026')
                 ->get()->toArray();
@@ -184,7 +184,7 @@ class ExportReportController extends Controller
                    $soprostatus='2',
                    '1215-'.$local['ledgerdiamension'].'-'.$local['sbuname'],
                    $company='tvs',
-                   'ALSERV-'.$local['ledgerdiamension'],
+                   $local['sbuname'].'-'.$local['ledgerdiamension'],
                    $offsetledgerdiamension='0',
                    $personnelnumber='INTG01',
                    $logisticlocation='T V Sundram Iyengar & Sons P Ltd(CEN)',
