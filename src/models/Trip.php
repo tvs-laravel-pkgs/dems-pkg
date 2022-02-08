@@ -1623,8 +1623,11 @@ class Trip extends Model {
 			$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 			if (!$employee_claim->number) {
 				$outlet_id = $trip->outlet_id;
-				if (!$outlet_id)
-					return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+				if (!$outlet_id) {
+					$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+					if (!$outlet_id)
+						return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+				}
 
 				$financial_year = getFinancialYear();
 				$financial_year_id = FinancialYear::where('from', $financial_year)->pluck('id')->first();
