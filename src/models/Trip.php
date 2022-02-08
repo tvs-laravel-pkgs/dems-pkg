@@ -1626,7 +1626,7 @@ class Trip extends Model {
 				if (!$outlet_id) {
 					$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
 					if (!$outlet_id)
-						return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+						return response()->json(['success' => false, 'errors' => ['Outlet not found!']]);
 				}
 
 				$financial_year = getFinancialYear();
