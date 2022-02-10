@@ -744,12 +744,14 @@ class LocalTrip extends Model {
 		return response()->json(['success' => true, 'message' => $message]);
 	}
 
-	public static function cancelTrip($trip_id) {
+	public static function cancelTrip($r) {
+		$trip_id=$r->trip_id;
 
 		$trip = LocalTrip::where('id', $trip_id)->first();
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$trip->employee_trip_cancel_remarks=$r->employee_trip_cancel_remarks;
 		$trip->status_id = 3032;
 		$trip->save();
 

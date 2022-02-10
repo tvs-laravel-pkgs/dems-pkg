@@ -704,44 +704,100 @@ app.component('eyatraTripLocalView', {
         });
 
         //CANCEL TRIP
-        $scope.confirmCancelLocalTrip = function() {
-            $id = $('#trip_id').val();
+        /* $scope.confirmCancelLocalTrip = function() {
+             $id = $('#trip_id').val();
 
-            $http.get(
-                local_trip_cancel_url + '/' + $id,
-            ).then(function(response) {
-                if (!response.data.success) {
-                    var errors = '';
-                    for (var i in res.errors) {
-                        errors += '<li>' + res.errors[i] + '</li>';
-                    }
-                    $noty = new Noty({
-                        type: 'error',
-                        layout: 'topRight',
-                        text: errors,
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                } else {
-                    $('#cancel_local_trip').modal('hide');
-                    $noty = new Noty({
-                        type: 'success',
-                        layout: 'topRight',
-                        text: 'Trip Cancelled Successfully',
-                    }).show();
-                    setTimeout(function() {
-                        $noty.close();
-                    }, 5000);
-                    setTimeout(function() {
-                        $location.path('/local-trip/list')
-                        $scope.$apply()
-                    }, 1000);
+             $http.get(
+                 local_trip_cancel_url + '/' + $id,
+             ).then(function(response) {
+                 if (!response.data.success) {
+                     var errors = '';
+                     for (var i in res.errors) {
+                         errors += '<li>' + res.errors[i] + '</li>';
+                     }
+                     $noty = new Noty({
+                         type: 'error',
+                         layout: 'topRight',
+                         text: errors,
+                     }).show();
+                     setTimeout(function() {
+                         $noty.close();
+                     }, 5000);
+                 } else {
+                     $('#cancel_local_trip').modal('hide');
+                     $noty = new Noty({
+                         type: 'success',
+                         layout: 'topRight',
+                         text: 'Trip Cancelled Successfully',
+                     }).show();
+                     setTimeout(function() {
+                         $noty.close();
+                     }, 5000);
+                     setTimeout(function() {
+                         $location.path('/local-trip/list')
+                         $scope.$apply()
+                     }, 1000);
 
-                }
+                 }
 
+             });
+         }*/
+
+        //CANCEL TRIP WITH REMARKS
+        $(document).on('click', '.reject_local_btn', function() {
+            var form_id = '#local_trip-cancel-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+
+                submitHandler: function(form) {
+
+                    let formData = new FormData($(form_id)[0]);
+                    $('#reject_local_btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['localTripCancel'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            console.log(res.success);
+                            if (!res.success) {
+                                $('#reject_local_btn').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Trip Cancelled Successfully',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 1000);
+                                $('#cancel_local_trip').modal('hide');
+                                setTimeout(function() {
+                                    $location.path('/local-trip/list')
+                                    $scope.$apply()
+                                }, 500);
+
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
             });
-        }
+        });
+
+
 
         //DELETE TRIP
         $scope.confirmDeleteLocalTrip = function() {

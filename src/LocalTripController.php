@@ -311,8 +311,8 @@ class LocalTripController extends Controller {
 		return LocalTrip::deleteTrip($trip_id);
 	}
 
-	public function cancelTrip($trip_id) {
-		return LocalTrip::cancelTrip($trip_id);
+	public function cancelTrip(Request $r) {
+		return LocalTrip::cancelTrip($r);
 	}
 
 	public function listLocalTripVerification(Request $r) {

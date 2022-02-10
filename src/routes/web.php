@@ -467,7 +467,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/view/{trip_id}', 'Uitoux\EYatra\LocalTripController@viewLocalTrip')->name('viewLocalTrip');
 		Route::get('eyatra/local-trip/get-filter-data', 'Uitoux\EYatra\LocalTripController@eyatraLocalTripFilterData')->name('eyatraLocalTripFilterData');
 		Route::get('eyatra/local-trip/delete/{trip_id}', 'Uitoux\EYatra\LocalTripController@deleteTrip')->name('deleteTrip');
-		Route::get('eyatra/local-trip/cancel/{trip_id?}', 'Uitoux\EYatra\Api\LocalTripController@cancelTrip');
+		Route::post('eyatra/local-trip/cancel', 'Uitoux\EYatra\LocalTripController@cancelTrip')->name('localTripCancel');
 
 		Route::post('eyatra/local-trip/attachment/update', 'Uitoux\EYatra\LocalTripController@updateAttachmentStatus')->name('updateLocalTripAttachmentStatus');
 
