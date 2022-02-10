@@ -139,43 +139,43 @@ class ExportReportController extends Controller
         ->get()->toArray();
         //dd($claims);
         $locals=array_merge($claims,$outstations);
+        $local_trips_header = [
+            'SNo',
+            'Account Number',
+            'Name',
+            'Bank Account Number',
+            'Purpose',
+            'Created Date and Time',
+            'Amount',
+            'Posted',
+            'Batch',
+        ];
+        $travelex_header = [
+            'LINENUM',
+            'INVOICE',
+            'DOCUMENTNUM',
+            'DOCUMENTDATE',
+            'LEDGERDIMENSION',
+            'TRANSDATE',
+            'ACCOUNTTYPE',
+            'AMOUNTCURCREDIT',
+            'OFFSETACCOUNTTYPE',
+            'AMOUNTCURDEBIT',
+            'TXT',
+            'VOUCHER',
+            'POSTED',
+            'DATAAREAID',
+            'JOURNALTYPE',
+            'JOURNALNAME',
+            'SOPROSTATUS',
+            'ACCOUNTNUM',
+            'COMPANY',
+            'DEFAULTLEDGERDIAMENSIONTXT',
+            'OFFSETLEDGERDIAMENSION',
+            'PERSONNELNUMBER',
+            'LOGISTICSLOCATION',
+        ];
         if(count($locals) > 0){
-            $local_trips_header = [
-                'SNo',
-                'Account Number',
-                'Name',
-                'Bank Account Number',
-                'Purpose',
-                'Created Date and Time',
-                'Amount',
-                'Posted',
-                'Batch',
-            ];
-            $travelex_header = [
-                'LINENUM',
-                'INVOICE',
-                'DOCUMENTNUM',
-                'DOCUMENTDATE',
-                'LEDGERDIMENSION',
-                'TRANSDATE',
-                'ACCOUNTTYPE',
-                'AMOUNTCURCREDIT',
-                'OFFSETACCOUNTTYPE',
-                'AMOUNTCURDEBIT',
-                'TXT',
-                'VOUCHER',
-                'POSTED',
-                'DATAAREAID',
-                'JOURNALTYPE',
-                'JOURNALNAME',
-                'SOPROSTATUS',
-                'ACCOUNTNUM',
-                'COMPANY',
-                'DEFAULTLEDGERDIAMENSIONTXT',
-                'OFFSETLEDGERDIAMENSION',
-                'PERSONNELNUMBER',
-                'LOGISTICSLOCATION',
-            ];
             $local_trips=array();
             $travelex_details=array();
             $voucher='v';
@@ -324,8 +324,8 @@ class ExportReportController extends Controller
         $travelex_details[]=$consolidation_detail;
         // ob_end_clean();
         // ob_start();
-        $outputfile ='_travelex_report' . $time_stamp;
-        $file=Excel::create('travelex_' . $time_stamp, function ($excel) use ($travelex_header,$travelex_details) {
+        $outputfile ='travelex_report_' . $time_stamp;
+        $file=Excel::create($outputfile, function ($excel) use ($travelex_header,$travelex_details) {
             $excel->sheet('travelex_', function ($sheet) use ($travelex_header,$travelex_details) {
                 $sheet->fromArray($travelex_details, NULL, 'A1');
                 $sheet->row(1, $travelex_header);
@@ -346,8 +346,8 @@ class ExportReportController extends Controller
         $report_details->bank_date=$time_stamp;
         $report_details->credit_total_amount=$total_amount;
         $report_details->save();
-        $outputfile_bank ='_travelex_report' . $time_stamp;
-        $file_one=Excel::create('bank_statement_' . $time_stamp, function ($excel) use ($local_trips_header,$local_trips) {
+        $outputfile_bank ='bank_statement_' . $time_stamp;
+        $file_one=Excel::create($outputfile_bank, function ($excel) use ($local_trips_header,$local_trips) {
             $excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header,$local_trips) {
                 $sheet->fromArray($local_trips, NULL, 'A1');
                 $sheet->row(1, $local_trips_header);
