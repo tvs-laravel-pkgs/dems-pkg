@@ -363,38 +363,91 @@ app.component('eyatraLocalTripVerificationDetailView', {
             $scope.search = '';
         };
 
+        // $scope.confirmApproveLocalTripClaim = function() {
+        //     $id = $('#trip_id').val();
+        //     $('#claim_local_approve_btn').button('loading');
+        //     if (local_trip_approve == 0) {
+        //         local_trip_approve = 1;
+        //         $http.get(
+        //             local_trip_verification_approve_url + '/' + $id,
+        //         ).then(function(response) {
+        //             console.log(response);
+        //             $('#claim_local_approve_btn').button('reset');
+        //             if (!response.data.success) {
+        //                 var errors = '';
+        //                 for (var i in response.data.errors) {
+        //                     errors += '<li>' + response.data.errors[i] + '</li>';
+        //                 }
+        //                 $noty = new Noty({
+        //                     type: 'error',
+        //                     layout: 'topRight',
+        //                     text: errors,
+        //                 }).show();
+        //                 setTimeout(function() {
+        //                     $noty.close();
+        //                 }, 1000);
+        //             } else {
+        //                 custom_noty('success', 'Local Trip Claim Approved Successfully');
+        //                 $('#alert-local-claim-modal-approve').modal('hide');
+        //                 setTimeout(function() {
+        //                     $location.path('/local-trip/verification/list')
+        //                     $scope.$apply()
+        //                 }, 500);
+        //             }
+
+        //         });
+        //         local_trip_approve = 0;
+        //     }
+        // }
+
+        //APPROVE WITH REMARKS
         $scope.confirmApproveLocalTripClaim = function() {
-            $id = $('#trip_id').val();
-            $('#claim_local_approve_btn').button('loading');
             if (local_trip_approve == 0) {
                 local_trip_approve = 1;
-                $http.get(
-                    local_trip_verification_approve_url + '/' + $id,
-                ).then(function(response) {
-                    console.log(response);
-                    $('#claim_local_approve_btn').button('reset');
-                    if (!response.data.success) {
-                        var errors = '';
-                        for (var i in response.data.errors) {
-                            errors += '<li>' + response.data.errors[i] + '</li>';
-                        }
-                        $noty = new Noty({
-                            type: 'error',
-                            layout: 'topRight',
-                            text: errors,
-                        }).show();
-                        setTimeout(function() {
-                            $noty.close();
-                        }, 1000);
-                    } else {
-                        custom_noty('success', 'Local Trip Claim Approved Successfully');
-                        $('#alert-local-claim-modal-approve').modal('hide');
-                        setTimeout(function() {
-                            $location.path('/local-trip/verification/list')
-                            $scope.$apply()
-                        }, 500);
-                    }
+                var form_id = '#trip-approve-form';
 
+                var v = jQuery(form_id).validate({
+                    ignore: '',
+                    submitHandler: function(form) {
+                        let formData = new FormData($(form_id)[0]);
+                        $('#claim_local_approve_btn').button('loading');
+                        $.ajax({
+                                url: laravel_routes['approveLocalTrip'],
+                                method: "POST",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                            })
+                            .done(function(res) {
+                                console.log(res.success);
+                                $('#claim_local_approve_btn').button('reset');
+                                if (!res.success) {
+                                    var errors = '';
+                                    for (var i in res.errors) {
+                                        errors += '<li>' + res.errors[i] + '</li>';
+                                    }
+                                    $noty = new Noty({
+                                        type: 'error',
+                                        layout: 'topRight',
+                                        text: errors,
+                                    }).show();
+                                    setTimeout(function() {
+                                        $noty.close();
+                                    }, 1000);
+                                } else {
+                                    custom_noty('success', 'Local Trip Claim Approved Successfully');
+                                    $('#alert-local-claim-modal-approve').modal('hide');
+                                    setTimeout(function() {
+                                        $location.path('/local-trip/verification/list')
+                                        $scope.$apply()
+                                    }, 500);
+                                }
+                            })
+                            .fail(function(xhr) {
+                                $('#claim_local_approve_btn').button('reset');
+                                custom_noty('error', 'Something went wrong at server');
+                            });
+                    },
                 });
                 local_trip_approve = 0;
             }
