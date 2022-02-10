@@ -2234,8 +2234,14 @@ class Trip extends Model {
 				}
 				// Changed deviation by Karthick T on 21-01-2022
 				// If lodging exist and attachment not found the claim will go to deviation
-				if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
+				$lodge_attachment_count = Attachment::where('attachment_of_id', 3181)
+					->where('attachment_type_id', 3200)
+					->where('entity_id', $request->trip_id)
+					->count();
+				$lodging_count = Lodging::where('trip_id', $request->trip_id)->count();
+				if ($lodging_count > 0 && $lodge_attachment_count == 0)
 					$employee_claim->is_deviation = 1;
+				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
 				// Changed deviation by Karthick T on 21-01-2022
 
 				$employee_claim->created_by = Auth::user()->id;
