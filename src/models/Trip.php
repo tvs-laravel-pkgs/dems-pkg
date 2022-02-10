@@ -2417,7 +2417,7 @@ class Trip extends Model {
 			'pending_transport_attachments',
 			'pending_lodging_attachments',
 			'pending_boarding_attachments',
-			// 'pending_local_travel_attachments',
+			'pending_local_travel_attachments',
 			'pending_google_attachments',
 		])->find($trip_id);
 		$pending_count = 0;
@@ -2434,7 +2434,7 @@ class Trip extends Model {
 			$pending_count += count($trip_attachment->pending_transport_attachments);
 			$pending_count += count($trip_attachment->pending_lodging_attachments);
 			$pending_count += count($trip_attachment->pending_boarding_attachments);
-			// $pending_count += count($trip_attachment->pending_local_travel_attachments);
+			$pending_count += count($trip_attachment->pending_local_travel_attachments);
 			$pending_count += count($trip_attachment->pending_google_attachments);
 		}
 		$approval_status = ($pending_count == 0) ? false : true;

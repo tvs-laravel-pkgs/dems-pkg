@@ -128,6 +128,7 @@ app.component('eyatraTripClaimVerificationOneView', {
         self.eyatra_trip_claim_verification_one_lodging_attachment_url = eyatra_trip_claim_verification_one_lodging_attachment_url;
         self.eyatra_trip_claim_verification_one_boarding_attachment_url = eyatra_trip_claim_verification_one_boarding_attachment_url;
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url = eyatra_trip_claim_verification_one_local_travel_attachment_url;
+        self.eyatra_trip_claim_verification_one_local_travel_attachment_url_new = eyatra_trip_claim_verification_one_local_travel_attachment_url_new;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
         $http.get(
