@@ -230,6 +230,20 @@ app.component('eyatraTripLocalForm', {
                         showDropdowns: false,
                         autoApply: true,
                     });
+                    var nowDate = new Date();
+                    var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+                    $(".daterange.min-daterange").daterangepicker({
+                        autoclose: true,
+                        minDate: todayDate,
+                        // maxDate: new Date(self.max_eligible_date),
+                        locale: {
+                            cancelLabel: 'Clear',
+                            format: "DD-MM-YYYY",
+                            separator: " to ",
+                        },
+                        showDropdowns: false,
+                        autoApply: true,
+                    });
                     $(".daterange").val('');
                 }, 500);
             }

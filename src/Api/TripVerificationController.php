@@ -16,8 +16,8 @@ class TripVerificationController extends Controller {
 		return response()->json(['success' => true, 'trips' => $trips]);
 
 	}
-
-	public function approveTrip($trip_id, Request $r) {
+    //changes in uat
+	public function approveTrip(Request $r) {
 		return Trip::approveTrip($r);
 	}
 

@@ -42,7 +42,8 @@ Route::group(['middleware' => ['api']], function () {
 
 		//TRIP VERIFICATION
 		Route::get('trip/verification/get-list', 'Uitoux\EYatra\Api\TripVerificationController@listTripVerification');
-		Route::post('trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
+		//changes in uat
+		Route::post('trip/verification/approve', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
 		Route::post('trip/verification/reject', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
 
 		//TRIP CLAIM VERIFICATION LEVEL
@@ -65,14 +66,14 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('local-trip/get-form-data', 'Uitoux\EYatra\Api\LocalTripController@getTripFormData');
 		Route::post('local-trip/save', 'Uitoux\EYatra\Api\LocalTripController@saveLocalTrip');
 		Route::get('local-trip/view/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@viewTrip');
-		Route::get('local-trip/cancel/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@cancelTrip');
+		Route::get('local-trip/cancel', 'Uitoux\EYatra\Api\LocalTripController@cancelTrip');
 		Route::get('local-trip/delete/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@deleteTrip');
 		Route::post('local-trip/save/attachments', 'Uitoux\EYatra\Api\LocalTripController@saveAttachments');
 
 		//LOCAL TRIP VERIFICATION
 		Route::post('local-trip/verification/get-list', 'Uitoux\EYatra\Api\LocalTripController@listTripVerification');
-
-		Route::get('local-trip/verification/approve/{trip_id}', 'Uitoux\EYatra\Api\LocalTripController@approveTrip');
+       //changes in uat
+		Route::post('local-trip/verification/approve', 'Uitoux\EYatra\Api\LocalTripController@approveTrip');
 		Route::post('local-trip/verification/reject', 'Uitoux\EYatra\Api\LocalTripController@rejectTrip');
 
 		//PROFILE IMAGE SAVE
