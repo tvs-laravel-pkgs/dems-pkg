@@ -13,7 +13,10 @@ use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\LocalTripVisitDetail;
+use Uitoux\EYatra\Employee;
 use Validator;
+use Mail;
+use Illuminate\Support\Facades\URL;
 
 class LocalTrip extends Model {
 	use SoftDeletes;
@@ -787,5 +790,38 @@ class LocalTrip extends Model {
 		$approval_status = ($pending_count == 0) ? false : true;
 		return $approval_status;
 	}
+	// Pending local trip mail by Karthick T on 15-02-2022
+	public static function pendingTripMail($date) {
+		$pending_local_trips = LocalTrip::where('end_date', $date)
+            ->whereNull('claim_number')
+            ->get();
+        if (count($pending_local_trips) > 0) {
+            foreach($pending_local_trips as $local_trip_key => $pending_local_trip) {
+                $content = 'Your local trip ' . $pending_local_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull.';
+                $subject = 'Pending Local Trip Mail';
+                $arr['content'] = $content;
+                $arr['subject'] = $subject;
+                $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_local_trip->employee_id)
+                        ->pluck('email')->toArray();;
+                $cc_email = $arr['cc_email'] = [];
+                $arr['base_url'] = URL::to('/');
+
+                $view_name = 'mail.report_mail';
+                Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $to_email) {
+                    $message->to($to_email)->subject($subject);
+                    $message->cc($cc_email)->subject($subject);
+                    $message->from('tvsfinance@tvs.in');
+                });
+            }
+			\Log::info('Pending Local trip mail completed');
+		} else {
+			\Log::info('No pending local trips.');
+		}
+		return true;
+	}
+	// Pending local trip mail by Karthick T on 15-02-2022
 
 }

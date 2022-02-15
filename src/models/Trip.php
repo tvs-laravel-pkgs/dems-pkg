@@ -20,6 +20,8 @@ use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Validator;
 use App\Http\Controllers\AngularController;
+use Mail;
+use Illuminate\Support\Facades\URL;
 
 
 class Trip extends Model {
@@ -2441,5 +2443,42 @@ class Trip extends Model {
 		return $approval_status;
 	}
 	// Checking attachment status by Karthick T on 20-01-2022
+	// Pending outstation trip mail by Karthick T on 15-02-2022
+	public static function pendingTripMail($date) {
+		$pending_trips = Trip::select(
+					'trips.number',
+					'trips.employee_id'
+				)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->where('trips.end_date', $date)
+				->whereNull('ey_employee_claims.number')
+				->get();
+        if (count($pending_trips) > 0) {
+            foreach($pending_trips as $trip_key => $pending_trip) {
+                $content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull.';
+                $subject = 'Pending Outstation Trip Mail';
+                $arr['content'] = $content;
+                $arr['subject'] = $subject;
+                $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_trip->employee_id)
+                        ->pluck('email')->toArray();;
+                $cc_email = $arr['cc_email'] = [];
+                $arr['base_url'] = URL::to('/');
+
+                $view_name = 'mail.report_mail';
+                Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $to_email) {
+                    $message->to($to_email)->subject($subject);
+                    $message->cc($cc_email)->subject($subject);
+                    $message->from('tvsfinance@tvs.in');
+                });
+            }
+			\Log::info('Pending Outstation trip mail completed');
+		} else {
+			\Log::info('No pending outstation trips.');
+		}
+		return 'true';
+	}
+	// Pending outstation trip mail by Karthick T on 15-02-2022
 
 }

@@ -582,3 +582,4 @@ Route::get('eyatra/outlet-detail/{region_ids?}', 'Uitoux\EYatra\ExportReportCont
 Route::get('eyatra/report-list/filter', 'Uitoux\EYatra\ExportReportController@getReportListFilter')->name('getReportListFilter');
 Route::get('eyatra/report-list/data', 'Uitoux\EYatra\ExportReportController@getReportListData')->name('getReportListData');
 Route::get('eyatra/report-data/mail', 'Uitoux\EYatra\ExportReportController@sendMail')->name('sendMail');
+Route::get('eyatra/pending-trip/mail', 'Uitoux\EYatra\MailController@sendMail')->name('sendPendingTripMail');
