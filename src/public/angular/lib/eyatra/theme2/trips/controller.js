@@ -257,8 +257,6 @@ app.component('eyatraTripForm', {
                     endDate: end_date,
                     autoApply: true,
                 });
-                console.log(self.eligible_date);
-                console.log(self.max_eligible_date);
                 // Booking Preference Conditions
                 $.each(self.trip.visits, function(key, value) {
                     setTimeout(function() {
@@ -278,6 +276,23 @@ app.component('eyatraTripForm', {
                             separator: " to ",
                         },
                         showDropdowns: false,
+                        autoApply: true,
+                    });
+                    var nowDate = new Date();
+                    var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+                    $(".daterange.min-daterange").daterangepicker({
+                        autoclose: true,
+                        minDate: todayDate,
+                        // maxDate: new Date(self.max_eligible_date),
+
+                        locale: {
+                            cancelLabel: 'Clear',
+                            format: "DD-MM-YYYY",
+                            separator: " to ",
+                        },
+                        showDropdowns: false,
+                        startDate: start_date,
+                        endDate: end_date,
                         autoApply: true,
                     });
                     $(".daterange").val('');
