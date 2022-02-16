@@ -102,9 +102,9 @@ class TripController extends Controller {
 		return Trip::deleteTrip($trip_id);
 	}
 
-	public function cancelTrip($trip_id) {
+	public function cancelTrip(Request $r) {
 
-		return Trip::cancelTrip($trip_id);
+		return Trip::cancelTrip($r);
 	}
 	public function requestCancelVisitBooking($visit_id) {
 		return Trip::requestCancelVisitBooking($visit_id);

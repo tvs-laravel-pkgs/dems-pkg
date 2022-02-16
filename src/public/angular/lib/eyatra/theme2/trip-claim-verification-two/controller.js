@@ -150,7 +150,10 @@ app.component('eyatraTripClaimVerificationTwoView', {
             // self.transport_total_amount = response.data.transport_total_amount;
             // self.lodging_total_amount = response.data.lodging_total_amount;
             // self.boardings_total_amount = response.data.boardings_total_amount;
-            // self.local_travels_total_amount = response.data.local_travels_total_amount;
+            //self.local_travels_total_amount = response.data.local_travels_total_amount;
+            console.log(self.eyatra_trip_claim_verification_two_local_travel_attachment_url);
+            console.log(response.data.trip.local_travel_attachments);
+            console.log(response.data.trip.transport_attachments.length);
             self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
             if (response.data.trip.transport_attachments.length === 0 && response.data.trip.boarding_attachments.length === 0 && response.data.trip.lodging_attachments.length === 0 && response.data.trip.local_travel_attachments.length === 0 && response.data.trip.google_attachments.length === 0) {

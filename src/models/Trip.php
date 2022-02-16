@@ -12,6 +12,7 @@ use DatePeriod;
 use DateTime;
 use DB;
 use Entrust;
+use Uitoux\EYatra\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
@@ -1094,7 +1095,18 @@ class Trip extends Model {
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
+		$financier_approve = Auth::user()->company->financier_approve;
 		$trip->status_id = 3028;
+		if ($financier_approve == '0') {
+		$trip->advance_request_approval_status_id = 3261;//Advance request Approved
+		//PAYMENT SAVE
+		/*$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
+		$payment->fill($r->all());
+		$payment->payment_of_id = 3250;
+		$payment->entity_id = $trip->id;
+		$payment->created_by = Auth::user()->id;
+		$payment->save();*/
+	    }
 		$trip->approve_remarks=$r->approve_remarks;
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
@@ -1505,7 +1517,7 @@ class Trip extends Model {
 			'local_travel_attachments',
 
 		])->find($trip_id);
-		//dd($trip->local_travel_attachments);
+		//dd($trip);
 
 		if (!$trip) {
 			$data['success'] = false;
