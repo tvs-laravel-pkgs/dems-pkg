@@ -157,6 +157,14 @@ class TripController extends Controller {
 				}
 			}
 		}
+		//if advance requested until trip completed again advance amount is not eligible.
+		if ($request->advance_received) {
+			$get_previous_trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.employee_id', Auth::user()->entity_id)->where('ey_employee_claims.status_id', 3026)->orderBy('ey_employee_claims.id', 'DESC')->select('ey_employee_claims.trip_id')->first();
+			if (!$get_previous_trips) {
+				
+					return response()->json(['success' => false, 'errors' => ['Your have already taken advance amount and the trip is not completed. once you completed your trip you are eligible for advance amount']]);
+			}
+		}
 
 		if ($request->id) {
 			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)

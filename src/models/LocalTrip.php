@@ -647,6 +647,7 @@ class LocalTrip extends Model {
 	}
 
 	public static function approveTrip($r) {
+		//dd('saya');
 		$additional_approve = Auth::user()->company->additional_approve;
 		$financier_approve = Auth::user()->company->financier_approve;
 		$trip_id=$r->trip_id;
@@ -692,6 +693,9 @@ class LocalTrip extends Model {
 
 			//Claim Approval Log
 			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3607, Auth::user()->entity_id, Carbon::now());
+			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+			$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip", $notification_type = $notification_type);
+			dd($type, $trip,$notification_type,$user);
 		} else {
 			//Trip Approval Log
 			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3606, Auth::user()->entity_id, Carbon::now());
