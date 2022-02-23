@@ -162,7 +162,7 @@ class TripController extends Controller {
 			$get_previous_trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.employee_id', Auth::user()->entity_id)->where('ey_employee_claims.status_id', 3026)->orderBy('ey_employee_claims.id', 'DESC')->select('ey_employee_claims.trip_id')->first();
 			if (!$get_previous_trips) {
 				
-					return response()->json(['success' => false, 'errors' => ['Your have already taken advance amount and the trip is not completed. once you completed your trip you are eligible for advance amount']]);
+					return response()->json(['success' => false, 'errors' => ['Yor are not Eligible for Advance Amount since your previous trip not completed']]);
 			}
 		}
 

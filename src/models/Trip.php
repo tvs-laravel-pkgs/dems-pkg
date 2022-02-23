@@ -1096,9 +1096,10 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		$financier_approve = Auth::user()->company->financier_approve;
-		$trip->status_id = 3028;
 		if ($financier_approve == '0') {
-		$trip->advance_request_approval_status_id = 3261;//Advance request Approved
+			if ($request->advance_received >= 1) {
+						$trip->advance_request_approval_status_id = 3261;//Advance request Approved
+					}
 		//PAYMENT SAVE
 		/*$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
 		$payment->fill($r->all());
@@ -1106,6 +1107,8 @@ class Trip extends Model {
 		$payment->entity_id = $trip->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();*/
+	    }else{
+	    	$trip->status_id = 3028;
 	    }
 		$trip->approve_remarks=$r->approve_remarks;
 		$trip->save();
