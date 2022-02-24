@@ -182,6 +182,7 @@ app.component('eyatraPettyCashForm', {
             self.employee_list = response.data.employee_list;
             self.employee = response.data.employee;
             self.petty_cash_others = response.data.petty_cash_other;
+            console.log(self.petty_cash_others);
             self.user_role = response.data.user_role;
             self.emp_details = response.data.emp_details;
             self.petty_cash_removal_id = [];
@@ -190,8 +191,11 @@ app.component('eyatraPettyCashForm', {
             self.petty_cash_other_attach_removal_ids = [];
             self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
             self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
-
-
+            if (self.action == 'Add') {
+                $.each(self.petty_cash_locals, function(index, value) {
+                    value.invoice = 1;
+                });
+            }
             $("#employee_id").val(self.emp_details.emp_id);
 
             if (self.action == 'Edit') {
@@ -281,6 +285,43 @@ app.component('eyatraPettyCashForm', {
                 endDate: "today",
             });
         }, 1000);
+
+        //show model popup for petty cash others 
+        $scope.openRemarksPopup = function(index, remarks) {
+            $("#petty-cash-other-remarks-model").modal("show");
+            $('#modal_expense_type_id').val(index);
+            $('#petty_cash_other_remarks').val(remarks);
+        }
+        //save petty cash others model
+        $scope.savePettyCashRemarks = function(index, remarks) {
+            $('#petty-cash-other-remarks-model').modal('hide');
+            var index = $('#modal_expense_type_id').val();
+            var remarks = $('#petty_cash_other_remarks').val();
+            self.petty_cash_others[index].remarks = $('#petty_cash_other_remarks').val();
+            setTimeout(function() {
+                $scope.$apply()
+            }, 100);
+        }
+
+        //show model popup for petty local 
+        $scope.vechiclePurpose = function(index, remarks) {
+            $("#petty-cash-vechicle-local-remarks-model").modal("show");
+            $('#modal_expense_purpose_id').val(index);
+            $('#petty_cash_local_remarks').val(remarks);
+        }
+        //save petty cash local model
+        $scope.savePettyCashVechicleRemarks = function(index, remarks) {
+            $('#petty-cash-vechicle-local-remarks-model').modal('hide');
+            var index = $('#modal_expense_purpose_id').val();
+            var remarks = $('#petty_cash_local_remarks').val();
+            self.petty_cash_locals[index].remarks = $('#petty_cash_local_remarks').val();
+            console.log(self.petty_cash_locals[index].remarks);
+            setTimeout(function() {
+                $scope.$apply()
+            }, 500);
+        }
+
+
 
         //LOCALCONVEYANCE AMOUNT SHOW BASED ON FROM AND TWO KM DIFFERENCE
         $(document).on('input', '.localconveyance_km', function() {
@@ -397,6 +438,7 @@ app.component('eyatraPettyCashForm', {
                 from_km: '',
                 to_km: '',
                 amount: '',
+                remarks: '',
             });
         }
 
@@ -408,6 +450,11 @@ app.component('eyatraPettyCashForm', {
                 amount: '',
                 tax: '',
                 remarks: '',
+                invoice: '',
+                invoice_date: '',
+                invoice_amount: '',
+                invoice_no: '',
+                gstin: '',
             });
         }
 

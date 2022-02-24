@@ -12,6 +12,7 @@ use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\AngularController;
 
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
@@ -353,7 +354,7 @@ class PettyCashController extends Controller {
 	}
 
 	public function pettycashSave(Request $request) {
-		// dd($request->all());
+		//dd($request->all());
 		try {
 			// $validator = Validator::make($request->all(), [
 			// 	'purpose_id' => [
@@ -441,6 +442,8 @@ class PettyCashController extends Controller {
 					foreach ($request->petty_cash as $petty_cash_data) {
 						$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
 						$petty_cash->fill($petty_cash_data);
+						//dd($petty_cash_data);
+						$petty_cash->remarks=$petty_cash_data['remarks'];
 						$petty_cash->petty_cash_id = $petty_cash_employee_edit->id;
 						$petty_cash->expence_type = $petty_cash_data['localconveyance'];
 						$date = date("Y-m-d", strtotime($petty_cash_data['date']));
@@ -489,6 +492,24 @@ class PettyCashController extends Controller {
 					foreach ($request->petty_cash_other as $petty_cash_data_other) {
 						$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
 						$petty_cash_other->fill($petty_cash_data_other);
+						$petty_cash_other->invoice=$petty_cash_data_other['invoice'];
+						if($petty_cash_data_other['invoice'] == 1){
+						$petty_cash_other->invoice_date=date("Y-m-d", strtotime($petty_cash_data_other['invoice_date']));
+						$petty_cash_other->invoice_amount=$petty_cash_data_other['invoice_amount'];
+						$petty_cash_other->invoice_number=$petty_cash_data_other['invoice_number'];
+						$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($petty_cash_data_other['gstin'],"",false);
+			        //dd($response);
+			        if(!$response['success']){
+				    return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			        } 
+                        $petty_cash_other->gstin=$response['gstin'];
+                    }
+						//dd($petty_cash_data_other);
 						$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
 						$petty_cash_other->petty_cash_id = $petty_cash_employee_edit->id;
 						$date = date("Y-m-d", strtotime($petty_cash_data_other['date_other']));
