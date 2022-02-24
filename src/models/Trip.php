@@ -1096,11 +1096,12 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		$financier_approve = Auth::user()->company->financier_approve;
-		$trip->advance_received=Trip::select('advance_received')->where('id','=',$trip)->get()->first();
+		$trip->advance_request_approval_status_id=Trip::select('id','advance_request_approval_status_id')
+		->where('id','=',$trip)->where('advance_request_approval_status_id',3260)->get()->first();
 		//dd($trip->advance_received);
 		$trip->status_id = 3028;
 		if ($financier_approve == '0') {
-			if ($trip->advance_received > 0) {
+			if ($trip->advance_request_approval_status_id != null) {
 						$trip->advance_request_approval_status_id = 3261;//Advance request Approved
 			}
 		}
