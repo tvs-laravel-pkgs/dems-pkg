@@ -218,13 +218,14 @@ class TripClaimVerificationLevelController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function approveTripClaimVerificationOne($trip_id) {
+	public function approveTripClaimVerificationOne(Request $r) {
 		$additional_approve = Auth::user()->company->additional_approve;
-		$trip = Trip::find($trip_id);
+		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
+		$trip->verification_one_remarks=$r->verification_one_remarks;
+		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
