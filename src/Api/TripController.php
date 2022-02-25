@@ -23,9 +23,17 @@ class TripController extends Controller {
 	}
 
 	public function addTrip(Request $request) {
-		// dd($request->all());
-
-		if ($request->advance_received) {
+		 //dd($request->all());
+       if ($request->advance_received) {
+			$get_previous_trips = Trip::select('id')
+			        ->where('employee_id', Auth::user()->entity_id)
+			        ->whereIn('advance_request_approval_status_id',[3260,3261])
+			        ->whereNotIn('status_id',[3026,3032])
+			        ->orderBy('id', 'DESC')->first();
+			        //dd($get_previous_trips);
+			if ($get_previous_trips) {
+				return response()->json(['success' => false, 'errors' => ['Yor are not Eligible for Advance Amount since your previous trip not completed']]);
+			}
 			$get_previous_entry = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.employee_id', Auth::user()->entity_id)->where('ey_employee_claims.status_id', 3031)->orderBy('ey_employee_claims.id', 'DESC')->select('ey_employee_claims.balance_amount')->first();
 			if ($get_previous_entry) {
 				$previous_amount = $get_previous_entry->balance_amount;
