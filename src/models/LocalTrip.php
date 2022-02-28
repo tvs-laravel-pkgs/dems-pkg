@@ -647,7 +647,6 @@ class LocalTrip extends Model {
 	}
 
 	public static function approveTrip($r) {
-		//dd('saya');
 		$additional_approve = Auth::user()->company->additional_approve;
 		$financier_approve = Auth::user()->company->financier_approve;
 		$trip_id=$r->trip_id;

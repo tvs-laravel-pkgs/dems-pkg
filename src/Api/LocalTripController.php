@@ -170,8 +170,8 @@ class LocalTripController extends Controller {
 		return response()->json(['success' => true, 'trips' => $trips]);
 	}
 
-	public function approveTrip($trip_id) {
-		return LocalTrip::approveTrip($trip_id);
+	public function approveTrip(Request $r) {
+		return LocalTrip::approveTrip($r);
 	}
 
 	public function rejectTrip(Request $request) {

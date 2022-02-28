@@ -72,7 +72,6 @@ Route::group(['middleware' => ['api']], function () {
 
 		//LOCAL TRIP VERIFICATION
 		Route::post('local-trip/verification/get-list', 'Uitoux\EYatra\Api\LocalTripController@listTripVerification');
-       //changes in uat
 		Route::post('local-trip/verification/approve', 'Uitoux\EYatra\Api\LocalTripController@approveTrip');
 		Route::post('local-trip/verification/reject', 'Uitoux\EYatra\Api\LocalTripController@rejectTrip');
 
