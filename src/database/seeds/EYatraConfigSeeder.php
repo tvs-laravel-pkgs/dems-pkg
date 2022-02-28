@@ -733,12 +733,13 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			//PETTY CASH TYPE
+			//CHANEGED AS LOCAL CONVEYANCE AS VEHICLE CONVEYANCE AND OTHER EXPENSES AS PCV EXPENSE ON 28-02-2022
 			3440 => [
-				'name' => 'Local Conveyance',
+				'name' => 'Vehicle Conveyance',
 				'config_type_id' => 527,
 			],
 			3441 => [
-				'name' => 'Other Expense',
+				'name' => 'PCV Expense',
 				'config_type_id' => 527,
 			],
 			3442 => [
