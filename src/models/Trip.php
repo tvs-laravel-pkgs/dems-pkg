@@ -2506,35 +2506,37 @@ class Trip extends Model {
                         ->where('employees.id', $pending_trip->employee_id)
                         ->pluck('email')->toArray();
                     }elseif($status == 'PRA'){
-                       $content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
-                       $subject = 'Pending Outstation Trip Mail';
+                       $content = 'The Outstation trip ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
+                       $subject = 'Pending Outstation Approval Trip Mail';
                        $arr['content'] = $content;
                        $arr['subject'] = $subject;
                        $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-                        ->join('users', 'users.entity_id', 'employees.id')
+                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_trip->employee_id)
                         ->pluck('email')->toArray();
                     }elseif($status == 'PCA'){
-                    	$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
-                       $subject = 'Pending Outstation Trip Mail';
+                    	$content = 'The Outstation Trip Claim ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
+                       $subject = 'Pending Outstation Claim Approval Trip Mail';
                        $arr['content'] = $content;
                        $arr['subject'] = $subject;
                        $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-                        ->join('users', 'users.entity_id', 'employees.id')
+                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_trip->employee_id)
                         ->pluck('email')->toArray();
                     }elseif($status == 'PDCA'){
-                    	$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
-                       $subject = 'Pending Outstation Trip Mail';
+                    	$content = 'The Outstation trip claim  ' . $pending_trip->number . ' is not approval yet. Kindly login to DEMS portal and do the needfull'.$status;
+                       $subject = 'Pending Outstation Deviation Trip Mail';
                        $arr['content'] = $content;
                        $arr['subject'] = $subject;
-                       $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-                        ->join('users', 'users.entity_id', 'employees.id')
-                        ->where('users.user_type_id', 3121)
-                        ->where('employees.id', $pending_trip->employee_id)
-                        ->pluck('email')->toArray();
+                       $to_email = $arr['to_email'] = EmployeeClaim::join('employees as e', 'e.id', 'ey_employee_claims.employee_id')
+					->join('employees as trip_manager_employee', 'trip_manager_employee.id', 'e.reporting_to_id')
+					->join('employees as se_manager_employee', 'se_manager_employee.id', 'trip_manager_employee.reporting_to_id')
+					->join('users', 'users.entity_id', 'se_manager_employee.id')
+					->where('users.user_type_id', 3121)
+					->select('users.email as email', 'users.name as name')
+                    ->pluck('email')->toArray();
                     }
                 $cc_email = $arr['cc_email'] = [];
                 $arr['base_url'] = URL::to('/');

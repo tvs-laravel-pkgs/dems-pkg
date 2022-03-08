@@ -795,20 +795,27 @@ class LocalTrip extends Model {
 	}
 	// Pending local trip mail by Karthick T on 15-02-2022
 	public static function pendingTripMail($date,$status) {
-		$pending_local_trips = LocalTrip::where('end_date', $date)
+		$pending_local_trips=[];
+		if($status == 'CG'){
+		    $pending_local_trips = LocalTrip::where('end_date', $date)
             ->whereNull('claim_number')
             ->get();
-            $local_trips_approval = LocalTrip::where('created_at', $date)
+        }elseif($status == 'PRA'){
+            $pending_local_trips = LocalTrip::where('created_at', $date)
             ->where('status_id','=',3021)
             ->get();
-            $pending_local_trips_claim_approval = LocalTrip::where('claimed_date', $date)
+        }elseif($status == 'PCA'){
+            $pending_local_trips = LocalTrip::where('claimed_date', $date)
             ->where('status_id','=',3023)
             ->get();
-            $pending_local_trips_deviation_claim_approval = LocalTrip::where('claimed_date', $date)
+        }elseif($status == 'PDCA'){
+            $pending_local_trips = LocalTrip::where('claimed_date', $date)
             ->where('status_id','=',3029)
             ->get();
+        }
         if (count($pending_local_trips) > 0) {
             foreach($pending_local_trips as $local_trip_key => $pending_local_trip) {
+            	if($status == 'CG'){
                 $content = 'Your local trip ' . $pending_local_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
@@ -817,7 +824,40 @@ class LocalTrip extends Model {
                         ->join('users', 'users.entity_id', 'employees.id')
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_local_trip->employee_id)
-                        ->pluck('email')->toArray();;
+                        ->pluck('email')->toArray();
+                 }elseif($status == 'PRA'){
+                 	$content = 'The local trip ' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull'.$status;
+                $subject = 'Pending Local Trip Mail';
+                $arr['content'] = $content;
+                $arr['subject'] = $subject;
+                $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_local_trip->employee_id)
+                        ->pluck('email')->toArray();
+                 }elseif($status == 'PCA'){
+                 	$content = 'The local trip Claim' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull'.$status;
+                $subject = 'Pending Local Trip Mail';
+                $arr['content'] = $content;
+                $arr['subject'] = $subject;
+                $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_local_trip->employee_id)
+                        ->pluck('email')->toArray();
+                 }elseif($status == 'PDCA'){
+                 	$content = 'The local trip Deviation Claim' . $pending_local_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
+                $subject = 'Pending Local Trip Mail';
+                $arr['content'] = $content;
+                $arr['subject'] = $subject;
+                $to_email = $arr['to_email'] = EmployeeClaim::join('employees as e', 'e.id', 'ey_employee_claims.employee_id')
+					->join('employees as trip_manager_employee', 'trip_manager_employee.id', 'e.reporting_to_id')
+					->join('employees as se_manager_employee', 'se_manager_employee.id', 'trip_manager_employee.reporting_to_id')
+					->join('users', 'users.entity_id', 'se_manager_employee.id')
+					->where('users.user_type_id', 3121)
+					->select('users.email as email', 'users.name as name')
+                        ->pluck('email')->toArray();
+                 }
                 $cc_email = $arr['cc_email'] = [];
                 $arr['base_url'] = URL::to('/');
 
