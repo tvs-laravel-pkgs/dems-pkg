@@ -2460,7 +2460,9 @@ class Trip extends Model {
 	}
 	// Checking attachment status by Karthick T on 20-01-2022
 	// Pending outstation trip mail by Karthick T on 15-02-2022
-	public static function pendingTripMail($date) {
+	public static function pendingTripMail($date,$status) {
+		$pending_trips=[];
+		if($status == 'CG'){
 		$pending_trips = Trip::select(
 					'trips.number',
 					'trips.employee_id'
@@ -2468,9 +2470,33 @@ class Trip extends Model {
 				->where('trips.end_date', $date)
 				->whereNull('ey_employee_claims.number')
 				->get();
+			}elseif($status == 'PRA'){
+				$pending_trips = Trip::select(
+					'trips.number',
+				)->where('trips.created_at', $date)
+				->where('trips.status_id','=',3021)
+				->get();
+			}elseif($status == 'PCA'){
+				$pending_trips = Trip::select(
+					'trips.number',
+					'trips.employee_id'
+				)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->where('ey_employee_claims.created_at', $date)
+				->where('trips.status_id','=',3023)
+				->get();
+			}elseif($status == 'PDCA'){
+				$pending_trips = Trip::select(
+					'trips.number',
+					'trips.employee_id'
+				)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->where('trips.created_at', $date)
+				->where('trips.status_id','=',3029)
+				->get();
+			}
         if (count($pending_trips) > 0) {
             foreach($pending_trips as $trip_key => $pending_trip) {
-                $content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull.';
+                if($status == 'CG'){
+                	$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Outstation Trip Mail';
                 $arr['content'] = $content;
                 $arr['subject'] = $subject;
@@ -2478,7 +2504,38 @@ class Trip extends Model {
                         ->join('users', 'users.entity_id', 'employees.id')
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_trip->employee_id)
-                        ->pluck('email')->toArray();;
+                        ->pluck('email')->toArray();
+                    }elseif($status == 'PRA'){
+                       $content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
+                       $subject = 'Pending Outstation Trip Mail';
+                       $arr['content'] = $content;
+                       $arr['subject'] = $subject;
+                       $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_trip->employee_id)
+                        ->pluck('email')->toArray();
+                    }elseif($status == 'PCA'){
+                    	$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
+                       $subject = 'Pending Outstation Trip Mail';
+                       $arr['content'] = $content;
+                       $arr['subject'] = $subject;
+                       $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_trip->employee_id)
+                        ->pluck('email')->toArray();
+                    }elseif($status == 'PDCA'){
+                    	$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
+                       $subject = 'Pending Outstation Trip Mail';
+                       $arr['content'] = $content;
+                       $arr['subject'] = $subject;
+                       $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_trip->employee_id)
+                        ->pluck('email')->toArray();
+                    }
                 $cc_email = $arr['cc_email'] = [];
                 $arr['base_url'] = URL::to('/');
 

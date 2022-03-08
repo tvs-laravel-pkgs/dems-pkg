@@ -794,13 +794,22 @@ class LocalTrip extends Model {
 		return $approval_status;
 	}
 	// Pending local trip mail by Karthick T on 15-02-2022
-	public static function pendingTripMail($date) {
+	public static function pendingTripMail($date,$status) {
 		$pending_local_trips = LocalTrip::where('end_date', $date)
             ->whereNull('claim_number')
             ->get();
+            $local_trips_approval = LocalTrip::where('created_at', $date)
+            ->where('status_id','=',3021)
+            ->get();
+            $pending_local_trips_claim_approval = LocalTrip::where('claimed_date', $date)
+            ->where('status_id','=',3023)
+            ->get();
+            $pending_local_trips_deviation_claim_approval = LocalTrip::where('claimed_date', $date)
+            ->where('status_id','=',3029)
+            ->get();
         if (count($pending_local_trips) > 0) {
             foreach($pending_local_trips as $local_trip_key => $pending_local_trip) {
-                $content = 'Your local trip ' . $pending_local_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull.';
+                $content = 'Your local trip ' . $pending_local_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
                 $arr['subject'] = $subject;
