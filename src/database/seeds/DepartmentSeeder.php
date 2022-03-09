@@ -82,13 +82,13 @@ class DepartmentSeeder extends Seeder
                     ->where('name', $val->name)
                     ->where('short_name', $val->short_name)
                     ->first();
-
+                    dump($exist_department);
                     if ($exist_department) {
                         dump('Record No: ' . ($key + 1) . ' - Department is ALready Exist');
 						continue;
                     }
-                    dump($exist_department);
-                    dd($business->id);
+                    
+
                     $new_department = new Department;
                     $new_department->company_id = $val->company;
                     $new_department->business_id =  $business->id;
