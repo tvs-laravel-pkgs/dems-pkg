@@ -74,15 +74,14 @@ class DepartmentSeeder extends Seeder
 						continue;
 					}
 
-                    $business->id = Business::select('id')->where('name',$val->business)->first();
+                    $business = Business::select('id')->where('name',$val->business)->first();
 
                     
-
-                    $exist_department = Department::where('company_id',(int)$val->company)
+                    $exist_department = Department::where('company_id',$val->company)
                     ->where('name', $val->name)
                     ->where('short_name', $val->short_name)
                     ->first();
-                    
+
                     if ($exist_department) {
                         dump('Record No: ' . ($key + 1) . ' - Department is ALready Exist');
 						continue;
