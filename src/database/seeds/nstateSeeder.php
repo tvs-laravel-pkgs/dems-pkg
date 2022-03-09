@@ -1,7 +1,9 @@
 <?php
 
 namespace Uitoux\EYatra\Database\Seeds;
-use App\NState;
+use PHPExcel_IOFactory;
+use Validator;
+use Uitoux\EYatra\NState;
 use DB;
 use Illuminate\Database\Seeder;
 

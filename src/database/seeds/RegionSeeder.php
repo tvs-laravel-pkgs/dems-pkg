@@ -1,8 +1,10 @@
 <?php
 
 namespace Uitoux\EYatra\Database\Seeds;
-use App\NState;
-use App\Region;
+use PHPExcel_IOFactory;
+use Validator;
+use Uitoux\EYatra\NState;
+use Uitoux\EYatra\Region;
 use Illuminate\Database\Seeder;
 
 class RegionSeeder extends Seeder

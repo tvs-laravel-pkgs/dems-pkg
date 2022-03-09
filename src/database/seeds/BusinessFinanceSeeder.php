@@ -1,8 +1,10 @@
 <?php
 
 namespace Uitoux\EYatra\Database\Seeds;
-use App\Business;
-use App\BusinessFinance;
+use PHPExcel_IOFactory;
+use Validator;
+use Uitoux\EYatra\Business;
+use Uitoux\EYatra\BusinessFinance;
 use Illuminate\Database\Seeder;
 
 class BusinessFinanceSeeder extends Seeder
