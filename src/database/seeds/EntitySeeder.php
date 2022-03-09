@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class StateAgentTravelModeSeeder extends Seeder
+class EntitySeeder extends Seeder
 {
     /**
      * Run the database seeds.
