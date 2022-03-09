@@ -55,17 +55,15 @@ class BusinessFinanceSeeder extends Seeder
 						continue;
                     }
                     dump($val->business,$val->financial_year,$val->budget_amount);
-                    DB::enableQueryLog();
 
                     $business = Business::select('id')->where('name',$val->business)->first();
-                    dump($business);
                     
                     if (!$business) {
                         dump('Record No: ' . ($key + 1) . ' - Business is Not Found');
 						continue;
                     }
-                    dd(DB::getQueryLog()); 
-                    $exist_business_finance = BusinessFinance::where('business_id', $business)
+
+                    $exist_business_finance = BusinessFinance::where('business_id', $business->id)
                     ->where('financial_year', $val->financial_year)
                     ->first();
 
@@ -73,9 +71,10 @@ class BusinessFinanceSeeder extends Seeder
                         dump('Record No: ' . ($key + 1) . ' - Business Finance is ALready Exist');
 						continue;
                     }
+                    dump($business->id,$val->financial_year,$val->budget_amount);
 
                     $new_business_finance = new BusinessFinance;
-                    $new_business_finance->business_id = $business;
+                    $new_business_finance->business_id = $business->id;
                     $new_business_finance->financial_year = $val->financial_year;
                     $new_business_finance->budget_amount = $val->budget_amount;
                     $new_business_finance->created_by = 1;
