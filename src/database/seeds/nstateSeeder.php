@@ -78,7 +78,7 @@ class nstateSeeder extends Seeder
 						continue;
                     }
 
-                    $exist_nstate = NState::where('country_id',$country)
+                    $exist_nstate = NState::where('country_id',$country->id)
                     ->where('code', $val->code)
                     ->where('name', $val->name)
                     ->first();
@@ -89,7 +89,7 @@ class nstateSeeder extends Seeder
                     }
 
                     $new_nstate = new NState;
-                    $new_nstate->country_id = $country;
+                    $new_nstate->country_id = $country->id;
                     $new_nstate->code = $val->code;
                     $new_nstate->name = $val->name;
                     $new_nstate->created_by = 1;
