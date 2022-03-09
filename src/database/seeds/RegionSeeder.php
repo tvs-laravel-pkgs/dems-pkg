@@ -75,18 +75,18 @@ class RegionSeeder extends Seeder
 						continue;
 					}
 
-                    $state_id = NState::pluck('id')->where('name',$val->state)->first();
+                    $state = NState::select('id')->where('name',$val->state)->first();
 
-                    if(!$state_id) {
+                    if(!$stateid && !$state->id) {
                         dump('Record No: ' . ($key + 1) . ' - State not Found');
 						continue;
                     }
 
-                    dump($val->company,$val->code,$val->name,$val->state);
+                    dump($val->company,$val->code,$val->name,$state->id);
 
                     $exist_region = Region::where('company_id',$val->company)
                     ->where('code', $val->code)->where('name', $val->name)
-                    ->where('state_id', $state_id)->first();
+                    ->where('state_id', $state->id)->first();
 
                     if ($exist_region) {
                         dump('Record No: ' . ($key + 1) . ' - Region is ALready Exist');
@@ -97,7 +97,7 @@ class RegionSeeder extends Seeder
                     $new_region->name = $val->name;
                     $new_region->company_id = $val->company;
                     $new_region->code = $val->code;
-                    $new_region->state_id = $state_id;
+                    $new_region->state_id = $state->id;
                     $new_region->created_by = 1;
                     $new_region->save();
                     dump(' === updated === ');
