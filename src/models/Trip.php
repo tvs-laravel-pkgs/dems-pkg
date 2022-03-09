@@ -2472,7 +2472,7 @@ class Trip extends Model {
 				->get();
 			}elseif($status == 'PRA'){
 				$pending_trips = Trip::select(
-					'trips.number',
+					'trips.number'
 				)->where('trips.created_at', $date)
 				->where('trips.status_id','=',3021)
 				->get();
