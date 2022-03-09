@@ -70,6 +70,11 @@ class DepartmentFinanceSeeder extends Seeder
                     ->where('name',$val->department)
                     // ->where('short_name',$val->department)
                     ->first();
+                    
+                    if (!$department_id) {
+                        dump('Record No: ' . ($key + 1) . ' - Department is Not Found');
+						continue;
+                    }
 
                     dump($val->department,$val->financial_year,$val->budget_amount);
 
