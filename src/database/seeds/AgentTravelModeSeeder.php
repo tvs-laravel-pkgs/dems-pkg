@@ -4,8 +4,9 @@ namespace Uitoux\EYatra\Database\Seeds;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\AgentTravelMode;
 use Uitoux\EYatra\Entity;
-use Illuminate\Database\Seeder;
 use PHPExcel_IOFactory;
+use Validator;
+use Illuminate\Database\Seeder;
 
 class AgentTravelModeSeeder extends Seeder {
 	/**
