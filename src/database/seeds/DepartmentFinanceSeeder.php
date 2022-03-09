@@ -66,11 +66,11 @@ class DepartmentFinanceSeeder extends Seeder
 						continue;
 					}
 
-                    $department_id = Department::pluck('id')
+                    $department = Department::select('id')
                     ->where('name',$val->department)
                     // ->where('short_name',$val->department)
                     ->first();
-                    
+
                     if (!$department_id) {
                         dump('Record No: ' . ($key + 1) . ' - Department is Not Found');
 						continue;
@@ -78,7 +78,7 @@ class DepartmentFinanceSeeder extends Seeder
 
                     dump($val->department,$val->financial_year,$val->budget_amount);
 
-                    $exist_department_finance = DepartmentFinance::where('department_id',$department_id)
+                    $exist_department_finance = DepartmentFinance::where('department_id',$department->id)
                     ->where('financial_year', $val->financial_year)
                     ->first();
 
@@ -88,7 +88,7 @@ class DepartmentFinanceSeeder extends Seeder
                     }
 
                     $new_department_finance = new DepartmentFinance;
-                    $new_department_finance->department_id = $department_id;
+                    $new_department_finance->department_id = $department->id;
                     $new_department_finance->financial_year = $val->financial_year;
                     $new_department_finance->budget_amount = $val->budget_amount;
                     $new_department_finance->created_by = 1;
