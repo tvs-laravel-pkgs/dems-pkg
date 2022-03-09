@@ -87,6 +87,7 @@ class DepartmentSeeder extends Seeder
                         dump('Record No: ' . ($key + 1) . ' - Department is ALready Exist');
 						continue;
                     }
+                    dump($exist_department);
                     dd($business->id);
                     $new_department = new Department;
                     $new_department->company_id = $val->company;
