@@ -77,7 +77,7 @@ class RegionSeeder extends Seeder
 
                     $state = NState::select('id')->where('name',$val->state)->first();
 
-                    if(!$stateid && !$state->id) {
+                    if(!$state && !$state->id) {
                         dump('Record No: ' . ($key + 1) . ' - State not Found');
 						continue;
                     }
