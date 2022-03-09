@@ -71,7 +71,7 @@ class DepartmentFinanceSeeder extends Seeder
                     // ->where('short_name',$val->department)
                     ->first();
 
-                    if (!$department_id) {
+                    if (!$department) {
                         dump('Record No: ' . ($key + 1) . ' - Department is Not Found');
 						continue;
                     }
