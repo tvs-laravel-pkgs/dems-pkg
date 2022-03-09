@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra\Database\Seeds;
 use PHPExcel_IOFactory;
 use Validator;
+use DB;
 use Uitoux\EYatra\Business;
 use Uitoux\EYatra\BusinessFinance;
 use Illuminate\Database\Seeder;
