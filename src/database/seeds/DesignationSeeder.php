@@ -1,5 +1,5 @@
 <?php
-
+namespace Uitoux\EYatra\Database\Seeds;
 use App\Company;
 use App\Designation;
 use App\Entity;
