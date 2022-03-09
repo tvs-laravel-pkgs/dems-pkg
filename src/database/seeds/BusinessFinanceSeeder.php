@@ -56,7 +56,7 @@ class BusinessFinanceSeeder extends Seeder
                     }
                     dump($val->business,$val->financial_year,$val->budget_amount);
                     DB::enableQueryLog();
-                    $business = Business::pluck('name')->get();
+                    $business = Business::select('name')->get();
                     // $business =  Business::pluck('id')
                     // ->where('name',$val->business)->first();
                     dump($business);
