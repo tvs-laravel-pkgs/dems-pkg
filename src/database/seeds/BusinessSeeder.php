@@ -3,8 +3,8 @@
 namespace Uitoux\EYatra\Database\Seeds;
 use PHPExcel_IOFactory;
 use Validator;
-use App\Company;
-use App\Business;
+use Uitoux\EYatra\Company;
+use Uitoux\EYatra\Business;
 use Illuminate\Database\Seeder;
 
 class BusinessSeeder extends Seeder
