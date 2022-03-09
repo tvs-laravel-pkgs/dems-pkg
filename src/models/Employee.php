@@ -18,6 +18,8 @@ class Employee extends Model {
 		'reporting_to_id',
 		'grade_id',
 		'payment_mode_id',
+		'department_id',
+		'data_source',
 		'sbu_id',
 		'designation_id',
 		'date_of_joining',

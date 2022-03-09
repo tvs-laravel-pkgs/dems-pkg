@@ -204,8 +204,10 @@ class EmployeeController extends Controller {
 		$grade_list = collect(Entity::getGradeList())->prepend(['id' => '', 'name' => 'Select Grade']);
 		$designation_list = [];
 		// dd($designation_list);
-		$lob_list = collect(Business::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Business']);
-		$sbu_list = collect(Department::select('name', 'id')->get());
+		$lob_list = collect(Lob::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Business']);
+		$sbu_list = [];
+		$business_list = collect(Business::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Business']);
+		$department_list = [];
 		$this->data['extras'] = [
 			'manager_list' => Employee::getList(),
 			'outlet_list' => $outlet_list,
@@ -214,6 +216,8 @@ class EmployeeController extends Controller {
 			'role_list' => $role_list,
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
+			'business_list'=>$business_list,
+			'department_list'=>$department_list,
 			'grade_list' => $grade_list,
 			'designation_list' => $designation_list,
 		];
@@ -524,6 +528,15 @@ class EmployeeController extends Controller {
 			$sbu_list = [];
 		}
 		return response()->json(['sbu_list' => $sbu_list]);
+	}
+	public function getDepartmentByBusiness(Request $request) {
+		//dd($request);
+		if (!empty($request->business_id)) {
+			$department_list = collect(Department::where('business_id', $request->business_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Department']);
+		} else {
+			$department_list = [];
+		}
+		return response()->json(['department_list' => $department_list]);
 	}
 
 	public function getImportJobsList(Request $request) {

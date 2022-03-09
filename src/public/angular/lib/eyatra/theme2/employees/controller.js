@@ -235,6 +235,7 @@ app.component('eyatraEmployeeForm', {
                 $scope.getDesignation(self.employee.grade_id);
                 //$scope.selectPaymentMode(self.employee.payment_mode_id);
                 $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
+                $scope.getDepartmentBasedonBusiness(self.employee.department.business_id);
             } else {
                 $("#hide_password").show();
                 $("#password").prop('disabled', false);
@@ -266,6 +267,24 @@ app.component('eyatraEmployeeForm', {
                 .done(function(res) {
                     self.extras.sbu_list = [];
                     self.extras.sbu_list = res.sbu_list;
+                    $scope.$apply()
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+
+        }
+        $scope.getDepartmentBasedonBusiness = function(business_id) {
+
+            //alert(business_id);
+            $.ajax({
+                    url: get_department_by_business,
+                    method: "POST",
+                    data: { business_id: business_id },
+                })
+                .done(function(res) {
+                    self.extras.department_list = [];
+                    self.extras.department_list = res.department_list;
                     $scope.$apply()
                 })
                 .fail(function(xhr) {
