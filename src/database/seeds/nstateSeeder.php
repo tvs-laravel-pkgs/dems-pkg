@@ -4,7 +4,7 @@ namespace Uitoux\EYatra\Database\Seeds;
 use PHPExcel_IOFactory;
 use Validator;
 use Uitoux\EYatra\NState;
-use DB;
+use Uitoux\EYatra\NCountry;
 use Illuminate\Database\Seeder;
 
 class nstateSeeder extends Seeder
@@ -71,7 +71,7 @@ class nstateSeeder extends Seeder
 					}
                     dump($val->country,$val->code,$val->name);
 
-                    $country = DB::table('countries')::select('id')->where('name',$val->country)->first();
+                    $country = NCountry::select('id')->where('name',$val->country)->first();
 
                     if(!$country && !$country->id){
                         dump('Record No: ' . ($key + 1) . ' - Country Not Found');
