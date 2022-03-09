@@ -59,12 +59,12 @@ class BusinessFinanceSeeder extends Seeder
                     $business =  Business::pluck('id')
                     ->where('name',$val->business)->first();
                     dump($business);
-                    dd(DB::getQueryLog()); 
+                    
                     if (!$business) {
                         dump('Record No: ' . ($key + 1) . ' - Business is Not Found');
 						continue;
                     }
-
+                    dd(DB::getQueryLog()); 
                     $exist_business_finance = BusinessFinance::where('business_id', $business)
                     ->where('financial_year', $val->financial_year)
                     ->first();
