@@ -78,7 +78,7 @@ class BusinessFinanceSeeder extends Seeder
                     $new_business_finance->financial_year = $val->financial_year;
                     $new_business_finance->budget_amount = $val->budget_amount;
                     $new_business_finance->created_by = 1;
-                    $new_business->save();
+                    $new_business_finance->save();
                     dump(' === updated === ');
 
                 } catch (\Exception $e) {
