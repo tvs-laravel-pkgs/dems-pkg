@@ -1,8 +1,9 @@
 <?php
 
-use App\Agent;
-use App\AgentTravelMode;
-use App\Entity;
+namespace Uitoux\EYatra\Database\Seeds;
+use Uitoux\EYatra\Agent;
+use Uitoux\EYatra\AgentTravelMode;
+use Uitoux\EYatra\Entity;
 use Illuminate\Database\Seeder;
 use PHPExcel_IOFactory;
 
