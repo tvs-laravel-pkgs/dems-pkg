@@ -57,7 +57,7 @@ class BusinessFinanceSeeder extends Seeder
 
                     $business =  Business::pluck('id')
                     ->where('name',$val->business)->first();
-                    dump($business);
+                    dump($business->toSql());
                     if (!$business) {
                         dump('Record No: ' . ($key + 1) . ' - Business is Not Found');
 						continue;
