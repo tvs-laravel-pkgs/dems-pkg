@@ -71,9 +71,9 @@ class nstateSeeder extends Seeder
 					}
                     dump($val->country,$val->code,$val->name);
 
-                    $country = DB::table('countries')::pluck('id')->where('name',$val->country)->first();
+                    $country = DB::table('countries')::select('id')->where('name',$val->country)->first();
 
-                    if(!$country){
+                    if(!$country && !$country->id){
                         dump('Record No: ' . ($key + 1) . ' - Country Not Found');
 						continue;
                     }
