@@ -1,5 +1,7 @@
 <?php
 
+namespace Uitoux\EYatra\Database\Seeds;
+
 use Illuminate\Database\Seeder;
 
 class AgentSeeder extends Seeder
@@ -11,6 +13,6 @@ class AgentSeeder extends Seeder
      */
     public function run()
     {
-        //
+       dump('hi');
     }
 }
