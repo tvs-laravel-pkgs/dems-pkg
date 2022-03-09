@@ -74,9 +74,9 @@ class DepartmentSeeder extends Seeder
 						continue;
 					}
 
-                    $business_id = Business::pluck('id')->where('name',$val->business)->first();
+                    $business->id = Business::select('id')->where('name',$val->business)->first();
 
-                    dump($val->company,$val->name,$val->short_name,$val->business);
+                    dump($val->company,$val->name,$val->short_name, $business->id);
 
                     $exist_department = Department::where('company_id',$val->company)
                     ->where('name', $val->name)
@@ -90,7 +90,7 @@ class DepartmentSeeder extends Seeder
 
                     $new_department = new Department;
                     $new_department->company_id = $val->company;
-                    $new_department->business_id = $business_id;
+                    $new_department->business_id =  $business->id;
                     $new_department->name = $val->name;
                     $new_department->short_name = $val->short_name;
                     $new_department->created_by = 1;
