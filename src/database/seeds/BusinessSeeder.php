@@ -2,6 +2,7 @@
 
 namespace Uitoux\EYatra\Database\Seeds;
 use PHPExcel_IOFactory;
+use Validator;
 use App\Company;
 use App\Business;
 use Illuminate\Database\Seeder;
