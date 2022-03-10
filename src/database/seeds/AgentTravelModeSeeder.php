@@ -88,7 +88,7 @@ class AgentTravelModeSeeder extends Seeder
 
 					$agent_travel_mode = new AgentTravelMode;
 					$agent_travel_mode->agent_id = $agents->id;
-					$agent_travel_mode->travel_mode_id = $travel_mode->id;
+					$agent_travel_mode->travel_mode_id = $travel_mode_details->id;
 					$agent_travel_mode->save();
 					dump(' === updated === ');
 
