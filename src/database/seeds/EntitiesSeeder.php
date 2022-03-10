@@ -1,12 +1,12 @@
 <?php
 
-use App\Company;
-use App\Entity;
-use App\EntityType;
-use Auth;
-use Carbon\Carbon;
-use Illuminate\Database\Seeder;
+namespace Uitoux\EYatra\Database\Seeds;
 use PHPExcel_IOFactory;
+use Validator;
+use Uitoux\EYatra\Company;
+use Uitoux\EYatra\Entity;
+use Uitoux\EYatra\EntityType;
+use Illuminate\Database\Seeder;
 
 class EntitiesSeeder extends Seeder {
 	/**
@@ -85,7 +85,7 @@ class EntitiesSeeder extends Seeder {
 						'id',
 						'name'
 					)
-						->where('name', $val->company)
+						->where('id', $val->company)
 						->first();
 					if (!$company) {
 						dump('Record No: ' . ($key + 1) . ' - Company not found');
@@ -108,10 +108,7 @@ class EntitiesSeeder extends Seeder {
 					$entities->entity_type_id = $entity_type->id;
 					$entities->name = $val->name;
 					$entities->display_order = $val->display_order;
-					$entities->created_by = Auth::user()->id;
-					$entities->updated_by = Auth::user()->id;
-					$entities->created_at = Carbon::now();
-					$entities->updated_at = Carbon::now();
+					$entities->created_by = 1;
 					$entities->save();
 					dump(' === updated === ');
 
