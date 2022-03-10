@@ -5,7 +5,7 @@ use PHPExcel_IOFactory;
 use Validator;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
-use Uitoux\EYatra\Nstate;
+use Uitoux\EYatra\NState;
 use Uitoux\EYatra\StateAgentTravelMode;
 use Illuminate\Database\Seeder;
 
@@ -97,7 +97,7 @@ class StateAgentTravelModeSeeder extends Seeder
 						dump('Record No: ' . ($key + 1) . ' - Travel Mode not found');
 						continue;
 					}
-					$states = Nstate::select(
+					$states = NState::select(
 						'id',
 						'code',
 						'name'
