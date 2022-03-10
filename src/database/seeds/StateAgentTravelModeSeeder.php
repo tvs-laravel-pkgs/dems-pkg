@@ -6,7 +6,7 @@ use Validator;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\NState;
-use Uitoux\EYatra\StateAgentTravelMode;
+use App\StateAgentTravelMode;
 use Illuminate\Database\Seeder;
 
 class StateAgentTravelModeSeeder extends Seeder
@@ -58,7 +58,7 @@ class StateAgentTravelModeSeeder extends Seeder
 						dump('Record No: ' . ($key + 1) . ' - Service Charge is required');
 						continue;
 					}
-					// dump($val->agent, $val->state, $val->travel_mode, $val->service_charge);
+					dump($val->agent, $val->state, $val->travel_mode, $val->service_charge);
 
 					$validator = Validator::make((array) $val, [
 						'travel_mode' => [
@@ -105,8 +105,7 @@ class StateAgentTravelModeSeeder extends Seeder
 					)
 						->where('code', $val->state)
 						->first();
-						dump($states);
-						dump($val->state);
+
 					if (!$states) {
 						dump('Record No: ' . ($key + 1) . ' - NState not found');
 						continue;
