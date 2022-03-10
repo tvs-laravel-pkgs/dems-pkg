@@ -68,7 +68,7 @@ class AgentTravelModeSeeder extends Seeder
 						'id',
 						'code'
 					)
-						->where('code', $val->agent)
+						->where('id', $val->agent)
 						->first();
 					if (!$agents) {
 						dump('Record No: ' . ($key + 1) . ' - Agent not found');
