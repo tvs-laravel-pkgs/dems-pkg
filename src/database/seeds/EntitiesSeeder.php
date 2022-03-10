@@ -58,22 +58,10 @@ class EntitiesSeeder extends Seeder {
 					dump($val->company, $val->entity_type, $val->name, $val->display_order);
 
 					$validator = Validator::make((array) $val, [
-						'company' => [
-							'string',
-							'max:20',
-						],
-						'entity_type' => [
-							'string',
-							'max:20',
-						],
 						'name' => [
 							'string',
 							'max:255',
-						],
-						'display_order' => [
-							'string',
-							'max:20',
-						],
+						]
 					]);
 					if ($validator->fails()) {
 						dump('Record No: ' . ($key + 1) . ' ' . implode('', $validator->errors()->all()));
