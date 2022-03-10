@@ -74,7 +74,6 @@ class StateAgentTravelModeSeeder extends Seeder
 						dump('Record No: ' . ($key + 1) . ' ' . implode('', $validator->errors()->all()));
 						continue;
 					}
-					dump($val->agent, $val->state, $val->travel_mode, $val->service_charge);
 
 					$agents = Agent::select(
 						'id',
@@ -93,6 +92,7 @@ class StateAgentTravelModeSeeder extends Seeder
 					)
 						->where('name', $val->travel_mode)
 						->first();
+						dump('travel_mode_details',$travel_mode_details);
 					if (!$travel_mode_details) {
 						dump('Record No: ' . ($key + 1) . ' - Travel Mode not found');
 						continue;
@@ -105,14 +105,16 @@ class StateAgentTravelModeSeeder extends Seeder
 						->where('code', $val->state)
 						->first();
 					if (!$states) {
-						dump('Record No: ' . ($key + 1) . ' - Travel Mode not found');
+						dump('Record No: ' . ($key + 1) . ' - NState not found');
 						continue;
 					}
+
+					dump($agents->id, $states->id, $travel_mode_details->id, $val->service_charge);
 
 					$state_agent_travel_mode = new StateAgentTravelMode;
 					$state_agent_travel_mode->agent_id = $agents->id;
 					$state_agent_travel_mode->state_id = $states->id;
-					$state_agent_travel_mode->travel_mode_id = $travel_mode->id;
+					$state_agent_travel_mode->travel_mode_id = $travel_mode_details->id;
 					$state_agent_travel_mode->service_charge = $val->service_charge;
 					$state_agent_travel_mode->save();
 					dump(' === updated === ');
