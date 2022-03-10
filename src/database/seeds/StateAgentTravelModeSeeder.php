@@ -58,7 +58,7 @@ class StateAgentTravelModeSeeder extends Seeder
 						dump('Record No: ' . ($key + 1) . ' - Service Charge is required');
 						continue;
 					}
-					dump($val->agent, $val->state, $val->travel_mode, $val->service_charge);
+					// dump($val->agent, $val->state, $val->travel_mode, $val->service_charge);
 
 					$validator = Validator::make((array) $val, [
 						'travel_mode' => [
@@ -92,11 +92,12 @@ class StateAgentTravelModeSeeder extends Seeder
 					)
 						->where('name', $val->travel_mode)
 						->first();
-						dump('travel_mode_details',$travel_mode_details);
+					
 					if (!$travel_mode_details) {
 						dump('Record No: ' . ($key + 1) . ' - Travel Mode not found');
 						continue;
 					}
+
 					$states = NState::select(
 						'id',
 						'code',
@@ -104,6 +105,8 @@ class StateAgentTravelModeSeeder extends Seeder
 					)
 						->where('code', $val->state)
 						->first();
+						dump($states->toArray());
+						dump($val->state);
 					if (!$states) {
 						dump('Record No: ' . ($key + 1) . ' - NState not found');
 						continue;
