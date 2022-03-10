@@ -90,7 +90,7 @@ class EntitiesSeeder extends Seeder {
 					$existing_entities = Entity::select('id')->where('entity_type_id',$entity_type->id)->where('name',$val->name)
 					->where('display_order',$val->display_order)->where('company_id',$company->id)->first();
 					
-					if (!$existing_entities) {
+					if ($existing_entities) {
 						dump('Record No: ' . ($key + 1) . ' - Entity Already Exist');
 						continue;
 					}
