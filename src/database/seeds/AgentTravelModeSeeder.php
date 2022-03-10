@@ -4,7 +4,7 @@ namespace Uitoux\EYatra\Database\Seeds;
 use PHPExcel_IOFactory;
 use Validator;
 use Uitoux\EYatra\Agent;
-use Uitoux\EYatra\AgentTravelMode;
+use App\AgentTravelMode;
 use Uitoux\EYatra\Entity;
 use Illuminate\Database\Seeder;
 
