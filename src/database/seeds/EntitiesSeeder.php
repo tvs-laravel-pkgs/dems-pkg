@@ -55,7 +55,7 @@ class EntitiesSeeder extends Seeder {
 						dump('Record No: ' . ($key + 1) . ' - Display Order is required');
 						continue;
 					}
-					// dump($val->company, $val->entity_type, $val->name, $val->display_order);
+					dump($val->company, $val->entity_type, $val->name, $val->display_order);
 
 					$validator = Validator::make((array) $val, [
 						'name' => [
@@ -67,7 +67,7 @@ class EntitiesSeeder extends Seeder {
 						dump('Record No: ' . ($key + 1) . ' ' . implode('', $validator->errors()->all()));
 						continue;
 					}
-					// dump($val->company, $val->entity_type, $val->name, $val->display_order);
+					dump($val->company, $val->entity_type, $val->name, $val->display_order);
 
 					$company = company::select(
 						'id',
@@ -79,11 +79,9 @@ class EntitiesSeeder extends Seeder {
 						dump('Record No: ' . ($key + 1) . ' - Company not found');
 						continue;
 					}
-					dump($val->entity_type);
 
 					$entity_type = EntityType::where('name', $val->entity_type)->first();
-					
-					dump($entity_type);
+
 					if (!$entity_type) {
 						dump('Record No: ' . ($key + 1) . ' - Travel Mode not found');
 						continue;
