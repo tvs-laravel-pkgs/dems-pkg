@@ -105,7 +105,7 @@ class StateAgentTravelModeSeeder extends Seeder
 					)
 						->where('code', $val->state)
 						->first();
-						dump($states->toArray());
+						dump($states);
 						dump($val->state);
 					if (!$states) {
 						dump('Record No: ' . ($key + 1) . ' - NState not found');
