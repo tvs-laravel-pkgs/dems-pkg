@@ -80,12 +80,9 @@ class EntitiesSeeder extends Seeder {
 						continue;
 					}
 					dump($val->entity_type);
-					$entity_type = EntityType::select(
-						'id',
-						'name'
-					)
-						->where('name', $val->entity_type)
-						->first();
+
+					$entity_type = EntityType::where('name', $val->entity_type)->first();
+					
 					dump($entity_type);
 					if (!$entity_type) {
 						dump('Record No: ' . ($key + 1) . ' - Travel Mode not found');
