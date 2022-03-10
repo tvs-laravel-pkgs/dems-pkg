@@ -68,11 +68,7 @@ class StateAgentTravelModeSeeder extends Seeder
 						'state' => [
 							'string',
 							'max:20',
-						],
-						'service_charge' => [
-							'string',
-							'max:20',
-						],
+						]
 					]);
 					if ($validator->fails()) {
 						dump('Record No: ' . ($key + 1) . ' ' . implode('', $validator->errors()->all()));
