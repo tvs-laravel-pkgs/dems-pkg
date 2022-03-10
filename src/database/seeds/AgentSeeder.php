@@ -76,7 +76,7 @@ class AgentSeeder extends Seeder
 						'id',
 						'name'
 					)
-						->where('name', $val->company)
+						->where('id', $val->company)
 						->first();
 					if (!$company) {
 						dump('Record No: ' . ($key + 1) . ' - Company not found');
