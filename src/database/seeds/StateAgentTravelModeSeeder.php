@@ -113,6 +113,16 @@ class StateAgentTravelModeSeeder extends Seeder
 
 					dump($agents->id, $states->id, $travel_mode_details->id, $val->service_charge);
 
+					$existing_state_agent_travel_mode = StateAgentTravelMode::where('agent_id',$agents->id)
+					->where('state_id',$states->id)
+					->where('travel_mode_id',$travel_mode_details->id)
+					->where('service_charge',$val->service_charge)->first();
+					
+					if ($existing_state_agent_travel_mode) {
+						dump('Record No: ' . ($key + 1) . ' - State Agent Travel Mode Already Exist');
+						continue;
+					}
+
 					$state_agent_travel_mode = new StateAgentTravelMode;
 					$state_agent_travel_mode->agent_id = $agents->id;
 					$state_agent_travel_mode->state_id = $states->id;

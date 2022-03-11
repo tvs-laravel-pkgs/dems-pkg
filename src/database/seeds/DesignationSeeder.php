@@ -86,6 +86,15 @@ class DesignationSeeder extends Seeder
 						->where('name', $val->grade)
 						->first();
 
+					$existing_designation = Designation::where('company_id',$company->id)
+					->where('name',$val->name)
+					->where('grade_id',$grade->id)->first();
+					
+					if ($existing_designation) {
+						dump('Record No: ' . ($key + 1) . ' - Designation Already Exist');
+						continue;
+					}
+
 					$designation = new Designation;
 					$designation->company_id = $company->id;
 					$designation->name = $val->name;

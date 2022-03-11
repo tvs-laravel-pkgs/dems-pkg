@@ -94,6 +94,16 @@ class AgentSeeder extends Seeder
 						continue;
 					}
 
+					$existing_agents = Agent::where('company_id',$company->id)
+					->where('code',$val->code)
+					->where('payment_mode_id',$payment_mode_details->id)
+					->where('gstin',$val->gstin)->first();
+					
+					if ($existing_agents) {
+						dump('Record No: ' . ($key + 1) . ' - Agent Already Exist');
+						continue;
+					}
+
 					$agents = new Agent;
 					$agents->company_id = $company->id;
 					$agents->code = $val->code;

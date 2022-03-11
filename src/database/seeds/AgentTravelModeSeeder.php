@@ -86,6 +86,14 @@ class AgentTravelModeSeeder extends Seeder
 						continue;
 					}
 
+					$existing_agent_travel_mode = AgentTravelMode::where('agent_id',$agents->id)
+					->where('travel_mode_id',$travel_mode_details->id)->first();
+					
+					if ($existing_agent_travel_mode) {
+						dump('Record No: ' . ($key + 1) . ' - Agent Travel Mode Already Exist');
+						continue;
+					}
+
 					$agent_travel_mode = new AgentTravelMode;
 					$agent_travel_mode->agent_id = $agents->id;
 					$agent_travel_mode->travel_mode_id = $travel_mode_details->id;
