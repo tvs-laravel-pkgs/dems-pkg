@@ -2462,7 +2462,7 @@ class Trip extends Model {
 	// Pending outstation trip mail by Karthick T on 15-02-2022
 	public static function pendingTripMail($date,$status) {
 		$pending_trips=[];
-		if($status == 'CG'){
+		if($status == 'Claim Generation'){
 		$pending_trips = Trip::select(
 					'trips.number',
 					'trips.employee_id'
@@ -2470,13 +2470,14 @@ class Trip extends Model {
 				->where('trips.end_date', $date)
 				->whereNull('ey_employee_claims.number')
 				->get();
-			}elseif($status == 'PRA'){
+				dd($pending_trips);
+			}elseif($status == 'Pending Requsation Approval'){
 				$pending_trips = Trip::select(
 					'trips.number'
 				)->where('trips.created_at', $date)
 				->where('trips.status_id','=',3021)
 				->get();
-			}elseif($status == 'PCA'){
+			}elseif($status == 'Pending Claim Approval'){
 				$pending_trips = Trip::select(
 					'trips.number',
 					'trips.employee_id'
@@ -2484,7 +2485,7 @@ class Trip extends Model {
 				->where('ey_employee_claims.created_at', $date)
 				->where('trips.status_id','=',3023)
 				->get();
-			}elseif($status == 'PDCA'){
+			}elseif($status == 'Pending Divation Claim Approval'){
 				$pending_trips = Trip::select(
 					'trips.number',
 					'trips.employee_id'
@@ -2495,7 +2496,7 @@ class Trip extends Model {
 			}
         if (count($pending_trips) > 0) {
             foreach($pending_trips as $trip_key => $pending_trip) {
-                if($status == 'CG'){
+                if($status == 'Claim Generation'){
                 	$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Outstation Trip Mail';
                 $arr['content'] = $content;
@@ -2505,7 +2506,7 @@ class Trip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_trip->employee_id)
                         ->pluck('email')->toArray();
-                    }elseif($status == 'PRA'){
+                    }elseif($status == 'Pending Requsation Approval'){
                        $content = 'The Outstation trip ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
                        $subject = 'Pending Outstation Approval Trip Mail';
                        $arr['content'] = $content;
@@ -2515,7 +2516,7 @@ class Trip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_trip->employee_id)
                         ->pluck('email')->toArray();
-                    }elseif($status == 'PCA'){
+                    }elseif($status == 'Pending Claim Approval'){
                     	$content = 'The Outstation Trip Claim ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
                        $subject = 'Pending Outstation Claim Approval Trip Mail';
                        $arr['content'] = $content;
@@ -2525,7 +2526,7 @@ class Trip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_trip->employee_id)
                         ->pluck('email')->toArray();
-                    }elseif($status == 'PDCA'){
+                    }elseif($status == 'Pending Divation Claim Approval'){
                     	$content = 'The Outstation trip claim  ' . $pending_trip->number . ' is not approval yet. Kindly login to DEMS portal and do the needfull'.$status;
                        $subject = 'Pending Outstation Deviation Trip Mail';
                        $arr['content'] = $content;

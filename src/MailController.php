@@ -11,7 +11,7 @@ class MailController extends Controller
 {
     // Send mail
     public function sendMail() {
-        $status='CG';
+        $status='Claim Generation';
         //2- NORMAL
         $date = date('Y-m-d', strtotime('-3days'));
         $local_trip_mail = LocalTrip::pendingTripMail($date,$status);
@@ -25,7 +25,7 @@ class MailController extends Controller
         $local_trip_mail = LocalTrip::pendingTripMail($date,$status);
         $trip_mail = Trip::pendingTripMail($date,$status);
         
-        $status='PRA';
+        $status='Pending Requsation Approval';
         //2- NORMAL
         $date = date('Y-m-d', strtotime('-3days'));
         $local_trip_mail = LocalTrip::pendingTripMail($date,$status);
@@ -39,7 +39,7 @@ class MailController extends Controller
         $local_trip_mail = LocalTrip::pendingTripMail($date,$status);
         $trip_mail = Trip::pendingTripMail($date,$status);
 
-        $status='PCA';
+        $status='Pending Claim Approval';
         //2- NORMAL
         $date = date('Y-m-d', strtotime('-3days'));
         $local_trip_mail = LocalTrip::pendingTripMail($date,$status);
@@ -53,7 +53,7 @@ class MailController extends Controller
         $local_trip_mail = LocalTrip::pendingTripMail($date,$status);
         $trip_mail = Trip::pendingTripMail($date,$status);
 
-        $status='PDCA';
+        $status='Pending Divation Claim Approval';
         //2- NORMAL
         $date = date('Y-m-d', strtotime('-3days'));
         $local_trip_mail = LocalTrip::pendingTripMail($date,$status);

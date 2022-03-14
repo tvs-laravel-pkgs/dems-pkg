@@ -796,26 +796,26 @@ class LocalTrip extends Model {
 	// Pending local trip mail by Karthick T on 15-02-2022
 	public static function pendingTripMail($date,$status) {
 		$pending_local_trips=[];
-		if($status == 'CG'){
+		if($status == 'Claim Generation'){
 		    $pending_local_trips = LocalTrip::where('end_date', $date)
             ->whereNull('claim_number')
             ->get();
-        }elseif($status == 'PRA'){
+        }elseif($status == 'Pending Requsation Approval'){
             $pending_local_trips = LocalTrip::where('created_at', $date)
             ->where('status_id','=',3021)
             ->get();
-        }elseif($status == 'PCA'){
+        }elseif($status == 'Pending Claim Approval'){
             $pending_local_trips = LocalTrip::where('claimed_date', $date)
             ->where('status_id','=',3023)
             ->get();
-        }elseif($status == 'PDCA'){
+        }elseif($status == 'Pending Divation Claim Approval'){
             $pending_local_trips = LocalTrip::where('claimed_date', $date)
             ->where('status_id','=',3029)
             ->get();
         }
         if (count($pending_local_trips) > 0) {
             foreach($pending_local_trips as $local_trip_key => $pending_local_trip) {
-            	if($status == 'CG'){
+            	if($status == 'Claim Generation'){
                 $content = 'Your local trip ' . $pending_local_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
@@ -825,7 +825,7 @@ class LocalTrip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_local_trip->employee_id)
                         ->pluck('email')->toArray();
-                 }elseif($status == 'PRA'){
+                 }elseif($status == 'Pending Requsation Approval'){
                  	$content = 'The local trip ' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
@@ -835,7 +835,7 @@ class LocalTrip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_local_trip->employee_id)
                         ->pluck('email')->toArray();
-                 }elseif($status == 'PCA'){
+                 }elseif($status == 'Pending Claim Approval'){
                  	$content = 'The local trip Claim' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
@@ -845,7 +845,7 @@ class LocalTrip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_local_trip->employee_id)
                         ->pluck('email')->toArray();
-                 }elseif($status == 'PDCA'){
+                 }elseif($status == 'Pending Divation Claim Approval'){
                  	$content = 'The local trip Deviation Claim' . $pending_local_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
