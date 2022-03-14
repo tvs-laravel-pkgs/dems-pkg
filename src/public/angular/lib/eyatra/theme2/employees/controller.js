@@ -210,10 +210,10 @@ app.component('eyatraEmployeeForm', {
                 $scope.$apply()
                 return;
             }
-            console.log(response.data.employee);
+
             self.employee = response.data.employee;
             self.extras = response.data.extras;
-
+            console.log(self.employee);
 
             self.action = response.data.action;
             if (response.data.employee.payment_mode_id == null || !response.data.employee.payment_mode_id) {
@@ -234,6 +234,7 @@ app.component('eyatraEmployeeForm', {
                 $("#password").prop('disabled', true);
                 $scope.getDesignation(self.employee.grade_id);
                 //$scope.selectPaymentMode(self.employee.payment_mode_id);
+                $scope.getApiData(self.employee.code);
                 $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
                 $scope.getDepartmentBasedonBusiness(self.employee.department.business_id);
             } else {
@@ -255,6 +256,50 @@ app.component('eyatraEmployeeForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
+        $scope.getApiData = function(code) {
+            // alert(code);
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['getEmployeeFromApi'],
+                    data: {
+                        code: code
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.employee = [];
+                        self.employee = res.employee;
+
+                        self.employee.payment_mode_id = '3244';
+                        self.employee.user = {
+                            name: res.employee.name,
+                            username: res.employee.code,
+                            password: 'Tvs@123',
+                        };
+                        self.employee.department = {
+                            business_id: res.employee.business_id,
+                            id: res.employee.department_id,
+                        };
+                        self.employee.sbu = {
+                            lob_id: res.employee.lob_id,
+                            id: res.employee.sbu_id,
+                        };
+                        console.log(self.employee);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+        }
 
         $scope.getSbuBasedonLob = function(lob_id) {
 

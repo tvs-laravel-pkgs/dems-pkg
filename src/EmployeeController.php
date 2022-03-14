@@ -20,13 +20,20 @@ use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\ImportJob;
+use Uitoux\EYatra\Department;
+use Uitoux\EYatra\Business;
 use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\WalletDetail;
 use Validator;
 use Yajra\Datatables\Datatables;
+use Uitoux\EYatra\SoapController;
 
 class EmployeeController extends Controller {
+
+	public function __construct(SoapController $getSoap) {
+		$this->getSoap = $getSoap;
+	}
 
 	public function filterEYatraEmployee() {
 		$this->data['outlet_list'] = $outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
@@ -189,7 +196,7 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::withTrashed()->with('sbu', 'bankDetail', 'reportingTo', 'walletDetail', 'user', 'chequeDetail')->find($employee_id);
+			$employee = Employee::withTrashed()->with('sbu','bankDetail', 'reportingTo', 'walletDetail', 'user', 'chequeDetail')->find($employee_id);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
@@ -256,7 +263,7 @@ class EmployeeController extends Controller {
 	}
 
 	public function saveEYatraEmployee(Request $request) {
-		// dd($request->all());
+		//dd($request->all());
 		//validation
 		try {
 			$error_messages = [
@@ -331,6 +338,7 @@ class EmployeeController extends Controller {
 				$employee->updated_at = Carbon::now();
 			}
 			$employee->fill($request->all());
+			//dd($employee->fill($request->all()));
 			$employee->company_id = Auth::user()->company_id;
 			if ($request->status == 0) {
 				$employee->deleted_at = date('Y-m-d H:i:s');
@@ -532,10 +540,11 @@ class EmployeeController extends Controller {
 	public function getDepartmentByBusiness(Request $request) {
 		//dd($request);
 		if (!empty($request->business_id)) {
-			$department_list = collect(Department::where('business_id', $request->business_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Department']);
+			$department_list = collect(Department::where('business_id', $request->business_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sub Business/Dept']);
 		} else {
 			$department_list = [];
 		}
+		//dd($department_list);
 		return response()->json(['department_list' => $department_list]);
 	}
 
@@ -681,6 +690,15 @@ class EmployeeController extends Controller {
 		$update_status = ImportJob::where('id', $id)->update(['total_records' => 0, 'processed' => 0, 'remaining' => 0, 'new' => 0, 'updated' => 0, 'error' => 0, 'status_id' => 3361, 'export_file' => null, 'server_status' => null]);
 
 		return response()->json(['success' => true]);
+	}
+
+	public function getEmployeeFromApi(Request $r){
+       if(!empty($r->code)){
+         $employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
+       }else{
+          return response()->json(['success' => false, 'errors' => ['Employee code is empty']]);
+       }
+       return response()->json(['success' => true,'employee' => $employee]);
 	}
 
 }

@@ -228,6 +228,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/employee/delete/{employee_id}', 'Uitoux\EYatra\EmployeeController@deleteEYatraEmployee')->name('deleteEYatraEmployee');
 		Route::post('eyatra/employee/manager/search', 'Uitoux\EYatra\EmployeeController@searchManager')->name('searchManager');
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
+		Route::post('eyatra/employee/get/api', 'Uitoux\EYatra\EmployeeController@getEmployeeFromApi')->name('getEmployeeFromApi');
 		Route::post('eyatra/employee/get/department', 'Uitoux\EYatra\EmployeeController@getDepartmentByBusiness')->name('getDepartmentByBusiness');
 		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
 		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
@@ -583,3 +584,4 @@ Route::get('eyatra/report-list/filter', 'Uitoux\EYatra\ExportReportController@ge
 Route::get('eyatra/report-list/data', 'Uitoux\EYatra\ExportReportController@getReportListData')->name('getReportListData');
 Route::get('eyatra/report-data/mail', 'Uitoux\EYatra\ExportReportController@sendMail')->name('sendMail');
 Route::get('eyatra/pending-trip/mail', 'Uitoux\EYatra\MailController@sendMail')->name('sendPendingTripMail');
+Route::get('GetCMSEmployeeDetails/{empCode?}', 'Uitoux\EYatra\SoapController@GetCMSEmployeeDetails');
