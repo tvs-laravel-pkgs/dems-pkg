@@ -227,12 +227,12 @@ app.component('eyatraBusinessForm', {
             rules: {
                 'name': {
                     required: true,
-                    minlength: 3,
+                    minlength: 2,
                     maxlength: 255,
                 },
                 'short_name': {
                     required: true,
-                    minlength: 3,
+                    minlength: 2,
                     maxlength: 191,
                 },
                 'company_id': {

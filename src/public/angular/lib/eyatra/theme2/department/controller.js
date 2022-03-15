@@ -238,12 +238,12 @@ app.component('eyatraDepartmentForm', {
             rules: {
                 'name': {
                     required: true,
-                    minlength: 3,
+                    minlength: 2,
                     maxlength: 255,
                 },
                 'short_name': {
                     required: true,
-                    minlength: 3,
+                    minlength: 2,
                     maxlength: 255,
                 },
                 'company_id': {
