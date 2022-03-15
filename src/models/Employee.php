@@ -44,6 +44,9 @@ class Employee extends Model {
 	public function Sbu() {
 		return $this->belongsTo('Uitoux\EYatra\Sbu');
 	}
+	public function Department() {
+		return $this->belongsTo('Uitoux\EYatra\Department');
+	}
 
 	public function trips() {
 		return $this->hasMany('Uitoux\EYatra\Trip');
