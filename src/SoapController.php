@@ -33,8 +33,11 @@ class SoapController extends Controller
                     ->wsdl('https://tvsapp.tvs.in/OnGo/WebService.asmx?wsdl')
                     ->trace(true);
             });
+            $employeeData=array();
             $employee_details = $this->soapWrapper->call('Employee.GetCMSEmployeeDetails', [$params]);
+            if(isset($employee_details->GetCMSEmployeeDetailsResult)&&$employee_details->GetCMSEmployeeDetailsResult){
             $employeeData =$employee_details->GetCMSEmployeeDetailsResult->any;
+           }
            //dd($employeeData);
             //$//customer_details = $this->soapWrapper->call('customer.GetNewCustMasterDetails_Search', [$params]);
 
@@ -63,19 +66,15 @@ class SoapController extends Controller
                    $response['success'] = true;
                     return $response;
                 } else {
-                    $response['success'] = false;
-                    $response['error'] = "Employee details not found";
-                    return $response;
+                    
+                    return false;
                 }
             } else {
-                $response['success'] = false;
-                $response['error'] = "Employee details not found";
-                return $response;
+                return false;
             }
         } catch (Exception $e) {
-            $response['success'] = false;
-            $response['error'] = (isset($e->faultstring) && !empty($e->faultstring)) ? $e->faultstring : "Employee details not found";
-            return $response;
+            
+            return false;
         }
     }
 }

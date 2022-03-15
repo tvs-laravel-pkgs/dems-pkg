@@ -698,6 +698,9 @@ class EmployeeController extends Controller {
        }else{
           return response()->json(['success' => false, 'errors' => ['Employee code is empty']]);
        }
+       if(!$employee){
+       	return response()->json(['success' => false, 'errors' => ['Employee Details not found']]);
+       }
        return response()->json(['success' => true,'employee' => $employee]);
 	}
 
