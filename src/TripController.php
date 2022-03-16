@@ -147,12 +147,15 @@ class TripController extends Controller {
 	public function saveTrip(Request $request) {
 
 		if ($request->advance_received) {
+			//dd($request->id);
 			$get_previous_trips = Trip::select('id')
 			        ->where('employee_id', Auth::user()->entity_id)
+			        ->where('id','!=',$request->id)
 			        ->whereIn('advance_request_approval_status_id',[3260,3261])
 			        ->whereNotIn('status_id',[3026,3032])
 			        ->orderBy('id', 'DESC')->first();
 			        //dd($get_previous_trips);
+
 			if ($get_previous_trips) {
 				return response()->json(['success' => false, 'errors' => ['Yor are not Eligible for Advance Amount since your previous trip not completed']]);
 			}
