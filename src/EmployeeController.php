@@ -692,7 +692,7 @@ class EmployeeController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
-	/*public function getEmployeeFromApi(Request $r){
+	public function getEmployeeFromApi(Request $r){
        if(!empty($r->code)){
          $employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
        }else{
@@ -702,6 +702,6 @@ class EmployeeController extends Controller {
        	return response()->json(['success' => false, 'errors' => ['Employee Details not found']]);
        }
        return response()->json(['success' => true,'employee' => $employee]);
-	}*/
+	}
 
 }
