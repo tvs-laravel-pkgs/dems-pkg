@@ -54,7 +54,7 @@ class DesignationSeeder extends Seeder
 						dump('Record No: ' . ($key + 1) . ' - Grade name is required');
 						continue;
 					}
-					// dump($val->company, $val->name, $val->grade);
+					dump($val->company, $val->name, $val->grade);
 
 					$validator = Validator::make((array) $val, [
 						'name' => [
@@ -66,7 +66,7 @@ class DesignationSeeder extends Seeder
 						dump('Record No: ' . ($key + 1) . ' ' . implode('', $validator->errors()->all()));
 						continue;
 					}
-					// dump($val->company, $val->name, $val->grade);
+					dump($val->company, $val->name, $val->grade);
 
 					$company = Company::select(
 						'id',
@@ -85,7 +85,12 @@ class DesignationSeeder extends Seeder
 					)
 						->where('name', $val->grade)
 						->first();
-					dd($company,$grade);
+
+					if (!$grade) {
+						dump('Record No: ' . ($key + 1) . ' - Grade Not Found');
+						continue;
+					}
+
 					$existing_designation = Designation::where('company_id',$company->id)
 					->where('name',$val->name)
 					->where('grade_id',$grade->id)->first();
