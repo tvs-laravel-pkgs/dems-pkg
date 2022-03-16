@@ -85,7 +85,7 @@ class DesignationSeeder extends Seeder
 					)
 						->where('name', $val->grade)
 						->first();
-
+dd($company->id,$val->name,$grade->id);
 					$existing_designation = Designation::where('company_id',$company->id)
 					->where('name',$val->name)
 					->where('grade_id',$grade->id)->first();
