@@ -176,12 +176,186 @@ app.component('eyatraCompanyForm', {
             });
         }
 
-        $scope.validateGstin = function(gst_number, name) {
+        $scope.validateTnGstin = function(tn_gst_number, name) {
             $.ajax({
                     method: "POST",
-                    url: laravel_routes['validateGstin'],
+                    url: laravel_routes['validateTnGstin'],
                     data: {
-                        gst_number: gst_number,
+                        tn_gst_number: tn_gst_number,
+                        name: name
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', 'Gstin Verified');
+                        self.gst_number = res.gst_number;
+                        console.log(self.gst_number.gstin_details);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+        }
+        $scope.validatePuducherryGstin = function(puducherry_gst_number, name) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['validatePuducherryGstin'],
+                    data: {
+                        puducherry_gst_number: puducherry_gst_number,
+                        name: name
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', 'Gstin Verified');
+                        self.gst_number = res.gst_number;
+                        console.log(self.gst_number.gstin_details);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+        }
+        $scope.validateKeralaGstin = function(kerala_gst_number, name) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['validateKeralaGstin'],
+                    data: {
+                        kerala_gst_number: kerala_gst_number,
+                        name: name
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', 'Gstin Verified');
+                        self.gst_number = res.gst_number;
+                        console.log(self.gst_number.gstin_details);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+        }
+        $scope.validateKarnatakaGstin = function(karnataka_gst_number, name) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['validateKarnatakaGstin'],
+                    data: {
+                        karnataka_gst_number: karnataka_gst_number,
+                        name: name
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', 'Gstin Verified');
+                        self.gst_number = res.gst_number;
+                        console.log(self.gst_number.gstin_details);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+        }
+        $scope.validateMpGstin = function(mp_gst_number, name) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['validateMpGstin'],
+                    data: {
+                        mp_gst_number: mp_gst_number,
+                        name: name
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', 'Gstin Verified');
+                        self.gst_number = res.gst_number;
+                        console.log(self.gst_number.gstin_details);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+        }
+        $scope.validateTelanganaGstin = function(telangana_gst_number, name) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['validateTelanganaGstin'],
+                    data: {
+                        telangana_gst_number: telangana_gst_number,
+                        name: name
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', 'Gstin Verified');
+                        self.gst_number = res.gst_number;
+                        console.log(self.gst_number.gstin_details);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+        }
+        $scope.validateUpGstin = function(up_gst_number, name) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['validateUpGstin'],
+                    data: {
+                        up_gst_number: up_gst_number,
                         name: name
                     },
                 })

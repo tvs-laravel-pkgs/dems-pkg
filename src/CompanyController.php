@@ -143,7 +143,7 @@ class CompanyController extends Controller {
 				return response()->json([
                         'success' => false,
                         'errors' => [
-                          'Enter Atleast one GSTIN number'
+                          'Enter Atleast one GSTIN Number'
                         ],
                     ]);
 			}
@@ -239,11 +239,13 @@ class CompanyController extends Controller {
 		}
 		return response()->json(['success' => true]);
 	}
-	public function validateGstNumber(Request $r) {
-		if (empty($r->gst_number)) {
+	public function validateTnGstin(Request $r) {
+		if (empty($r->tn_gst_number)) {
 			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}elseif(substr($r->tn_gst_number, 0, 2) != 33){
+      return response()->json(['success' => false, 'errors' => ['Please Provide TamilNadu Gstin Number']]);
 		}else{
-			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->gst_number,$r->name,true);
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->tn_gst_number,$r->name,true);
 			if(!$response['success']){
 				return response()->json([
                         'success' => false,
@@ -255,5 +257,112 @@ class CompanyController extends Controller {
 		}
 		return response()->json(['success' => true,'gst_number'=>$response]);
 	}
-
+	public function validatePuducherryGstin(Request $r) {
+		if (empty($r->puducherry_gst_number)) {
+			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}elseif(substr($r->puducherry_gst_number, 0, 2) != 34){
+      return response()->json(['success' => false, 'errors' => ['Please Provide Puducherry GSTIN Number']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->puducherry_gst_number,$r->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			}
+		}
+		return response()->json(['success' => true,'gst_number'=>$response]);
+	}
+	public function validateKeralaGstin(Request $r) {
+		if (empty($r->kerala_gst_number)) {
+			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}elseif(substr($r->kerala_gst_number, 0, 2) != 32){
+      return response()->json(['success' => false, 'errors' => ['Please Provide Kerala GSTIN Number']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->kerala_gst_number,$r->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			}
+		}
+		return response()->json(['success' => true,'gst_number'=>$response]);
+	}
+	public function validateKarnatakaGstin(Request $r) {
+		if (empty($r->karnataka_gst_number)) {
+			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}elseif(substr($r->karnataka_gst_number, 0, 2) != 29){
+      return response()->json(['success' => false, 'errors' => ['Please Provide Karnataka GSTIN Number']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->karnataka_gst_number,$r->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			}
+		}
+		return response()->json(['success' => true,'gst_number'=>$response]);
+	}
+	public function validateMpGstin(Request $r) {
+		if (empty($r->mp_gst_number)) {
+			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}elseif(substr($r->mp_gst_number, 0, 2) != 23){
+      return response()->json(['success' => false, 'errors' => ['Please Provide Madhya Pradesh GSTIN Number']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->mp_gst_number,$r->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			}
+		}
+		return response()->json(['success' => true,'gst_number'=>$response]);
+	}
+	public function validateTelanganaGstin(Request $r) {
+		if (empty($r->telangana_gst_number)) {
+			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}elseif(substr($r->gst_number, 0, 2) != 36){
+      return response()->json(['success' => false, 'errors' => ['Please Provide Telangana GSTIN Number']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->telangana_gst_number,$r->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			}
+		}
+		return response()->json(['success' => true,'gst_number'=>$response]);
+	}
+	public function validateUpGstin(Request $r) {
+		if (empty($r->up_gst_number)) {
+			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}elseif(substr($r->up_gst_number, 0, 2) != '09'){
+      return response()->json(['success' => false, 'errors' => ['Please Provide Uttar Pradesh GSTIN Number']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->up_gst_number,$r->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			}
+		}
+		return response()->json(['success' => true,'gst_number'=>$response]);
+	}
 }

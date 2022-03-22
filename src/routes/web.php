@@ -190,7 +190,13 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/company/view/{id}', 'Uitoux\EYatra\CompanyController@viewEYatraCompany')->name('viewEYatraCompany');
 		Route::get('eyatra/company/delete/{id}', 'Uitoux\EYatra\CompanyController@deleteEYatraCompany')->name('deleteEYatraCompany');
 		Route::get('eyatra/company/get-filter-data', 'Uitoux\EYatra\CompanyController@eyatraCompanyFilterData')->name('eyatraCompanyFilterData');
-		Route::post('eyatra/company/validate-gst-number/{gst_number?}', 'Uitoux\EYatra\CompanyController@validateGstNumber')->name('validateGstin');
+		Route::post('eyatra/company/validate-tn-gst-number/{tn_gst_number?}', 'Uitoux\EYatra\CompanyController@validateTnGstin')->name('validateTnGstin');
+		Route::post('eyatra/company/validate-puducherry-gst-number/{puducherry_gst_number?}', 'Uitoux\EYatra\CompanyController@validatePuducherryGstin')->name('validatePuducherryGstin');
+		Route::post('eyatra/company/validate-kerala-gst-number/{kerala_gst_number?}', 'Uitoux\EYatra\CompanyController@validateKeralaGstin')->name('validateKeralaGstin');
+		Route::post('eyatra/company/validate-karnataka-gst-number/{karnataka-gst_number?}', 'Uitoux\EYatra\CompanyController@validateKarnatakaGstin')->name('validateKarnatakaGstin');
+		Route::post('eyatra/company/validate-mp-gst-number/{mp_gst_number?}', 'Uitoux\EYatra\CompanyController@validateMpGstin')->name('validateMpGstin');
+		Route::post('eyatra/company/validate-telangana-gst-number/{telangana_gst_number?}', 'Uitoux\EYatra\CompanyController@validateTelanganaGstin')->name('validateTelanganaGstin');
+		Route::post('eyatra/company/validate-up-gst-number/{up_gst_number?}', 'Uitoux\EYatra\CompanyController@validateUpGstin')->name('validateUpGstin');
 
 		//BUSINESS
 		Route::get('eyatra/business/get-list', 'Uitoux\EYatra\BusinessController@listEYatraBusiness')->name('listEYatraBusiness');
