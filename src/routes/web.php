@@ -190,6 +190,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/company/view/{id}', 'Uitoux\EYatra\CompanyController@viewEYatraCompany')->name('viewEYatraCompany');
 		Route::get('eyatra/company/delete/{id}', 'Uitoux\EYatra\CompanyController@deleteEYatraCompany')->name('deleteEYatraCompany');
 		Route::get('eyatra/company/get-filter-data', 'Uitoux\EYatra\CompanyController@eyatraCompanyFilterData')->name('eyatraCompanyFilterData');
+		Route::post('eyatra/company/validate-gst-number/{gst_number?}', 'Uitoux\EYatra\CompanyController@validateGstNumber')->name('validateGstin');
 
 		//BUSINESS
 		Route::get('eyatra/business/get-list', 'Uitoux\EYatra\BusinessController@listEYatraBusiness')->name('listEYatraBusiness');

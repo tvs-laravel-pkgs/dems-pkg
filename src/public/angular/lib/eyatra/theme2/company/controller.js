@@ -40,7 +40,7 @@ app.component('eyatraCompany', {
                 { data: 'name', name: 'companies.name', searchable: true },
                 { data: 'address', name: 'companies.address', searchable: true },
                 { data: 'cin_number', name: 'companies.cin_number', searchable: true },
-                { data: 'gst_number', name: 'companies.gst_number', searchable: true },
+                { data: 'tn_gst_number', name: 'companies.tn_gst_number', searchable: true },
                 { data: 'customer_care_email', name: 'companies.customer_care_email', searchable: true },
                 { data: 'customer_care_phone', name: 'companies.customer_care_phone', searchable: true },
                 { data: 'created_by', name: 'users.name', searchable: true },
@@ -174,6 +174,36 @@ app.component('eyatraCompanyForm', {
                 outstation_budget_amount: '',
                 local_budget_amount: '',
             });
+        }
+
+        $scope.validateGstin = function(gst_number, name) {
+            $.ajax({
+                    method: "POST",
+                    url: laravel_routes['validateGstin'],
+                    data: {
+                        gst_number: gst_number,
+                        name: name
+                    },
+                })
+                .done(function(res) {
+                    // console.log(res.success);
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', 'Gstin Verified');
+                        self.gst_number = res.gst_number;
+                        console.log(self.gst_number.gstin_details);
+                        $scope.$apply()
+                    }
+                })
+                .fail(function(xhr) {
+                    $('#submit').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
         }
         self.removeBudget = function(index, id) {
             self.company.company_budgets.splice(index, 1);

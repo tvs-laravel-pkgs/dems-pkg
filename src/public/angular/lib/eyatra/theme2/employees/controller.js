@@ -213,7 +213,7 @@ app.component('eyatraEmployeeForm', {
 
             self.employee = response.data.employee;
             self.extras = response.data.extras;
-            console.log(self.employee);
+            console.log(response.data.employee);
 
             self.action = response.data.action;
             if (response.data.employee.payment_mode_id == null || !response.data.employee.payment_mode_id) {

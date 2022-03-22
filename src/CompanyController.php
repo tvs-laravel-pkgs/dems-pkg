@@ -21,7 +21,13 @@ class CompanyController extends Controller {
 			'companies.name',
 			'companies.address',
 			'companies.cin_number',
-			'companies.gst_number',
+			'companies.tn_gst_number',
+			'companies.puducherry_gst_number',
+			'companies.kerala_gst_number',
+			'companies.karnataka_gst_number',
+			'companies.mp_gst_number',
+			'companies.up_gst_number',
+			'companies.telangana_gst_number',
 			'companies.customer_care_email',
 			'companies.customer_care_phone',
 			DB::raw('IF(companies.deleted_at IS NULL,"Active","Inactive") as status'),
@@ -108,8 +114,8 @@ class CompanyController extends Controller {
 			$error_messages = [
 				'code.required' => 'Company Code is Required',
 				'name.required' => 'Company Name is Required',
-				'gst_number.required' => 'GSTIN is Required',
-				'gst_number.unique' => 'GSTIN is already taken',
+				/*'gst_number.required' => 'GSTIN is Required',
+				'gst_number.unique' => 'GSTIN is already taken',*/
 				'code.unique' => "Company Code is already taken",
 				'name.unique' => "Company Name is already taken",
 				'company_budgets.*.financial_year_id.distinct' => 'Same Financial year multiple times entered',
@@ -118,10 +124,10 @@ class CompanyController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'name' => 'required',
-				'gst_number' => [
+				/*'gst_number' => [
                     'required',
                     'min:6',
-                ],
+                ],*/
 				'code' => 'required|unique:companies,code,' . $request->id . ',id',
 				'name' => 'required|unique:companies,name,' . $request->id . ',id',
 				'company_budgets.*.financial_year_id' => [
@@ -132,6 +138,14 @@ class CompanyController extends Controller {
 			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
+			if(empty($request->tn_gst_number||$request->puducherry_gst_number||$request->kerala_gst_number||$request->karnataka_gst_number||$request->mp_gst_number||$request->telangana_gst_number||$request->up_gst_number)){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          'Enter Atleast one GSTIN number'
+                        ],
+                    ]);
 			}
 			// dd($request->all());
 			DB::beginTransaction();
@@ -153,18 +167,15 @@ class CompanyController extends Controller {
 				$company->deleted_at = date('Y-m-d H:i:s');
 				$company->deleted_by = Auth::user()->id;
 			}
-			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($request->gst_number,$request->name,true);
-			if(!$response['success']){
-				return response()->json([
-                        'success' => false,
-                        'errors' => [
-                          $response['error']
-                        ],
-                    ]);
-			} 	
-            $company->name=$response['name'];
-            $company->gst_number =$response['gstin'];
-            $company->fill($request->all());
+			$company->tn_gst_number=!empty($request->tn_gst_number) ? $request->tn_gst_number : NULL;
+			$company->puducherry_gst_number=!empty($request->puducherry_gst_number) ? $request->puducherry_gst_number : NULL;
+			$company->kerala_gst_number=!empty($request->kerala_gst_number) ? $request->kerala_gst_number : NULL;
+			$company->karnataka_gst_number=!empty($request->karnataka_gst_number) ? $request->karnataka_gst_number : NULL;
+			$company->mp_gst_number=!empty($request->mp_gst_number) ? $request->mp_gst_number : NULL;
+			$company->telangana_gst_number=!empty($request->telangana_gst_number) ? $request->telangana_gst_number : NULL;
+			$company->up_gst_number=!empty($request->up_gst_number) ? $request->up_gst_number : NULL;
+			$company->name=$request->name;
+      $company->fill($request->all());
 			$company->save();
 			$company->companyBudgets()->sync([]);
 
@@ -227,6 +238,22 @@ class CompanyController extends Controller {
 			return response()->json(['success' => false, 'errors' => ['Company not found']]);
 		}
 		return response()->json(['success' => true]);
+	}
+	public function validateGstNumber(Request $r) {
+		if (empty($r->gst_number)) {
+			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->gst_number,$r->name,true);
+			if(!$response['success']){
+				return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			}
+		}
+		return response()->json(['success' => true,'gst_number'=>$response]);
 	}
 
 }
