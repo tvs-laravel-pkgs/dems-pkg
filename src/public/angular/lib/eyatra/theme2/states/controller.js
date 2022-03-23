@@ -5,7 +5,7 @@ app.component('eyatraStates', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.permission = self.hasPermission('eyatra-state-add');
-        
+
         var dataTable = $('#eyatra_state_table').DataTable({
             stateSave: true,
             "dom": dom_structure_separate_2,
@@ -35,6 +35,7 @@ app.component('eyatraStates', {
             columns: [
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'nstates.code', searchable: true },
+                { data: 'gstin_state_code', name: 'nstates.gstin_state_code', searchable: true },
                 { data: 'name', name: 'nstates.name', searchable: true },
                 { data: 'country', name: 'c.name', searchable: true },
                 { data: 'status', name: 'nstates.deleted_at', searchable: true },
@@ -343,6 +344,11 @@ app.component('eyatraStateForm', {
                     minlength: 2,
                     maxlength: 2,
                 },
+                'gstin_state_code': {
+                    required: true,
+                    minlength: 2,
+                    maxlength: 2,
+                },
                 'name': {
                     required: true,
                     minlength: 3,
@@ -368,6 +374,10 @@ app.component('eyatraStateForm', {
             },
             messages: {
                 'code': {
+                    minlength: 'Please enter minimum of 2 letters',
+                    maxlength: 'Please enter maximum of 2 letters',
+                },
+                'gstin_state_code': {
                     minlength: 'Please enter minimum of 2 letters',
                     maxlength: 'Please enter maximum of 2 letters',
                 },

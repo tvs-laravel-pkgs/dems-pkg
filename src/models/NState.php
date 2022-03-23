@@ -11,6 +11,7 @@ class NState extends Model {
 	protected $fillable = [
 		'country_id',
 		'code',
+		'gstin_state_code',
 		'name',
 		'created_by',
 	];
