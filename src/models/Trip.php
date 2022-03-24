@@ -3,8 +3,11 @@
 namespace Uitoux\EYatra;
 
 //use App\Mail\TripNotificationMail;
+
+use App\Company;
+use App\FinancialYear;
+use App\SerialNumberGroup;
 use App\User;
-use App\{SerialNumberGroup, FinancialYear};
 use Auth;
 use Carbon\Carbon;
 use DateInterval;
@@ -12,18 +15,15 @@ use DatePeriod;
 use DateTime;
 use DB;
 use Entrust;
-use Uitoux\EYatra\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use Mail;
 use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Validator;
-use App\Http\Controllers\AngularController;
-use Mail;
-use Illuminate\Support\Facades\URL;
-
 
 class Trip extends Model {
 	use SoftDeletes;
@@ -193,18 +193,22 @@ class Trip extends Model {
 			DB::beginTransaction();
 			if (!$request->id) {
 				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
-				if (!$outlet_id)
+				if (!$outlet_id) {
 					return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
+				}
 
 				$financial_year = getFinancialYear();
 				$financial_year_id = FinancialYear::where('from', $financial_year)->pluck('id')->first();
-				if (!$financial_year_id)
+				if (!$financial_year_id) {
 					return response()->json(['success' => false, 'errors' => ['Financial Year Not Found']]);
+				}
 
 				// Outstation Trip
 				$get_request_no = SerialNumberGroup::generateNumber(2, $financial_year_id, $outlet_id);
-				if (!$get_request_no['success'])
+				if (!$get_request_no['success']) {
 					return response()->json(['success' => false, 'errors' => ['Serial Number Not Found']]);
+				}
+
 				$number = $get_request_no['number'];
 
 				$trip = new Trip;
@@ -264,7 +268,7 @@ class Trip extends Model {
 				$i = 0;
 
 				//Check Visits booking status pending or booked.If Pending means remove
-				$visit = Visit::where('trip_id',$trip->id)->where('booking_status_id',3060)->forceDelete();
+				$visit = Visit::where('trip_id', $trip->id)->where('booking_status_id', 3060)->forceDelete();
 
 				foreach ($request->visits as $key => $visit_data) {
 					//dump($visit_data);
@@ -313,12 +317,12 @@ class Trip extends Model {
 								$visit->manager_verification_status_id = 3080; //NEW
 							}
 						} else {
-							if($old_visit){
+							if ($old_visit) {
 								$visit = $old_visit;
-							}else{
-								$visit = new Visit;	
+							} else {
+								$visit = new Visit;
 							}
-							
+
 							$visit->booking_status_id = 3060; //PENDING
 							$visit->status_id = 3220; //NEW
 							$visit->manager_verification_status_id = 3080; //NEW
@@ -366,7 +370,7 @@ class Trip extends Model {
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
 			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
 			$activity_log = ActivityLog::saveLog($activity);
-            
+
 			if (empty($request->id)) {
 				return response()->json(['success' => true, 'message' => 'Trip added successfully!', 'trip' => $trip]);
 			} else {
@@ -948,7 +952,7 @@ class Trip extends Model {
 	}
 
 	public static function cancelTrip($r) {
-		$trip_id=$r->trip_id;
+		$trip_id = $r->trip_id;
 		//$trip = Trip::find($r->trip_id);
 		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
 		$trip = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
@@ -966,7 +970,7 @@ class Trip extends Model {
 		}
 
 		$trip->status_id = 3032;
-		$trip->employee_remarks=$r->employee_remarks;
+		$trip->employee_remarks = $r->employee_remarks;
 		$trip->save();
 
 		$activity['entity_id'] = $trip_id;
@@ -1095,13 +1099,13 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		$financier_approve = Auth::user()->company->financier_approve;
-		$trip->advance_request_approval_status_id=Trip::select('id','advance_request_approval_status_id')
-		->where('id','=',$trip)->where('advance_request_approval_status_id',3260)->get()->first();
+		$trip->advance_request_approval_status_id = Trip::select('id', 'advance_request_approval_status_id')
+			->where('id', '=', $trip)->where('advance_request_approval_status_id', 3260)->get()->first();
 		//dd($trip->advance_received);
 		$trip->status_id = 3028;
 		if ($financier_approve == '0') {
 			if ($trip->advance_request_approval_status_id != null) {
-						$trip->advance_request_approval_status_id = 3261;//Advance request Approved
+				$trip->advance_request_approval_status_id = 3261; //Advance request Approved
 			}
 		}
 		//PAYMENT SAVE
@@ -1111,7 +1115,7 @@ class Trip extends Model {
 		$payment->entity_id = $trip->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();*/
-		$trip->approve_remarks=$r->approve_remarks;
+		$trip->approve_remarks = $r->approve_remarks;
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
@@ -1203,9 +1207,9 @@ class Trip extends Model {
 				'transport_attachments',
 				'lodging_attachments',
 				'boarding_attachments',
-				 'local_travel_attachments',
+				'local_travel_attachments',
 			])->find($trip_id);
-		 //dd($trip);
+		//dd($trip);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -1233,7 +1237,7 @@ class Trip extends Model {
 		// Calculating Lodging days by Karthick T on 21-01-2022
 		$visit_start_date = $visit_end_date = null;
 		if (isset($trip->visits) && count($trip->visits) > 1) {
-			foreach($trip->visits as $visit_key => $visit) {
+			foreach ($trip->visits as $visit_key => $visit) {
 				if (!$visit_start_date) {
 					$visit_start_date = date('Y-m-d', strtotime($visit->arrival_date));
 				}
@@ -1263,7 +1267,7 @@ class Trip extends Model {
 
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
-		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km','gae.outstation_trip_amount')
+		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km', 'gae.outstation_trip_amount')
 			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
@@ -1432,7 +1436,7 @@ class Trip extends Model {
 				->orderBy('users.name')
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
-		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id',  [3034, 3030,3026,3025,3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);
+		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3034, 3030, 3026, 3025, 3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);
 
 		$data['success'] = true;
 		//dd($data);
@@ -1463,7 +1467,7 @@ class Trip extends Model {
 			$data['message'] = 'Trip not found';
 			return response()->json($data);
 		}
-        
+
 		$trip = Trip::with([
 			'visits' => function ($q) {
 				$q->orderBy('id', 'asc');
@@ -1610,7 +1614,7 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
-		// dd($request->all());
+		//dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -1636,36 +1640,49 @@ class Trip extends Model {
 			}
 
 			//Get employee outstion beta amount
-			$beta_amount = Employee::join('grade_advanced_eligibility','grade_advanced_eligibility.grade_id','employees.grade_id')->where('employees.id',$trip->employee_id)->pluck('grade_advanced_eligibility.outstation_trip_amount')->first();
+			$beta_amount = Employee::join('grade_advanced_eligibility', 'grade_advanced_eligibility.grade_id', 'employees.grade_id')->where('employees.id', $trip->employee_id)->pluck('grade_advanced_eligibility.outstation_trip_amount')->first();
 
 			$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 			if (!$employee_claim->number) {
 				$outlet_id = $trip->outlet_id;
 				if (!$outlet_id) {
 					$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
-					if (!$outlet_id)
+					if (!$outlet_id) {
 						return response()->json(['success' => false, 'errors' => ['Outlet not found!']]);
+					}
+
 				}
 
 				$financial_year = getFinancialYear();
 				$financial_year_id = FinancialYear::where('from', $financial_year)->pluck('id')->first();
-				if (!$financial_year_id)
+				if (!$financial_year_id) {
 					return response()->json(['success' => false, 'errors' => ['Financial Year Not Found']]);
+				}
 
 				// Outstation Trip Claim
 				$get_request_no = SerialNumberGroup::generateNumber(4, $financial_year_id, $outlet_id);
-				if (!$get_request_no['success'])
+				if (!$get_request_no['success']) {
 					return response()->json(['success' => false, 'errors' => ['Serial Number Not Found']]);
+				}
+
 				$number = $get_request_no['number'];
 				$employee_claim->number = $number;
-				if (!$employee_claim->employee_id)
+				if (!$employee_claim->employee_id) {
 					$employee_claim->employee_id = Auth::user()->entity_id;
-				if (!$employee_claim->status_id)
-					$employee_claim->status_id = 3033; //CLAIM INPROGRESS
-				if (!$employee_claim->created_by)
+				}
+
+				if (!$employee_claim->status_id) {
+					$employee_claim->status_id = 3033;
+				}
+				//CLAIM INPROGRESS
+				if (!$employee_claim->created_by) {
 					$employee_claim->created_by = Auth::user()->id;
-				if (!$employee_claim->total_amount)
+				}
+
+				if (!$employee_claim->total_amount) {
 					$employee_claim->total_amount = 0;
+				}
+
 				$employee_claim->save();
 			}
 
@@ -1718,21 +1735,28 @@ class Trip extends Model {
 							$visit_booking->paid_amount = $visit_data['total'];
 							$visit_booking->created_by = Auth::user()->id;
 							$visit_booking->status_id = 3241; //Claimed
-            
-                   // $gstin = $visit_data['gstin'];
-			        $response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
-			        //dd($response);
-			        if(!$response['success']){
-				    return response()->json([
-                        'success' => false,
-                        'errors' => [
-                          $response['error']
-                        ],
-                    ]);
-			        } 
-                    $visit_booking->gstin = $response['gstin'];
-				    $visit_booking->save();
 
+							// $gstin = $visit_data['gstin'];
+							$user_company_id = Auth::user()->company_id;
+							$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
+							//dd($gstin_enable);
+
+							if ($gstin_enable == 1) {
+								$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'], "", false);
+								//dd($response);
+								if (!$response['success']) {
+									return response()->json([
+										'success' => false,
+										'errors' => [
+											$response['error'],
+										],
+									]);
+								}
+
+								$visit_booking->gstin = $response['gstin'];
+
+							}
+							$visit_booking->save();
 							$transport_total = 0;
 							if ($visit_booking) {
 								$transport_total = $visit_booking->amount + $visit_booking->tax + $visit_booking->toll_fee;
@@ -1805,14 +1829,14 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
-				
+
 				//Check Beta Amount
-				if($lodging_amount == 0 && $boarding_amount == 0){
+				if ($lodging_amount == 0 && $boarding_amount == 0) {
 					$employee_beta_amount = $beta_amount * $request->trip_total_days;
 					$total_amount += $employee_beta_amount;
 
 					$employee_claim->beta_amount = $employee_beta_amount;
-				}else{
+				} else {
 					$employee_claim->beta_amount = NULL;
 				}
 
@@ -1847,7 +1871,7 @@ class Trip extends Model {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
-				 //dd($request->all());
+				//dd($request->all());
 				//REMOVE LODGING ATTACHMENT
 				if (!empty($request->lodgings_attach_removal_ids)) {
 					$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
@@ -1878,28 +1902,28 @@ class Trip extends Model {
 					$lodgings = Lodging::where('trip_id', $request->trip_id)->forceDelete();
 
 					$lodging_total_amount = 0;
-					 foreach ($request->lodgings as $lodging_data) {
+					foreach ($request->lodgings as $lodging_data) {
 
-						if(isset($lodging_data['id'])){
+						if (isset($lodging_data['id'])) {
 							$lodging = Lodging::where('id', $lodging_data['id'])->first();
-							if(!$lodging){
+							if (!$lodging) {
 								$lodging = new Lodging;
 							}
-						}else{
+						} else {
 							$lodging = new Lodging;
 						}
 						//dd($lodging_data['lodge_name']);
-						$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'],$lodging_data['lodge_name'],true);
-						if(!$response['success']){
-				       return response()->json([
-                        'success' => false,
-                        'errors' => [
-                          $response['error']
-                        ],
-                      ]);
-			          } 	
-                        $lodging->lodge_name=$response['name'];
-                     	$lodging->gstin=$response['gstin'];
+						$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
+						if (!$response['success']) {
+							return response()->json([
+								'success' => false,
+								'errors' => [
+									$response['error'],
+								],
+							]);
+						}
+						$lodging->lodge_name = $response['name'];
+						$lodging->gstin = $response['gstin'];
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
 
@@ -1977,14 +2001,14 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
-				
+
 				//Check Beta Amount
-				if($lodging_amount == 0 && $boarding_amount == 0){
+				if ($lodging_amount == 0 && $boarding_amount == 0) {
 					$employee_beta_amount = $beta_amount * $employee_claim->total_trip_days;
 					$total_amount += $employee_beta_amount;
 
 					$employee_claim->beta_amount = $employee_beta_amount;
-				}else{
+				} else {
 					$employee_claim->beta_amount = NULL;
 				}
 
@@ -2071,13 +2095,13 @@ class Trip extends Model {
 
 					$boarding_total_amount = 0;
 					foreach ($request->boardings as $boarding_data) {
-						
-						if(isset($boarding_data['id'])){
+
+						if (isset($boarding_data['id'])) {
 							$boarding = Boarding::where('id', $boarding_data['id'])->first();
-							if(!$boarding){
+							if (!$boarding) {
 								$boarding = new Boarding;
 							}
-						}else{
+						} else {
 							$boarding = new Boarding;
 						}
 
@@ -2148,14 +2172,14 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
-				
+
 				//Check Beta Amount
-				if($lodging_amount == 0 && $boarding_amount == 0){
+				if ($lodging_amount == 0 && $boarding_amount == 0) {
 					$employee_beta_amount = $beta_amount * $employee_claim->total_trip_days;
 					$total_amount += $employee_beta_amount;
 
 					$employee_claim->beta_amount = $employee_beta_amount;
-				}else{
+				} else {
 					$employee_claim->beta_amount = NULL;
 				}
 
@@ -2216,25 +2240,24 @@ class Trip extends Model {
 				$trip->rejection_remarks = NULL;
 				$trip->save();
 
-
 				//SAVE LOCAL TRAVEL ATTACHMENT
-					$item_images = storage_path('app/public/trip/local_travel/attachments/');
-					Storage::makeDirectory($item_images, 0777);
-					if (!empty($request->local_travel_attachments)) {
-						foreach ($request->local_travel_attachments as $key => $attachement) {
-							$value = rand(1, 100);
-							$image = $attachement;
-							$extension = $image->getClientOriginalExtension();
-							$name = $request->trip_id . '_local_travel_attachment' . $value . '.' . $extension;
-							$attachement->move(storage_path('app/public/trip/local_travel/attachments/'), $name);
-							$attachement_local_travel = new Attachment;
-							$attachement_local_travel->attachment_of_id = 3183;
-							$attachement_local_travel->attachment_type_id = 3200;
-							$attachement_local_travel->entity_id = $request->trip_id;
-							$attachement_local_travel->name = $name;
-							$attachement_local_travel->save();
-						}
+				$item_images = storage_path('app/public/trip/local_travel/attachments/');
+				Storage::makeDirectory($item_images, 0777);
+				if (!empty($request->local_travel_attachments)) {
+					foreach ($request->local_travel_attachments as $key => $attachement) {
+						$value = rand(1, 100);
+						$image = $attachement;
+						$extension = $image->getClientOriginalExtension();
+						$name = $request->trip_id . '_local_travel_attachment' . $value . '.' . $extension;
+						$attachement->move(storage_path('app/public/trip/local_travel/attachments/'), $name);
+						$attachement_local_travel = new Attachment;
+						$attachement_local_travel->attachment_of_id = 3183;
+						$attachement_local_travel->attachment_type_id = 3200;
+						$attachement_local_travel->entity_id = $request->trip_id;
+						$attachement_local_travel->name = $name;
+						$attachement_local_travel->save();
 					}
+				}
 
 				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
 				if ($request->is_justify_my_trip) {
@@ -2257,8 +2280,10 @@ class Trip extends Model {
 					->where('entity_id', $request->trip_id)
 					->count();
 				$lodging_count = Lodging::where('trip_id', $request->trip_id)->count();
-				if ($lodging_count > 0 && $lodge_attachment_count == 0)
+				if ($lodging_count > 0 && $lodge_attachment_count == 0) {
 					$employee_claim->is_deviation = 1;
+				}
+
 				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
 				// Changed deviation by Karthick T on 21-01-2022
 
@@ -2304,12 +2329,12 @@ class Trip extends Model {
 
 					$local_total_amount = 0;
 					foreach ($request->local_travels as $local_travel_data) {
-						if(isset($local_travel_data['id'])){
+						if (isset($local_travel_data['id'])) {
 							$local_travel = LocalTravel::where('id', $local_travel_data['id'])->first();
-							if(!$local_travel){
+							if (!$local_travel) {
 								$local_travel = new LocalTravel;
 							}
-						}else{
+						} else {
 							$local_travel = new LocalTravel;
 						}
 
@@ -2354,20 +2379,20 @@ class Trip extends Model {
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
-				
+
 				//Check Beta Amount
-				if($lodging_amount == 0 && $boarding_amount == 0){
+				if ($lodging_amount == 0 && $boarding_amount == 0) {
 					$employee_beta_amount = $beta_amount * $employee_claim->total_trip_days;
 					$total_amount += $employee_beta_amount;
 
 					$employee_claim->beta_amount = $employee_beta_amount;
-				}else{
+				} else {
 					$employee_claim->beta_amount = NULL;
 				}
 
 				// $employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
-				
+
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {
 					if ($trip->advance_received > $total_amount) {
@@ -2398,7 +2423,7 @@ class Trip extends Model {
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
-	
+
 	//GET TRAVEL MODE CATEGORY STATUS TO CHECK IF IT IS NO VEHICLE CLAIM
 	public static function getVisitTrnasportModeClaimStatus($request) {
 		// if (!empty($request->travel_mode_id)) {
@@ -2426,7 +2451,7 @@ class Trip extends Model {
 	}
 
 	// Checking attachment status by Karthick T on 20-01-2022
-	// Checking all the attachments are viewed or not 
+	// Checking all the attachments are viewed or not
 	public static function validateAttachment($trip_id) {
 		$trip_attachment = Trip::with([
 			// 'visits.pending_attachments',
@@ -2443,10 +2468,10 @@ class Trip extends Model {
 			// foreach($trip_attachment->visits as $visit) {
 			// 	$pending_count += count($visit->pending_attachments);
 			// }
-			foreach($trip_attachment->lodgings as $lodging) {
+			foreach ($trip_attachment->lodgings as $lodging) {
 				$pending_count += count($lodging->pending_attachments);
 			}
-			foreach($trip_attachment->boardings as $boarding) {
+			foreach ($trip_attachment->boardings as $boarding) {
 				$pending_count += count($boarding->pending_attachments);
 			}
 			$pending_count += count($trip_attachment->pending_transport_attachments);
@@ -2460,95 +2485,95 @@ class Trip extends Model {
 	}
 	// Checking attachment status by Karthick T on 20-01-2022
 	// Pending outstation trip mail by Karthick T on 15-02-2022
-	public static function pendingTripMail($date,$status) {
-		$pending_trips=[];
-		if($status == 'Claim Generation'){
-		$pending_trips = Trip::select(
-					'trips.number',
-					'trips.employee_id'
-				)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+	public static function pendingTripMail($date, $status) {
+		$pending_trips = [];
+		if ($status == 'Claim Generation') {
+			$pending_trips = Trip::select(
+				'trips.number',
+				'trips.employee_id'
+			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->where('trips.end_date', $date)
 				->whereNull('ey_employee_claims.number')
 				->get();
-				dd($pending_trips);
-			}elseif($status == 'Pending Requsation Approval'){
-				$pending_trips = Trip::select(
-					'trips.number'
-				)->where('trips.created_at', $date)
-				->where('trips.status_id','=',3021)
+			dd($pending_trips);
+		} elseif ($status == 'Pending Requsation Approval') {
+			$pending_trips = Trip::select(
+				'trips.number'
+			)->where('trips.created_at', $date)
+				->where('trips.status_id', '=', 3021)
 				->get();
-			}elseif($status == 'Pending Claim Approval'){
-				$pending_trips = Trip::select(
-					'trips.number',
-					'trips.employee_id'
-				)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+		} elseif ($status == 'Pending Claim Approval') {
+			$pending_trips = Trip::select(
+				'trips.number',
+				'trips.employee_id'
+			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->where('ey_employee_claims.created_at', $date)
-				->where('trips.status_id','=',3023)
+				->where('trips.status_id', '=', 3023)
 				->get();
-			}elseif($status == 'Pending Divation Claim Approval'){
-				$pending_trips = Trip::select(
-					'trips.number',
-					'trips.employee_id'
-				)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+		} elseif ($status == 'Pending Divation Claim Approval') {
+			$pending_trips = Trip::select(
+				'trips.number',
+				'trips.employee_id'
+			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->where('trips.created_at', $date)
-				->where('trips.status_id','=',3029)
+				->where('trips.status_id', '=', 3029)
 				->get();
-			}
-        if (count($pending_trips) > 0) {
-            foreach($pending_trips as $trip_key => $pending_trip) {
-                if($status == 'Claim Generation'){
-                	$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
-                $subject = 'Pending Outstation Trip Mail';
-                $arr['content'] = $content;
-                $arr['subject'] = $subject;
-                $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-                        ->join('users', 'users.entity_id', 'employees.id')
-                        ->where('users.user_type_id', 3121)
-                        ->where('employees.id', $pending_trip->employee_id)
-                        ->pluck('email')->toArray();
-                    }elseif($status == 'Pending Requsation Approval'){
-                       $content = 'The Outstation trip ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
-                       $subject = 'Pending Outstation Approval Trip Mail';
-                       $arr['content'] = $content;
-                       $arr['subject'] = $subject;
-                       $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
-                        ->where('users.user_type_id', 3121)
-                        ->where('employees.id', $pending_trip->employee_id)
-                        ->pluck('email')->toArray();
-                    }elseif($status == 'Pending Claim Approval'){
-                    	$content = 'The Outstation Trip Claim ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
-                       $subject = 'Pending Outstation Claim Approval Trip Mail';
-                       $arr['content'] = $content;
-                       $arr['subject'] = $subject;
-                       $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
-                        ->where('users.user_type_id', 3121)
-                        ->where('employees.id', $pending_trip->employee_id)
-                        ->pluck('email')->toArray();
-                    }elseif($status == 'Pending Divation Claim Approval'){
-                    	$content = 'The Outstation trip claim  ' . $pending_trip->number . ' is not approval yet. Kindly login to DEMS portal and do the needfull'.$status;
-                       $subject = 'Pending Outstation Deviation Trip Mail';
-                       $arr['content'] = $content;
-                       $arr['subject'] = $subject;
-                       $to_email = $arr['to_email'] = EmployeeClaim::join('employees as e', 'e.id', 'ey_employee_claims.employee_id')
-					->join('employees as trip_manager_employee', 'trip_manager_employee.id', 'e.reporting_to_id')
-					->join('employees as se_manager_employee', 'se_manager_employee.id', 'trip_manager_employee.reporting_to_id')
-					->join('users', 'users.entity_id', 'se_manager_employee.id')
-					->where('users.user_type_id', 3121)
-					->select('users.email as email', 'users.name as name')
-                    ->pluck('email')->toArray();
-                    }
-                $cc_email = $arr['cc_email'] = [];
-                $arr['base_url'] = URL::to('/');
+		}
+		if (count($pending_trips) > 0) {
+			foreach ($pending_trips as $trip_key => $pending_trip) {
+				if ($status == 'Claim Generation') {
+					$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull' . $status;
+					$subject = 'Pending Outstation Trip Mail';
+					$arr['content'] = $content;
+					$arr['subject'] = $subject;
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+						->join('users', 'users.entity_id', 'employees.id')
+						->where('users.user_type_id', 3121)
+						->where('employees.id', $pending_trip->employee_id)
+						->pluck('email')->toArray();
+				} elseif ($status == 'Pending Requsation Approval') {
+					$content = 'The Outstation trip ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull' . $status;
+					$subject = 'Pending Outstation Approval Trip Mail';
+					$arr['content'] = $content;
+					$arr['subject'] = $subject;
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+						->join('users', 'users.entity_id', 'employees.reporting_to_id')
+						->where('users.user_type_id', 3121)
+						->where('employees.id', $pending_trip->employee_id)
+						->pluck('email')->toArray();
+				} elseif ($status == 'Pending Claim Approval') {
+					$content = 'The Outstation Trip Claim ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull' . $status;
+					$subject = 'Pending Outstation Claim Approval Trip Mail';
+					$arr['content'] = $content;
+					$arr['subject'] = $subject;
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+						->join('users', 'users.entity_id', 'employees.reporting_to_id')
+						->where('users.user_type_id', 3121)
+						->where('employees.id', $pending_trip->employee_id)
+						->pluck('email')->toArray();
+				} elseif ($status == 'Pending Divation Claim Approval') {
+					$content = 'The Outstation trip claim  ' . $pending_trip->number . ' is not approval yet. Kindly login to DEMS portal and do the needfull' . $status;
+					$subject = 'Pending Outstation Deviation Trip Mail';
+					$arr['content'] = $content;
+					$arr['subject'] = $subject;
+					$to_email = $arr['to_email'] = EmployeeClaim::join('employees as e', 'e.id', 'ey_employee_claims.employee_id')
+						->join('employees as trip_manager_employee', 'trip_manager_employee.id', 'e.reporting_to_id')
+						->join('employees as se_manager_employee', 'se_manager_employee.id', 'trip_manager_employee.reporting_to_id')
+						->join('users', 'users.entity_id', 'se_manager_employee.id')
+						->where('users.user_type_id', 3121)
+						->select('users.email as email', 'users.name as name')
+						->pluck('email')->toArray();
+				}
+				$cc_email = $arr['cc_email'] = [];
+				$arr['base_url'] = URL::to('/');
 
-                $view_name = 'mail.report_mail';
-                Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $to_email) {
-                    $message->to($to_email)->subject($subject);
-                    $message->cc($cc_email)->subject($subject);
-                    $message->from('tvsfinance@tvs.in');
-                });
-            }
+				$view_name = 'mail.report_mail';
+				Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $to_email) {
+					$message->to($to_email)->subject($subject);
+					$message->cc($cc_email)->subject($subject);
+					$message->from('tvsfinance@tvs.in');
+				});
+			}
 			\Log::info('Pending Outstation trip mail completed');
 		} else {
 			\Log::info('No pending outstation trips.');
