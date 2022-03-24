@@ -633,6 +633,17 @@ class LocalTrip extends Model {
 				$data['claim_status'] = 0;
 			}
 		}
+
+		$current_year_arr = calculateFinancialYearForDate(date('m'));
+		$from_date = $current_year_arr['from_fy'];
+		$to_date = $current_year_arr['to_fy'];
+		$emp_claim_amount = LocalTrip::whereDate('claimed_date', '>=', $from_date)
+			->whereDate('claimed_date', '<=', $to_date)
+			->where('status_id', 3026)
+			->where('employee_id', $trip->employee_id)
+			->sum('claim_amount');		
+		$trip->emp_claim_amount = $emp_claim_amount;
+
 		$data['trip'] = $trip;
 		$data['success'] = true;
 
@@ -694,7 +705,7 @@ class LocalTrip extends Model {
 			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3607, Auth::user()->entity_id, Carbon::now());
 			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 			$notification = sendnotification($type, $trip, $user, $trip_type = "Local Trip", $notification_type = $notification_type);
-			dd($type, $trip,$notification_type,$user);
+			// dd($type, $trip,$notification_type,$user);
 		} else {
 			//Trip Approval Log
 			$approval_log = ApprovalLog::saveApprovalLog(3582, $trip->id, 3606, Auth::user()->entity_id, Carbon::now());

@@ -84,6 +84,9 @@ class Company extends Model {
 	public function companyBudgets() {
 		return $this->belongsToMany('Uitoux\EYatra\Config', 'company_budget', 'company_id', 'financial_year_id')->withPivot('outstation_budget_amount', 'local_budget_amount');
 	}
+	public function operatingStates() {
+		return $this->hasMany('Uitoux\EYatra\OperatingStates')->withTrashed();
+	}
 
 	//ENDS EYATRA RELATIONSHIPS
 
