@@ -381,6 +381,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/claim/get-eligible-amount/by-staytype', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGradeStaytype')->name('getEligibleAmtBasedonCitycategoryGradeStaytype');
 		Route::get('eyatra/trip/claim/get-visit-transport-mode-claim-status', 'Uitoux\EYatra\TripClaimController@getVisitTrnasportModeClaimStatus')->name('getVisitTrnasportModeClaimStatus');
 		Route::get('eyatra/trip/claim/get-filter-data', 'Uitoux\EYatra\TripClaimController@eyatraTripClaimFilterData')->name('eyatraTripClaimFilterData');
+		Route::get('eyatra/trip/claim/get_previous_closing_km_details', 'Uitoux\EYatra\TripClaimController@getPreviousEndKm')->name('getPreviousEndKm');
 
 		Route::post('eyatra/trip/claim/attachment/update', 'Uitoux\EYatra\TripClaimVerificationOneController@updateAttachmentStatus')->name('updateAttachmentStatus');
 		Route::post('eyatra/trip/claim/lodging/days', 'Uitoux\EYatra\TripClaimController@calculateLodgingDays')->name('calculateLodgingDays');
