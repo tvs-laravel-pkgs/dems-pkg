@@ -243,6 +243,7 @@ app.component('eyatraTripClaimForm', {
             self.travel_dates_list = response.data.travel_dates_list;
             self.lodging_dates_list = response.data.lodging_dates_list;
             self.travel_values = response.data.travel_values;
+            self.state_code = response.data.state_code;
             console.log(self.local_travel_attachments);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
@@ -1551,6 +1552,98 @@ app.component('eyatraTripClaimForm', {
                 $('#lodgings_attach_removal_ids').val(JSON.stringify(self.lodgings_attachment_removal_ids));
             }
             self.trip.lodging_attachments.splice(lodge_attachment_index, 1);
+        }
+
+        $scope.fareDetailGstChange = (index, gst_number) => {
+            self.trip.visits[index]['fare_gst_detail'] = '';
+            if (gst_number.length == 15) {
+                $http({
+                    url: laravel_routes['getGstInData'],
+                    method: 'GET',
+                    params: {'gst_number' : gst_number}
+                }).then(function(res) {
+                    console.log(res);
+                    if (!res.data.success) {
+                        var errors = '';
+                        if (res.data.errors) {
+                            for (var i in res.data.errors) {
+                                errors += '<li>' + res.data.errors[i] + '</li>';
+                            }
+                        }
+                        if (res.data.error) {
+                            errors += '<li>' + res.data.error + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.trip.visits[index]['fare_gst_detail'] = res.data.gst_data.TradeName ? res.data.gst_data.TradeName : res.data.gst_data.LegalName; 
+                    }
+                });
+            }
+        }
+
+        $scope.lodgingGstChange = (index, gst_number) => {
+            self.trip.lodgings[index]['lodge_name'] = '';
+            if (gst_number.length == 15) {
+                $http({
+                    url: laravel_routes['getGstInData'],
+                    method: 'GET',
+                    params: {'gst_number' : gst_number}
+                }).then(function(res) {
+                    console.log(res);
+                    if (!res.data.success) {
+                        var errors = '';
+                        if (res.data.errors) {
+                            for (var i in res.data.errors) {
+                                errors += '<li>' + res.data.errors[i] + '</li>';
+                            }
+                        }
+                        if (res.data.error) {
+                            errors += '<li>' + res.data.error + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.trip.lodgings[index]['lodge_name'] = res.data.gst_data.TradeName ? res.data.gst_data.TradeName : res.data.gst_data.LegalName; 
+                    }
+                });
+            }
+            $scope.calculateTax(index);
+        }
+        $scope.calculateTax = (index) => {
+            const amount = self.trip.lodgings[index]['amount'];
+            const gst_number = self.trip.lodgings[index]['gstin'];
+            var cgst_percentage = sgst_percentage = igst_percentage = 0;
+            if (amount != undefined && amount && amount >= 1000 && gst_number && gst_number.length == 15) {
+                const gst_state_code = gst_number.substr(0, 2);
+                percentage = 12;
+                if (amount >= 7500)
+                    percentage = 18;
+                if (gst_state_code == self.state_code) {
+                    cgst_percentage = sgst_percentage = percentage / 2;
+                } else {
+                    igst_percentage = percentage;
+                }
+            }
+            total_tax = 0;
+            total_tax += cgst = amount * (cgst_percentage / 100);
+            total_tax += sgst = amount * (sgst_percentage / 100);
+            total_tax += igst = amount * (igst_percentage / 100);
+
+            cgst = Number.parseFloat(cgst).toFixed(2);
+            sgst = Number.parseFloat(sgst).toFixed(2);
+            igst = Number.parseFloat(igst).toFixed(2);
+
+            total_tax = Number.parseFloat(total_tax).toFixed(2);
+
+            self.trip.lodgings[index]['cgst'] = cgst;
+            self.trip.lodgings[index]['sgst'] = sgst;
+            self.trip.lodgings[index]['igst'] = igst;
+
+            self.trip.lodgings[index]['tax'] = total_tax;
+
+            self.trip.lodgings[index]['tax_percentage'] = tax_percentage = cgst_percentage + sgst_percentage + igst_percentage;
+            self.trip.lodgings[index]['cgst_percentage'] = cgst_percentage;
+            self.trip.lodgings[index]['sgst_percentage'] = sgst_percentage;
+            self.trip.lodgings[index]['igst_percentage'] = igst_percentage;
         }
 
         // Boardings
