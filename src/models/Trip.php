@@ -2589,4 +2589,18 @@ class Trip extends Model {
 	}
 	// Pending outstation trip mail by Karthick T on 15-02-2022
 
+	public static function getPreviousEndKm($request) {
+		$trip = Trip::select([
+			'visit_bookings.km_end as km_end',
+		])
+		->join('visits', 'visits.trip_id', 'trips.id')
+		->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+		->where('visit_bookings.id', $request->visit_booking_id)
+		->first();
+
+		$end_km = ($trip && $trip->km_end) ? $trip->km_end : null;
+
+		return response()->json(['end_km' => $end_km]);
+	}
+
 }
