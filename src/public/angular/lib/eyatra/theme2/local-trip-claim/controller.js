@@ -199,6 +199,7 @@ app.component('eyatraLocalTripClaimForm', {
             self.trip.trip_periods = '';
             self.eligible_date = response.data.eligible_date;
             self.beta_amount = response.data.beta_amount;
+            self.sbu_lists = response.data.sbu_lists;
 
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
@@ -541,10 +542,16 @@ app.component('eyatraLocalTripClaimForm', {
                 'trip_mode[]': {
                     required: true,
                 },
+                'sbu_id': {
+                    required: true,
+                },
             },
             messages: {
                 'trip_mode[]': {
                     required: 'Select Visit Mode',
+                },
+                'sbu_id': {
+                    required: 'Select SBU',
                 },
             },
             invalidHandler: function(event, validator) {

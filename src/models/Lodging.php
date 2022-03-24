@@ -25,6 +25,7 @@ class Lodging extends Model {
 		'lodge_name',
 		'eligible_amount',
 		'remarks',
+		'tax_percentage',
 		'cgst',
 		'sgst',
 		'igst',

@@ -244,6 +244,7 @@ app.component('eyatraTripClaimForm', {
             self.lodging_dates_list = response.data.lodging_dates_list;
             self.travel_values = response.data.travel_values;
             self.state_code = response.data.state_code;
+            self.sbu_lists = response.data.sbu_lists;
             console.log(self.local_travel_attachments);
             // console.log(self.travel_values);
             if (self.action == 'Add') {

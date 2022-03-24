@@ -14,6 +14,7 @@ use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\LocalTripVisitDetail;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\Sbu;
 use Validator;
 use Mail;
 use Illuminate\Support\Facades\URL;
@@ -28,6 +29,9 @@ class LocalTrip extends Model {
 
 	public function expense() {
 		return $this->hasMany('Uitoux\EYatra\LocalTripExpense', 'trip_id')->orderBy('expense_date','asc');
+	}
+	public function sbu() {
+		return $this->belongsTo('Uitoux\EYatra\Sbu', 'sbu_id');
 	}
 
 	public function getStartDateAttribute($date) {
@@ -266,6 +270,8 @@ class LocalTrip extends Model {
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+30 days"));
 
+		$data['sbu_lists'] = Sbu::getSbuList();
+
 		return response()->json($data);
 	}
 
@@ -394,6 +400,9 @@ class LocalTrip extends Model {
 			$trip->travel_amount = $request->total_travel_amount;
 			$trip->other_expense_amount = $request->total_expense_amount;
 			$trip->claim_amount = $request->total_claim_amount;
+			$trip->sbu_id = null;
+			if (isset($request->sbu_id) && $request->sbu_id)
+				$trip->sbu_id = $request->sbu_id;
 			$trip->claimed_date = date('Y-m-d');
 			$trip->save();
 			if (!$trip->number)
@@ -603,6 +612,8 @@ class LocalTrip extends Model {
 			'expenseAttachments',
 			'otherExpenseAttachments',
 			'google_attachments',
+			'sbu',
+			'sbu.lob'
 		])
 			->find($trip_id);
 

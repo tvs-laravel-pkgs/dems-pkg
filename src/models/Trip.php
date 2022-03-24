@@ -20,6 +20,7 @@ use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\NState;
+use Uitoux\EYatra\Sbu;
 use Validator;
 use App\Http\Controllers\AngularController;
 use Mail;
@@ -1407,6 +1408,7 @@ class Trip extends Model {
 			->pluck('nstates.gstin_state_code')->first();
 		$data['trip'] = $trip;
 		$data['state_code'] = $state_code;
+		$data['sbu_lists'] = Sbu::getSbuList();
 		return response()->json($data);
 	}
 
@@ -1525,6 +1527,8 @@ class Trip extends Model {
 			'boarding_attachments',
 			'google_attachments',
 			'local_travel_attachments',
+			'cliam.sbu',
+			'cliam.sbu.lob'
 
 		])->find($trip_id);
 		//dd($trip);
@@ -2287,6 +2291,9 @@ class Trip extends Model {
 				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
 				// Changed deviation by Karthick T on 21-01-2022
 
+				$employee_claim->sbu_id = null;
+				if (isset($request->sbu_id) && $request->sbu_id)
+					$employee_claim->sbu_id = $request->sbu_id;
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->remarks = $request->remarks;
 				$employee_claim->save();

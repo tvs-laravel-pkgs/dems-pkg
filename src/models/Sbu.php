@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra;
 use Uitoux\EYatra\Outlet;
 use DB;
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 
 class Sbu extends Model {
@@ -63,6 +64,20 @@ class Sbu extends Model {
 			
 			}
 		return $data;
+	}
+
+	public static function getSbuList() {
+		$list = Collect(
+				Sbu::select(
+					'sbus.id',
+					DB::raw('CONCAT(lobs.name, " / " , sbus.name) as name')
+				)->join('lobs', 'lobs.id', 'sbus.lob_id')
+				->where('lobs.functional_support', 0)
+				->where('lobs.company_id', Auth::user()->company_id)
+				->orderBy('sbus.id', 'ASC')
+				->get()
+			)->prepend(['id' => null, 'name' => 'Select Any Sbu']);
+		return $list;
 	}
 
 }
