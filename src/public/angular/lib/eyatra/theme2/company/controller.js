@@ -337,6 +337,11 @@ app.component('eyatraCompanyView', {
         ).then(function(response) {
             self.company = response.data.company;
             self.status = response.data.status;
+            self.name = response.data.name;
+            self.gst_number = response.data.gst_number;
+            self.legal_name = response.data.legal_name;
+            self.address = response.data.address;
+            self.pincode = response.data.pincode;
             self.financial_year = response.data.financial_year;
             self.outstation_budget_amount = response.data.outstation_budget_amount;
             self.local_budget_amount = response.data.local_budget_amount;

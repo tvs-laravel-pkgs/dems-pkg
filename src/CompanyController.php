@@ -215,6 +215,13 @@ class CompanyController extends Controller {
 	public function viewEYatraCompany($id) {
 		$company = Company::with('createdBy')->withTrashed()
 			->find($id);
+		$operating_state = DB::table('operating_states')->select('nstates.name','operating_states.gst_number','operating_states.legal_name','operating_states.address','operating_states.pincode')->where('operating_states.company_id',$company->id)->leftjoin('nstates','nstates.id','operating_states.nstate_id')->get()->toArray();
+		 //dd($operating_state);
+		$this->data['name'] = array_column($operating_state, 'name');
+		$this->data['gst_number'] = array_column($operating_state, 'gst_number');
+		$this->data['legal_name'] = array_column($operating_state, 'legal_name');
+		$this->data['address'] = array_column($operating_state, 'address');
+		$this->data['pincode'] = array_column($operating_state, 'pincode');
 		$company_budget = DB::table('company_budget')->select('configs.name as financial_year', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'), DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('company_budget.company_id', $company->id)
 			->leftJoin('configs', 'configs.id', 'company_budget.financial_year_id')
 			->get()->toArray();
@@ -232,7 +239,6 @@ class CompanyController extends Controller {
 		} else {
 			$this->data['status'] = 'Inactive';
 		}
-
 		$this->data['action'] = 'View';
 		$this->data['company'] = $company;
 		$this->data['success'] = true;
