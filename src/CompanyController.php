@@ -155,7 +155,8 @@ class CompanyController extends Controller {
 				$company->deleted_by = Auth::user()->id;
 			}
 			$company->name=$request->name;
-      $company->fill($request->all());
+			$company->gstin_enable = $request->gstin_enable;
+            $company->fill($request->all());
 			$company->save();
 			//SAVING OPERATING STATES
 			if ($request->operating_states) {

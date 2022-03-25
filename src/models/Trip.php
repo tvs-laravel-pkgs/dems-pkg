@@ -1747,8 +1747,8 @@ class Trip extends Model {
 							$visit_booking->paid_amount = $visit_data['total'];
 							$visit_booking->created_by = Auth::user()->id;
 							$visit_booking->status_id = 3241; //Claimed
-            
                    // $gstin = $visit_data['gstin'];
+				if ($gstin_enable == 1) {
 			        $response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
 			        //dd($response);
 			        if(!$response['success']){
@@ -1760,6 +1760,7 @@ class Trip extends Model {
                     ]);
 			        } 
                     $visit_booking->gstin = $response['gstin'];
+                }
 				    $visit_booking->save();
 
 							$transport_total = 0;
