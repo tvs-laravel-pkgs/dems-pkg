@@ -326,6 +326,26 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.local_travels.length == 0) {
                 self.addNewLocalTralvels();
             }
+            if (self.transport_attachments.length > 0) {
+                attachment('Yes', 'fare-details-attachments-list');
+            } else {
+                attachment('No', 'fare-details-attachments-list');
+            }
+            if (self.lodging_attachments.length > 0) {
+                attachment('Yes', 'lodging-attachments-list');
+            } else {
+                attachment('No', 'lodging-attachments-list');
+            }
+            if (self.boarding_attachments.length > 0) {
+                attachment('Yes', 'boarding-attachments-list');
+            } else {
+                attachment('No', 'boarding-attachments-list');
+            }            
+            if (self.local_travel_attachments.length > 0) {
+                attachment('Yes', 'local_travel-attachments-list');
+            } else {
+                attachment('No', 'local_travel-attachments-list');
+            }           
             setTimeout(function () {
                 self.travelCal();
                 self.lodgingCal();
@@ -336,6 +356,34 @@ app.component('eyatraTripClaimForm', {
             $rootScope.loading = false;
 
         });
+
+        $scope.attachmentRadio = function(value, className) {
+            console.log(value, className);
+            self.className = value;
+            if (value == 'Yes'){                
+                $('.'+className).show();
+                $('.'+className+'-input').addClass('required');
+            } else {                
+                $('.'+className).hide();
+                $('.'+className+'-input').removeClass('required');
+            }        
+        }
+
+        function attachment(value, className) {
+            console.log(value, className);
+            self.className = value;
+            if (value == 'Yes'){             
+                $('#'+className+'-active').prop('checked', true);
+                $('.'+className).show();
+                $('.'+className+'-input').addClass('required');
+            } else {
+                $('.'+className+'inactive').prop('checked', true);            
+                $('.'+className).hide();
+                $('.'+className+'-input').removeClass('required');
+            }
+        }
+        
+        
 
         // var arrival_date_error_flag = 0;
         $(document).on('input', '.localconveyance_km', function () {
@@ -803,18 +851,20 @@ app.component('eyatraTripClaimForm', {
 
         // calculate total KMs
         self.totalKm = function (key, self_booking_id) {
-            if (self_booking_id) {
-                $.ajax({
-                    url : get_previous_closing_km_details,
-                    method: 'GET',
-                    data:{visit_booking_id : self_booking_id}
-                })
-                .done(function(response) {
-                    if (response.end_km != null){
-                        $('.km_start_' + key).val(response.end_km);
-                    }
-                })
-            }            
+            if(self.action == 'Add'){
+                if (self_booking_id) {
+                    $.ajax({
+                        url : get_previous_closing_km_details,
+                        method: 'GET',
+                        data:{visit_booking_id : self_booking_id}
+                    })
+                    .done(function(response) {
+                        if (response.end_km != null){
+                            $('.km_start_' + key).val(response.end_km);
+                        }
+                    })
+                }
+            }                       
             var from_km = parseInt($('.km_start_' + key).val());
             var to_km = parseInt($('.km_end_' + key).val());
             var total_km = 0;
