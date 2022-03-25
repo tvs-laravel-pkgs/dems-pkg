@@ -1760,6 +1760,8 @@ class Trip extends Model {
                     ]);
 			        } 
                     $visit_booking->gstin = $response['gstin'];
+                }else{
+                	$visit_booking->gstin=NULL;
                 }
 				    $visit_booking->save();
 
