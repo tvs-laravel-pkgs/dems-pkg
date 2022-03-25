@@ -7,6 +7,7 @@ use DB;
 use Entrust;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\Company;
+use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Config;
 use Validator;
 use Yajra\Datatables\Datatables;
@@ -18,21 +19,16 @@ class CompanyController extends Controller {
 			'companies.id',
 			'companies.code',
 			'companies.name',
-			'companies.address',
 			'companies.cin_number',
-			'companies.tn_gst_number',
-			'companies.puducherry_gst_number',
-			'companies.kerala_gst_number',
-			'companies.karnataka_gst_number',
-			'companies.mp_gst_number',
-			'companies.up_gst_number',
-			'companies.telangana_gst_number',
+			'operating_states.gst_number',
+			'operating_states.address',
 			'companies.customer_care_email',
 			'companies.customer_care_phone',
 			DB::raw('IF(companies.deleted_at IS NULL,"Active","Inactive") as status'),
 			'users.name as created_by'
 		)
 			->join('users', 'companies.created_by', 'users.id')
+			->join('operating_states','operating_states.company_id','companies.id')
 			->groupBy('companies.id');
 
 		if (!Entrust::can('eyatra-all-company-view')) {
@@ -82,7 +78,8 @@ class CompanyController extends Controller {
 
 		} else {
 			$this->data['action'] = 'Edit';
-			$company = Company::with('companyBudgets')->find($id);
+			//$company = Company::with('companyBudgets')->find($id);
+			$company = Company::with('operatingStates')->find($id);
 			//dd($company);
 			if (!$company) {
 				$this->data['success'] = false;
@@ -93,8 +90,12 @@ class CompanyController extends Controller {
 			} else {
 				$this->data['status'] = 'Inactive';
 			}
+			foreach($company->operatingStates as $key=>$operating_state){
+			 $company->operatingStates[$key]->status=$operating_state->deleted_at?'Inactive':'Active';
+			}
 		}
 		$this->data['financial_year_list'] = $financial_year_list = collect(Config::select('name', 'id')->where('config_type_id', 536)->get());
+		$this->data['state_list']=$state_list=NState::select('name','id')->get();
 		//dd($company);
 		$this->data['company'] = $company;
 		$this->data['success'] = true;
@@ -113,8 +114,6 @@ class CompanyController extends Controller {
 			$error_messages = [
 				'code.required' => 'Company Code is Required',
 				'name.required' => 'Company Name is Required',
-				/*'gst_number.required' => 'GSTIN is Required',
-				'gst_number.unique' => 'GSTIN is already taken',*/
 				'code.unique' => "Company Code is already taken",
 				'name.unique' => "Company Name is already taken",
 				'company_budgets.*.financial_year_id.distinct' => 'Same Financial year multiple times entered',
@@ -123,10 +122,6 @@ class CompanyController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'name' => 'required',
-				/*'gst_number' => [
-					                    'required',
-					                    'min:6',
-				*/
 				'code' => 'required|unique:companies,code,' . $request->id . ',id',
 				'name' => 'required|unique:companies,name,' . $request->id . ',id',
 				'company_budgets.*.financial_year_id' => [
@@ -137,14 +132,6 @@ class CompanyController extends Controller {
 			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
-			}
-			if (empty($request->tn_gst_number || $request->puducherry_gst_number || $request->kerala_gst_number || $request->karnataka_gst_number || $request->mp_gst_number || $request->telangana_gst_number || $request->up_gst_number)) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						'Enter Atleast one GSTIN Number',
-					],
-				]);
 			}
 			// dd($request->all());
 			DB::beginTransaction();
@@ -166,17 +153,37 @@ class CompanyController extends Controller {
 				$company->deleted_at = date('Y-m-d H:i:s');
 				$company->deleted_by = Auth::user()->id;
 			}
-			$company->tn_gst_number = !empty($request->tn_gst_number) ? $request->tn_gst_number : NULL;
-			$company->puducherry_gst_number = !empty($request->puducherry_gst_number) ? $request->puducherry_gst_number : NULL;
-			$company->kerala_gst_number = !empty($request->kerala_gst_number) ? $request->kerala_gst_number : NULL;
-			$company->karnataka_gst_number = !empty($request->karnataka_gst_number) ? $request->karnataka_gst_number : NULL;
-			$company->mp_gst_number = !empty($request->mp_gst_number) ? $request->mp_gst_number : NULL;
-			$company->telangana_gst_number = !empty($request->telangana_gst_number) ? $request->telangana_gst_number : NULL;
-			$company->up_gst_number = !empty($request->up_gst_number) ? $request->up_gst_number : NULL;
-			$company->name = $request->name;
-			$company->gstin_enable = $request->gstin_enable;
-			$company->fill($request->all());
+			$company->name=$request->name;
+      $company->fill($request->all());
 			$company->save();
+			//SAVING OPERATING STATES
+			if ($request->operating_states) {
+				if (count($request->operating_states) > 0) {
+					foreach ($request->operating_states as $operating_state_data) {
+						$operating_state = OperatingStates::firstOrNew(['id' => $operating_state_data['id']]);
+						if (!$operating_state_data['id']) {
+				        $operating_state->created_by = Auth::user()->id;
+				        $operating_state->created_at = Carbon::now();
+				        $operating_state->updated_at = NULL;
+			      } else {
+				        $operating_state = OperatingStates::withTrashed()->find($operating_state_data['id']);
+				        $operating_state->updated_by = Auth::user()->id;
+				        $operating_state->updated_at = Carbon::now();
+				      }
+			      if ($operating_state_data['status'] == 'Active') {
+				        $operating_state->deleted_at = NULL;
+				        $operating_state->deleted_by = NULL;
+			      } else {
+				        $operating_state->deleted_at = date('Y-m-d H:i:s');
+				        $operating_state->deleted_by = Auth::user()->id;
+			      }
+			      $operating_state->company_id=$company->id;
+			      $operating_state->nstate_id=$operating_state_data['nstate_id'];
+						$operating_state->fill($operating_state_data);
+						$operating_state->save();
+				}
+			}
+		}
 			$company->companyBudgets()->sync([]);
 
 			//SAVING COMPANY BUDGET
@@ -207,6 +214,13 @@ class CompanyController extends Controller {
 	public function viewEYatraCompany($id) {
 		$company = Company::with('createdBy')->withTrashed()
 			->find($id);
+		$operating_state = DB::table('operating_states')->select('nstates.name','operating_states.gst_number','operating_states.legal_name','operating_states.address','operating_states.pincode')->where('operating_states.company_id',$company->id)->leftjoin('nstates','nstates.id','operating_states.nstate_id')->get()->toArray();
+		 //dd($operating_state);
+		$this->data['name'] = array_column($operating_state, 'name');
+		$this->data['gst_number'] = array_column($operating_state, 'gst_number');
+		$this->data['legal_name'] = array_column($operating_state, 'legal_name');
+		$this->data['address'] = array_column($operating_state, 'address');
+		$this->data['pincode'] = array_column($operating_state, 'pincode');
 		$company_budget = DB::table('company_budget')->select('configs.name as financial_year', DB::raw('format(outstation_budget_amount,2,"en_IN") as outstation_budget_amount'), DB::raw('format(local_budget_amount,2,"en_IN") as local_budget_amount'))->where('company_budget.company_id', $company->id)
 			->leftJoin('configs', 'configs.id', 'company_budget.financial_year_id')
 			->get()->toArray();
@@ -224,7 +238,6 @@ class CompanyController extends Controller {
 		} else {
 			$this->data['status'] = 'Inactive';
 		}
-
 		$this->data['action'] = 'View';
 		$this->data['company'] = $company;
 		$this->data['success'] = true;
@@ -239,129 +252,15 @@ class CompanyController extends Controller {
 		}
 		return response()->json(['success' => true]);
 	}
-	public function validateTnGstin(Request $r) {
-		if (empty($r->tn_gst_number)) {
-			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
-		} elseif (substr($r->tn_gst_number, 0, 2) != 33) {
-			return response()->json(['success' => false, 'errors' => ['Please Provide TamilNadu Gstin Number']]);
-		} else {
-			$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($r->tn_gst_number, $r->name, true);
-			if (!$response['success']) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						$response['error'],
-					],
-				]);
-			}
-		}
-		return response()->json(['success' => true, 'gst_number' => $response]);
-	}
-	public function validatePuducherryGstin(Request $r) {
-		if (empty($r->puducherry_gst_number)) {
-			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
-		} elseif (substr($r->puducherry_gst_number, 0, 2) != 34) {
-			return response()->json(['success' => false, 'errors' => ['Please Provide Puducherry GSTIN Number']]);
-		} else {
-			$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($r->puducherry_gst_number, $r->name, true);
-			if (!$response['success']) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						$response['error'],
-					],
-				]);
-			}
-		}
-		return response()->json(['success' => true, 'gst_number' => $response]);
-	}
-	public function validateKeralaGstin(Request $r) {
-		if (empty($r->kerala_gst_number)) {
-			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
-		} elseif (substr($r->kerala_gst_number, 0, 2) != 32) {
-			return response()->json(['success' => false, 'errors' => ['Please Provide Kerala GSTIN Number']]);
-		} else {
-			$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($r->kerala_gst_number, $r->name, true);
-			if (!$response['success']) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						$response['error'],
-					],
-				]);
-			}
-		}
-		return response()->json(['success' => true, 'gst_number' => $response]);
-	}
-	public function validateKarnatakaGstin(Request $r) {
-		if (empty($r->karnataka_gst_number)) {
-			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
-		} elseif (substr($r->karnataka_gst_number, 0, 2) != 29) {
-			return response()->json(['success' => false, 'errors' => ['Please Provide Karnataka GSTIN Number']]);
-		} else {
-			$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($r->karnataka_gst_number, $r->name, true);
-			if (!$response['success']) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						$response['error'],
-					],
-				]);
-			}
-		}
-		return response()->json(['success' => true, 'gst_number' => $response]);
-	}
-	public function validateMpGstin(Request $r) {
-		if (empty($r->mp_gst_number)) {
-			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
-		} elseif (substr($r->mp_gst_number, 0, 2) != 23) {
-			return response()->json(['success' => false, 'errors' => ['Please Provide Madhya Pradesh GSTIN Number']]);
-		} else {
-			$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($r->mp_gst_number, $r->name, true);
-			if (!$response['success']) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						$response['error'],
-					],
-				]);
-			}
-		}
-		return response()->json(['success' => true, 'gst_number' => $response]);
-	}
-	public function validateTelanganaGstin(Request $r) {
-		if (empty($r->telangana_gst_number)) {
-			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
-		} elseif (substr($r->gst_number, 0, 2) != 36) {
-			return response()->json(['success' => false, 'errors' => ['Please Provide Telangana GSTIN Number']]);
-		} else {
-			$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($r->telangana_gst_number, $r->name, true);
-			if (!$response['success']) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						$response['error'],
-					],
-				]);
-			}
-		}
-		return response()->json(['success' => true, 'gst_number' => $response]);
-	}
-	public function validateUpGstin(Request $r) {
-		if (empty($r->up_gst_number)) {
-			return response()->json(['success' => false, 'errors' => ['Gstin is empty']]);
-		} elseif (substr($r->up_gst_number, 0, 2) != '09') {
-			return response()->json(['success' => false, 'errors' => ['Please Provide Uttar Pradesh GSTIN Number']]);
-		} else {
-			$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($r->up_gst_number, $r->name, true);
-			if (!$response['success']) {
-				return response()->json([
-					'success' => false,
-					'errors' => [
-						$response['error'],
-					],
-				]);
-			}
+	public function validateGstin(Request $r) {
+		$gstin_code=NState::where('id',$r->state_id)->pluck('gstin_state_code')->first();
+		if(substr($r->gst_number, 0, 2) != $gstin_code){
+			   return response()->json(['success' => false, 'errors' => ['The State and Gstin Number Not Matching']]);
+		}else{
+			$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($r->gst_number,$r->name,true);
+			   if(!$response['success']){
+			       	return response()->json(['success' => false,'errors' => [$response['error']],]);
+		      }
 		}
 		return response()->json(['success' => true, 'gst_number' => $response]);
 	}

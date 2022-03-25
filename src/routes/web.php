@@ -190,13 +190,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/company/view/{id}', 'Uitoux\EYatra\CompanyController@viewEYatraCompany')->name('viewEYatraCompany');
 		Route::get('eyatra/company/delete/{id}', 'Uitoux\EYatra\CompanyController@deleteEYatraCompany')->name('deleteEYatraCompany');
 		Route::get('eyatra/company/get-filter-data', 'Uitoux\EYatra\CompanyController@eyatraCompanyFilterData')->name('eyatraCompanyFilterData');
-		Route::post('eyatra/company/validate-tn-gst-number/{tn_gst_number?}', 'Uitoux\EYatra\CompanyController@validateTnGstin')->name('validateTnGstin');
-		Route::post('eyatra/company/validate-puducherry-gst-number/{puducherry_gst_number?}', 'Uitoux\EYatra\CompanyController@validatePuducherryGstin')->name('validatePuducherryGstin');
-		Route::post('eyatra/company/validate-kerala-gst-number/{kerala_gst_number?}', 'Uitoux\EYatra\CompanyController@validateKeralaGstin')->name('validateKeralaGstin');
-		Route::post('eyatra/company/validate-karnataka-gst-number/{karnataka-gst_number?}', 'Uitoux\EYatra\CompanyController@validateKarnatakaGstin')->name('validateKarnatakaGstin');
-		Route::post('eyatra/company/validate-mp-gst-number/{mp_gst_number?}', 'Uitoux\EYatra\CompanyController@validateMpGstin')->name('validateMpGstin');
-		Route::post('eyatra/company/validate-telangana-gst-number/{telangana_gst_number?}', 'Uitoux\EYatra\CompanyController@validateTelanganaGstin')->name('validateTelanganaGstin');
-		Route::post('eyatra/company/validate-up-gst-number/{up_gst_number?}', 'Uitoux\EYatra\CompanyController@validateUpGstin')->name('validateUpGstin');
+		Route::post('eyatra/company/validate-gst-number/{gst_number?}', 'Uitoux\EYatra\CompanyController@validateGstin')->name('validateGstin');
 
 		//BUSINESS
 		Route::get('eyatra/business/get-list', 'Uitoux\EYatra\BusinessController@listEYatraBusiness')->name('listEYatraBusiness');
@@ -381,6 +375,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trip/claim/get-eligible-amount/by-staytype', 'Uitoux\EYatra\TripClaimController@getEligibleAmtBasedonCitycategoryGradeStaytype')->name('getEligibleAmtBasedonCitycategoryGradeStaytype');
 		Route::get('eyatra/trip/claim/get-visit-transport-mode-claim-status', 'Uitoux\EYatra\TripClaimController@getVisitTrnasportModeClaimStatus')->name('getVisitTrnasportModeClaimStatus');
 		Route::get('eyatra/trip/claim/get-filter-data', 'Uitoux\EYatra\TripClaimController@eyatraTripClaimFilterData')->name('eyatraTripClaimFilterData');
+		Route::get('eyatra/trip/claim/get_previous_closing_km_details', 'Uitoux\EYatra\TripClaimController@getPreviousEndKm')->name('getPreviousEndKm');
 
 		Route::post('eyatra/trip/claim/attachment/update', 'Uitoux\EYatra\TripClaimVerificationOneController@updateAttachmentStatus')->name('updateAttachmentStatus');
 		Route::post('eyatra/trip/claim/lodging/days', 'Uitoux\EYatra\TripClaimController@calculateLodgingDays')->name('calculateLodgingDays');
@@ -579,6 +574,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/local-trip/claim/verification/get-data', 'Uitoux\EYatra\TripClaimVerificationController@eyatraLocalClaimVerificationGetData')->name('eyatraLocalClaimVerificationGetData');
 		Route::post('eyatra/local-trip/claim/verifier/reject', 'Uitoux\EYatra\TripClaimVerificationController@rejectLocalTripClaimVerification')->name('rejectLocalTripClaimVerification');
 		Route::post('eyatra/local-trip/claim/verifier/approve', 'Uitoux\EYatra\TripClaimVerificationController@approveLocalTripClaimVerification')->name('approveLocalTripClaimVerification');
+		// Get GST IN Details by Karthick T on 23-03-2022
+		Route::get('eyatra/gst-detail', 'Uitoux\EYatra\TripClaimVerificationController@getGstInData')->name('getGstInData');
 	});
 });
 

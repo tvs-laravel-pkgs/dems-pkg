@@ -412,7 +412,10 @@ class ExportReportController extends Controller
             'SUPPLIER NAME',
             'INVOICE NUMBER',
             'INVOICE AMOUNT',
-            'TAX AMOUNT',
+            'TAX PERCENTAGE',
+            'CGST AMOUNT',
+            'SGST AMOUNT',
+            'IGST AMOUNT',
             // 'ADDRESS',
             'DATE',
         ];
@@ -427,7 +430,10 @@ class ExportReportController extends Controller
                 DB::raw('COALESCE(lodgings.lodge_name, "") as supplier_name'),
                 DB::raw('COALESCE(trips.number, "") as invoice_number'),
                 DB::raw('format(ROUND(IFNULL(lodgings.amount, 0)),2,"en_IN") as invoice_amount'),
-                DB::raw('format(ROUND(IFNULL(lodgings.tax, 0)),2,"en_IN") as tax_amount'),
+                DB::raw('format(ROUND(IFNULL(lodgings.tax_percentage, 0)),2,"en_IN") as tax_percentage'),
+                DB::raw('format(ROUND(IFNULL(lodgings.cgst, 0)),2,"en_IN") as cgst'),
+                DB::raw('format(ROUND(IFNULL(lodgings.sgst, 0)),2,"en_IN") as sgst'),
+                DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
                 DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as date')
             )->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
             ->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -475,7 +481,10 @@ class ExportReportController extends Controller
                 $gst_detail->supplier_name,
                 $gst_detail->invoice_number,
                 $gst_detail->invoice_amount,
-                $gst_detail->tax_amount,
+                $gst_detail->tax_percentage,
+                $gst_detail->cgst,
+                $gst_detail->sgst,
+                $gst_detail->igst,
                 $gst_detail->date,
             ];
 

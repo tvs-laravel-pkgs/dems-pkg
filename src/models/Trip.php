@@ -23,6 +23,8 @@ use Mail;
 use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\NState;
+use Uitoux\EYatra\Sbu;
 use Validator;
 
 class Trip extends Model {
@@ -1403,8 +1405,14 @@ class Trip extends Model {
 			'booking_type_list' => $booking_type_list,
 			'travel_cities_list' => $travel_cities_list,
 		];
-		// dd($trip);
+		$state_code = NState::leftJoin('ncities', 'ncities.state_id', 'nstates.id')
+			->leftJoin('ey_addresses', 'ey_addresses.city_id', 'ncities.id')
+			->where('ey_addresses.address_of_id', 3160)
+			->where('ey_addresses.entity_id', $trip->outlet_id)
+			->pluck('nstates.gstin_state_code')->first();
 		$data['trip'] = $trip;
+		$data['state_code'] = $state_code;
+		$data['sbu_lists'] = Sbu::getSbuList();
 		return response()->json($data);
 	}
 
@@ -1523,6 +1531,8 @@ class Trip extends Model {
 			'boarding_attachments',
 			'google_attachments',
 			'local_travel_attachments',
+			'cliam.sbu',
+			'cliam.sbu.lob'
 
 		])->find($trip_id);
 		//dd($trip);
@@ -1598,6 +1608,25 @@ class Trip extends Model {
 		$data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
 
 		$data['success'] = true;
+
+		$lodging_bal_amount = $trip->lodgings->sum('amount');
+		$lodging_tax_amount = $trip->lodgings->sum('tax');
+		$lodging_bal_amount = number_format($lodging_bal_amount, 2, '.', '');
+		$lodging_tax_amount = number_format($lodging_tax_amount, 2, '.', '');
+		$trip->lodging_bal_amount = $lodging_bal_amount;
+		$trip->lodging_tax_amount = $lodging_tax_amount;
+
+		$current_year_arr = calculateFinancialYearForDate(date('m'));
+		$from_date = $current_year_arr['from_fy'];
+		$to_date = $current_year_arr['to_fy'];
+		$emp_claim_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
+			->where('ey_employee_claims.status_id', 3026)
+			->where('ey_employee_claims.employee_id', $trip->employee->id)
+			->sum('trips.claim_amount');
+		
+		$trip->emp_claim_amount = $emp_claim_amount;
 
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
@@ -2287,6 +2316,9 @@ class Trip extends Model {
 				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
 				// Changed deviation by Karthick T on 21-01-2022
 
+				$employee_claim->sbu_id = null;
+				if (isset($request->sbu_id) && $request->sbu_id)
+					$employee_claim->sbu_id = $request->sbu_id;
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->remarks = $request->remarks;
 				$employee_claim->save();
@@ -2581,5 +2613,19 @@ class Trip extends Model {
 		return 'true';
 	}
 	// Pending outstation trip mail by Karthick T on 15-02-2022
+
+	public static function getPreviousEndKm($request) {
+		$trip = Trip::select([
+			'visit_bookings.km_end as km_end',
+		])
+		->join('visits', 'visits.trip_id', 'trips.id')
+		->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+		->where('visit_bookings.id', $request->visit_booking_id)
+		->first();
+
+		$end_km = ($trip && $trip->km_end) ? $trip->km_end : null;
+
+		return response()->json(['end_km' => $end_km]);
+	}
 
 }

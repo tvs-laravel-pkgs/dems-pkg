@@ -17,4 +17,8 @@ class EmployeeClaim extends Model {
 		'payment_id',
 		// 'is_deviation',
 	];
+
+	public function sbu() {
+		return $this->belongsTo('Uitoux\EYatra\Sbu', 'sbu_id');
+	}
 }

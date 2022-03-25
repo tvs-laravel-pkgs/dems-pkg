@@ -192,6 +192,11 @@ class TripClaimController extends Controller {
 		return Trip::getVisitTrnasportModeClaimStatus($request);
 	}
 
+	//GET Previous End Km
+	public function getPreviousEndKm(Request $request) {
+		return Trip::getPreviousEndKm($request);
+	}
+
 	// Function to get all the dates in given range
 	public static function getDatesFromRange($start, $end, $format = 'd-m-Y') {
 		// Declare an empty array
