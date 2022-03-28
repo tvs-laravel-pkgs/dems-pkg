@@ -206,6 +206,7 @@ app.component('eyatraTripForm', {
                 return;
             }
             self.trip = response.data.trip;
+            console.log(response.data.trip);
             self.trip.trip_periods = '';
             self.advance_eligibility = response.data.advance_eligibility;
             self.grade_advance_eligibility_amount = response.data.grade_advance_eligibility_amount;
@@ -240,11 +241,10 @@ app.component('eyatraTripForm', {
                     endDate: end_date,
                     autoApply: true,
                 });
-                var nowDate = new Date();
-                var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+                var eStartDate = response.data.trip.start_date;
                 $(".daterange.min-daterange").daterangepicker({
                     autoclose: true,
-                    minDate: todayDate,
+                    minDate: eStartDate,
                     // maxDate: new Date(self.max_eligible_date),
 
                     locale: {
@@ -279,6 +279,7 @@ app.component('eyatraTripForm', {
                         autoApply: true,
                     });
                     var nowDate = new Date();
+                    nowDate.setDate(nowDate.getDate() - 10);
                     var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
                     $(".daterange.min-daterange").daterangepicker({
                         autoclose: true,
@@ -479,7 +480,7 @@ app.component('eyatraTripForm', {
                 to_city_id: trip_array[arr_vol].from_city_id,
                 booking_method_name: 'Self',
                 preferred_travel_modes: '',
-                departure_date : self.trip.end_date ? self.trip.end_date : '',
+                departure_date: self.trip.end_date ? self.trip.end_date : '',
                 from_city_details: trip_array[arr_vol].to_city_details,
             });
             $('.datepicker_' + arr_length).datepicker('destroy');
@@ -515,7 +516,7 @@ app.component('eyatraTripForm', {
                         to_city_id: self.trip.visits[0].from_city_details,
                         booking_method_name: 'Self',
                         preferred_travel_modes: '',
-                        departure_date : self.trip.end_date ? self.trip.end_date : '',
+                        departure_date: self.trip.end_date ? self.trip.end_date : '',
                         to_city_details: self.trip.visits[0].from_city_details,
                     });
                     date_id = arr_length - 1;
