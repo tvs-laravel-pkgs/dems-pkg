@@ -34,6 +34,9 @@ class TripClaimController extends Controller {
 		return response()->json(['success' => true, 'trips' => $trips]);
 
 	}
+	public function getGstin(Request $r){
+	   return app('App\Http\Controllers\AngularController')->verifyGSTIN($r->gst_number,"",false);
+	}
 
 	public function getClaimFormData($trip_id) {
 		return Trip::getClaimFormData($trip_id);

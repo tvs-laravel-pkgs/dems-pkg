@@ -33,6 +33,7 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/claim/view/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimViewData');
 		Route::post('trip/claim/get-form-data/{trip_id}', 'Uitoux\EYatra\Api\TripClaimController@getClaimFormData');
 		Route::post('trip/claim/get-attachments', 'Uitoux\EYatra\Api\TripClaimController@getTripClaimAttachments');
+		Route::post('trip/claim/getGstin', 'Uitoux\EYatra\Api\TripClaimController@getGstin');
 
 		Route::post('trip/claim/get-eligible-amount', 'Uitoux\EYatra\Api\TripClaimController@getEligibleAmtBasedonCitycategoryGrade');
 		Route::post('trip/claim/get-eligible-amount/by-staytype', 'Uitoux\EYatra\Api\TripClaimController@getEligibleAmtBasedonCitycategoryGradeStaytype');
