@@ -199,6 +199,16 @@ app.component('eyatraLocalTripClaimForm', {
             self.trip.trip_periods = '';
             self.eligible_date = response.data.eligible_date;
             self.beta_amount = response.data.beta_amount;
+            if(self.trip.expense_attachments.length > 0) {
+                self.trip_expense_attachment_status = 'Yes';
+            } else {
+                self.trip_expense_attachment_status = 'No';
+            }
+            if(self.trip.other_expense_attachments.length > 0) {
+                self.trip_other_expense_attachment_status = 'Yes';
+            } else {
+                self.trip_other_expense_attachment_status = 'No';
+            }
 
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {

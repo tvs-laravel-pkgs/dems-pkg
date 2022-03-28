@@ -327,24 +327,24 @@ app.component('eyatraTripClaimForm', {
                 self.addNewLocalTralvels();
             }
             if (self.transport_attachments.length > 0) {
-                attachment('Yes', 'fare-details-attachments-list');
+                self.fare_details_attachments_status = 'Yes';
             } else {
-                attachment('No', 'fare-details-attachments-list');
+                self.fare_details_attachments_status = 'No';
             }
             if (self.lodging_attachments.length > 0) {
-                attachment('Yes', 'lodging-attachments-list');
+                self.lodging_attachment_status = 'Yes';
             } else {
-                attachment('No', 'lodging-attachments-list');
+                self.lodging_attachment_status = 'No';
             }
             if (self.boarding_attachments.length > 0) {
-                attachment('Yes', 'boarding-attachments-list');
+                self.boarding_attachment_status = 'Yes';
             } else {
-                attachment('No', 'boarding-attachments-list');
+                self.boarding_attachment_status = 'No';
             }            
             if (self.local_travel_attachments.length > 0) {
-                attachment('Yes', 'local_travel-attachments-list');
+                self.local_travel_attachment_status = 'Yes';
             } else {
-                attachment('No', 'local_travel-attachments-list');
+                self.local_travel_attachment_status = 'No';
             }           
             setTimeout(function () {
                 self.travelCal();
@@ -357,29 +357,77 @@ app.component('eyatraTripClaimForm', {
 
         });
 
-        $scope.attachmentRadio = function(value, className) {
-            console.log(value, className);
-            self.className = value;
-            if (value == 'Yes'){                
-                $('.'+className).show();
-                $('.'+className+'-input').addClass('required');
-            } else {                
-                $('.'+className).hide();
-                $('.'+className+'-input').removeClass('required');
-            }        
+        
+        $scope.attachmentRadio = function(value,key,booking_method_id) {
+            console.log(value, key, booking_method_id);
+            if(value == 'Yes' && booking_method_id == 3042) {
+                $('#fare_details_attachments_inactive_'+key).attr('checked',true);
+               self.fare_details_attachments_status = 'No';
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: ['Fare details attachments are not available for Agents'],
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function () {
+                    $noty.close();
+                }, 1000);
+            }
+            // if (value == 'Yes'){                
+            //     $('.'+className).show();
+            //     $('.'+className+'-input').addClass('required');
+            // } else {                
+            //     $('.'+className).hide();
+            //     $('.'+className+'-input').removeClass('required');
+            // }        
         }
 
-        function attachment(value, className) {
-            console.log(value, className);
-            self.className = value;
-            if (value == 'Yes'){             
-                $('#'+className+'-active').prop('checked', true);
-                $('.'+className).show();
-                $('.'+className+'-input').addClass('required');
-            } else {
-                $('.'+className+'inactive').prop('checked', true);            
-                $('.'+className).hide();
-                $('.'+className+'-input').removeClass('required');
+        $scope.lodgingAttachmentRadio = function(value,key,stay_type_id) {
+            console.log(value, key, stay_type_id);
+            if(value == 'Yes' && (stay_type_id == 3341 || stay_type_id == 3342)) {
+                $('#lodging_attachments_inactive_'+key).attr('checked',true);
+                self.lodging_attachment_status = 'No';
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: ['Fare Details attachments are not available for this booking method'],
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function () {
+                    $noty.close();
+                }, 1000);
+            } else if (stay_type_id == 3340 && value == 'No') {
+                $('#lodging_attachments_active_'+key).attr('checked',true);
+                self.lodging_attachment_status = 'Yes';
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: ['Please upload Fare Details attachments'],
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function () {
+                    $noty.close();
+                }, 1000);
+            }   
+        }
+
+        $scope.getBookingMethod = function(key, booking_method_id) {
+            if(booking_method_id == 3042){
+                self.fare_details_attachments_status = 'No';
+            }
+        }
+
+        $scope.lodgingAttachments = function(key, stay_type_id) {
+            if (stay_type_id == 3341 || stay_type_id == 3342) {
+                self.lodging_attachment_status = 'No';
+            } else if (stay_type_id == 3340) {
+                self.lodging_attachment_status = 'Yes';
             }
         }
         
