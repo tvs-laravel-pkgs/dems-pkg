@@ -199,7 +199,20 @@ app.component('eyatraLocalTripClaimForm', {
             self.trip.trip_periods = '';
             self.eligible_date = response.data.eligible_date;
             self.beta_amount = response.data.beta_amount;
+
             self.sbu_lists = response.data.sbu_lists;
+
+            if (self.trip.expense_attachments.length > 0) {
+                self.trip_expense_attachment_status = 'Yes';
+            } else {
+                self.trip_expense_attachment_status = 'No';
+            }
+            if (self.trip.other_expense_attachments.length > 0) {
+                self.trip_other_expense_attachment_status = 'Yes';
+            } else {
+                self.trip_other_expense_attachment_status = 'No';
+            }
+
 
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
@@ -207,7 +220,7 @@ app.component('eyatraLocalTripClaimForm', {
                     var end_date = response.data.trip.end_date;
                     trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
                     self.trip.trip_periods = trip_periods;
-                     setTimeout(function() {
+                    setTimeout(function() {
                         $scope.onChange(start_date, end_date);
                     }, 800);
                 }
@@ -273,8 +286,8 @@ app.component('eyatraLocalTripClaimForm', {
                 $('.travel-mode').show();
             } else {
                 $('.travel-mode').hide();
-            }       
-            if(travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined'){
+            }
+            if (travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined') {
                 if (!self.trip.visit_details[index].eligible_km) {
                     self.trip.visit_details[index].eligible_km = {
                         readonly: false
@@ -305,7 +318,7 @@ app.component('eyatraLocalTripClaimForm', {
                     self.trip.visit_details[index].editable_amount.readonly = false;
                 }
             }
-            self.totalKm(index);            
+            self.totalKm(index);
         }
 
         $(".daterange").on('change', function() {
@@ -365,8 +378,8 @@ app.component('eyatraLocalTripClaimForm', {
             $('.travel_attachment_' + index).hide();
         }
 
-         //REMOVE VISIT ATTACHMENT
-         self.removeOtherAttachment = function(index, attachment_id) {
+        //REMOVE VISIT ATTACHMENT
+        self.removeOtherAttachment = function(index, attachment_id) {
             console.log(attachment_id);
             if (attachment_id) {
                 attachment_removal_id.push(attachment_id);
@@ -417,9 +430,9 @@ app.component('eyatraLocalTripClaimForm', {
 
                 total_amount = total_travel_amount + total_beta_amount + total_expense_amount;
 
-                 //Total Travel Amount
-                 $('.claim_travel_amount').val(total_travel_amount.toFixed(2));
-                 $('.claim_travel_amount').text('₹ ' + total_travel_amount.toFixed(2));
+                //Total Travel Amount
+                $('.claim_travel_amount').val(total_travel_amount.toFixed(2));
+                $('.claim_travel_amount').text('₹ ' + total_travel_amount.toFixed(2));
 
                 //Total Beta Amount
                 $('.claim_beta_amount').val(total_beta_amount.toFixed(2));
@@ -466,43 +479,43 @@ app.component('eyatraLocalTripClaimForm', {
             var from_km = parseInt($(this).closest('tr').find('.from_km').val());
             var to_km = parseInt($(this).closest('tr').find('.to_km').val());
 
-            var travel_mode_id =  $(".travel_mode_" + index).val();
+            var travel_mode_id = $(".travel_mode_" + index).val();
 
-            $scope.calculateKMAmount(from_km,to_km,travel_mode_id,index);
+            $scope.calculateKMAmount(from_km, to_km, travel_mode_id, index);
         });
 
-        $scope.travelMode = function(travel_mode_id,index) {
+        $scope.travelMode = function(travel_mode_id, index) {
             if (travel_mode_id == 15 || travel_mode_id == 16) {
                 $('.travel-mode').show();
             } else {
                 $('.travel-mode').hide();
             }
-            if(travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined'){
-                $(".km_amount_" + index).prop("readonly",true);
-                $(".from_km_" + index).prop("readonly",false);
-                $(".to_km_" + index).prop("readonly",false);
+            if (travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined') {
+                $(".km_amount_" + index).prop("readonly", true);
+                $(".from_km_" + index).prop("readonly", false);
+                $(".to_km_" + index).prop("readonly", false);
 
                 var from_km = $(".from_km_" + index).val();
-                var to_km =  $(".to_km_" + index).val();
+                var to_km = $(".to_km_" + index).val();
 
                 self.trip.visit_details[index].km_amount = self.extras.travel_values[travel_mode_id];
                 $(".km_amount_label_" + index).show();
                 self.trip.visit_details[index].km_amount = 0;
                 self.trip.visit_details[index].from_km = '';
                 self.trip.visit_details[index].to_km = '';
-                $scope.calculateKMAmount(from_km,to_km,travel_mode_id,index);
-            }else{
-                $(".km_amount_" + index).prop("readonly",false);
+                $scope.calculateKMAmount(from_km, to_km, travel_mode_id, index);
+            } else {
+                $(".km_amount_" + index).prop("readonly", false);
                 self.trip.visit_details[index].km_amount = 0;
                 self.trip.visit_details[index].from_km = '-';
                 self.trip.visit_details[index].to_km = '-';
-                $(".from_km_" + index).prop("readonly",true);
-                $(".to_km_" + index).prop("readonly",true);
+                $(".from_km_" + index).prop("readonly", true);
+                $(".to_km_" + index).prop("readonly", true);
                 $(".km_amount_label_" + index).hide();
             }
         }
 
-        $scope.calculateKMAmount = function(from_km,to_km,travel_mode_id,index) {            
+        $scope.calculateKMAmount = function(from_km, to_km, travel_mode_id, index) {
             console.log(from_km, to_km, travel_mode_id, index);
             var from_km = parseInt(from_km);
             var to_km = parseInt(to_km);
@@ -519,16 +532,16 @@ app.component('eyatraLocalTripClaimForm', {
             } else if (from_km && to_km) {
                 $(".validation_error_" + index).text("");
 
-                if(travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined'){
+                if (travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined') {
                     var from_to_km_diff = to_km - from_km;
 
                     kilo_meter_amount = from_to_km_diff * self.extras.travel_values[travel_mode_id];
                     $(".km_amount_" + index).val(kilo_meter_amount);;
-                    $(".km_amount_" + index).prop("readonly",true);
+                    $(".km_amount_" + index).prop("readonly", true);
 
-                }else{
+                } else {
                     $(this).closest('tr').find('.kilo_meter_amount').val('0');
-                    $(".km_amount_" + index).prop("readonly",false);
+                    $(".km_amount_" + index).prop("readonly", false);
                 }
                 from_to_km_error_flag = 0;
             } else {
@@ -588,7 +601,7 @@ app.component('eyatraLocalTripClaimForm', {
                 }, 1000);
             },
             submitHandler: function(form) {
-                if(from_to_km_error_flag == 0){
+                if (from_to_km_error_flag == 0) {
                     let formData = new FormData($(form_id)[0]);
                     $('.btn-submit').button('loading');
                     $.ajax({
@@ -615,7 +628,7 @@ app.component('eyatraLocalTripClaimForm', {
                             $('.btn-submit').button('reset');
                             custom_noty('error', 'Something went wrong at server');
                         });
-                }else{
+                } else {
                     custom_noty('error', 'Please provide correct the From and To KMs');
                 }
             },
