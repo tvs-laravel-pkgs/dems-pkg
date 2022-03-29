@@ -1392,12 +1392,15 @@ class Trip extends Model {
 		$local_travel_mode_list = collect($local_travels_expense_types->prepend(['id' => '', 'name' => 'Select Local Travel / Expense Type']));
 		//dd($local_travel_mode_list);
 		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
+		$boarding_type_list = collect(Config::getBoardingTypeList()->prepend(['id' => '', 'name' => 'Select Type']));
+		//dd($boarding_type_list);
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
 			'local_travel_mode_list' => $local_travel_mode_list,
 			'city_list' => $city_list,
 			'stay_type_list' => $stay_type_list,
+			'boarding_type_list' => $boarding_type_list,
 			'booking_type_list' => $booking_type_list,
 			'travel_cities_list' => $travel_cities_list,
 		];
