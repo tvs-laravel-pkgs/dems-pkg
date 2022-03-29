@@ -1409,6 +1409,9 @@ class Trip extends Model {
 			->where('ey_addresses.address_of_id', 3160)
 			->where('ey_addresses.entity_id', $trip->outlet_id)
 			->pluck('nstates.gstin_state_code')->first();
+		$user_company_id = Auth::user()->company_id;
+		$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
+		$data['gstin']=$gstin_enable;
 		$data['trip'] = $trip;
 		$data['state_code'] = $state_code;
 		$data['sbu_lists'] = Sbu::getSbuList();
