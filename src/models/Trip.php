@@ -1645,7 +1645,6 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
-		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -1657,8 +1656,41 @@ class Trip extends Model {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
 
-			// dd($request->all());
 			DB::beginTransaction();
+
+			if(!empty($request->fare_details_attachments) && in_array('Yes',$request->fare_details_attachments)){
+				if(!isset($request->transport_attachments)){
+					$existing_attachments = Attachment::where('attachment_of_id', 3189)
+						->where('attachment_type_id',3200)
+						->where('entity_id', $request->entity_id)
+						->pluck('id')
+						->toArray();
+
+					if(empty($request->transport_attach_removal_ids)){
+						if(empty($existing_attachments)){
+							return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+						}
+					} else {
+						$transport_attach_removal_ids = json_decode($request->transport_attach_removal_ids, true);
+						if(array_intersect($transport_attach_removal_ids, $existing_attachments)) {
+							return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+						}
+					}
+				} else {
+					foreach ($request->fare_details_attachments as $key => $fare_details_attachments) {
+						if($fare_details_attachments == 'Yes' && $request->booking_method_id[$key] == 3042){
+							return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
+						}
+					}
+				}
+			} else {
+				if(isset($request->transport_attachments)){
+					return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
+				}
+			}
+			
+			// dd($request->all());
+
 
 			// dd($request->trip_id);
 			if (empty($request->trip_id)) {
@@ -1803,6 +1835,7 @@ class Trip extends Model {
 						$attachement_transport->save();
 					}
 				}
+				
 				//CHECK NEXT VISIT EXIST
 				//ONLY SELF VISITS WILL COME IN POST NOT AGENT BOOKED ==> NOT BEEN USED NOW
 
@@ -1887,7 +1920,37 @@ class Trip extends Model {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
-				 //dd($request->all());
+				//  dd($request->all());
+				 if(!empty($request->lodging_attachment) && in_array('Yes',$request->lodging_attachment)){
+					if(!isset($request->lodging_attachments)){
+						$existing_attachments = Attachment::where('attachment_of_id', 3181)
+							->where('attachment_type_id',3200)
+							->where('entity_id', $request->trip_id)
+							->pluck('id')
+							->toArray();
+	
+						if(empty($request->lodgings_attach_removal_ids)){
+							if(empty($existing_attachments)){
+								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+							}
+						} else {
+							$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
+							if(array_intersect($lodgings_attach_removal_ids, $existing_attachments)) {
+								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+							}
+						}
+					} else {
+						foreach ($request->lodging_attachment as $key => $lodging_attachment) {
+							if($lodging_attachment == 'Yes' && ($request->lodgings[$key]['stay_type_id'] == 3341 || $request->lodgings[$key]['stay_type_id'] == 3342)){
+								return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
+							}
+						}
+					}
+				} else {
+					if(isset($request->lodging_attachments)){
+						return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
+					}
+				}
 				//REMOVE LODGING ATTACHMENT
 				if (!empty($request->lodgings_attach_removal_ids)) {
 					$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
@@ -2085,6 +2148,30 @@ class Trip extends Model {
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
 				// dd($request->all());
+				if(!empty($request->boarding_attachment) && in_array('Yes',$request->boarding_attachment)){
+					if(!isset($request->boarding_attachments)){
+						$existing_attachments = Attachment::where('attachment_of_id', 3182)
+							->where('attachment_type_id',3200)
+							->where('entity_id', $request->trip_id)
+							->pluck('id')
+							->toArray();
+	
+						if(empty($request->lodgings_attach_removal_ids)){
+							if(empty($existing_attachments)){
+								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+							}
+						} else {
+							$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
+							if(array_intersect($boardings_attach_removal_ids, $existing_attachments)) {
+								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+							}
+						}
+					} 
+				} else {
+					if(isset($request->boarding_attachments)){
+						return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
+					}
+				}
 				//REMOVE BOARDINGS ATTACHMENT
 				if (!empty($request->boardings_attach_removal_ids)) {
 					$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
@@ -2233,6 +2320,30 @@ class Trip extends Model {
 			//FINAL SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
 				// dd($request->all());
+				if(!empty($request->local_travel_attachment) && in_array('Yes',$request->local_travel_attachment)){
+					if(!isset($request->local_travel_attachments)){
+						$existing_attachments = Attachment::where('attachment_of_id', 3183)
+							->where('attachment_type_id',3200)
+							->where('entity_id', $request->trip_id)
+							->pluck('id')
+							->toArray();
+	
+						if(empty($request->local_travels_removal_id)){
+							if(empty($existing_attachments)){
+								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+							}
+						} else {
+							$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
+							if(array_intersect($local_travels_removal_id, $existing_attachments)) {
+								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
+							}
+						}
+					} 
+				} else {
+					if(isset($request->local_travel_attachments)){
+						return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
+					}
+				}
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
