@@ -216,6 +216,29 @@ app.component('eyatraTripLocalForm', {
                     endDate: end_date,
                     autoApply: true,
                 });
+                var eStartDate = response.data.trip.start_date;
+                $(".daterange.min-daterange").daterangepicker({
+                    autoclose: true,
+                    minDate: eStartDate,
+                    // maxDate: new Date(self.max_eligible_date),
+
+                    locale: {
+                        cancelLabel: 'Clear',
+                        format: "DD-MM-YYYY",
+                        separator: " to ",
+                    },
+                    showDropdowns: false,
+                    startDate: start_date,
+                    endDate: end_date,
+                    autoApply: true,
+                });
+                // Booking Preference Conditions
+                $.each(self.trip.visits, function(key, value) {
+                    setTimeout(function() {
+                        $scope.onChangeTravelMode(value.travel_mode_id, key);
+                        $scope.onChangeBookingPreference(value.booking_method_name, key);
+                    }, 800);
+                });
             } else {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
@@ -231,6 +254,7 @@ app.component('eyatraTripLocalForm', {
                         autoApply: true,
                     });
                     var nowDate = new Date();
+                    nowDate.setDate(nowDate.getDate() - 10);
                     var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
                     $(".daterange.min-daterange").daterangepicker({
                         autoclose: true,

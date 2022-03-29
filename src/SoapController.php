@@ -56,7 +56,14 @@ class SoapController extends Controller
                         $response['designation_id'] = (isset($temp['DESIGNATION']) && $temp['DESIGNATION'] != "Not available") ? $temp['DESIGNATION'] : '';
                         $response['reporting_to'] = (isset($temp['REPORTING_MANAGER_ECODE']) && $temp['REPORTING_MANAGER_ECODE'] != "Not available") ? $temp['REPORTING_MANAGER_ECODE'] : '';
                         $response['reporting_to_name'] = (isset($temp['REPORTING_MANAGER']) && $temp['REPORTING_MANAGER'] != "Not available") ? $temp['REPORTING_MANAGER'] : '';
+                        $response['date_of_birth'] = (isset($temp['DATE_OF_BIRTH']) && $temp['DATE_OF_BIRTH'] != "Not available") ? $temp['DATE_OF_BIRTH'] : '';
+                        $response['date_of_joining'] = (isset($temp['DATE_OF_JOIN']) && $temp['DATE_OF_JOIN'] != "Not available") ? $temp['DATE_OF_JOIN'] : '';
+                        $response['gender'] = (isset($temp['GENDER']) && $temp['GENDER'] != "Not available") ? $temp['GENDER'] : '';
+                        $response['grade_id'] = (isset($temp['GRADES']) && $temp['GRADES'] != "Not available") ? $temp['GRADES'] : '';
+                        $response['pan_no'] = (isset($temp['PAN_NUMBER']) && $temp['PAN_NUMBER'] != "Not available") ? $temp['PAN_NUMBER'] : '';
+                        $response['aadhar_no'] = (isset($temp['AADHAR_NO']) && $temp['AADHAR_NO'] != "Not available") ? $temp['AADHAR_NO'] : '';
                         $response['email'] = (isset($temp['EMAILID']) && $temp['EMAILID'] != "Not available") ? $temp['EMAILID'] : '';
+                        $response['mobile_number'] = (isset($temp['MOBILE_NUMBER']) && $temp['MOBILE_NUMBER'] != "Not available") ? $temp['MOBILE_NUMBER'] : '';
                         $response['role'] = (isset($temp['ROLE']) && $temp['ROLE'] != "Not available") ? $temp['ROLE'] : '';
                         $response['employee_type'] = (isset($temp['EMPLOYEE_TYPE']) && $temp['EMPLOYEE_TYPE'] != "Not available") ? $temp['EMPLOYEE_TYPE'] : '';
                         $response['outlet_id'] = (isset($temp['SITE']) && $temp['SITE'] != "Not available") ? $temp['SITE'] : '';

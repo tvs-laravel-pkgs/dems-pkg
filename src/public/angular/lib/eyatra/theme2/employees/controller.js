@@ -279,6 +279,7 @@ app.component('eyatraEmployeeForm', {
                         self.employee.payment_mode_id = '3244';
                         self.employee.user = {
                             name: res.employee.name,
+                            mobile_number: res.employee.mobile_number,
                             username: res.employee.code,
                             password: 'Tvs@123',
                         };

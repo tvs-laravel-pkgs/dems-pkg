@@ -1764,6 +1764,25 @@ class Trip extends Model {
 							$visit_booking->paid_amount = $visit_data['total'];
 							$visit_booking->created_by = Auth::user()->id;
 							$visit_booking->status_id = 3241; //Claimed
+                   // $gstin = $visit_data['gstin'];
+					$user_company_id = Auth::user()->company_id;
+					$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
+				if ($gstin_enable == 1) {
+			        $response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
+			        //dd($response);
+			        if(!$response['success']){
+				    return response()->json([
+                        'success' => false,
+                        'errors' => [
+                          $response['error']
+                        ],
+                    ]);
+			        } 
+                    $visit_booking->gstin = $response['gstin'];
+                }else{
+                	$visit_booking->gstin=NULL;
+                }
+				    $visit_booking->save();
 
 							// $gstin = $visit_data['gstin'];
 							$user_company_id = Auth::user()->company_id;

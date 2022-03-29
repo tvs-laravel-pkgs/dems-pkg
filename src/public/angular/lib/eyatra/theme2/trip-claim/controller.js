@@ -327,6 +327,26 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.local_travels.length == 0) {
                 self.addNewLocalTralvels();
             }
+            if (self.transport_attachments.length > 0) {
+                self.fare_details_attachments_status = 'Yes';
+            } else {
+                self.fare_details_attachments_status = 'No';
+            }
+            if (self.lodging_attachments.length > 0) {
+                self.lodging_attachment_status = 'Yes';
+            } else {
+                self.lodging_attachment_status = 'No';
+            }
+            if (self.boarding_attachments.length > 0) {
+                self.boarding_attachment_status = 'Yes';
+            } else {
+                self.boarding_attachment_status = 'No';
+            }            
+            if (self.local_travel_attachments.length > 0) {
+                self.local_travel_attachment_status = 'Yes';
+            } else {
+                self.local_travel_attachment_status = 'No';
+            }           
             setTimeout(function () {
                 self.travelCal();
                 self.lodgingCal();
@@ -337,6 +357,82 @@ app.component('eyatraTripClaimForm', {
             $rootScope.loading = false;
 
         });
+
+        
+        $scope.attachmentRadio = function(value,key,booking_method_id) {
+            console.log(value, key, booking_method_id);
+            if(value == 'Yes' && booking_method_id == 3042) {
+                $('#fare_details_attachments_inactive_'+key).attr('checked',true);
+               self.fare_details_attachments_status = 'No';
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: ['Fare details attachments are not available for Agents'],
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function () {
+                    $noty.close();
+                }, 1000);
+            }
+            // if (value == 'Yes'){                
+            //     $('.'+className).show();
+            //     $('.'+className+'-input').addClass('required');
+            // } else {                
+            //     $('.'+className).hide();
+            //     $('.'+className+'-input').removeClass('required');
+            // }        
+        }
+
+        $scope.lodgingAttachmentRadio = function(value,key,stay_type_id) {
+            console.log(value, key, stay_type_id);
+            if(value == 'Yes' && (stay_type_id == 3341 || stay_type_id == 3342)) {
+                $('#lodging_attachments_inactive_'+key).attr('checked',true);
+                self.lodging_attachment_status = 'No';
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: ['Fare Details attachments are not available for this booking method'],
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function () {
+                    $noty.close();
+                }, 1000);
+            } else if (stay_type_id == 3340 && value == 'No') {
+                $('#lodging_attachments_active_'+key).attr('checked',true);
+                self.lodging_attachment_status = 'Yes';
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: ['Please upload Fare Details attachments'],
+                    animation: {
+                        speed: 500 // unavailable - no need
+                    },
+                }).show();
+                setTimeout(function () {
+                    $noty.close();
+                }, 1000);
+            }   
+        }
+
+        $scope.getBookingMethod = function(key, booking_method_id) {
+            if(booking_method_id == 3042){
+                self.fare_details_attachments_status = 'No';
+            }
+        }
+
+        $scope.lodgingAttachments = function(key, stay_type_id) {
+            if (stay_type_id == 3341 || stay_type_id == 3342) {
+                self.lodging_attachment_status = 'No';
+            } else if (stay_type_id == 3340) {
+                self.lodging_attachment_status = 'Yes';
+            }
+        }
+        
+        
 
         // var arrival_date_error_flag = 0;
         $(document).on('input', '.localconveyance_km', function () {
@@ -804,18 +900,20 @@ app.component('eyatraTripClaimForm', {
 
         // calculate total KMs
         self.totalKm = function (key, self_booking_id) {
-            if (self_booking_id) {
-                $.ajax({
-                    url : get_previous_closing_km_details,
-                    method: 'GET',
-                    data:{visit_booking_id : self_booking_id}
-                })
-                .done(function(response) {
-                    if (response.end_km != null){
-                        $('.km_start_' + key).val(response.end_km);
-                    }
-                })
-            }            
+            if(self.action == 'Add'){
+                if (self_booking_id) {
+                    $.ajax({
+                        url : get_previous_closing_km_details,
+                        method: 'GET',
+                        data:{visit_booking_id : self_booking_id}
+                    })
+                    .done(function(response) {
+                        if (response.end_km != null){
+                            $('.km_start_' + key).val(response.end_km);
+                        }
+                    })
+                }
+            }                       
             var from_km = parseInt($('.km_start_' + key).val());
             var to_km = parseInt($('.km_end_' + key).val());
             var total_km = 0;

@@ -117,6 +117,8 @@ class CompanyController extends Controller {
 				'code.unique' => "Company Code is already taken",
 				'name.unique' => "Company Name is already taken",
 				'company_budgets.*.financial_year_id.distinct' => 'Same Financial year multiple times entered',
+				'operating_states.*.nstate_id.distinct' => 'Same State selected multiple Times',
+				'operating_states.*.gst_number.distinct' => 'Same Gstin Number Entered Multiple Times',
 
 			];
 			$validator = Validator::make($request->all(), [
@@ -127,6 +129,14 @@ class CompanyController extends Controller {
 				'company_budgets.*.financial_year_id' => [
 					'integer',
 					'exists:configs,id',
+					'distinct',
+				],
+				'operating_states.*.nstate_id' => [
+					'integer',
+					'distinct',
+				],
+				'operating_states.*.gst_number' => [
+					'string',
 					'distinct',
 				],
 			], $error_messages);
@@ -154,7 +164,8 @@ class CompanyController extends Controller {
 				$company->deleted_by = Auth::user()->id;
 			}
 			$company->name=$request->name;
-      $company->fill($request->all());
+			$company->gstin_enable = $request->gstin_enable;
+            $company->fill($request->all());
 			$company->save();
 			//SAVING OPERATING STATES
 			if ($request->operating_states) {

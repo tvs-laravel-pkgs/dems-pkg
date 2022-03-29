@@ -644,7 +644,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//LODGING STAY
 			3340 => [
-				'name' => 'Normal',
+				'name' => 'Lodge Stay',
 				'config_type_id' => 521,
 			],
 			3341 => [
@@ -653,6 +653,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3342 => [
 				'name' => 'Office Guest House',
+				'config_type_id' => 521,
+			],
+			3343 => [
+				'name' => 'Flat Claim',
 				'config_type_id' => 521,
 			],
 
