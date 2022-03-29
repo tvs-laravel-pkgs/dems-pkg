@@ -450,7 +450,7 @@ app.component('eyatraPettyCashForm', {
                 amount: '',
                 tax: '',
                 remarks: '',
-                invoice: '',
+                invoice: '0',
                 invoice_date: '',
                 invoice_amount: '',
                 invoice_no: '',
