@@ -42,6 +42,9 @@ class Config extends Model {
 	public static function getLodgeStayTypeList() {
 		return Config::where('config_type_id', 521)->select('id', 'name')->get();
 	}
+	public static function getBoardingTypeList() {
+		return Config::where('config_type_id', 540)->select('id', 'name')->get();
+	}
 
 	public static function managerType() {
 		return Config::where('config_type_id', 529)->select('id', 'name')->get();

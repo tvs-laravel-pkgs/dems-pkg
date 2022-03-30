@@ -54,6 +54,7 @@ class EYatraConfigSeeder extends Seeder {
 			537 => 'Serial Number Segment Types',
 			538 => 'Report Types',
 			539 => 'Mail Config Types',
+			540=>'Boarding Types',
 		];
 
 		$configs = [
@@ -1060,6 +1061,19 @@ class EYatraConfigSeeder extends Seeder {
 			3731 => [
 				'name' => 'Bank and Traven x report mail',
 				'config_type_id' => 539,
+			],
+			//Boarding Type
+			3741 => [
+				'name' => 'Normal',
+				'config_type_id' => 540,
+			],
+			3742 => [
+				'name' => 'Sponsor',
+				'config_type_id' => 540,
+			],
+			3743 => [
+				'name' => 'Leave',
+				'config_type_id' => 540,
 			],
 
 		];
