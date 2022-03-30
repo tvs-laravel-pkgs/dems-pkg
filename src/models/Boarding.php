@@ -12,6 +12,7 @@ class Boarding extends Model {
 		// 'id',
 		'trip_id',
 		'city_id',
+		'boarding_type_id',
 		'expense_name',
 		// 'date',
 		'amount',
