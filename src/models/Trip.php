@@ -1629,8 +1629,36 @@ class Trip extends Model {
 			->where('ey_employee_claims.status_id', 3026)
 			->where('ey_employee_claims.employee_id', $trip->employee->id)
 			->sum('trips.claim_amount');
+			$transport_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
+			->where('ey_employee_claims.status_id', 3026)
+			->where('ey_employee_claims.employee_id', $trip->employee->id)
+			->sum('ey_employee_claims.transport_total');
+			$lodging_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
+			->where('ey_employee_claims.status_id', 3026)
+			->where('ey_employee_claims.employee_id', $trip->employee->id)
+			->sum('ey_employee_claims.lodging_total');
+			$boarding_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
+			->where('ey_employee_claims.status_id', 3026)
+			->where('ey_employee_claims.employee_id', $trip->employee->id)
+			->sum('ey_employee_claims.boarding_total');
+			$local_travel_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
+			->where('ey_employee_claims.status_id', 3026)
+			->where('ey_employee_claims.employee_id', $trip->employee->id)
+			->sum('ey_employee_claims.local_travel_total');
 		
 		$trip->emp_claim_amount = $emp_claim_amount;
+		$trip->transport_amount = $transport_amount;
+		$trip->lodging_amount = $lodging_amount;
+		$trip->boarding_amount = $boarding_amount;
+		$trip->local_travel_amount = $local_travel_amount;
 
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
