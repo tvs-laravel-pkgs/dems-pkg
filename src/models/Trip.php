@@ -1411,10 +1411,12 @@ class Trip extends Model {
 			->pluck('nstates.gstin_state_code')->first();
 		$user_company_id = Auth::user()->company_id;
 		$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
-		$km_end=VisitBooking::latest('id')->pluck('km_end')->first();
+		$km_end_twowheeler=VisitBooking::latest('id')->where('travel_mode_id','=',15)->pluck('km_end')->first();
+		$km_end_fourwheeler=VisitBooking::latest('id')->where('travel_mode_id','=',16)->pluck('km_end')->first();
 		$data['gstin_enable']=$gstin_enable;
 		$data['trip'] = $trip;
-		$data['km_end']=$km_end;
+		$data['km_end_twowheeler']=$km_end_twowheeler;
+		$data['km_end_fourwheeler']=$km_end_fourwheeler;
 		$data['state_code'] = $state_code;
 		$data['sbu_lists'] = Sbu::getSbuList();
 		return response()->json($data);
