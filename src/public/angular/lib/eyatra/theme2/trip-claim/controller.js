@@ -1160,7 +1160,7 @@ app.component('eyatraTripClaimForm', {
 
         // Changing boarding actual amount before updating those value by Karthick T on 20-01-2022
         $scope.assignActualAmount = function(city_id, index, boarding_id) {
-            if (!boarding_id && city_id && self.trip.visits && self.trip.visits.length > 0) {
+            if (!boarding_id && city_id && self.trip.visits && self.trip.visits.length > 0 && self.trip.boardings[index].boarding_type_id == 3741) {
                 var departure_date = arrival_date = '';
                 $(self.trip.visits).each(function(visit_index, visit) {
                     if (!departure_date)
@@ -1196,6 +1196,14 @@ app.component('eyatraTripClaimForm', {
                     self.trip.boardings[index].to_date = arrival_date;
                 $scope.boardingFromToDate();
                 // Calculating from, to date and boarding days by Karthick T on 21-01-2022
+            } else {
+                self.trip.boardings[index].from_date = '';
+                self.trip.boardings[index].to_date = '';
+                self.trip.boardings[index].days = '';
+                self.trip.boardings[index].expense_name = '';
+                self.trip.boardings[index].eligible_amount = '0.00';
+                self.trip.boardings[index].amount = '0.00';
+                self.trip.boardings[index].tax = '';
             }
         }
         // Changing boarding actual amount before updating those value by Karthick T on 20-01-2022
