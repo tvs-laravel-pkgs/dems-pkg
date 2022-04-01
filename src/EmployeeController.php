@@ -14,20 +14,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Uitoux\EYatra\BankDetail;
+use Uitoux\EYatra\Business;
 use Uitoux\EYatra\ChequeDetail;
 use Uitoux\EYatra\Config;
+use Uitoux\EYatra\Department;
 use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\Entity;
 use Uitoux\EYatra\ImportJob;
-use Uitoux\EYatra\Department;
-use Uitoux\EYatra\Business;
 use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\Sbu;
+use Uitoux\EYatra\SoapController;
 use Uitoux\EYatra\WalletDetail;
 use Validator;
 use Yajra\Datatables\Datatables;
-use Uitoux\EYatra\SoapController;
 
 class EmployeeController extends Controller {
 
@@ -196,7 +196,8 @@ class EmployeeController extends Controller {
 			$this->data['success'] = true;
 		} else {
 			$this->data['action'] = 'Edit';
-			$employee = Employee::withTrashed()->with('sbu','bankDetail', 'reportingTo', 'walletDetail', 'user', 'chequeDetail')->find($employee_id);
+			$employee = Employee::withTrashed()->with('sbu', 'department', 'bankDetail', 'reportingTo', 'walletDetail', 'user', 'chequeDetail')->find($employee_id);
+			//dd($employee);
 			if (!$employee) {
 				$this->data['success'] = false;
 				$this->data['message'] = 'Employee not found';
@@ -221,8 +222,8 @@ class EmployeeController extends Controller {
 			'payment_mode_list' => $payment_mode_list,
 			'wallet_mode_list' => $wallet_mode_list,
 			'role_list' => $role_list,
-			'business_list'=>$business_list,
-			'department_list'=>$department_list,
+			'business_list' => $business_list,
+			'department_list' => $department_list,
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
 			'grade_list' => $grade_list,
@@ -692,16 +693,16 @@ class EmployeeController extends Controller {
 		return response()->json(['success' => true]);
 	}
 
-	public function getEmployeeFromApi(Request $r){
-       if(!empty($r->code)){
-         $employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
-       }else{
-          return response()->json(['success' => false, 'errors' => ['Employee code is empty']]);
-       }
-       if(!$employee){
-       	return response()->json(['success' => false, 'errors' => ['Employee Details not found']]);
-       }
-       return response()->json(['success' => true,'employee' => $employee]);
+	public function getEmployeeFromApi(Request $r) {
+		if (!empty($r->code)) {
+			$employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
+		} else {
+			return response()->json(['success' => false, 'errors' => ['Employee code is empty']]);
+		}
+		if (!$employee) {
+			return response()->json(['success' => false, 'errors' => ['Employee Details not found']]);
+		}
+		return response()->json(['success' => true, 'employee' => $employee]);
 	}
 
 }
