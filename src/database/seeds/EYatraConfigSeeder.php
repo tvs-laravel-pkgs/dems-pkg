@@ -1035,6 +1035,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'FY-22',
 				'config_type_id' => 536,
 			],
+			3704 => [
+				'name' => 'FY-23',
+				'config_type_id' => 536,
+			],
 			// Serial Number Segment Types
 			3711 => [
 				'name' => 'Branch Code',
