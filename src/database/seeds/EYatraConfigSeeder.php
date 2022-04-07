@@ -55,6 +55,7 @@ class EYatraConfigSeeder extends Seeder {
 			538 => 'Report Types',
 			539 => 'Mail Config Types',
 			540=>'Boarding Types',
+			541 => 'Outstation Trip Attachments',
 		];
 
 		$configs = [
@@ -1078,6 +1079,26 @@ class EYatraConfigSeeder extends Seeder {
 			3743 => [
 				'name' => 'Leave',
 				'config_type_id' => 540,
+			],
+			3750 => [
+				'name' => 'All',
+				'config_type_id' => 541,
+			],
+			3751 => [
+				'name' => 'Fare Detail',
+				'config_type_id' => 541,
+			],
+			3752 => [
+				'name' => 'Lodging',
+				'config_type_id' => 541,
+			],
+			3753 => [
+				'name' => 'Boarding',
+				'config_type_id' => 541,
+			],
+			3754 => [
+				'name' => 'Others',
+				'config_type_id' => 541,
 			],
 
 		];
