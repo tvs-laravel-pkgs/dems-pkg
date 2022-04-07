@@ -563,6 +563,7 @@ class Trip extends Model {
 
 			->select(
 				'trips.id',
+				'trips.updated_at',
 				'trips.number',
 				DB::raw('CONCAT(u.name," ( ",e.code," ) ") as ecode'),
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
