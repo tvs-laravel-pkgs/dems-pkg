@@ -29,6 +29,7 @@ class Lodging extends Model {
 		'cgst',
 		'sgst',
 		'igst',
+		'attachment_status',
 		'created_by',
 		'updated_by',
 		'deleted_by',
@@ -55,6 +56,12 @@ class Lodging extends Model {
 
 	public function getCheckoutTimeAttribute() {
 		return $this->attributes['checkout_time'] = date('g:i A', strtotime($this->attributes['checkout_date']));
+	}
+	public function getAttachmentStatusAttribute($val) {
+		return (!empty($val) && $val == 1) ? 'Yes' : 'No';
+	}
+	public function setAttachmentStatusAttribute($val) {
+		$this->attributes['attachment_status'] = (!empty($val) && $val == 'Yes') ? 1 : 0;
 	}
 
 	public function city() {

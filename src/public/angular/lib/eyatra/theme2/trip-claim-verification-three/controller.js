@@ -411,6 +411,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
                 self.pay_to_employee = parseInt(self.total_amount).toFixed(2);
                 self.pay_to_company = '0.00';
             }
+            self.view = response.data.view;
             $rootScope.loading = false;
 
         });

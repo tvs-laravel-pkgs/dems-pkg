@@ -8,6 +8,8 @@ use App\Company;
 use App\FinancialYear;
 use App\SerialNumberGroup;
 use App\User;
+use App\Attachment;
+use Uitoux\EYatra\Config;
 use Auth;
 use Carbon\Carbon;
 use DateInterval;
@@ -155,6 +157,12 @@ class Trip extends Model {
 
 	public function pending_google_attachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3185)->where('attachment_type_id', 3200)->where('view_status', 0);
+	}
+	public function tripAttachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_type_id', 3200)->where('attachment_of_id', '!=', 3185);
+	}
+	public function pendingTripAttachments() {
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_type_id', 3200)->where('attachment_of_id', '!=', 3185)->where('view_status', 0);
 	}
 
 	public static function generate($employee, $trip_number, $faker, $trip_status_id, $admin) {
@@ -1207,12 +1215,18 @@ class Trip extends Model {
 				'selfVisits.agent',
 				'selfVisits.status',
 				'selfVisits.attachments',
-				'transport_attachments',
-				'lodging_attachments',
-				'boarding_attachments',
-				'local_travel_attachments',
+				// 'transport_attachments',
+				// 'lodging_attachments',
+				// 'boarding_attachments',
+				// 'local_travel_attachments',
+				'tripAttachments',
+				'tripAttachments.attachmentName',
 			])->find($trip_id);
 		//dd($trip);
+		$data['attachment_type_lists'] = Trip::getAttachmentList($trip_id);
+		$data['upload'] = URL::asset('public/img/content/file-icon.svg');
+		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
+		$data['delete'] = URL::asset('public/img/content/yatra/table/delete.svg');
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -1537,13 +1551,15 @@ class Trip extends Model {
 			'selfVisits.agent',
 			'selfVisits.status',
 			'selfVisits.attachments',
-			'transport_attachments',
-			'lodging_attachments',
-			'boarding_attachments',
+			// 'transport_attachments',
+			// 'lodging_attachments',
+			// 'boarding_attachments',
 			'google_attachments',
-			'local_travel_attachments',
+			// 'local_travel_attachments',
 			'cliam.sbu',
-			'cliam.sbu.lob'
+			'cliam.sbu.lob',
+			'tripAttachments',
+			'tripAttachments.attachmentName'
 
 		])->find($trip_id);
 		//dd($trip);
@@ -1677,11 +1693,13 @@ class Trip extends Model {
 		}
 
 		$data['approval_status'] = Trip::validateAttachment($trip_id);
+		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
 
 		return response()->json($data);
 	}
 
 	public static function saveEYatraTripClaim($request) {
+		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -1694,40 +1712,7 @@ class Trip extends Model {
 			// }
 
 			DB::beginTransaction();
-
-			if(!empty($request->fare_details_attachments) && in_array('Yes',$request->fare_details_attachments)){
-				if(!isset($request->transport_attachments)){
-					$existing_attachments = Attachment::where('attachment_of_id', 3189)
-						->where('attachment_type_id',3200)
-						->where('entity_id', $request->entity_id)
-						->pluck('id')
-						->toArray();
-
-					if(empty($request->transport_attach_removal_ids)){
-						if(empty($existing_attachments)){
-							return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-						}
-					} else {
-						$transport_attach_removal_ids = json_decode($request->transport_attach_removal_ids, true);
-						if(array_intersect($transport_attach_removal_ids, $existing_attachments)) {
-							return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-						}
-					}
-				} else {
-					foreach ($request->fare_details_attachments as $key => $fare_details_attachments) {
-						if($fare_details_attachments == 'Yes' && $request->booking_method_id[$key] == 3042){
-							return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
-						}
-					}
-				}
-			} else {
-				if(isset($request->transport_attachments)){
-					return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
-				}
-			}
-			
 			// dd($request->all());
-
 
 			// dd($request->trip_id);
 			if (empty($request->trip_id)) {
@@ -1738,6 +1723,49 @@ class Trip extends Model {
 			if (!$trip) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
+			// Attachment validation by Karthick T on 08-04-2022
+			if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
+				// dd('final save validation');
+				$error_messages = [
+					'fare_detail_doc.required' => 'Fare detail document is required',
+					'lodging_doc.required' => 'Lodging document is required',
+					'boarding_doc.required' => 'Boarding document is required',
+					'other_doc.required' => 'Others document is required',
+				];
+				$validations = [];
+				$attachement_types = Attachment::where('attachment_type_id', 3200)
+						->where('entity_id', $trip->id)
+						->pluck('attachment_of_id')
+						->toArray();
+				if (!in_array(3750, $attachement_types)) {	// All Type
+					$visit_count = Visit::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {	// Fare Detail Type
+						$validations['fare_detail_doc'] = 'required';
+					}
+					$lodging_count = Lodging::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+					if ($lodging_count > 0 && !in_array(3752, $attachement_types)) {	// Loding Type
+						$validations['lodging_doc'] = 'required';
+					}
+					$boarding_count = Boarding::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+					if ($boarding_count > 0 && !in_array(3753, $attachement_types)) {	// Boarding Type
+						$validations['boarding_doc'] = 'required';
+					}
+					$other_count = LocalTravel::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+					if ($other_count > 0 && !in_array(3754, $attachement_types)) {	// Others Type
+						$validations['other_doc'] = 'required';
+					}
+					$validator = Validator::make($request->all(), $validations , $error_messages);
+								
+					if ($validator->fails()) {
+						return response()->json([
+							'success' => false,
+							'message' => 'Validation Errors',
+							'errors' => $validator->errors()->all(),
+						]);
+					}
+				}
+			}
+			// Attachment validation by Karthick T on 08-04-2022
 
 			//Get employee outstion beta amount
 			$beta_amount = Employee::join('grade_advanced_eligibility', 'grade_advanced_eligibility.grade_id', 'employees.grade_id')->where('employees.id', $trip->employee_id)->pluck('grade_advanced_eligibility.outstation_trip_amount')->first();
@@ -1814,6 +1842,7 @@ class Trip extends Model {
 						if ($booked_by == 'self') {
 							$visit->travel_mode_id = $visit_data['travel_mode_id'];
 						}
+						$visit->attachment_status = $visit_data['attachment_status'];
 						$visit->save();
 						// dd($visit_data['id']);
 
@@ -1835,25 +1864,25 @@ class Trip extends Model {
 							$visit_booking->paid_amount = $visit_data['total'];
 							$visit_booking->created_by = Auth::user()->id;
 							$visit_booking->status_id = 3241; //Claimed
-                   // $gstin = $visit_data['gstin'];
-					$user_company_id = Auth::user()->company_id;
-					$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
-				if ($gstin_enable == 1) {
-			        $response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
-			        //dd($response);
-			        if(!$response['success']){
-				    return response()->json([
-                        'success' => false,
-                        'errors' => [
-                          $response['error']
-                        ],
-                    ]);
-			        } 
-                    $visit_booking->gstin = $response['gstin'];
-                }else{
-                	$visit_booking->gstin=NULL;
-                }
-				    $visit_booking->save();
+                   			// $gstin = $visit_data['gstin'];
+							$user_company_id = Auth::user()->company_id;
+							$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
+							if ($gstin_enable == 1) {
+								$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
+								//dd($response);
+								if(!$response['success']){
+								return response()->json([
+									'success' => false,
+									'errors' => [
+									$response['error']
+									],
+								]);
+								} 
+								$visit_booking->gstin = $response['gstin'];
+							}else{
+								$visit_booking->gstin=NULL;
+							}
+							$visit_booking->save();
 
 							// $gstin = $visit_data['gstin'];
 							$user_company_id = Auth::user()->company_id;
@@ -1992,42 +2021,6 @@ class Trip extends Model {
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
 				//  dd($request->all());
-				 if(!empty($request->lodging_attachment) && in_array('Yes',$request->lodging_attachment)){
-					if(!isset($request->lodging_attachments)){
-						$existing_attachments = Attachment::where('attachment_of_id', 3181)
-							->where('attachment_type_id',3200)
-							->where('entity_id', $request->trip_id)
-							->pluck('id')
-							->toArray();
-	
-						if(empty($request->lodgings_attach_removal_ids)){
-							if(empty($existing_attachments)){
-								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-							}
-						} else {
-							$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
-							if(array_intersect($lodgings_attach_removal_ids, $existing_attachments)) {
-								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-							}
-						}
-					} else {
-						foreach ($request->lodging_attachment as $key => $lodging_attachment) {
-							if($lodging_attachment == 'Yes' && ($request->lodgings[$key]['stay_type_id'] == 3341 || $request->lodgings[$key]['stay_type_id'] == 3342)){
-								return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
-							}
-						}
-					}
-				} else {
-					if(isset($request->lodging_attachments)){
-						return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
-					}
-				}
-				//REMOVE LODGING ATTACHMENT
-				if (!empty($request->lodgings_attach_removal_ids)) {
-					$lodgings_attach_removal_ids = json_decode($request->lodgings_attach_removal_ids, true);
-					Attachment::whereIn('id', $lodgings_attach_removal_ids)->delete();
-				}
-
 				//REMOVE LODGING AND THIER ATTACHMENTS
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
@@ -2219,30 +2212,6 @@ class Trip extends Model {
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
 				// dd($request->all());
-				if(!empty($request->boarding_attachment) && in_array('Yes',$request->boarding_attachment)){
-					if(!isset($request->boarding_attachments)){
-						$existing_attachments = Attachment::where('attachment_of_id', 3182)
-							->where('attachment_type_id',3200)
-							->where('entity_id', $request->trip_id)
-							->pluck('id')
-							->toArray();
-	
-						if(empty($request->lodgings_attach_removal_ids)){
-							if(empty($existing_attachments)){
-								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-							}
-						} else {
-							$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
-							if(array_intersect($boardings_attach_removal_ids, $existing_attachments)) {
-								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-							}
-						}
-					} 
-				} else {
-					if(isset($request->boarding_attachments)){
-						return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
-					}
-				}
 				//REMOVE BOARDINGS ATTACHMENT
 				if (!empty($request->boardings_attach_removal_ids)) {
 					$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
@@ -2388,33 +2357,9 @@ class Trip extends Model {
 				return response()->json(['success' => true, 'saved_boardings' => $saved_boardings]);
 			}
 
-			//FINAL SAVE LOCAL TRAVELS
+			//SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
 				// dd($request->all());
-				if(!empty($request->local_travel_attachment) && in_array('Yes',$request->local_travel_attachment)){
-					if(!isset($request->local_travel_attachments)){
-						$existing_attachments = Attachment::where('attachment_of_id', 3183)
-							->where('attachment_type_id',3200)
-							->where('entity_id', $request->trip_id)
-							->pluck('id')
-							->toArray();
-	
-						if(empty($request->local_travels_removal_id)){
-							if(empty($existing_attachments)){
-								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-							}
-						} else {
-							$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
-							if(array_intersect($local_travels_removal_id, $existing_attachments)) {
-								return response()->json(['success' => false, 'errors' => ['Attchment not found']]);
-							}
-						}
-					} 
-				} else {
-					if(isset($request->local_travel_attachments)){
-						return response()->json(['success' => false, 'errors' => ['Attchments are not needed']]);
-					}
-				}
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
@@ -2423,14 +2368,8 @@ class Trip extends Model {
 				$trip->rejection_remarks = NULL;
 				$trip->save();
 
-				//CHECK IF EMPLOYEE SELF APPROVE
-				if ($employee->self_approve == 1) {
-					$trip->status_id = 3034; // Payment Pending
-					$employee_claim->status_id = 3034; //PAYMENT PENDING
-				} else {
-					$trip->status_id = 3023; //Claim requested
-					$employee_claim->status_id = 3023; //CLAIM REQUESTED
-				}
+				$trip->status_id = 3033; //Claim requested
+				$employee_claim->status_id = 3033; //CLAIM REQUESTED
 
 				$trip->claim_amount = $request->claim_total_amount; //claimed
 				$trip->claimed_date = date('Y-m-d H:i:s');
@@ -2458,36 +2397,36 @@ class Trip extends Model {
 				}
 
 				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
-				if ($request->is_justify_my_trip) {
-					$employee_claim->is_justify_my_trip = 1;
-				} else {
-					$employee_claim->is_justify_my_trip = 0;
-				}
+				// if ($request->is_justify_my_trip) {
+				// 	$employee_claim->is_justify_my_trip = 1;
+				// } else {
+				// 	$employee_claim->is_justify_my_trip = 0;
+				// }
 
 				//CHECK EMPLOYEE GRADE HAS DEVIATION ELIGIBILITY ==> IF DEVIATION ELIGIBILITY IS 2-NO MEANS THERE IS NO DEVIATION, 1-YES MEANS NEED TO CHECK IN REQUEST
-				$grade_advance_eligibility = GradeAdvancedEligiblity::where('grade_id', $request->grade_id)->first();
-				if ($grade_advance_eligibility && $grade_advance_eligibility->deviation_eligiblity == 2) {
-					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
-				} else {
-					$employee_claim->is_deviation = $request->is_deviation;
-				}
+				// $grade_advance_eligibility = GradeAdvancedEligiblity::where('grade_id', $request->grade_id)->first();
+				// if ($grade_advance_eligibility && $grade_advance_eligibility->deviation_eligiblity == 2) {
+				// 	$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+				// } else {
+				// 	$employee_claim->is_deviation = $request->is_deviation;
+				// }
 				// Changed deviation by Karthick T on 21-01-2022
 				// If lodging exist and attachment not found the claim will go to deviation
-				$lodge_attachment_count = Attachment::where('attachment_of_id', 3181)
-					->where('attachment_type_id', 3200)
-					->where('entity_id', $request->trip_id)
-					->count();
-				$lodging_count = Lodging::where('trip_id', $request->trip_id)->count();
-				if ($lodging_count > 0 && $lodge_attachment_count == 0) {
-					$employee_claim->is_deviation = 1;
-				}
+				// $lodge_attachment_count = Attachment::where('attachment_of_id', 3181)
+				// 	->where('attachment_type_id', 3200)
+				// 	->where('entity_id', $request->trip_id)
+				// 	->count();
+				// $lodging_count = Lodging::where('trip_id', $request->trip_id)->count();
+				// if ($lodging_count > 0 && $lodge_attachment_count == 0) {
+				// 	$employee_claim->is_deviation = 1;
+				// }
 
 				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
 				// Changed deviation by Karthick T on 21-01-2022
 
-				$employee_claim->sbu_id = null;
-				if (isset($request->sbu_id) && $request->sbu_id)
-					$employee_claim->sbu_id = $request->sbu_id;
+				// $employee_claim->sbu_id = null;
+				// if (isset($request->sbu_id) && $request->sbu_id)
+				// 	$employee_claim->sbu_id = $request->sbu_id;
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->remarks = $request->remarks;
 				$employee_claim->save();
@@ -2513,11 +2452,11 @@ class Trip extends Model {
 
 				}
 
-				$activity['entity_id'] = $trip->id;
-				$activity['entity_type'] = "Trip";
-				$activity['details'] = "Trip is Claimed";
-				$activity['activity'] = "claim";
-				$activity_log = ActivityLog::saveLog($activity);
+				// $activity['entity_id'] = $trip->id;
+				// $activity['entity_type'] = "Trip";
+				// $activity['details'] = "Trip is ";
+				// $activity['activity'] = "claim";
+				// $activity_log = ActivityLog::saveLog($activity);
 
 				if (!empty($request->local_travels_removal_id)) {
 					$local_travels_removal_id = json_decode($request->local_travels_removal_id, true);
@@ -2574,6 +2513,144 @@ class Trip extends Model {
 					$employee_claim->local_travel_total = 0;
 					$employee_claim->save();
 				}
+
+				// $transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+				// $lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+				// $boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+				// $local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+				// $total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+
+				//Check Beta Amount
+				// if ($lodging_amount == 0 && $boarding_amount == 0) {
+				// 	$employee_beta_amount = $beta_amount * $employee_claim->total_trip_days;
+				// 	$total_amount += $employee_beta_amount;
+
+				// 	$employee_claim->beta_amount = $employee_beta_amount;
+				// } else {
+				// 	$employee_claim->beta_amount = NULL;
+				// }
+
+				// $employee_claim->total_trip_days = $request->trip_total_days;
+				// $employee_claim->total_amount = $total_amount;
+
+				//To Find Amount to Pay Financier or Employee
+				// if ($trip->advance_received) {
+				// 	if ($trip->advance_received > $total_amount) {
+				// 		$balance_amount = $trip->advance_received - $total_amount;
+				// 		$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+				// 		$employee_claim->amount_to_pay = 2;
+				// 	} else {
+				// 		$employee_claim->amount_to_pay = 1;
+				// 	}
+				// } else {
+				// 	$employee_claim->amount_to_pay = 1;
+				// }
+
+				$employee_claim->save();
+
+				// $employee = Employee::where('id', $trip->employee_id)->first();
+				// $user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+				// $notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
+
+				// DB::commit();
+				// return response()->json(['success' => true]);
+				$trip->status_id = 3033; //CLAIM INPROGRESS
+				$trip->save();
+				//GET SAVED TRAVELS
+				$local_travels = Trip::with([
+					'localTravels',
+					'localTravels.city',
+				])->find($request->trip_id);
+				DB::commit();
+				return response()->json(['success' => true, 'local_travels' => $local_travels]);
+			}
+			//FINAL SAVE
+			if ($request->is_attachment_trip) {
+				// dd($request->all());
+				//GET EMPLOYEE DETAILS
+				$employee = Employee::where('id', $request->employee_id)->first();
+				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+				//UPDATE TRIP STATUS
+				$trip = Trip::find($request->trip_id);
+				$trip->rejection_remarks = NULL;
+				$trip->save();
+
+				//CHECK IF EMPLOYEE SELF APPROVE
+				if ($employee->self_approve == 1) {
+					$trip->status_id = 3034; // Payment Pending
+					$employee_claim->status_id = 3034; //PAYMENT PENDING
+				} else {
+					$trip->status_id = 3023; //Claim requested
+					$employee_claim->status_id = 3023; //CLAIM REQUESTED
+				}
+
+				$trip->claim_amount = $request->claim_total_amount; //claimed
+				$trip->claimed_date = date('Y-m-d H:i:s');
+				$trip->rejection_id = NULL;
+				$trip->rejection_remarks = NULL;
+				$trip->save();
+
+				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
+				if ($request->is_justify_my_trip) {
+					$employee_claim->is_justify_my_trip = 1;
+				} else {
+					$employee_claim->is_justify_my_trip = 0;
+				}
+
+				//CHECK EMPLOYEE GRADE HAS DEVIATION ELIGIBILITY ==> IF DEVIATION ELIGIBILITY IS 2-NO MEANS THERE IS NO DEVIATION, 1-YES MEANS NEED TO CHECK IN REQUEST
+				$grade_advance_eligibility = GradeAdvancedEligiblity::where('grade_id', $request->grade_id)->first();
+				if ($grade_advance_eligibility && $grade_advance_eligibility->deviation_eligiblity == 2) {
+					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+				} else {
+					$employee_claim->is_deviation = $request->is_deviation;
+				}
+				// Changed deviation by Karthick T on 21-01-2022
+				// If lodging exist and attachment not found the claim will go to deviation
+				$lodge_attachment_count = Attachment::where('attachment_of_id', 3752)
+					->where('attachment_type_id', 3200)
+					->where('entity_id', $request->trip_id)
+					->count();
+				$lodging_count = Lodging::where('trip_id', $request->trip_id)->count();
+				if ($lodging_count > 0 && $lodge_attachment_count == 0) {
+					$employee_claim->is_deviation = 1;
+				}
+
+				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
+				// Changed deviation by Karthick T on 21-01-2022
+
+				$employee_claim->sbu_id = null;
+				if (isset($request->sbu_id) && $request->sbu_id)
+					$employee_claim->sbu_id = $request->sbu_id;
+				$employee_claim->created_by = Auth::user()->id;
+				$employee_claim->remarks = $request->remarks;
+				$employee_claim->save();
+
+				//STORE GOOGLE ATTACHMENT
+				$item_images = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
+				Storage::makeDirectory($item_images, 0777);
+				if ($request->hasfile('google_attachments')) {
+
+					foreach ($request->file('google_attachments') as $key => $attachement) {
+						$value = rand(1, 100);
+						$image = $attachement;
+						$extension = $image->getClientOriginalExtension();
+						$name = $trip->id . 'google_attachment' . $value . '.' . $extension;
+						$image->move(storage_path('app/public/trip/ey_employee_claims/google_attachments/'), $name);
+						$attachement = new Attachment;
+						$attachement->attachment_of_id = 3185;
+						$attachement->attachment_type_id = 3200;
+						$attachement->entity_id = $trip->id;
+						$attachement->name = $name;
+						$attachement->save();
+					}
+
+				}
+
+				$activity['entity_id'] = $trip->id;
+				$activity['entity_type'] = "Trip";
+				$activity['details'] = "Trip is Claimed";
+				$activity['activity'] = "claim";
+				$activity_log = ActivityLog::saveLog($activity);
 
 				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
 				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
@@ -2656,12 +2733,13 @@ class Trip extends Model {
 	public static function validateAttachment($trip_id) {
 		$trip_attachment = Trip::with([
 			// 'visits.pending_attachments',
-			'lodgings.pending_attachments',
-			'boardings.pending_attachments',
-			'pending_transport_attachments',
-			'pending_lodging_attachments',
-			'pending_boarding_attachments',
-			'pending_local_travel_attachments',
+			// 'lodgings.pending_attachments',
+			// 'boardings.pending_attachments',
+			// 'pending_transport_attachments',
+			// 'pending_lodging_attachments',
+			// 'pending_boarding_attachments',
+			// 'pending_local_travel_attachments',
+			'pendingTripAttachments',
 			'pending_google_attachments',
 		])->find($trip_id);
 		$pending_count = 0;
@@ -2669,17 +2747,18 @@ class Trip extends Model {
 			// foreach($trip_attachment->visits as $visit) {
 			// 	$pending_count += count($visit->pending_attachments);
 			// }
-			foreach ($trip_attachment->lodgings as $lodging) {
-				$pending_count += count($lodging->pending_attachments);
-			}
-			foreach ($trip_attachment->boardings as $boarding) {
-				$pending_count += count($boarding->pending_attachments);
-			}
-			$pending_count += count($trip_attachment->pending_transport_attachments);
-			$pending_count += count($trip_attachment->pending_lodging_attachments);
-			$pending_count += count($trip_attachment->pending_boarding_attachments);
-			$pending_count += count($trip_attachment->pending_local_travel_attachments);
+			// foreach ($trip_attachment->lodgings as $lodging) {
+			// 	$pending_count += count($lodging->pending_attachments);
+			// }
+			// foreach ($trip_attachment->boardings as $boarding) {
+			// 	$pending_count += count($boarding->pending_attachments);
+			// }
+			// $pending_count += count($trip_attachment->pending_transport_attachments);
+			// $pending_count += count($trip_attachment->pending_lodging_attachments);
+			// $pending_count += count($trip_attachment->pending_boarding_attachments);
+			// $pending_count += count($trip_attachment->pending_local_travel_attachments);
 			$pending_count += count($trip_attachment->pending_google_attachments);
+			$pending_count += count($trip_attachment->pendingTripAttachments);
 		}
 		$approval_status = ($pending_count == 0) ? false : true;
 		return $approval_status;
@@ -2796,5 +2875,21 @@ class Trip extends Model {
 
 		return response()->json(['end_km' => $end_km]);
 	}
+	// For Attachment by Karthick T on 07-04-2022
+	public static function getAttachmentList($trip_id) {
+		$exist_attachment_ids = Attachment::where('attachment_type_id', 3200)
+				->where('entity_id', $trip_id)
+				->pluck('attachment_of_id')->toArray();
+		$pending_attachment_lists = Collect(
+				Config::select('id', 'name')
+					->where('config_type_id', 541)
+					->whereNotIn('id', $exist_attachment_ids)
+					->orderBy('id', 'ASC')
+					->get()
+			)->prepend(['id' => null, 'name' => 'Select Any Type']);
+		return $pending_attachment_lists;
+	}
+	// For Attachment by Karthick T on 07-04-2022
+
 
 }

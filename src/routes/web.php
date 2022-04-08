@@ -577,6 +577,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/local-trip/claim/verifier/approve', 'Uitoux\EYatra\TripClaimVerificationController@approveLocalTripClaimVerification')->name('approveLocalTripClaimVerification');
 		// Get GST IN Details by Karthick T on 23-03-2022
 		Route::get('eyatra/gst-detail', 'Uitoux\EYatra\TripClaimVerificationController@getGstInData')->name('getGstInData');
+		// Upload document in trip by Karthick T in 07-04-2022
+		Route::post('eyatra/trip/document-upload', 'Uitoux\EYatra\TripClaimController@uploadTripDocument')->name('uploadTripDocument');
+		Route::post('eyatra/trip/document-delete', 'Uitoux\EYatra\TripClaimController@deleteTripDocument')->name('deleteTripDocument');
 	});
 });
 

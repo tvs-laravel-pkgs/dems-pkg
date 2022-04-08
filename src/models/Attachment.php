@@ -19,5 +19,8 @@ class Attachment extends Model {
 	public function attachmentType() {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'attachment_type_id', 'id');
 	}
+	public function attachmentName() {
+		return $this->belongsTo('App\Config', 'attachment_of_id', 'id');
+	}
 
 }

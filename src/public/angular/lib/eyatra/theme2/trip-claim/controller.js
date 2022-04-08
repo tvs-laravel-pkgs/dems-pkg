@@ -186,6 +186,7 @@ app.component('eyatraTripClaimForm', {
         var lodging_save = 0;
         var boarding_save = 0;
         var other_expense_save = 0;
+        var trip_attachment_save = 0;
         $scope.searchTravelMode;
         $scope.clearSearchTravelMode = function() {
             $scope.searchTravelMode = '';
@@ -247,6 +248,10 @@ app.component('eyatraTripClaimForm', {
             self.km_end = response.data.km_end;
             self.state_code = response.data.state_code;
             self.sbu_lists = response.data.sbu_lists;
+            self.attachment_type_lists = response.data.attachment_type_lists;
+            self.upload = response.data.upload;
+            self.view = response.data.view;
+            self.delete = response.data.delete;
             console.log(self.local_travel_attachments);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
@@ -329,36 +334,102 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.local_travels.length == 0) {
                 self.addNewLocalTralvels();
             }
-            if (self.transport_attachments.length > 0) {
-                self.fare_details_attachments_status = 'Yes';
-            } else {
-                self.fare_details_attachments_status = 'No';
-            }
-            if (self.lodging_attachments.length > 0) {
-                self.lodging_attachment_status = 'Yes';
-            } else {
-                self.lodging_attachment_status = 'No';
-            }
-            if (self.boarding_attachments.length > 0) {
-                self.boarding_attachment_status = 'Yes';
-            } else {
-                self.boarding_attachment_status = 'No';
-            }
-            if (self.local_travel_attachments.length > 0) {
-                self.local_travel_attachment_status = 'Yes';
-            } else {
-                self.local_travel_attachment_status = 'No';
-            }
+            // if (self.transport_attachments.length > 0) {
+            //     self.fare_details_attachments_status = 'Yes';
+            // } else {
+            //     self.fare_details_attachments_status = 'No';
+            // }
+            // if (self.lodging_attachments.length > 0) {
+            //     self.lodging_attachment_status = 'Yes';
+            // } else {
+            //     self.lodging_attachment_status = 'No';
+            // }
+            // if (self.boarding_attachments.length > 0) {
+            //     self.boarding_attachment_status = 'Yes';
+            // } else {
+            //     self.boarding_attachment_status = 'No';
+            // }
+            // if (self.local_travel_attachments.length > 0) {
+            //     self.local_travel_attachment_status = 'Yes';
+            // } else {
+            //     self.local_travel_attachment_status = 'No';
+            // }
+            self.document_type_id = null;
             setTimeout(function() {
                 self.travelCal();
                 self.lodgingCal();
                 self.boardingCal();
                 self.localTravelCal();
+
+                fileUpload();
             }, 500);
 
             $rootScope.loading = false;
 
         });
+
+        // Proof document by Karthick T on 07-04-2022
+        $scope.uploadDocument = (document_type_id, id) => {
+            console.log('document_type_id : ' + document_type_id);
+            if (!document_type_id || document_type_id == undefined) {
+                custom_noty('error', 'Document type is missing.');
+            } else {
+                $('#upload').button('loading');
+                var files = $('#upload_document')[0].files;
+                var form_data = new FormData();
+                for (var i = 0; i < files.length; i++) {
+                    form_data.append('atttachment', files[i])
+                }
+                form_data.append('id', id);
+                form_data.append('document_type_id', document_type_id);
+
+                $.ajax({
+                    url: laravel_routes['uploadTripDocument'],
+                    method: "POST",
+                    data: form_data,
+                    processData: false,
+                    contentType: false,
+                })
+                .done(function(res) {
+                    $('#upload').button('reset');
+                    if (!res.success) {
+                        custom_noty('error', res.errors);
+                    } else {
+                        custom_noty('success', res.message);
+                        self.trip.trip_attachments = res.trip_attachments;
+                        self.attachment_type_lists = res.attachment_type_lists;
+                        self.document_type_id = null;
+                        $("#upload_document").val('').trigger('change');
+                        $scope.$apply();
+                    }
+                })
+                .fail(function(xhr) {
+                    custom_noty('error', 'Something went wrong at server.');
+                    $('#upload').button('reset');
+                })
+            }
+        }
+        self.deleteOrderedAttachment = function(attachment_id) {
+            console.log('attachment_id : ' + attachment_id);
+            if (attachment_id) {
+                $http({
+                    url: laravel_routes['deleteTripDocument'],
+                    method: 'POST',
+                    params: { 'attachment_id': attachment_id }
+                }).then(function(res) {
+                    console.log(res.data);
+                    custom_noty('success', res.data.message);
+                    self.trip.trip_attachments = res.data.trip_attachments;
+                    self.attachment_type_lists = res.data.attachment_type_lists;
+                    self.document_type_id = null;
+                    $("#upload_document").val('').trigger('change');
+                    $scope.$apply();
+                });
+            } else {
+                custom_noty('error', 'Something went wrong!');
+            }
+        }
+        // Proof document by Karthick T on 07-04-2022
 
 
         $scope.attachmentRadio = function(value, key, booking_method_id) {
@@ -391,7 +462,8 @@ app.component('eyatraTripClaimForm', {
             console.log(value, key, stay_type_id);
             if (value == 'Yes' && (stay_type_id == 3341 || stay_type_id == 3342)) {
                 $('#lodging_attachments_inactive_' + key).attr('checked', true);
-                self.lodging_attachment_status = 'No';
+                // self.lodging_attachment_status = 'No';
+                self.trip.lodgings[key].attachment_status = 'No';
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
@@ -405,7 +477,8 @@ app.component('eyatraTripClaimForm', {
                 }, 1000);
             } else if (stay_type_id == 3340 && value == 'No') {
                 $('#lodging_attachments_active_' + key).attr('checked', true);
-                self.lodging_attachment_status = 'Yes';
+                // self.lodging_attachment_status = 'Yes';
+                self.trip.lodgings[key].attachment_status = 'Yes';
                 $noty = new Noty({
                     type: 'error',
                     layout: 'topRight',
@@ -422,15 +495,18 @@ app.component('eyatraTripClaimForm', {
 
         $scope.getBookingMethod = function(key, booking_method_id) {
             if (booking_method_id == 3042) {
-                self.fare_details_attachments_status = 'No';
+                self.trip.visits[key].attachment_status = 'No';
+                // self.fare_details_attachments_status = 'No';
             }
         }
 
         $scope.lodgingAttachments = function(key, stay_type_id) {
-            if (stay_type_id == 3341 || stay_type_id == 3342) {
-                self.lodging_attachment_status = 'No';
+            if ((stay_type_id == 3341 || stay_type_id == 3342) && self.trip.lodgings[key].attachment_status != 'Yes') {
+                // self.lodging_attachment_status = 'No';
+                self.trip.lodgings[key].attachment_status = 'No';
             } else if (stay_type_id == 3340) {
-                self.lodging_attachment_status = 'Yes';
+                // self.lodging_attachment_status = 'Yes';
+                self.trip.lodgings[key].attachment_status = 'Yes';
             }
         }
 
@@ -1700,7 +1776,7 @@ app.component('eyatraTripClaimForm', {
 
         $scope.fareDetailGstChange = (index, gst_number) => {
             self.trip.visits[index]['fare_gst_detail'] = '';
-            if (gst_number.length == 15) {
+            if (gst_number && gst_number.length == 15) {
                 $http({
                     url: laravel_routes['getGstInData'],
                     method: 'GET',
@@ -2029,6 +2105,7 @@ app.component('eyatraTripClaimForm', {
                 lodging_save = 1;
                 boarding_save = 1;
                 other_expense_save = 1;
+                trip_attachment_save = 1;
                 $('#claim_' + active_tab_type + '_expense_form').submit();
             } else {
                 self.enable_switch_tab = true;
@@ -2055,6 +2132,7 @@ app.component('eyatraTripClaimForm', {
             lodging_save = 1;
             boarding_save = 1;
             other_expense_save = 1;
+            trip_attachment_save = 1;
 
             var current_form = $(this).attr('data-submit_type');
             var next_form = $(this).attr('data-next_submit_type');
@@ -2069,6 +2147,10 @@ app.component('eyatraTripClaimForm', {
                 $('#' + next_form + '-expenses').addClass('in active');
             }
             // }, 1000);
+        });
+        $(document).on('click', '#modal_attachment_submit', function() {
+            trip_attachment_save = 1;
+            $('#claim_attachment_expense_form').submit();
         });
 
         //TRANSPORT FORM SUBMIT
@@ -2309,29 +2391,9 @@ app.component('eyatraTripClaimForm', {
                 }
             },
         });
-
-
-        var form_id = '#claim_local_travel_expense_form';
-        $.validator.addClassRules({
-            // maxlength_name: {
-            //     maxlength: 191,
-            //     required: true,
-            // },
-            // num_amount: {
-            //     maxlength: 12,
-            //     number: true,
-            //     required: true,
-            // },
-            // boarding_expense: {
-            //     maxlength: 255,
-            //     required: true,
-            // }
-            // attachments: {
-            //     // extension: "xlsx,xls",
-            // }
-        });
-
-        var v = jQuery(form_id).validate({
+        // TRAVEL SUBMIT
+        var form_expense_id = '#claim_local_expense_form';
+        var v = jQuery(form_expense_id).validate({
             ignore: "",
             rules: {},
             errorElement: "div", // default is 'label'
@@ -2342,7 +2404,7 @@ app.component('eyatraTripClaimForm', {
                 //console.log(self.item);
                 if (other_expense_save) {
                     other_expense_save = 0;
-                    let formData = new FormData($(form_id)[0]);
+                    let formData = new FormData($(form_expense_id)[0]);
                     $('#local_travel_submit').html('loading');
                     $("#local_travel_submit").attr("disabled", true);
                     $.ajax({
@@ -2351,18 +2413,96 @@ app.component('eyatraTripClaimForm', {
                             data: formData,
                             processData: false,
                             contentType: false,
+                            async: false,
                         })
                         .done(function(res) {
                             //console.log(res.success);
+                            $('#local_travel_submit').html('Save & Next');
+                            $("#local_travel_submit").attr("disabled", false);
                             if (!res.success) {
-                                $('#local_travel_submit').html('Submit');
-                                $("#local_travel_submit").attr("disabled", false);
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
                                 }
                                 custom_noty('error', errors);
                             } else {
+                                custom_noty('success', 'Others saved successfully!');
+                                //REFRESH OTHERS
+                                self.trip.local_travels = res.local_travels.local_travels;
+
+                                self.enable_switch_tab = true;
+                                $scope.$apply()
+                                // $noty = new Noty({
+                                //     type: 'success',
+                                //     layout: 'topRight',
+                                //     text: 'Claim Requested successfully!!',
+                                //     animation: {
+                                //         speed: 500 // unavailable - no need
+                                //     },
+                                // }).show();
+                                
+                                // $('.tab_li').removeClass('active');
+                                // $('.tab_local_travel').addClass('active');
+                                // $('.tab-pane').removeClass('in active');
+                                // $('#local_travel-expenses').addClass('in active');
+                                // setTimeout(function() {
+                                //     $noty.close();
+                                //     self.local_travel_attachment_removal_ids = [];
+                                //     $('#local_travel_attach_removal_ids').val('');
+                                //     $location.path('/trip/claim/list')
+                                //     $scope.$apply()
+                                // }, 1000);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#local_travel_submit').html('Submit');
+                            $("#local_travel_submit").attr("disabled", false);
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
+            },
+        });
+        // ATTACHMENT SUBMIT
+        var form_attachment_id = '#claim_attachment_expense_form';
+        var v = jQuery(form_attachment_id).validate({
+            ignore: "",
+            rules: {},
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
+            invalidHandler: function(event, validator) {
+                custom_noty('error', 'dadasds');
+            },
+            submitHandler: function(form) {
+                //console.log(self.item);
+                if (trip_attachment_save) {
+                    trip_attachment_save = 0;
+                    let formData = new FormData($(form_attachment_id)[0]);
+                    $('#modal_attachment_submit').html('loading');
+                    $("#modal_attachment_submit").attr("disabled", true);
+                    $.ajax({
+                            url: eyatra_trip_claim_save_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            async: false,
+                        })
+                        .done(function(res) {
+                            //console.log(res.success);
+                            $('#modal_attachment_submit').html('Submit');
+                            $("#modal_attachment_submit").attr("disabled", false);
+                            if (!res.success) {
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+
+                                self.enable_switch_tab = true;
+                                $scope.$apply()
                                 $noty = new Noty({
                                     type: 'success',
                                     layout: 'topRight',
@@ -2382,8 +2522,8 @@ app.component('eyatraTripClaimForm', {
                             }
                         })
                         .fail(function(xhr) {
-                            $('#local_travel_submit').html('Submit');
-                            $("#local_travel_submit").attr("disabled", false);
+                            $('#modal_attachment_submit').html('Submit');
+                            $("#modal_attachment_submit").attr("disabled", false);
                             custom_noty('error', 'Something went wrong at server');
                         });
                 }

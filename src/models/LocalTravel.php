@@ -20,6 +20,7 @@ class LocalTravel extends Model {
 		'tax',
 		'eligible_amount',
 		'description',
+		'attachment_status',
 		'created_by',
 		'updated_by',
 		'deleted_by',
@@ -35,6 +36,12 @@ class LocalTravel extends Model {
 
 	public function getDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+	public function getAttachmentStatusAttribute($val) {
+		return (!empty($val) && $val == 1) ? 'Yes' : 'No';
+	}
+	public function setAttachmentStatusAttribute($val) {
+		$this->attributes['attachment_status'] = (!empty($val) && $val == 'Yes') ? 1 : 0;
 	}
 
 	public function fromCity() {

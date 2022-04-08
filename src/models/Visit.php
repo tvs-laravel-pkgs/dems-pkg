@@ -22,6 +22,7 @@ class Visit extends Model {
 		'status_id',
 		// 'prefered_departure_time',
 		'manager_verification_status_id',
+		'attachment_status',
 	];
 
 	protected $dates = [
@@ -58,6 +59,12 @@ class Visit extends Model {
 
 	public function getArrivalTimeAttribute() {
 		return isset($this->attributes['arrival_date']) ? date('g:i A', strtotime($this->attributes['arrival_date'])) : '';
+	}
+	public function getAttachmentStatusAttribute($val) {
+		return (!empty($val) && $val == 1) ? 'Yes' : 'No';
+	}
+	public function setAttachmentStatusAttribute($val) {
+		$this->attributes['attachment_status'] = (!empty($val) && $val == 'Yes') ? 1 : 0;
 	}
 
 	public function fromCity() {

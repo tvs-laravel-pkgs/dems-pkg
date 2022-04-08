@@ -154,11 +154,12 @@ app.component('eyatraTripClaimVerificationTwoView', {
             //self.local_travels_total_amount = response.data.local_travels_total_amount;
             console.log(self.eyatra_trip_claim_verification_two_local_travel_attachment_url_new);
             console.log(self.eyatra_trip_claim_verification_two_lodging_attachment_url);
-            console.log(response.data.trip.local_travel_attachments);
-            console.log(response.data.trip.lodging_attachments);
+            // console.log(response.data.trip.local_travel_attachments);
+            // console.log(response.data.trip.lodging_attachments);
+            console.log(response.data.trip.trip_attachments);
             self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
-            if (response.data.trip.transport_attachments.length === 0 && response.data.trip.boarding_attachments.length === 0 && response.data.trip.lodging_attachments.length === 0 && response.data.trip.local_travel_attachments.length === 0 && response.data.trip.google_attachments.length === 0) {
+            if (response.data.trip.trip_attachments.length === 0 && response.data.trip.google_attachments.length === 0) {
                 $scope.visitTwo = false;
             } else {
                 $scope.visitTwo = true;
@@ -182,6 +183,7 @@ app.component('eyatraTripClaimVerificationTwoView', {
                 self.pay_to_company = '0.00';
             }
             $scope.visitTwo = response.data.approval_status;
+            self.view = response.data.view;
             $rootScope.loading = false;
 
         });

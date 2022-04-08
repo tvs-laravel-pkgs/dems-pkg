@@ -20,6 +20,7 @@ class Boarding extends Model {
 		'days',
 		'eligible_amount',
 		'remarks',
+		'attachment_status',
 		'created_by',
 		'updated_by',
 		'deleted_by',
@@ -33,6 +34,12 @@ class Boarding extends Model {
 	}
 	public function getToDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+	public function getAttachmentStatusAttribute($val) {
+		return (!empty($val) && $val == 1) ? 'Yes' : 'No';
+	}
+	public function setAttachmentStatusAttribute($val) {
+		$this->attributes['attachment_status'] = (!empty($val) && $val == 'Yes') ? 1 : 0;
 	}
 
 	public function city() {

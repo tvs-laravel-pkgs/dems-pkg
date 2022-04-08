@@ -233,12 +233,12 @@ app.component('eyatraTripLocalForm', {
                     autoApply: true,
                 });
                 // Booking Preference Conditions
-                $.each(self.trip.visits, function(key, value) {
-                    setTimeout(function() {
-                        $scope.onChangeTravelMode(value.travel_mode_id, key);
-                        $scope.onChangeBookingPreference(value.booking_method_name, key);
-                    }, 800);
-                });
+                // $.each(self.trip.visits, function(key, value) {
+                //     setTimeout(function() {
+                //         $scope.onChangeTravelMode(value.travel_mode_id, key);
+                //         $scope.onChangeBookingPreference(value.booking_method_name, key);
+                //     }, 800);
+                // });
             } else {
                 setTimeout(function() {
                     $(".daterange").daterangepicker({
