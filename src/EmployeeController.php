@@ -316,7 +316,25 @@ class EmployeeController extends Controller {
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
-
+		
+			if(!is_numeric($request->business_id)){
+              return response()->json(['success' => false, 'errors' => ['Business Not Exist']]);
+			}
+			if(!is_numeric($request->lob_id)){
+              return response()->json(['success' => false, 'errors' => ['Lob Not Exist']]);
+			}
+			if(!is_numeric($request->outlet_id)){
+              return response()->json(['success' => false, 'errors' => ['Outlet Not Exist']]);
+			}
+			if(!is_numeric($request->grade_id)){
+              return response()->json(['success' => false, 'errors' => ['Grade Not Exist']]);
+			}
+			if(!is_numeric($request->designation_id)){
+              return response()->json(['success' => false, 'errors' => ['Designation Not Exist']]);
+			}
+			if(!is_numeric($request->reporting_to_id)){
+              return response()->json(['success' => false, 'errors' => ['Reporting Manager Not Exist']]);
+			}
 			//ROLE VALIDATION
 			$roles_valid = json_decode($request->roles);
 			if (empty($roles_valid)) {
@@ -694,9 +712,28 @@ class EmployeeController extends Controller {
 	}
 
 	public function getEmployeeFromApi(Request $r) {
-		if (!empty($r->code)) {
-			$employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
-		} else {
+      if (!empty($r->code)) {
+		$employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
+		//dump($employee);
+		$business = Business::where('name',$employee['business_id'])->pluck('id')->first();
+		$employee['business_id']=$business;
+		// dd($employee);
+		$department = Department::where('name',$employee['department_id'])->where('id',$business)->pluck('id')->first();
+		 $employee['department_id']=$department;
+		 $lob = Lob::where('name',$employee['lob_id'])->pluck('id')->first();
+		 $employee['lob_id']=$lob;
+		 $sbu = Sbu::where('name',$employee['business_id'])->where('id',$lob)->pluck('id')->first();
+		 $employee['business_id']=$sbu;
+         $outlet = Outlet::where('name',$employee['outlet_id'])->pluck('id')->first();
+         $employee['outlet_id']=$outlet;
+		 $grade = Entity::where('name',$employee['grade_id'])->pluck('id')->first();
+		 $employee['grade_id']=$grade;
+		 //dd($grade);
+		 $designation = Designation::where('name',$employee['designation_id'])->where('id',$grade)->pluck('id')->first();
+		 $employee['grade_id']=$designation;
+		 $reporting = User::where('username',$employee['reporting_to'])->pluck('id')->first();
+		 $employee['grade_id']=$reporting;
+         } else {
 			return response()->json(['success' => false, 'errors' => ['Employee code is empty']]);
 		}
 		if (!$employee) {

@@ -62,8 +62,8 @@ class SoapController extends Controller
                         $response['grade_id'] = (isset($temp['GRADES']) && $temp['GRADES'] != "Not available") ? $temp['GRADES'] : '';
                         $response['pan_no'] = (isset($temp['PAN_NUMBER']) && $temp['PAN_NUMBER'] != "Not available") ? $temp['PAN_NUMBER'] : '';
                         $response['aadhar_no'] = (isset($temp['AADHAR_NO']) && $temp['AADHAR_NO'] != "Not available") ? $temp['AADHAR_NO'] : '';
-                        $response['email'] = (isset($temp['EMAILID']) && $temp['EMAILID'] != "Not available") ? $temp['EMAILID'] : '';
                         $response['mobile_number'] = (isset($temp['MOBILE_NUMBER']) && $temp['MOBILE_NUMBER'] != "Not available") ? $temp['MOBILE_NUMBER'] : '';
+                        $response['email'] = (isset($temp['EMAILID']) && $temp['EMAILID'] != "Not available") ? $temp['EMAILID'] : '';
                         $response['role'] = (isset($temp['ROLE']) && $temp['ROLE'] != "Not available") ? $temp['ROLE'] : '';
                         $response['employee_type'] = (isset($temp['EMPLOYEE_TYPE']) && $temp['EMPLOYEE_TYPE'] != "Not available") ? $temp['EMPLOYEE_TYPE'] : '';
                         $response['outlet_id'] = (isset($temp['SITE']) && $temp['SITE'] != "Not available") ? $temp['SITE'] : '';

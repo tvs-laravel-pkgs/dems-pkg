@@ -275,7 +275,7 @@ app.component('eyatraEmployeeForm', {
                     } else {
                         self.employee = [];
                         self.employee = res.employee;
-
+                        self.employee.reporting_to = res.employee.reporting_to.replace(/ /g, "") + '-' + res.employee.reporting_to_name;
                         self.employee.payment_mode_id = '3244';
                         self.employee.user = {
                             name: res.employee.name,
