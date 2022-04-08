@@ -344,8 +344,14 @@ app.component('eyatraTripForm', {
             self.trip.start_date = date[0];
             self.trip.end_date = date[1];
             $scope.onChange(self.trip.start_date, self.trip.end_date);
-
-            self.trip.visits[0].departure_date = self.trip.start_date ? self.trip.start_date : '';
+            if (self.trip.visits && self.trip.visits.length > 0) {
+                $.each(self.trip.visits, function(index, value) {
+                    self.trip.visits[index].departure_date = self.trip.start_date ? self.trip.start_date : '';
+                    if (index == self.trip.visits.length - 1)
+                        self.trip.visits[index].departure_date = self.trip.end_date ? self.trip.end_date : '';
+                });
+            }
+            //$scope.$apply();
         });
 
         var startdate;
