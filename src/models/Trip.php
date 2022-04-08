@@ -1660,6 +1660,7 @@ class Trip extends Model {
 			->get()
 			->toArray();
 		$emp_claim_amount = $transport_amount = $lodging_amount = $boarding_amount = $local_travel_amount = 0;
+		$emp_trip_count = count($emp_fy_amounts);
 		if (count($emp_fy_amounts) > 0) {
 			$emp_claim_amount = number_format(array_sum(array_column($emp_fy_amounts, 'claim_amount')), 2, '.', ',');
 			$transport_amount = number_format(array_sum(array_column($emp_fy_amounts, 'transport_total')), 2, '.', ',');
@@ -1699,6 +1700,7 @@ class Trip extends Model {
 		// 	->where('ey_employee_claims.employee_id', $trip->employee->id)
 		// 	->sum('ey_employee_claims.local_travel_total');
 		
+		$trip->emp_trip_count = $emp_trip_count;
 		$trip->emp_claim_amount = $emp_claim_amount;
 		$trip->transport_amount = $transport_amount;
 		$trip->lodging_amount = $lodging_amount;
