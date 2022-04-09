@@ -49,6 +49,7 @@ class StateController extends Controller {
 			->select(
 				'nstates.id',
 				'nstates.code',
+				'nstates.gstin_state_code',
 				'nstates.name',
 				'c.name as country',
 				DB::raw('IF(nstates.deleted_at IS NULL,"Active","Inactive") as status')
