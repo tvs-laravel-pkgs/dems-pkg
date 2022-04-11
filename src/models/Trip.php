@@ -1654,7 +1654,7 @@ class Trip extends Model {
 				'ey_employee_claims.lodging_total',
 				'ey_employee_claims.boarding_total',
 				'ey_employee_claims.local_travel_total',
-				'ey_employee_claims.beta_amount',
+				'ey_employee_claims.beta_amount'
 			)->join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
@@ -1672,7 +1672,6 @@ class Trip extends Model {
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
-		dd($emp_fy_amounts);
 
 		// $emp_claim_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 		// 	->whereDate('trips.claimed_date', '>=', $from_date)
