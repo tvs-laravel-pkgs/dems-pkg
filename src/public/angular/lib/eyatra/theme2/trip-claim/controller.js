@@ -224,7 +224,7 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }*/
-            console.log(response.data);
+            console.log(response.data.trip.boardings);
             // console.log(response.data.travel_dates);
             // console.log(response.data.cities_with_expenses);
             self.cities_with_expenses = response.data.cities_with_expenses;
@@ -384,29 +384,29 @@ app.component('eyatraTripClaimForm', {
                 form_data.append('document_type_id', document_type_id);
 
                 $.ajax({
-                    url: laravel_routes['uploadTripDocument'],
-                    method: "POST",
-                    data: form_data,
-                    processData: false,
-                    contentType: false,
-                })
-                .done(function(res) {
-                    $('#upload').button('reset');
-                    if (!res.success) {
-                        custom_noty('error', res.errors);
-                    } else {
-                        custom_noty('success', res.message);
-                        self.trip.trip_attachments = res.trip_attachments;
-                        self.attachment_type_lists = res.attachment_type_lists;
-                        self.document_type_id = null;
-                        $("#upload_document").val('').trigger('change');
-                        $scope.$apply();
-                    }
-                })
-                .fail(function(xhr) {
-                    custom_noty('error', 'Something went wrong at server.');
-                    $('#upload').button('reset');
-                })
+                        url: laravel_routes['uploadTripDocument'],
+                        method: "POST",
+                        data: form_data,
+                        processData: false,
+                        contentType: false,
+                    })
+                    .done(function(res) {
+                        $('#upload').button('reset');
+                        if (!res.success) {
+                            custom_noty('error', res.errors);
+                        } else {
+                            custom_noty('success', res.message);
+                            self.trip.trip_attachments = res.trip_attachments;
+                            self.attachment_type_lists = res.attachment_type_lists;
+                            self.document_type_id = null;
+                            $("#upload_document").val('').trigger('change');
+                            $scope.$apply();
+                        }
+                    })
+                    .fail(function(xhr) {
+                        custom_noty('error', 'Something went wrong at server.');
+                        $('#upload').button('reset');
+                    })
             }
         }
         self.deleteOrderedAttachment = function(attachment_id) {
@@ -510,7 +510,7 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
-        
+
         // var arrival_date_error_flag = 0;
         $(document).on('input', '.localconveyance_km', function() {
             var index = $(this).attr("data-index");
@@ -976,7 +976,7 @@ app.component('eyatraTripClaimForm', {
         }
 
         // calculate total KMs
-        self.totalKm = function(key, self_booking_id) {             
+        self.totalKm = function(key, self_booking_id) {
             if (self.action == 'Add') {
                 if (self_booking_id) {
                     $.ajax({
@@ -999,11 +999,11 @@ app.component('eyatraTripClaimForm', {
                 $('.km_total_' + key).val(total_km);
             } else {
                 $('.km_total_' + key).val('--');
-            }           
+            }
         }
 
         $scope.getStartEndKm = function(travel_mode_id, key) {
-            if (travel_mode_id == 15 || travel_mode_id == 16) {         
+            if (travel_mode_id == 15 || travel_mode_id == 16) {
                 $('.km_start_' + key).val('');
                 $('.km_end_' + key).val('');
             } else {
@@ -1022,7 +1022,7 @@ app.component('eyatraTripClaimForm', {
                 $('.km_end_' + key).attr('disabled', false);
                 $('.km_total_' + key).attr('disabled', false);
                 $('.toll_fee_' + key).attr('disabled', false);
-                
+
             } else {
                 $('.km_start_' + key).attr('disabled', true);
                 $('.km_end_' + key).attr('disabled', true);
@@ -1288,14 +1288,6 @@ app.component('eyatraTripClaimForm', {
                     self.trip.boardings[index].to_date = arrival_date;
                 $scope.boardingFromToDate();
                 // Calculating from, to date and boarding days by Karthick T on 21-01-2022
-            } else {
-                self.trip.boardings[index].from_date = '';
-                self.trip.boardings[index].to_date = '';
-                self.trip.boardings[index].days = '';
-                self.trip.boardings[index].expense_name = '';
-                self.trip.boardings[index].eligible_amount = '0.00';
-                self.trip.boardings[index].amount = '0.00';
-                self.trip.boardings[index].tax = '';
             }
         }
         // Changing boarding actual amount before updating those value by Karthick T on 20-01-2022
@@ -2456,7 +2448,7 @@ app.component('eyatraTripClaimForm', {
                                 //         speed: 500 // unavailable - no need
                                 //     },
                                 // }).show();
-                                
+
                                 // $('.tab_li').removeClass('active');
                                 // $('.tab_local_travel').addClass('active');
                                 // $('.tab-pane').removeClass('in active');

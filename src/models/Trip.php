@@ -1203,6 +1203,7 @@ class Trip extends Model {
 				'lodgings.city',
 				'lodgings.attachments',
 				'boardings',
+				'boardings.stateType',
 				'boardings.city',
 				'boardings.attachments',
 				'localTravels',
@@ -1222,7 +1223,7 @@ class Trip extends Model {
 				'tripAttachments',
 				'tripAttachments.attachmentName',
 			])->find($trip_id);
-		//dd($trip);
+		//dd($trip->boardings);
 		$data['attachment_type_lists'] = Trip::getAttachmentList($trip_id);
 		$data['upload'] = URL::asset('public/img/content/file-icon.svg');
 		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
@@ -1537,6 +1538,7 @@ class Trip extends Model {
 			'lodgings.stateType',
 			'lodgings.attachments',
 			'boardings',
+			'boardings.stateType',
 			'boardings.city',
 			'boardings.attachments',
 			'localTravels',
@@ -1562,7 +1564,7 @@ class Trip extends Model {
 			'tripAttachments.attachmentName'
 
 		])->find($trip_id);
-		//dd($trip);
+		//dd($trip->lodgings);
 
 		if (!$trip) {
 			$data['success'] = false;
@@ -1647,11 +1649,12 @@ class Trip extends Model {
 		$from_date = $current_year_arr['from_fy'];
 		$to_date = $current_year_arr['to_fy'];
 		$emp_fy_amounts = Trip::select(
-				'trips.claim_amount',
+				'ey_employee_claims.total_amount',
 				'ey_employee_claims.transport_total',
 				'ey_employee_claims.lodging_total',
 				'ey_employee_claims.boarding_total',
-				'ey_employee_claims.local_travel_total'
+				'ey_employee_claims.local_travel_total',
+				'ey_employee_claims.beta_amount',
 			)->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
@@ -1659,7 +1662,7 @@ class Trip extends Model {
 			->where('ey_employee_claims.employee_id', $trip->employee->id)
 			->get()
 			->toArray();
-		$emp_claim_amount = $transport_amount = $lodging_amount = $boarding_amount = $local_travel_amount = 0;
+		$emp_claim_amount = $transport_amount = $lodging_amount = $boarding_amount = $local_travel_amount = $beta_amount = 0;
 		$emp_trip_count = count($emp_fy_amounts);
 		if (count($emp_fy_amounts) > 0) {
 			$emp_claim_amount = number_format(array_sum(array_column($emp_fy_amounts, 'claim_amount')), 2, '.', ',');
@@ -1667,6 +1670,7 @@ class Trip extends Model {
 			$lodging_amount = number_format(array_sum(array_column($emp_fy_amounts, 'lodging_total')), 2, '.', ',');
 			$boarding_amount = number_format(array_sum(array_column($emp_fy_amounts, 'boarding_total')), 2, '.', ',');
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
+			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 		}
 
 		// $emp_claim_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
@@ -1723,7 +1727,7 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
-		// dd($request->all());
+		 //dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -2273,6 +2277,7 @@ class Trip extends Model {
 						}
 
 						$boarding->fill($boarding_data);
+						//dd($boarding_data);
 						$boarding->trip_id = $request->trip_id;
 						$boarding->from_date = date('Y-m-d', strtotime($boarding_data['from_date']));
 						$boarding->to_date = date('Y-m-d', strtotime($boarding_data['to_date']));
@@ -2373,6 +2378,7 @@ class Trip extends Model {
 				//GET SAVED BOARDINGS
 				$saved_boardings = Trip::with([
 					'boardings',
+					'boardings.stateType',
 					'boarding_attachments',
 					'boardings.city',
 					'boardings.attachments',
@@ -2607,7 +2613,7 @@ class Trip extends Model {
 					$trip->status_id = 3023; //Claim requested
 					$employee_claim->status_id = 3023; //CLAIM REQUESTED
 				}
-
+                 //dd($request->claim_total_amount);
 				$trip->claim_amount = $request->claim_total_amount; //claimed
 				$trip->claimed_date = date('Y-m-d H:i:s');
 				$trip->rejection_id = NULL;
