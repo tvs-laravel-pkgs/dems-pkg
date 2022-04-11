@@ -1665,7 +1665,7 @@ class Trip extends Model {
 		$emp_claim_amount = $transport_amount = $lodging_amount = $boarding_amount = $local_travel_amount = $beta_amount = 0;
 		$emp_trip_count = count($emp_fy_amounts);
 		if (count($emp_fy_amounts) > 0) {
-			$emp_claim_amount = number_format(array_sum(array_column($emp_fy_amounts, 'claim_amount')), 2, '.', ',');
+			$emp_claim_amount = number_format(array_sum(array_column($emp_fy_amounts, 'total_amount')), 2, '.', ',');
 			$transport_amount = number_format(array_sum(array_column($emp_fy_amounts, 'transport_total')), 2, '.', ',');
 			$lodging_amount = number_format(array_sum(array_column($emp_fy_amounts, 'lodging_total')), 2, '.', ',');
 			$boarding_amount = number_format(array_sum(array_column($emp_fy_amounts, 'boarding_total')), 2, '.', ',');
