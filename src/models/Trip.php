@@ -1648,14 +1648,14 @@ class Trip extends Model {
 		$current_year_arr = calculateFinancialYearForDate(date('m'));
 		$from_date = $current_year_arr['from_fy'];
 		$to_date = $current_year_arr['to_fy'];
-		$emp_fy_amounts = Trip::select(
+		$emp_fy_amounts = EmployeeClaim::select(
 				'ey_employee_claims.total_amount',
 				'ey_employee_claims.transport_total',
 				'ey_employee_claims.lodging_total',
 				'ey_employee_claims.boarding_total',
 				'ey_employee_claims.local_travel_total',
 				'ey_employee_claims.beta_amount',
-			)->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			)->join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->where('ey_employee_claims.status_id', 3026)
@@ -1672,6 +1672,7 @@ class Trip extends Model {
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
+		dd($emp_fy_amounts);
 
 		// $emp_claim_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 		// 	->whereDate('trips.claimed_date', '>=', $from_date)
