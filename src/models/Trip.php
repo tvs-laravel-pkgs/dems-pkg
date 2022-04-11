@@ -1670,7 +1670,7 @@ class Trip extends Model {
 			$lodging_amount = number_format(array_sum(array_column($emp_fy_amounts, 'lodging_total')), 2, '.', ',');
 			$boarding_amount = number_format(array_sum(array_column($emp_fy_amounts, 'boarding_total')), 2, '.', ',');
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
-			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
+			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
 
 		// $emp_claim_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
