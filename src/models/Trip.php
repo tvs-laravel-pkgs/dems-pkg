@@ -1880,9 +1880,9 @@ class Trip extends Model {
 							$visit_booking->remarks = $visit_data['remarks'];
 							$visit_booking->amount = $visit_data['amount'];
 							$visit_booking->tax = $visit_data['tax'];
-							$visit_booking->km_start = $visit_data['km_start'];
-							$visit_booking->km_end = $visit_data['km_end'];
-							$visit_booking->toll_fee = $visit_data['toll_fee'];
+							$visit_booking->km_start = (isset($visit_data['km_start']) && !empty($visit_data['km_start'])) ? $visit_data['km_start'] : null;
+							$visit_booking->km_end = (isset($visit_data['km_end']) && !empty($visit_data['km_end'])) ? $visit_data['km_end'] : null;
+							$visit_booking->toll_fee = (isset($visit_data['toll_fee']) && !empty($visit_data['toll_fee'])) ? $visit_data['toll_fee'] : null;
 							$visit_booking->service_charge = '0.00';
 							$visit_booking->total = $visit_data['total'];
 							$visit_booking->paid_amount = $visit_data['total'];

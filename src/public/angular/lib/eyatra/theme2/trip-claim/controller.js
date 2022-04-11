@@ -510,8 +510,7 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
-
-
+        
         // var arrival_date_error_flag = 0;
         $(document).on('input', '.localconveyance_km', function() {
             var index = $(this).attr("data-index");
@@ -977,7 +976,7 @@ app.component('eyatraTripClaimForm', {
         }
 
         // calculate total KMs
-        self.totalKm = function(key, self_booking_id) {
+        self.totalKm = function(key, self_booking_id, travel_mode_id) {             
             if (self.action == 'Add') {
                 if (self_booking_id) {
                     $.ajax({
@@ -995,11 +994,25 @@ app.component('eyatraTripClaimForm', {
             var from_km = parseInt($('.km_start_' + key).val());
             var to_km = parseInt($('.km_end_' + key).val());
             var total_km = 0;
-            if (to_km > from_km) {
-                var total_km = to_km - from_km;
-                $('.km_total_' + key).val(total_km);
+            if(travel_mode_id == 15 || travel_mode_id == 16){
+                if (to_km > from_km) {
+                    var total_km = to_km - from_km;
+                    $('.km_total_' + key).val(total_km);
+                } else {
+                    $('.km_total_' + key).val('--');
+                }
             } else {
                 $('.km_total_' + key).val('--');
+            }            
+        }
+
+        $scope.getStartEndKm = function(travel_mode_id, key) {
+            if (travel_mode_id == 15 || travel_mode_id == 16) {         
+                $('.km_start_' + key).val('');
+                $('.km_end_' + key).val('');
+            } else {
+                $('.km_start_' + key).val('--');
+                $('.km_end_' + key).val('--');
             }
         }
 
@@ -1009,9 +1022,16 @@ app.component('eyatraTripClaimForm', {
 
             //Get Travel Mode KM
             if (travel_mode_id == 15 || travel_mode_id == 16) {
-                $('.travel-mode').show();
+                $('.km_start_' + key).attr('disabled', false);
+                $('.km_end_' + key).attr('disabled', false);
+                $('.km_total_' + key).attr('disabled', false);
+                $('.toll_fee_' + key).attr('disabled', false);
+                
             } else {
-                $('.travel-mode').hide();
+                $('.km_start_' + key).attr('disabled', true);
+                $('.km_end_' + key).attr('disabled', true);
+                $('.km_total_' + key).attr('disabled', true);
+                $('.toll_fee_' + key).attr('disabled', true);
             }
             if (travel_mode_id) {
                 var travel_mode_ids = self.travel_values;
@@ -1119,7 +1139,7 @@ app.component('eyatraTripClaimForm', {
                             var from_km = parseInt($('.km_start_' + key).val());
                             var to_km = parseInt($('.km_end_' + key).val());
                             var visit_booking_id = (self.trip.visits[key].self_booking && self.trip.visits[key].self_booking.id) ? self.trip.visits[key].self_booking.id : null;
-                            self.totalKm(key, visit_booking_id);
+                            self.totalKm(key, visit_booking_id, travel_mode_id);
                             console.log(from_km, to_km, travel_mode_ids[travel_mode_id]);
 
                             if (from_km == to_km) {
