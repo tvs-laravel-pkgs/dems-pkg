@@ -976,7 +976,7 @@ app.component('eyatraTripClaimForm', {
         }
 
         // calculate total KMs
-        self.totalKm = function(key, self_booking_id, travel_mode_id) {             
+        self.totalKm = function(key, self_booking_id) {             
             if (self.action == 'Add') {
                 if (self_booking_id) {
                     $.ajax({
@@ -994,16 +994,12 @@ app.component('eyatraTripClaimForm', {
             var from_km = parseInt($('.km_start_' + key).val());
             var to_km = parseInt($('.km_end_' + key).val());
             var total_km = 0;
-            if(travel_mode_id == 15 || travel_mode_id == 16){
-                if (to_km > from_km) {
-                    var total_km = to_km - from_km;
-                    $('.km_total_' + key).val(total_km);
-                } else {
-                    $('.km_total_' + key).val('--');
-                }
+            if (to_km > from_km) {
+                var total_km = to_km - from_km;
+                $('.km_total_' + key).val(total_km);
             } else {
                 $('.km_total_' + key).val('--');
-            }            
+            }           
         }
 
         $scope.getStartEndKm = function(travel_mode_id, key) {
@@ -1139,7 +1135,7 @@ app.component('eyatraTripClaimForm', {
                             var from_km = parseInt($('.km_start_' + key).val());
                             var to_km = parseInt($('.km_end_' + key).val());
                             var visit_booking_id = (self.trip.visits[key].self_booking && self.trip.visits[key].self_booking.id) ? self.trip.visits[key].self_booking.id : null;
-                            self.totalKm(key, visit_booking_id, travel_mode_id);
+                            self.totalKm(key, visit_booking_id);
                             console.log(from_km, to_km, travel_mode_ids[travel_mode_id]);
 
                             if (from_km == to_km) {

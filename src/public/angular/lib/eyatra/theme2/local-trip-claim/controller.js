@@ -269,19 +269,15 @@ app.component('eyatraLocalTripClaimForm', {
             $rootScope.loading = false;
         });
 
-        self.totalKm = function(travel_mode_id,key) {
+        self.totalKm = function(key) {
             var from_km = parseInt($('.from_km_' + key).val());
             var to_km = parseInt($('.to_km_' + key).val());
             var total_km = 0;
-            if(travel_mode_id == 15 || travel_mode_id == 16){
-                if (to_km > from_km) {
-                    var total_km = to_km - from_km;
-                    $('.km_total_' + key).val(total_km);
-                } else {
-                    $('.km_total_' + key).val('--');
-                }
+            if (to_km > from_km) {
+                var total_km = to_km - from_km;
+                $('.total_km_' + key).val(total_km);
             } else {
-                $('.km_total_' + key).val('--');
+                $('.total_km_' + key).val('-');
             }
         }
 
@@ -534,8 +530,8 @@ app.component('eyatraLocalTripClaimForm', {
                 $(".to_km_" + index).prop("readonly", true);
                 $(".km_amount_label_" + index).hide();
             }
-            self.totalKm(travel_mode_id.index);
-            self.getStartEndKm(travel_mode_id.index);
+            self.totalKm(index);
+            self.getStartEndKm(travel_mode_id, index);
         }
 
         $scope.calculateKMAmount = function(from_km, to_km, travel_mode_id, index) {
