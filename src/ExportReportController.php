@@ -104,7 +104,7 @@ class ExportReportController extends Controller
             't.id as invoice',
             'eyec.total_amount as Amount',
             'eyec.number as documentnum',
-            'ol.code as ledgerdiamension',
+            'eyec_s.name as ledgerdiamension',
             's.name as sbuname'
         )
         ->join('users as u','u.entity_id', 'employees.id')
@@ -113,6 +113,7 @@ class ExportReportController extends Controller
         ->join('ey_employee_claims as eyec','eyec.employee_id','employees.id')
         ->leftjoin('outlets as ol','ol.id','t.outlet_id')
         ->join('sbus as s','s.id','employees.sbu_id')
+        ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
         ->where('t.status_id','=','3026')
         ->get()->toArray();
         //dd($outstations);
@@ -127,18 +128,21 @@ class ExportReportController extends Controller
             'lt.id as invoice',
             'lt.claimed_date as documentdate',
             'lt.number as documentnum',
-            'ol.code as ledgerdiamension',
+            'lt_s.name as ledgerdiamension',
             's.name as sbuname'
         )
         ->join('users as u','u.entity_id', 'employees.id')
         ->join('bank_details as bd', 'bd.entity_id', 'employees.id')
         ->join('local_trips as lt','lt.employee_id','employees.id')
         ->leftjoin('outlets as ol','ol.id','lt.outlet_id')
-        ->join('sbus as s','s.id','employees.sbu_id')
+        ->leftjoin('sbus as s','s.id','employees.sbu_id')
+        ->leftjoin('sbus as lt_s','lt_s.id','lt.sbu_id')
         ->where('lt.status_id','=','3026')
         ->get()->toArray();
+        //dd($sbu);
         //dd($claims);
         $locals=array_merge($claims,$outstations);
+        //dd($locals);
         $local_trips_header = [
             'SNo',
             'Account Number',
