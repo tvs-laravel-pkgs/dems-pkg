@@ -977,20 +977,20 @@ app.component('eyatraTripClaimForm', {
 
         // calculate total KMs
         self.totalKm = function(key, self_booking_id) {
-            if (self.action == 'Add') {
-                if (self_booking_id) {
-                    $.ajax({
-                            url: get_previous_closing_km_details,
-                            method: 'GET',
-                            data: { visit_booking_id: self_booking_id }
-                        })
-                        .done(function(response) {
-                            if (response.end_km != null) {
-                                $('.km_start_' + key).val(response.end_km);
-                            }
-                        })
+            /*if (self.action == 'Add') {
+    if (self_booking_id) {
+        $.ajax({
+                url: get_previous_closing_km_details,
+                method: 'GET',
+                data: { visit_booking_id: self_booking_id }
+            })
+            .done(function(response) {
+                if (response.end_km != null) {
+                    $('.km_start_' + key).val(response.end_km);
                 }
-            }
+            })
+    }
+}*/
             var from_km = parseInt($('.km_start_' + key).val());
             var to_km = parseInt($('.km_end_' + key).val());
             var total_km = 0;
@@ -1288,6 +1288,17 @@ app.component('eyatraTripClaimForm', {
                     self.trip.boardings[index].to_date = arrival_date;
                 $scope.boardingFromToDate();
                 // Calculating from, to date and boarding days by Karthick T on 21-01-2022
+            } else {
+                if (self.action == 'Add') {
+                    self.trip.boardings[index].from_date = '';
+                    self.trip.boardings[index].to_date = '';
+                    self.trip.boardings[index].days = '';
+                    self.trip.boardings[index].expense_name = '';
+                    self.trip.boardings[index].eligible_amount = '0.00';
+                    self.trip.boardings[index].amount = '0.00';
+                    self.trip.boardings[index].tax = '';
+                }
+
             }
         }
         // Changing boarding actual amount before updating those value by Karthick T on 20-01-2022
