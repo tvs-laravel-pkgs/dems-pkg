@@ -650,18 +650,13 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 521,
 			],
 			3341 => [
-				'name' => 'Home',
+				'name' => 'Flat Claim',
 				'config_type_id' => 521,
 			],
 			3342 => [
 				'name' => 'Office Guest House',
 				'config_type_id' => 521,
 			],
-			3343 => [
-				'name' => 'Flat Claim',
-				'config_type_id' => 521,
-			],
-
 			//IMPORT STATUS
 			3361 => [
 				'name' => 'Pending',
