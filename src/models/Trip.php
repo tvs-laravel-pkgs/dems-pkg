@@ -1913,28 +1913,6 @@ class Trip extends Model {
 							    }
 						}
 							$visit_booking->save();
-
-							// $gstin = $visit_data['gstin'];
-							$user_company_id = Auth::user()->company_id;
-							$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
-							//dd($gstin_enable);
-
-							if ($gstin_enable == 1) {
-								$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'], "", false);
-								//dd($response);
-								if (!$response['success']) {
-									return response()->json([
-										'success' => false,
-										'errors' => [
-											$response['error'],
-										],
-									]);
-								}
-
-								$visit_booking->gstin = $response['gstin'];
-
-							}
-							$visit_booking->save();
 							$transport_total = 0;
 							if ($visit_booking) {
 								$transport_total = $visit_booking->amount + $visit_booking->tax + $visit_booking->toll_fee;
