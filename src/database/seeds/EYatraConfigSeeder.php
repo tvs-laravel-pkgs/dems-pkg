@@ -650,7 +650,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 521,
 			],
 			3341 => [
-				'name' => 'Home',
+				'name' => 'Flat Claim',
 				'config_type_id' => 521,
 			],
 			3342 => [
