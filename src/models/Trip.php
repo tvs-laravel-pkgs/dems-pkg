@@ -1896,20 +1896,22 @@ class Trip extends Model {
 							$user_company_id = Auth::user()->company_id;
 							$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
 							if ($gstin_enable == 1) {
-								$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
-								//dd($response);
-								if(!$response['success']){
-								return response()->json([
-									'success' => false,
-									'errors' => [
-									$response['error']
-									],
-								]);
-								} 
-								$visit_booking->gstin = $response['gstin'];
-							}else{
-								$visit_booking->gstin=NULL;
-							}
+								  if($visit_data['travel_mode_id'] == '12' && $visit_data['travel_mode_id'] == '13'){
+								    $response=app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'],"",false);
+								   //dd($response);
+								        if(!$response['success']){
+								        return response()->json([
+									   'success' => false,
+									   'errors' => [
+									    $response['error']
+									    ],
+								        ]);
+								        } 
+								       $visit_booking->gstin = $response['gstin'];
+							       }else{
+								   $visit_booking->gstin=NULL;
+							    }
+						}
 							$visit_booking->save();
 
 							// $gstin = $visit_data['gstin'];
@@ -2900,7 +2902,6 @@ class Trip extends Model {
 		->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 		->where('visit_bookings.id', $request->visit_booking_id)
 		->first();
-
 		$end_km = ($trip && $trip->km_end) ? $trip->km_end : null;
 
 		return response()->json(['end_km' => $end_km]);
