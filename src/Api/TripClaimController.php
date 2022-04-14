@@ -11,6 +11,7 @@ use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
+use Validator;
 
 class TripClaimController extends Controller {
 	public $successStatus = 200;
