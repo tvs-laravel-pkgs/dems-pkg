@@ -47,6 +47,9 @@ Route::group(['middleware' => ['api']], function () {
 		Route::post('trip/verification/approve', 'Uitoux\EYatra\Api\TripVerificationController@approveTrip');
 		Route::post('trip/verification/reject', 'Uitoux\EYatra\Api\TripVerificationController@rejectTrip');
 
+		Route::post('eyatra/trip/document-upload', 'Uitoux\EYatra\Api\TripClaimController@uploadTripDocument');
+		Route::post('eyatra/trip/document-delete', 'Uitoux\EYatra\Api\TripClaimController@deleteTripDocument');
+
 		//TRIP CLAIM VERIFICATION LEVEL
 		Route::get('trip/claim/verification/one/get-list', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@listTripClaimVerificationOneList');
 		Route::get('trip/claim/verification/view/{trip_id?}', 'Uitoux\EYatra\Api\TripClaimVerificationLevelController@getClaimVerificationViewData');
