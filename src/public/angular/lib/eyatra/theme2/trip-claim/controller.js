@@ -224,7 +224,7 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }*/
-            console.log(response.data.trip.boardings);
+            console.log(response.data);
             // console.log(response.data.travel_dates);
             // console.log(response.data.cities_with_expenses);
             self.cities_with_expenses = response.data.cities_with_expenses;
@@ -252,9 +252,9 @@ app.component('eyatraTripClaimForm', {
             self.upload = response.data.upload;
             self.view = response.data.view;
             self.delete = response.data.delete;
-            self.two_wheeler_start_km =10;
-            self.four_wheeler_start_km =100;
-            console.log(self.local_travel_attachments);
+            self.two_wheeler_start_km = response.data.km_end_twowheeler;
+            self.four_wheeler_start_km = response.data.km_end_fourwheeler;
+            console.log(self.four_wheeler_start_km);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
@@ -981,7 +981,7 @@ app.component('eyatraTripClaimForm', {
         self.totalKm = function(key, travel_mode_id) {
             if (travel_mode_id == 15 || travel_mode_id == 16) {
                 var vehicle_starting_km = '';
-                if(travel_mode_id == 15) {
+                if (travel_mode_id == 15) {
                     vehicle_starting_km = self.two_wheeler_start_km;
                 } else {
                     vehicle_starting_km = self.four_wheeler_start_km;
@@ -1133,7 +1133,7 @@ app.component('eyatraTripClaimForm', {
                             var to_km = parseInt($('.km_end_' + key).val());
                             var visit_booking_id = (self.trip.visits[key].self_booking && self.trip.visits[key].self_booking.id) ? self.trip.visits[key].self_booking.id : null;
                             self.totalKm(key, travel_mode_id);
-                            
+
 
                             if (from_km == to_km) {
                                 $(".validation_error_" + key).text("From,To km should not be same");

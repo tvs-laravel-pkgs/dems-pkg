@@ -2863,7 +2863,7 @@ class Trip extends Model {
 				Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $to_email) {
 					$message->to($to_email)->subject($subject);
 					$message->cc($cc_email)->subject($subject);
-					$message->from('tvsfinance@tvs.in');
+					$message->from('travelex@tvs.in');
 				});
 			}
 			\Log::info('Pending Outstation trip mail completed');

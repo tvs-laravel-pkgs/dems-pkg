@@ -544,7 +544,7 @@ class ExportReportController extends Controller
                 Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $to_email, $mail_attachements) {
                     $message->to($to_email)->subject($subject);
                     $message->cc($cc_email)->subject($subject);
-                    $message->from('tvsfinance@tvs.in');
+                    $message->from('travelex@tvs.in');
                     if (count($mail_attachements) > 0) {
                         foreach ($mail_attachements as $file) {
                             if ($file) {
