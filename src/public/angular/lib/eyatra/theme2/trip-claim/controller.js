@@ -252,6 +252,8 @@ app.component('eyatraTripClaimForm', {
             self.upload = response.data.upload;
             self.view = response.data.view;
             self.delete = response.data.delete;
+            self.two_wheeler_start_km =10;
+            self.four_wheeler_start_km =100;
             console.log(self.local_travel_attachments);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
@@ -976,21 +978,16 @@ app.component('eyatraTripClaimForm', {
         }
 
         // calculate total KMs
-        self.totalKm = function(key, self_booking_id) {
-            /*if (self.action == 'Add') {
-    if (self_booking_id) {
-        $.ajax({
-                url: get_previous_closing_km_details,
-                method: 'GET',
-                data: { visit_booking_id: self_booking_id }
-            })
-            .done(function(response) {
-                if (response.end_km != null) {
-                    $('.km_start_' + key).val(response.end_km);
+        self.totalKm = function(key, travel_mode_id) {
+            if (travel_mode_id == 15 || travel_mode_id == 16) {
+                var vehicle_starting_km = '';
+                if(travel_mode_id == 15) {
+                    vehicle_starting_km = self.two_wheeler_start_km;
+                } else {
+                    vehicle_starting_km = self.four_wheeler_start_km;
                 }
-            })
-    }
-}*/
+                $('.km_start_' + key).val(vehicle_starting_km);
+            }
             var from_km = parseInt($('.km_start_' + key).val());
             var to_km = parseInt($('.km_end_' + key).val());
             var total_km = 0;
@@ -1135,8 +1132,8 @@ app.component('eyatraTripClaimForm', {
                             var from_km = parseInt($('.km_start_' + key).val());
                             var to_km = parseInt($('.km_end_' + key).val());
                             var visit_booking_id = (self.trip.visits[key].self_booking && self.trip.visits[key].self_booking.id) ? self.trip.visits[key].self_booking.id : null;
-                            self.totalKm(key, visit_booking_id);
-                            console.log(from_km, to_km, travel_mode_ids[travel_mode_id]);
+                            self.totalKm(key, travel_mode_id);
+                            
 
                             if (from_km == to_km) {
                                 $(".validation_error_" + key).text("From,To km should not be same");
