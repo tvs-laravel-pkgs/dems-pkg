@@ -1353,34 +1353,34 @@ app.component('eyatraTripClaimForm', {
         }
 
         // Calculate lodge stay days by Karthick T on 15-02-2022
-        $scope.calculateLodgeDays = (index, lodging_id) => {
-            if (!lodging_id && !index) {
-                var check_in_date = self.trip.lodgings[index].check_in_date;
-                var check_in_time = self.trip.lodgings[index].check_in_time;
-                var check_out_date = self.trip.lodgings[index].checkout_date;
-                var check_out_time = self.trip.lodgings[index].checkout_time;
+        /*$scope.calculateLodgeDays = (index, lodging_id) => {
+    if (!lodging_id && !index) {
+        var check_in_date = self.trip.lodgings[index].check_in_date;
+        var check_in_time = self.trip.lodgings[index].check_in_time;
+        var check_out_date = self.trip.lodgings[index].checkout_date;
+        var check_out_time = self.trip.lodgings[index].checkout_time;
 
-                var stayed_days = '';
-                if (check_in_date && check_in_time && check_out_date && check_out_time) {
-                    var date_1 = check_in_date.split("-");
-                    var date_2 = check_out_date.split("-");
-                    var check_in_date = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
-                    var check_out_date = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
+        var stayed_days = '';
+        if (check_in_date && check_in_time && check_out_date && check_out_time) {
+            var date_1 = check_in_date.split("-");
+            var date_2 = check_out_date.split("-");
+            var check_in_date = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
+            var check_out_date = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
 
-                    var timeDiff = (new Date(check_out_date + ' ' + check_out_time)) - (new Date(check_in_date + ' ' + check_in_time));
+            var timeDiff = (new Date(check_out_date + ' ' + check_out_time)) - (new Date(check_in_date + ' ' + check_in_time));
 
-                    var hours = Math.abs(timeDiff / 3600000);
-                    if (hours > 24) {
-                        var days = hours / 24;
-                        stayed_days = parseInt(days);
-                    } else {
-                        stayed_days = 1;
-                    }
-                }
-
-                self.trip.lodgings[index].stayed_days = stayed_days;
+            var hours = Math.abs(timeDiff / 3600000);
+            if (hours > 24) {
+                var days = hours / 24;
+                stayed_days = parseInt(days);
+            } else {
+                stayed_days = 1;
             }
         }
+
+        self.trip.lodgings[index].stayed_days = stayed_days;
+    }
+}*/
         // Calculate lodge stay days by Karthick T on 15-02-2022
 
         //LODGE STAY DAYS CALC
