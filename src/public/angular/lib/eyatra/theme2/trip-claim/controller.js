@@ -328,13 +328,13 @@ app.component('eyatraTripClaimForm', {
             self.local_travel_attachment_removal_ids = [];
 
             if (self.trip.lodgings.length == 0) {
-                self.addNewLodgings();
+                // self.addNewLodgings();
             }
             if (!self.trip.boardings.length) {
-                self.addNewBoardings();
+                // self.addNewBoardings();
             }
             if (self.trip.local_travels.length == 0) {
-                self.addNewLocalTralvels();
+                // self.addNewLocalTralvels();
             }
             // if (self.transport_attachments.length > 0) {
             //     self.fare_details_attachments_status = 'Yes';
@@ -1001,9 +1001,11 @@ app.component('eyatraTripClaimForm', {
 
         $scope.getStartEndKm = function(travel_mode_id, key) {
             if (travel_mode_id == 15 || travel_mode_id == 16) {
+                $('.travel-mode-change').show();
                 $('.km_start_' + key).val('');
                 $('.km_end_' + key).val('');
             } else {
+                $('.travel-mode-change').hide();
                 $('.km_start_' + key).val('--');
                 $('.km_end_' + key).val('--');
             }
