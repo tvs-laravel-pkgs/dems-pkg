@@ -2066,6 +2066,7 @@ class Trip extends Model {
 							$lodging = new Lodging;
 						}
 						//dd($lodging_data['lodge_name']);
+						if($lodging_data['amount'] >= 1000){
 						$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
 						if (!$response['success']) {
 							return response()->json([
@@ -2077,7 +2078,11 @@ class Trip extends Model {
 						}
 						$lodging->lodge_name = $response['name'];
 						$lodging->gstin = $response['gstin'];
-						$lodging->fill($lodging_data);
+					}else{
+						$lodging->lodge_name = null;
+						$lodging->gstin = null;
+					}
+					    $lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
 
 						//CONCATENATE DATE & TIME
@@ -2407,7 +2412,6 @@ class Trip extends Model {
 						$attachement_local_travel->save();
 					}
 				}
-
 				//CHECK IS JUSTIFY MY TRIP CHECKBOX CHECKED OR NOT
 				// if ($request->is_justify_my_trip) {
 				// 	$employee_claim->is_justify_my_trip = 1;
