@@ -192,7 +192,7 @@ app.component('eyatraLocalTripClaimForm', {
                 $location.path('/local-trip/list')
                 return;
             }
-
+            fileUpload();
             $('.testt1').imageuploadify();
             self.trip = response.data.trip;
             console.log(self.trip);
@@ -282,8 +282,8 @@ app.component('eyatraLocalTripClaimForm', {
         }
 
         self.getStartEndKm = function(travel_mode_id, key) {
-            if (travel_mode_id == 15 || travel_mode_id == 16) { 
-                $('.travel-mode-change').show();          
+            if (travel_mode_id == 15 || travel_mode_id == 16) {
+                $('.travel-mode-change').show();
                 $('.from_km_' + key).val('');
                 $('.to_km_' + key).val('');
             } else {
@@ -295,13 +295,13 @@ app.component('eyatraLocalTripClaimForm', {
 
         $scope.travelClaimStatus = function(travel_mode_id, index) {
             if (travel_mode_id == 15 || travel_mode_id == 16) {
-                $('.from_km_'+index).attr('disabled', false);
-                $('.to_km_'+index).attr('disabled', false);
-                $('.total_km_'+index).attr('disabled', false);
+                $('.from_km_' + index).attr('disabled', false);
+                $('.to_km_' + index).attr('disabled', false);
+                $('.total_km_' + index).attr('disabled', false);
             } else {
-                $('.from_km_'+index).attr('disabled', true);
-                $('.to_km_'+index).attr('disabled', true);
-                $('.total_km_'+index).attr('disabled', true);
+                $('.from_km_' + index).attr('disabled', true);
+                $('.to_km_' + index).attr('disabled', true);
+                $('.total_km_' + index).attr('disabled', true);
             }
             if (travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined') {
                 if (!self.trip.visit_details[index].eligible_km) {
@@ -501,13 +501,13 @@ app.component('eyatraLocalTripClaimForm', {
 
         $scope.travelMode = function(travel_mode_id, index) {
             if (travel_mode_id == 15 || travel_mode_id == 16) {
-                $('.from_km_'+index).attr('disabled', false);
-                $('.to_km_'+index).attr('disabled', false);
-                $('.total_km_'+index).attr('disabled', false);
+                $('.from_km_' + index).attr('disabled', false);
+                $('.to_km_' + index).attr('disabled', false);
+                $('.total_km_' + index).attr('disabled', false);
             } else {
-                $('.from_km_'+index).attr('disabled', true);
-                $('.to_km_'+index).attr('disabled', true);
-                $('.total_km_'+index).attr('disabled', true);
+                $('.from_km_' + index).attr('disabled', true);
+                $('.to_km_' + index).attr('disabled', true);
+                $('.total_km_' + index).attr('disabled', true);
             }
             if (travel_mode_id && self.extras.travel_values[travel_mode_id] && self.extras.travel_values[travel_mode_id] != 'undefined') {
                 $(".km_amount_" + index).prop("readonly", true);

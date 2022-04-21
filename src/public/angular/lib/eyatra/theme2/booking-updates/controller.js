@@ -89,7 +89,7 @@ app.component('eyatraTripBookingUpdatesForm', {
         });
 
         $('input[type="file"]').imageuploadify();
-
+        fileUpload();
 
         var form_id = '#visit-booking-update-form';
         var v = jQuery(form_id).validate({
