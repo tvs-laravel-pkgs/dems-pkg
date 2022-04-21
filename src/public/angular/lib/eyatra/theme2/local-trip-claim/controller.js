@@ -282,10 +282,12 @@ app.component('eyatraLocalTripClaimForm', {
         }
 
         self.getStartEndKm = function(travel_mode_id, key) {
-            if (travel_mode_id == 15 || travel_mode_id == 16) {           
+            if (travel_mode_id == 15 || travel_mode_id == 16) { 
+                $('.travel-mode-change').show();          
                 $('.from_km_' + key).val('');
                 $('.to_km_' + key).val('');
             } else {
+                $('.travel-mode-change').hide();
                 $('.from_km_' + key).val('--');
                 $('.to_km_' + key).val('--');
             }
