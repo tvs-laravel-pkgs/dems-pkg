@@ -467,8 +467,9 @@ class ExportReportController extends Controller
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
             ->groupBy('ey_employee_claims.id')
             ->get();
+            // dd(count($gst_details));
         if (count($gst_details) == 0) {
-            return redirect()->back()->with(['error' => 'No Record Found!']);
+            return redirect()->to('/#!/gst/report')->with('error','No Record Found!');
         }
         $export_details = [];
         $s_no = 1;

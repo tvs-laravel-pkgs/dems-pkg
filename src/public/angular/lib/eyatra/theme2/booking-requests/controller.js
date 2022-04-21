@@ -230,6 +230,35 @@ app.component('eyatraTripBookingRequestsView', {
                 $("#cancel").attr('disabled', false);
             }
         });
+
+        $scope.gstHelper = function(key) {
+            console.log(key);
+            var cgst = $('#cgst_'+key).val();
+            var sgst = $('#sgst_'+key).val();
+            var igst = $('#igst_'+key).val();
+
+            if(cgst == '' && sgst == ''){
+                $('#igst_'+key).attr('readonly', false);
+                $('#igst_'+key).attr('placeholder', 'Eg:60');
+            } else {
+                $('#igst_'+key).attr('readonly', true);                
+                $('#igst_'+key).attr('placeholder', '0');
+            }
+
+            if(igst == ''){
+                $('#cgst_'+key).attr('readonly', false);
+                $('#sgst_'+key).attr('readonly', false);
+                $('#cgst_'+key).attr('placeholder', 'Eg:40');
+                $('#sgst_'+key).attr('placeholder', 'Eg:50');
+            } else {
+                $('#cgst_'+key).attr('readonly', true);
+                $('#sgst_'+key).attr('readonly', true);
+                $('#cgst_'+key).attr('placeholder', '0');
+                $('#sgst_'+key).attr('placeholder', '0');
+            }
+        }
+
+
         //old booking cancel
         $(document).on('click', '.booking_cancel', function() {
             var form_id = '#visit-booking-cancel-form';
