@@ -70,13 +70,13 @@ class Sbu extends Model {
 		$list = Collect(
 				Sbu::select(
 					'sbus.id',
-					DB::raw('CONCAT(lobs.name, " / " , sbus.name) as name')
+					DB::raw('CONCAT(sbus.name) as name')
 				)->join('lobs', 'lobs.id', 'sbus.lob_id')
 				->where('lobs.functional_support', 0)
 				->where('lobs.company_id', Auth::user()->company_id)
 				->orderBy('sbus.id', 'ASC')
 				->get()
-			)->prepend(['id' => null, 'name' => 'Select Any Sbu']);
+			)->prepend(['id' => null, 'name' => 'Select Any Functional Support']);
 		return $list;
 	}
 
