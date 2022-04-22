@@ -357,7 +357,7 @@ class TripBookingUpdateController extends Controller {
 			$arr['from_name'] = $from_name;
 			$arr['to_email'] = $to_user->email;
 			$arr['to_name'] = $to_user->name;
-			$arr['to_email'] = 'saravanan@uitoux.in';
+			$arr['to_email'] = $employee->email;
 			//$arr['to_name'] = 'parthiban';
 			$arr['subject'] = 'Ticket Booking Mail';
 			$arr['body'] = 'Employee ticket booking notification';
