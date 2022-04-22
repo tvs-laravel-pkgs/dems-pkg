@@ -113,6 +113,13 @@ app.component('eyatraTripVerifications', {
             $('#to_date').val('');
             dataTable.draw();
         }
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
+
         /*$('#period').on('apply.daterangepicker', function(ev, picker) {
             //alert();
             //$('#status_id').val(query);
@@ -156,7 +163,7 @@ app.component('eyatraTripVerifications', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripVerificationForm', {
     templateUrl: trip_verification_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $mdSelect) {
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/trip/verifications')
             $scope.$apply()

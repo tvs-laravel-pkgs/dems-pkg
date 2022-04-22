@@ -292,7 +292,7 @@ app.component('eyatraLocalTripVerificationView', {
 
 app.component('eyatraLocalTripVerificationDetailView', {
     templateUrl: local_trip_verification_detail_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $scope, $route) {
+    controller: function($http, $location, $routeParams, HelperService, $scope, $route, $mdSelect) {
 
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -496,7 +496,12 @@ app.component('eyatraLocalTripVerificationDetailView', {
                 },
             });
         });
-
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
 
     }
 });

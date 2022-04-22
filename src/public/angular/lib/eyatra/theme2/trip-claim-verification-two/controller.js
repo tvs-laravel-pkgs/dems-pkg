@@ -111,7 +111,7 @@ app.component('eyatraTripClaimVerificationTwoList', {
 
 app.component('eyatraTripClaimVerificationTwoView', {
     templateUrl: eyatra_trip_claim_verification_two_view_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $mdSelect) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_verification_two_view_url + '/' : eyatra_trip_claim_verification_two_view_url + '/' + $routeParams.trip_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
@@ -377,6 +377,12 @@ app.component('eyatraTripClaimVerificationTwoView', {
                         });
                 },
             });
+        });
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
         });
 
         /* Tooltip */
