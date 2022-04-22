@@ -1276,7 +1276,8 @@ app.component('eyatraTripClaimForm', {
                             if (hours < 12) {
                                 actual_amount = eligible_amount / 2;
                             }
-                            self.trip.boardings[index].amount = actual_amount;
+                            $scope.eligibleAmountCalc(actual_amount,index);
+                            // self.trip.boardings[index].amount = actual_amount;
                         }
                     }
                 });
@@ -1288,6 +1289,53 @@ app.component('eyatraTripClaimForm', {
                 $scope.boardingFromToDate();
                 // Calculating from, to date and boarding days by Karthick T on 21-01-2022
             }
+        }
+        $scope.eligibleAmountCalc = function(actual_amount, index) {
+            $timeout(function() {
+                $('.boarding_from_to_date').each(function() {
+                    var checkin_date = $(this).closest('tr').find('.boarding_from_date').val();
+                    var checkout_date = $(this).closest('tr').find('.boarding_to_date').val();
+                    var base_eligible_amount = $(this).closest('tr').find('.boarding_base_eligible_amount').val();
+
+                    var date_1 = checkin_date.split("-");
+                    var date_2 = checkout_date.split("-");
+                    var checkin_date_format = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
+                    var checkout_date_format = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
+                    if (checkin_date_format && checkout_date_format) {
+                        var timeDiff = (new Date(checkout_date_format)) - (new Date(checkin_date_format));
+                        var days = (timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                        var eligible_amount_with_days = 0;
+                        var days_c = '';
+                        // Changing days calculation by Karthick T on 21-01-2022
+                        var departure_date = arrival_date = '';
+                        var departure_from_date = arrival_from_date = '';
+                        $(self.trip.visits).each(function(visit_index, visit) {
+                            if (visit.departure_time != '' && typeof visit.departure_time !== "undefined" && visit.arrival_time != '' && typeof visit.arrival_time !== "undefined") {
+                                if (departure_date == '') {
+                                    departure_date = new Date(checkin_date_format + ' ' + visit.departure_time)
+                                    departure_from_date = new Date(checkin_date_format + ' ' + '19:00:00')
+                                }
+                                arrival_date = new Date(checkout_date_format + ' ' + visit.arrival_time);
+                                arrival_from_date = new Date(checkout_date_format + ' ' + '07:00:00')
+                            }
+                        });
+                        var depature_diff = Math.round((departure_date.getTime() - departure_from_date.getTime()) / 1000);
+                        var arrival_diff = Math.round((arrival_date.getTime() - arrival_from_date.getTime()) / 1000);
+                        if (depature_diff > 0)
+                            days -= 1;
+                        if (arrival_diff <= 0)
+                            days -= 1;
+                        if (!$.isNumeric(days)) {
+                            days_c = '';
+                        } else {
+                            days_c = days;
+                        }
+
+                    }
+                    self.trip.boardings[index].amount = actual_amount * days;
+                    console.log("eligible_amount_with_days "+days);
+                });
+            }, 100);
         }
         // Changing boarding actual amount before updating those value by Karthick T on 20-01-2022
         // Calculating lodging days list by Karthick T on 21-01-2022
