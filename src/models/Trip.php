@@ -2791,7 +2791,7 @@ class Trip extends Model {
 				->where('trips.end_date', $date)
 				->whereNull('ey_employee_claims.number')
 				->get();
-			dd($pending_trips);
+			//dd($pending_trips);
 		} elseif ($status == 'Pending Requsation Approval') {
 			$pending_trips = Trip::select(
 				'trips.number'
