@@ -977,8 +977,7 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
-        // calculate total KMs
-        self.totalKm = function(key, travel_mode_id) {
+        $scope.getStartingKm = function(key, travel_mode_id) {
             if (travel_mode_id == 15 || travel_mode_id == 16) {
                 var vehicle_starting_km = '';
                 if (travel_mode_id == 15) {
@@ -987,6 +986,19 @@ app.component('eyatraTripClaimForm', {
                     vehicle_starting_km = self.four_wheeler_start_km;
                 }
                 $('.km_start_' + key).val(vehicle_starting_km);
+            }
+        }
+        // calculate total KMs
+
+        self.totalKm = function(key, travel_mode_id) {
+            if (travel_mode_id == 15 || travel_mode_id == 16) {
+                var vehicle_starting_km = '';
+                if (travel_mode_id == 15) {
+                    //vehicle_starting_km = self.two_wheeler_start_km;
+                } else {
+                    //vehicle_starting_km = self.four_wheeler_start_km;
+                }
+                /*$('.km_start_' + key).val(vehicle_starting_km);*/
             }
             var from_km = parseInt($('.km_start_' + key).val());
             var to_km = parseInt($('.km_end_' + key).val());
@@ -1276,7 +1288,7 @@ app.component('eyatraTripClaimForm', {
                             if (hours < 12) {
                                 actual_amount = eligible_amount / 2;
                             }
-                            $scope.eligibleAmountCalc(actual_amount,index);
+                            $scope.eligibleAmountCalc(actual_amount, index);
                             // self.trip.boardings[index].amount = actual_amount;
                         }
                     }
@@ -1333,7 +1345,7 @@ app.component('eyatraTripClaimForm', {
 
                     }
                     self.trip.boardings[index].amount = actual_amount * days;
-                    console.log("eligible_amount_with_days "+days);
+                    console.log("eligible_amount_with_days " + days);
                 });
             }, 100);
         }
