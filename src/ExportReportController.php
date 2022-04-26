@@ -4,7 +4,7 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 
 use Uitoux\EYatra\{Region,Outlet,EmployeeClaim,Employee};
-use App\{Config,ReportDetail,MailConfiguration};
+use App\{Config,ReportDetail,MailConfiguration,BatchWiseReport};
 use Illuminate\Http\Request;
 use Excel;
 use Redirect;
@@ -115,7 +115,9 @@ class ExportReportController extends Controller
         ->join('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
         ->where('t.status_id','=','3026')
+        ->where('eyec.batch','=',0)
         ->get()->toArray();
+
         //dd($outstations);
         $claims = Employee::select(
             'employees.code as Account_Number',
@@ -138,10 +140,12 @@ class ExportReportController extends Controller
         ->leftjoin('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as lt_s','lt_s.id','lt.sbu_id')
         ->where('lt.status_id','=','3026')
+        ->where('lt.batch','=',0)
         ->get()->toArray();
-        //dd($sbu);
         //dd($claims);
         $locals=array_merge($claims,$outstations);
+        $batch_id=BatchWiseReport::where('date','=',date('Y-m-d'))->orderBy('id','DESC')->pluck('name')->first();
+        $batch=((int) $batch_id?:'0') + 1;
         //dd($locals);
         $local_trips_header = [
             'SNo',
@@ -153,6 +157,7 @@ class ExportReportController extends Controller
             'Amount',
             'Posted',
             'Batch',
+            'Bank Date'
         ];
         $travelex_header = [
             'LINENUM',
@@ -201,7 +206,7 @@ class ExportReportController extends Controller
             //$amountcurdebit=$local['Amount'];
             $amountcurdebit_two='0.00';
             $posted='0';
-            $batch='1';
+            
             $total_amount=0;
             $s_no=1;
             $l_no=1;
@@ -217,6 +222,7 @@ class ExportReportController extends Controller
                     $local['Amount'],
                     $posted,
                     $batch,
+                    $time_stamp,
                 ];
                 $travelex_local=[
                     $s_no++,
@@ -272,6 +278,8 @@ class ExportReportController extends Controller
                 $travelex_details[]=$travelex_local;
                 $travelex_details[]=$travelex_detail;
             }  
+        }else{
+            return redirect()->to('/#!/report/list')->with('error','No Data Found!');
         }
  
         $consolidation_local=[
@@ -350,6 +358,11 @@ class ExportReportController extends Controller
         $report_details->bank_date=$time_stamp;
         $report_details->credit_total_amount=$total_amount;
         $report_details->save();
+        $batch_wise_reports = new BatchWiseReport;
+        $batch_wise_reports->report_detail_id=$report_details->id;
+        $batch_wise_reports->name=$report_details->batch;
+        $batch_wise_reports->date=$time_stamp;
+        $batch_wise_reports->save();
         $outputfile_bank ='bank_statement_' . $time_stamp;
         $file_one=Excel::create($outputfile_bank, function ($excel) use ($local_trips_header,$local_trips) {
             $excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header,$local_trips) {
@@ -373,6 +386,13 @@ class ExportReportController extends Controller
         $report_details->bank_date=$time_stamp;
         $report_details->credit_total_amount=$total_amount;
         $report_details->save();
+        $batch_wise_reports = new BatchWiseReport;
+        $batch_wise_reports->report_detail_id=$report_details->id;
+        $batch_wise_reports->name=$report_details->batch;
+        $batch_wise_reports->date=$time_stamp;
+        $batch_wise_reports->save();
+        $batch_update=DB::table('ey_employee_claims')->where('batch',0)->update(['batch'=>1]);
+        $batch_update=DB::table('local_trips')->where('batch',0)->update(['batch'=>1]);
         return Redirect::to('/');
     }
         
