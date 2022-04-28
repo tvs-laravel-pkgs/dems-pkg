@@ -254,7 +254,7 @@ app.component('eyatraTripClaimForm', {
             self.delete = response.data.delete;
             self.two_wheeler_start_km = response.data.km_end_twowheeler;
             self.four_wheeler_start_km = response.data.km_end_fourwheeler;
-            console.log(self.four_wheeler_start_km);
+            console.log('lodging_date', response.data.lodging_dates_list);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
@@ -328,34 +328,14 @@ app.component('eyatraTripClaimForm', {
             self.local_travel_attachment_removal_ids = [];
 
             if (self.trip.lodgings.length == 0) {
-                // self.addNewLodgings();
+                self.addNewLodgings();
             }
             if (!self.trip.boardings.length) {
-                // self.addNewBoardings();
+                self.addNewBoardings();
             }
             if (self.trip.local_travels.length == 0) {
-                // self.addNewLocalTralvels();
+                self.addNewLocalTralvels();
             }
-            // if (self.transport_attachments.length > 0) {
-            //     self.fare_details_attachments_status = 'Yes';
-            // } else {
-            //     self.fare_details_attachments_status = 'No';
-            // }
-            // if (self.lodging_attachments.length > 0) {
-            //     self.lodging_attachment_status = 'Yes';
-            // } else {
-            //     self.lodging_attachment_status = 'No';
-            // }
-            // if (self.boarding_attachments.length > 0) {
-            //     self.boarding_attachment_status = 'Yes';
-            // } else {
-            //     self.boarding_attachment_status = 'No';
-            // }
-            // if (self.local_travel_attachments.length > 0) {
-            //     self.local_travel_attachment_status = 'Yes';
-            // } else {
-            //     self.local_travel_attachment_status = 'No';
-            // }
             self.document_type_id = null;
             setTimeout(function() {
                 self.travelCal();
@@ -1801,7 +1781,7 @@ app.component('eyatraTripClaimForm', {
         }
 
         // Lodgings
-        self.addNewLodgings = function() {
+        self.lodgingAdd = function() {
             self.trip.lodgings.push({
                 id: '',
                 city_id: '',

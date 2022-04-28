@@ -1265,6 +1265,7 @@ class Trip extends Model {
 		$lodging_dates_list = $travel_dates_list;
 		if ($visit_start_date && $visit_end_date) {
 			$date_range = Trip::getDatesFromRange($visit_start_date, $visit_end_date);
+			//dd($date_range);
 			if (!empty($date_range)) {
 				$lodging_dates_list = [];
 				$lodging_dates_list[0]['id'] = '';
@@ -1281,7 +1282,7 @@ class Trip extends Model {
 		$data['travelled_cities_with_dates'] = $travelled_cities_with_dates;
 		$data['lodge_cities'] = $lodge_cities;
 		$data['travel_dates_list'] = $travel_dates_list;
-		$data['lodging_dates_list'] = $lodging_dates_list;
+		$data['lodging_dates_list'] = $travel_dates_list;
 
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
