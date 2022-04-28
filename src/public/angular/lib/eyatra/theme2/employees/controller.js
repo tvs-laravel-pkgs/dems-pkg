@@ -267,10 +267,13 @@ app.component('eyatraEmployeeForm', {
                 .done(function(res) {
                     // console.log(res.success);
                     if (!res.success) {
+                        console.log(self.employee.data_source);
                         var errors = '';
                         for (var i in res.errors) {
                             errors += '<li>' + res.errors[i] + '</li>';
                         }
+                        //self.employee.data_source = 1;
+                        console.log(self.employee.data_source);
                         custom_noty('error', errors);
                     } else {
                         self.employee = [];

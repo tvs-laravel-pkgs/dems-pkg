@@ -712,9 +712,13 @@ class EmployeeController extends Controller {
 	}
 
 	public function getEmployeeFromApi(Request $r) {
+		//dd($r->all());
       if (!empty($r->code)) {
 		$employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
-		//dump($employee);
+		//dd($employee);
+		if (empty($employee)) {
+			return response()->json(['success' => false, 'errors' => ['Employee Details not found in AX']]);
+		}
 		$business = Business::where('name',$employee['business_id'])->pluck('id')->first();
 		$employee['business_id']=$business;
 		// dd($employee);
@@ -735,9 +739,6 @@ class EmployeeController extends Controller {
 		 $employee['grade_id']=$reporting;
          } else {
 			return response()->json(['success' => false, 'errors' => ['Employee code is empty']]);
-		}
-		if (!$employee) {
-			return response()->json(['success' => false, 'errors' => ['Employee Details not found']]);
 		}
 		return response()->json(['success' => true, 'employee' => $employee]);
 	}

@@ -2275,9 +2275,11 @@ app.component('eyatraTripClaimForm', {
                                     self.transport_attachment_removal_ids = [];
                                     $('#transport_attach_removal_ids').val('');
                                     self.enable_switch_tab = true;
-                                    $scope.$apply()
+                                    $scope.$apply();
                                     $('#transport_submit').html('Save & Next');
                                     $("#transport_submit").attr("disabled", false);
+                                    $('#claim_lodge_expense_form').trigger("reset");
+                                    $('#claim_board_expense_form').trigger("reset");
                                 }
                             })
                             .fail(function(xhr) {
