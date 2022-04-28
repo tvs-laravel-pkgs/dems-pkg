@@ -277,7 +277,7 @@ class LocalTrip extends Model {
 	}
 
 	public static function saveTrip($request) {
-		// dd($request->all());
+		//dd($request->all());
 		try {
 			//validation
 			$validator = Validator::make($request->all(), [
@@ -309,7 +309,7 @@ class LocalTrip extends Model {
 			// 	$local_removal_ids = json_decode($request->trip_detail_removal_id, true);
 			// 	LocalTrip::whereIn('id', $local_removal_ids)->forceDelete();
 			// }
-
+    
 			DB::beginTransaction();
 			if (!$request->id) {
 				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
@@ -462,8 +462,9 @@ class LocalTrip extends Model {
 					// $visit->amount = $visit_data['amount'];
 					$visit->amount = $visit_data['amount'];
 					$visit->description = $visit_data['description'];
-					$visit->from_km = $visit_data['from_km'];
-					$visit->to_km = $visit_data['to_km'];
+					$visit->from_km = (isset($visit_data['from_km']) && !empty($visit_data['from_km'])) ? $visit_data['from_km'] : null;
+					$visit->to_km = (isset($visit_data['to_km']) && !empty($visit_data['to_km'])) ? $visit_data['to_km'] : null;
+					$visit->attachment_status = (isset($visit_data['attachment_status'])) ? $visit_data['attachment_status'] : 0;
 					$visit->created_by = Auth::user()->id;
 					$visit->created_at = Carbon::now();
 					$visit->save();
@@ -480,6 +481,8 @@ class LocalTrip extends Model {
 					$visit->expense_date = date('Y-m-d', strtotime($expense_data['expense_date']));
 					$visit->amount = $expense_data['amount'];
 					$visit->description = $expense_data['description'];
+					//dd($expense_data['attachment_status']);
+					$visit->attachment_status = (isset($expense_data['attachment_status'])) ? $expense_data['attachment_status'] : 0;
 					$visit->created_by = Auth::user()->id;
 					$visit->created_at = Carbon::now();
 					$visit->save();
