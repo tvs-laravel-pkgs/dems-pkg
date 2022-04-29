@@ -375,5 +375,12 @@ app.component('eyatraTripVerificationForm', {
             });
         });
 
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
+
     }
 });
