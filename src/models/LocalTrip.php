@@ -290,6 +290,9 @@ class LocalTrip extends Model {
 				'end_date' => [
 					'required',
 				],
+				'is_justify_my_trip' => [
+					'required',
+				],
 
 			]);
 			if ($validator->fails()) {
