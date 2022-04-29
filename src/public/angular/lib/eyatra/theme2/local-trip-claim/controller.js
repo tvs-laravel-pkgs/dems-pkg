@@ -201,7 +201,16 @@ app.component('eyatraLocalTripClaimForm', {
             self.beta_amount = response.data.beta_amount;
 
             self.sbu_lists = response.data.sbu_lists;
-
+            if (self.trip.expense_attachments.length > 0) {
+                $('#visit_attachment_available').val('yes');
+            } else {
+                $('#visit_attachment_available').val('no');
+            }
+            if (self.trip.other_expense_attachments.length > 0) {
+                $('#other_expense_attachment_available').val('yes');
+            } else {
+                $('#other_expense_attachment_available').val('no');
+            }
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
                     var start_date = response.data.trip.start_date;

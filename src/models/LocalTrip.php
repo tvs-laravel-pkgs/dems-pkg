@@ -299,7 +299,36 @@ class LocalTrip extends Model {
 					'errors' => $validator->errors()->all(),
 				]);
 			}
+			$local_trip_attachment=false;
+			foreach($request->trip_detail as $data){
+				//dd($data['attachment_status']);
+                  if($data['attachment_status'] == '1'){
+                  	$local_trip_attachment=true;
+                  }
+			}
+			if(!isset($request->expense_attachments) && !$request->expense_attachments){
+            	if($local_trip_attachment){
+            		if($request->visit_attachment_available != 'yes'){
+            		return response()->json(['success' => false, 'errors' => 'Please Add Visit Attachment!']);
+            	}
 
+            	}
+            }
+           $local_trip_attachment=false;
+            foreach($request->expense_detail as $data){
+            	if($data['attachment_status'] == '1'){
+                  	$local_trip_attachment=true;
+                  }
+            }
+            
+            if(!isset($request->other_expense_attachments) && !$request->other_expense_attachments){
+            	if($local_trip_attachment){
+            		if($request->other_expense_attachment_available != 'yes'){
+            		return response()->json(['success' => false, 'errors' => 'Please Add Other Expense Attachment!']);
+            	}
+
+            	}
+            }
 			if (!empty($request->attachment_removal_ids)) {
 				$attachment_removal_ids = json_decode($request->attachment_removal_ids, true);
 				Attachment::whereIn('id', $attachment_removal_ids)->delete();
