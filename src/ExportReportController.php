@@ -115,7 +115,7 @@ class ExportReportController extends Controller
         ->join('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
         ->where('t.status_id','=','3026')
-        ->where('eyec.batch','=',0)
+        ->where('eyec.batch','=','0')
         ->get()->toArray();
 
         //dd($outstations);
@@ -140,7 +140,7 @@ class ExportReportController extends Controller
         ->leftjoin('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as lt_s','lt_s.id','lt.sbu_id')
         ->where('lt.status_id','=','3026')
-        ->where('lt.batch','=',0)
+        ->where('lt.batch','=','0')
         ->get()->toArray();
         //dd($claims);
         $locals=array_merge($claims,$outstations);
@@ -278,8 +278,6 @@ class ExportReportController extends Controller
                 $travelex_details[]=$travelex_local;
                 $travelex_details[]=$travelex_detail;
             }  
-        }else{
-            return redirect()->to('/#!/report/list')->with('error','No Data Found!');
         }
  
         $consolidation_local=[
@@ -391,8 +389,8 @@ class ExportReportController extends Controller
         $batch_wise_reports->name=$report_details->batch;
         $batch_wise_reports->date=$time_stamp;
         $batch_wise_reports->save();
-        $batch_update=DB::table('ey_employee_claims')->where('status_id','=','3026')->where('batch',0)->update(['batch'=>1]);
-        $batch_update=DB::table('local_trips')->where('status_id','=','3026')->where('batch',0)->update(['batch'=>1]);
+        $batch_update=DB::table('ey_employee_claims')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
+        $batch_update=DB::table('local_trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         return Redirect::to('/#!/report/list');
     }
         
