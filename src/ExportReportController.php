@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Excel;
 use Redirect;
 use DB;
+use Session;
 use Uitoux\EYatra\Trip;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -279,7 +280,8 @@ class ExportReportController extends Controller
                 $travelex_details[]=$travelex_detail;
             }  
         }else{
-            return redirect()->to('/#!/report/list')->with('error','No Data Found!');
+            Session()->flash('error', 'No Data Found');
+            return redirect()->to('/#!/report/list');
         }
  
         $consolidation_local=[
@@ -489,7 +491,8 @@ class ExportReportController extends Controller
             ->get();
             // dd(count($gst_details));
         if (count($gst_details) == 0) {
-            return redirect()->to('/#!/gst/report')->with('error','No Record Found!');
+            Session()->flash('error', 'No Data Found');
+            //return redirect()->to('/#!/gst/report');
         }
         $export_details = [];
         $s_no = 1;
