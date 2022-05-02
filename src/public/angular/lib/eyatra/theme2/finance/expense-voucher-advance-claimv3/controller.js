@@ -87,7 +87,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraExpenseVoucherAdvanceVerification3View', {
     templateUrl: expense_voucher_advance_verification3_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -312,6 +312,12 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                         custom_noty('error', 'Something went wrong at server');
                     });
             },
+        });
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
         });
 
         $rootScope.loading = false;

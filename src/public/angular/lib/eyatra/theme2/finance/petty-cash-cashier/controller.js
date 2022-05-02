@@ -95,7 +95,7 @@ app.component('eyatraPettyCashCashierList', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraPettyCashCashierView', {
     templateUrl: pettycash_cashier_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -326,6 +326,13 @@ app.component('eyatraPettyCashCashierView', {
                     });
             },
         });
+        /* Modal Md Select Hide */
+        $('.modal').bind('click', function(event) {
+            if ($('.md-select-menu-container').hasClass('md-active')) {
+                $mdSelect.hide();
+            }
+        });
+
 
         $rootScope.loading = false;
     }
