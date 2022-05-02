@@ -278,6 +278,8 @@ class ExportReportController extends Controller
                 $travelex_details[]=$travelex_local;
                 $travelex_details[]=$travelex_detail;
             }  
+        }else{
+            return redirect()->to('/#!/report/list')->with('error','No Data Found!');
         }
  
         $consolidation_local=[
