@@ -573,6 +573,22 @@ app.component('eyatraLocalTripClaimForm', {
             }, 1000);
         }
 
+        $scope.visitAttachments = function (key){
+            if(self.trip.visit_details[key].attachment_status != 1){
+                self.trip.visit_details[key].attachment_status = '0';                
+            } else {
+                self.trip.visit_details[key].attachment_status = '1';
+            }
+        }
+
+        $scope.otherExpenseAttachments = function (key){
+            if(self.trip.expense[key].attachment_status != 1){
+                self.trip.expense[key].attachment_status = '0';                
+            } else {
+                self.trip.expense[key].attachment_status = '1';
+            }
+        }
+
         function datecall(startdate, enddate, id) {
             $(".datepicker_" + id).datepicker({
                 autoclose: true,
