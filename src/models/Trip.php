@@ -311,6 +311,7 @@ class Trip extends Model {
 							$old_visit_detail_check = Visit::where('id', $visit_data['id'])
 								->where('from_city_id', $visit_data['from_city_id'])
 								->where('to_city_id', $visit_data['to_city_id'])
+								->where('other_city', $visit_data['other_city'])
 								->where('travel_mode_id', $visit_data['travel_mode_id'])
 								->where('booking_method_id', $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042)
 								->whereDate('departure_date', date('Y-m-d', strtotime($visit_data['date'])))
@@ -353,6 +354,7 @@ class Trip extends Model {
 					$visit->trip_id = $trip->id;
 					$visit->from_city_id = $from_city_id;
 					$visit->to_city_id = $visit_data['to_city_id'];
+					$visit->other_city = $visit_data['other_city']?$visit_data['other_city']:NULL;
 					$visit->travel_mode_id = $visit_data['travel_mode_id'];
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
@@ -1223,7 +1225,7 @@ class Trip extends Model {
 				'tripAttachments',
 				'tripAttachments.attachmentName',
 			])->find($trip_id);
-		//dd($trip->boardings);
+		//dd($trip->lodgings);
 		$data['attachment_type_lists'] = Trip::getAttachmentList($trip_id);
 		$data['upload'] = URL::asset('public/img/content/file-icon.svg');
 		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
@@ -1239,7 +1241,6 @@ class Trip extends Model {
 		}
 		$travelled_cities_with_dates = array();
 		$lodge_cities = array();
-
 		//GET TRAVEL DATE LIST FROM TRIP START AND END DATE
 		$travel_dates_list = array();
 		$date_range = Trip::getDatesFromRange($trip->start_date, $trip->end_date);
@@ -2906,6 +2907,5 @@ class Trip extends Model {
 		return $pending_attachment_lists;
 	}
 	// For Attachment by Karthick T on 07-04-2022
-
 
 }
