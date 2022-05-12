@@ -144,6 +144,11 @@ class TripClaimVerificationLevelController extends Controller {
 				'selfVisits.agent',
 				'selfVisits.status',
 				'selfVisits.attachments',
+				'google_attachments',
+				'cliam.sbu',
+			    'cliam.sbu.lob',
+			    'tripAttachments',
+			    'tripAttachments.attachmentName'
 			])->find($trip_id);
 
 			if (!$trip) {
