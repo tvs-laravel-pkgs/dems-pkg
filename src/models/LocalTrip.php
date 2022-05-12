@@ -290,9 +290,6 @@ class LocalTrip extends Model {
 				'end_date' => [
 					'required',
 				],
-				'is_justify_my_trip' => [
-					'required',
-				],
 
 			]);
 			if ($validator->fails()) {
@@ -302,6 +299,11 @@ class LocalTrip extends Model {
 					'errors' => $validator->errors()->all(),
 				]);
 			}
+			if ($request->id) { 
+			if($request->is_justify_my_trip == NULL){
+				return response()->json(['success' => false, 'errors' => 'Justify my trip field is required!']);
+			}
+					
 			$local_trip_attachment=false;
 			foreach($request->trip_detail as $data){
 				//dd($data['attachment_status']);
@@ -332,6 +334,7 @@ class LocalTrip extends Model {
 
             	}
             }
+      }
 			if (!empty($request->attachment_removal_ids)) {
 				$attachment_removal_ids = json_decode($request->attachment_removal_ids, true);
 				Attachment::whereIn('id', $attachment_removal_ids)->delete();
