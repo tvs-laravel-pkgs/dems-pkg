@@ -256,52 +256,54 @@ app.component('eyatraEmployeeForm', {
             $('.editDetails-tabs li.active').prev().children('a').trigger("click");
         });
 
-        $scope.getApiData = function(code) {
-            $.ajax({
-                    method: "POST",
-                    url: laravel_routes['getEmployeeFromApi'],
-                    data: {
-                        code: code
-                    },
-                })
-                .done(function(res) {
-                    // console.log(res.success);
-                    if (!res.success) {
-                        console.log(self.employee.data_source);
-                        var errors = '';
-                        for (var i in res.errors) {
-                            errors += '<li>' + res.errors[i] + '</li>';
+        $scope.getApiData = function(code, data_source) {
+            if (data_source == 1) {
+                $.ajax({
+                        method: "POST",
+                        url: laravel_routes['getEmployeeFromApi'],
+                        data: {
+                            code: code
+                        },
+                    })
+                    .done(function(res) {
+                        // console.log(res.success);
+                        if (!res.success) {
+                            console.log(self.employee.data_source);
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            //self.employee.data_source = 1;
+                            console.log(self.employee.data_source);
+                            custom_noty('error', errors);
+                        } else {
+                            self.employee = [];
+                            self.employee = res.employee;
+                            self.employee.reporting_to = res.employee.reporting_to.replace(/ /g, "") + '-' + res.employee.reporting_to_name;
+                            self.employee.payment_mode_id = '3244';
+                            self.employee.user = {
+                                name: res.employee.name,
+                                mobile_number: res.employee.mobile_number,
+                                username: res.employee.code,
+                                password: 'Tvs@123',
+                            };
+                            self.employee.department = {
+                                business_id: res.employee.business_id,
+                                id: res.employee.department_id,
+                            };
+                            self.employee.sbu = {
+                                lob_id: res.employee.lob_id,
+                                id: res.employee.sbu_id,
+                            };
+                            console.log(self.employee);
+                            $scope.$apply()
                         }
-                        //self.employee.data_source = 1;
-                        console.log(self.employee.data_source);
-                        custom_noty('error', errors);
-                    } else {
-                        self.employee = [];
-                        self.employee = res.employee;
-                        self.employee.reporting_to = res.employee.reporting_to.replace(/ /g, "") + '-' + res.employee.reporting_to_name;
-                        self.employee.payment_mode_id = '3244';
-                        self.employee.user = {
-                            name: res.employee.name,
-                            mobile_number: res.employee.mobile_number,
-                            username: res.employee.code,
-                            password: 'Tvs@123',
-                        };
-                        self.employee.department = {
-                            business_id: res.employee.business_id,
-                            id: res.employee.department_id,
-                        };
-                        self.employee.sbu = {
-                            lob_id: res.employee.lob_id,
-                            id: res.employee.sbu_id,
-                        };
-                        console.log(self.employee);
-                        $scope.$apply()
-                    }
-                })
-                .fail(function(xhr) {
-                    $('#submit').button('reset');
-                    custom_noty('error', 'Something went wrong at server');
-                });
+                    })
+                    .fail(function(xhr) {
+                        $('#submit').button('reset');
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+            }
         }
 
         $scope.getSbuBasedonLob = function(lob_id) {
