@@ -254,13 +254,22 @@ app.component('eyatraTripClaimForm', {
             self.delete = response.data.delete;
             self.two_wheeler_start_km = response.data.km_end_twowheeler;
             self.four_wheeler_start_km = response.data.km_end_fourwheeler;
-            console.log('lodging_date', response.data.lodging_dates_list);
+            console.log(self.trip.visits.from_city_id);
             // console.log(self.travel_values);
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
                 self.is_deviation = 0;
-
+                $('.custom-city-change').addClass('ng-hide');
+                var custom_city_show = false;
+                $(self.trip.visits).each(function(visit, key) {
+                    if ((visit.from_city_id == 879 || visit.to_city.id == 879) && custom_city_show == false) {
+                        custom_city_show = true;
+                    }
+                });
+                if (custom_city_show) {
+                    $('.custom-city-change').removeClass('ng-hide');
+                }
                 //NOT BEEN USED NOW
                 // if (!self.trip.lodgings.length) {
                 //     self.trip.lodgings = [];
@@ -344,7 +353,19 @@ app.component('eyatraTripClaimForm', {
                 self.localTravelCal();
 
                 fileUpload();
+                $('.custom-city-change').addClass('ng-hide');
+                var custom_city_show = false;
+                $(self.trip.visits).each(function(key, visit) {
+                    if ((visit.from_city_id == 879 || visit.to_city_id == 879) && custom_city_show == false) {
+                        custom_city_show = true;
+                    }
+                });
+                if (custom_city_show) {
+                    $('.custom-city-change').removeClass('ng-hide');
+                }
+
             }, 500);
+
 
             $rootScope.loading = false;
 
