@@ -48,6 +48,12 @@ class LocalTripController extends Controller {
 		if ($trip_start_date_data) {
 			return response()->json(['success' => false, 'errors' => "You have another local trip on this trip period"]);
 		}
+		$date_lessthan_previous_trip = LocalTrip::where('employee_id', Auth::user()->entity_id)
+				->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))
+				->first();
+		if($date_lessthan_previous_trip){
+		 return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
+		}
 
 		if ($request->trip_detail) {
 			$size = sizeof($request->trip_detail);
