@@ -194,6 +194,7 @@ class TripController extends Controller {
 
 		$date_lessthan_previous_trip = Trip::where('employee_id', Auth::user()->entity_id)
 				->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))
+				->where('status_id','!=',3032)
 				->first();
 		if($date_lessthan_previous_trip){
 		 return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
