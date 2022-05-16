@@ -191,8 +191,8 @@ class TripController extends Controller {
 		if ($trip_start_date_data) {
 			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
 		}
-
-		$date_lessthan_previous_trip = Trip::where('employee_id', Auth::user()->entity_id)
+		$date_lessthan_previous_trip = Trip::select('id')->where('employee_id', Auth::user()->entity_id)
+		        ->where('id','!=',$request->id)
 				->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))
 				->where('status_id','!=',3032)
 				->first();
