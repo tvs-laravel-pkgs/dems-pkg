@@ -743,4 +743,16 @@ class EmployeeController extends Controller {
 		return response()->json(['success' => true, 'employee' => $employee]);
 	}
 
+	public function getSendSms(Request $r){
+		//dd($r->sms_mobile_number);
+        if(!empty($r->sms_mobile_number)){
+        	$message = str_replace('XXXXXX', 2, config('custom.SMS_TEMPLATES.TRIP_APPROVE'));
+        	$mobile_number=$r->sms_mobile_number;
+        	$sms=sendNotificationTxtMsg(2,$message,$mobile_number);
+        }else {
+			return response()->json(['success' => false, 'errors' => ['Mobile Number is Empty']]);
+		}
+		return response()->json(['success' => true, 'message' => 'SMS Send Successfully']);
+	}
+
 }

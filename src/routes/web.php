@@ -234,6 +234,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/employee/manager/search', 'Uitoux\EYatra\EmployeeController@searchManager')->name('searchManager');
 		Route::post('eyatra/employee/get/sbu', 'Uitoux\EYatra\EmployeeController@getSbuByLob')->name('getSbuByLob');
 		Route::post('eyatra/employee/get/api', 'Uitoux\EYatra\EmployeeController@getEmployeeFromApi')->name('getEmployeeFromApi');
+		Route::post('eyatra/employee/send/sms', 'Uitoux\EYatra\EmployeeController@getSendSms')->name('getSendSms');
 		Route::post('eyatra/employee/get/department', 'Uitoux\EYatra\EmployeeController@getDepartmentByBusiness')->name('getDepartmentByBusiness');
 		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
 		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
