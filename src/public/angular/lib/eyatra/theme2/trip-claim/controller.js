@@ -262,7 +262,7 @@ app.component('eyatraTripClaimForm', {
                 self.is_deviation = 0;
                 $('.custom-city-change').addClass('ng-hide');
                 var custom_city_show = false;
-                $(self.trip.visits).each(function(visit, key) {
+                $(self.trip.visits).each(function(key, visit) {
                     if ((visit.from_city_id == 879 || visit.to_city.id == 879) && custom_city_show == false) {
                         custom_city_show = true;
                     }
