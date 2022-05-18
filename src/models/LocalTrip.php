@@ -855,29 +855,46 @@ class LocalTrip extends Model {
 		return $approval_status;
 	}
 	// Pending local trip mail by Karthick T on 15-02-2022
-	public static function pendingTripMail($date,$status) {
+	public static function pendingTripMail($date,$status,$title) {
 		$pending_local_trips=[];
-		if($status == 'Claim Generation'){
-		    $pending_local_trips = LocalTrip::where('end_date', $date)
-            ->whereNull('claim_number')
-            ->get();
-        }elseif($status == 'Pending Requsation Approval'){
-            $pending_local_trips = LocalTrip::where('created_at', $date)
+	  if($status == 'Pending Requsation Approval'){
+            $pending_local_trips = LocalTrip::select('local_trips.number',
+				'local_trips.employee_id')->where('created_at', $date)
             ->where('status_id','=',3021)
             ->get();
+        }elseif($status == 'Claim Generation'){
+		    $pending_local_trips = LocalTrip::select('local_trips.number',
+				'local_trips.employee_id')->where('end_date', $date)
+            ->whereNull('claim_number')
+            ->get();
         }elseif($status == 'Pending Claim Approval'){
-            $pending_local_trips = LocalTrip::where('claimed_date', $date)
+            $pending_local_trips = LocalTrip::select('local_trips.number',
+				'local_trips.employee_id')->where('claimed_date', $date)
             ->where('status_id','=',3023)
             ->get();
         }elseif($status == 'Pending Divation Claim Approval'){
-            $pending_local_trips = LocalTrip::where('claimed_date', $date)
+            $pending_local_trips = LocalTrip::select('local_trips.number',
+				'local_trips.employee_id')->where('claimed_date', $date)
             ->where('status_id','=',3029)
             ->get();
         }
         if (count($pending_local_trips) > 0) {
             foreach($pending_local_trips as $local_trip_key => $pending_local_trip) {
-            	if($status == 'Claim Generation'){
-                $content = 'Your local trip ' . $pending_local_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull'.$status;
+            	if($status == 'Pending Requsation Approval'){
+                 	$content = $title . 'The local trip ' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull';
+                $subject = 'Pending Local Trip Mail';
+                $arr['content'] = $content;
+                $arr['subject'] = $subject;
+                $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
+                        ->where('users.user_type_id', 3121)
+                        ->where('employees.id', $pending_local_trip->employee_id)
+                        ->pluck('email')->toArray();
+                         if($title == 'Cancelled'){
+				  $status_update=DB::table('local_trips')->where('number',$pending_local_trip->number)->where('status_id',3021)->update(['status_id'=>3032]);
+				}
+                 }elseif($status == 'Claim Generation'){
+                $content = $title . 'Your local trip ' . $pending_local_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull';
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
                 $arr['subject'] = $subject;
@@ -886,18 +903,11 @@ class LocalTrip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_local_trip->employee_id)
                         ->pluck('email')->toArray();
-                 }elseif($status == 'Pending Requsation Approval'){
-                 	$content = 'The local trip ' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull'.$status;
-                $subject = 'Pending Local Trip Mail';
-                $arr['content'] = $content;
-                $arr['subject'] = $subject;
-                $to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-                        ->join('users', 'users.entity_id', 'employees.reporting_to_id')
-                        ->where('users.user_type_id', 3121)
-                        ->where('employees.id', $pending_local_trip->employee_id)
-                        ->pluck('email')->toArray();
+                        if($title == 'Cancelled'){
+							$status_update=DB::table('local_trips')->where('number',$pending_local_trip->number)->where('status_id',3028)->update(['status_id'=>3032]);
+						}
                  }elseif($status == 'Pending Claim Approval'){
-                 	$content = 'The local trip Claim' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull'.$status;
+                 	$content =$title . 'The local trip Claim' . $pending_local_trip->number . ' is not Approved yet. Kindly login to DEMS portal and do the needfull';
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
                 $arr['subject'] = $subject;
@@ -906,8 +916,11 @@ class LocalTrip extends Model {
                         ->where('users.user_type_id', 3121)
                         ->where('employees.id', $pending_local_trip->employee_id)
                         ->pluck('email')->toArray();
+                        if($title == 'Cancelled'){
+							$status_update=DB::table('local_trips')->where('number',$pending_local_trip->number)->where('status_id',3023)->update(['status_id'=>3024]);
+						}
                  }elseif($status == 'Pending Divation Claim Approval'){
-                 	$content = 'The local trip Deviation Claim' . $pending_local_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull'.$status;
+                 	$content =$title .  'The local trip Deviation Claim' . $pending_local_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull';
                 $subject = 'Pending Local Trip Mail';
                 $arr['content'] = $content;
                 $arr['subject'] = $subject;
@@ -918,6 +931,9 @@ class LocalTrip extends Model {
 					->where('users.user_type_id', 3121)
 					->select('users.email as email', 'users.name as name')
                         ->pluck('email')->toArray();
+                        if($title == 'Cancelled'){
+							$status_update=DB::table('local_trips')->where('number',$pending_local_trip->number)->where('status_id',3029)->update(['status_id'=>3024]);
+						}
                  }
                 $cc_email = $arr['cc_email'] = [];
                 $arr['base_url'] = URL::to('/');

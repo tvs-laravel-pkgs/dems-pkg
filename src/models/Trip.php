@@ -2783,54 +2783,46 @@ class Trip extends Model {
 	}
 	// Checking attachment status by Karthick T on 20-01-2022
 	// Pending outstation trip mail by Karthick T on 15-02-2022
-	public static function pendingTripMail($date, $status) {
+	public static function pendingTripMail($date, $status,$title) {
 		$pending_trips = [];
-		if ($status == 'Claim Generation') {
+		if ($status == 'Pending Requsation Approval') {
+			$pending_trips = Trip::select(
+				'trips.number',
+				'trips.employee_id'
+			)->where('trips.created_at', $date)
+				->where('trips.status_id', '=', 3021)
+				->get();
+		} elseif ($status == 'Claim Generation') {
 			$pending_trips = Trip::select(
 				'trips.number',
 				'trips.employee_id'
 			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->where('trips.end_date', $date)
 				->whereNull('ey_employee_claims.number')
+				->where('trips.status_id','=', 3028)
 				->get();
-			//dd($pending_trips);
-		} elseif ($status == 'Pending Requsation Approval') {
-			$pending_trips = Trip::select(
-				'trips.number'
-			)->where('trips.created_at', $date)
-				->where('trips.status_id', '=', 3021)
-				->get();
-		} elseif ($status == 'Pending Claim Approval') {
+		}  elseif ($status == 'Pending Claim Approval') {
 			$pending_trips = Trip::select(
 				'trips.number',
 				'trips.employee_id'
 			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->where('ey_employee_claims.created_at', $date)
-				->where('trips.status_id', '=', 3023)
+				->where('trips.status_id', '=', 3023)//Claim Requested
 				->get();
+
 		} elseif ($status == 'Pending Divation Claim Approval') {
 			$pending_trips = Trip::select(
 				'trips.number',
 				'trips.employee_id'
 			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				->where('trips.created_at', $date)
-				->where('trips.status_id', '=', 3029)
+				->where('ey_employee_claims.created_at', $date)
+				->where('trips.status_id', '=', 3029)//Senior Manager Approval Pending
 				->get();
 		}
 		if (count($pending_trips) > 0) {
 			foreach ($pending_trips as $trip_key => $pending_trip) {
-				if ($status == 'Claim Generation') {
-					$content = 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull' . $status;
-					$subject = 'Pending Outstation Trip Mail';
-					$arr['content'] = $content;
-					$arr['subject'] = $subject;
-					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
-						->join('users', 'users.entity_id', 'employees.id')
-						->where('users.user_type_id', 3121)
-						->where('employees.id', $pending_trip->employee_id)
-						->pluck('email')->toArray();
-				} elseif ($status == 'Pending Requsation Approval') {
-					$content = 'The Outstation trip ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull' . $status;
+				if ($status == 'Pending Requsation Approval') {
+					$content = $title  . 'The Outstation trip ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull';
 					$subject = 'Pending Outstation Approval Trip Mail';
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
@@ -2839,8 +2831,24 @@ class Trip extends Model {
 						->where('users.user_type_id', 3121)
 						->where('employees.id', $pending_trip->employee_id)
 						->pluck('email')->toArray();
-				} elseif ($status == 'Pending Claim Approval') {
-					$content = 'The Outstation Trip Claim ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull' . $status;
+						if($title == 'Cancelled'){
+							$status_update=DB::table('trips')->where('number',$pending_trip->number)->where('status_id',3021)->update(['status_id'=>3032]);
+						}
+				} elseif ($status == 'Claim Generation') {
+					$content = $title . 'Your Outstation trip ' . $pending_trip->number . ' is not claimed yet. Kindly login to DEMS portal and do the needfull';
+					$subject = 'Pending Outstation Trip Mail';
+					$arr['content'] = $content;
+					$arr['subject'] = $subject;
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
+						->join('users', 'users.entity_id', 'employees.id')
+						->where('users.user_type_id', 3121)
+						->where('employees.id', $pending_trip->employee_id)
+						->pluck('email')->toArray();
+						if($title == 'Cancelled'){
+							$status_update=DB::table('trips')->where('number',$pending_trip->number)->where('status_id',3028)->update(['status_id'=>3032]);
+						}
+				}  elseif ($status == 'Pending Claim Approval') {
+					$content =$title . 'The Outstation Trip Claim ' . $pending_trip->number . ' is not approved yet. Kindly login to DEMS portal and do the needfull';
 					$subject = 'Pending Outstation Claim Approval Trip Mail';
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
@@ -2849,8 +2857,11 @@ class Trip extends Model {
 						->where('users.user_type_id', 3121)
 						->where('employees.id', $pending_trip->employee_id)
 						->pluck('email')->toArray();
+						if($title == 'Cancelled'){
+							$status_update=DB::table('trips')->where('number',$pending_trip->number)->where('status_id',3023)->update(['status_id'=>3024]);
+						}
 				} elseif ($status == 'Pending Divation Claim Approval') {
-					$content = 'The Outstation trip claim  ' . $pending_trip->number . ' is not approval yet. Kindly login to DEMS portal and do the needfull' . $status;
+					$content =$title . 'The Outstation trip claim  ' . $pending_trip->number . ' is not approval yet. Kindly login to DEMS portal and do the needfull';
 					$subject = 'Pending Outstation Deviation Trip Mail';
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
@@ -2861,6 +2872,9 @@ class Trip extends Model {
 						->where('users.user_type_id', 3121)
 						->select('users.email as email', 'users.name as name')
 						->pluck('email')->toArray();
+						if($title == 'Cancelled'){
+							$status_update=DB::table('trips')->where('number',$pending_trip->number)->where('status_id',3029)->update(['status_id'=>3024]);
+						}
 				}
 				$cc_email = $arr['cc_email'] = [];
 				$arr['base_url'] = URL::to('/');
