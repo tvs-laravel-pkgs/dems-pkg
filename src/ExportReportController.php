@@ -103,7 +103,7 @@ class ExportReportController extends Controller
             't.company_id as company_id',
             't.claimed_date as documentdate',
             't.id as invoice',
-            'eyec.total_amount as Amount',
+            't.claim_amount as Amount',
             'eyec.number as documentnum',
             'eyec_s.name as ledgerdiamension',
             's.name as sbuname'
@@ -117,6 +117,7 @@ class ExportReportController extends Controller
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
         ->where('t.status_id','=','3026')
         ->where('eyec.batch','=','0')
+        ->groupBy('t.id')
         ->get()->toArray();
 
         //dd($outstations);
@@ -142,12 +143,11 @@ class ExportReportController extends Controller
         ->leftjoin('sbus as lt_s','lt_s.id','lt.sbu_id')
         ->where('lt.status_id','=','3026')
         ->where('lt.batch','=','0')
+        ->groupBy('lt.id')
         ->get()->toArray();
-        //dd($claims);
         $locals=array_merge($claims,$outstations);
         $batch_id=BatchWiseReport::where('date','=',date('Y-m-d'))->orderBy('id','DESC')->pluck('name')->first();
         $batch=((int) $batch_id?:'0') + 1;
-        //dd($locals);
         $local_trips_header = [
             'SNo',
             'Account Number',
