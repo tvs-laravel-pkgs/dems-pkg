@@ -2788,14 +2788,14 @@ class Trip extends Model {
 		if ($status == 'Pending Requsation Approval') {
 			$pending_trips = Trip::select(
 				'trips.number',
-				'trips.employee_id',
+				'trips.employee_id'
 			)->whereDate('trips.created_at',$date)
 			->where('trips.status_id', '=', 3021)
 			->get();
 		} elseif ($status == 'Claim Generation') {
 			$pending_trips = Trip::select(
 				'trips.number',
-				'trips.employee_id',
+				'trips.employee_id'
 			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->where('trips.end_date', $date)
 				->whereNull('ey_employee_claims.number')
@@ -2804,7 +2804,7 @@ class Trip extends Model {
 		}  elseif ($status == 'Pending Claim Approval') {
 			$pending_trips = Trip::select(
 				'trips.number',
-				'trips.employee_id',
+				'trips.employee_id'
 			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->whereDate('ey_employee_claims.created_at', $date)
 				->where('trips.status_id', '=', 3023)//Claim Requested
@@ -2813,7 +2813,7 @@ class Trip extends Model {
 		} elseif ($status == 'Pending Divation Claim Approval') {
 			$pending_trips = Trip::select(
 				'trips.number',
-				'trips.employee_id',
+				'trips.employee_id'
 			)->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->whereDate('ey_employee_claims.created_at', $date)
 				->where('trips.status_id', '=', 3029)//Senior Manager Approval Pending
