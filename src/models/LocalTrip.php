@@ -299,7 +299,7 @@ class LocalTrip extends Model {
 					'errors' => $validator->errors()->all(),
 				]);
 			}
-			if ($request->id) { 
+			if ($request->trip_detail) { 
 			if($request->is_justify_my_trip == NULL){
 				return response()->json(['success' => false, 'errors' => 'Justify my trip field is required!']);
 			}
@@ -866,6 +866,7 @@ class LocalTrip extends Model {
 		    $pending_local_trips = LocalTrip::select('local_trips.number',
 				'local_trips.employee_id')->where('end_date', $date)
             ->whereNull('claim_number')
+            ->where('status_id','=',3028)
             ->get();
         }elseif($status == 'Pending Claim Approval'){
             $pending_local_trips = LocalTrip::select('local_trips.number',
