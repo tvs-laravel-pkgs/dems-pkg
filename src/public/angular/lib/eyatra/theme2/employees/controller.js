@@ -173,81 +173,84 @@ app.component('eyatraEmployees', {
             });
         }
 
-        var form_id = '#send_sms';
-        var v = jQuery(form_id).validate({
-            invalidHandler: function(event, validator) {
-                $noty = new Noty({
-                    type: 'error',
-                    layout: 'topRight',
-                    text: 'Kindly check in each tab to fix errors',
-                    animation: {
-                        speed: 500 // unavailable - no need
+        $scope.sendSms = function() {
+            var form_id = '#send_sms';
+            var v = jQuery(form_id).validate({
+                invalidHandler: function(event, validator) {
+                    $noty = new Noty({
+                        type: 'error',
+                        layout: 'topRight',
+                        text: 'Kindly check in each tab to fix errors',
+                        animation: {
+                            speed: 500 // unavailable - no need
+                        },
+                    }).show();
+                    setTimeout(function() {
+                        $noty.close();
+                    }, 5000);
+                },
+                errorPlacement: function(error, element) {
+                    error.insertAfter(element)
+                },
+                ignore: '',
+                rules: {
+                    'sms_mobile_number': {
+                        required: true,
+                        maxlength: 10,
+                        minlength: 10,
                     },
-                }).show();
-                setTimeout(function() {
-                    $noty.close();
-                }, 5000);
-            },
-            errorPlacement: function(error, element) {
-                error.insertAfter(element)
-            },
-            ignore: '',
-            rules: {
-                'sms_mobile_number': {
-                    required: true,
-                    maxlength: 10,
-                    minlength: 10,
                 },
-            },
-            messages: {
-                'sms_mobile_number': {
-                    maxlength: 'Please enter maximum of 80 letters',
+                messages: {
+                    'sms_mobile_number': {
+                        maxlength: 'Please enter maximum of 80 letters',
+                    },
                 },
-            },
-            submitHandler: function(form) {
+                submitHandler: function(form) {
 
-                let formData = new FormData($(form_id)[0]);
-                $('#submit').button('loading');
-                $.ajax({
-                        url: laravel_routes['getSendSms'],
-                        method: "POST",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                    })
-                    .done(function(res) {
-                        // console.log(res.success);
-                        if (!res.success) {
-                            $('#submit').button('reset');
-                            var errors = '';
-                            for (var i in res.errors) {
-                                errors += '<li>' + res.errors[i] + '</li>';
+                    let formData = new FormData($(form_id)[0]);
+                    $('#submit').button('loading');
+                    $.ajax({
+                            url: laravel_routes['getSendSms'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            //console.log(res.success);
+                            if (!res.success) {
+                                $('#submit').button('reset');
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                console.log('success' + res.msg);
+                                $noty = new Noty({
+                                    type: 'success',
+                                    layout: 'topRight',
+                                    text: 'Sms Send Sucessfully!!!',
+                                    animation: {
+                                        speed: 500 // unavailable - no need
+                                    },
+                                }).show();
+                                dataTable.ajax.reload(function(json) {});
+                                $('#submit').button('reset');
+                                $('#sms_send_modal').modal('hide');
+                                setTimeout(function() {
+                                    $noty.close();
+                                }, 2500);
+                                $scope.$apply()
                             }
-                            custom_noty('error', errors);
-                        } else {
-                            console.log('success' + res.msg);
-                            $noty = new Noty({
-                                type: 'success',
-                                layout: 'topRight',
-                                text: res.message,
-                                animation: {
-                                    speed: 500 // unavailable - no need
-                                },
-                            }).show();
-                            $('#sms_send_modal').modal('hide');
-                            setTimeout(function() {
-                                $noty.close();
-                            }, 2500);
-                            $location.path('/employees')
-                            $scope.$apply()
-                        }
-                    })
-                    .fail(function(xhr) {
-                        $('#submit').button('reset');
-                        custom_noty('error', 'Something went wrong at server');
-                    });
-            },
-        });
+                        })
+                        .fail(function(xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        }
 
 
         $rootScope.loading = false;
