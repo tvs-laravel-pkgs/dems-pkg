@@ -859,7 +859,7 @@ class LocalTrip extends Model {
 		$pending_local_trips=[];
 	  if($status == 'Pending Requsation Approval'){
             $pending_local_trips = LocalTrip::select('local_trips.number',
-				'local_trips.employee_id')->where('created_at', $date)
+				'local_trips.employee_id')->whereDate('created_at', $date)
             ->where('status_id','=',3021)
             ->get();
         }elseif($status == 'Claim Generation'){
@@ -869,12 +869,12 @@ class LocalTrip extends Model {
             ->get();
         }elseif($status == 'Pending Claim Approval'){
             $pending_local_trips = LocalTrip::select('local_trips.number',
-				'local_trips.employee_id')->where('claimed_date', $date)
+				'local_trips.employee_id')->whereDate('claimed_date', $date)
             ->where('status_id','=',3023)
             ->get();
         }elseif($status == 'Pending Divation Claim Approval'){
             $pending_local_trips = LocalTrip::select('local_trips.number',
-				'local_trips.employee_id')->where('claimed_date', $date)
+				'local_trips.employee_id')->whereDate('claimed_date', $date)
             ->where('status_id','=',3029)
             ->get();
         }
