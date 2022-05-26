@@ -164,7 +164,7 @@ class TripClaimVerificationTwoController extends Controller {
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
-
+		$notification = sendnotification($type = 13, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
 		return response()->json(['success' => true]);
 	}
 

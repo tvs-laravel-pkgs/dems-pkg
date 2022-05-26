@@ -9,6 +9,7 @@ use App\FinancialYear;
 use App\SerialNumberGroup;
 use App\User;
 use App\Attachment;
+use App\ReportDetail;
 use Uitoux\EYatra\Config;
 use Auth;
 use Carbon\Carbon;
@@ -968,9 +969,11 @@ class Trip extends Model {
 		$trip_id = $r->trip_id;
 		//$trip = Trip::find($r->trip_id);
 		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
-		$trip = Trip::where('id', $trip_id)->where('advance_request_approval_status_id', 3261)->first();
+		$trip = Trip::where('id', $trip_id)->where('advance_received', '>', 0)->where('status_id',3028)->where('batch',1)->first();
 		if ($trip) {
-			return response()->json(['success' => false, 'errors' => ['Trip cannot be Cancelled! Financier approved the advance amount']]);
+			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+			$notification = sendnotification($type = 12, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Amount Repay');
+			//return response()->json(['success' => false, 'errors' => ['Trip cannot be Cancelled! Financier approved the advance amount']]);
 		}
 
 		$trip = Trip::find($trip_id);
@@ -2011,9 +2014,12 @@ class Trip extends Model {
 						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
 						$employee_claim->amount_to_pay = 2;
 					} else {
+						$balance_amount = $total_amount - $trip->advance_received;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
 						$employee_claim->amount_to_pay = 1;
 					}
 				} else {
+					$employee_claim->balance_amount= $total_amount ? $total_amount : 0;
 					$employee_claim->amount_to_pay = 1;
 				}
 

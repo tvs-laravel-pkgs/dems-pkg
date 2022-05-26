@@ -103,7 +103,7 @@ class ExportReportController extends Controller
             't.company_id as company_id',
             't.claimed_date as documentdate',
             't.id as invoice',
-            't.claim_amount as Amount',
+            'eyec.balance_amount as Amount',
             'eyec.number as documentnum',
             'eyec_s.name as ledgerdiamension',
             's.name as sbuname'
@@ -115,12 +115,40 @@ class ExportReportController extends Controller
         ->leftjoin('outlets as ol','ol.id','t.outlet_id')
         ->join('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
-        ->where('t.status_id','=','3026')
-        ->where('eyec.batch','=','0')
+        ->where('eyec.amount_to_pay',1)
+        ->where('t.status_id',3026)
+        ->where('eyec.batch',0)
         ->groupBy('t.id')
         ->get()->toArray();
 
         //dd($outstations);
+        $advance_amount= Employee::select(
+            'employees.code as Account_Number',
+            'u.name as Name',
+            'bd.account_number as Bank_Account_Number',
+            't.description as Purpose',
+            't.created_at as Created_Date_and_Time',
+            't.company_id as company_id',
+            't.created_at as documentdate',
+            't.id as invoice',
+            't.advance_received as Amount',
+            't.number as documentnum',
+             DB::raw('COALESCE(eyec_s.name, "") as ledgerdiamension'),
+            's.name as sbuname'
+        )
+        ->join('users as u','u.entity_id', 'employees.id')
+        ->join('bank_details as bd', 'bd.entity_id', 'employees.id')
+        ->join('trips as t','t.employee_id','employees.id')
+        ->join('ey_employee_claims as eyec','eyec.employee_id','employees.id')
+        ->leftjoin('outlets as ol','ol.id','t.outlet_id')
+        ->join('sbus as s','s.id','employees.sbu_id')
+        ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
+        ->where('t.status_id',3028)
+        ->where('t.advance_received','>' ,0)
+        ->where('t.batch',0)
+        ->groupBy('t.id')
+        ->get()->toArray();
+        //dd($advance_amount);
         $claims = Employee::select(
             'employees.code as Account_Number',
             'u.name as Name',
@@ -142,10 +170,11 @@ class ExportReportController extends Controller
         ->leftjoin('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as lt_s','lt_s.id','lt.sbu_id')
         ->where('lt.status_id','=','3026')
-        ->where('lt.batch','=','0')
+        ->where('lt.batch',0)
         ->groupBy('lt.id')
         ->get()->toArray();
-        $locals=array_merge($claims,$outstations);
+        $locals=array_merge($claims,$outstations,$advance_amount);
+       // dd($locals);
         $batch_id=BatchWiseReport::where('date','=',date('Y-m-d'))->orderBy('id','DESC')->pluck('name')->first();
         $batch=((int) $batch_id?:'0') + 1;
         $local_trips_header = [
@@ -393,6 +422,7 @@ class ExportReportController extends Controller
         $batch_wise_reports->name=$report_details->batch;
         $batch_wise_reports->date=$time_stamp;
         $batch_wise_reports->save();
+        $batch_update=DB::table('trips')->where('status_id','=','3028')->where('batch','0')->update(['batch'=>1]);
         $batch_update=DB::table('ey_employee_claims')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         $batch_update=DB::table('local_trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         return Redirect::to('/#!/report/list');
@@ -434,9 +464,12 @@ class ExportReportController extends Controller
             'SBU',
             'CLAIM NUMBER',
             'CLAIM DATE',
-            'GST NUMBER',
-            'SUPPLIER NAME',
             'INVOICE NUMBER',
+            'TRANSPORT GSTIN',
+            'TRANSPORT AMOUNT',
+            'TRANSPORT TAX',
+            'LODGING GST NUMBER',
+            'SUPPLIER NAME',
             'INVOICE AMOUNT',
             'TAX PERCENTAGE',
             'CGST AMOUNT',
@@ -454,7 +487,10 @@ class ExportReportController extends Controller
                 DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as claim_date'),
                 DB::raw('COALESCE(lodgings.gstin, "") as gst_number'),
                 DB::raw('COALESCE(lodgings.lodge_name, "") as supplier_name'),
+                DB::raw('COALESCE(visit_bookings.gstin, "") as transport_gst_number'),
                 DB::raw('COALESCE(trips.number, "") as invoice_number'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as transport_amount'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.tax, 0)),2,"en_IN") as tax'),
                 DB::raw('format(ROUND(IFNULL(lodgings.amount, 0)),2,"en_IN") as invoice_amount'),
                 DB::raw('format(ROUND(IFNULL(lodgings.tax_percentage, 0)),2,"en_IN") as tax_percentage'),
                 DB::raw('format(ROUND(IFNULL(lodgings.cgst, 0)),2,"en_IN") as cgst'),
@@ -468,6 +504,8 @@ class ExportReportController extends Controller
                     ->where('users.user_type_id', 3121);
             })
             ->leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
+            ->leftJoin('visits','visits.trip_id','trips.id')
+            ->leftJoin('visit_bookings', 'visit_bookings.visit_id','visits.id')
             ->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
             ->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
             ->leftJoin('ey_addresses as a', function ($join) {
@@ -505,9 +543,12 @@ class ExportReportController extends Controller
                 $gst_detail->sbu,
                 $gst_detail->claim_number,
                 $gst_detail->claim_date,
+                $gst_detail->invoice_number,
+                $gst_detail->transport_gst_number,
+                $gst_detail->transport_amount,
+                $gst_detail->tax,
                 $gst_detail->gst_number,
                 $gst_detail->supplier_name,
-                $gst_detail->invoice_number,
                 $gst_detail->invoice_amount,
                 $gst_detail->tax_percentage,
                 $gst_detail->cgst,
