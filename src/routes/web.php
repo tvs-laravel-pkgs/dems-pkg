@@ -59,6 +59,12 @@ Route::group(['middleware' => ['api']], function () {
 		//TRIP REJECTION REASON
 		Route::get('trip/rejection/reasons', 'Uitoux\EYatra\Api\TripVerificationController@getRejectionData');
 
+		//TRIP CLAIM VERIFICATION TWO
+		Route::get('trip/claim/verification/two/get-list', 'Uitoux\EYatra\Api\TripClaimVerificationTwoController@listEYatraTripClaimVerificationTwoList');
+		Route::get('trip/claim/verification/two/view/{trip_id?}', 'Uitoux\EYatra\Api\TripClaimVerificationTwoController@viewEYatraTripClaimVerificationTwo');
+		Route::post('trip/claim/verification/two/reject', 'Uitoux\EYatra\Api\TripClaimVerificationTwoController@rejectTripClaimVerificationTwo');
+		Route::post('trip/claim/verification/two/approve', 'Uitoux\EYatra\Api\TripClaimVerificationTwoController@approveTripClaimVerificationTwo');
+
 		//DASHBOARD
 		Route::get('eyatra/dashboard', 'Uitoux\EYatra\Api\DashboardController@getDashboard');
 
