@@ -92,9 +92,21 @@ class TripClaimVerificationTwoController extends Controller {
 			})
 			->where('ey_employee_claims.status_id', 3029) //SENIOR MANAGER APPROVAL PENDING
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc')->get();
+			->orderBy('trips.created_at', 'desc');
 
-		return response()->json(['success' => true, 'trips' => $trips]);
+		return Datatables::of($trips)
+			->addColumn('action', function ($trip) {
+
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+
+				return '
+				<a href="#!/trip/claim/verification2/view/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
+
+			})
+			->make(true);
 	}
 
 	public function viewEYatraTripClaimVerificationTwo($trip_id) {
