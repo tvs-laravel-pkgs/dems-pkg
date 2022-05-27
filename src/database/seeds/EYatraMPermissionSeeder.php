@@ -70,6 +70,12 @@ class EYatraMPermissionSeeder extends Seeder {
 				'name' => 'eyatra-mobile-trips-claim-verification',
 				'display_name' => 'Claim Verification',
 			],
+			9008 => [
+				'display_order' => 1,
+				'parent_id' => 9000,
+				'name' => 'eyatra-mobile-trips-claim-verification 2',
+				'display_name' => 'Claim Verification 2',
+			],
 			//PETTY CASH SIGNATURE
 
 		];

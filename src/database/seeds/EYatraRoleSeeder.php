@@ -335,7 +335,10 @@ class EYatraRoleSeeder extends Seeder {
 					9006,
 
 					//CLAIM VERIFICATION
-					9007,
+					9007, 
+
+					//CLAIM VERIFICATION 2
+					9008, 
 
 					//REPORTS
 					5680, 5684, 5685, 5686,
