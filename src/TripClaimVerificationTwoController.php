@@ -92,7 +92,7 @@ class TripClaimVerificationTwoController extends Controller {
 			})
 			->where('ey_employee_claims.status_id', 3029) //SENIOR MANAGER APPROVAL PENDING
 			->groupBy('trips.id')
-			->orderBy('trips.created_at', 'desc');
+			->orderBy('trips.created_at', 'desc')->get();
 
 		return response()->json(['success' => true, 'trips' => $trips]);
 	}
