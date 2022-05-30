@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\ApprovalLog;
+use Uitoux\EYatra\Attachment;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Boarding;
 use Uitoux\EYatra\Entity;
