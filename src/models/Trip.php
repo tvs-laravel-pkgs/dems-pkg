@@ -1084,12 +1084,15 @@ class Trip extends Model {
 	}
 
 	public static function requestCancelVisitBooking($visit_id) {
-
 		$visit = Visit::where('id', $visit_id)->update(['status_id' => 3221]);
 
+		$trip = Trip::select('trips.employee_id','trips.id')->join('visits','visits.trip_id','trips.id')->where('visits.id', $visit_id)->get()->first();
 		if (!$visit) {
 			return response()->json(['success' => false, 'errors' => ['Booking Details not Found']]);
 		}
+		$employee = Employee::where('id', $trip->employee_id)->first();
+			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+			$notification = sendnotification($type = 17, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Ticket Cancell');
 		return response()->json(['success' => true]);
 	}
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Entrust;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Mail;
@@ -304,8 +305,18 @@ class TripBookingUpdateController extends Controller {
 
 					//Ticket Employee Mail Trigger
 					if ($visit) {
-						// $this->sendTicketNotificationMail($visit);
-					}
+						if($visit->booking_status_id == 3061){
+						 $this->sendTicketNotificationMail($type = 16,$visit);
+						 $employee = Employee::where('id', $trip->employee_id)->first();
+						 $user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+						 $notification = sendnotification($type = 16, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Ticket Booking Mail');
+						}
+						if($visit->booking_status_id == 3062){
+					     $employee = Employee::where('id', $trip->employee_id)->first();
+						 $user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+			        $notification = sendnotification($type = 18, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Ticket Cancelled');
+			    }
+	}
 				}
 			}
 			// DB::commit();
@@ -315,15 +326,15 @@ class TripBookingUpdateController extends Controller {
 		}
 		return response()->json(['success' => true]);
 	}
-	public function sendTicketNotificationMail($visit) {
-		$from_mail = env('MAIL_FROM_ADDRESS');
-		$from_name = env('MAIL_USERNAME');
+	public function sendTicketNotificationMail($type,$visit) {
+		$from_mail = env('MAIL_FROM_ADDRESS','travelex@tvs.in');
+		$from_name = env('MAIL_USERNAME','Tvsnsons');
 		$to_user = $visit->trip->employee->user;
 		$employee_details = $visit->trip->employee;
 		$visit_details = Visit::select(
 			'visits.id',
-			//'trips.id as trip_id',
-			//'users.name as employee_name',
+			'trips.id as trip_id',
+			'users.name as employee_name',
 			DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 			DB::raw('TIME_FORMAT(visits.prefered_departure_time,"h:i A") as prefered_departure_time'),
 			'fromcity.name as fromcity_name',
@@ -332,8 +343,8 @@ class TripBookingUpdateController extends Controller {
 			'booking_modes.name as booking_method_name',
 			'booking_status.name as booking_status'
 		)
-		//->join('trips', 'trips.id', 'visits.trip_id')
-		//->leftjoin('users', 'trips.employee_id', 'users.id')
+		->join('trips', 'trips.id', 'visits.trip_id')
+		->leftjoin('users', 'trips.employee_id', 'users.id')
 			->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 			->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
@@ -357,12 +368,13 @@ class TripBookingUpdateController extends Controller {
 			$arr['from_name'] = $from_name;
 			$arr['to_email'] = $to_user->email;
 			$arr['to_name'] = $to_user->name;
-			$arr['to_email'] = $employee->email;
+			//$arr['to_email'] = $employee->email;
 			//$arr['to_name'] = 'parthiban';
 			$arr['subject'] = 'Ticket Booking Mail';
 			$arr['body'] = 'Employee ticket booking notification';
 			$arr['employee_details'] = $employee_details;
 			$arr['visits'] = $visit_details;
+			$arr['type'] = 16;
 			if ($arr['visits_attachments']) {
 				$arr['attachment'] = url('storage/app/public/visit/booking-updates/attachments/' . $arr['visits_attachments'][0]['name']);
 			} else {
@@ -370,10 +382,10 @@ class TripBookingUpdateController extends Controller {
 			}
 //dd($arr['attachment']);
 			//dump($visit->bookings);
-			/*$arr['visits_attachments'] = Attachment::where('entity_id',$visit->bookings)->where('attachment_of_id', 3180)->where('attachment_type_id', 3200)->get();
+			//$arr['visits_attachments'] = Attachment::where('entity_id',$visit->bookings)->where('attachment_of_id', 3180)->where('attachment_type_id', 3200)->get();
 				//dd($arr['visits_attachments']);
 				//$arr['trip'] = $trip;
-				//$arr['type'] = 2;*/
+				//$arr['type'] = 2;
 			$MailInstance = new TicketNotificationMail($arr);
 			$Mail = Mail::send($MailInstance);
 		}
