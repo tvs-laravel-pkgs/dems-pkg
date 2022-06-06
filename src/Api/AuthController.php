@@ -4,6 +4,7 @@ namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 // use Mail;
 use App\User;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
@@ -128,6 +129,86 @@ class AuthController extends Controller {
 			}
 		}
 
+	}
+
+	public function mpinLogin(Request $request) {
+		// dd($request->all());
+		try {
+			$validator = Validator::make($request->all(), [
+				'mpin' => [
+					'required',
+					'string',
+					'min:4',
+					'max:10',
+				],
+				'imei' => 'required|min:3|max:16',
+				// 'app_type_id' => 'nullable|integer|exists:configs,id',
+				// 'company_code' => 'required|string|exists:companies,code',
+			]);
+
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => $validator->errors()->all(),
+				], $this->successStatus);
+			}
+
+			// $company = Company::where('code', $request->company_code)->first();
+
+			$user = User::where('imei', $request->imei)
+				->where('mpin', $request->mpin)
+				->where('company_id', 4)
+				->first();
+
+			if (!$user) {
+				$user = User::where('imei', $request->imei)
+					->where('mpin', $request->mpin)
+					->first();
+			}
+			if ($user && $token = JWTAuth::fromUser($user)) {
+			$data = User::with([
+				'employee_details',
+				'employee_details.reportingTo',
+				'employee_details.reportingTo.user',
+				'employee_details.paymentMode',
+				'employee_details.grade',
+				'employee_details.designation',
+				'employee_details.bankDetail',
+				'employee_details.chequeDetail',
+				'employee_details.walletDetail',
+				'employee_details.walletDetail.type',
+				'employee_details.sbu',
+				'employee_details.sbu.lob',
+				'roles',
+			])
+				->find($user->id);
+			
+			$user->permissions = $data->permissions($only_mobile = true);
+			$user->entity->designation;
+			$user->entity->grade;
+			$user->entity->outlet->address;
+			$user->employee = $data->entity;
+			$user['token'] = $data->createToken('eYatra')->accessToken;
+			return response()->json(['success' => true, 'user' => $data], $this->successStatus);
+			} else {
+				return response()->json([
+					'success' => false,
+					'errors' => [
+						'Invalid credentials',
+					],
+				], $this->successStatus);
+			}
+
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'error' => 'Exception Error',
+				'errors' => [
+					$e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			], $this->successStatus);
+		}
 	}
 
 	public function logout(Request $request) {

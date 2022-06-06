@@ -1,6 +1,7 @@
 <?php
 //AUTH
 Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
+Route::post('eyatra/api/mpinLogin', 'Uitoux\EYatra\Api\AuthController@mpinLogin');
 
 //FORGET PASSWORD
 Route::post('eyatra/api/forgotPassword', 'Uitoux\EYatra\Api\AuthController@forgotPassword');
