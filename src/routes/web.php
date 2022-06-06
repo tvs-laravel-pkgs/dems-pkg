@@ -1,11 +1,18 @@
 <?php
 //AUTH
 Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
+//login with mpin login
 Route::post('eyatra/api/mpinLogin', 'Uitoux\EYatra\Api\AuthController@mpinLogin');
+//login with OTP
+Route::post('eyatra/api/loginWithOtp', 'Uitoux\EYatra\Api\AuthController@loginWithOtp');
 
 //FORGET PASSWORD
 Route::post('eyatra/api/forgotPassword', 'Uitoux\EYatra\Api\AuthController@forgotPassword');
 Route::post('eyatra/api/changePassword', 'Uitoux\EYatra\Api\AuthController@changePassword');
+//generate mpin
+Route::post('eyatra/api/checkMobileNumber', 'Uitoux\EYatra\Api\AuthController@checkMobileNumber');
+Route::post('eyatra/api/confirmOTPForm', 'Uitoux\EYatra\Api\AuthController@confirmOTPForm');
+Route::post('eyatra/api/setMpinForm', 'Uitoux\EYatra\Api\AuthController@setMpinForm');
 
 //LOGOUT
 Route::post('eyatra/api/logout', 'Uitoux\EYatra\Api\AuthController@logout');
