@@ -180,7 +180,7 @@ app.component('eyatraTrips', {
 
 app.component('eyatraTripForm', {
     templateUrl: trip_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $filter) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var arr_ind;
@@ -215,7 +215,8 @@ app.component('eyatraTripForm', {
             self.max_eligible_date = response.data.max_eligible_date;
             self.claimable_travel_mode_list = response.data.extras.claimable_travel_mode_list;
             self.trip_advance_amount_edit = response.data.trip_advance_amount_edit;
-            console.log(self.claimable_travel_mode_list)
+            self.trip_advance_amount_employee_edit = response.data.trip_advance_amount_employee_edit;
+            console.log(self.trip_advance_amount_edit)
             if (response.data.action == "Edit") {
                 if (response.data.trip.start_date && response.data.trip.end_date) {
                     var start_date = response.data.trip.start_date;
@@ -305,13 +306,25 @@ app.component('eyatraTripForm', {
                 }, 500);
             }
 
-
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }
 
             if (self.trip_advance_amount_edit == 0) {
                 $("#advance_amount").prop('readonly', true);
+            }
+            if (self.trip_advance_amount_employee_edit == 0) {
+                $("#advance_amount").prop('readonly', true);
+            }
+            $scope.AdvanceAmountDisable = function(start_date) {
+                var date = new Date();
+                var myDate = $filter('date')(date, "dd-MM-yyyy");
+                if (start_date >= myDate) {
+                    $("#advance").show().prop('disabled', false);
+                } else {
+                    $("#advance").hide().prop('disabled', true);
+                    self.trip.advance_received = '0.00';
+                }
             }
 
 

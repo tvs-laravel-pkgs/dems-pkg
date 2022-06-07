@@ -525,6 +525,15 @@ class Trip extends Model {
 			} else {
 				$trip_advance_amount_edit = 1;
 			}
+			if ($trip->status_id) {
+				if ($trip->status_id == 3021 || $trip->status_id == 3022 || $trip->status_id == 3032) {
+					$trip_advance_amount_employee_edit = 1;
+				} else {
+					$trip_advance_amount_employee_edit = 0;
+				}
+			} else {
+				$trip_advance_amount_employee_edit = 1;
+			}
 
 		}
 
@@ -554,6 +563,7 @@ class Trip extends Model {
 		$data['trip'] = $trip;
 
 		$data['trip_advance_amount_edit'] = $trip_advance_amount_edit;
+		$data['trip_advance_amount_employee_edit'] = $trip_advance_amount_employee_edit;
 
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-60 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
