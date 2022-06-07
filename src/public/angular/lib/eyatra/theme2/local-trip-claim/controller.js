@@ -59,6 +59,7 @@ app.component('eyatraClaimedLocalTrips', {
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'reason', name: 'reason', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -573,17 +574,17 @@ app.component('eyatraLocalTripClaimForm', {
             }, 1000);
         }
 
-        $scope.visitAttachments = function (key){
-            if(self.trip.visit_details[key].attachment_status != 1){
-                self.trip.visit_details[key].attachment_status = '0';                
+        $scope.visitAttachments = function(key) {
+            if (self.trip.visit_details[key].attachment_status != 1) {
+                self.trip.visit_details[key].attachment_status = '0';
             } else {
                 self.trip.visit_details[key].attachment_status = '1';
             }
         }
 
-        $scope.otherExpenseAttachments = function (key){
-            if(self.trip.expense[key].attachment_status != 1){
-                self.trip.expense[key].attachment_status = '0';                
+        $scope.otherExpenseAttachments = function(key) {
+            if (self.trip.expense[key].attachment_status != 1) {
+                self.trip.expense[key].attachment_status = '0';
             } else {
                 self.trip.expense[key].attachment_status = '1';
             }

@@ -59,6 +59,7 @@ app.component('eyatraLocalTrips', {
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'reason', name: 'reason', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {

@@ -33,6 +33,7 @@ class LocalTripController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
+				DB::raw('IF((local_trips.reason) IS NULL,"--",local_trips.reason) as reason'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
@@ -140,6 +141,7 @@ class LocalTripController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
+				DB::raw('IF((local_trips.reason) IS NULL,"--",local_trips.reason) as reason'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)

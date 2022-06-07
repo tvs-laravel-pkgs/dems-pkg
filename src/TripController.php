@@ -36,6 +36,7 @@ class TripController extends Controller {
 				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
+				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
