@@ -322,8 +322,10 @@ app.component('eyatraTripForm', {
                 if (start_date >= myDate) {
                     $("#advance").show().prop('disabled', false);
                 } else {
-                    $("#advance").hide().prop('disabled', true);
-                    self.trip.advance_received = '0.00';
+                    if (self.trip_advance_amount_employee_edit == 1) {
+                        $("#advance").hide().prop('disabled', true);
+                        self.trip.advance_received = '0.00';
+                    }
                 }
             }
 

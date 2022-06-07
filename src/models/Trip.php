@@ -494,6 +494,7 @@ class Trip extends Model {
 			$trip->trip_type = '';
 			$trip->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('ncities.id', Auth::user()->entity->outlet->address->city_id)->first();
 			$trip_advance_amount_edit = 1;
+			$trip_advance_amount_employee_edit = 1;
 			$data['success'] = true;
 		} else {
 			$data['action'] = 'Edit';
