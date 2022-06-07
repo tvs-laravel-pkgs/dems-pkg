@@ -299,17 +299,76 @@ class AuthController extends Controller {
 					'errors' => $validator->errors()->all(),
 				], $this->successStatus);
 			}
-        $user = User::where('mobile_number', $request->mobile)->first();
+        $result = 0;
+		$user_id = "";
+		$cust_save_otp = 0;
+		$empl_save_otp = 0;
+		$otp_no = null;
+		$user = User::where('mobile_number', $request->mobile)->first();
 		if ($user) {
 			$sender_id = config('custom.sms_sender_id');
 			$mobile_number = $user->mobile_number;
 			$otp_no = mt_rand(100000, 999999);
 			$user->otp = $otp_no;
 			$user->save();
-			$message = "Your OTP is " . $otp_no . " to reset mpin in DEMS Application. Please enter OTP to verify your mobile number.";
+			$message = "Your OTP is " . $otp_no . " to reset Mpin in DEMS Application. Please enter OTP to verify your mobile number.";
 			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
 			$result = 1;
 			$user_id = $user->id;
+		return response()->json([
+			'user_id' => $user_id,
+			'result' => $result,
+			'otp_no'=>$otp_no,
+		]);
+	}else{
+		return response()->json([
+					'success' => false,
+					'errors' => [
+						'Invalid Mobile Number',
+					],
+				], $this->successStatus);
+	}
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'error' => 'Exception Error',
+				'errors' => [
+					$e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			], $this->successStatus);
+		}
+
+	}
+	public function confirmOTP(Request $request) {
+		$validator = Validator::make($request->all(), [
+				'otp_no' => [
+					'required',
+					'string',
+					'min:6',
+					'max:6',
+				],
+				'user_id' => [
+					'required',
+					'string',
+				],
+			]);
+
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => $validator->errors()->all(),
+				], $this->successStatus);
+			}
+		$result = 0;
+		$user_id = "";
+		$check = 0;
+		$user = User::where('id', $request->user_id)->first();
+		if ($user) {
+			$employee = User::where('id', $user->id)->where('otp', $request->otp_no)->first();
+			$check = $employee ? 1 : 0;
+		}
+		if ($user && $check) {
 			$data = User::with([
 				'employee_details',
 				'employee_details.reportingTo',
@@ -333,20 +392,15 @@ class AuthController extends Controller {
 			$user->entity->outlet->address;
 			$user->employee = $data->entity;
 			$user['token'] = $data->createToken('eYatra')->accessToken;
-			return response()->json(['status' => 'true', 'data' => $data], $this->successStatus);
+			return response()->json(['success' => true, 'user' => $data], $this->successStatus);
 		} else {
-			return response()->json(['status' => 'false', 'error' => 'Incorrect mobile number'], $this->successStatus);
-		}
-		} catch (\Exception $e) {
-			return response()->json([
-				'success' => false,
-				'error' => 'Exception Error',
-				'errors' => [
-					$e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
-				],
-			], $this->successStatus);
-		}
-
+				return response()->json([
+					'success' => false,
+					'errors' => [
+						'Invalid credentials',
+					],
+				], $this->successStatus);
+			}
 	}
 
 	public function logout(Request $request) {

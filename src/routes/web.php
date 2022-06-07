@@ -5,7 +5,7 @@ Route::post('eyatra/api/login', 'Uitoux\EYatra\Api\AuthController@login');
 Route::post('eyatra/api/mpinLogin', 'Uitoux\EYatra\Api\AuthController@mpinLogin');
 //login with OTP
 Route::post('eyatra/api/loginWithOtp', 'Uitoux\EYatra\Api\AuthController@loginWithOtp');
-
+Route::post('eyatra/api/confirmOTP', 'Uitoux\EYatra\Api\AuthController@confirmOTP');
 //FORGET PASSWORD
 Route::post('eyatra/api/forgotPassword', 'Uitoux\EYatra\Api\AuthController@forgotPassword');
 Route::post('eyatra/api/changePassword', 'Uitoux\EYatra\Api\AuthController@changePassword');
