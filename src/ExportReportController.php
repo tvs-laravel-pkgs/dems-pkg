@@ -135,7 +135,7 @@ class ExportReportController extends Controller
             DB::raw('format(ROUND(IFNULL(t.advance_received, 0)),2,"en_IN") as Amount'),
             't.number as documentnum',
              DB::raw('COALESCE(eyec_s.name, "") as ledgerdiamension'),
-             DB::raw('COALESCE(s.name, "") as sbuname'),
+             DB::raw('COALESCE(s.name, "") as sbuname')
         )
         ->join('users as u','u.entity_id', 'employees.id')
         ->join('bank_details as bd', 'bd.entity_id', 'employees.id')
