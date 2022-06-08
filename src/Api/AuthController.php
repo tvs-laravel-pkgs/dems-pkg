@@ -168,7 +168,8 @@ class AuthController extends Controller {
 					->first();
 			}
 			if ($user && $token = JWTAuth::fromUser($user)) {
-			$data = User::with([
+			//Get User Information
+			$user = User::with([
 				'employee_details',
 				'employee_details.reportingTo',
 				'employee_details.reportingTo.user',
@@ -184,14 +185,13 @@ class AuthController extends Controller {
 				'roles',
 			])
 				->find($user->id);
-			
-			$user->permissions = $data->permissions($only_mobile = true);
+			$user->permissions = $user->permissions($only_mobile = true);
 			$user->entity->designation;
 			$user->entity->grade;
 			$user->entity->outlet->address;
-			$user->employee = $data->entity;
-			$user['token'] = $data->createToken('eYatra')->accessToken;
-			return response()->json(['success' => true, 'user' => $data], $this->successStatus);
+			$user->employee = $user->entity;
+			$user['token'] = $user->createToken('eYatra')->accessToken;
+			return response()->json(['success' => true, 'user' => $user], $this->successStatus);
 			} else {
 				return response()->json([
 					'success' => false,
@@ -366,10 +366,19 @@ class AuthController extends Controller {
 		$user = User::where('id', $request->user_id)->first();
 		if ($user) {
 			$employee = User::where('id', $user->id)->where('otp', $request->otp_no)->first();
+			//dd($employee);
 			$check = $employee ? 1 : 0;
 		}
 		if ($user && $check) {
-			$data = User::with([
+
+			//Check Device Token already available or not
+			//User::where('device_token', request('device_token'))->update(['device_token' => NULL]);
+
+			//Save Device Token
+			//$user = User::where('id', Auth::user()->id)->update(['device_token' => request('device_token')]);
+
+			//Get User Information
+			$user = User::with([
 				'employee_details',
 				'employee_details.reportingTo',
 				'employee_details.reportingTo.user',
@@ -384,16 +393,16 @@ class AuthController extends Controller {
 				'employee_details.sbu.lob',
 				'roles',
 			])
-				->find($user->id);
-			
-			$user->permissions = $data->permissions($only_mobile = true);
+				->find($employee->id);
+			$user->permissions = $user->permissions($only_mobile = true);
 			$user->entity->designation;
 			$user->entity->grade;
 			$user->entity->outlet->address;
-			$user->employee = $data->entity;
-			$user['token'] = $data->createToken('eYatra')->accessToken;
-			return response()->json(['success' => true, 'user' => $data], $this->successStatus);
-		} else {
+			$user->employee = $user->entity;
+			$user['token'] = $user->createToken('eYatra')->accessToken;
+			return response()->json(['success' => true, 'user' => $user], $this->successStatus);
+		}
+		 else {
 				return response()->json([
 					'success' => false,
 					'errors' => [
