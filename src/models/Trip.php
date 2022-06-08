@@ -851,6 +851,7 @@ class Trip extends Model {
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,2,"en_IN")) as advance_received'),
 				// 'trips.created_at',
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date'),
+				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
 				'status.name as status', 'status.name as status_name'
 
 			)

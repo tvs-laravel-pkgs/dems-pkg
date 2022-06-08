@@ -54,6 +54,7 @@ app.component('eyatraTripClaimVerificationThreeList', {
                 // { data: 'cities', name: 'c.name', searchable: true },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+                { data: 'reason', name: 'reason', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -82,12 +83,12 @@ app.component('eyatraTripClaimVerificationThreeList', {
             dataTable.draw();
         }
         $scope.getFromDateData = function(query) {
-            
+
             $('#from_date').val(query);
             dataTable.draw();
         }
         $scope.getToDateData = function(query) {
-            
+
             $('#to_date').val(query);
             dataTable.draw();
         }
@@ -250,7 +251,7 @@ app.component('eyatraTripClaimVerificationThreeList', {
                     url: eyatra_trip_claim_verification_three_chunk_import,
                     method: "POST",
                     headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') },
-                    data: { skip: imported_rows, file: file, records_per_request: records_per_request, outputfile: outputfile, headings: headings, reference: reference, import_number: import_number},
+                    data: { skip: imported_rows, file: file, records_per_request: records_per_request, outputfile: outputfile, headings: headings, reference: reference, import_number: import_number },
                 })
                 .done(function(response) {
                     console.log(response);
@@ -359,7 +360,7 @@ app.component('eyatraTripClaimVerificationThreeView', {
         self.eyatra_trip_claim_verification_three_local_travel_attachment_url = eyatra_trip_claim_verification_three_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
-        
+
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -776,8 +777,8 @@ app.component('eyatraTripClaimPaymentPendingList', {
                 { data: 'total_amount', searchable: false },
                 { data: 'balance_amount', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
-              
-                
+
+
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');
@@ -800,10 +801,10 @@ app.component('eyatraTripClaimPaymentPendingList', {
             $('#purpose_id').val(query);
             dataTable.draw();
         }
-       /* $scope.getStatusData = function(query) {
-            $('#status_id').val(query);
-            dataTable.draw();
-        }*/
+        /* $scope.getStatusData = function(query) {
+             $('#status_id').val(query);
+             dataTable.draw();
+         }*/
         $scope.onSelectOutlet = function(query) {
             $('#outlet_id').val(query);
             dataTable.draw();
@@ -819,7 +820,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
 
         $('#head_booking').on('click', function() {
             var count = 0;
-            selected_employee_claims= [];
+            selected_employee_claims = [];
             if (event.target.checked == true) {
                 $('.employee_claim_list').prop('checked', true);
                 $.each($('.employee_claim_list:checked'), function() {
@@ -837,7 +838,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
 
             }
             $('.approve_ids').val(selected_employee_claims);
-          
+
         });
 
         $(document.body).on('click', '.employee_claim_list', function() {
@@ -856,7 +857,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
             }
             $('.approve_ids').val(selected_employee_claims);
         });
-        
+
 
         $(document.body).on('click', '.approve_claim', function() {
             var id = $(this).data('claim_id');
@@ -897,7 +898,7 @@ app.component('eyatraTripClaimPaymentPendingList', {
                     $scope.$apply();
                     // window.location.href = laravel_routes['listEYatraTripClaimPaymentPendingList'];
                 }
-        });
+            });
         });
 
         $('#approve').on('click', function() {

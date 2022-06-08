@@ -37,6 +37,7 @@ class TripClaimVerificationTwoController extends Controller {
 				DB::raw('DATE_FORMAT(trips.end_date,"%d-%m-%Y") as end_date'),
 				'purpose.name as purpose',
 				'trips.advance_received',
+				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)

@@ -55,6 +55,7 @@ app.component('eyatraLocalTripFinancierVerification', {
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
+                { data: 'reason', name: 'reason', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -258,7 +259,7 @@ app.component('eyatraLocalTripFinancierVerification', {
                     url: local_trip_financier_chunk_import,
                     method: "POST",
                     headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') },
-                    data: { skip: imported_rows, file: file, records_per_request: records_per_request, outputfile: outputfile, headings: headings, reference: reference, import_number: import_number},
+                    data: { skip: imported_rows, file: file, records_per_request: records_per_request, outputfile: outputfile, headings: headings, reference: reference, import_number: import_number },
                 })
                 .done(function(response) {
                     console.log(response);
@@ -337,7 +338,7 @@ app.component('eyatraLocalTripFinancierVerificationView', {
         self.hasPermission = HelperService.hasPermission;
         self.local_travel_attachment_url = local_travel_attachment_url;
         self.local_travel_google_attachment_url = local_travel_google_attachment_url;
-        
+
         $http.get(
             local_trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {

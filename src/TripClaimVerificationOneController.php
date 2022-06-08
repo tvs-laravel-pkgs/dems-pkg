@@ -49,7 +49,7 @@ class TripClaimVerificationOneController extends Controller {
 				DB::raw('DATE_FORMAT(trips.end_date,"%d-%m-%Y") as end_date'),
 				'purpose.name as purpose',
 				DB::raw('FORMAT(trips.advance_received,2,"en_IN") as advance_received'),
-
+                DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
 				'status.name as status'
 			)
 
