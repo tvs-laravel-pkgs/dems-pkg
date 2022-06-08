@@ -103,7 +103,7 @@ class ExportReportController extends Controller
             't.company_id as company_id',
             't.claimed_date as documentdate',
             't.id as invoice',
-            DB::raw('format(ROUND(IFNULL(eyec.balance_amount, 0)),2,"en_IN") as Amount'),
+            'eyec.balance_amount as Amount',
             't.number as documentnum',
             'eyec_s.name as ledgerdiamension',
             's.name as sbuname'
@@ -117,7 +117,7 @@ class ExportReportController extends Controller
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
         ->where('eyec.amount_to_pay',1)
         ->where('t.status_id',3026)
-        //->where('eyec.status_id',3026)
+        ->where('eyec.status_id',3026)
         ->where('eyec.batch',0)
         ->groupBy('t.id')
         ->get()->toArray();
@@ -132,7 +132,7 @@ class ExportReportController extends Controller
             't.company_id as company_id',
             't.created_at as documentdate',
             't.id as invoice',
-            DB::raw('format(ROUND(IFNULL(t.advance_received, 0)),2,"en_IN") as Amount'),
+            't.advance_received as Amount',
             't.number as documentnum',
              DB::raw('COALESCE(eyec_s.name, "") as ledgerdiamension'),
              DB::raw('COALESCE(s.name, "") as sbuname')
@@ -158,7 +158,7 @@ class ExportReportController extends Controller
             'lt.description as Purpose',
             'lt.created_at as Created_Date_and_Time',
             'lt.company_id as company_id',
-            DB::raw('format(ROUND(IFNULL(lt.claim_amount, 0)),2,"en_IN") as Amount'),
+            'lt.claim_amount as Amount',
             'lt.id as invoice',
             'lt.claimed_date as documentdate',
             'lt.number as documentnum',
