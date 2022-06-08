@@ -316,6 +316,7 @@ app.component('eyatraTripForm', {
             if (self.trip_advance_amount_employee_edit == 0) {
                 $("#advance_amount").prop('readonly', true);
             }
+
             $scope.AdvanceAmountDisable = function(start_date) {
                 var date = new Date();
                 var myDate = $filter('date')(date, "dd-MM-yyyy");
@@ -325,6 +326,8 @@ app.component('eyatraTripForm', {
                     if (self.trip_advance_amount_employee_edit == 1) {
                         $("#advance").hide().prop('disabled', true);
                         self.trip.advance_received = '0.00';
+                    } else {
+                        $("#advance").show().prop('disabled', false);
                     }
                 }
             }
