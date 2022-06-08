@@ -92,7 +92,8 @@ class LocalTrip extends Model {
 				DB::raw('CONCAT(DATE_FORMAT(local_trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(local_trips.end_date,"%d-%m-%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(local_trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
 				'purpose.name as purpose',
-				'status.name as status'
+				'status.name as status',
+				DB::raw('IF((local_trips.reason) IS NULL,"--",local_trips.reason) as reason')
 			)
 			->where('local_trips.employee_id', Auth::user()->entity_id)
 			->groupBy('local_trips.id')

@@ -600,6 +600,7 @@ class Trip extends Model {
 				'trips.advance_received',
 				'trips.status_id as status_id',
 				'status.name as status_name',
+				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
 			)
 			->where('u.user_type_id', 3121)
@@ -724,6 +725,7 @@ class Trip extends Model {
 				'trips.advance_received',
 				'trips.status_id as status_id',
 				'status.name as status_name',
+				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
 				DB::raw('DATE_FORMAT(MAX(trips.created_at),"%d/%m/%Y %h:%i %p") as date')
 			)
 			->where('u.user_type_id', 3121)
