@@ -117,7 +117,7 @@ class ExportReportController extends Controller
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
         ->where('eyec.amount_to_pay',1)
         ->where('t.status_id',3026)
-        ->where('eyec.status_id',3026)
+        //->where('eyec.status_id',3026)
         ->where('eyec.batch',0)
         ->groupBy('t.id')
         ->get()->toArray();
