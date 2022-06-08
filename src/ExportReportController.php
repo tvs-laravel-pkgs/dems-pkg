@@ -248,7 +248,6 @@ class ExportReportController extends Controller
                     $l_no++,
                     'EMP_'.$local['Account_Number'],
                     $local['Name'],
-                    $local['documentnum'],
                     $local['Bank_Account_Number'],
                     '('.$local['Account_Number']. '-' .$local['Name'].')'. '-' .$local['Purpose'],
                     $local['Created_Date_and_Time'],
