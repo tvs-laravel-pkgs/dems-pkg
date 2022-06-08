@@ -2282,8 +2282,8 @@ app.component('eyatraTripClaimForm', {
                                     $scope.$apply();
                                     $('#transport_submit').html('Save & Next');
                                     $("#transport_submit").attr("disabled", false);
-                                    $('#claim_lodge_expense_form').trigger("reset");
-                                    $('#claim_board_expense_form').trigger("reset");
+                                    //$('#claim_lodge_expense_form').trigger("reset");
+                                    //$('#claim_board_expense_form').trigger("reset");
                                 }
                             })
                             .fail(function(xhr) {
@@ -2545,7 +2545,7 @@ app.component('eyatraTripClaimForm', {
                 error.insertAfter(element.parent())
             },
             invalidHandler: function(event, validator) {
-                custom_noty('error', 'dadasds');
+                custom_noty('error', 'You have errors in all tabs');
             },
             submitHandler: function(form) {
                 //console.log(self.item);
