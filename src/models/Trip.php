@@ -1694,38 +1694,6 @@ class Trip extends Model {
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
-
-		// $emp_claim_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-		// 	->whereDate('trips.claimed_date', '>=', $from_date)
-		// 	->whereDate('trips.claimed_date', '<=', $to_date)
-		// 	->where('ey_employee_claims.status_id', 3026)
-		// 	->where('ey_employee_claims.employee_id', $trip->employee->id)
-		// 	->sum('trips.claim_amount');
-		// 	$transport_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-		// 	->whereDate('trips.claimed_date', '>=', $from_date)
-		// 	->whereDate('trips.claimed_date', '<=', $to_date)
-		// 	->where('ey_employee_claims.status_id', 3026)
-		// 	->where('ey_employee_claims.employee_id', $trip->employee->id)
-		// 	->sum('ey_employee_claims.transport_total');
-		// 	$lodging_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-		// 	->whereDate('trips.claimed_date', '>=', $from_date)
-		// 	->whereDate('trips.claimed_date', '<=', $to_date)
-		// 	->where('ey_employee_claims.status_id', 3026)
-		// 	->where('ey_employee_claims.employee_id', $trip->employee->id)
-		// 	->sum('ey_employee_claims.lodging_total');
-		// 	$boarding_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-		// 	->whereDate('trips.claimed_date', '>=', $from_date)
-		// 	->whereDate('trips.claimed_date', '<=', $to_date)
-		// 	->where('ey_employee_claims.status_id', 3026)
-		// 	->where('ey_employee_claims.employee_id', $trip->employee->id)
-		// 	->sum('ey_employee_claims.boarding_total');
-		// 	$local_travel_amount = Trip::join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-		// 	->whereDate('trips.claimed_date', '>=', $from_date)
-		// 	->whereDate('trips.claimed_date', '<=', $to_date)
-		// 	->where('ey_employee_claims.status_id', 3026)
-		// 	->where('ey_employee_claims.employee_id', $trip->employee->id)
-		// 	->sum('ey_employee_claims.local_travel_total');
-		
 		$trip->emp_trip_count = $emp_trip_count;
 		$trip->emp_claim_amount = $emp_claim_amount;
 		$trip->transport_amount = $transport_amount;

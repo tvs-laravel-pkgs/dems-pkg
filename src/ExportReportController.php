@@ -115,11 +115,12 @@ class ExportReportController extends Controller
         ->leftjoin('outlets as ol','ol.id','t.outlet_id')
         ->join('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
-        ->where('eyec.amount_to_pay',1)
         ->where('t.status_id',3026)
         ->where('eyec.status_id',3026)
+        ->where('eyec.amount_to_pay',1)
         ->where('eyec.batch',0)
-        ->groupBy('t.id')
+        ->where('t.batch',0)
+        ->groupBy('eyec.id')
         ->get()->toArray();
 
         //dd($outstations);
@@ -145,7 +146,6 @@ class ExportReportController extends Controller
         ->join('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
         ->where('t.status_id',3028)
-        ->whereNull('eyec.number')
         ->where('t.advance_received','>' ,0)
         ->where('t.batch',0)
         ->groupBy('t.id')
