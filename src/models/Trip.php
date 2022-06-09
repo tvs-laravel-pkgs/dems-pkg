@@ -2613,6 +2613,20 @@ class Trip extends Model {
 				} else {
 					$employee_claim->is_deviation = $request->is_deviation;
 				}
+                
+				// If transport exist and attachment not found the claim will go to deviation
+				$transport_attachment_count = Attachment::where('attachment_of_id', 3751)
+					->where('attachment_type_id', 3200)
+					->where('entity_id', $request->trip_id)
+					->count();
+				$self_booking_count=Visit::where('booking_method_id',3040)->where('trip_id',$request->trip_id)->select('id')->get();
+				foreach($self_booking_count as $key=>$value){
+				$transport_count = VisitBooking::where('visit_id', $value->id)->count();
+			}
+				if ($transport_count > 0 && $transport_attachment_count == 0) {
+					$employee_claim->is_deviation = 1;
+				}
+
 				// Changed deviation by Karthick T on 21-01-2022
 				// If lodging exist and attachment not found the claim will go to deviation
 				$lodge_attachment_count = Attachment::where('attachment_of_id', 3752)
