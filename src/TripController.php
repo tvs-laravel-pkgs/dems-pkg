@@ -6,6 +6,7 @@ use App\User;
 use Auth;
 use DB;
 use Entrust;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
@@ -169,6 +170,11 @@ class TripController extends Controller {
 
 				}
 			}
+			if($request->advance_received>0){
+			if($request->start_date< carbon::now()){
+				return response()->json(['success' => false, 'errors' => ['Select start date Grater than or equal to today ,to get advance amount']]);
+			}
+		  }
 		}
 		if ($request->id) {
 			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
