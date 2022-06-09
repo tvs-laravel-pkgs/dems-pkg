@@ -1893,7 +1893,7 @@ app.component('eyatraTripClaimForm', {
                         }
                         custom_noty('error', errors);
                     } else {
-                        self.trip.lodgings[index]['lodge_name'] = res.data.gst_data.TradeName ? res.data.gst_data.TradeName : res.data.gst_data.LegalName;
+                        self.trip.lodgings[index]['lodge_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
                     }
                 });
             }
