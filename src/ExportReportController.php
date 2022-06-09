@@ -425,6 +425,7 @@ class ExportReportController extends Controller
         $batch_wise_reports->date=$time_stamp;
         $batch_wise_reports->save();
         $batch_update=DB::table('trips')->where('status_id','=','3028')->where('batch','0')->update(['batch'=>1]);
+        $batch_update=DB::table('trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         $batch_update=DB::table('ey_employee_claims')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         $batch_update=DB::table('local_trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         return Redirect::to('/#!/report/list');

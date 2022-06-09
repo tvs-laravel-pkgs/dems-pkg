@@ -1866,7 +1866,7 @@ app.component('eyatraTripClaimForm', {
                         }
                         custom_noty('error', errors);
                     } else {
-                        self.trip.visits[index]['fare_gst_detail'] = res.data.gst_data.TradeName ? res.data.gst_data.TradeName : res.data.gst_data.LegalName;
+                        self.trip.visits[index]['fare_gst_detail'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
                     }
                 });
             }
