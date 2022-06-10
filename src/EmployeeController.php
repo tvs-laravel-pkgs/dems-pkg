@@ -745,7 +745,7 @@ class EmployeeController extends Controller {
 
 	public function getSendSms(Request $r){
         if(!empty($r->sms_mobile_number)){
-        	$message = str_replace('XXXXXX', 2, config('custom.SMS_TEMPLATES.TRIP_APPROVE'));
+        	$message = str_replace('XXXXXX', 2, config('custom.SMS_TEMPLATES.SMS_SENT'));
         	$mobile_number=$r->sms_mobile_number;
         	$sms=sendNotificationTxtMsg(2,$message,$mobile_number);
         }else {
