@@ -264,9 +264,35 @@ class AuthController extends Controller {
 		]);
 	}
 	public function setMpinForm(Request $request) {
+		$validator = Validator::make($request->all(), [
+				'mpin' => [
+					'required',
+					'string',
+					'min:4',
+					'max:4',
+				],
+				'confirm_mpin' => [
+					'required',
+					'string',
+					'min:4',
+					'max:4',
+				],
+				'user_id' => [
+					'required',
+					'string',
+				],
+			]);
+
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => $validator->errors()->all(),
+				], $this->successStatus);
+			}
 
 		if ($request->mpin != $request->confirm_mpin) {
-			return redirect()->back()->with(['error' => "Please Enter Same Mpin"]);
+			return response()->json(['error' => "Please Enter Same Mpin"]);
 		}
 
 		$mpin = Hash::make($request->mpin);
@@ -275,9 +301,10 @@ class AuthController extends Controller {
 		$user = User::where('id', $request->user_id)->update(['password' => $mpin]);
 
 		if ($user) {
-			return redirect()->back()->with(['success' => "Mpin Changed Successfully"]);
+			return response()->json(['success' => 'true', 'message' => "Mpin Changed Successfully"], $this->successStatus);
+			//return redirect()->back()->with(['success' => "Mpin Changed Successfully"]);
 		} else {
-			return redirect()->back()->with(['error' => "Something went wrong. Please try Again"]);
+			return response()->json(['error' => "Something went wrong. Please try Again"],$this->successStatus);
 
 		}
 	}
