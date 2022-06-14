@@ -346,7 +346,7 @@ class AuthController extends Controller {
 		return response()->json([
 			'user_id' => $user_id,
 			'result' => $result,
-			'otp_no'=>$otp_no,
+			'otp'=>$otp_no,
 		]);
 	}else{
 		return response()->json([
