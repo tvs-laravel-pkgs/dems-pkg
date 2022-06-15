@@ -44,11 +44,6 @@ class TripController extends Controller {
 
 				}
 			}
-			if($request->advance_received>0){
-			if($request->start_date< carbon::now()){
-				return response()->json(['success' => false, 'errors' => ['Select start date Grater than or equal to today ,to get advance amount']]);
-			}
-		  }
 		}
 
 		if ($request->id) {
