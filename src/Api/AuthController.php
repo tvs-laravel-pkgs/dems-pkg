@@ -142,7 +142,7 @@ class AuthController extends Controller {
 					'min:4',
 					'max:10',
 				],
-				'imei' => 'required|min:3|max:16',
+				'imei' => 'required|min:3|max:15',
 				// 'app_type_id' => 'nullable|integer|exists:configs,id',
 				// 'company_code' => 'required|string|exists:companies,code',
 			]);
@@ -281,6 +281,7 @@ class AuthController extends Controller {
 					'required',
 					'string',
 				],
+				'imei' => 'required|min:3|max:15',
 			]);
 
 			if ($validator->fails()) {
@@ -297,8 +298,7 @@ class AuthController extends Controller {
 
 		$mpin = Hash::make($request->mpin);
 		$user = User::where('id', $request->user_id)->first();
-
-		$user = User::where('id', $request->user_id)->update(['password' => $mpin]);
+		$user = User::where('id', $request->user_id)->update(['mpin' => $mpin, 'imei'=>$request->imei]);
 
 		if ($user) {
 			return response()->json(['success' => 'true', 'message' => "Mpin Changed Successfully"], $this->successStatus);
