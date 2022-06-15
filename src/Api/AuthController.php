@@ -142,7 +142,7 @@ class AuthController extends Controller {
 					'min:4',
 					'max:10',
 				],
-				'imei' => 'required|min:3|max:15',
+				'imei' => 'required|min:3|max:16',
 				// 'app_type_id' => 'nullable|integer|exists:configs,id',
 				// 'company_code' => 'required|string|exists:companies,code',
 			]);
@@ -281,7 +281,7 @@ class AuthController extends Controller {
 					'required',
 					'string',
 				],
-				'imei' => 'required|min:3|max:15',
+				'imei' => 'required|min:3|max:16',
 			]);
 
 			if ($validator->fails()) {
