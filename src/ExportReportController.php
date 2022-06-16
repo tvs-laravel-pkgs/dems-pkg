@@ -70,7 +70,14 @@ class ExportReportController extends Controller
     public function getForm(Request $r) {
         $this->data['base_url'] = URL::to('/');
         $this->data['token'] = csrf_token();
+        $this->data['business_list'] = Business::select('id', 'name')->get()->prepend(['id' => -1, 'name' => 'All Businesses']);
         $this->data['region_list'] = Region::select('id', 'name')->get()->prepend(['id' => -1, 'name' => 'All Regions']);
+        return response()->json($this->data);
+    }
+    public function getView(Request $r) {
+        $this->data['base_url'] = URL::to('/');
+        $this->data['token'] = csrf_token();
+        $this->data['business_list'] = Business::select('id', 'name')->get()->prepend(['id' => -1, 'name' => 'All Businesses']);
         return response()->json($this->data);
     }
     // Taking outlet based on region
@@ -93,7 +100,13 @@ class ExportReportController extends Controller
     }
     // Bank statement report
     public function bankStatement(Request $r) {
+        //dd($r->all());
+        $business_ids=explode(',', $r->business_ids);
+        //dd($r);
         $time_stamp = date('Y_m_d_h_i_s');
+        //dd($business_ids);
+        foreach($business_ids as $business_id){
+
         $outstations = Employee::select(
             'employees.code as Account_Number',
             'u.name as Name',
@@ -115,11 +128,14 @@ class ExportReportController extends Controller
         ->leftjoin('outlets as ol','ol.id','t.outlet_id')
         ->join('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
+        ->join('departments','departments.id','employees.department_id')
+        ->join('businesses','businesses.id','departments.business_id')
         ->where('t.status_id',3026)
         ->where('eyec.status_id',3026)
         ->where('eyec.amount_to_pay',1)
         ->where('eyec.batch',0)
         ->where('t.batch',0)
+        ->where('departments.business_id','=',$business_id)
         ->groupBy('eyec.id')
         ->get()->toArray();
 
@@ -145,9 +161,12 @@ class ExportReportController extends Controller
         ->leftjoin('outlets as ol','ol.id','t.outlet_id')
         ->join('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as eyec_s','eyec_s.id','eyec.sbu_id')
+        ->join('departments','departments.id','employees.department_id')
+        ->join('businesses','businesses.id','departments.business_id')
         ->where('t.status_id',3028)
         ->where('t.advance_received','>' ,0)
         ->where('t.batch',0)
+        ->where('departments.business_id','=',$business_id)
         ->groupBy('t.id')
         ->get()->toArray();
         //dd($advance_amount);
@@ -171,11 +190,17 @@ class ExportReportController extends Controller
         ->leftjoin('outlets as ol','ol.id','lt.outlet_id')
         ->leftjoin('sbus as s','s.id','employees.sbu_id')
         ->leftjoin('sbus as lt_s','lt_s.id','lt.sbu_id')
+        ->join('departments','departments.id','employees.department_id')
+        ->join('businesses','businesses.id','departments.business_id')
         ->where('lt.status_id','=','3026')
         ->where('lt.batch',0)
+        ->where('departments.business_id','=',$business_id)
         ->groupBy('lt.id')
         ->get()->toArray();
         $locals=array_merge($claims,$outstations,$advance_amount);
+        if(count($locals)==0){
+            continue;
+        }
        // dd($locals);
         $batch_id=BatchWiseReport::where('date','=',date('Y-m-d'))->orderBy('id','DESC')->pluck('name')->first();
         $batch=((int) $batch_id?:'0') + 1;
@@ -312,7 +337,7 @@ class ExportReportController extends Controller
             }  
         }else{
             Session()->flash('error', 'No Data Found');
-            return redirect()->to('/#!/report/list');
+           // return Redirect::to('/#!/report/list');
         }
  
         $consolidation_local=[
@@ -369,7 +394,9 @@ class ExportReportController extends Controller
         $travelex_details[]=$consolidation_detail;
         // ob_end_clean();
         // ob_start();
-        $outputfile ='travelex_report_' . $time_stamp;
+        $business_name=Business::where('id','=',$business_id)->pluck('name')->first();
+        //dd($business_name);
+        $outputfile =$business_name . '_travelex_report_' . $time_stamp;
         $file=Excel::create($outputfile, function ($excel) use ($travelex_header,$travelex_details) {
             $excel->sheet('travelex_', function ($sheet) use ($travelex_header,$travelex_details) {
                 $sheet->fromArray($travelex_details, NULL, 'A1');
@@ -396,7 +423,7 @@ class ExportReportController extends Controller
         $batch_wise_reports->name=$report_details->batch;
         $batch_wise_reports->date=$time_stamp;
         $batch_wise_reports->save();
-        $outputfile_bank ='bank_statement_' . $time_stamp;
+        $outputfile_bank =$business_name . '_bank_statement_' . $time_stamp;
         $file_one=Excel::create($outputfile_bank, function ($excel) use ($local_trips_header,$local_trips) {
             $excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header,$local_trips) {
                 $sheet->fromArray($local_trips, NULL, 'A1');
@@ -428,6 +455,7 @@ class ExportReportController extends Controller
         $batch_update=DB::table('trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         $batch_update=DB::table('ey_employee_claims')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
         $batch_update=DB::table('local_trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
+    }
         return Redirect::to('/#!/report/list');
     }
         
@@ -437,7 +465,7 @@ class ExportReportController extends Controller
     }
     // Gst report
     public function gst(Request $r) {
-        // dd($r->all());
+        //dd($r->business_ids);
         ob_end_clean();
 		$date = explode(' to ', $r->period);
 		$from_date = date('Y-m-d', strtotime($date[0]));
@@ -518,6 +546,8 @@ class ExportReportController extends Controller
 			->leftJoin('ncities as city', 'city.id', 'a.city_id')
 			->leftJoin('nstates as s', 's.id', 'city.state_id')
 			->leftJoin('regions as r', 'r.state_id', 's.id')
+            ->join('departments','departments.id','employees.department_id')
+            ->join('businesses','businesses.id','departments.business_id')
             ->where(function($q) use ($region_ids, $outlet_ids) {
                 if (count($outlet_ids) == 0) {
                     $q->whereIn('r.id', $region_ids);
@@ -528,6 +558,7 @@ class ExportReportController extends Controller
             ->where('ey_employee_claims.status_id', 3026)
             ->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
+            ->where('departments.business_id','=',$r->business_ids)
             ->groupBy('ey_employee_claims.id')
             ->get();
             // dd(count($gst_details));
@@ -596,7 +627,7 @@ class ExportReportController extends Controller
                         ->pluck('path')
                         ->toArray();
 
-                $content = 'Kindly find you are Bank Statement And Travek X to Ax Report Below.';
+                $content = 'Kindly find your Bank Statement And Travek X to Ax Report Below.';
                 if (count($mail_attachements) == 0)
                     $content = 'No reports found today.';
                 $subject = 'Mail Report';

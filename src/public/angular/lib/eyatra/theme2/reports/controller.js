@@ -10,6 +10,7 @@ app.component('eyatraGstReport', {
             self.token = res.data.token;
             self.region_list = res.data.region_list;
             self.outlet_list = [];
+            self.business_list = res.data.business_list;
 
             self.report_export_route = res.data.base_url + '/eyatra/gst/report';
             $rootScope.loading = false;
@@ -46,6 +47,9 @@ app.component('eyatraGstReport', {
                     required: true,
                 },
                 'outlets': {
+                    required: true,
+                },
+                'business_ids': {
                     required: true,
                 },
                 'period': {
@@ -171,5 +175,49 @@ app.component('eyatraReportList', {
             }, 500);
         });
         $rootScope.loading = false;
+    }
+});
+app.component('eyatraReportView', {
+    templateUrl: eyatra_report_view_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+
+        $http.get(
+            laravel_routes['getReportViewDetail']
+        ).then(function(res) {
+
+            self.token = res.data.token;
+            self.business_list = res.data.business_list;
+
+            self.bank_report_export_route = res.data.base_url + '/eyatra/bank-statement/report';
+            $rootScope.loading = false;
+        });
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+        var form_id = '#bank-statement-form';
+        var v = jQuery(form_id).validate({
+            ignore: '',
+            rules: {
+                'business_ids': {
+                    required: true,
+                },
+            },
+            errorPlacement: function(error, element) {
+                error.insertAfter(element);
+            },
+            invalidHandler: function(event, validator) {
+                custom_noty('error', 'You have errors,Please check all tabs');
+            },
+        });
     }
 });

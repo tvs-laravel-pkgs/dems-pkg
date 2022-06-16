@@ -601,10 +601,13 @@ Route::group(['middleware' => ['web']], function () {
 	});
 });
 
+Route::post('eyatra/bank-statement/report', 'Uitoux\EYatra\ExportReportController@bankStatement')->name('bankStatementReport');
 Route::get('eyatra/bank-statement/report', 'Uitoux\EYatra\ExportReportController@bankStatement')->name('bankStatementReport');
-Route::get('eyatra/travelx-to-ax/report', 'Uitoux\EYatra\ExportReportController@travelXtoAx')->name('travelXtoAxReport');
+Route::post('eyatra/travelx-to-ax/report', 'Uitoux\EYatra\ExportReportController@travelXtoAx')->name('travelXtoAxReport');
 Route::post('eyatra/gst/report', 'Uitoux\EYatra\ExportReportController@gst')->name('gstReport');
 Route::get('eyatra/reports-data', 'Uitoux\EYatra\ExportReportController@getForm')->name('getReportFormDetail');
+Route::get('eyatra/reports-view-data', 'Uitoux\EYatra\ExportReportController@getView')->name('getReportViewDetail');
+
 Route::get('eyatra/outlet-detail/{region_ids?}', 'Uitoux\EYatra\ExportReportController@getOutlet')->name('getOutletDetail');
 Route::get('eyatra/report-list/filter', 'Uitoux\EYatra\ExportReportController@getReportListFilter')->name('getReportListFilter');
 Route::get('eyatra/report-list/data', 'Uitoux\EYatra\ExportReportController@getReportListData')->name('getReportListData');

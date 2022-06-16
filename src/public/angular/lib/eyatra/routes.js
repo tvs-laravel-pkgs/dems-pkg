@@ -842,6 +842,10 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/report/list', {
         template: '<eyatra-report-list></eyatra-report-list>',
         title: 'Report List',
+    }).
+    when('/report/view', {
+        template: '<eyatra-report-view></eyatra-report-view>',
+        title: 'Report View',
     });
 
 
