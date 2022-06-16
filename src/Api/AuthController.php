@@ -104,7 +104,8 @@ class AuthController extends Controller {
 			$otp_no = mt_rand(100000, 999999);
 			$user->otp = $otp_no;
 			$user->save();
-			$message = "Your OTP is " . $otp_no . " to reset password in DEMS Application. Please enter OTP to verify your mobile number.";
+			//$message = "Your OTP is " . $otp_no . " to reset password in DEMS Application. Please enter OTP to verify your mobile number.";
+			$message = str_replace('XXXXXX', $otp_no, config('custom.SMS_TEMPLATES.DEMS_MOBILE_APPLICATION_OTP'));
 			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
 			$result = 1;
 			$user_id = $user->id;
@@ -232,7 +233,8 @@ class AuthController extends Controller {
 			$otp_no = mt_rand(100000, 999999);
 			$user->otp = $otp_no;
 			$user->save();
-			$message = "Your OTP is " . $otp_no . " to reset Mpin in DEMS Application. Please enter OTP to verify your mobile number.";
+			//$message = "Your OTP is " . $otp_no . " to reset Mpin in DEMS Application. Please enter OTP to verify your mobile number.";
+			$message = str_replace('XXXXXX', $otp_no, config('custom.SMS_TEMPLATES.DEMS_MOBILE_APPLICATION_OTP'));
 			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
 			$result = 1;
 			$user_id = $user->id;
@@ -339,7 +341,8 @@ class AuthController extends Controller {
 			$otp_no = mt_rand(100000, 999999);
 			$user->otp = $otp_no;
 			$user->save();
-			$message = "Your OTP is " . $otp_no . " to reset Mpin in DEMS Application. Please enter OTP to verify your mobile number.";
+			//$message = "Your OTP is " . $otp_no . " to reset Mpin in DEMS Application. Please enter OTP to verify your mobile number.";
+			$message = str_replace('XXXXXX', $otp_no, config('custom.SMS_TEMPLATES.DEMS_MOBILE_APPLICATION_OTP'));
 			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
 			$result = 1;
 			$user_id = $user->id;
