@@ -1728,9 +1728,36 @@ class Trip extends Model {
 			// if ($validator->fails()) {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
-
 			DB::beginTransaction();
 			// dd($request->all());
+			//starting ending Km validation
+				$visit_id=Visit::select('id')->where('trip_id',$request->trip_id)->count();
+				$two_wheeler_count=Visit::select('travel_mode_id')->where('trip_id',$request->trip_id)->where('travel_mode_id','=',15)->count();
+				$four_wheeler_count=Visit::select('travel_mode_id')->where('trip_id',$request->trip_id)->where('travel_mode_id','=',16)->count();
+				if($visit_id >= 2 && $two_wheeler_count >= 2){
+					$validate_end_km=0;
+					//dd($validate_end_km);
+				    foreach ($request->visits as $visit_key => $visit_val) {
+				     if($visit_key==0){
+				    	$validate_end_km=$visit_val['km_end'];
+				    }
+				        if($visit_key>0 && $validate_end_km > $visit_val['km_start']){
+                           return response()->json(['success' => false, 'errors' => ['Start KM should be grater then previous end KM']]);
+					    }
+				    }
+			    }
+			    if($visit_id >= 2 && $four_wheeler_count >= 2){
+			    	$validate_end_km=0;
+				    foreach ($request->visits as $visit_key => $visit_val) {
+				    	if($visit_key==0){
+				    	$validate_end_km=$visit_val['km_end'];
+				    }
+				        if($visit_key>0 && $validate_end_km > $visit_val['km_start']){
+					      return response()->json(['success' => false, 'errors' => ['Start KM should be grater then previous end KM']]);
+					    }	
+				    }
+                }
+                //starting ending km validation
 
 			// dd($request->trip_id);
 			if (empty($request->trip_id)) {
