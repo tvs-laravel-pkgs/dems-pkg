@@ -1731,6 +1731,7 @@ class Trip extends Model {
 			DB::beginTransaction();
 			// dd($request->all());
 			//starting ending Km validation
+			if(!empty($request->visits)){
 				$visit_id=Visit::select('id')->where('trip_id',$request->trip_id)->count();
 				$two_wheeler_count=Visit::select('travel_mode_id')->where('trip_id',$request->trip_id)->where('travel_mode_id','=',15)->count();
 				$four_wheeler_count=Visit::select('travel_mode_id')->where('trip_id',$request->trip_id)->where('travel_mode_id','=',16)->count();
@@ -1757,6 +1758,7 @@ class Trip extends Model {
 					    }	
 				    }
                 }
+            }
                 //starting ending km validation
 
 			// dd($request->trip_id);
