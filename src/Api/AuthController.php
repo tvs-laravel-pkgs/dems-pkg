@@ -298,7 +298,7 @@ class AuthController extends Controller {
 			return response()->json(['error' => "Please Enter Same Mpin"]);
 		}
 
-		$mpin = Hash::make($request->mpin);
+		$mpin = $request->mpin;
 		$user = User::where('id', $request->user_id)->first();
 		$user = User::where('id', $request->user_id)->update(['mpin' => $mpin, 'imei'=>$request->imei]);
 
