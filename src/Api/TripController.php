@@ -60,7 +60,7 @@ class TripController extends Controller {
 		}
 
 		// dd($trip_start_date_data);
-		if ($trip_start_date_data) {
+		if ($trip_start_date_data && $trip_start_date_data->status_id != 3032) {
 			return response()->json(['success' => false, 'errors' => ["You have another trip on this trip period"]]);
 		}
 		$date_lessthan_previous_trip = Trip::select('id')->where('employee_id', Auth::user()->entity_id)

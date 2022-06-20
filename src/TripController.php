@@ -29,6 +29,7 @@ class TripController extends Controller {
 				'trips.number',
 				'e.code as ecode',
 				'users.name as ename', 'trips.status_id',
+				'trips.approve_remarks',
 				DB::raw('GROUP_CONCAT(DISTINCT(c.name)) as cities'),
 
 				// DB::raw('DATE_FORMAT(MIN(v.departure_date),"%d/%m/%Y") as start_date'),
@@ -95,7 +96,7 @@ class TripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
+				if ($trip->status_id == '3032' && empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
 						$edit_class = "";
@@ -105,6 +106,9 @@ class TripController extends Controller {
 						$delete_class = "";
 					}
 				} else {
+					
+					
+				
 					$edit_class = "visibility:hidden";
 					$delete_class = "visibility:hidden";
 				}
@@ -189,8 +193,7 @@ class TripController extends Controller {
 				return response()->json(['success' => false, 'errors' => "Your previous trips waiting for approval!"]);
 			}
 		}
-
-		if ($trip_start_date_data) {
+		if ($trip_start_date_data && $trip_start_date_data->status_id != 3032) {
 			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
 		}
 		$date_lessthan_previous_trip = Trip::select('id')->where('employee_id', Auth::user()->entity_id)
