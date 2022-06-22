@@ -30,10 +30,47 @@ class DashboardController extends Controller {
 		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->whereIN('trips.status_id', [3023, 3024, 3025, 3029, 3030, 3034, 3036])->count();
 
 		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3028)->where('start_date', '>', date('Y-m-d'))->count();
+		$trips_pending=Trip::where('status_id', '=', '3021')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$trips_approved=Trip::where('status_id', '=', '3028')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$trips_rejected=Trip::where('status_id', '=', '3022')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$claims_new=Trip::where('status_id', '=', [3033,3028])->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$claims_requested=Trip::where('status_id', '=', '3023')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$claims_approved=Trip::where('status_id', '=', '3029')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$claims_rejected=Trip::where('status_id', '=', '3024')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$claims_completed=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)->count();
+		/*$verification_new=Trip::where('status_id', '=', [3033,3028])->where('employee_id', Auth::user()->entity_id)
+			->count();*/
+		$verification_requested=Trip::where('status_id', '=', '3023')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$verification_approved=Trip::where('status_id', '=', '3029')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$verification_rejected=Trip::where('status_id', '=', '3024')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$verification_completed=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)->count();
 
 		$dashboard_details['total_trips'] = $total_trips;
 		$dashboard_details['total_claims_pending'] = $total_claims_pending;
 		$dashboard_details['total_upcoming_trips'] = $total_upcoming_trips;
+
+        $dashboard_details['trips_pending'] = $trips_pending;
+		$dashboard_details['trips_approved'] = $trips_approved;
+		$dashboard_details['trips_rejected'] = $trips_rejected;
+		$dashboard_details['claims_new'] = $claims_new;
+		$dashboard_details['claims_requested'] = $claims_requested;
+		$dashboard_details['claims_approved'] = $claims_approved;
+		$dashboard_details['claims_rejected'] = $claims_rejected;
+		$dashboard_details['claims_completed'] = $claims_completed;
+		$dashboard_details['verification_requested'] = $verification_requested;
+		$dashboard_details['verification_approved'] = $verification_approved;
+		$dashboard_details['verification_rejected'] = $verification_rejected;
+		$dashboard_details['verification_completed'] = $verification_completed;
 
 		$getversion_code = DB::table('version_control')->where('project_name', 'dems')->orderBy('id', 'DESC')->first();
 		if ($getversion_code != NULL) {
