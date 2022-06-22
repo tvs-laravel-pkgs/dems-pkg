@@ -100,13 +100,10 @@ class ExportReportController extends Controller
     }
     // Bank statement report
     public function bankStatement(Request $r) {
-        //dd($r->all());
         $business_ids=explode(',', $r->business_ids);
         //dd($r);
         $time_stamp = date('Y_m_d_h_i_s');
-        //dd($business_ids);
         foreach($business_ids as $business_id){
-
         $outstations = Employee::select(
             'employees.code as Account_Number',
             'u.name as Name',
@@ -201,7 +198,7 @@ class ExportReportController extends Controller
         if(count($locals)==0){
             continue;
         }
-       // dd($locals);
+        //dd($locals);
         $batch_id=BatchWiseReport::where('date','=',date('Y-m-d'))->orderBy('id','DESC')->pluck('name')->first();
         $batch=((int) $batch_id?:'0') + 1;
         $local_trips_header = [
@@ -451,10 +448,17 @@ class ExportReportController extends Controller
         $batch_wise_reports->name=$report_details->batch;
         $batch_wise_reports->date=$time_stamp;
         $batch_wise_reports->save();
-        $batch_update=DB::table('trips')->where('status_id','=','3028')->where('batch','0')->update(['batch'=>1]);
-        $batch_update=DB::table('trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
-        $batch_update=DB::table('ey_employee_claims')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
-        $batch_update=DB::table('local_trips')->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
+
+        foreach($locals as $local){
+        $batch_update=DB::table('trips')->where('id',$local['invoice'])->where('status_id','=','3028')->where('batch','0')->update(['batch'=>1]);
+    
+    
+        $batch_update=DB::table('trips')->where('id',$local['invoice'])->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
+        $batch_update=DB::table('ey_employee_claims')->where('trip_id',$local['invoice'])->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
+   
+    
+        $batch_update=DB::table('local_trips')->where('id',$local['invoice'])->where('status_id','=','3026')->where('batch','0')->update(['batch'=>1]);
+    }
     }
         return Redirect::to('/#!/report/list');
     }
