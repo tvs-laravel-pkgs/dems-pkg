@@ -238,6 +238,8 @@ class AuthController extends Controller {
 			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
 			$result = 1;
 			$user_id = $user->id;
+		}else{
+			return response()->json(['status' => 'false', 'msg' => 'Invalid Mobile Number'], $this->successStatus);
 		}
 		return response()->json([
 			'user_id' => $user_id,

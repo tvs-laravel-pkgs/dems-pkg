@@ -601,7 +601,6 @@ Route::group(['middleware' => ['web']], function () {
 	});
 });
 
-Route::post('eyatra/bank-statement/report', 'Uitoux\EYatra\ExportReportController@bankStatement')->name('bankStatementReport');
 Route::get('eyatra/bank-statement/report', 'Uitoux\EYatra\ExportReportController@bankStatement')->name('bankStatementReport');
 Route::post('eyatra/travelx-to-ax/report', 'Uitoux\EYatra\ExportReportController@travelXtoAx')->name('travelXtoAxReport');
 Route::post('eyatra/gst/report', 'Uitoux\EYatra\ExportReportController@gst')->name('gstReport');
