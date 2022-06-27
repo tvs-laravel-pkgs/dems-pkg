@@ -355,11 +355,7 @@ class AuthController extends Controller {
 		]);
 	}else{
 		return response()->json([
-					'success' => false,
-					'errors' => [
-						'Invalid Mobile Number',
-					],
-				], $this->successStatus);
+					'success' => false,'errors' => "Invalid Mobile Number"], $this->successStatus);
 	}
 		} catch (\Exception $e) {
 			return response()->json([
