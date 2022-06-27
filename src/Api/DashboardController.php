@@ -7,6 +7,7 @@ use Auth;
 use DB;
 use Uitoux\EYatra\MobileNotificationDetail;
 use Uitoux\EYatra\Trip;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller {
 	public $successStatus = 200;
@@ -47,11 +48,19 @@ class DashboardController extends Controller {
 		$claims_completed=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)->count();
 		/*$verification_new=Trip::where('status_id', '=', [3033,3028])->where('employee_id', Auth::user()->entity_id)
 			->count();*/
+		
+		$verification_trips=Trip::where('status_id','=',3021)->count();
 		$verification_requested=Trip::where('status_id', '=', '3023')->where('employee_id', Auth::user()->entity_id)
 			->count();
 		$verification_approved=Trip::where('status_id', '=', '3029')->where('employee_id', Auth::user()->entity_id)
 			->count();
 		$verification_rejected=Trip::where('status_id', '=', '3024')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$verification_claim2_requested=Trip::where('status_id', '=', '3029')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$verification_claim2_approved=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)
+			->count();
+		$verification_claim2_rejected=Trip::where('status_id', '=', '3024')->where('employee_id', Auth::user()->entity_id)
 			->count();
 		$verification_completed=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)->count();
 
@@ -70,6 +79,9 @@ class DashboardController extends Controller {
 		$dashboard_details['verification_requested'] = $verification_requested;
 		$dashboard_details['verification_approved'] = $verification_approved;
 		$dashboard_details['verification_rejected'] = $verification_rejected;
+		$dashboard_details['verification_claim2_requested'] = $verification_claim2_requested;
+		$dashboard_details['verification_claim2_approved'] = $verification_claim2_approved;
+		$dashboard_details['verification_claim2_rejected'] = $verification_claim2_rejected;
 		$dashboard_details['verification_completed'] = $verification_completed;
 
 		$getversion_code = DB::table('version_control')->where('project_name', 'dems')->orderBy('id', 'DESC')->first();
