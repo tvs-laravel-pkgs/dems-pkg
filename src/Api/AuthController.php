@@ -303,6 +303,12 @@ class AuthController extends Controller {
 		$mpin = $request->mpin;
 		$user = User::where('id', $request->user_id)->first();
 		$user = User::where('id', $request->user_id)->update(['mpin' => $mpin, 'imei'=>$request->imei]);
+		//Check Device Token already available or not
+		$device_token=Hash::make($request->imei);
+			User::where('device_token', $device_token)->update(['device_token' => NULL]);
+
+			//Save Device Token
+			$user = User::where('id', $request->user_id)->update(['device_token' =>$device_token]);
 
 		if ($user) {
 			return response()->json(['success' => 'true', 'message' => "Mpin Changed Successfully"], $this->successStatus);
