@@ -24,7 +24,7 @@ class TripController extends Controller {
 
 	public function addTrip(Request $request) {
 		 //dd($request->all());
-       if ($request->advance_received) {
+       if ($request->advance_received > 0) {
        	    $get_previous_trips = Trip::select('id')
 			        ->where('employee_id', Auth::user()->entity_id)
 			        ->where('id','!=',$request->id)
