@@ -2089,6 +2089,7 @@ class Trip extends Model {
 						}
 						//dd($lodging_data['lodge_name']);
 						if($lodging_data['amount'] >= 1000){
+						if(empty($lodging_data['gstin'] && $lodging_data['lodge_name'])){
 						$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
 						if (!$response['success']) {
 							return response()->json([
@@ -2098,8 +2099,9 @@ class Trip extends Model {
 								],
 							]);
 						}
-						$lodging->lodge_name = $response['name'];
-						$lodging->gstin = $response['gstin'];
+						$lodging->lodge_name = $lodging_data['gstin'];
+						$lodging->gstin = $lodging_data['lodge_name'];
+					}
 					}else{
 						$lodging->lodge_name = null;
 						$lodging->gstin = null;
