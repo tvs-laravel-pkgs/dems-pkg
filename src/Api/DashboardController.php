@@ -50,20 +50,20 @@ class DashboardController extends Controller {
 		/*$verification_new=Trip::where('status_id', '=', [3033,3028])->where('employee_id', Auth::user()->entity_id)
 			->count();*/
 		
-		$verification_trips=Trip::where('status_id','=',3021)->count();
-		$verification_requested=Trip::where('status_id', '=', '3023')->where('employee_id', Auth::user()->entity_id)
+		$verification_trips=Trip::where('status_id','=',3021)->where('manager_id', Auth::user()->entity_id)->count();
+		$verification_requested=Trip::where('status_id', '=', '3023')->where('manager_id', Auth::user()->entity_id)
 			->count();
-		$verification_approved=Trip::where('status_id', '=', '3029')->where('employee_id', Auth::user()->entity_id)
+		$verification_approved=Trip::where('status_id', '=', '3029')->where('manager_id', Auth::user()->entity_id)
 			->count();
-		$verification_rejected=Trip::where('status_id', '=', '3024')->where('employee_id', Auth::user()->entity_id)
+		$verification_rejected=Trip::where('status_id', '=', '3024')->where('manager_id', Auth::user()->entity_id)
 			->count();
-		$verification_claim2_requested=Trip::where('status_id', '=', '3029')->where('employee_id', Auth::user()->entity_id)
+		$verification_claim2_requested=Trip::where('status_id', '=', '3029')->where('manager_id', Auth::user()->entity_id)
 			->count();
-		$verification_claim2_approved=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)
+		$verification_claim2_approved=Trip::where('status_id', '=', '3026')->where('manager_id', Auth::user()->entity_id)
 			->count();
-		$verification_claim2_rejected=Trip::where('status_id', '=', '3024')->where('employee_id', Auth::user()->entity_id)
+		$verification_claim2_rejected=Trip::where('status_id', '=', '3024')->where('manager_id', Auth::user()->entity_id)
 			->count();
-		$verification_completed=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)->count();
+		$verification_completed=Trip::where('status_id', '=', '3026')->where('manager_id', Auth::user()->entity_id)->count();
 
 		$dashboard_details['total_trips'] = $total_trips;
 		$dashboard_details['total_claims_pending'] = $total_claims_pending;
