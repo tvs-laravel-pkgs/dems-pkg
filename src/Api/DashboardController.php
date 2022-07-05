@@ -37,6 +37,7 @@ class DashboardController extends Controller {
 			->count();
 		$trips_rejected=Trip::where('status_id', '=', '3022')->where('employee_id', Auth::user()->entity_id)
 			->count();
+		$trips_completed=Trip::where('status_id', '=', '3026')->where('employee_id', Auth::user()->entity_id)->count();
 		$claims_new=Trip::where('status_id', '=', [3033,3028])->where('employee_id', Auth::user()->entity_id)
 			->count();
 		$claims_requested=Trip::where('status_id', '=', '3023')->where('employee_id', Auth::user()->entity_id)
@@ -71,6 +72,7 @@ class DashboardController extends Controller {
         $dashboard_details['trips_pending'] = $trips_pending;
 		$dashboard_details['trips_approved'] = $trips_approved;
 		$dashboard_details['trips_rejected'] = $trips_rejected;
+		$dashboard_details['trips_completed'] = $trips_completed;
 		$dashboard_details['claims_new'] = $claims_new;
 		$dashboard_details['claims_requested'] = $claims_requested;
 		$dashboard_details['claims_approved'] = $claims_approved;
