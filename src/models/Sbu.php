@@ -76,7 +76,7 @@ class Sbu extends Model {
 				->where('lobs.company_id', Auth::user()->company_id)
 				->orderBy('sbus.id', 'ASC')
 				->get()
-			)->prepend(['id' => null, 'name' => 'Select Any Functional Support']);
+			)->prepend(['id' => null, 'name' => 'Select Any Debit to Business Unit']);
 		return $list;
 	}
 

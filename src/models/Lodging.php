@@ -29,6 +29,7 @@ class Lodging extends Model {
 		'cgst',
 		'sgst',
 		'igst',
+		'invoice_date',
 		'attachment_status',
 		'created_by',
 		'updated_by',
@@ -44,6 +45,9 @@ class Lodging extends Model {
 
 	public function getCheckInDateAttribute($value) {
 		return empty($value) ? '' : date('d-m-Y', strtotime($value));
+	}
+	public function getInvoiceDateAttribute($date) {
+		return empty($date) ? '' : date('d-m-Y', strtotime($date));
 	}
 
 	public function getCheckInTimeAttribute() {

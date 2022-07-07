@@ -372,6 +372,26 @@ app.component('eyatraTripClaimForm', {
 
         });
 
+        //CURRENT DATE SHOW IN DATEPICKER
+        setTimeout(function() {
+            $('div[data-provide="datepicker"]').datepicker({
+                todayHighlight: true,
+                autoclose: true,
+                endDate: "today",
+            });
+        }, 1000);
+
+        $('body').on('click', "#datepicker", function() {
+            var id = $(this).data('picker');
+            setTimeout(function() {
+                $(".datepicker_" + id).datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                    endDate: "today",
+                });
+            }, 500);
+        });
+
         // Proof document by Karthick T on 07-04-2022
         $scope.uploadDocument = (document_type_id, id) => {
             console.log('document_type_id : ' + document_type_id);
