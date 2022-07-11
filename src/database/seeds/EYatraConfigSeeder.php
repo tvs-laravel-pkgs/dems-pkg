@@ -1095,6 +1095,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Others',
 				'config_type_id' => 541,
 			],
+			3755 => [
+				'name' => 'Self Booking Attachments',
+				'config_type_id' => 541,
+			],
 
 		];
 

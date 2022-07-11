@@ -17,6 +17,7 @@ class Visit extends Model {
 		'booking_status_id',
 		'agent_id',
 		'notes_to_agent',
+		'self_booking_approval',
 		// 'departure_date',
 		// 'arrival_date',
 		'status_id',

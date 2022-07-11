@@ -361,6 +361,11 @@ class Trip extends Model {
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
 					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
+					if($visit->booking_method_id == 3040){
+						$visit->self_booking_approval=1;
+					}else{
+					$visit->self_booking_approval=0;
+				   }
 					if ($visit_data['booking_method_name'] == 'Agent') {
 						$state = $trip->employee->outlet->address->city->state;
 
@@ -1778,6 +1783,7 @@ class Trip extends Model {
 					'lodging_doc.required' => 'Lodging document is required',
 					'boarding_doc.required' => 'Boarding document is required',
 					'other_doc.required' => 'Others document is required',
+					'self_booking_doc.required'=>'Self Booking Approval Email is required',
 				];
 				$validations = [];
 				$attachement_types = Attachment::where('attachment_type_id', 3200)
@@ -1800,6 +1806,10 @@ class Trip extends Model {
 					$other_count = LocalTravel::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
 					if ($other_count > 0 && !in_array(3754, $attachement_types)) {	// Others Type
 						$validations['other_doc'] = 'required';
+					}
+					$self_booking=Visit::where('trip_id',$trip->id)->where('self_booking_approval',1)->count();
+					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {	// Others Type
+						$validations['self_booking_doc'] = 'required';
 					}
 					$validator = Validator::make($request->all(), $validations , $error_messages);
 								
