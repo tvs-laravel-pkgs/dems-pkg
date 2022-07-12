@@ -1890,6 +1890,45 @@ app.component('eyatraTripClaimForm', {
                     }
                 });
             }
+            $scope.calculateFareDetailTax(index);
+        }
+
+        $scope.calculateFareDetailTax = (index) => {
+            const amount = self.trip.visits[index].self_booking['amount'];
+            const gst_number = self.trip.visits[index].self_booking['gstin'];
+            var cgst_percentage = sgst_percentage = igst_percentage = 0;
+            if (amount != undefined && amount && amount >= 1000 && gst_number && gst_number.length == 15) {
+                const gst_state_code = gst_number.substr(0, 2);
+                percentage = 12;
+                if (amount >= 7500)
+                    percentage = 18;
+                if (gst_state_code == self.state_code) {
+                    cgst_percentage = sgst_percentage = percentage / 2;
+                } else {
+                    igst_percentage = percentage;
+                }
+            }
+            total_tax = 0;
+            total_tax += cgst = amount * (cgst_percentage / 100);
+            total_tax += sgst = amount * (sgst_percentage / 100);
+            total_tax += igst = amount * (igst_percentage / 100);
+
+            cgst = Number.parseFloat(cgst).toFixed(2);
+            sgst = Number.parseFloat(sgst).toFixed(2);
+            igst = Number.parseFloat(igst).toFixed(2);
+
+            total_tax = Number.parseFloat(total_tax).toFixed(2);
+
+            self.trip.visits[index].self_booking['cgst'] = cgst;
+            self.trip.visits[index].self_booking['sgst'] = sgst;
+            self.trip.visits[index].self_booking['igst'] = igst;
+
+            self.trip.visits[index].self_booking['tax'] = total_tax;
+
+            self.trip.visits[index].self_booking['tax_percentage'] = tax_percentage = cgst_percentage + sgst_percentage + igst_percentage;
+            self.trip.visits[index].self_booking['cgst_percentage'] = cgst_percentage;
+            self.trip.visits[index].self_booking['sgst_percentage'] = sgst_percentage;
+            self.trip.visits[index].self_booking['igst_percentage'] = igst_percentage;
         }
 
         $scope.lodgingGstChange = (index, gst_number) => {

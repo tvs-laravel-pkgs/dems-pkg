@@ -177,6 +177,8 @@ class TripBookingUpdateController extends Controller {
 				$visit_bookings->service_charge = $service_charge;
 				$visit_bookings->total = $total_amount;
 				$visit_bookings->created_by = Auth::user()->id;
+				$visit_bookings->gstin=$r->gstin;
+				$visit_bookings->tax_percentage = $r->tax_percentage;
 				$visit_bookings->tax = $tax_total;
 				$visit_bookings->cgst = $r->cgst;
 				$visit_bookings->sgst = $r->sgst;
@@ -268,9 +270,11 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->booking_type_id = $value['booking_mode_id'];
 					$visit_bookings->amount = $amount;
 					$visit_bookings->tax = $tax;
+					$visit_bookings->gstin = $value['gstin'];
 					$visit_bookings->cgst = $value['cgst'];
 					$visit_bookings->sgst = $value['sgst'];
 					$visit_bookings->igst = $value['igst'];
+					$visit_bookings->tax_percentage = $value['tax_percentage'];
 					$visit_bookings->service_charge = $service_charge;
 					$visit_bookings->total = $total_amount;
 					$visit_bookings->paid_amount = $claim_amount;
@@ -391,6 +395,10 @@ class TripBookingUpdateController extends Controller {
 		}
 		unset($arr['visits_attachments']);
 
+	}
+
+	public function getGstInData(Request $r) {
+		return app('App\Http\Controllers\AngularController')->verifyGSTIN($r->gst_number,"",false);
 	}
 
 }

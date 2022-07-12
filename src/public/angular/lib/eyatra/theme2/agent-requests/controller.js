@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraAgentRequestForm', {
     templateUrl: agent_request_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $mdSelect, $rootScope, $scope, $timeout) {
         //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/agent/requests')
@@ -87,6 +87,73 @@ app.component('eyatraAgentRequestForm', {
         //APPROVE TRIP
         self.approveTrip = function(id) {
             $('#trip_id').val(id);
+        }
+
+        $scope.fareDetailGstChange = (index, gst_number) => {
+            console.log(gst_number);
+            self.ticket_booking[index]['fare_gst_detail'] = '';
+            if (gst_number && gst_number.length == 15) {
+                $http({
+                    url: laravel_routes['getGstInData'],
+                    method: 'GET',
+                    params: { 'gst_number': gst_number }
+                }).then(function(res) {
+                    console.log(res);
+                    if (!res.data.success) {
+                        var errors = '';
+                        if (res.data.errors) {
+                            for (var i in res.data.errors) {
+                                errors += '<li>' + res.data.errors[i] + '</li>';
+                            }
+                        }
+                        if (res.data.error) {
+                            errors += '<li>' + res.data.error + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.ticket_booking[index]['fare_gst_detail'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                    }
+                });
+            }
+            $scope.calculateFareDetailTax(index);
+        }
+
+        $scope.calculateFareDetailTax = (index) => {
+            const amount = self.ticket_booking[index]['ticket_amount'];
+            const gst_number = self.ticket_booking[index]['gstin'];
+            var cgst_percentage = sgst_percentage = igst_percentage = 0;
+            if (amount != undefined && amount && amount >= 1000 && gst_number && gst_number.length == 15) {
+                const gst_state_code = gst_number.substr(0, 2);
+                percentage = 12;
+                if (amount >= 7500)
+                    percentage = 18;
+                if (gst_state_code == self.state_code) {
+                    cgst_percentage = sgst_percentage = percentage / 2;
+                } else {
+                    igst_percentage = percentage;
+                }
+            }
+            total_tax = 0;
+            total_tax += cgst = amount * (cgst_percentage / 100);
+            total_tax += sgst = amount * (sgst_percentage / 100);
+            total_tax += igst = amount * (igst_percentage / 100);
+
+            cgst = Number.parseFloat(cgst).toFixed(2);
+            sgst = Number.parseFloat(sgst).toFixed(2);
+            igst = Number.parseFloat(igst).toFixed(2);
+
+            total_tax = Number.parseFloat(total_tax).toFixed(2);
+
+            self.trip.visits[index].self_booking['cgst'] = cgst;
+            self.trip.visits[index].self_booking['sgst'] = sgst;
+            self.trip.visits[index].self_booking['igst'] = igst;
+
+            self.trip.visits[index].self_booking['tax'] = total_tax;
+
+            self.trip.visits[index].self_booking['tax_percentage'] = tax_percentage = cgst_percentage + sgst_percentage + igst_percentage;
+            self.trip.visits[index].self_booking['cgst_percentage'] = cgst_percentage;
+            self.trip.visits[index].self_booking['sgst_percentage'] = sgst_percentage;
+            self.trip.visits[index].self_booking['igst_percentage'] = igst_percentage;
         }
 
         self.confirmApproveTrip = function() {
