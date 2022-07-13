@@ -199,6 +199,7 @@ app.component('eyatraTripClaimVerificationOneView', {
         // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
         $scope.updateAttchementStatus = function(attchement_id) {
             if (attchement_id) {
+                this.view_status = 1;
                 $http.post(
                     laravel_routes['updateAttachmentStatus'], {
                         id: attchement_id,
