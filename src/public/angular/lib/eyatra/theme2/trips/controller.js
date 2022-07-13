@@ -313,21 +313,23 @@ app.component('eyatraTripForm', {
             if (self.trip_advance_amount_edit == 0) {
                 $("#advance_amount").prop('readonly', true);
             }
-            if (self.trip_advance_amount_employee_edit == 0) {
-                $("#advance_amount").prop('readonly', true);
-            }
+            //if (self.trip_advance_amount_employee_edit == 0) {
+            $("#advance_amount").prop('readonly', true);
+            //}
 
             $scope.AdvanceAmountDisable = function(start_date) {
                 var date = new Date();
                 var myDate = $filter('date')(date, "dd-MM-yyyy");
                 if (start_date >= myDate) {
                     $("#advance").show().prop('disabled', false);
+                    $("#advance_amount").prop('readonly', false);
                 } else {
                     if (self.trip_advance_amount_employee_edit == 1) {
                         $("#advance").hide().prop('disabled', true);
                         self.trip.advance_received = '0.00';
                     } else {
                         $("#advance").show().prop('disabled', false);
+                        $("#advance_amount").prop('readonly', false);
                     }
                 }
             }
