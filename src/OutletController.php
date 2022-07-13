@@ -132,6 +132,7 @@ class OutletController extends Controller {
 			$outlet = Outlet::with('sbu', 'address', 'address.city', 'address.city.state')->withTrashed()->find($outlet_id);
 			//dd($outlet);
 			$outlet->cashier = $outlet->employee ? $outlet->employee->user : '';
+			$outlet->nodel = $outlet->employeeNodel ? $outlet->employeeNodel->user : '';
 			// $outlet->cashier = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
 			// dd($outlet->cashier);
 			// $this->data['cashier'] = Employee::select('code', 'id')->where('id', $outlet->employee->id)->first();
@@ -216,6 +217,7 @@ class OutletController extends Controller {
 			'lob_list' => $lob_list,
 			'sbu_list' => $sbu_list,
 			'cashier_list' => Employee::getList(),
+			'nodel_list' => Employee::getList(),
 			// 'city_list' => NCity::getList(),
 		];
 		//$this->data['sbu_outlet'] = [];
@@ -246,6 +248,10 @@ class OutletController extends Controller {
 		// 	DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
 		// 		->get())->prepend($option);
 		$this->data['cashier_list'] = $cashier_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('outlets', 'outlets.cashier_id', 'employees.id')->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
+			DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
+				->groupBy('employees.id')
+				->get())->prepend($option);
+		$this->data['nodel_list'] = $nodel_list = collect(Employee::join('users', 'users.entity_id', 'employees.id')->join('outlets', 'outlets.cashier_id', 'employees.id')->where('users.company_id', Auth::user()->company_id)->where('users.user_type_id', 3121)->select(
 			DB::raw('concat(employees.code," - ",users.name) as name'), 'employees.id')
 				->groupBy('employees.id')
 				->get())->prepend($option);
@@ -297,6 +303,27 @@ class OutletController extends Controller {
 			->get();
 		return response()->json($cashier_list);
 	}
+	//SEARCH NODEL
+	public function searchNodel(Request $r) {
+		$key = $r->key;
+		$nodel_list = Employee::select(
+
+			'name',
+			'code',
+			'employees.id as entity_id'
+		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)
+			->where(function ($q) use ($key) {
+				$q->where('code', 'like', '%' . $key . '%')
+					->orWhere('name', 'like', '%' . $key . '%')
+				;
+			})
+
+			->get();
+		return response()->json($nodel_list);
+	}
 	public function saveEYatraOutlet(Request $request) {
 		// dd($request->all());
 		//validation
@@ -316,6 +343,7 @@ class OutletController extends Controller {
 				'outlet_name' => 'required',
 				'line_1' => 'required',
 				'cashier_id' => 'required',
+				'nodel_id'=>'required',
 				// 'amount_eligible' => 'required',
 				// 'country_id' => 'required',
 				// 'state_id' => 'required',
@@ -419,8 +447,9 @@ class OutletController extends Controller {
 			'Sbu',
 			'Sbu.lob',
 			'employee',
-
-			'employee.user',
+            'employee.user',
+            'employeeNodel',
+            'employeeNodel.user',
 		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);

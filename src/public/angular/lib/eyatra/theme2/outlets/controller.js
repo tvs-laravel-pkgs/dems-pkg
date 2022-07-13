@@ -11,6 +11,7 @@ app.component('eyatraOutlets', {
             // console.log(response.data);
             self.region_list = response.data.region_list;
             self.cashier_list = response.data.cashier_list;
+            self.nodel_list = response.data.nodel_list;
             // self.city_list = response.data.city_list;
             // self.state_list = response.data.state_list;
             self.country_list = response.data.country_list;
@@ -319,6 +320,25 @@ app.component('eyatraOutletForm', {
                 return [];
             }
         }
+        self.searchNodel = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            search_nodel_url, {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            // console.log(response.data);
+                            resolve(response.data);
+                        });
+                    //reject(response);
+                });
+            } else {
+                return [];
+            }
+        }
 
         $scope.getSbus = function() {
             var lob_ids = [];
@@ -519,6 +539,9 @@ app.component('eyatraOutletForm', {
                 'cashier_id': {
                     required: true,
                 },
+                'nodel_id': {
+                    required: true,
+                },
                 'amount_limit': {
                     required: true,
                     number: true,
@@ -668,7 +691,7 @@ app.component('eyatraOutletView', {
             outlet_view_url + '/' + $routeParams.outlet_id
         ).then(function(response) {
             self.outlet = response.data.outlet;
-
+            console.log(response.data.outlet);
             self.lob_name = response.data.lob_name;
             self.sbu_name = response.data.sbu_name;
             self.outstation_budget_amount = response.data.outstation_budget_amount;

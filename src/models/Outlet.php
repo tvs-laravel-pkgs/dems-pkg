@@ -16,6 +16,7 @@ class Outlet extends Model {
 		'name',
 		'sbu_id',
 		'cashier_id',
+		'nodel_id',
 		'amount_eligible',
 		'expense_voucher_limit',
 		'amount_limit',
@@ -31,6 +32,9 @@ class Outlet extends Model {
 	}
 	public function employee() {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'cashier_id');
+	}
+	public function employeeNodel() {
+		return $this->belongsTo('Uitoux\EYatra\Employee', 'nodel_id');
 	}
 	public static function getList() {
 		return Outlet::select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
