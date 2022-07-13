@@ -50,7 +50,6 @@ app.component('eyatraTrips', {
                     d.status_id = $('#status_id').val();
                 }
             },
-
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'number', name: 'trips.number', searchable: true },
@@ -60,6 +59,7 @@ app.component('eyatraTrips', {
                 { data: 'travel_period', name: 'travel_period', searchable: false },
                 { data: 'purpose', name: 'purpose.name', searchable: true },
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
+                { data: 'reason', name: 'trips.reason', searchable: false },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
