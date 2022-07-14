@@ -196,6 +196,7 @@ app.component('eyatraOutstationClaimVerificationView', {
             $form_data_url
         ).then(function(response) {
             self.trip = response.data.trip;
+            console.log(response.data.trip);
             self.gender = (response.data.trip.employee.gender).toLowerCase();
             self.travel_cities = response.data.travel_cities;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
@@ -218,9 +219,27 @@ app.component('eyatraOutstationClaimVerificationView', {
                 self.pay_to_employee = parseInt(self.total_amount).toFixed(2);
                 self.pay_to_company = '0.00';
             }
+            $scope.visit = response.data.approval_status;
+            self.view = response.data.view;
             $rootScope.loading = false;
 
         });
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
+        $scope.updateAttchementStatus = function(attchement_id) {
+            if (attchement_id) {
+                this.view_status = 1;
+                $http.post(
+                    laravel_routes['updateAttachmentStatus'], {
+                        id: attchement_id,
+                    }
+                ).then(function(res) {
+                    if (res.data.success) {
+                        $scope.visit = res.data.approval_status;
+                    }
+                });
+            }
+        }
+        // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
 
         $(document).on('mouseover', ".separate-file-attachment", function() {
             var $this = $(this);
