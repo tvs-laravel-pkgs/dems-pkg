@@ -137,7 +137,8 @@ class TripClaimVerificationTwoController extends Controller
         // // $employee_claim->status_id = 3223; //Payment Pending
         $additional_approve = Auth::user()->company->additional_approve;
         $financier_approve = Auth::user()->company->financier_approve;
-        if ($additional_approve == '1') {
+        $gstin_available= Lodging::select('lodgings.gstin as lodging_gstin','visit_bookings.gstin as transport_gstin')->join('visits','visits.trip_id','lodgings.trip_id')->join('visit_bookings','visit_bookings.visit_id','visits.id')->where('lodgings.trip_id',$trip_id)->get()->first();
+        if ($additional_approve == '1' && ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
             $employee_claim->status_id = 3036; //Claim Verification Pending
             $trip->status_id = 3036; //Claim Verification Pending
         } else if ($financier_approve == '1') {
