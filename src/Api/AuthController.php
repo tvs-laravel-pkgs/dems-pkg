@@ -242,6 +242,7 @@ class AuthController extends Controller {
 			return response()->json(['status' => 'false', 'msg' => 'Invalid Mobile Number'], $this->successStatus);
 		}
 		return response()->json([
+			'success' => true,
 			'user_id' => $user_id,
 			'result' => $result,
 			'otp'=>$otp_no,
@@ -355,6 +356,7 @@ class AuthController extends Controller {
 			$result = 1;
 			$user_id = $user->id;
 		return response()->json([
+			'success' => true,
 			'user_id' => $user_id,
 			'result' => $result,
 			'otp'=>$otp_no,
