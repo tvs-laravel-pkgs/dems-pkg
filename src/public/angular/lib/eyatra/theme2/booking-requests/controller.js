@@ -152,11 +152,11 @@ app.component('eyatraTripBookingRequestsView', {
             self.attachment_path = response.data.attach_path;
             self.action = response.data.action;
 
-            // if (self.trip.agent_visits.length > 0) {
-            //     self.trip.agent_visits.forEach(function(visit, index) {
-            //         $scope.calculateTax(index);
-            //     });
-            // }
+            if (self.trip.agent_visits.length > 0) {
+                self.trip.agent_visits.forEach(function(visit, index) {
+                    $scope.calculateTax(index);
+                });
+            }
 
             $rootScope.loading = false;
         });
