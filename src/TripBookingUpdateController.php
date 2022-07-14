@@ -2,10 +2,10 @@
 
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
+use App\User;
 use Auth;
 use DB;
 use Entrust;
-use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Mail;
@@ -100,8 +100,8 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		 //dd($r->all());
-		// DB::beginTransaction();
+		// dd($r->all());
+		DB::beginTransaction();
 		try {
 			$error_messages = [
 				'ticket_booking.*.travel_mode_id.required' => 'Ticket booking mode is required',
@@ -124,9 +124,12 @@ class TripBookingUpdateController extends Controller {
 			], $error_messages);
 
 			if ($validator->fails()) {
-				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+				return response()->json([
+					'success' => false,
+					'errors' => $validator->errors()->all(),
+				]);
 			}
-			//dd($r->all());
+
 			//Check Booking Method Agent of Self
 			if ($r->booking_method == 'self') {
 				//Unique validation
@@ -160,7 +163,6 @@ class TripBookingUpdateController extends Controller {
 			}
 
 			if ($r->booking_method == 'self') {
-
 				//Visit status update
 				$visit = Visit::find($r->visit_id);
 				$visit->booking_status_id = $booking_status_id;
@@ -220,11 +222,8 @@ class TripBookingUpdateController extends Controller {
 					$attachement->name = $name;
 					$attachement->save();
 				}
-				// dd();
-			}
-			//AGENT BOOKING TRIP
-			else {
-				// dd($r->ticket_booking);
+			} else {
+				//AGENT BOOKING TRIP
 				foreach ($r->ticket_booking as $key => $value) {
 					$visit = Visit::find($value['visit_id']);
 					$visit->booking_status_id = $booking_status_id;
@@ -265,14 +264,25 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->type_id = $r->type_id;
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
 					$visit_bookings->reference_number = $value['reference_number'];
-					$visit_bookings->booking_type_id = $value['booking_mode_id'];
+
+					// $visit_bookings->booking_type_id = $value['booking_mode_id'];
+
+					$visit_bookings->booking_category_id = $value['booking_category_id'];
+					$visit_bookings->booking_method_id = $value['booking_method_id'];
+					$visit_bookings->agent_service_charges = $value['agent_service_charges'];
 					$visit_bookings->amount = $amount;
 					$visit_bookings->tax = $tax;
+					$visit_bookings->tax_percentage = $value['tax_percentage'];
+					$visit_bookings->gstin = $value['gstin'];
 					$visit_bookings->cgst = $value['cgst'];
 					$visit_bookings->sgst = $value['sgst'];
 					$visit_bookings->igst = $value['igst'];
+					$visit_bookings->other_charges = $value['other_charges'];
 					$visit_bookings->service_charge = $service_charge;
-					$visit_bookings->total = $total_amount;
+
+					// $visit_bookings->total = $total_amount;
+					$visit_bookings->total = $value['total'];
+
 					$visit_bookings->paid_amount = $claim_amount;
 					$visit_bookings->status_id = $r->status_id;
 					$visit_bookings->created_by = Auth::user()->id;
@@ -305,30 +315,37 @@ class TripBookingUpdateController extends Controller {
 
 					//Ticket Employee Mail Trigger
 					if ($visit) {
-						if($visit->booking_status_id == 3061){
-						 $this->sendTicketNotificationMail($type = 16,$visit);
-						 $employee = Employee::where('id', $trip->employee_id)->first();
-						 $user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-						 $notification = sendnotification($type = 16, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Ticket Booking Mail');
+						if ($visit->booking_status_id == 3061) {
+							$this->sendTicketNotificationMail($type = 16, $visit);
+							$employee = Employee::where('id', $trip->employee_id)->first();
+							$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+							$notification = sendnotification($type = 16, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Ticket Booking Mail');
 						}
-						if($visit->booking_status_id == 3062){
-					     $employee = Employee::where('id', $trip->employee_id)->first();
-						 $user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-			        $notification = sendnotification($type = 18, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Ticket Cancelled');
-			    }
-	}
+						if ($visit->booking_status_id == 3062) {
+							$employee = Employee::where('id', $trip->employee_id)->first();
+							$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+							$notification = sendnotification($type = 18, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Ticket Cancelled');
+						}
+					}
 				}
 			}
-			// DB::commit();
-		} catch (Exception $e) {
-			// dd($e->getMessage());
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			DB::commit();
+			return response()->json([
+				'success' => true,
+			]);
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage(),
+				],
+			]);
 		}
-		return response()->json(['success' => true]);
 	}
-	public function sendTicketNotificationMail($type,$visit) {
-		$from_mail = env('MAIL_FROM_ADDRESS','travelex@tvs.in');
-		$from_name = env('MAIL_USERNAME','Tvsnsons');
+
+	public function sendTicketNotificationMail($type, $visit) {
+		$from_mail = env('MAIL_FROM_ADDRESS', 'travelex@tvs.in');
+		$from_name = env('MAIL_USERNAME', 'Tvsnsons');
 		$to_user = $visit->trip->employee->user;
 		$employee_details = $visit->trip->employee;
 		$visit_details = Visit::select(
@@ -343,8 +360,8 @@ class TripBookingUpdateController extends Controller {
 			'booking_modes.name as booking_method_name',
 			'booking_status.name as booking_status'
 		)
-		->join('trips', 'trips.id', 'visits.trip_id')
-		->leftjoin('users', 'trips.employee_id', 'users.id')
+			->join('trips', 'trips.id', 'visits.trip_id')
+			->leftjoin('users', 'trips.employee_id', 'users.id')
 			->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 			->join('entities as travel_modes', 'travel_modes.id', 'visits.travel_mode_id')
@@ -383,9 +400,9 @@ class TripBookingUpdateController extends Controller {
 //dd($arr['attachment']);
 			//dump($visit->bookings);
 			//$arr['visits_attachments'] = Attachment::where('entity_id',$visit->bookings)->where('attachment_of_id', 3180)->where('attachment_type_id', 3200)->get();
-				//dd($arr['visits_attachments']);
-				//$arr['trip'] = $trip;
-				//$arr['type'] = 2;
+			//dd($arr['visits_attachments']);
+			//$arr['trip'] = $trip;
+			//$arr['type'] = 2;
 			$MailInstance = new TicketNotificationMail($arr);
 			$Mail = Mail::send($MailInstance);
 		}

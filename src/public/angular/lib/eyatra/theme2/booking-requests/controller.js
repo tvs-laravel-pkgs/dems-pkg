@@ -137,7 +137,7 @@ app.component('eyatraTripBookingRequestsView', {
             //     $scope.$apply()
             //     return;
             // }
-            console.log(response.data.trip.agent_visits);
+            // console.log(response.data.trip.agent_visits);
             self.trip = response.data.trip;
             self.age = response.data.age;
             self.total_amount = response.data.total_amount;
@@ -146,8 +146,18 @@ app.component('eyatraTripBookingRequestsView', {
             self.trip_status = response.data.trip_status;
             self.booking_mode_list = response.data.booking_mode_list;
             self.travel_mode_list = response.data.travel_mode_list;
+            self.booking_category_list = response.data.booking_category_list;
+            self.bookingMethods = response.data.bookingMethods;
+            self.booking_method_list = response.data.booking_method_list;
             self.attachment_path = response.data.attach_path;
             self.action = response.data.action;
+
+            // if (self.trip.agent_visits.length > 0) {
+            //     self.trip.agent_visits.forEach(function(visit, index) {
+            //         $scope.calculateTax(index);
+            //     });
+            // }
+
             $rootScope.loading = false;
         });
 
@@ -179,7 +189,7 @@ app.component('eyatraTripBookingRequestsView', {
 
 
         $scope.showBookDetail = function(id, amount) {
-            //alert();
+            // alert();
             // console.log(id, parseInt(amount));
             $("#open_book_form_" + id).hide();
             $(".book_open_" + id).show();
@@ -231,30 +241,70 @@ app.component('eyatraTripBookingRequestsView', {
             }
         });
 
+        $scope.onChangeBookingMethod = index => {
+            self.trip.agent_visits[index].bookings.agent_service_charges = self.bookingMethods[self.trip.agent_visits[index].bookings.booking_method_id];
+        }
+
+        $scope.calculateTax = index => {
+            self.trip.agent_visits[index].bookings.gstin = '';
+            self.trip.agent_visits[index].bookings.cgst = '';
+            self.trip.agent_visits[index].bookings.sgst = '';
+            self.trip.agent_visits[index].bookings.igst = '';
+            self.trip.agent_visits[index].bookings.gstin = self.trip.agent_visits[index].toCityGstin;
+
+            const cgstPercentage = sgstPercentage = 2.5;
+            const igstPercentage = 5;
+            if (self.trip.employee_gst_code && self.trip.agent_visits[index].toCityGstCode && self.trip.agent_visits[index].bookings.amount && self.trip.agent_visits[index].bookings.booking_method_id && self.trip.agent_visits[index].bookings.booking_method_id != 13) {
+                let taxableValue = self.trip.agent_visits[index].bookings.amount;
+                if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
+                    self.trip.agent_visits[index].bookings.cgst = parseFloat(taxableValue * (cgstPercentage / 100)).toFixed(2);
+                    self.trip.agent_visits[index].bookings.sgst = parseFloat(taxableValue * (sgstPercentage / 100)).toFixed(2);
+                    self.trip.agent_visits[index].bookings.igst = 0.00;
+                } else {
+                    self.trip.agent_visits[index].bookings.cgst = 0.00;
+                    self.trip.agent_visits[index].bookings.sgst = 0.00;
+                    self.trip.agent_visits[index].bookings.igst = parseFloat(taxableValue * (igstPercentage / 100)).toFixed(2);
+                }
+            }
+            $scope.calculateTotalVal(index);
+        }
+
+        $scope.calculateTotalVal = index => {
+            let totalValue = 0.00;
+            const taxableValue = parseFloat(self.trip.agent_visits[index].bookings.amount) || 0.00;
+            const cgstValue = parseFloat(self.trip.agent_visits[index].bookings.cgst) || 0.00;
+            const sgstValue = parseFloat(self.trip.agent_visits[index].bookings.sgst) || 0.00;
+            const igstValue = parseFloat(self.trip.agent_visits[index].bookings.igst) || 0.00;
+            const otherCharges = parseFloat(self.trip.agent_visits[index].bookings.other_charges) || 0.00;
+
+            totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue + otherCharges).toFixed(2);
+            self.trip.agent_visits[index].bookings.total = totalValue;
+        }
+
         $scope.gstHelper = function(key) {
             console.log(key);
-            var cgst = $('#cgst_'+key).val();
-            var sgst = $('#sgst_'+key).val();
-            var igst = $('#igst_'+key).val();
+            var cgst = $('#cgst_' + key).val();
+            var sgst = $('#sgst_' + key).val();
+            var igst = $('#igst_' + key).val();
 
-            if(cgst == '' && sgst == ''){
-                $('#igst_'+key).attr('readonly', false);
-                $('#igst_'+key).attr('placeholder', 'Eg:60');
+            if (cgst == '' && sgst == '') {
+                $('#igst_' + key).attr('readonly', false);
+                $('#igst_' + key).attr('placeholder', 'Eg: 60');
             } else {
-                $('#igst_'+key).attr('readonly', true);                
-                $('#igst_'+key).attr('placeholder', '0');
+                $('#igst_' + key).attr('readonly', true);
+                $('#igst_' + key).attr('placeholder', '0');
             }
 
-            if(igst == ''){
-                $('#cgst_'+key).attr('readonly', false);
-                $('#sgst_'+key).attr('readonly', false);
-                $('#cgst_'+key).attr('placeholder', 'Eg:40');
-                $('#sgst_'+key).attr('placeholder', 'Eg:50');
+            if (igst == '') {
+                $('#cgst_' + key).attr('readonly', false);
+                $('#sgst_' + key).attr('readonly', false);
+                $('#cgst_' + key).attr('placeholder', 'Eg: 40');
+                $('#sgst_' + key).attr('placeholder', 'Eg: 50');
             } else {
-                $('#cgst_'+key).attr('readonly', true);
-                $('#sgst_'+key).attr('readonly', true);
-                $('#cgst_'+key).attr('placeholder', '0');
-                $('#sgst_'+key).attr('placeholder', '0');
+                $('#cgst_' + key).attr('readonly', true);
+                $('#sgst_' + key).attr('readonly', true);
+                $('#cgst_' + key).attr('placeholder', '0');
+                $('#sgst_' + key).attr('placeholder', '0');
             }
         }
 

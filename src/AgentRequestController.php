@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Http\Request;
+use Uitoux\EYatra\BookingMethod;
+use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Payment;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
@@ -143,6 +145,8 @@ class AgentRequestController extends Controller {
 			'agentVisits',
 			'agentVisits.fromCity',
 			'agentVisits.toCity',
+			'agentVisits.toCity.state',
+			'agentVisits.toCity.state.operatingState',
 			'agentVisits.travelMode',
 			'agentVisits.bookingMethod',
 			'agentVisits.bookingStatus',
@@ -154,6 +158,10 @@ class AgentRequestController extends Controller {
 			'agentVisits.status',
 			'agentVisits.managerVerificationStatus',
 			'employee',
+			'employee.outlet',
+			'employee.outlet.address',
+			'employee.outlet.address.city',
+			'employee.outlet.address.city.state',
 			'employee.user',
 			'employee.grade',
 			'employee.designation',
@@ -161,7 +169,6 @@ class AgentRequestController extends Controller {
 			'status',
 		])
 			->find($trip_id);
-
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
@@ -176,13 +183,26 @@ class AgentRequestController extends Controller {
 		$ticket_amount = 0;
 		$service_charge = 0;
 		$total_amount = 0;
-		if ($visits) {
-			foreach ($visits as $key => $value) {
-				if ($value->booking_status_id == 3061 || $value->booking_status_id == 3062 || $value->booking_status_id == 3064) {
+		if ($visits->isNotEmpty()) {
+			foreach ($visits as $key => $visit) {
+				if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062 || $visit->booking_status_id == 3064) {
 					//3061 Booked //3062 Cancelled // 3064 Visit Reschedule
 					$trip_status = 'booked';
 				}
+				$visits[$key]->toCityGstin = '';
+				$visits[$key]->toCityGstCode = '';
+				if ($visit->toCity && $visit->toCity->state) {
+					if ($visit->toCity->state->operatingState) {
+						$visits[$key]->toCityGstin = $visit->toCity->state->operatingState->gst_number;
+						$visits[$key]->toCityGstCode = substr($visit->toCity->state->operatingState->gst_number, 0, 2);
+					}
+				}
 			}
+		}
+
+		$trip->employee_gst_code = '';
+		if ($trip && $trip->employee && $trip->employee->outlet && $trip->employee->outlet->address && $trip->employee->outlet->address->city && $trip->employee->outlet->address->city->state) {
+			$trip->employee_gst_code = $trip->employee->outlet->address->city->state->gstin_state_code;
 		}
 
 		//dd($visits);
@@ -213,6 +233,9 @@ class AgentRequestController extends Controller {
 		//$trip->attachments = $attachments;
 		$this->data['travel_mode_list'] = $payment_mode_list = collect(Entity::agentTravelModeList())->prepend(['id' => '', 'name' => 'Select Travel Mode']);
 		$this->data['booking_mode_list'] = $booking_mode_list = collect(Entity::bookingModeList())->prepend(['id' => '', 'name' => 'Select Booking Method']);
+		$this->data['booking_category_list'] = Config::select('id', 'name')->where('config_type_id', 545)->get()->prepend(['id' => '', 'name' => 'Select Booking Category']);
+		$this->data['bookingMethods'] = BookingMethod::pluck('amount', 'id');
+		$this->data['booking_method_list'] = BookingMethod::select('id', 'name')->get()->prepend(['id' => '', 'name' => 'Select Booking Method']);
 		$this->data['trip'] = $trip;
 		//$this->data['trip']['visit_booking'] = $visit_booking;
 
