@@ -419,6 +419,12 @@ app.config(['$routeProvider', function($routeProvider) {
         title: 'View Trip Claim',
     }).
 
+    //TRIP APPROVALS
+    when('/trip/approvals', {
+        template: '<eyatra-trip-approvals></eyatra-trip-approvals>',
+        title: 'Trip Approvals',
+    }).
+
     //MANAGER - EMPLOYEE CLAIM VERIFICATION
     when('/trip/claim/verification1/list', {
         template: '<eyatra-trip-claim-verification-one-list></eyatra-trip-claim-verification-one-list>',
@@ -454,7 +460,6 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-claim-payment-pending-list></eyatra-trip-claim-payment-pending-list>',
         title: 'Employee Claim Payment Pending',
     }).
-
 
     //TRIP VERIFICATION
     when('/trip/verifications', {

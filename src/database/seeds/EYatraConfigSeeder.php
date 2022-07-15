@@ -54,8 +54,10 @@ class EYatraConfigSeeder extends Seeder {
 			537 => 'Serial Number Segment Types',
 			538 => 'Report Types',
 			539 => 'Mail Config Types',
-			540=>'Boarding Types',
+			540 => 'Boarding Types',
 			541 => 'Outstation Trip Attachments',
+
+			545 => 'Booking Categories',
 		];
 
 		$configs = [
@@ -1098,6 +1100,16 @@ class EYatraConfigSeeder extends Seeder {
 			3755 => [
 				'name' => 'Self Booking Attachments',
 				'config_type_id' => 541,
+			],
+
+			// Booking Categories
+			3760 => [
+				'name' => 'Agent',
+				'config_type_id' => 545,
+			],
+			3761 => [
+				'name' => 'Non Agent',
+				'config_type_id' => 545,
 			],
 
 		];
