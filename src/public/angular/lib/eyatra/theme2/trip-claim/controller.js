@@ -263,7 +263,7 @@ app.component('eyatraTripClaimForm', {
                     self.trip.cliam.sbu_id = response.data.employee.sbu_id;
                     self.trip.cliam.sbu_name = response.data.employee.sbu_name;
                     $('.dropdown').removeClass('ng-hide');
-                    $('.drop-sbu').addClass('ng-hide');
+                    $('.claimsbu').addClass('ng-hide');
                 } else {
                     //$('.drop-sbu').addClass('ng-hide');
                     $('.dropdown').addClass('ng-hide');
