@@ -217,7 +217,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/business/view/{id}', 'Uitoux\EYatra\BusinessController@viewEYatraBusiness')->name('viewEYatraBusiness');
 		Route::get('eyatra/business/delete/{id}', 'Uitoux\EYatra\BusinessController@deleteEYatraBusiness')->name('deleteEYatraBusiness');
 		Route::get('eyatra/business/get-filter-data', 'Uitoux\EYatra\BusinessController@eyatraBusinessFilterData')->name('eyatraBusinessFilterData');
-		
+
 		//DEPATMENT
 		Route::get('eyatra/department/get-list', 'Uitoux\EYatra\DepartmentController@listEYatraDepartment')->name('listEYatraDepartment');
 		Route::get('eyatra/department/get-form-data/{id?}', 'Uitoux\EYatra\DepartmentController@eyatraDepartmentFormData')->name('eyatraDepartmentFormData');
@@ -399,6 +399,9 @@ Route::group(['middleware' => ['web']], function () {
 
 		Route::post('eyatra/trip/claim/attachment/update', 'Uitoux\EYatra\TripClaimVerificationOneController@updateAttachmentStatus')->name('updateAttachmentStatus');
 		Route::post('eyatra/trip/claim/lodging/days', 'Uitoux\EYatra\TripClaimController@calculateLodgingDays')->name('calculateLodgingDays');
+
+		//TRIP APPROVALS
+		Route::get('eyatra/trip/approval/get-list', 'Uitoux\EYatra\TripApprovalController@getList')->name('getEyatraTripApprovalList');
 
 		//TRIP CLAIM VERIFICATION ONE
 		Route::get('eyatra/trip/claim/verification/one/get-list', 'Uitoux\EYatra\TripClaimVerificationOneController@listEYatraTripClaimVerificationOneList')->name('listEYatraTripClaimVerificationOneList');
