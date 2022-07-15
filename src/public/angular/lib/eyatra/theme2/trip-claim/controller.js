@@ -257,6 +257,18 @@ app.component('eyatraTripClaimForm', {
             self.four_wheeler_start_km = response.data.km_end_fourwheeler;
             console.log(self.trip.visits.from_city_id);
             // console.log(self.travel_values);
+            $('.dropdown').addClass('ng-hide');
+            $(self.sbu_lists).each(function(key, value) {
+                if (value.id != self.employee.sbu_id) {
+                    self.trip.cliam.sbu_id = response.data.employee.sbu_id;
+                    self.trip.cliam.sbu_name = response.data.employee.sbu_name;
+                    $('.dropdown').removeClass('ng-hide');
+                    $('.drop-sbu').addClass('ng-hide');
+                } else {
+                    //$('.drop-sbu').addClass('ng-hide');
+                    $('.dropdown').addClass('ng-hide');
+                }
+            });
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
@@ -364,9 +376,7 @@ app.component('eyatraTripClaimForm', {
                 if (custom_city_show) {
                     $('.custom-city-change').removeClass('ng-hide');
                 }
-
             }, 500);
-
 
             $rootScope.loading = false;
 
