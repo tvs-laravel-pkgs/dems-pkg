@@ -257,18 +257,6 @@ app.component('eyatraTripClaimForm', {
             self.four_wheeler_start_km = response.data.km_end_fourwheeler;
             console.log(self.trip.visits.from_city_id);
             // console.log(self.travel_values);
-            $('.dropdown').addClass('ng-hide');
-            $(self.sbu_lists).each(function(key, value) {
-                if (value.id != self.employee.sbu_id) {
-                    self.trip.cliam.sbu_id = response.data.employee.sbu_id;
-                    self.trip.cliam.sbu_name = response.data.employee.sbu_name;
-                    $('.dropdown').removeClass('ng-hide');
-                    $('.claimsbu').addClass('ng-hide');
-                } else {
-                    //$('.drop-sbu').addClass('ng-hide');
-                    $('.dropdown').addClass('ng-hide');
-                }
-            });
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
@@ -341,6 +329,18 @@ app.component('eyatraTripClaimForm', {
                 }, 1000);
                 self.is_deviation = self.trip.employee.trip_employee_claim.is_deviation;
             }
+            $('.dropdown').addClass('ng-hide');
+            $(self.sbu_lists).each(function(key, value) {
+                if (value.id != self.employee.sbu_id) {
+                    self.trip.cliam.sbu_id = response.data.employee.sbu_id;
+                    self.trip.cliam.sbu_name = response.data.employee.sbu_name;
+                    $('.dropdown').removeClass('ng-hide');
+                    $('.claimsbu').addClass('ng-hide');
+                } else {
+                    //$('.drop-sbu').addClass('ng-hide');
+                    $('.dropdown').addClass('ng-hide');
+                }
+            });
             self.lodgings_removal_id = [];
             self.transport_attachment_removal_ids = [];
             self.lodgings_attachment_removal_ids = [];
