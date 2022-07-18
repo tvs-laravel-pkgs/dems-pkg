@@ -732,11 +732,13 @@ class LocalTrip extends Model {
 		}
 		$trip->save();
 		// Update attachment status by Karthick T on 21-01-2022
+		if($trip_visit_details > 0){
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)
 				->whereIn('attachment_of_id', [3186, 3187, 3188])
 				->where('attachment_type_id', 3200)
 				->where('view_status', 1)
 				->update(['view_status' => 0]);
+		}
 		// Update attachment status by Karthick T on 21-01-2022
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
