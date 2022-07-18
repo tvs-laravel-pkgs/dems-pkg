@@ -438,6 +438,8 @@ class Trip extends Model {
 		}
 
 		$employee = Employee::find($trip->employee_id);
+		$sbu_name=Sbu::where('id',$trip->employee->sbu_id)->pluck('name')->first();
+		$trip->sbu_name=$sbu_name;
 		if ((!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) && $employee->reporting_to_id != Auth::user()->entity_id) {
 			$data['success'] = false;
 			$data['message'] = 'Trip belongs to you';
