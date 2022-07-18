@@ -329,16 +329,18 @@ app.component('eyatraTripClaimForm', {
                 }, 1000);
                 self.is_deviation = self.trip.employee.trip_employee_claim.is_deviation;
             }
-            $('.dropdown').addClass('ng-hide');
+            drop_down_show = false;
+            $('.claim-sbu').addClass('ng-hide');
             $(self.sbu_lists).each(function(key, value) {
-                if (value.id != self.employee.sbu_id) {
-                    self.trip.cliam.sbu_id = response.data.employee.sbu_id;
-                    self.trip.cliam.sbu_name = response.data.employee.sbu_name;
-                    $('.dropdown').removeClass('ng-hide');
-                    $('.claimsbu').addClass('ng-hide');
-                } else {
-                    //$('.drop-sbu').addClass('ng-hide');
-                    $('.dropdown').addClass('ng-hide');
+                if (value.id == response.data.employee.sbu_id) {
+                    $('.drop-down').removeClass('ng-hide');
+                    $('.claim-sbu').addClass('ng-hide');
+                    drop_down_show = true;
+                } else if (!drop_down_show) {
+                    self.trip.claim.sbu_id = response.data.employee.sbu_id;
+                    self.trip.claim.sbu_name = response.data.employee.sbu_name;
+                    $('.claim-sbu').removeClass('ng-hide');
+                    $('.drop-down').addClass('ng-hide');
                 }
             });
             self.lodgings_removal_id = [];
