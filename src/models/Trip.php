@@ -2180,6 +2180,13 @@ class Trip extends Model {
 								],
 							]);
 						}
+						$lodging->lodge_name = $lodging_data['gstin'];
+						$lodging->gstin = $lodging_data['lodge_name'];
+					}
+					}else{
+						$lodging->lodge_name = null;
+						$lodging->gstin = null;
+					}
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
 
@@ -2350,7 +2357,7 @@ class Trip extends Model {
 					$boarding_days = (int) array_sum(array_column($request->boardings, 'days'));
 					$trip_total_days = (int) $request->trip_total_days;
 					if ($boarding_days > $trip_total_days + 1) {
-//need to verify
+                       //need to verify
 						return response()->json(['success' => false, 'errors' => ['Total boarding days should be less than total trip days']]);
 					}
 
@@ -2836,7 +2843,7 @@ class Trip extends Model {
 
 			$request->session()->flash('success', 'Trip saved successfully!');
 			return response()->json(['success' => true]);
-		} catch (Exception $e) {
+		}catch(Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
