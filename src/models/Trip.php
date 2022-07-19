@@ -2164,7 +2164,7 @@ class Trip extends Model {
 							$lodging = new Lodging;
 						}
 						//dd($lodging_data['lodge_name']);
-						if($lodging_data['amount'] >= 1000){
+						if($lodging_data['amount'] > 0){
 						if(empty($lodging_data['gstin'] && $lodging_data['lodge_name'])){
 						$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
 						if (!$response['success']) {
