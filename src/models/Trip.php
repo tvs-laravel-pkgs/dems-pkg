@@ -1154,7 +1154,7 @@ class Trip extends Model {
 		$payment->entity_id = $trip->id;
 		$payment->created_by = Auth::user()->id;
 		$payment->save();*/
-		$trip->approve_remarks = $r->approve_remarks;
+		$trip->approve_remarks = $r->approve_remarks ? $r->approve_remarks : 0;
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
