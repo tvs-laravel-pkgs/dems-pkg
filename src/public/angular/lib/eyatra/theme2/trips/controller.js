@@ -545,7 +545,7 @@ app.component('eyatraTripForm', {
                     self.trip.visits.push({
                         from_city_id: from_city_id_data,
                         to_city_id: self.trip.visits[0].from_city_details,
-                        booking_method_name: 'Self',
+                        booking_method_name: 'Agent',
                         preferred_travel_modes: '',
                         departure_date: self.trip.end_date ? self.trip.end_date : '',
                         to_city_details: self.trip.visits[0].from_city_details,

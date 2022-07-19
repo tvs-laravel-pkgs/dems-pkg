@@ -438,6 +438,8 @@ class Trip extends Model {
 		}
 
 		$employee = Employee::find($trip->employee_id);
+		$sbu_name=Sbu::where('id',$trip->employee->sbu_id)->pluck('name')->first();
+		$trip->sbu_name=$sbu_name;
 		if ((!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) && $employee->reporting_to_id != Auth::user()->entity_id) {
 			$data['success'] = false;
 			$data['message'] = 'Trip belongs to you';
@@ -1700,14 +1702,77 @@ class Trip extends Model {
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
+		$visit=Visit::select('id')->where('trip_id',$trip->id)->get()->toArray();
+        $lodge=Lodging::where('trip_id',$trip->id)->pluck('trip_id')->count();
+        $board=Boarding::select('trip_id')->where('trip_id',$trip->id)->get()->toArray();
+        $other=LocalTravel::select('trip_id')->where('trip_id',$trip->id)->get()->toArray();
+	    $tax_details=EmployeeClaim::select('lodgings.amount as lodging_basic','lodgings.cgst as lodging_cgst','lodgings.sgst as lodging_sgst','lodgings.igst as lodging_igst','visit_bookings.cgst as transport_cgst','visit_bookings.sgst as transport_sgst','visit_bookings.amount as transport_basic','visit_bookings.igst as transport_igst','boardings.amount as boarding_basic','boardings.tax as boarding_tax','local_travels.amount as local_basic','local_travels.tax as local_tax')->leftjoin('lodgings','lodgings.trip_id','ey_employee_claims.trip_id')->leftjoin('visits','visits.trip_id','ey_employee_claims.trip_id')->leftjoin('visit_bookings','visit_bookings.visit_id','visits.id')->leftjoin('boardings','boardings.trip_id','ey_employee_claims.trip_id')->leftjoin('local_travels','local_travels.trip_id','ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id',$trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
+
+	if(count($visit) > 1){
+			$transport_basic = number_format(array_sum(array_column($tax_details, 'transport_basic')), 2, '.', ',');
+			$transport_cgst = number_format(array_sum(array_column($tax_details, 'transport_cgst')), 2, '.', ',');
+			$transport_sgst = number_format(array_sum(array_column($tax_details, 'transport_sgst')), 2, '.', ',');
+			$transport_igst = number_format(array_sum(array_column($tax_details, 'transport_igst')), 2, '.', ',');
+	}else{
+		    $transport_basic =isset($tax_details[0]['transport_basic'])?$tax_details[0]['transport_basic']:0;
+			$transport_cgst =isset($tax_details[0]['transport_cgst'])?$tax_details[0]['transport_cgst']:0;
+			$transport_sgst = isset($tax_details[0]['transport_sgst'])?$tax_details[0]['transport_sgst']:0;
+			$transport_igst = isset($tax_details[0]['transport_igst'])?$tax_details[0]['transport_igst']:0;
+	}
+           if($lodge > 1){
+	        $lodging_basic = number_format(array_sum(array_column($tax_details, 'lodging_basic')), 2, '.', ',');
+			$lodging_cgst = number_format(array_sum(array_column($tax_details, 'lodging_cgst')), 2, '.', ',');
+			$lodging_sgst = number_format(array_sum(array_column($tax_details, 'lodging_sgst')), 2, '.', ',');
+			$lodging_igst = number_format(array_sum(array_column($tax_details, 'lodging_igst')), 2, '.', ',');
+		}else{
+             $lodging_basic =isset($tax_details[0]['lodging_basic'])?$tax_details[0]['lodging_basic']:0;
+			$lodging_cgst =isset($tax_details[0]['lodging_cgst'])?$tax_details[0]['lodging_cgst']:0;
+			$lodging_sgst = isset($tax_details[0]['lodging_sgst'])?$tax_details[0]['lodging_sgst']:0;
+			$lodging_igst = isset($tax_details[0]['lodging_igst'])?$tax_details[0]['lodging_igst']:0;
+		}
+		if(count($board) > 1){
+			$boarding_basic = number_format(array_sum(array_column($tax_details, 'boarding_basic')), 2, '.', ',');
+			$boarding_tax = number_format(array_sum(array_column($tax_details, 'boarding_tax')), 2, '.', ',');
+		}else{
+			$boarding_basic =isset($tax_details[0]['boarding_basic'])?$tax_details[0]['boarding_basic']:0;
+			$boarding_tax =isset($tax_details[0]['boarding_tax'])?$tax_details[0]['boarding_tax']:0;
+		}
+          if(count($other) > 1){		
+			$local_travel_basic = number_format(array_sum(array_column($tax_details, 'local_basic')), 2, '.', ',');
+			$local_travel_tax = number_format(array_sum(array_column($tax_details, 'local_tax')), 2, '.', ',');
+		}else{
+			$local_travel_basic =isset($tax_details[0]['local_basic'])?$tax_details[0]['local_basic']:0;
+			$local_travel_tax =isset($tax_details[0]['local_tax'])?$tax_details[0]['local_tax']:0;
+		}
+		$transport_total = $lodging_total = $boarding_total=$local_travel_total=0;
+		$transport_total = floatval(preg_replace('/[^\d.]/', '', $transport_basic)) + floatval(preg_replace('/[^\d.]/', '', $transport_cgst)) + floatval(preg_replace('/[^\d.]/', '', $transport_sgst)) + floatval(preg_replace('/[^\d.]/', '', $transport_igst));
+		$lodging_total = floatval(preg_replace('/[^\d.]/', '', $lodging_basic)) + floatval(preg_replace('/[^\d.]/', '', $lodging_cgst)) + floatval(preg_replace('/[^\d.]/', '', $lodging_sgst)) + floatval(preg_replace('/[^\d.]/', '', $lodging_igst));
+		$boarding_total = floatval(preg_replace('/[^\d.]/', '', $boarding_basic)) + floatval(preg_replace('/[^\d.]/', '', $boarding_tax));
+		$local_travel_total = floatval(preg_replace('/[^\d.]/', '', $local_travel_basic)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_tax));
+		
+		$trip->transport_basic = $transport_basic;
+		$trip->transport_cgst = $transport_cgst;
+		$trip->transport_sgst = $transport_sgst;
+		$trip->transport_igst = $transport_igst;
+		$trip->lodging_basic = $lodging_basic;
+		$trip->lodging_cgst = $lodging_cgst;
+		$trip->lodging_sgst = $lodging_sgst;
+		$trip->lodging_igst = $lodging_igst;
+		$trip->boarding_basic = $boarding_basic;
+		$trip->boarding_tax = $boarding_tax;
+		$trip->local_travel_basic = $local_travel_basic;
+		$trip->local_travel_tax = $local_travel_tax;
+		$trip->transport_total = $transport_total;
+	    $trip->lodging_total =$lodging_total;
+	    $trip->boarding_total =$boarding_total;
+	    $trip->local_travel_total =$local_travel_total;
 		$trip->emp_trip_count = $emp_trip_count;
 		$trip->emp_claim_amount = $emp_claim_amount;
 		$trip->transport_amount = $transport_amount;
 		$trip->lodging_amount = $lodging_amount;
 		$trip->boarding_amount = $boarding_amount;
 		$trip->local_travel_amount = $local_travel_amount;
-
-		$data['trip'] = $trip;
+        $data['trip'] = $trip;
 		$data['trip_justify'] = 0;
 
 		if ($trip->employee->tripEmployeeClaim) {
@@ -2127,6 +2192,10 @@ class Trip extends Model {
 						$checkout_time = $lodging_data['checkout_time'];
 						$lodging->check_in_date = date('Y-m-d H:i:s', strtotime("$check_in_date $check_in_time"));
 						$lodging->checkout_date = date('Y-m-d H:i:s', strtotime("$checkout_date $checkout_time"));
+						if($lodging_data['stay_type_id'] == 3340 && empty($lodging_data['reference_number'])){
+                        return response()->json(['success' => false, 'errors' => ['Enter Hotel Bill Number']]);
+
+						}
 						$lodging->reference_number = (isset($lodging_data['reference_number']) && !empty($lodging_data['reference_number'])) ? $lodging_data['reference_number'] : null;
 						$invoice_date =(isset($lodging_data['invoice_date']) && !empty($lodging_data['invoice_date'])) ? $lodging_data['invoice_date']: null;
 						$lodging->invoice_date=date('Y-m-d', strtotime($invoice_date));
@@ -2664,13 +2733,15 @@ class Trip extends Model {
 					->where('attachment_type_id', 3200)
 					->where('entity_id', $request->trip_id)
 					->count();
-				$self_booking_count=Visit::where('booking_method_id',3040)->where('trip_id',$request->trip_id)->select('id')->get();
+				$self_booking_count=Visit::where('booking_method_id',3040)->where('trip_id',$request->trip_id)->select('id','booking_method_id')->get();
+				if(!empty($self_booking_count->booking_method_id) == 3040){
 				foreach($self_booking_count as $key=>$value){
 				$transport_count = VisitBooking::where('visit_id', $value->id)->count();
 			}
 				if ($transport_count > 0 && $transport_attachment_count == 0) {
 					$employee_claim->is_deviation = 1;
 				}
+			}
 
 				// Changed deviation by Karthick T on 21-01-2022
 				// If lodging exist and attachment not found the claim will go to deviation

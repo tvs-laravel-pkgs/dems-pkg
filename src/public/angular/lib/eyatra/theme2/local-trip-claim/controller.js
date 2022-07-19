@@ -256,8 +256,20 @@ app.component('eyatraLocalTripClaimForm', {
                     $(".daterange").val('');
                 }, 500);
             }
-
-
+            drop_down_show = false;
+            $('.claim-sbu').addClass('ng-hide');
+            $(self.sbu_lists).each(function(key, value) {
+                if (value.id == response.data.trip.employee.sbu_id) {
+                    $('.drop-down').removeClass('ng-hide');
+                    $('.claim-sbu').addClass('ng-hide');
+                    drop_down_show = true;
+                } else if (!drop_down_show) {
+                    self.trip.sbu_id = response.data.trip.employee.sbu_id;
+                    self.trip.sbu_name = response.data.trip.employee.sbu_name;
+                    $('.claim-sbu').removeClass('ng-hide');
+                    $('.drop-down').addClass('ng-hide');
+                }
+            });
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
             }

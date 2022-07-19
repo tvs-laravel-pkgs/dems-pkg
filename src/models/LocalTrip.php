@@ -222,7 +222,6 @@ class LocalTrip extends Model {
 				$data['success'] = false;
 				$data['message'] = 'Trip not found';
 			}
-
 			$grade_id = Employee::where('id',$trip->employee_id)->pluck('grade_id')->first();
 			$employee_id = $trip->employee_id;
 
@@ -236,11 +235,12 @@ class LocalTrip extends Model {
 		}
 		$data['beta_amount'] = $beta_amount;
 
-		$employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km','gae.local_trip_amount')
+		$employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km','gae.local_trip_amount','sbus.id as sbu_id','sbus.name as sbu_name')
 			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
 			->leftjoin('entities', 'entities.id', 'employees.grade_id')
+			->leftJoin('sbus','sbus.id','employees.sbu_id')
 			->where('employees.id', $employee_id)
 			->where('users.user_type_id', 3121)->first();
 			
@@ -266,8 +266,9 @@ class LocalTrip extends Model {
 			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
 			'travel_values' => $values,
 		];
+		$trip->employee=$employee;
 		$data['trip'] = $trip;
-
+            
 		$data['success'] = true;
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+30 days"));
@@ -663,7 +664,6 @@ class LocalTrip extends Model {
 			$data['errors'] = ['Trip not found'];
 			return response()->json($data);
 		}
-
 		$days = LocalTrip::select(DB::raw('DATEDIFF(end_date,start_date)+1 as days'))->where('id', $trip_id)->first();
 		$trip->days = $days->days;
 		$trip->purpose_name = $trip->purpose->name;
@@ -694,7 +694,6 @@ class LocalTrip extends Model {
 			->where('employee_id', $trip->employee_id)
 			->sum('claim_amount');		
 		$trip->emp_claim_amount = $emp_claim_amount;
-
 		$data['trip'] = $trip;
 		$data['success'] = true;
 
@@ -733,11 +732,13 @@ class LocalTrip extends Model {
 		}
 		$trip->save();
 		// Update attachment status by Karthick T on 21-01-2022
+		if($trip_visit_details > 0){
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)
 				->whereIn('attachment_of_id', [3186, 3187, 3188])
 				->where('attachment_type_id', 3200)
 				->where('view_status', 1)
 				->update(['view_status' => 0]);
+		}
 		// Update attachment status by Karthick T on 21-01-2022
 		$activity['entity_id'] = $trip->id;
 		$activity['entity_type'] = 'trip';
