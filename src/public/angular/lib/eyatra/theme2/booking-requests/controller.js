@@ -210,10 +210,7 @@ app.component('eyatraTripBookingRequestsView', {
         });
 
         $scope.checkDetail = function(id, type) {
-            //console.log(id, type);
-
             angular.forEach(self.trip.agent_visits, function(value, key) {
-                console.log(value, key);
                 if (value.id != id) {
                     if (value.booking_status_id == 3060) {
                         $("#open_book_form_" + value.id).show();
@@ -240,6 +237,23 @@ app.component('eyatraTripBookingRequestsView', {
                 $("#cancel").attr('disabled', false);
             }
         });
+
+        $scope.onChangeTravelMode = (index, travelModeId) => {
+            self.booking_method_list = [];
+            self.trip.agent_visits[index].bookings.booking_method_id = '';
+            self.trip.agent_visits[index].bookings.agent_service_charges = '';
+            if (travelModeId) {
+                $http.get(
+                    getBookingMethodsByTravelMode + '/' + travelModeId
+                ).then(function(res) {
+                    if (!res.data.success) {
+                        custom_noty('error', res.data.error);
+                        return;
+                    }
+                    self.booking_method_list = res.data.booking_method_list;
+                });
+            }
+        }
 
         $scope.onChangeBookingMethod = index => {
             self.trip.agent_visits[index].bookings.agent_service_charges = self.bookingMethods[self.trip.agent_visits[index].bookings.booking_method_id];
@@ -363,7 +377,6 @@ app.component('eyatraTripBookingRequestsView', {
         });
 
         $(document).on('click', '.submit', function() {
-            //alert();
             var form_id = '#trip-booking-updates-form';
             var v = jQuery(form_id).validate({
                 errorPlacement: function(error, element) {
@@ -421,7 +434,7 @@ app.component('eyatraTripBookingRequestsView', {
                                 setTimeout(function() {
                                     $noty.close();
                                 }, 1000);
-                                $route.reload();
+                                $location.path('/trips/booking-requests')
                                 $scope.$apply()
                             }
                         })

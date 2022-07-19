@@ -585,39 +585,33 @@ app.component('eyatraTripForm', {
         //     }
         // })
 
-        //On Change Booking Preference
-        $scope.onChangeBookingPreference = function(value, index) {
+        $scope.onChangeBookingPreference = (value, index) => {
             if (value == "Self") {
-                $('.agent_form_fields_' + index).hide();
-                $('.self_form_fields_' + index).show();
-            } else {
-                $('.agent_form_fields_' + index).show();
-                $('.self_form_fields_' + index).hide();
+                self.trip.visits[index].self_booking_approval = "1";
             }
         }
-        //End
-        $scope.onChangeSelfBookingApproval = function(value, index) {
+
+        $scope.onChangeTravelMode = (id, key) => {
+            if (self.claimable_travel_mode_list.includes(id)) {
+                self.trip.visits[key].booking_method_name = "Agent";
+                $('#inactive_' + key).attr('disabled', false);
+            } else {
+                self.trip.visits[key].booking_method_name = "Self";
+                $('#active_' + key).prop('checked', true);
+                $('#inactive_' + key).attr('disabled', true);
+            }
+        }
+
+        $scope.onChangeSelfBookingApproval = (value, index) => {
             if (value == "No") {
                 $('#inactive_' + index).prop('checked', true);
-                $('.agent_form_fields_' + index).show();
-                $('.self_form_fields_' + index).hide();
+                self.trip.visits[index].booking_method_name = "Agent";
             } else {
-                $('.agent_form_fields_' + index).hide();
+                self.trip.visits[index].booking_method_name = "Self";
                 $('#active_' + index).prop('checked', true);
             }
         }
 
-        //On Change Travel Mode
-        $scope.onChangeTravelMode = function(id, key) {
-            if (self.claimable_travel_mode_list.includes(id)) {
-                $('#inactive_' + key).attr('disabled', false);
-            } else {
-                $('#active_' + key).prop('checked', true);
-                $('#inactive_' + key).attr('disabled', true);
-                $('.agent_form_fields_' + key).hide();
-            }
-        }
-        //End
 
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({

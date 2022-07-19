@@ -67,6 +67,10 @@ class VisitBooking extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Entity', 'booking_type_id');
 	}
 
+	public function bookingCategory() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'booking_category_id');
+	}
+
 	public function paymentStatus() {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'payment_status_id');
 	}

@@ -140,7 +140,7 @@ class AgentRequestController extends Controller {
 	}
 
 	public function agentRequestFormData($trip_id) {
-
+		// dd($trip_id);
 		$trip = Trip::with([
 			'agentVisits',
 			'agentVisits.fromCity',
@@ -154,6 +154,7 @@ class AgentRequestController extends Controller {
 			'agentVisits.bookings.attachments',
 			'agentVisits.bookings.travelMode',
 			'agentVisits.bookings.bookingMode',
+			'agentVisits.bookings.bookingCategory',
 			'agentVisits.agent',
 			'agentVisits.status',
 			'agentVisits.managerVerificationStatus',
@@ -205,9 +206,15 @@ class AgentRequestController extends Controller {
 			$trip->employee_gst_code = $trip->employee->outlet->address->city->state->gstin_state_code;
 		}
 
-		//dd($visits);
 		if ($trip_status == 'booked') {
-			$visits = Trip::select(DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.service_charge) as service_charge'))
+			$visits = Trip::select([
+				DB::raw('SUM(visit_bookings.amount) as amount'),
+				DB::raw('SUM(visit_bookings.tax) as tax'),
+				// DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'),
+				// DB::raw('SUM(visit_bookings.service_charge) as service_charge'),
+				DB::raw('SUM(visit_bookings.total) as paid_amount'),
+				DB::raw('SUM(visit_bookings.agent_service_charges) as service_charge'),
+			])
 				->join('visits', 'trips.id', 'visits.trip_id')
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.booking_method_id', 3042) //Agent
@@ -215,7 +222,6 @@ class AgentRequestController extends Controller {
 				->where('visits.trip_id', $trip_id)
 				->groupBy('visits.trip_id')
 				->first();
-			//dd($visits);
 
 			if ($visits) {
 				$ticket_amount = $visits->amount + $visits->tax;
@@ -235,7 +241,7 @@ class AgentRequestController extends Controller {
 		$this->data['booking_mode_list'] = $booking_mode_list = collect(Entity::bookingModeList())->prepend(['id' => '', 'name' => 'Select Booking Method']);
 		$this->data['booking_category_list'] = Config::select('id', 'name')->where('config_type_id', 545)->get()->prepend(['id' => '', 'name' => 'Select Booking Category']);
 		$this->data['bookingMethods'] = BookingMethod::pluck('amount', 'id');
-		$this->data['booking_method_list'] = BookingMethod::select('id', 'name')->get()->prepend(['id' => '', 'name' => 'Select Booking Method']);
+		$this->data['booking_method_list'] = [];
 		$this->data['trip'] = $trip;
 		//$this->data['trip']['visit_booking'] = $visit_booking;
 
@@ -247,6 +253,36 @@ class AgentRequestController extends Controller {
 		$this->data['attach_path'] = url('storage/app/public/visit/booking-updates/attachments/');
 		$this->data['success'] = true;
 		return response()->json($this->data);
+	}
+
+	public function getBookingMethodsByTravelMode($travelTypeId) {
+		$travelType = Entity::select([
+			'id',
+		])
+			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
+			->where('entities.entity_type_id', 502)
+			->where('travel_mode_category_type.category_id', 3403)
+			->where('entities.company_id', Auth::user()->company_id)
+			->where('entities.id', $travelTypeId)
+			->first();
+		if (!$travelType) {
+			return response()->json([
+				'success' => false,
+				'error' => 'Travel mode not found',
+			]);
+		}
+
+		$bookingMethods = BookingMethod::select([
+			'id',
+			'name',
+		])
+			->where('travel_type_id', $travelTypeId)
+			->get();
+
+		return response()->json([
+			'success' => true,
+			'booking_method_list' => $bookingMethods,
+		]);
 	}
 
 	public function saveAgentRequest(Request $r) {

@@ -2018,10 +2018,22 @@ app.component('eyatraTripClaimForm', {
                 from_id: '',
                 to_id: '',
                 amount: '',
+                tax: '',
                 description: '',
-                eligible_amount: '0.00',
+                attachment_status: 'Yes',
+                // eligible_amount: '0.00',
             });
         }
+
+        $scope.onChangeLocalTravelExpenseType = (modeId, index) => {
+            //AUTO RICKSAW OR BUS
+            if (modeId == '20' || modeId == '21') {
+                self.trip.local_travels[index].attachment_status = 'No';
+            } else {
+                self.trip.local_travels[index].attachment_status = 'Yes';
+            }
+        }
+
         self.removeLocalTralvel = function(index, local_travel_id) {
             if (local_travel_id) {
                 self.local_travels_removal_id.push(local_travel_id);

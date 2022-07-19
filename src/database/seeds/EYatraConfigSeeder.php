@@ -1109,7 +1109,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 545,
 			],
 			3761 => [
-				'name' => 'Non Agent',
+				'name' => 'User',
 				'config_type_id' => 545,
 			],
 

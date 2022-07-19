@@ -10,5 +10,6 @@ class BookingMethod extends Model {
 
 	protected $fillable = [
 		'name',
+		'travel_type_id',
 	];
 }
