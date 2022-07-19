@@ -158,7 +158,7 @@ class TripClaimVerificationTwoController extends Controller {
 		$trip->save();
 		// Update attachment status by Karthick T on 20-01-2022
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)
-				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189])
+				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189,3750,3751,3752,3753,3754,3755])
 				->where('attachment_type_id', 3200)
 				->where('view_status', 1)
 				->update(['view_status' => 0]);
