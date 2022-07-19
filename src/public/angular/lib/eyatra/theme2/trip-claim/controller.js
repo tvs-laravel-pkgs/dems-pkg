@@ -330,6 +330,16 @@ app.component('eyatraTripClaimForm', {
                 self.boardingCal();
                 self.localTravelCal();
             }
+            $('.custom-city-change').addClass('ng-hide');
+            var custom_city_show = false;
+            $(self.trip.visits).each(function(key, visit) {
+                if ((visit.from_city_id == 879 || visit.to_city_id == 879) && custom_city_show == false) {
+                    custom_city_show = true;
+                }
+            });
+            if (custom_city_show) {
+                $('.custom-city-change').removeClass('ng-hide');
+            }
             drop_down_show = false;
             $('.claim-sbu').addClass('ng-hide');
             $(self.sbu_lists).each(function(key, value) {
@@ -369,16 +379,6 @@ app.component('eyatraTripClaimForm', {
                 self.localTravelCal();
 
                 fileUpload();
-                $('.custom-city-change').addClass('ng-hide');
-                var custom_city_show = false;
-                $(self.trip.visits).each(function(key, visit) {
-                    if ((visit.from_city_id == 879 || visit.to_city_id == 879) && custom_city_show == false) {
-                        custom_city_show = true;
-                    }
-                });
-                if (custom_city_show) {
-                    $('.custom-city-change').removeClass('ng-hide');
-                }
             }, 500);
 
             $rootScope.loading = false;
