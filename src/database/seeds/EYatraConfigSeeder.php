@@ -153,7 +153,8 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 535,
 			],
 			3036 => [
-				'name' => 'Claim Verification Pending',
+				/*'name' => 'Claim Verification Pending',*/
+				'name' => 'Nodel Approval Pending',
 				'config_type_id' => 535,
 			],
 			3037 => [
