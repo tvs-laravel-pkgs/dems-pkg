@@ -1762,10 +1762,10 @@ class Trip extends Model {
 		$trip->boarding_tax = $boarding_tax;
 		$trip->local_travel_basic = $local_travel_basic;
 		$trip->local_travel_tax = $local_travel_tax;
-		$trip->transport_total = $transport_total;
-	    $trip->lodging_total =$lodging_total;
-	    $trip->boarding_total =$boarding_total;
-	    $trip->local_travel_total =$local_travel_total;
+		$trip->transport_total = number_format($transport_total,2, '.', '');
+	    $trip->lodging_total =number_format($lodging_total,2, '.', '');
+	    $trip->boarding_total =number_format($boarding_total,2, '.', '');
+	    $trip->local_travel_total =number_format($local_travel_total,2, '.', '');
 		$trip->emp_trip_count = $emp_trip_count;
 		$trip->emp_claim_amount = $emp_claim_amount;
 		$trip->transport_amount = $transport_amount;
