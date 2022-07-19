@@ -6,7 +6,6 @@ use App\User;
 use Auth;
 use DB;
 use Entrust;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Trip;
@@ -106,9 +105,7 @@ class TripController extends Controller {
 						$delete_class = "";
 					}
 				} else {
-					
-					
-				
+
 					$edit_class = "visibility:hidden";
 					$delete_class = "visibility:hidden";
 				}
@@ -120,9 +117,9 @@ class TripController extends Controller {
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				</a> ';
 				/*$action .= '<a style="' . $delete_class . '" href="javascript:;" data-toggle="modal" data-target="#delete_trip"
-				onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-                </a>';*/
+									onclick="angular.element(this).scope().deleteTrip(' . $trip->id . ')" dusk = "delete-btn" title="Delete">
+					                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
+				*/
 
 				return $action;
 			})
@@ -151,16 +148,16 @@ class TripController extends Controller {
 	// }
 
 	public function saveTrip(Request $request) {
-
-		if ($request->advance_received>0) {
+		// dd($request->all());
+		if ($request->advance_received > 0) {
 			//dd($request->id);
 			$get_previous_trips = Trip::select('id')
-			        ->where('employee_id', Auth::user()->entity_id)
-			        ->where('id','!=',$request->id)
-			        ->whereIn('advance_request_approval_status_id',[3260,3261])
-			        ->whereNotIn('status_id',[3026,3032])
-			        ->orderBy('id', 'DESC')->first();
-			        //dd($get_previous_trips);
+				->where('employee_id', Auth::user()->entity_id)
+				->where('id', '!=', $request->id)
+				->whereIn('advance_request_approval_status_id', [3260, 3261])
+				->whereNotIn('status_id', [3026, 3032])
+				->orderBy('id', 'DESC')->first();
+			//dd($get_previous_trips);
 
 			if ($get_previous_trips) {
 				return response()->json(['success' => false, 'errors' => ['Advance Amount Eligible, After All Previous Claim Process Completed']]);
@@ -197,12 +194,12 @@ class TripController extends Controller {
 			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);
 		}
 		$date_lessthan_previous_trip = Trip::select('id')->where('employee_id', Auth::user()->entity_id)
-		        ->where('id','!=',$request->id)
-				->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))
-				->where('status_id','!=',3032)
-				->first();
-		if($date_lessthan_previous_trip){
-		 return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
+			->where('id', '!=', $request->id)
+			->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))
+			->where('status_id', '!=', 3032)
+			->first();
+		if ($date_lessthan_previous_trip) {
+			return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
 		}
 
 		$size = sizeof($request->visits);
