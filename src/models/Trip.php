@@ -2170,7 +2170,7 @@ class Trip extends Model {
 						}
 						//dd($lodging_data['lodge_name']);
 						if($lodging_data['amount'] > 0){
-						if(empty($lodging_data['gstin'] && $lodging_data['lodge_name'])){
+						if(empty($lodging_data['lodge_name'])){
 						$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
 						if (!$response['success']) {
 							return response()->json([
