@@ -2338,6 +2338,10 @@ app.component('eyatraTripClaimForm', {
                                     $('#transport_submit').html('Save & Next');
                                     $("#transport_submit").attr("disabled", false);
                                     //$('#claim_lodge_expense_form').trigger("reset");
+                                    $(self.trip).each(function(key, val) {
+                                        self.trip.boardings[key].boarding_type_id = [];
+                                    });
+                                    $scope.$apply()
                                     //$('#claim_board_expense_form').trigger("reset");
                                 }
                             })
