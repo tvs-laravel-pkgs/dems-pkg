@@ -240,8 +240,8 @@ class TripClaimVerificationLevelController extends Controller {
 				$employee_claim->status_id = 3036; //Claim Verification Pending
 				$trip->status_id = 3036; //Claim Verification Pending
 			} else {
-				$employee_claim->status_id = 3034; //Payment Pending
-				$trip->status_id = 3034; //Payment Pending
+				$employee_claim->status_id = 3026; //Payment Pending
+				$trip->status_id = 3026; //Payment Pending
 			}
 		} else {
 			$employee_claim->status_id = 3029; //Senior Manager Approval Pending
