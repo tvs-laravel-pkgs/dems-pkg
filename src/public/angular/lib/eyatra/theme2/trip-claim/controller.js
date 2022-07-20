@@ -2057,31 +2057,31 @@ app.component('eyatraTripClaimForm', {
             self.trip.local_travel_attachments.splice(local_travel_attachment_index, 1);
         }
 
-        self.travelCal = () => {
-            let totalTravelAmount = 0;
-            let travelCurrentTotal = 0;
-            let travelAmount = 0;
-            let travelTax = 0;
-            let travelTollFee = 0;
-            jQuery.each(self.trip.visits, (index, visit) => {
-                travelAmount = parseInt(visit.self_booking.amount || 0);
-                if (!$.isNumeric(travelAmount)) {
-                    travelAmount = 0;
+        self.travelCal = function() {
+            // alert();
+            var total_travel_amount = 0;
+            $('.travel_amount').each(function() {
+                var travel_amount = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_amount').val() || 0);
+                // alert(travel_amount);
+                var travel_tax = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_tax').val() || 0);
+                var travel_toll_fee = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
+                // console.log(travel_toll_fee);
+                if (!$.isNumeric(travel_amount)) {
+                    travel_amount = 0;
                 }
-                travelTax = parseInt(visit.self_booking.tax || 0);
-                if (!$.isNumeric(travelTax)) {
-                    travelTax = 0;
+                if (!$.isNumeric(travel_tax)) {
+                    travel_tax = 0;
                 }
-                travelTollFee = parseInt(visit.self_booking.toll_fee || 0);
-                if (!$.isNumeric(travelTollFee)) {
-                    travelTollFee = 0;
+                if (!$.isNumeric(travel_toll_fee)) {
+                    travel_toll_fee = 0;
                 }
-                travelCurrentTotal = parseFloat(travelAmount + travelTax + travelTollFee);
-                visit.self_booking.total = travelCurrentTotal;
-                totalTravelAmount += travelCurrentTotal;
+                travel_current_total = travel_amount + travel_tax + travel_toll_fee;
+                total_travel_amount += travel_current_total;
+                $(this).closest('tr').find('.visit_booking_total_amount').val(travel_current_total);
             });
-            $('.transport_expenses').text('₹ ' + totalTravelAmount.toFixed(2));
-            $('.total_travel_amount').val(totalTravelAmount.toFixed(2));
+            console.log(total_travel_amount);
+            $('.transport_expenses').text('₹ ' + total_travel_amount.toFixed(2));
+            $('.total_travel_amount').val(total_travel_amount.toFixed(2));
             caimTotalAmount();
         }
 
