@@ -329,6 +329,7 @@ app.component('eyatraTripClaimForm', {
                 self.lodgingCal();
                 self.boardingCal();
                 self.localTravelCal();
+                fileUpload();
             }
             $('.custom-city-change').addClass('ng-hide');
             var custom_city_show = false;
