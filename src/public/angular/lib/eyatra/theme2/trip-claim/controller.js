@@ -1444,8 +1444,10 @@ app.component('eyatraTripClaimForm', {
             });
             if (is_deviation) {
                 self.is_deviation = 1;
+                // $('#is_deviation').val(1);
             } else {
                 self.is_deviation = 0;
+                // $('#is_deviation').val(0);
             }
         }
 
