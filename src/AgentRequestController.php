@@ -150,6 +150,7 @@ class AgentRequestController extends Controller {
 			'agentVisits.travelMode',
 			'agentVisits.bookingMethod',
 			'agentVisits.bookingStatus',
+			'agentVisits.booking',
 			'agentVisits.bookings',
 			'agentVisits.bookings.attachments',
 			'agentVisits.bookings.travelMode',

@@ -120,6 +120,10 @@ class Visit extends Model {
 		return $this->hasMany('Uitoux\EYatra\VisitBooking');
 	}
 
+	public function booking() {
+		return $this->hasOne('Uitoux\EYatra\VisitBooking', 'visit_id');
+	}
+
 	public function selfBooking() {
 		return $this->hasOne('Uitoux\EYatra\VisitBooking')->where('type_id', 3100)->latest();
 	}

@@ -437,6 +437,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trips/booking-updates/get-list', 'Uitoux\EYatra\TripBookingUpdateController@listTripBookingUpdates')->name('listTripBookingUpdates');
 		Route::get('eyatra/trips/booking-updates/get-form-data/{visit_id?}', 'Uitoux\EYatra\TripBookingUpdateController@tripBookingUpdatesFormData')->name('tripBookingUpdatesFormData');
 		Route::post('eyatra/trips/booking-updates/save', 'Uitoux\EYatra\TripBookingUpdateController@saveTripBookingUpdates')->name('saveTripBookingUpdates');
+		Route::post('eyatra/trips/booking/proof-upload/save', 'Uitoux\EYatra\TripBookingUpdateController@saveTripBookingProofUpload')->name('saveTripBookingProofUpload');
 		Route::get('/eyatra/trip/booking-updates/booking-tatkal-change/{visit_id}', 'Uitoux\EYatra\TripBookingUpdateController@changeBookingTatkal')->name('changeBookingTatkal');
 
 		//TRIPS TATKAL BOOKING
