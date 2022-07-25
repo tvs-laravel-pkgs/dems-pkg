@@ -87,40 +87,45 @@ class TripApprovalController extends Controller {
 			array_push($ids, Auth::user()->entity_id);
 
 			//OUTSTATION TRIP CLIAM VERIFICATION ONE
-			if (Entrust::can('eyatra-indv-employee-claims-verification1')) {
-				if (count($sub_employee_id) > 0) {
-					$trips->whereIn('employee.reporting_to_id', $ids) //Alternate MANAGER
-						->where('ey_employee_claims.status_id', 3023) //CLAIM REQUESTED
-						->where('employee.company_id', Auth::user()->company_id)
+			if(Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && !Entrust::can('eyatra-indv-employee-claims-verification2')) {
+				if(count($sub_employee_id) > 0) {
+					$trips->whereIn('employee.reporting_to_id', $ids)//alternate manager
+                       ->whereIn('trips.status_id', [3021,3023]) //CLAIM REQUESTED
+					   ->where('employee.company_id', Auth::user()->company_id)
 					;
 				} else {
-					$trips->where('employee.reporting_to_id', Auth::user()->entity_id) //MANAGER
-						->where('ey_employee_claims.status_id', 3023) //CLAIM REQUESTED
+					$trips->where('employee.reporting_to_id', Auth::user()->entity_id)
+						->whereIn('trips.status_id', [3021,3023]) //CLAIM REQUESTED
 						->where('employee.company_id', Auth::user()->company_id)
 					;
 				}
-			} elseif (Entrust::can('eyatra-indv-employee-claims-verification2')) {
+			}else if(Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && Entrust::can('eyatra-indv-employee-claims-verification2')) {
 				//OUTSTATION TRIP CLIAM VERIFICATION TWO
 				if (count($sub_employee_id) > 0) {
-					$trips->whereIn('senior_manager_employee.id', $ids) //Alternate MANAGER
-						->where('ey_employee_claims.status_id', 3029) //SENIOR MANAGER APPROVAL PENDING
-						->where('employee.company_id', Auth::user()->company_id)
-					;
+					$trips->where(function($q) use ($ids){ //Alternate seniour manager
+    				$q->where(function($reportingQ) use ($ids) {
+        			$reportingQ->where('employee.reporting_to_id', $ids)
+       				 ->whereIn('trips.status_id', [3021,3023]);
+    				})
+    				->orWhere(function($seniorQ) use ($ids) {
+        			$seniorQ->where('senior_manager_employee.id', $ids)
+        			->whereIn('trips.status_id', [3029]);
+    				});
+				})
+				->where('employee.company_id', Auth::user()->company_id); 
 				} else {
-					$trips->where('senior_manager_employee.id', Auth::user()->entity_id) //MANAGER
-						->where('ey_employee_claims.status_id', 3029) //SENIOR MANAGER APPROVAL PENDING
-						->where('employee.company_id', Auth::user()->company_id)
-					;
-				}
-			} elseif (Entrust::can('eyatra-indv-trip-verifications')) {
-				//OUTSTATION TRIP VERIFICATIONS
-				if (count($sub_employee_id) > 0) {
-					$trips->whereIn('trips.manager_id', $ids) //Alternate MANAGER
-						->where('trips.status_id', 3021); //MANAGER APPROVAL PENDING
-				} else {
-					$trips->where('trips.manager_id', Auth::user()->entity_id) //MANAGER
-						->where('trips.status_id', 3021); //MANAGER APPROVAL PENDING
-				}
+					$trips->where(function($q) use ($ids){
+    				$q->where(function($reportingQ) use ($ids) {
+        			$reportingQ->where('employee.reporting_to_id', Auth::user()->entity_id)
+        			->whereIn('trips.status_id', [3021,3023]);
+    				})
+    				->orWhere(function($seniorQ) use ($ids) {
+        			$seniorQ->where('senior_manager_employee.id', Auth::user()->entity_id)
+        			->whereIn('trips.status_id', [3029]);
+    				});
+					})
+			       ->where('employee.company_id', Auth::user()->company_id); 
+			    }
 			} else {
 				$trips = collect();
 			}
@@ -133,18 +138,29 @@ class TripApprovalController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$action = '';
 				//OUTSTATION TRIP CLIAM VERIFICATION ONE
-				if (Entrust::can('eyatra-indv-employee-claims-verification1')) {
-					$action = '<a href="#!/trip/claim/verification1/view/' . $trip->id . '">
-									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-								</a>';
-				} elseif (Entrust::can('eyatra-indv-employee-claims-verification2')) {
-					//OUTSTATION TRIP CLIAM VERIFICATION TWO
-					$action = '<a href="#!/trip/claim/verification2/view/' . $trip->id . '">
-									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-								</a>';
-				} elseif (Entrust::can('eyatra-indv-trip-verifications')) {
+				if (Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && !Entrust::can('eyatra-indv-employee-claims-verification2')) {
 					//OUTSTATION TRIP VERIFICATIONS
+					if($trip->status_id =='3021'){
 					$action = '<a href="#!/trip/verification/form/' . $trip->id . '">
+									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+								</a>';
+					}else if($trip->status_id == '3023'){
+						$action = '<a href="#!/trip/claim/verification1/view/' . $trip->id . '">
+									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+								</a>';
+					}
+				}else if(Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && Entrust::can('eyatra-indv-employee-claims-verification2')) {
+					//OUTSTATION TRIP CLIAM VERIFICATION TWO
+					if($trip->status_id== '3021'){
+					$action = '<a href="#!/trip/verification/form/' . $trip->id . '">
+									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+								</a>';
+					}else if($trip->status_id== '3023'){
+						$action = '<a href="#!/trip/claim/verification1/view/' . $trip->id . '">
+									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+								</a>';
+					}else if($trip->status_id== '3029')
+					$action = '<a href="#!/trip/claim/verification2/view/' . $trip->id . '">
 									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 								</a>';
 				}

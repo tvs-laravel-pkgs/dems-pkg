@@ -860,6 +860,13 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Cashier Outlet Reimbursement',
 			],
 
+		    5589 => [
+				'display_order' => 1,
+				'parent_id' => 5000,
+				'name' => 'eyatra-indv-trip-approval',
+				'display_name' => 'Trip Approval',
+			],
+
 			//APPROVALS / VERIFICATION
 			5600 => [
 				'display_order' => 1,
