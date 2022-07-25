@@ -2983,8 +2983,12 @@ class Trip extends Model {
 		if (count($pending_trips) > 0) {
 			foreach ($pending_trips as $trip_key => $pending_trip) {
 				if ($status == 'Pending Requsation Approval') {
+					$detail='You have the following Travel Requisition(s) waiting for Approval and is / are
+pending for more than 2 days. Please approve. In case any of the below travel
+request is not desired, then those may be rejected.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
-					$subject = 'Pending Outstation Approval Trip Mail';
+					$subject = 'Pending Trip Approval Mail';
+					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
 					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
@@ -2996,8 +3000,12 @@ class Trip extends Model {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3021)->update(['status_id' => 3032, 'reason' => 'Your Trip not approved,So system Cancelled Automatically']);
 					}
 				} elseif ($status == 'Claim Generation') {
+					$detail='You have the following Travel Requisition(s) waiting for claim generation and is / are
+pending for more than 2 days. Please claim your trip. In case any of the below travel
+request is not desired, then those may be cancelled.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
-					$subject = 'Pending Outstation Trip Mail';
+					$subject = 'Pending Claim Generation Mail';
+					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
 					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
@@ -3009,8 +3017,12 @@ class Trip extends Model {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
 					}
 				} elseif ($status == 'Pending Claim Approval') {
+					$detail='You have the following Claim waiting for Approval and is / are
+pending for more than 2 days. Please approve. In case any of the below claim
+request is not desired, then those may be rejected.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
-					$subject = 'Pending Outstation Claim Approval Trip Mail';
+					$subject = 'Pending Claim Approval Mail';
+					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
 					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name')
@@ -3022,8 +3034,12 @@ class Trip extends Model {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3023)->update(['status_id' => 3024, 'status_id' => 3024, 'reason' => 'Your claim is not Approved,So system Rejected Automatically']);
 					}
 				} elseif ($status == 'Pending Divation Claim Approval') {
+					$detail='You have the following Deviation Claim waiting for Approval and is / are
+pending for more than 2 days. Please approve. In case any of the below claim
+request is not desired, then those may be rejected.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
-					$subject = 'Pending Outstation Deviation Trip Mail';
+					$subject = 'Pending Deviation Claim Approval Mail';
+					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
 					$to_email = $arr['to_email'] = EmployeeClaim::join('employees as e', 'e.id', 'ey_employee_claims.employee_id')
