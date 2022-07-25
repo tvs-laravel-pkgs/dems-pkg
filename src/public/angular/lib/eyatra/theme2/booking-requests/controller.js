@@ -94,7 +94,7 @@ app.component('eyatraTripBookingRequests', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraTripBookingRequestsView', {
     templateUrl: agent_request_form_template_url,
-    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route) {
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $timeout, $route, $window) {
         //alert();
         if (typeof($routeParams.trip_id) == 'undefined') {
             $location.path('/agent/requests')
@@ -187,6 +187,9 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.checkDetail(id, 'cancel');
         });
 
+        $scope.onClickProofUpload = (visitId) => {
+            $('#visitId').val(visitId)
+        }
 
         $scope.showBookDetail = function(id, amount) {
             // alert();
@@ -240,8 +243,8 @@ app.component('eyatraTripBookingRequestsView', {
 
         $scope.onChangeTravelMode = (index, travelModeId) => {
             self.booking_method_list = [];
-            self.trip.agent_visits[index].bookings.booking_method_id = '';
-            self.trip.agent_visits[index].bookings.agent_service_charges = '';
+            self.trip.agent_visits[index].booking.booking_method_id = '';
+            self.trip.agent_visits[index].booking.agent_service_charges = '';
             if (travelModeId) {
                 $http.get(
                     getBookingMethodsByTravelMode + '/' + travelModeId
@@ -256,43 +259,45 @@ app.component('eyatraTripBookingRequestsView', {
         }
 
         $scope.onChangeBookingMethod = index => {
-            self.trip.agent_visits[index].bookings.agent_service_charges = self.bookingMethods[self.trip.agent_visits[index].bookings.booking_method_id];
+            self.trip.agent_visits[index].booking.agent_service_charges = self.bookingMethods[self.trip.agent_visits[index].booking.booking_method_id];
         }
 
         $scope.calculateTax = index => {
-            self.trip.agent_visits[index].bookings.gstin = '';
-            self.trip.agent_visits[index].bookings.cgst = '';
-            self.trip.agent_visits[index].bookings.sgst = '';
-            self.trip.agent_visits[index].bookings.igst = '';
-            self.trip.agent_visits[index].bookings.gstin = self.trip.agent_visits[index].toCityGstin;
+            if (self.trip.agent_visits[index].booking) {
+                self.trip.agent_visits[index].booking.gstin = '';
+                self.trip.agent_visits[index].booking.cgst = '';
+                self.trip.agent_visits[index].booking.sgst = '';
+                self.trip.agent_visits[index].booking.igst = '';
+                self.trip.agent_visits[index].booking.gstin = self.trip.agent_visits[index].toCityGstin;
 
-            const cgstPercentage = sgstPercentage = 2.5;
-            const igstPercentage = 5;
-            if (self.trip.employee_gst_code && self.trip.agent_visits[index].toCityGstCode && self.trip.agent_visits[index].bookings.amount && self.trip.agent_visits[index].bookings.booking_method_id && self.trip.agent_visits[index].bookings.booking_method_id != 13) {
-                let taxableValue = self.trip.agent_visits[index].bookings.amount;
-                if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
-                    self.trip.agent_visits[index].bookings.cgst = parseFloat(taxableValue * (cgstPercentage / 100)).toFixed(2);
-                    self.trip.agent_visits[index].bookings.sgst = parseFloat(taxableValue * (sgstPercentage / 100)).toFixed(2);
-                    self.trip.agent_visits[index].bookings.igst = 0.00;
-                } else {
-                    self.trip.agent_visits[index].bookings.cgst = 0.00;
-                    self.trip.agent_visits[index].bookings.sgst = 0.00;
-                    self.trip.agent_visits[index].bookings.igst = parseFloat(taxableValue * (igstPercentage / 100)).toFixed(2);
+                const cgstPercentage = sgstPercentage = 2.5;
+                const igstPercentage = 5;
+                if (self.trip.employee_gst_code && self.trip.agent_visits[index].toCityGstCode && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
+                    let taxableValue = self.trip.agent_visits[index].booking.amount;
+                    if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
+                        self.trip.agent_visits[index].booking.cgst = parseFloat(taxableValue * (cgstPercentage / 100)).toFixed(2);
+                        self.trip.agent_visits[index].booking.sgst = parseFloat(taxableValue * (sgstPercentage / 100)).toFixed(2);
+                        self.trip.agent_visits[index].booking.igst = 0.00;
+                    } else {
+                        self.trip.agent_visits[index].booking.cgst = 0.00;
+                        self.trip.agent_visits[index].booking.sgst = 0.00;
+                        self.trip.agent_visits[index].booking.igst = parseFloat(taxableValue * (igstPercentage / 100)).toFixed(2);
+                    }
                 }
+                $scope.calculateTotalVal(index);
             }
-            $scope.calculateTotalVal(index);
         }
 
         $scope.calculateTotalVal = index => {
             let totalValue = 0.00;
-            const taxableValue = parseFloat(self.trip.agent_visits[index].bookings.amount) || 0.00;
-            const cgstValue = parseFloat(self.trip.agent_visits[index].bookings.cgst) || 0.00;
-            const sgstValue = parseFloat(self.trip.agent_visits[index].bookings.sgst) || 0.00;
-            const igstValue = parseFloat(self.trip.agent_visits[index].bookings.igst) || 0.00;
-            const otherCharges = parseFloat(self.trip.agent_visits[index].bookings.other_charges) || 0.00;
+            const taxableValue = parseFloat(self.trip.agent_visits[index].booking.amount) || 0.00;
+            const cgstValue = parseFloat(self.trip.agent_visits[index].booking.cgst) || 0.00;
+            const sgstValue = parseFloat(self.trip.agent_visits[index].booking.sgst) || 0.00;
+            const igstValue = parseFloat(self.trip.agent_visits[index].booking.igst) || 0.00;
+            const otherCharges = parseFloat(self.trip.agent_visits[index].booking.other_charges) || 0.00;
 
             totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue + otherCharges).toFixed(2);
-            self.trip.agent_visits[index].bookings.total = totalValue;
+            self.trip.agent_visits[index].booking.total = totalValue;
         }
 
         $scope.gstHelper = function(key) {
@@ -375,6 +380,51 @@ app.component('eyatraTripBookingRequestsView', {
                 },
             });
         });
+
+        let proofUploadFormId = '#tripBookingRequestUploadProofDocForm';
+        let v = jQuery(proofUploadFormId).validate({
+            ignore: '',
+            rules: {
+                proof_attachment: {
+                    required: true,
+                }
+            },
+            errorPlacement: function(error, element) {
+                error.insertAfter(element)
+            },
+            submitHandler: function(form) {
+                let formData = new FormData($(proofUploadFormId)[0]);
+                $('#proofUploadSubmitId').button('loading');
+                $.ajax({
+                        url: laravel_routes['saveTripBookingProofUpload'],
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                    .done(function(res) {
+                        console.log(res);
+                        if (!res.success) {
+                            $('#proofUploadSubmitId').button('reset');
+                            var errors = '';
+                            for (var i in res.errors) {
+                                errors += '<li>' + res.errors[i] + '</li>';
+                            }
+                            custom_noty('error', errors);
+                        } else {
+                            custom_noty('success', "Proof uploaded successfully");
+                            setTimeout(function() {
+                                $window.location.reload()
+                            }, 3000);
+                        }
+                    })
+                    .fail(function(xhr) {
+                        $('#proofUploadSubmitId').button('reset');
+                        custom_noty('error', 'Something went wrong at server');
+                    });
+            },
+        });
+
 
         $(document).on('click', '.submit', function() {
             var form_id = '#trip-booking-updates-form';

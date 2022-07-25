@@ -248,10 +248,15 @@ class TripBookingUpdateController extends Controller {
 						$claim_amount = $total_amount;
 					} else {
 						//Get Same Visit Booking Details
-						$previous_visit_booking = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->select('amount', 'tax', 'service_charge')->first();
+						$previous_visit_booking = VisitBooking::where('visit_id', $value['visit_id'])
+							->where('type_id', 3100)
+							->select('amount', 'tax', 'service_charge')
+							->first();
 
 						//Update Same Visit Booking details paid/claim amount
-						$visit_booking_update = VisitBooking::where('visit_id', $value['visit_id'])->where('type_id', 3100)->update(['paid_amount' => $service_charge]);
+						$visit_booking_update = VisitBooking::where('visit_id', $value['visit_id'])
+							->where('type_id', 3100)
+							->update(['paid_amount' => $service_charge]);
 
 						$previous_booking_amount = $previous_visit_booking->amount + $previous_visit_booking->tax;
 						$cancel_booking_amount = $amount + $tax;
@@ -259,14 +264,16 @@ class TripBookingUpdateController extends Controller {
 
 					}
 
-					$visit_bookings = new VisitBooking;
+					if (!empty($value['visit_booking_id'])) {
+						$visit_bookings = VisitBooking::find($value['visit_booking_id']);
+					} else {
+						$visit_bookings = new VisitBooking;
+					}
 					$visit_bookings->visit_id = $value['visit_id'];
 					$visit_bookings->type_id = $r->type_id;
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
 					$visit_bookings->reference_number = $value['reference_number'];
-
 					// $visit_bookings->booking_type_id = $value['booking_mode_id'];
-
 					$visit_bookings->booking_category_id = $value['booking_category_id'];
 					$visit_bookings->booking_method_id = $value['booking_method_id'];
 					$visit_bookings->agent_service_charges = $value['agent_service_charges'];
@@ -279,26 +286,18 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->igst = $value['igst'];
 					$visit_bookings->other_charges = $value['other_charges'];
 					$visit_bookings->service_charge = $service_charge;
-
 					// $visit_bookings->total = $total_amount;
 					$visit_bookings->total = $value['total'];
-
 					$visit_bookings->paid_amount = $claim_amount;
 					$visit_bookings->status_id = $r->status_id;
 					$visit_bookings->created_by = Auth::user()->id;
 					$visit_bookings->save();
-					//dd($visit_bookings);
-					// dump($value);
+
 					$booking_updates_images = storage_path('app/public/visit/booking-updates/attachments/');
 					Storage::makeDirectory($booking_updates_images, 0777);
-					// if ($value->hasfile('attachments')) {
-					// dd($value['attachments']);
 					if (isset($value['attachments'])) {
 						$image = $value['attachments'];
-
-						// dd($image);
 						// foreach ($r->file('attachments') as $image) {
-
 						$extension = $image->getClientOriginalExtension();
 						$value = rand(1, 100);
 						$name = $visit_bookings->id . '_ticket_booking_attachment' . $value . '.' . $extension;
@@ -310,6 +309,10 @@ class TripBookingUpdateController extends Controller {
 						$attachement->entity_id = $visit_bookings->id;
 						$attachement->name = $name;
 						$attachement->save();
+
+						// PROOF ATTACHED
+						$visit_bookings->is_proof_attached = 1;
+						$visit_bookings->save();
 						// }
 					}
 
@@ -338,6 +341,99 @@ class TripBookingUpdateController extends Controller {
 				'success' => false,
 				'errors' => [
 					'Exception Error' => $e->getMessage(),
+				],
+			]);
+		}
+	}
+
+	public function saveTripBookingProofUpload(Request $request) {
+		// dd($request->all());
+		DB::beginTransaction();
+		try {
+			$validator = Validator::make($request->all(), [
+				'visit_id' => [
+					'required:true',
+					'integer',
+					'exists:visits,id',
+				],
+				'proof_attachment' => 'required',
+			]);
+
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'errors' => $validator->errors()->all(),
+				]);
+			}
+
+			$visit = Visit::find($request->visit_id);
+			$trip = Trip::find($visit->trip_id);
+
+			//SAVE VISIT BOOKING
+			$visitBooking = VisitBooking::firstOrNew([
+				'visit_id' => $request->visit_id,
+			]);
+			$visitBooking->visit_id = $request->visit_id;
+			$visitBooking->is_proof_attached = 1;
+			$visitBooking->type_id = 3100; //Booking
+			$visitBooking->status_id = 3240; //Claim Pending
+			$visitBooking->created_by = Auth::user()->id;
+			$visitBooking->save();
+
+			$removeAttachments = Attachment::where('attachment_of_id', 3180) // Visit Booking Attachment
+				->where('attachment_type_id', 3200) //Multi Attachment
+				->where('entity_id', $visitBooking->id)
+				->get();
+			if ($removeAttachments) {
+				if ($removeAttachments->isNotEmpty()) {
+					foreach ($removeAttachments as $ket => $removeAttachment) {
+						if (Storage::disk('local')->exists('/public/visit/booking-updates/attachments/' . $removeAttachment->name)) {
+							unlink(storage_path('app/public/visit/booking-updates/attachments/' . $removeAttachment->name));
+						}
+						$removeAttachment->delete();
+					}
+				}
+			}
+
+			if ($request->hasFile('proof_attachment')) {
+				$image = $request->file('proof_attachment');
+				$extension = $image->getClientOriginalExtension();
+				$value = rand(1, 100);
+				$name = $visitBooking->id . '_ticket_booking_attachment' . $value . '.' . $extension;
+				$des_path = storage_path('app/public/visit/booking-updates/attachments/');
+				$image->move($des_path, $name);
+
+				//SAVE ATTACHMENT
+				$attachement = new Attachment;
+				$attachement->attachment_of_id = 3180; // Visit Booking Attachment
+				$attachement->attachment_type_id = 3200; //Multi Attachment
+				$attachement->entity_id = $visitBooking->id;
+				$attachement->name = $name;
+				$attachement->save();
+			}
+
+			if ($visit && $trip) {
+				$this->sendTicketNotificationMail(16, $visit);
+				$employee = Employee::where('id', $trip->employee_id)->first();
+				if ($employee) {
+					$user = User::where('entity_id', $employee->reporting_to_id)
+						->where('user_type_id', 3121)
+						->first();
+					sendnotification(16, $trip, $user, "Outstation Trip", 'Ticket Booking Mail');
+				}
+			}
+
+			DB::commit();
+			return response()->json([
+				'success' => true,
+			]);
+
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
 				],
 			]);
 		}
