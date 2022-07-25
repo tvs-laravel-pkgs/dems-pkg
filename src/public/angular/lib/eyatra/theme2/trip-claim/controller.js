@@ -338,8 +338,8 @@ app.component('eyatraTripClaimForm', {
                     $('.claim-sbu').addClass('ng-hide');
                     drop_down_show = true;
                 } else if (!drop_down_show) {
-                    self.trip.claim.sbu_id = response.data.employee.sbu_id;
-                    self.trip.claim.sbu_name = response.data.employee.sbu_name;
+                    self.trip.cliam.sbu_id = response.data.employee.sbu_id;
+                    self.trip.cliam.sbu_name = response.data.employee.sbu_name;
                     $('.claim-sbu').removeClass('ng-hide');
                     $('.drop-down').addClass('ng-hide');
                 }
