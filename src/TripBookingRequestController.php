@@ -161,6 +161,7 @@ class TripBookingRequestController extends Controller {
 			'bookingStatus',
 			'agent',
 			'status',
+			'other_charges',
 			'managerVerificationStatus',
 			'trip.employee',
 			'trip.purpose',

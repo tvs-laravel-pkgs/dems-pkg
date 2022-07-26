@@ -273,6 +273,8 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->type_id = $r->type_id;
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
 					$visit_bookings->reference_number = $value['reference_number'];
+					$visit_bookings->invoice_date = date('Y-m-d', strtotime($value['invoice_date']));
+					$visit_bookings->invoice_number = $value['invoice_number'];
 					// $visit_bookings->booking_type_id = $value['booking_mode_id'];
 					$visit_bookings->booking_category_id = $value['booking_category_id'];
 					$visit_bookings->booking_method_id = $value['booking_method_id'];

@@ -200,6 +200,12 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.bookDetailId = id;
             $scope.userDetailId = 0;
             $scope.checkDetail(id, 'book');
+            setTimeout(function() {
+                $(".datepicker").datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                });
+            }, 800);
         }
 
         $(document).on('click', '.book_close', function() {

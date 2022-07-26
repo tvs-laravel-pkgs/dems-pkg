@@ -24,6 +24,8 @@ class VisitBooking extends Model {
 		'other_charges',
 		'service_charge',
 		'total',
+		'invoice_date',
+		'invoice_number',
 		'status_id',
 		// 'claim_amount',
 		// 'payment_status_id',
@@ -51,6 +53,12 @@ class VisitBooking extends Model {
 		$this->attributes['amount'] = IND_money_format($value);
 		dd();
 	*/
+	public function setStartDateAttribute($date) {
+		return $this->attributes['invoice_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
+	}
+	public function setEndDateAttribute($date) {
+		return $this->attributes['invoice_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
+	}
 	public function visit() {
 		return $this->belongsTo('Uitoux\EYatra\Visit');
 	}
