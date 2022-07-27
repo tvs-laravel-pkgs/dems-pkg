@@ -225,6 +225,7 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }*/
+            console.log(response.data);
             self.cities_with_expenses = response.data.cities_with_expenses;
             self.employee = response.data.employee;
             self.gender = (response.data.employee.gender).toLowerCase();
@@ -2341,7 +2342,7 @@ app.component('eyatraTripClaimForm', {
                                     $('#transport_submit').html('Save & Next');
                                     $("#transport_submit").attr("disabled", false);
                                     //$('#claim_lodge_expense_form').trigger("reset");
-                                    $('#claim_board_expense_form').trigger("reset");
+                                    //$('#claim_board_expense_form').trigger("reset");
                                 }
                             })
                             .fail(function(xhr) {
