@@ -1983,7 +1983,10 @@ class Trip extends Model {
 							$visit_booking->reference_number = $visit_data['reference_number'];
 							$visit_booking->remarks = $visit_data['remarks'];
 							$visit_booking->amount = $visit_data['amount'];
-							$visit_booking->tax = $visit_data['tax'];
+							//$visit_booking->tax = $visit_data['tax'];
+							$visit_booking->tax = $visit_data['cgst'];
+							$visit_booking->tax = $visit_data['sgst'];
+							$visit_booking->tax = $visit_data['igst'];
 							$visit_booking->km_start = (isset($visit_data['km_start']) && !empty($visit_data['km_start'])) ? $visit_data['km_start'] : null;
 							$visit_booking->km_end = (isset($visit_data['km_end']) && !empty($visit_data['km_end'])) ? $visit_data['km_end'] : null;
 							$visit_booking->toll_fee = (isset($visit_data['toll_fee']) && !empty($visit_data['toll_fee'])) ? $visit_data['toll_fee'] : null;
