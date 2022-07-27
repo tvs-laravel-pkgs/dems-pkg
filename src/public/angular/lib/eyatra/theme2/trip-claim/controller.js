@@ -253,8 +253,14 @@ app.component('eyatraTripClaimForm', {
             self.delete = response.data.delete;
             self.two_wheeler_start_km = response.data.km_end_twowheeler;
             self.four_wheeler_start_km = response.data.km_end_fourwheeler;
-            // console.log(self.trip.visits.from_city_id);
-            // console.log(self.travel_values);
+            self.lodgingTaxInvoiceModalIndex = '';
+            self.lodgingTaxInvoice = {};
+            self.drywashTaxInvoice = {};
+            self.boardingTaxInvoice = {};
+            self.othersTaxInvoice = {};
+            self.roundoffTaxInvoice = {};
+            self.grandTotalTaxInvoice = {};
+
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
@@ -364,9 +370,9 @@ app.component('eyatraTripClaimForm', {
             self.local_travels_removal_id = [];
             self.local_travel_attachment_removal_ids = [];
 
-            if (self.trip.lodgings.length == 0) {
-                self.addNewLodgings();
-            }
+            // if (self.trip.lodgings.length == 0) {
+            //     self.addNewLodgings();
+            // }
             if (!self.trip.boardings.length) {
                 self.addNewBoardings();
             }
@@ -922,6 +928,7 @@ app.component('eyatraTripClaimForm', {
         $(document).on('click', ".separate-page-divider-btn-close", function() {
             $(".separate-page-divider-wrap").removeClass("in");
         })
+
 
         //ASSIGN ELIGIBLE AMOUNT BASED ON CITY & EXPENSE & GRADE
         $scope.assignEligibleAmount = function(city_id, type_id, index, stay_type_id) {
@@ -1848,6 +1855,7 @@ app.component('eyatraTripClaimForm', {
                 city_id: '',
                 lodge_name: '',
                 stay_type_id: '',
+                has_multiple_tax_invoice: 'No',
                 eligible_amount: '0.00',
                 check_in_date: '',
                 checkout_date: '',
@@ -1910,7 +1918,216 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
+        $scope.onChangeStayType = (lodgingIndex, lodgeStayTypeId) => {
+            console.log(' == onChangeStayType ==');
+            console.log(lodgingIndex, lodgeStayTypeId);
+            //OTHER THAN LODGE STAY
+            if (lodgeStayTypeId != 3340) {
+                self.trip.lodgings[lodgingIndex].has_multiple_tax_invoice = "No";
+                $('#lodging_has_multiple_tax_invoice_active_' + lodgingIndex).attr('disabled', true);
+                $('#lodging_has_multiple_tax_invoice_inactive_' + lodgingIndex).prop('checked', true);
+            } else {
+                //IF LODGE STAY
+                $('#lodging_has_multiple_tax_invoice_active_' + lodgingIndex).attr('disabled', false);
+            }
+        }
+
+        $scope.onClickHasMultipleTaxInvoice = (val, lodgingIndex) => {
+            self.lodgingTaxInvoiceModalIndex = lodgingIndex;
+            $('#lodgingTaxInvoiceFormModal').modal('hide');
+            if (val == 'Yes') {
+                if (self.trip.lodgings[lodgingIndex].gstin != '') {
+                    //LODGE
+                    self.lodgingTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceLodgingWithoutTaxAmount").val();
+                    self.lodgingTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceLodgingCgst").val();
+                    self.lodgingTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceLodgingSgst").val();
+                    self.lodgingTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceLodgingIgst").val();
+                    self.lodgingTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceLodgingTotal").val();
+
+                    //DRYWASH
+                    self.drywashTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceDrywashWithoutTaxAmount").val();
+                    self.drywashTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceDrywashCgst").val();
+                    self.drywashTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceDrywashSgst").val();
+                    self.drywashTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceDrywashIgst").val();
+                    self.drywashTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceDrywashTotal").val();
+
+                    //BOARDING
+                    self.boardingTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceBoardingWithoutTaxAmount").val();
+                    self.boardingTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceBoardingCgst").val();
+                    self.boardingTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceBoardingSgst").val();
+                    self.boardingTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceBoardingIgst").val();
+                    self.boardingTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceBoardingTotal").val();
+
+                    //OTHERS
+                    self.othersTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceOthersWithoutTaxAmount").val();
+                    self.othersTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceOthersCgst").val();
+                    self.othersTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceOthersSgst").val();
+                    self.othersTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceOthersIgst").val();
+                    self.othersTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceOthersTotal").val();
+
+                    //ROUNDOFF
+                    self.roundoffTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceRoundoffWithoutTaxAmount").val();
+                    self.roundoffTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceRoundoffCgst").val();
+                    self.roundoffTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceRoundoffSgst").val();
+                    self.roundoffTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceRoundoffIgst").val();
+                    self.roundoffTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceRoundoffTotal").val();
+
+                    //GRAND TOTAL
+                    self.grandTotalTaxInvoice.total = self.trip.lodgings[lodgingIndex].tax_invoice_amount;
+
+                    $scope.calculateLodgeTaxInvoiceAmount();
+
+                    $('#lodgingTaxInvoiceFormModal').modal('show');
+                } else {
+                    custom_noty('error', "Kindly enter GSTIN and try after that");
+                    self.trip.lodgings[lodgingIndex].has_multiple_tax_invoice = "No";
+                    self.trip.lodgings[lodgingIndex].tax_invoice_amount = '';
+                    self.lodgingTaxInvoiceModalIndex = '';
+                    self.lodgingTaxInvoice = {};
+                    self.drywashTaxInvoice = {};
+                    self.boardingTaxInvoice = {};
+                    self.othersTaxInvoice = {};
+                    self.roundoffTaxInvoice = {};
+                    self.grandTotalTaxInvoice = {};
+                    $('#lodging_has_multiple_tax_invoice_active_' + lodgingIndex).attr('disabled', true);
+                    $('#lodging_has_multiple_tax_invoice_inactive_' + lodgingIndex).prop('checked', true);
+                }
+            } else {
+                //NO
+                self.lodgingTaxInvoiceModalIndex = '';
+                self.lodgingTaxInvoice = {};
+                self.drywashTaxInvoice = {};
+                self.boardingTaxInvoice = {};
+                self.othersTaxInvoice = {};
+                self.roundoffTaxInvoice = {};
+                self.grandTotalTaxInvoice = {};
+            }
+        }
+
+        $scope.onClickLodgeTaxInvoiceFormModal = () => {
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].has_multiple_tax_invoice = "No";
+        }
+
+        $scope.calculateLodgeTaxInvoiceAmount = () => {
+            let lodgeWithoutTaxAmount = parseFloat(self.lodgingTaxInvoice.without_tax_amount) || 0;
+            let lodgeCgst = 0;
+            let lodgeSgst = 0;
+            let lodgeIgst = 0;
+            let lodgeTotal = 0;
+            let drywashWithoutTaxAmount = parseFloat(self.drywashTaxInvoice.without_tax_amount) || 0;
+            let drywashCgst = parseFloat(self.drywashTaxInvoice.cgst) || 0;
+            let drywashSgst = parseFloat(self.drywashTaxInvoice.sgst) || 0;
+            let drywashIgst = parseFloat(self.drywashTaxInvoice.igst) || 0;
+            let drywashTotal = 0;
+            let boardingWithoutTaxAmount = parseFloat(self.boardingTaxInvoice.without_tax_amount) || 0;
+            let boardingCgst = parseFloat(self.boardingTaxInvoice.cgst) || 0;
+            let boardingSgst = parseFloat(self.boardingTaxInvoice.sgst) || 0;
+            let boardingIgst = parseFloat(self.boardingTaxInvoice.igst) || 0;
+            let boardingTotal = 0;
+            let othersWithoutTaxAmount = parseFloat(self.othersTaxInvoice.without_tax_amount) || 0;
+            let othersCgst = parseFloat(self.othersTaxInvoice.cgst) || 0;
+            let othersSgst = parseFloat(self.othersTaxInvoice.sgst) || 0;
+            let othersIgst = parseFloat(self.othersTaxInvoice.igst) || 0;
+            let othersTotal = 0;
+            let roundoffTotal = parseFloat(self.roundoffTaxInvoice.total) || 0;;
+            let grandTotal = 0;
+
+            //LODGE GST CALCULATION
+            if (lodgeWithoutTaxAmount && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex] && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin']) {
+                const lodgeGstin = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin'];
+                let lodgeCgstPerc = lodgeSgstPerc = lodgeIgstPerc = 0;
+                const lodgeGstCode = lodgeGstin.substr(0, 2);
+
+                let lodgePercentage = 12;
+                if (lodgeWithoutTaxAmount >= 7500) {
+                    lodgePercentage = 18;
+                }
+
+                if (lodgeGstCode == self.state_code) {
+                    lodgeCgstPerc = lodgeSgstPerc = lodgePercentage / 2;
+                } else {
+                    lodgeIgstPerc = lodgePercentage;
+                }
+
+                lodgeCgst = lodgeWithoutTaxAmount * (lodgeCgstPerc / 100);
+                lodgeSgst = lodgeWithoutTaxAmount * (lodgeSgstPerc / 100);
+                lodgeIgst = lodgeWithoutTaxAmount * (lodgeIgstPerc / 100);
+                lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
+            }
+
+            drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+            boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
+            othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+            grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal + roundoffTotal;
+
+            self.lodgingTaxInvoice.cgst = parseFloat(lodgeCgst).toFixed(2);
+            self.lodgingTaxInvoice.sgst = parseFloat(lodgeSgst).toFixed(2);
+            self.lodgingTaxInvoice.igst = parseFloat(lodgeIgst).toFixed(2);
+            self.lodgingTaxInvoice.total = parseFloat(lodgeTotal).toFixed(2);
+            self.drywashTaxInvoice.total = parseFloat(drywashTotal).toFixed(2);
+            self.boardingTaxInvoice.total = parseFloat(boardingTotal).toFixed(2);
+            self.othersTaxInvoice.total = parseFloat(othersTotal).toFixed(2);
+            self.grandTotalTaxInvoice.total = parseFloat(grandTotal).toFixed(2);
+        }
+
+        $scope.onSubmitLodgeTaxInvoice = () => {
+            //LODGE
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingTypeId").val(3771);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingWithoutTaxAmount").val(self.lodgingTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingCgst").val(self.lodgingTaxInvoice.cgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingSgst").val(self.lodgingTaxInvoice.sgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingIgst").val(self.lodgingTaxInvoice.igst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingTotal").val(self.lodgingTaxInvoice.total);
+
+            //DRYWASH
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDrywashTypeId").val(3772);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDrywashWithoutTaxAmount").val(self.drywashTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDrywashCgst").val(self.drywashTaxInvoice.cgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDrywashSgst").val(self.drywashTaxInvoice.sgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDrywashIgst").val(self.drywashTaxInvoice.igst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDrywashTotal").val(self.drywashTaxInvoice.total);
+
+            //BOARDING
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceBoardingTypeId").val(3773);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceBoardingWithoutTaxAmount").val(self.boardingTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceBoardingCgst").val(self.boardingTaxInvoice.cgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceBoardingSgst").val(self.boardingTaxInvoice.sgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceBoardingIgst").val(self.boardingTaxInvoice.igst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceBoardingTotal").val(self.boardingTaxInvoice.total);
+
+            //OTHERS
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersTypeId").val(3774);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersWithoutTaxAmount").val(self.othersTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersCgst").val(self.othersTaxInvoice.cgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersSgst").val(self.othersTaxInvoice.sgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersIgst").val(self.othersTaxInvoice.igst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersTotal").val(self.othersTaxInvoice.total);
+
+            //ROUNDOFF
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffTypeId").val(3775);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffWithoutTaxAmount").val(self.roundoffTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffCgst").val(self.roundoffTaxInvoice.cgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffSgst").val(self.roundoffTaxInvoice.sgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffIgst").val(self.roundoffTaxInvoice.igst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffTotal").val(self.roundoffTaxInvoice.total);
+
+            //GRAND TOTAL
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_invoice_amount = self.grandTotalTaxInvoice.total;
+
+            self.lodgingTaxInvoiceModalIndex = '';
+            self.lodgingTaxInvoice = {};
+            self.drywashTaxInvoice = {};
+            self.boardingTaxInvoice = {};
+            self.othersTaxInvoice = {};
+            self.roundoffTaxInvoice = {};
+            self.grandTotalTaxInvoice = {};
+            $('#lodgingTaxInvoiceFormModal').modal('hide');
+        }
+
         $scope.lodgingGstChange = (index, gst_number) => {
+            //IF GSTIN CHANGE THEN RESET TO NO TO AUTO CALCULATE TAX INVOICE DETAILS
+            self.trip.lodgings[index].has_multiple_tax_invoice = "No";
+
             self.trip.lodgings[index]['lodge_name'] = '';
             if (gst_number.length == 15) {
                 $http({
@@ -1932,6 +2149,12 @@ app.component('eyatraTripClaimForm', {
                         custom_noty('error', errors);
                     } else {
                         self.trip.lodgings[index]['lodge_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+
+                        //IF STAY TYPE IS LODGE STAY AND GSTIN FILLED AND VALID THEN ENABLE HAS MULTIPLE TAX INVOICE YES OPTION
+                        if (self.trip.lodgings[index]['stay_type_id'] == 3340) {
+                            $('#lodging_has_multiple_tax_invoice_active_' + index).attr('disabled', false);
+                        }
+
                     }
                 });
             }
