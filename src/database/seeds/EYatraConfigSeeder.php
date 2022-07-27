@@ -58,6 +58,7 @@ class EYatraConfigSeeder extends Seeder {
 			541 => 'Outstation Trip Attachments',
 
 			545 => 'Booking Categories',
+			546 => 'Lodging Tax Invoice Types ',
 		];
 
 		$configs = [
@@ -1111,6 +1112,28 @@ class EYatraConfigSeeder extends Seeder {
 			3761 => [
 				'name' => 'User',
 				'config_type_id' => 545,
+			],
+
+			// Lodging Tax Invoice Types
+			3771 => [
+				'name' => 'Lodging',
+				'config_type_id' => 546,
+			],
+			3772 => [
+				'name' => 'Drywash',
+				'config_type_id' => 546,
+			],
+			3773 => [
+				'name' => 'Boarding',
+				'config_type_id' => 546,
+			],
+			3774 => [
+				'name' => 'Others',
+				'config_type_id' => 546,
+			],
+			3775 => [
+				'name' => 'Roundoff',
+				'config_type_id' => 546,
 			],
 
 		];

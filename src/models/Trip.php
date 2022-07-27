@@ -25,6 +25,7 @@ use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\LodgingTaxInvoice;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Sbu;
 use Validator;
@@ -1227,6 +1228,11 @@ class Trip extends Model {
 					$q->orderBy('id', 'asc');
 				},
 				'lodgings',
+				'lodgings.lodgingTaxInvoice',
+				'lodgings.drywashTaxInvoice',
+				'lodgings.boardingTaxInvoice',
+				'lodgings.othersTaxInvoice',
+				'lodgings.roundoffTaxInvoice',
 				'lodgings.stateType',
 				'lodgings.city',
 				'lodgings.attachments',
@@ -1432,17 +1438,14 @@ class Trip extends Model {
 		$booking_type_list = collect(Config::getBookingTypeTypeList()->prepend(['id' => '', 'name' => 'Select Booked By']));
 		$purpose_list = collect(Entity::uiPurposeList()->prepend(['id' => '', 'name' => 'Select Purpose']));
 		$travel_mode_list = collect(Entity::uiClaimTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode']));
-		//dd($travel_mode_list);
 		$local_travels = Entity::uiClaimLocaTravelModeList();
 		$expense_types = Entity::uiClaimExpenseList();
 		$local_travels_expense_types = $local_travels->merge($expense_types);
 
 		// $local_travel_mode_list = collect(Entity::uiClaimLocaTravelModeList()->prepend(['id' => '', 'name' => 'Select Local Travel Mode']));
 		$local_travel_mode_list = collect($local_travels_expense_types->prepend(['id' => '', 'name' => 'Select Local Travel / Expense Type']));
-		//dd($local_travel_mode_list);
 		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$boarding_type_list = collect(Config::getBoardingTypeList()->prepend(['id' => '', 'name' => 'Select Type']));
-		//dd($boarding_type_list);
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
@@ -1787,7 +1790,7 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
-		//dd($request->all());
+		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -2158,7 +2161,7 @@ class Trip extends Model {
 					$lodgings = Lodging::where('trip_id', $request->trip_id)->forceDelete();
 
 					$lodging_total_amount = 0;
-					foreach ($request->lodgings as $lodging_data) {
+					foreach ($request->lodgings as $lodgeKey => $lodging_data) {
 
 						if (isset($lodging_data['id'])) {
 							$lodging = Lodging::where('id', $lodging_data['id'])->first();
@@ -2168,9 +2171,9 @@ class Trip extends Model {
 						} else {
 							$lodging = new Lodging;
 						}
-						//dd($lodging_data['lodge_name']);
+
 						if ($lodging_data['amount'] >= 1000) {
-							if (empty($lodging_data['gstin'] && $lodging_data['lodge_name'])) {
+							if (empty($lodging_data['gstin']) && empty($lodging_data['lodge_name'])) {
 								$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
 								if (!$response['success']) {
 									return response()->json([
@@ -2198,19 +2201,144 @@ class Trip extends Model {
 						$lodging->check_in_date = date('Y-m-d H:i:s', strtotime("$check_in_date $check_in_time"));
 						$lodging->checkout_date = date('Y-m-d H:i:s', strtotime("$checkout_date $checkout_time"));
 						if ($lodging_data['stay_type_id'] == 3340 && empty($lodging_data['reference_number'])) {
-							return response()->json(['success' => false, 'errors' => ['Enter Hotel Bill Number']]);
-
+							return response()->json([
+								'success' => false,
+								'errors' => [
+									'Enter Hotel Bill Number',
+								],
+							]);
 						}
 						$lodging->reference_number = (isset($lodging_data['reference_number']) && !empty($lodging_data['reference_number'])) ? $lodging_data['reference_number'] : null;
 						$invoice_date = (isset($lodging_data['invoice_date']) && !empty($lodging_data['invoice_date'])) ? $lodging_data['invoice_date'] : null;
 						$lodging->invoice_date = date('Y-m-d', strtotime($invoice_date));
 						$lodging->created_by = Auth::user()->id;
+						$lodging->has_multiple_tax_invoice = 0;
+						$lodging->tax_invoice_amount = NULL;
 						$lodging->save();
 
 						$lodging_total = 0;
 						if ($lodging) {
 							$lodging_total = $lodging->amount + $lodging->tax;
 							$lodging_total_amount += $lodging_total;
+						}
+
+						//LODGE TAX INVOICE SAVE
+
+						$lodging->taxInvoices()->forceDelete();
+
+						//ONLY FOR LODGE STAY TYPE
+						if ($lodging_data['stay_type_id'] == '3340' && $lodging_data['has_multiple_tax_invoice'] == "Yes") {
+							if (empty($lodging_data['tax_invoice_amount'])) {
+								return response()->json([
+									'success' => false,
+									'errors' => [
+										"Lodge tax invoice amount is required. Kindly fill in the tax invoice details form.",
+									],
+								]);
+							}
+
+							if (floatval($lodging_data['tax_invoice_amount']) != floatval($lodging_data['amount'])) {
+								return response()->json([
+									'success' => false,
+									'errors' => [
+										"Lodge tax invoice amount not matched with the actual amount",
+									],
+								]);
+							}
+
+							$lodging->has_multiple_tax_invoice = 1;
+							$lodging->tax_invoice_amount = !empty($lodging_data['tax_invoice_amount']) ? $lodging_data['tax_invoice_amount'] : NULL;
+							$lodging->save();
+
+							//SAVE LODGE TAX INVOICE
+							$lodgeTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3771,
+							]);
+							//NEW
+							if (!$lodgeTaxInvoice->exists) {
+								$lodgeTaxInvoice->created_at = Carbon::now();
+							} else {
+								$lodgeTaxInvoice->updated_at = Carbon::now();
+							}
+							$lodgeTaxInvoice->without_tax_amount = !empty($lodging_data['lodgingTaxInvoice']['without_tax_amount']) ? $lodging_data['lodgingTaxInvoice']['without_tax_amount'] : NULL;
+							$lodgeTaxInvoice->cgst = !empty($lodging_data['lodgingTaxInvoice']['cgst']) ? $lodging_data['lodgingTaxInvoice']['cgst'] : NULL;
+							$lodgeTaxInvoice->sgst = !empty($lodging_data['lodgingTaxInvoice']['sgst']) ? $lodging_data['lodgingTaxInvoice']['sgst'] : NULL;
+							$lodgeTaxInvoice->igst = !empty($lodging_data['lodgingTaxInvoice']['igst']) ? $lodging_data['lodgingTaxInvoice']['igst'] : NULL;
+							$lodgeTaxInvoice->total = !empty($lodging_data['lodgingTaxInvoice']['total']) ? $lodging_data['lodgingTaxInvoice']['total'] : NULL;
+							$lodgeTaxInvoice->save();
+
+							//SAVE DRYWASH TAX INVOICE
+							$drywashTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3772,
+							]);
+							//NEW
+							if (!$drywashTaxInvoice->exists) {
+								$drywashTaxInvoice->created_at = Carbon::now();
+							} else {
+								$drywashTaxInvoice->updated_at = Carbon::now();
+							}
+							$drywashTaxInvoice->without_tax_amount = !empty($lodging_data['drywashTaxInvoice']['without_tax_amount']) ? $lodging_data['drywashTaxInvoice']['without_tax_amount'] : NULL;
+							$drywashTaxInvoice->cgst = !empty($lodging_data['drywashTaxInvoice']['cgst']) ? $lodging_data['drywashTaxInvoice']['cgst'] : NULL;
+							$drywashTaxInvoice->sgst = !empty($lodging_data['drywashTaxInvoice']['sgst']) ? $lodging_data['drywashTaxInvoice']['sgst'] : NULL;
+							$drywashTaxInvoice->igst = !empty($lodging_data['drywashTaxInvoice']['igst']) ? $lodging_data['drywashTaxInvoice']['igst'] : NULL;
+							$drywashTaxInvoice->total = !empty($lodging_data['drywashTaxInvoice']['total']) ? $lodging_data['drywashTaxInvoice']['total'] : NULL;
+							$drywashTaxInvoice->save();
+
+							//SAVE BOARDING TAX INVOICE
+							$boardingTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3773,
+							]);
+							//NEW
+							if (!$boardingTaxInvoice->exists) {
+								$boardingTaxInvoice->created_at = Carbon::now();
+							} else {
+								$boardingTaxInvoice->updated_at = Carbon::now();
+							}
+							$boardingTaxInvoice->without_tax_amount = !empty($lodging_data['boardingTaxInvoice']['without_tax_amount']) ? $lodging_data['boardingTaxInvoice']['without_tax_amount'] : NULL;
+							$boardingTaxInvoice->cgst = !empty($lodging_data['boardingTaxInvoice']['cgst']) ? $lodging_data['boardingTaxInvoice']['cgst'] : NULL;
+							$boardingTaxInvoice->sgst = !empty($lodging_data['boardingTaxInvoice']['sgst']) ? $lodging_data['boardingTaxInvoice']['sgst'] : NULL;
+							$boardingTaxInvoice->igst = !empty($lodging_data['boardingTaxInvoice']['igst']) ? $lodging_data['boardingTaxInvoice']['igst'] : NULL;
+							$boardingTaxInvoice->total = !empty($lodging_data['boardingTaxInvoice']['total']) ? $lodging_data['boardingTaxInvoice']['total'] : NULL;
+							$boardingTaxInvoice->save();
+
+							//SAVE OTHERS TAX INVOICE
+							$othersTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3774,
+							]);
+							//NEW
+							if (!$othersTaxInvoice->exists) {
+								$othersTaxInvoice->created_at = Carbon::now();
+							} else {
+								$othersTaxInvoice->updated_at = Carbon::now();
+							}
+							$othersTaxInvoice->without_tax_amount = !empty($lodging_data['othersTaxInvoice']['without_tax_amount']) ? $lodging_data['othersTaxInvoice']['without_tax_amount'] : NULL;
+							$othersTaxInvoice->cgst = !empty($lodging_data['othersTaxInvoice']['cgst']) ? $lodging_data['othersTaxInvoice']['cgst'] : NULL;
+							$othersTaxInvoice->sgst = !empty($lodging_data['othersTaxInvoice']['sgst']) ? $lodging_data['othersTaxInvoice']['sgst'] : NULL;
+							$othersTaxInvoice->igst = !empty($lodging_data['othersTaxInvoice']['igst']) ? $lodging_data['othersTaxInvoice']['igst'] : NULL;
+							$othersTaxInvoice->total = !empty($lodging_data['othersTaxInvoice']['total']) ? $lodging_data['othersTaxInvoice']['total'] : NULL;
+							$othersTaxInvoice->save();
+
+							//SAVE ROUNDOFF TAX INVOICE
+							$roundoffTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3775,
+							]);
+							//NEW
+							if (!$roundoffTaxInvoice->exists) {
+								$roundoffTaxInvoice->created_at = Carbon::now();
+							} else {
+								$roundoffTaxInvoice->updated_at = Carbon::now();
+							}
+							$roundoffTaxInvoice->without_tax_amount = !empty($lodging_data['roundoffTaxInvoice']['without_tax_amount']) ? $lodging_data['roundoffTaxInvoice']['without_tax_amount'] : NULL;
+							$roundoffTaxInvoice->cgst = !empty($lodging_data['roundoffTaxInvoice']['cgst']) ? $lodging_data['roundoffTaxInvoice']['cgst'] : NULL;
+							$roundoffTaxInvoice->sgst = !empty($lodging_data['roundoffTaxInvoice']['sgst']) ? $lodging_data['roundoffTaxInvoice']['sgst'] : NULL;
+							$roundoffTaxInvoice->igst = !empty($lodging_data['roundoffTaxInvoice']['igst']) ? $lodging_data['roundoffTaxInvoice']['igst'] : NULL;
+							$roundoffTaxInvoice->total = !empty($lodging_data['roundoffTaxInvoice']['total']) ? $lodging_data['roundoffTaxInvoice']['total'] : NULL;
+							$roundoffTaxInvoice->save();
 						}
 
 						//STORE ATTACHMENT
@@ -2303,6 +2431,11 @@ class Trip extends Model {
 				//GET SAVED LODGINGS
 				$saved_lodgings = Trip::with([
 					'lodgings',
+					'lodgings.lodgingTaxInvoice',
+					'lodgings.drywashTaxInvoice',
+					'lodgings.boardingTaxInvoice',
+					'lodgings.othersTaxInvoice',
+					'lodgings.roundoffTaxInvoice',
 					'lodging_attachments',
 					'lodgings.city',
 					'lodgings.stateType',
@@ -2338,7 +2471,6 @@ class Trip extends Model {
 
 			//SAVING BOARDINGS
 			if ($request->is_boarding) {
-				// dd($request->all());
 				//REMOVE BOARDINGS ATTACHMENT
 				if (!empty($request->boardings_attach_removal_ids)) {
 					$boardings_attach_removal_ids = json_decode($request->boardings_attach_removal_ids, true);
@@ -2357,7 +2489,7 @@ class Trip extends Model {
 					$boarding_days = (int) array_sum(array_column($request->boardings, 'days'));
 					$trip_total_days = (int) $request->trip_total_days;
 					if ($boarding_days > $trip_total_days + 1) {
-//need to verify
+						//need to verify
 						return response()->json(['success' => false, 'errors' => ['Total boarding days should be less than total trip days']]);
 					}
 
@@ -2489,7 +2621,6 @@ class Trip extends Model {
 
 			//SAVE LOCAL TRAVELS
 			if ($request->is_local_travel) {
-				// dd($request->all());
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
@@ -2695,7 +2826,6 @@ class Trip extends Model {
 			}
 			//FINAL SAVE
 			if ($request->is_attachment_trip) {
-				// dd($request->all());
 				//GET EMPLOYEE DETAILS
 				$employee = Employee::where('id', $request->employee_id)->first();
 				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
@@ -2842,10 +2972,17 @@ class Trip extends Model {
 			}
 
 			$request->session()->flash('success', 'Trip saved successfully!');
-			return response()->json(['success' => true]);
+			return response()->json([
+				'success' => true,
+			]);
 		} catch (Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
 		}
 	}
 
