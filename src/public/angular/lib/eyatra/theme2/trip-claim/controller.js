@@ -555,6 +555,81 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
+        $scope.gstHelper = function(index) {
+            var cgst = $('#' + index + '-visitCgst').val();
+            var sgst = $('#' + index + '-visitSgst').val();
+            var igst = $('#' + index + '-visitIgst').val();
+
+            if (cgst == '' && sgst == '') {
+                $('#' + index + '-visitIgst').attr('readonly', false);
+                $('#' + index + '-visitIgst').attr('placeholder', 'Eg:133.50');
+            } else {
+                $('#' + index + '-visitIgst').attr('readonly', true);
+                $('#' + index + '-visitIgst').attr('placeholder', 'N/A');
+            }
+
+            if (igst == '') {
+                $('#' + index + '-visitCgst').attr('readonly', false);
+                $('#' + index + '-visitSgst').attr('readonly', false);
+                $('#' + index + '-visitCgst').attr('placeholder', 'Eg:113.50');
+                $('#' + index + '-visitSgst').attr('placeholder', 'Eg:123.50');
+            } else {
+                $('#' + index + '-visitCgst').attr('readonly', true);
+                $('#' + index + '-visitSgst').attr('readonly', true);
+                $('#' + index + '-visitCgst').attr('placeholder', 'N/A');
+                $('#' + index + '-visitSgst').attr('placeholder', 'N/A');
+            }
+        }
+        $scope.gstBoardingHelper = function(index) {
+            var cgst = $('#' + index + '-boardingCgst').val();
+            var sgst = $('#' + index + '-boardingSgst').val();
+            var igst = $('#' + index + '-boardingIgst').val();
+
+            if (cgst == '' && sgst == '') {
+                $('#' + index + '-boardingIgst').attr('readonly', false);
+                $('#' + index + '-boardingIgst').attr('placeholder', 'Eg:133.50');
+            } else {
+                $('#' + index + '-boardingIgst').attr('readonly', true);
+                $('#' + index + '-boardingIgst').attr('placeholder', 'N/A');
+            }
+
+            if (igst == '') {
+                $('#' + index + '-boardingCgst').attr('readonly', false);
+                $('#' + index + '-boardingSgst').attr('readonly', false);
+                $('#' + index + '-boardingCgst').attr('placeholder', 'Eg:113.50');
+                $('#' + index + '-boardingSgst').attr('placeholder', 'Eg:123.50');
+            } else {
+                $('#' + index + '-boardingCgst').attr('readonly', true);
+                $('#' + index + '-boardingSgst').attr('readonly', true);
+                $('#' + index + '-boardingCgst').attr('placeholder', 'N/A');
+                $('#' + index + '-boardingSgst').attr('placeholder', 'N/A');
+            }
+        }
+        $scope.gstLocalTravelHelper = function(index) {
+            var cgst = $('#' + index + '-localTravelCgst').val();
+            var sgst = $('#' + index + '-localTravelSgst').val();
+            var igst = $('#' + index + '-localTravelIgst').val();
+
+            if (cgst == '' && sgst == '') {
+                $('#' + index + '-localTravelIgst').attr('readonly', false);
+                $('#' + index + '-localTravelIgst').attr('placeholder', 'Eg:133.50');
+            } else {
+                $('#' + index + '-localTravelIgst').attr('readonly', true);
+                $('#' + index + '-localTravelIgst').attr('placeholder', 'N/A');
+            }
+
+            if (igst == '') {
+                $('#' + index + '-localTravelCgst').attr('readonly', false);
+                $('#' + index + '-localTravelSgst').attr('readonly', false);
+                $('#' + index + '-localTravelCgst').attr('placeholder', 'Eg:113.50');
+                $('#' + index + '-localTravelSgst').attr('placeholder', 'Eg:123.50');
+            } else {
+                $('#' + index + '-localTravelCgst').attr('readonly', true);
+                $('#' + index + '-localTravelSgst').attr('readonly', true);
+                $('#' + index + '-localTravelCgst').attr('placeholder', 'N/A');
+                $('#' + index + '-localTravelSgst').attr('placeholder', 'N/A');
+            }
+        }
 
         // var arrival_date_error_flag = 0;
         $(document).on('input', '.localconveyance_km', function() {
