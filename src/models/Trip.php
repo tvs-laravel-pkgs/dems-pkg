@@ -2282,11 +2282,11 @@ class Trip extends Model {
 							} else {
 								$lodgeTaxInvoice->updated_at = Carbon::now();
 							}
-							$lodgeTaxInvoice->without_tax_amount = !empty($lodging_data['lodgingTaxInvoice']['without_tax_amount']) ? $lodging_data['lodgingTaxInvoice']['without_tax_amount'] : NULL;
-							$lodgeTaxInvoice->cgst = !empty($lodging_data['lodgingTaxInvoice']['cgst']) ? $lodging_data['lodgingTaxInvoice']['cgst'] : NULL;
-							$lodgeTaxInvoice->sgst = !empty($lodging_data['lodgingTaxInvoice']['sgst']) ? $lodging_data['lodgingTaxInvoice']['sgst'] : NULL;
-							$lodgeTaxInvoice->igst = !empty($lodging_data['lodgingTaxInvoice']['igst']) ? $lodging_data['lodgingTaxInvoice']['igst'] : NULL;
-							$lodgeTaxInvoice->total = !empty($lodging_data['lodgingTaxInvoice']['total']) ? $lodging_data['lodgingTaxInvoice']['total'] : NULL;
+							$lodgeTaxInvoice->without_tax_amount = !empty($lodging_data['lodgingTaxInvoice']['without_tax_amount']) ? $lodging_data['lodgingTaxInvoice']['without_tax_amount'] : 0;
+							$lodgeTaxInvoice->cgst = !empty($lodging_data['lodgingTaxInvoice']['cgst']) ? $lodging_data['lodgingTaxInvoice']['cgst'] : 0;
+							$lodgeTaxInvoice->sgst = !empty($lodging_data['lodgingTaxInvoice']['sgst']) ? $lodging_data['lodgingTaxInvoice']['sgst'] : 0;
+							$lodgeTaxInvoice->igst = !empty($lodging_data['lodgingTaxInvoice']['igst']) ? $lodging_data['lodgingTaxInvoice']['igst'] : 0;
+							$lodgeTaxInvoice->total = !empty($lodging_data['lodgingTaxInvoice']['total']) ? $lodging_data['lodgingTaxInvoice']['total'] : 0;
 							$lodgeTaxInvoice->save();
 
 							//SAVE DRYWASH TAX INVOICE
@@ -2300,11 +2300,11 @@ class Trip extends Model {
 							} else {
 								$drywashTaxInvoice->updated_at = Carbon::now();
 							}
-							$drywashTaxInvoice->without_tax_amount = !empty($lodging_data['drywashTaxInvoice']['without_tax_amount']) ? $lodging_data['drywashTaxInvoice']['without_tax_amount'] : NULL;
-							$drywashTaxInvoice->cgst = !empty($lodging_data['drywashTaxInvoice']['cgst']) ? $lodging_data['drywashTaxInvoice']['cgst'] : NULL;
-							$drywashTaxInvoice->sgst = !empty($lodging_data['drywashTaxInvoice']['sgst']) ? $lodging_data['drywashTaxInvoice']['sgst'] : NULL;
-							$drywashTaxInvoice->igst = !empty($lodging_data['drywashTaxInvoice']['igst']) ? $lodging_data['drywashTaxInvoice']['igst'] : NULL;
-							$drywashTaxInvoice->total = !empty($lodging_data['drywashTaxInvoice']['total']) ? $lodging_data['drywashTaxInvoice']['total'] : NULL;
+							$drywashTaxInvoice->without_tax_amount = !empty($lodging_data['drywashTaxInvoice']['without_tax_amount']) ? $lodging_data['drywashTaxInvoice']['without_tax_amount'] : 0;
+							$drywashTaxInvoice->cgst = !empty($lodging_data['drywashTaxInvoice']['cgst']) ? $lodging_data['drywashTaxInvoice']['cgst'] : 0;
+							$drywashTaxInvoice->sgst = !empty($lodging_data['drywashTaxInvoice']['sgst']) ? $lodging_data['drywashTaxInvoice']['sgst'] : 0;
+							$drywashTaxInvoice->igst = !empty($lodging_data['drywashTaxInvoice']['igst']) ? $lodging_data['drywashTaxInvoice']['igst'] : 0;
+							$drywashTaxInvoice->total = !empty($lodging_data['drywashTaxInvoice']['total']) ? $lodging_data['drywashTaxInvoice']['total'] : 0;
 							$drywashTaxInvoice->save();
 
 							//SAVE BOARDING TAX INVOICE
@@ -2318,11 +2318,11 @@ class Trip extends Model {
 							} else {
 								$boardingTaxInvoice->updated_at = Carbon::now();
 							}
-							$boardingTaxInvoice->without_tax_amount = !empty($lodging_data['boardingTaxInvoice']['without_tax_amount']) ? $lodging_data['boardingTaxInvoice']['without_tax_amount'] : NULL;
-							$boardingTaxInvoice->cgst = !empty($lodging_data['boardingTaxInvoice']['cgst']) ? $lodging_data['boardingTaxInvoice']['cgst'] : NULL;
-							$boardingTaxInvoice->sgst = !empty($lodging_data['boardingTaxInvoice']['sgst']) ? $lodging_data['boardingTaxInvoice']['sgst'] : NULL;
-							$boardingTaxInvoice->igst = !empty($lodging_data['boardingTaxInvoice']['igst']) ? $lodging_data['boardingTaxInvoice']['igst'] : NULL;
-							$boardingTaxInvoice->total = !empty($lodging_data['boardingTaxInvoice']['total']) ? $lodging_data['boardingTaxInvoice']['total'] : NULL;
+							$boardingTaxInvoice->without_tax_amount = !empty($lodging_data['boardingTaxInvoice']['without_tax_amount']) ? $lodging_data['boardingTaxInvoice']['without_tax_amount'] : 0;
+							$boardingTaxInvoice->cgst = !empty($lodging_data['boardingTaxInvoice']['cgst']) ? $lodging_data['boardingTaxInvoice']['cgst'] : 0;
+							$boardingTaxInvoice->sgst = !empty($lodging_data['boardingTaxInvoice']['sgst']) ? $lodging_data['boardingTaxInvoice']['sgst'] : 0;
+							$boardingTaxInvoice->igst = !empty($lodging_data['boardingTaxInvoice']['igst']) ? $lodging_data['boardingTaxInvoice']['igst'] : 0;
+							$boardingTaxInvoice->total = !empty($lodging_data['boardingTaxInvoice']['total']) ? $lodging_data['boardingTaxInvoice']['total'] : 0;
 							$boardingTaxInvoice->save();
 
 							//SAVE OTHERS TAX INVOICE
@@ -2336,11 +2336,11 @@ class Trip extends Model {
 							} else {
 								$othersTaxInvoice->updated_at = Carbon::now();
 							}
-							$othersTaxInvoice->without_tax_amount = !empty($lodging_data['othersTaxInvoice']['without_tax_amount']) ? $lodging_data['othersTaxInvoice']['without_tax_amount'] : NULL;
-							$othersTaxInvoice->cgst = !empty($lodging_data['othersTaxInvoice']['cgst']) ? $lodging_data['othersTaxInvoice']['cgst'] : NULL;
-							$othersTaxInvoice->sgst = !empty($lodging_data['othersTaxInvoice']['sgst']) ? $lodging_data['othersTaxInvoice']['sgst'] : NULL;
-							$othersTaxInvoice->igst = !empty($lodging_data['othersTaxInvoice']['igst']) ? $lodging_data['othersTaxInvoice']['igst'] : NULL;
-							$othersTaxInvoice->total = !empty($lodging_data['othersTaxInvoice']['total']) ? $lodging_data['othersTaxInvoice']['total'] : NULL;
+							$othersTaxInvoice->without_tax_amount = !empty($lodging_data['othersTaxInvoice']['without_tax_amount']) ? $lodging_data['othersTaxInvoice']['without_tax_amount'] : 0;
+							$othersTaxInvoice->cgst = !empty($lodging_data['othersTaxInvoice']['cgst']) ? $lodging_data['othersTaxInvoice']['cgst'] : 0;
+							$othersTaxInvoice->sgst = !empty($lodging_data['othersTaxInvoice']['sgst']) ? $lodging_data['othersTaxInvoice']['sgst'] : 0;
+							$othersTaxInvoice->igst = !empty($lodging_data['othersTaxInvoice']['igst']) ? $lodging_data['othersTaxInvoice']['igst'] : 0;
+							$othersTaxInvoice->total = !empty($lodging_data['othersTaxInvoice']['total']) ? $lodging_data['othersTaxInvoice']['total'] : 0;
 							$othersTaxInvoice->save();
 
 							//SAVE ROUNDOFF TAX INVOICE
@@ -2354,11 +2354,11 @@ class Trip extends Model {
 							} else {
 								$roundoffTaxInvoice->updated_at = Carbon::now();
 							}
-							$roundoffTaxInvoice->without_tax_amount = !empty($lodging_data['roundoffTaxInvoice']['without_tax_amount']) ? $lodging_data['roundoffTaxInvoice']['without_tax_amount'] : NULL;
-							$roundoffTaxInvoice->cgst = !empty($lodging_data['roundoffTaxInvoice']['cgst']) ? $lodging_data['roundoffTaxInvoice']['cgst'] : NULL;
-							$roundoffTaxInvoice->sgst = !empty($lodging_data['roundoffTaxInvoice']['sgst']) ? $lodging_data['roundoffTaxInvoice']['sgst'] : NULL;
-							$roundoffTaxInvoice->igst = !empty($lodging_data['roundoffTaxInvoice']['igst']) ? $lodging_data['roundoffTaxInvoice']['igst'] : NULL;
-							$roundoffTaxInvoice->total = !empty($lodging_data['roundoffTaxInvoice']['total']) ? $lodging_data['roundoffTaxInvoice']['total'] : NULL;
+							$roundoffTaxInvoice->without_tax_amount = !empty($lodging_data['roundoffTaxInvoice']['without_tax_amount']) ? $lodging_data['roundoffTaxInvoice']['without_tax_amount'] : 0;
+							$roundoffTaxInvoice->cgst = !empty($lodging_data['roundoffTaxInvoice']['cgst']) ? $lodging_data['roundoffTaxInvoice']['cgst'] : 0;
+							$roundoffTaxInvoice->sgst = !empty($lodging_data['roundoffTaxInvoice']['sgst']) ? $lodging_data['roundoffTaxInvoice']['sgst'] : 0;
+							$roundoffTaxInvoice->igst = !empty($lodging_data['roundoffTaxInvoice']['igst']) ? $lodging_data['roundoffTaxInvoice']['igst'] : 0;
+							$roundoffTaxInvoice->total = !empty($lodging_data['roundoffTaxInvoice']['total']) ? $lodging_data['roundoffTaxInvoice']['total'] : 0;
 							$roundoffTaxInvoice->save();
 						}
 
