@@ -244,7 +244,7 @@ app.component('eyatraTripForm', {
                     autoApply: true,
                 });
                 var nowDate = new Date();
-                nowDate.setDate(nowDate.getDate() - 5);
+                nowDate.setDate(nowDate.getDate() - 100);
                 var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
                 var eStartDate = response.data.trip.start_date;
                 $(".daterange.min-daterange").daterangepicker({
@@ -285,7 +285,7 @@ app.component('eyatraTripForm', {
                         autoApply: true,
                     });
                     var nowDate = new Date();
-                    nowDate.setDate(nowDate.getDate() - 5);
+                    nowDate.setDate(nowDate.getDate() - 100);
                     var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
                     $(".daterange.min-daterange").daterangepicker({
                         autoclose: true,
