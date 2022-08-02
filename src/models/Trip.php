@@ -2193,7 +2193,7 @@ class Trip extends Model {
 							$lodging = new Lodging;
 						}
 						//dd($lodging_data['lodge_name']);
-						if($lodging_data['amount'] > 0){
+						if($lodging_data['amount'] > 0 && $lodging_data['stay_type_id'] == 3340){
 						if(empty($lodging_data['lodge_name'])){
 						$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
 						if (!$response['success']) {
@@ -2221,14 +2221,6 @@ class Trip extends Model {
 						$checkout_time = $lodging_data['checkout_time'];
 						$lodging->check_in_date = date('Y-m-d H:i:s', strtotime("$check_in_date $check_in_time"));
 						$lodging->checkout_date = date('Y-m-d H:i:s', strtotime("$checkout_date $checkout_time"));
-						if ($lodging_data['stay_type_id'] == 3340 && empty($lodging_data['reference_number'])) {
-							return response()->json([
-								'success' => false,
-								'errors' => [
-									'Enter Hotel Bill Number',
-								],
-							]);
-						}
 						$lodging->reference_number = (isset($lodging_data['reference_number']) && !empty($lodging_data['reference_number'])) ? $lodging_data['reference_number'] : null;
 						$invoice_date = (isset($lodging_data['invoice_date']) && !empty($lodging_data['invoice_date'])) ? $lodging_data['invoice_date'] : null;
 						$lodging->invoice_date = date('Y-m-d', strtotime($invoice_date));
