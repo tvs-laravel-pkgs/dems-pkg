@@ -167,6 +167,15 @@ class TripApprovalController extends Controller {
 				return $action;
 
 			})
+			->addColumn('title', function ($trip) {
+					if($trip->claim_number == '--'){
+					$title ='Trip';
+					}else{
+						$title ='Claim';
+					}
+				return $title;
+
+			})
 			->make(true);
 	}
 }

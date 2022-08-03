@@ -10,9 +10,9 @@ app.component('eyatraTripApprovals', {
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
-
             const cols = [
                 { data: 'action', searchable: false, class: 'action' },
+                { data: 'title', searchable: false, class: 'title' },
                 { data: 'claim_number', name: 'ey_employee_claims.number', searchable: true },
                 { data: 'number', name: 'trips.number', searchable: true },
                 { data: 'ecode', name: 'e.code', searchable: true },
@@ -25,7 +25,6 @@ app.component('eyatraTripApprovals', {
                 { data: 'reason', name: 'reason', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ];
-
             var dataTable = $('#eyatraTripApprovalListTable').DataTable({
                 stateSave: true,
                 "dom": dom_structure_separate_2,
