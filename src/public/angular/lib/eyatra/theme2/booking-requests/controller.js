@@ -201,6 +201,7 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.userDetailId = 0;
             $scope.checkDetail(id, 'book');
             setTimeout(function() {
+                fileUpload();
                 $(".datepicker").datepicker({
                     todayHighlight: true,
                     autoclose: true,
