@@ -470,7 +470,7 @@ class Trip extends Model {
 			}
 		}
 		$data['trip'] = $trip;
-
+        $trip->today = Carbon::today()->format('d-m-Y');
 		if ($trip->advance_request_approval_status_id) {
 			if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
 				$trip_reject = 1;
