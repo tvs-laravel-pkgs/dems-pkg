@@ -102,8 +102,8 @@ class AgentClaimController extends Controller {
 				'trips.id as trip_id', 'visits.id as visit_id', 'employees.code as employee_code',
 				'users.name as employee_name', 'configs.name as status', 'trips.number as trip_number',
 				'visit_bookings.invoice_date',
-				DB::raw('SUM(visit_bookings.service_charge) as service_charge'),
-				DB::raw('SUM(visit_bookings.service_charge) as total_amount')
+				DB::raw('SUM(visit_bookings.agent_service_charges) as service_charge'),
+				DB::raw('SUM(visit_bookings.agent_service_charges) as total_amount')
 				)
 				->join('visits', 'visits.id', 'visit_bookings.visit_id')
 				->join('trips', 'trips.id', 'visits.trip_id')
