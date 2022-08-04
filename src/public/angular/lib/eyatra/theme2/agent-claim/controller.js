@@ -151,12 +151,26 @@ app.component('eyatraAgentClaimForm', {
             $rootScope.loading = false;
         });
         var total = 0;
-        $(document).on('keyup', '#tax', function() {
-            // $('#tax').on('change', function() {
+        // $(document).on('keyup', '#tax', function() {
+        //     // $('#tax').on('change', function() {
+        //     var net_amt = parseFloat($(".net_amount").val());
+        //     var tax = parseFloat($("#tax").val());
+        //     total = (net_amt + tax);
+        //     $("#invoice_amount").val(total.toFixed(2));
+        // });
+        $(document).on('keyup', '.tax_calculate', function() {
             var net_amt = parseFloat($(".net_amount").val());
-            var tax = parseFloat($("#tax").val());
+            var cgst_tax = parseFloat($("#cgst_tax").val())
+            cgst_tax = cgst_tax ? cgst_tax : 0
+            var sgst_tax = parseFloat($("#sgst_tax").val())
+            sgst_tax = sgst_tax ? sgst_tax : 0
+            var igst_tax = parseFloat($("#igst_tax").val())
+            igst_tax = igst_tax ? igst_tax : 0
+            var tax = parseFloat(cgst_tax + sgst_tax + igst_tax)
+            // var tax = parseFloat($("#tax").val());
             total = (net_amt + tax);
             $("#invoice_amount").val(total.toFixed(2));
+            $("#tax").val(tax.toFixed(2));
         });
 
         $(document).on("click", ".booking_list", function() {

@@ -98,9 +98,13 @@ class AgentClaimController extends Controller {
 			$this->data['attachment'] = [];
 
 			$this->data['booking_list'] = $booking_list = VisitBooking::select(
-				DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.paid_amount) as total_amount'),
+				DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), //DB::raw('SUM(visit_bookings.paid_amount) as total_amount'),
 				'trips.id as trip_id', 'visits.id as visit_id', 'employees.code as employee_code',
-				'users.name as employee_name', 'configs.name as status', 'trips.number as trip_number')
+				'users.name as employee_name', 'configs.name as status', 'trips.number as trip_number',
+				'visit_bookings.invoice_date',
+				DB::raw('SUM(visit_bookings.service_charge) as service_charge'),
+				DB::raw('SUM(visit_bookings.service_charge) as total_amount')
+				)
 				->join('visits', 'visits.id', 'visit_bookings.visit_id')
 				->join('trips', 'trips.id', 'visits.trip_id')
 				->join('employees', 'employees.id', 'trips.employee_id')
@@ -191,6 +195,9 @@ class AgentClaimController extends Controller {
 			if ($request->tax == '') {
 				$request->tax = 0;
 			}
+			$request->cgst_tax = ($request->cgst_tax == '') ? 0 : $request->cgst_tax;
+			$request->sgst_tax = ($request->sgst_tax == '') ? 0 : $request->sgst_tax;
+			$request->igst_tax = ($request->igst_tax == '') ? 0 : $request->igst_tax;
 
 			// if (!empty($request->booking_list)) {
 			// 	if (!array_filter($request->booking_list)) {
@@ -221,6 +228,9 @@ class AgentClaimController extends Controller {
 			$agentClaim->invoice_date = $invoice_date;
 			$agentClaim->net_amount = $request->net_amount;
 			$agentClaim->tax = $request->tax;
+			$agentClaim->cgst_tax = $request->cgst_tax;
+			$agentClaim->sgst_tax = $request->sgst_tax;
+			$agentClaim->igst_tax = $request->igst_tax;
 			// dd($invoice_amount);
 			$agentClaim->invoice_amount = $request->invoice_amount;
 			$agentClaim->status_id = 3520;
@@ -279,6 +289,9 @@ class AgentClaimController extends Controller {
 			'ey_agent_claims.invoice_number',
 			'ey_agent_claims.net_amount',
 			'ey_agent_claims.tax',
+			'ey_agent_claims.cgst_tax',
+			'ey_agent_claims.sgst_tax',
+			'ey_agent_claims.igst_tax',
 			'configs.name as status',
 			'users.name as agent_name', 'agents.id as agent_id', 'agents.code as agent_code',
 			DB::raw('DATE_FORMAT(ey_agent_claims.invoice_date,"%d/%m/%Y") as invoice_date'),

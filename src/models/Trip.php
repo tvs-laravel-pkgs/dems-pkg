@@ -2871,6 +2871,8 @@ class Trip extends Model {
 					$trip->status_id = 3023; //Claim requested
 					$employee_claim->status_id = 3023; //CLAIM REQUESTED
 				}
+				// Deviation reason by Karthick T on 04-08-2022
+				$employee_claim->deviation_reason = (isset($request->deviation_reason) && $request->deviation_reason) ? $request->deviation_reason : '';
 				//dd($request->claim_total_amount);
 				$trip->claim_amount = $request->claim_total_amount; //claimed
 				$trip->claimed_date = date('Y-m-d H:i:s');
