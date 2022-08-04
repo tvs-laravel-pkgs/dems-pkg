@@ -172,6 +172,7 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.userDetailId = id;
             $scope.bookDetailId = 0;
             setTimeout(function() {
+                fileUpload();
                 $(".cancellation_amount_" + id).val(parseInt(amount));
             }, 500);
             $scope.checkDetail(id, 'cancel');
