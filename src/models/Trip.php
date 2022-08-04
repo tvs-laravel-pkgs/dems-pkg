@@ -1713,7 +1713,7 @@ class Trip extends Model {
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$board = Boarding::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
 		$other = LocalTravel::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
-		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst','boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst','local_travels.amount as local_basic', 'local_travels.cgst as local_cgst','local_travels.sgst as local_sgst','local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
+		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
 
 		if (count($visit) > 1) {
 			$transport_basic = number_format(array_sum(array_column($tax_details, 'transport_basic')), 2, '.', ',');
@@ -1782,10 +1782,10 @@ class Trip extends Model {
 		$trip->local_travel_cgst = $local_travel_cgst;
 		$trip->local_travel_sgst = $local_travel_sgst;
 		$trip->local_travel_igst = $local_travel_igst;
-		$trip->transport_total = number_format($transport_total,2, '.', '');
-	    $trip->lodging_total =number_format($lodging_total,2, '.', '');
-	    $trip->boarding_total =number_format($boarding_total,2, '.', '');
-	    $trip->local_travel_total =number_format($local_travel_total,2, '.', '');
+		$trip->transport_total = number_format($transport_total, 2, '.', '');
+		$trip->lodging_total = number_format($lodging_total, 2, '.', '');
+		$trip->boarding_total = number_format($boarding_total, 2, '.', '');
+		$trip->local_travel_total = number_format($local_travel_total, 2, '.', '');
 		$trip->emp_trip_count = $emp_trip_count;
 		$trip->emp_claim_amount = $emp_claim_amount;
 		$trip->transport_amount = $transport_amount;
@@ -1997,6 +1997,35 @@ class Trip extends Model {
 
 						//UPDATE VISIT BOOKING STATUS ONLY FOR SELF
 						if ($booked_by == 'self') {
+
+							//TWO WHEELER OR FOUR WHELLER VALIDATIONS
+							if ($visit_data['travel_mode_id'] == '16' || $visit_data['travel_mode_id'] == '15') {
+								if (!isset($visit_data['km_start']) || (isset($visit_data['km_start']) && empty($visit_data['km_start']))) {
+									return response()->json([
+										'success' => false,
+										'errors' => [
+											'Starting KM is required',
+										],
+									]);
+								}
+								if (!isset($visit_data['km_end']) || (isset($visit_data['km_end']) && empty($visit_data['km_end']))) {
+									return response()->json([
+										'success' => false,
+										'errors' => [
+											'Ending KM is required',
+										],
+									]);
+								}
+								if (!isset($visit_data['toll_fee']) || (isset($visit_data['toll_fee']) && empty($visit_data['toll_fee']))) {
+									return response()->json([
+										'success' => false,
+										'errors' => [
+											'Toll Fee is required',
+										],
+									]);
+								}
+							}
+
 							$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
 							$visit_booking->visit_id = $visit_data['id'];
 							$visit_booking->type_id = 3100;
@@ -2193,24 +2222,24 @@ class Trip extends Model {
 							$lodging = new Lodging;
 						}
 						//dd($lodging_data['lodge_name']);
-						if($lodging_data['amount'] > 0 && $lodging_data['stay_type_id'] == 3340){
-						if(empty($lodging_data['lodge_name'])){
-						$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
-						if (!$response['success']) {
-							return response()->json([
-								'success' => false,
-								'errors' => [
-									$response['error'],
-								],
-							]);
+						if ($lodging_data['amount'] > 0 && $lodging_data['stay_type_id'] == 3340) {
+							if (empty($lodging_data['lodge_name'])) {
+								$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
+								if (!$response['success']) {
+									return response()->json([
+										'success' => false,
+										'errors' => [
+											$response['error'],
+										],
+									]);
+								}
+								$lodging->lodge_name = $lodging_data['gstin'];
+								$lodging->gstin = $lodging_data['lodge_name'];
+							}
+						} else {
+							$lodging->lodge_name = null;
+							$lodging->gstin = null;
 						}
-						$lodging->lodge_name = $lodging_data['gstin'];
-						$lodging->gstin = $lodging_data['lodge_name'];
-					}
-					}else{
-						$lodging->lodge_name = null;
-						$lodging->gstin = null;
-					}
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
 
@@ -2502,7 +2531,7 @@ class Trip extends Model {
 					$boarding_days = (int) array_sum(array_column($request->boardings, 'days'));
 					$trip_total_days = (int) $request->trip_total_days;
 					if ($boarding_days > $trip_total_days + 1) {
-                       //need to verify
+						//need to verify
 						return response()->json(['success' => false, 'errors' => ['Total boarding days should be less than total trip days']]);
 					}
 
@@ -2986,7 +3015,7 @@ class Trip extends Model {
 
 			$request->session()->flash('success', 'Trip saved successfully!');
 			return response()->json(['success' => true]);
-		}catch(Exception $e) {
+		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json([
 				'success' => false,
@@ -3131,7 +3160,7 @@ class Trip extends Model {
 		if (count($pending_trips) > 0) {
 			foreach ($pending_trips as $trip_key => $pending_trip) {
 				if ($status == 'Pending Requsation Approval') {
-					$detail='You have the following Travel Requisition(s) waiting for Approval and is / are
+					$detail = 'You have the following Travel Requisition(s) waiting for Approval and is / are
 pending for more than 2 days. Please approve. In case any of the below travel
 request is not desired, then those may be rejected.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
@@ -3148,7 +3177,7 @@ request is not desired, then those may be rejected.';
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3021)->update(['status_id' => 3032, 'reason' => 'Your Trip not approved,So system Cancelled Automatically']);
 					}
 				} elseif ($status == 'Claim Generation') {
-					$detail='You have the following Travel Requisition(s) waiting for claim generation and is / are
+					$detail = 'You have the following Travel Requisition(s) waiting for claim generation and is / are
 pending for more than 2 days. Please claim your trip. In case any of the below travel
 request is not desired, then those may be cancelled.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
@@ -3165,7 +3194,7 @@ request is not desired, then those may be cancelled.';
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
 					}
 				} elseif ($status == 'Pending Claim Approval') {
-					$detail='You have the following Claim waiting for Approval and is / are
+					$detail = 'You have the following Claim waiting for Approval and is / are
 pending for more than 2 days. Please approve. In case any of the below claim
 request is not desired, then those may be rejected.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
@@ -3182,7 +3211,7 @@ request is not desired, then those may be rejected.';
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3023)->update(['status_id' => 3024, 'status_id' => 3024, 'reason' => 'Your claim is not Approved,So system Rejected Automatically']);
 					}
 				} elseif ($status == 'Pending Divation Claim Approval') {
-					$detail='You have the following Deviation Claim waiting for Approval and is / are
+					$detail = 'You have the following Deviation Claim waiting for Approval and is / are
 pending for more than 2 days. Please approve. In case any of the below claim
 request is not desired, then those may be rejected.';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;

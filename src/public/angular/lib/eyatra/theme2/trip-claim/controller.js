@@ -254,6 +254,8 @@ app.component('eyatraTripClaimForm', {
             self.two_wheeler_start_km = response.data.km_end_twowheeler;
             self.four_wheeler_start_km = response.data.km_end_fourwheeler;
             self.lodgingTaxInvoiceModalIndex = '';
+            self.fareDetailsKmModalIndex = '';
+            self.fareDetailsKmModalValues = {};
             self.lodgingTaxInvoice = {};
             self.drywashTaxInvoice = {};
             self.boardingTaxInvoice = {};
@@ -1190,16 +1192,16 @@ app.component('eyatraTripClaimForm', {
 
                             if (!self.trip.visits[key].self_booking_km) {
                                 self.trip.visits[key].self_booking_km = {
-                                    km_start: '--',
-                                    km_end: '--',
-                                    toll_fee: '0',
+                                    km_start: '',
+                                    km_end: '',
+                                    toll_fee: '',
                                     readonly: true
                                 };
                             } else {
                                 self.trip.visits[key].self_booking_km.readonly = true;
-                                self.trip.visits[key].self_booking_km.km_start = '--';
-                                self.trip.visits[key].self_booking_km.km_end = '--';
-                                self.trip.visits[key].self_booking_km.toll_fee = '0';
+                                self.trip.visits[key].self_booking_km.km_start = '';
+                                self.trip.visits[key].self_booking_km.km_end = '';
+                                self.trip.visits[key].self_booking_km.toll_fee = '';
                             }
                             if (!self.trip.visits[key].self_amount) {
                                 self.trip.visits[key].self_amount = {
@@ -1212,9 +1214,9 @@ app.component('eyatraTripClaimForm', {
                             }
 
                             self.trip.visits[key].self_booking.amount = '0.00';
-                            self.trip.visits[key].self_booking.km_start = '--';
-                            self.trip.visits[key].self_booking.km_end = '--';
-                            self.trip.visits[key].self_booking.toll_fee = '0';
+                            self.trip.visits[key].self_booking.km_start = '';
+                            self.trip.visits[key].self_booking.km_end = '';
+                            self.trip.visits[key].self_booking.toll_fee = '';
                         }
                         //if Vehicle has own vehicle type
                         else if (category_type == 3400) {
@@ -1240,14 +1242,14 @@ app.component('eyatraTripClaimForm', {
                                 self.trip.visits[key].self_booking_km = {
                                     km_start: '',
                                     km_end: '',
-                                    toll_fee: '0.00',
+                                    toll_fee: '',
                                     readonly: false
                                 };
                             } else {
                                 self.trip.visits[key].self_booking_km.readonly = false;
                                 self.trip.visits[key].self_booking_km.km_start = self.trip.visits[key].self_booking.km_start ? self.trip.visits[key].self_booking.km_start : '';
                                 self.trip.visits[key].self_booking_km.km_end = self.trip.visits[key].self_booking.km_end ? self.trip.visits[key].self_booking.km_end : '';
-                                self.trip.visits[key].self_booking_km.toll_fee = self.trip.visits[key].self_booking.toll_fee ? self.trip.visits[key].self_booking.toll_fee : '0.00';
+                                self.trip.visits[key].self_booking_km.toll_fee = self.trip.visits[key].self_booking.toll_fee ? self.trip.visits[key].self_booking.toll_fee : '';
                             }
                             if (!self.trip.visits[key].self_amount) {
                                 self.trip.visits[key].self_amount = {
@@ -1306,16 +1308,16 @@ app.component('eyatraTripClaimForm', {
 
                             if (!self.trip.visits[key].self_booking_km) {
                                 self.trip.visits[key].self_booking_km = {
-                                    km_start: '--',
-                                    km_end: '--',
-                                    toll_fee: '0',
+                                    km_start: '',
+                                    km_end: '',
+                                    toll_fee: '',
                                     readonly: true
                                 };
                             } else {
                                 self.trip.visits[key].self_booking_km.readonly = true;
-                                self.trip.visits[key].self_booking_km.km_start = '--';
-                                self.trip.visits[key].self_booking_km.km_end = '--';
-                                self.trip.visits[key].self_booking_km.toll_fee = '0';
+                                self.trip.visits[key].self_booking_km.km_start = '';
+                                self.trip.visits[key].self_booking_km.km_end = '';
+                                self.trip.visits[key].self_booking_km.toll_fee = '';
                             }
                             if (!self.trip.visits[key].self_amount) {
                                 self.trip.visits[key].self_amount = {
@@ -1327,9 +1329,9 @@ app.component('eyatraTripClaimForm', {
                                 self.trip.visits[key].self_amount.amount = self.trip.visits[key].self_amount.amount ? self.trip.visits[key].self_amount.amount : '0.00';
                             }
 
-                            self.trip.visits[key].self_booking.km_start = '--';
-                            self.trip.visits[key].self_booking.km_end = '--';
-                            self.trip.visits[key].self_booking.toll_fee = '0';
+                            self.trip.visits[key].self_booking.km_start = '';
+                            self.trip.visits[key].self_booking.km_end = '';
+                            self.trip.visits[key].self_booking.toll_fee = '';
                         }
 
                         //Old Method for Claim and Not Claim Vehicle Method
@@ -1994,8 +1996,6 @@ app.component('eyatraTripClaimForm', {
         }
 
         $scope.onChangeStayType = (lodgingIndex, lodgeStayTypeId) => {
-            console.log(' == onChangeStayType ==');
-            console.log(lodgingIndex, lodgeStayTypeId);
             //OTHER THAN LODGE STAY
             if (lodgeStayTypeId != 3340) {
                 self.trip.lodgings[lodgingIndex].has_multiple_tax_invoice = "No";
@@ -2005,6 +2005,82 @@ app.component('eyatraTripClaimForm', {
                 //IF LODGE STAY
                 $('#lodging_has_multiple_tax_invoice_active_' + lodgingIndex).attr('disabled', false);
             }
+        }
+
+        $scope.onChangeTransportMode = (travelModeId, index) => {
+            self.fareDetailsKmModalIndex = index;
+            self.fareDetailsKmModalValues = {};
+            $('#fareDetailKmModal').modal('hide');
+
+            setTimeout(function() {
+                //TWO WHEELER OR FOUR WHELLER
+                if (travelModeId == '16' || travelModeId == '15') {
+                    self.fareDetailsKmModalValues.kmStart = $("#" + index + "-fareDetailStartingKm").val();
+                    self.fareDetailsKmModalValues.kmEnd = $("#" + index + "-fareDetailEndingKm").val();
+                    self.fareDetailsKmModalValues.tollFee = $("#" + index + "-fareDetailTollFee").val();
+
+                    $scope.calculateFareDetailTotalKM();
+                    $('#fareDetailKmModal').modal('show');
+                } else {
+                    $("#" + index + "-fareDetailStartingKm").val('');
+                    $("#" + index + "-fareDetailEndingKm").val('');
+                    $("#" + index + "-fareDetailTollFee").val('');
+                    self.trip.visits[index].self_booking.amount = '';
+                }
+                $scope.$apply()
+            }, 500);
+        }
+
+        $scope.calculateFareDetailTotalKM = () => {
+            let fareDetailTotalKm = 0;
+            let fareDetailStartingKm = parseFloat(self.fareDetailsKmModalValues.kmStart) || 0;
+            let fareDetailEndingKm = parseFloat(self.fareDetailsKmModalValues.kmEnd) || 0;
+            let fareDetailElibleAmount = parseFloat($(".twoWheelerEligibleAmount-" + self.fareDetailsKmModalIndex).val()) || 0;
+
+            if (fareDetailStartingKm && fareDetailEndingKm && fareDetailElibleAmount) {
+                fareDetailTotalKm = fareDetailElibleAmount * (fareDetailEndingKm - fareDetailStartingKm);
+            }
+            self.fareDetailsKmModalValues.totalKm = parseFloat(fareDetailTotalKm).toFixed(2);
+        }
+
+        $scope.onSubmitFareDetailKmModal = () => {
+            if (!self.fareDetailsKmModalValues.kmStart) {
+                custom_noty('error', "Starting KM is required");
+                return;
+            }
+            if (!self.fareDetailsKmModalValues.kmEnd) {
+                custom_noty('error', "Ending KM is required");
+                return;
+            }
+            if (!self.fareDetailsKmModalValues.tollFee) {
+                custom_noty('error', "Toll Fee is required");
+                return;
+            }
+            $("#" + self.fareDetailsKmModalIndex + "-fareDetailStartingKm").val(self.fareDetailsKmModalValues.kmStart);
+            $("#" + self.fareDetailsKmModalIndex + "-fareDetailEndingKm").val(self.fareDetailsKmModalValues.kmEnd);
+            $("#" + self.fareDetailsKmModalIndex + "-fareDetailTollFee").val(self.fareDetailsKmModalValues.tollFee);
+            self.trip.visits[self.fareDetailsKmModalIndex].self_booking.amount = self.fareDetailsKmModalValues.totalKm;
+
+            self.fareDetailsKmModalIndex = '';
+            self.fareDetailsKmModalValues = {};
+            $('#fareDetailKmModal').modal('hide');
+
+            setTimeout(function() {
+                self.travelCal();
+            }, 500);
+        }
+
+        $scope.onClickCloseFareDetailKmModal = () => {
+            $("#" + self.fareDetailsKmModalIndex + "-fareDetailStartingKm").val('');
+            $("#" + self.fareDetailsKmModalIndex + "-fareDetailEndingKm").val('');
+            $("#" + self.fareDetailsKmModalIndex + "-fareDetailTollFee").val('');
+            self.trip.visits[self.fareDetailsKmModalIndex].self_booking.amount = '';
+            self.fareDetailsKmModalIndex = '';
+            self.fareDetailsKmModalValues = {};
+            $('#fareDetailKmModal').modal('hide');
+            setTimeout(function() {
+                self.travelCal();
+            }, 500);
         }
 
         $scope.onClickHasMultipleTaxInvoice = (val, lodgingIndex) => {
