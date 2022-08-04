@@ -22,6 +22,7 @@ class VisitBooking extends Model {
 		'tax_percentage',
 		'gstin',
 		'other_charges',
+		'round_off',
 		'service_charge',
 		'total',
 		'invoice_date',

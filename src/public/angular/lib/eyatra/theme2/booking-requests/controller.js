@@ -192,7 +192,7 @@ app.component('eyatraTripBookingRequestsView', {
             $('#visitId').val(visitId)
         }
 
-        $scope.showBookDetail = function(id, amount) {
+        $scope.showBookDetail = function(id, amount, date) {
             // alert();
             // console.log(id, parseInt(amount));
             $("#open_book_form_" + id).hide();
@@ -205,6 +205,8 @@ app.component('eyatraTripBookingRequestsView', {
                 fileUpload();
                 $(".datepicker").datepicker({
                     todayHighlight: true,
+                    startDate: self.trip.created_at,
+                    endDate: date,
                     autoclose: true,
                 });
             }, 800);
@@ -303,8 +305,9 @@ app.component('eyatraTripBookingRequestsView', {
             const sgstValue = parseFloat(self.trip.agent_visits[index].booking.sgst) || 0.00;
             const igstValue = parseFloat(self.trip.agent_visits[index].booking.igst) || 0.00;
             const otherCharges = parseFloat(self.trip.agent_visits[index].booking.other_charges) || 0.00;
+            const roundOff = parseFloat(self.trip.agent_visits[index].booking.round_off) || 0.00;
 
-            totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue + otherCharges).toFixed(2);
+            totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue + otherCharges + roundOff).toFixed(2);
             self.trip.agent_visits[index].booking.total = totalValue;
         }
 

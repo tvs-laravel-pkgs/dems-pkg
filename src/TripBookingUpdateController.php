@@ -274,6 +274,7 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
 					$visit_bookings->reference_number = $value['reference_number'];
 					$visit_bookings->fill($value);
+					$visit_bookings->invoice_date = date('Y-m-d', strtotime($value['invoice_date']));
 					//$visit_bookings->invoice_number = $value['invoice_number'];
 					// $visit_bookings->booking_type_id = $value['booking_mode_id'];
 					//$visit_bookings->booking_category_id = $value['booking_category_id'];
@@ -290,7 +291,6 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->service_charge = $service_charge;
 					// $visit_bookings->total = $total_amount;
 					//$visit_bookings->total = $value['total'];
-					//$visit_bookings->invoice_date = date('Y-m-d', strtotime($value['invoice_date']));
 					$visit_bookings->paid_amount = $claim_amount;
 					$visit_bookings->status_id = $r->status_id;
 					$visit_bookings->created_by = Auth::user()->id;
