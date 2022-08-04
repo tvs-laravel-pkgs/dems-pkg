@@ -227,7 +227,18 @@ app.component('eyatraTripForm', {
                         $scope.onChange(start_date, end_date);
                     }, 800);
                 }
-
+                $(".datepicker").datepicker({
+                    //todayHighlight: true,
+                    startDate: start_date,
+                    endDate: end_date,
+                    autoclose: true,
+                });
+                $(".datepicker").datepicker({
+                    //todayHighlight: true,
+                    startDate: start_date,
+                    endDate: end_date,
+                    autoclose: true,
+                });
                 $(".daterange").daterangepicker({
                     autoclose: true,
                     // minDate: new Date(self.eligible_date),
@@ -306,6 +317,10 @@ app.component('eyatraTripForm', {
                     // $(".daterange").val('');
                 }, 500);
             }
+            $(".datepicker").datepicker({
+                todayHighlight: true,
+                autoclose: true,
+            });
 
             if (self.advance_eligibility == 1) {
                 $("#advance").show().prop('disabled', false);
@@ -319,9 +334,10 @@ app.component('eyatraTripForm', {
             //}
 
             $scope.AdvanceAmountDisable = function(start_date) {
-                var date = new Date();
-                var myDate = $filter('date')(date, "dd-MM-yyyy");
-                if (start_date >= myDate) {
+                var d2 = new Date();
+                var d1 = start_date.split("-");
+                var start_date_trip = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
+                if (start_date_trip >= d2) {
                     $("#advance").show().prop('disabled', false);
                     $("#advance_amount").prop('readonly', false);
                 } else {
@@ -361,11 +377,9 @@ app.component('eyatraTripForm', {
             $scope.showWallet = false;
         });
 
-        $(".daterange").on('change', function() {
-            var dates = $("#trip_periods").val();
-            var date = dates.split(" to ");
-            self.trip.start_date = date[0];
-            self.trip.end_date = date[1];
+        $("#start_date").on('change', function() {
+            self.trip.start_date;
+            self.trip.end_date;
             $scope.onChange(self.trip.start_date, self.trip.end_date);
             if (self.trip.visits && self.trip.visits.length > 0) {
                 $.each(self.trip.visits, function(index, value) {
