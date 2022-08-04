@@ -29,6 +29,7 @@ class Lodging extends Model {
 		'cgst',
 		'sgst',
 		'igst',
+		'round_off',
 		'invoice_date',
 		'attachment_status',
 		'created_by',

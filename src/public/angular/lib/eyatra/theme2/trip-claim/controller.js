@@ -445,6 +445,7 @@ app.component('eyatraTripClaimForm', {
                             self.attachment_type_lists = res.attachment_type_lists;
                             self.document_type_id = null;
                             $("#upload_document").val('').trigger('change');
+                            $scope.isDeviation()
                             $scope.$apply();
                         }
                     })
@@ -468,6 +469,7 @@ app.component('eyatraTripClaimForm', {
                     self.attachment_type_lists = res.data.attachment_type_lists;
                     self.document_type_id = null;
                     $("#upload_document").val('').trigger('change');
+                    $scope.isDeviation()
                     $scope.$apply();
                 });
             } else {
@@ -1507,8 +1509,10 @@ app.component('eyatraTripClaimForm', {
         }
         // Calculating lodging days list by Karthick T on 21-01-2022
 
+        self.deviationTypeName = '';
         $scope.isDeviation = function() {
             var is_deviation = false;
+            var deviationTypes = [];
             $('.is_deviation_amount').each(function() {
                 var amount_entered = $(this).val();
                 var default_eligible_amount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
@@ -1524,8 +1528,49 @@ app.component('eyatraTripClaimForm', {
                 }
                 if (amount_entered > default_eligible_amount) {
                     is_deviation = true;
+
+                    var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+
+                    if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
+                        deviationTypes[deviationTypes.length] = isDeviationType;
                 }
             });
+            console.log({deviationTypes})
+            self.deviationTypeName = deviationTypes.toString()
+
+            if (self.deviationTypeName)
+                self.deviationTypeName += ' amount is greater than their eligible amount';
+            
+            if (self.trip.trip_attachments.length == 0) {
+                is_deviation = true;
+                attachmentError = 'Fare detail document not uploaded'
+                self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+            } else {
+                var tripAttachmentTypeIds = []
+                $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                    tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id
+                })                
+                /*  
+                    3750 -> ALL Document type
+                    3751 -> Fare detail document type
+                    3752 -> Lodging detail document type
+                */
+                if (jQuery.inArray(3750, tripAttachmentTypeIds) == -1) {
+                    // Fare detail document validation
+                    if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
+                        is_deviation = true;
+                        attachmentError = 'Fare detail document not uploaded'
+                        self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                    }
+                    // Lodging detail document validation
+                    if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
+                        is_deviation = true;
+                        attachmentError = 'Lodging detail document not uploaded'
+                        self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                    }
+                }
+            }
+
             if (is_deviation) {
                 self.is_deviation = 1;
                 // $('#is_deviation').val(1);
@@ -1953,6 +1998,7 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings.splice(index, 1);
             setTimeout(function() {
                 self.lodgingCal();
+                $scope.isDeviation()
             }, 500);
         }
 
@@ -2363,10 +2409,10 @@ app.component('eyatraTripClaimForm', {
             // alert();
             var total_travel_amount = 0;
             $('.travel_amount').each(function() {
-                var travel_amount = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_amount').val() || 0);
+                var travel_amount = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_amount').val() || 0);
                 // alert(travel_amount);
-                var travel_tax = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_tax').val() || 0);
-                var travel_toll_fee = parseInt($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
+                var travel_tax = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_tax').val() || 0);
+                var travel_toll_fee = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
                 // console.log(travel_toll_fee);
                 if (!$.isNumeric(travel_amount)) {
                     travel_amount = 0;
@@ -2394,24 +2440,33 @@ app.component('eyatraTripClaimForm', {
             let lodgingCgst = 0;
             let lodgingSgst = 0;
             let lodgingIgst = 0;
+            let lodgingRoundOff = 0;
             jQuery.each(self.trip.lodgings, (index, lodging) => {
-                lodgingAmount = parseInt(lodging.amount || 0);
+                lodgingAmount = parseFloat(lodging.amount || 0);
                 if (!$.isNumeric(lodgingAmount)) {
                     lodgingAmount = 0;
                 }
-                lodgingCgst = parseInt(lodging.cgst || 0);
+                lodgingCgst = parseFloat(lodging.cgst || 0);
                 if (!$.isNumeric(lodgingCgst)) {
                     lodgingCgst = 0;
                 }
-                lodgingSgst = parseInt(lodging.sgst || 0);
+                lodgingSgst = parseFloat(lodging.sgst || 0);
                 if (!$.isNumeric(lodgingSgst)) {
                     lodgingSgst = 0;
                 }
-                lodgingIgst = parseInt(lodging.igst || 0);
+                lodgingIgst = parseFloat(lodging.igst || 0);
                 if (!$.isNumeric(lodgingIgst)) {
                     lodgingIgst = 0;
                 }
+                // Added round off amount
+                lodgingRoundOff = parseFloat(lodging.round_off || 0);
+                if (!$.isNumeric(lodgingRoundOff)) {
+                    lodgingRoundOff = 0;
+                }
+                // Added round off amount
                 currentTotal = parseFloat(lodgingAmount + lodgingCgst + lodgingSgst + lodgingIgst);
+                // Added round off amount
+                currentTotal = parseFloat(currentTotal + lodgingRoundOff);
                 lodging.total = currentTotal;
                 totalLodgingAmount += currentTotal;
             });
@@ -2426,11 +2481,11 @@ app.component('eyatraTripClaimForm', {
             let boardingTax = 0;
             let currentBoardingTotal = 0;
             jQuery.each(self.trip.boardings, (index, boarding) => {
-                boardingAmount = parseInt(boarding.amount || 0);
+                boardingAmount = parseFloat(boarding.amount || 0);
                 if (!$.isNumeric(boardingAmount)) {
                     boardingAmount = 0;
                 }
-                boardingTax = parseInt(boarding.tax || 0);
+                boardingTax = parseFloat(boarding.tax || 0);
                 if (!$.isNumeric(boardingTax)) {
                     boardingTax = 0;
                 }
@@ -2448,11 +2503,11 @@ app.component('eyatraTripClaimForm', {
             let localTravelTax = 0;
             let currentLocalTravelTotal = 0;
             jQuery.each(self.trip.local_travels, (index, localTravel) => {
-                localTravelAmount = parseInt(localTravel.amount || 0);
+                localTravelAmount = parseFloat(localTravel.amount || 0);
                 if (!$.isNumeric(localTravelAmount)) {
                     localTravelAmount = 0;
                 }
-                localTravelTax = parseInt(localTravel.tax || 0);
+                localTravelTax = parseFloat(localTravel.tax || 0);
                 if (!$.isNumeric(localTravelTax)) {
                     localTravelTax = 0;
                 }
