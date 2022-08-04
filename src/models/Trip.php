@@ -1713,7 +1713,7 @@ class Trip extends Model {
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$board = Boarding::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
 		$other = LocalTravel::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
-		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst','boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst','local_travels.amount as local_basic', 'local_travels.cgst as local_cgst','local_travels.sgst as local_sgst','local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
+		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst','boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst','local_travels.amount as local_basic', 'local_travels.cgst as local_cgst','local_travels.sgst as local_sgst','local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
 
 		if (count($visit) > 1) {
 			$transport_basic = number_format(array_sum(array_column($tax_details, 'transport_basic')), 2, '.', ',');
@@ -1731,11 +1731,13 @@ class Trip extends Model {
 			$lodging_cgst = number_format(array_sum(array_column($tax_details, 'lodging_cgst')), 2, '.', ',');
 			$lodging_sgst = number_format(array_sum(array_column($tax_details, 'lodging_sgst')), 2, '.', ',');
 			$lodging_igst = number_format(array_sum(array_column($tax_details, 'lodging_igst')), 2, '.', ',');
+			$lodging_round_off = number_format(array_sum(array_column($tax_details, 'lodging_round_off')), 2, '.', ',');
 		} else {
 			$lodging_basic = isset($tax_details[0]['lodging_basic']) ? $tax_details[0]['lodging_basic'] : 0;
 			$lodging_cgst = isset($tax_details[0]['lodging_cgst']) ? $tax_details[0]['lodging_cgst'] : 0;
 			$lodging_sgst = isset($tax_details[0]['lodging_sgst']) ? $tax_details[0]['lodging_sgst'] : 0;
 			$lodging_igst = isset($tax_details[0]['lodging_igst']) ? $tax_details[0]['lodging_igst'] : 0;
+			$lodging_round_off = isset($tax_details[0]['lodging_round_off']) ? $tax_details[0]['lodging_round_off'] : 0;
 		}
 		if (count($board) > 1) {
 			$boarding_basic = number_format(array_sum(array_column($tax_details, 'boarding_basic')), 2, '.', ',');
@@ -1763,6 +1765,8 @@ class Trip extends Model {
 		$transport_total = $lodging_total = $boarding_total = $local_travel_total = 0;
 		$transport_total = floatval(preg_replace('/[^\d.]/', '', $transport_basic)) + floatval(preg_replace('/[^\d.]/', '', $transport_cgst)) + floatval(preg_replace('/[^\d.]/', '', $transport_sgst)) + floatval(preg_replace('/[^\d.]/', '', $transport_igst));
 		$lodging_total = floatval(preg_replace('/[^\d.]/', '', $lodging_basic)) + floatval(preg_replace('/[^\d.]/', '', $lodging_cgst)) + floatval(preg_replace('/[^\d.]/', '', $lodging_sgst)) + floatval(preg_replace('/[^\d.]/', '', $lodging_igst));
+		// Adding round off value
+		$lodging_total = floatval(preg_replace('/[^\d.]/', '', $lodging_total)) + floatval(preg_replace('/[^\d.]/', '', $lodging_round_off));
 		$boarding_total = floatval(preg_replace('/[^\d.]/', '', $boarding_basic)) + floatval(preg_replace('/[^\d.]/', '', $boarding_cgst)) + floatval(preg_replace('/[^\d.]/', '', $boarding_sgst)) + floatval(preg_replace('/[^\d.]/', '', $boarding_igst));
 		$local_travel_total = floatval(preg_replace('/[^\d.]/', '', $local_travel_basic)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_cgst)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_sgst)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_igst));
 
@@ -1774,6 +1778,7 @@ class Trip extends Model {
 		$trip->lodging_cgst = $lodging_cgst;
 		$trip->lodging_sgst = $lodging_sgst;
 		$trip->lodging_igst = $lodging_igst;
+		$trip->lodging_round_off = $lodging_round_off;
 		$trip->boarding_basic = $boarding_basic;
 		$trip->boarding_cgst = $boarding_cgst;
 		$trip->boarding_sgst = $boarding_sgst;
@@ -1915,6 +1920,17 @@ class Trip extends Model {
 				}
 			}
 			// Attachment validation by Karthick T on 08-04-2022
+			// Validate Boading amount by Karthick T on 04-08-2022
+			if ($request->boardings) {
+				foreach ($request->boardings as $boarding_data) {
+					// dd($boarding_data);
+					$boardingEligibleAmount = (float) $boarding_data['eligible_amount'] * $boarding_data['days'];
+					$boardingAmount = (float) $boarding_data['amount'];
+					if ($boardingAmount > $boardingEligibleAmount)
+						return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
+				}
+			}
+			// Validate Boading amount by Karthick T on 04-08-2022
 
 			//Get employee outstion beta amount
 			$beta_amount = Employee::join('grade_advanced_eligibility', 'grade_advanced_eligibility.grade_id', 'employees.grade_id')->where('employees.id', $trip->employee_id)->pluck('grade_advanced_eligibility.outstation_trip_amount')->first();
