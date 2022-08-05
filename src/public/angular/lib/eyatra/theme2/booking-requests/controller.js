@@ -426,7 +426,7 @@ app.component('eyatraTripBookingRequestsView', {
                             custom_noty('success', "Proof uploaded successfully");
                             setTimeout(function() {
                                 $window.location.reload()
-                            }, 3000);
+                            }, 1000);
                         }
                     })
                     .fail(function(xhr) {

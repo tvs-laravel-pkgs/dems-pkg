@@ -768,6 +768,41 @@ app.component('eyatraTripView', {
             }
         }
 
+        $scope.onClickClaimButton = () => {
+            if (self.trip && self.trip.visits && self.trip.visits.length > 0) {
+                let agentVisitsBookedLength = 0;
+                let agentVisitsLength = 0;
+                const tripVisits = self.trip.visits;
+                tripVisits.forEach((tripVisit, key) => {
+                    //AGENT BOOKING METHOD
+                    if (tripVisit.booking_method_id == 3042) {
+                        agentVisitsLength++;
+                        //PROOF ATTACHED
+                        if (tripVisit.booking && tripVisit.booking.is_proof_attached == 1) {
+                            agentVisitsBookedLength++;
+                        }
+                    }
+                });
+                //AGENT VISITS EXISTS
+                if (agentVisitsLength > 0) {
+                    //IF ALL VISITS ARE BOOKED THEN ENABLE CLAIM
+                    if (agentVisitsLength === agentVisitsBookedLength) {
+                        window.location = "#!/trip/claim/add/" + self.trip.id;
+                        return;
+                    } else {
+                        custom_noty('error', "To enable claim kindly get the ticket from agent");
+                        return;
+                    }
+                } else {
+                    window.location = "#!/trip/claim/add/" + self.trip.id;
+                    return;
+                }
+            } else {
+                custom_noty('error', "No visits found");
+                return;
+            }
+        }
+
         //CANCEL VISIT BOOKING
         $scope.cancelVisitBookingPopup = function(visit_id) {
             $('#cancel_visit_id').val(visit_id);
