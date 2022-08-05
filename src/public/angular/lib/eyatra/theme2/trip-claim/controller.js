@@ -328,6 +328,9 @@ app.component('eyatraTripClaimForm', {
                 //         });
                 //     });
                 // });
+                // Added empty lodging if no record exist
+                if (self.trip.lodgings.length == 0)
+                    self.lodgingAdd()
             } else {
                 $timeout(function() {
                     // $scope.stayDaysEach();
