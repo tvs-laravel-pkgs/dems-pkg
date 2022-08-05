@@ -114,6 +114,7 @@ class AgentClaimController extends Controller {
 				->where('visit_bookings.created_by', Auth::user()->id)
 				->where('visit_bookings.status_id', 3240)
 				->groupBy('trips.id')
+				->orderBy('trips.created_at', 'desc')
 				->get();
 			$date = date('d-m-Y');
 		}
