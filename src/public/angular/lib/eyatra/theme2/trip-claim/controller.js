@@ -1540,12 +1540,12 @@ app.component('eyatraTripClaimForm', {
                         deviationTypes[deviationTypes.length] = isDeviationType;
                 }
             });
-            console.log({deviationTypes})
+            console.log({ deviationTypes })
             self.deviationTypeName = deviationTypes.toString()
 
             if (self.deviationTypeName)
                 self.deviationTypeName += ' amount is greater than their eligible amount';
-            
+
             if (self.trip.trip_attachments.length == 0) {
                 is_deviation = true;
                 attachmentError = 'Fare detail document not uploaded'
@@ -1554,7 +1554,7 @@ app.component('eyatraTripClaimForm', {
                 var tripAttachmentTypeIds = []
                 $(self.trip.trip_attachments).each(function(key, tripAttachment) {
                     tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id
-                })                
+                })
                 /*  
                     3750 -> ALL Document type
                     3751 -> Fare detail document type
@@ -2490,19 +2490,27 @@ app.component('eyatraTripClaimForm', {
             $('.travel_amount').each(function() {
                 var travel_amount = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_amount').val() || 0);
                 // alert(travel_amount);
-                var travel_tax = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_tax').val() || 0);
+                var travel_cgst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_cgst').val() || 0);
+                var travel_sgst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_sgst').val() || 0);
+                var travel_igst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_igst').val() || 0);
                 var travel_toll_fee = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
                 // console.log(travel_toll_fee);
                 if (!$.isNumeric(travel_amount)) {
                     travel_amount = 0;
                 }
-                if (!$.isNumeric(travel_tax)) {
-                    travel_tax = 0;
+                if (!$.isNumeric(travel_cgst)) {
+                    travel_cgst = 0;
+                }
+                if (!$.isNumeric(travel_sgst)) {
+                    travel_sgst = 0;
+                }
+                if (!$.isNumeric(travel_igst)) {
+                    travel_igst = 0;
                 }
                 if (!$.isNumeric(travel_toll_fee)) {
                     travel_toll_fee = 0;
                 }
-                travel_current_total = travel_amount + travel_tax + travel_toll_fee;
+                travel_current_total = travel_amount + travel_cgst + travel_igst + travel_sgst + travel_toll_fee;
                 total_travel_amount += travel_current_total;
                 $(this).closest('tr').find('.visit_booking_total_amount').val(travel_current_total);
             });
