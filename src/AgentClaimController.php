@@ -537,7 +537,7 @@ class AgentClaimController extends Controller {
 			}
 		}
 		if ($trip_status == 'booked') {
-			$visits = Trip::select(DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.service_charge) as service_charge'))
+			$visits = Trip::select('visit_bookings.other_charges as other_charges',DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.agent_service_charges) as service_charge'))
 				->join('visits', 'trips.id', 'visits.trip_id')
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.booking_method_id', 3042)
@@ -545,11 +545,12 @@ class AgentClaimController extends Controller {
 				->where('visits.trip_id', $trip_id)
 				->groupBy('visits.trip_id')
 				->first();
-
+            // dd($visits);
 			if ($visits) {
 				$ticket_amount = $visits->amount + $visits->tax;
 				$service_charge = $visits->service_charge;
 				$total_amount = $visits->paid_amount;
+				$other_charges = $visits->other_charges;
 			}
 
 		}
@@ -567,6 +568,7 @@ class AgentClaimController extends Controller {
 		$this->data['total_amount'] = $total_amount;
 		$this->data['ticket_amount'] = $ticket_amount;
 		$this->data['service_charge'] = $service_charge;
+		$this->data['other_charges'] = $other_charges;
 		$this->data['attach_path'] = url('storage/app/public/visit/booking-updates/attachments/');
 		$this->data['success'] = true;
 		return response()->json($this->data);

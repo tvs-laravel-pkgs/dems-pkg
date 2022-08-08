@@ -525,6 +525,7 @@ app.component('eyatraTripBookingView', {
             self.total_amount = response.data.total_amount;
             self.ticket_amount = response.data.ticket_amount;
             self.service_charge = response.data.service_charge;
+            self.other_charges = response.data.other_charges;
             self.trip_status = response.data.trip_status;
             self.booking_mode_list = response.data.booking_mode_list;
             self.travel_mode_list = response.data.travel_mode_list;
