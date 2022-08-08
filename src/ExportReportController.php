@@ -610,6 +610,125 @@ class ExportReportController extends Controller
             $excel->setActiveSheetIndex(0);
         })->download('xlsx');
     }
+    //Agent report
+     public function agent(Request $r) {
+        ini_set('max_execution_time', 0);
+        $excel_headers = [
+            'Sl.No',
+            'Name',
+            'ECode',
+            'Sbu',
+            'State',
+            'Date of Request',
+            'Date of Booking',
+            'Date Of Travel',
+            'From',
+            'To',
+            'Mode',
+            'Reference Number',
+            'Ticket Base Amount',
+            'Cgst',
+            'Sgst',
+            'Igst',
+            'Other Charges',
+            'Total Ticket Amount',
+            'Booking Charge',
+            'Total Amount',
+            'Original Refernce Number',
+            'Original Ticket Amount',
+            'Cancel Charges',
+            'Original Booking Date',
+            'Cr.Amount',
+            'Ref',
+        ];
+        $booking_details = Trip::select(
+                DB::raw('COALESCE(users.name, "") as name'),
+                DB::raw('COALESCE(employees.code, "") as ecode'),
+                DB::raw('COALESCE(sbus.name, "") as sbu'),
+                DB::raw('COALESCE(nstates.name, "") as state'),
+                DB::raw('COALESCE(DATE_FORMAT(trips.created_at,"%d-%m-%Y"), "") as date_of_request'),
+                DB::raw('COALESCE(DATE_FORMAT(visit_bookings.created_at,"%d-%m-%Y"), "") as date_of_booking'),
+                DB::raw('COALESCE(DATE_FORMAT(visits.departure_date,"%d-%m-%Y"), "") as date_of_travel'),
+                DB::raw('COALESCE(ncities.name, "") as from'),
+                //DB::raw('COALESCE(ncities.name, "") as To'),
+                DB::raw('COALESCE(entities.name, "") as mode'),
+                DB::raw('COALESCE(visit_bookings.reference_number, "") as reference_number'),
+                DB::raw('COALESCE(visit_bookings.amount, "") as ticket_base_amount'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.cgst, 0)),2,"en_IN") as cgst'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.sgst, 0)),2,"en_IN") as sgst'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as total_ticket_amount'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.agent_service_charges, 0)),2,"en_IN") as booking_charge'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as total_amount'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.reference_number, 0)),2,"en_IN") as original_reference_number'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as original_ticket_amount'),
+               // DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as cancel_charges'),
+                DB::raw('COALESCE(DATE_FORMAT(visit_bookings.created_at,"%d-%m-%Y"), "") as origin_booking_date'),
+                DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
+                DB::raw('COALESCE(visit_bookings.reference_number, "") as ref')
+            )
+            ->leftJoin('employees', 'employees.id', 'trips.employee_id')
+            ->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+            ->leftJoin('users', function($user_q) {
+                $user_q->on('employees.id', 'users.entity_id')
+                   ->where('users.user_type_id', 3121);
+            })
+            ->leftJoin('visits','visits.trip_id','trips.id')
+            ->leftJoin('visit_bookings', 'visit_bookings.visit_id','visits.id')
+            ->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
+            ->leftJoin('ncities', 'ncities.id', 'visits.from_city_id')
+            ->leftJoin('nstates', 'nstates.id', 'ncities.state_id')
+            ->where('visit_bookings.type_id', 3100)
+            ->whereDate('visit_bookings.created_at', '>=', $from_date)
+            ->whereDate('visit_bookings.created_at', '<=', $to_date)
+            ->groupBy('visit_bookings.id')
+            ->get()->toArray();
+         //dd($booking_details);
+        if (count($booking_details) == 0) {
+            Session()->flash('error', 'No Data Found');
+            //return redirect()->to('/#!/gst/report');
+        }
+        $export_details = [];
+        $s_no = 1;
+        foreach ($booking_details as $booking_detail_key => $booking_detail) {
+            $export_data = [
+                $s_no++,
+                $booking_detail->emp_code,
+                $booking_detail->emp_name,
+                $gst_detail->outlet,
+                $gst_detail->sbu,
+                $gst_detail->claim_number,
+                $gst_detail->claim_date,
+                $gst_detail->invoice_number,
+                $gst_detail->transport_gst_number,
+                $gst_detail->transport_amount,
+                $gst_detail->tax,
+                $gst_detail->gst_number,
+                $gst_detail->supplier_name,
+                $gst_detail->invoice_amount,
+                $gst_detail->tax_percentage,
+                $gst_detail->cgst,
+                $gst_detail->sgst,
+                $gst_detail->igst,
+                $gst_detail->date,
+            ];
+
+            $export_details[] = $export_data;
+        }
+        $title = 'GST_REPORT_' . Carbon::now();
+        $sheet_name = 'GST REPORT';
+        Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
+            $excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+                $sheet->fromArray($export_details, NULL, 'A1');
+                $sheet->row(1, $excel_headers);
+                $sheet->row(1, function ($row) {
+                    $row->setBackground('#c4c4c4');
+                });
+            });
+            $excel->setActiveSheetIndex(0);
+        })->download('xlsx');
+    }
     // Send mail
     public function sendMail() {
         try {
