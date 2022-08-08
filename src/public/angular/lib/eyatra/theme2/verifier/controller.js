@@ -204,6 +204,14 @@ app.component('eyatraOutstationClaimVerificationView', {
 
             self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
+            if (response.data.trip.trip_attachments.length === 0 && response.data.trip.google_attachments.length === 0) {
+                $scope.visit = false;
+            } else {
+                $scope.visit = true;
+            }
+            $scope.doSomethingOnClick = function() {
+                $scope.visit = false;
+            }
             if (self.trip.advance_received) {
                 if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {
                     self.pay_to_employee = (parseInt(self.total_amount) - parseInt(self.trip.advance_received)).toFixed(2);
