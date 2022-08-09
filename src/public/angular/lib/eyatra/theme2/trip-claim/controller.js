@@ -2484,6 +2484,45 @@ app.component('eyatraTripClaimForm', {
             self.trip.local_travel_attachments.splice(local_travel_attachment_index, 1);
         }
 
+        self.travelRoundOff = function() {
+            //alert();
+            $('.travel_amount').each(function() {
+                var travel_amount = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_amount').val() || 0);
+                //alert(travel_amount);
+                var travel_cgst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_cgst').val() || 0);
+                var travel_sgst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_sgst').val() || 0);
+                var travel_igst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_igst').val() || 0);
+                var travel_toll_fee = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
+                var travel_round_off = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_round_off').val() || 0);
+                var travel_invoice_amount = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_invoice_amount').val() || 0);
+                console.log(travel_toll_fee, travel_round_off, travel_invoice_amount);
+                if (!$.isNumeric(travel_amount)) {
+                    travel_amount = 0;
+                }
+                if (!$.isNumeric(travel_cgst)) {
+                    travel_cgst = 0;
+                }
+                if (!$.isNumeric(travel_sgst)) {
+                    travel_sgst = 0;
+                }
+                if (!$.isNumeric(travel_igst)) {
+                    travel_igst = 0;
+                }
+                if (!$.isNumeric(travel_toll_fee)) {
+                    travel_toll_fee = 0;
+                }
+                if (!$.isNumeric(travel_round_off)) {
+                    travel_round_off = 0;
+                }
+                if (!$.isNumeric(travel_invoice_amount)) {
+                    travel_invoice_amount = 0;
+                }
+                travel_current_total = travel_amount + travel_cgst + travel_igst + travel_sgst + travel_toll_fee;
+                travel_round_off = parseFloat(travel_invoice_amount - travel_current_total).toFixed(2);
+                $(this).closest('.is_deviation_amount_row').find('.travel_round_off').val(travel_round_off);
+            });
+        }
+
         self.travelCal = function() {
             // alert();
             var total_travel_amount = 0;
@@ -2518,6 +2557,52 @@ app.component('eyatraTripClaimForm', {
             $('.transport_expenses').text('₹ ' + total_travel_amount.toFixed(2));
             $('.total_travel_amount').val(total_travel_amount.toFixed(2));
             caimTotalAmount();
+        }
+
+        self.roundOff = () => {
+            let currentTotal = 0;
+            let lodgingAmount = 0;
+            let lodgingCgst = 0;
+            let lodgingSgst = 0;
+            let lodgingIgst = 0;
+            let lodgingRoundOff = 0;
+            let lodgingInvoiceAmount = 0;
+            jQuery.each(self.trip.lodgings, (index, lodging) => {
+                lodgingAmount = parseFloat(lodging.amount || 0);
+                if (!$.isNumeric(lodgingAmount)) {
+                    lodgingAmount = 0;
+                }
+                lodgingCgst = parseFloat(lodging.cgst || 0);
+                if (!$.isNumeric(lodgingCgst)) {
+                    lodgingCgst = 0;
+                }
+                lodgingSgst = parseFloat(lodging.sgst || 0);
+                if (!$.isNumeric(lodgingSgst)) {
+                    lodgingSgst = 0;
+                }
+                lodgingIgst = parseFloat(lodging.igst || 0);
+                if (!$.isNumeric(lodgingIgst)) {
+                    lodgingIgst = 0;
+                }
+                // Added round off amount
+                lodgingRoundOff = parseFloat(lodging.round_off || 0);
+                if (!$.isNumeric(lodgingRoundOff)) {
+                    lodgingRoundOff = 0;
+                }
+                lodgingRoundOff = parseFloat(lodging.round_off || 0);
+                if (!$.isNumeric(lodgingRoundOff)) {
+                    lodgingRoundOff = 0;
+                }
+                lodgingInvoiceAmount = parseFloat(lodging.invoice_amount || 0);
+                if (!$.isNumeric(lodgingInvoiceAmount)) {
+                    lodgingInvoiceAmount = 0;
+                } // Added round off amount
+                currentTotal = parseFloat(lodgingAmount + lodgingCgst + lodgingSgst + lodgingIgst);
+                lodgingRoundOff = parseFloat(lodgingInvoiceAmount - currentTotal).toFixed(2);
+                self.trip.lodgings[index].round_off = lodgingRoundOff;
+                // Added round off amount
+
+            });
         }
 
         self.lodgingCal = () => {

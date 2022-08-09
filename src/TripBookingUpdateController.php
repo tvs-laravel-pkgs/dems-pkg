@@ -273,10 +273,10 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->type_id = $r->type_id;
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
 					$visit_bookings->reference_number = $value['reference_number'];
-					if($value['round_off'] > 1){
+					if(!empty($value['round_off']) && ($value['round_off'] > 1 || $value['round_off'] < -1)){
 						return response()->json([
 											'success' => false,
-											'errors' => ['Round off amount limit is RS. 1'],
+											'errors' => ['Round off amount limit is +1 Or -1'],
 										]);
 					}
 					if (!empty($value['gstin'])) {
