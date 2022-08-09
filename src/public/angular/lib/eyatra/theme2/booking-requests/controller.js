@@ -278,11 +278,12 @@ app.component('eyatraTripBookingRequestsView', {
                 self.trip.agent_visits[index].booking.cgst = '';
                 self.trip.agent_visits[index].booking.sgst = '';
                 self.trip.agent_visits[index].booking.igst = '';
-                self.trip.agent_visits[index].booking.gstin = self.trip.agent_visits[index].toCityGstin;
+                //enable if company gstin needed and self.trip.agent_visits[index].toCityGstCode inside if condition
+                //self.trip.agent_visits[index].booking.gstin = self.trip.agent_visits[index].toCityGstin;
 
                 const cgstPercentage = sgstPercentage = 2.5;
                 const igstPercentage = 5;
-                if (self.trip.employee_gst_code && self.trip.agent_visits[index].toCityGstCode && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
+                if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
                     let taxableValue = self.trip.agent_visits[index].booking.amount;
                     if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
                         self.trip.agent_visits[index].booking.cgst = parseFloat(taxableValue * (cgstPercentage / 100)).toFixed(2);
@@ -305,10 +306,37 @@ app.component('eyatraTripBookingRequestsView', {
             const sgstValue = parseFloat(self.trip.agent_visits[index].booking.sgst) || 0.00;
             const igstValue = parseFloat(self.trip.agent_visits[index].booking.igst) || 0.00;
             const otherCharges = parseFloat(self.trip.agent_visits[index].booking.other_charges) || 0.00;
-            const roundOff = parseFloat(self.trip.agent_visits[index].booking.round_off) || 0.00;
-
-            totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue + otherCharges + roundOff).toFixed(2);
+            //const roundOff = parseFloat(self.trip.agent_visits[index].booking.round_off) || 0.00;
+            const invoiceAmount = parseFloat(self.trip.agent_visits[index].booking.invoice_amount) || 0.00;
+            totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue + otherCharges).toFixed(2);
             self.trip.agent_visits[index].booking.total = totalValue;
+            self.trip.agent_visits[index].booking.round_off = parseFloat(totalValue - invoiceAmount).toFixed(2);
+        }
+        $scope.fareDetailGstChange = (index, gst_number) => {
+            self.trip.agent_visits[index].booking.fare_gst_detail = '';
+            if (gst_number && gst_number.length == 15) {
+                $http({
+                    url: laravel_routes['getGstInData'],
+                    method: 'GET',
+                    params: { 'gst_number': gst_number }
+                }).then(function(res) {
+                    // console.log(res);
+                    if (!res.data.success) {
+                        var errors = '';
+                        if (res.data.errors) {
+                            for (var i in res.data.errors) {
+                                errors += '<li>' + res.data.errors[i] + '</li>';
+                            }
+                        }
+                        if (res.data.error) {
+                            errors += '<li>' + res.data.error + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.trip.agent_visits[index].booking.fare_gst_detail = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                    }
+                });
+            }
         }
 
         $scope.gstHelper = function(key) {

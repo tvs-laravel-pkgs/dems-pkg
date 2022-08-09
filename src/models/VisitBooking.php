@@ -25,6 +25,7 @@ class VisitBooking extends Model {
 		'round_off',
 		'service_charge',
 		'total',
+		'invoice_amount',
 		'invoice_date',
 		'invoice_number',
 		'status_id',

@@ -273,6 +273,21 @@ class TripBookingUpdateController extends Controller {
 					$visit_bookings->type_id = $r->type_id;
 					$visit_bookings->travel_mode_id = $value['travel_mode_id'];
 					$visit_bookings->reference_number = $value['reference_number'];
+					if($value['round_off'] > 1){
+						return response()->json([
+											'success' => false,
+											'errors' => ['Round off amount limit is RS. 1'],
+										]);
+					}
+					if (!empty($value['gstin'])) {
+							$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($value['gstin'], "", false);
+					    if (!$response['success']) {
+							return response()->json(['success' => false,'errors' => [$response['error'],],]);
+						}
+						$visit_bookings->gstin = $response['gstin'];
+					} else {
+						$visit_bookings->gstin = NULL;
+					}
 					$visit_bookings->fill($value);
 					$visit_bookings->invoice_date = date('Y-m-d', strtotime($value['invoice_date']));
 					//$visit_bookings->invoice_number = $value['invoice_number'];
