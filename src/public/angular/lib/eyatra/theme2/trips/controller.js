@@ -205,10 +205,10 @@ app.component('eyatraTripForm', {
                 return;
             }
             self.trip = response.data.trip;
-            // console.log(response.data.trip);
-            self.trip.trip_periods = '';
-            self.startDate = '';
-            self.endDate = '';
+
+            //DATERANGE DISABLED
+            // self.trip.trip_periods = '';
+
             self.advance_eligibility = response.data.advance_eligibility;
             self.grade_advance_eligibility_amount = response.data.grade_advance_eligibility_amount;
             self.eligible_date = response.data.eligible_date;
@@ -216,64 +216,75 @@ app.component('eyatraTripForm', {
             self.claimable_travel_mode_list = response.data.extras.claimable_travel_mode_list;
             self.trip_advance_amount_edit = response.data.trip_advance_amount_edit;
             self.trip_advance_amount_employee_edit = response.data.trip_advance_amount_employee_edit;
-            // console.log(self.trip_advance_amount_edit)
+
             if (response.data.action == "Edit") {
-                if (response.data.trip.start_date && response.data.trip.end_date) {
-                    var start_date = response.data.trip.start_date;
-                    var end_date = response.data.trip.end_date;
-                    trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
-                    self.trip.trip_periods = trip_periods;
-                    setTimeout(function() {
-                        $scope.onChange(start_date, end_date);
-                    }, 800);
-                }
-                $(".datepicker").datepicker({
-                    //todayHighlight: true,
-                    startDate: start_date,
-                    endDate: end_date,
-                    autoclose: true,
-                });
-                $(".datepicker").datepicker({
-                    //todayHighlight: true,
-                    startDate: start_date,
-                    endDate: end_date,
-                    autoclose: true,
-                });
-                $(".daterange").daterangepicker({
-                    autoclose: true,
-                    // minDate: new Date(self.eligible_date),
-                    maxDate: new Date(self.max_eligible_date),
 
-                    locale: {
-                        cancelLabel: 'Clear',
-                        format: "DD-MM-YYYY",
-                        separator: " to ",
-                    },
-                    showDropdowns: false,
-                    startDate: start_date,
-                    endDate: end_date,
-                    autoApply: true,
-                });
-                var nowDate = new Date();
-                nowDate.setDate(nowDate.getDate() - 100);
-                var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
-                var eStartDate = response.data.trip.start_date;
-                $(".daterange.min-daterange").daterangepicker({
-                    autoclose: true,
-                    minDate: todayDate,
-                    // maxDate: eStartDate,
-                    // maxDate: new Date(self.max_eligible_date)
+                //DATERANGE DISABLED
+                // if (response.data.trip.start_date && response.data.trip.end_date) {
+                // var start_date = response.data.trip.start_date;
+                // var end_date = response.data.trip.end_date;
+                // trip_periods = response.data.trip.start_date + ' to ' + response.data.trip.end_date;
+                // self.trip.trip_periods = trip_periods;
+                // }
 
-                    locale: {
-                        cancelLabel: 'Clear',
-                        format: "DD-MM-YYYY",
-                        separator: " to ",
-                    },
-                    showDropdowns: false,
-                    startDate: start_date,
-                    endDate: end_date,
-                    autoApply: true,
-                });
+                setTimeout(function() {
+                    $scope.onChangeTripStartAndEndDate();
+
+                    //TRIP START DATE
+                    $('.datepicker.tripStartDate').datepicker('destroy');
+                    $(".datepicker.tripStartDate").datepicker({
+                        setDate: self.trip.start_date,
+                        startDate: self.trip.start_date,
+                        endDate: self.trip.end_date,
+                        autoclose: true,
+                    });
+
+                    //TRIP END DATE
+                    $('.datepicker.tripEndDate').datepicker('destroy');
+                    $(".datepicker.tripEndDate").datepicker({
+                        setDate: self.trip.end_date,
+                        startDate: self.trip.start_date,
+                        endDate: self.trip.end_date,
+                        autoclose: true,
+                    });
+                }, 800);
+
+                //DATERANGE DISABLED
+                // $(".daterange").daterangepicker({
+                //     autoclose: true,
+                //     // minDate: new Date(self.eligible_date),
+                //     maxDate: new Date(self.max_eligible_date),
+
+                //     locale: {
+                //         cancelLabel: 'Clear',
+                //         format: "DD-MM-YYYY",
+                //         separator: " to ",
+                //     },
+                //     showDropdowns: false,
+                //     startDate: start_date,
+                //     endDate: end_date,
+                //     autoApply: true,
+                // });
+                // var nowDate = new Date();
+                // nowDate.setDate(nowDate.getDate() - 100);
+                // var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+                // var eStartDate = response.data.trip.start_date;
+                // $(".daterange.min-daterange").daterangepicker({
+                //     autoclose: true,
+                //     minDate: todayDate,
+                //     // maxDate: eStartDate,
+                //     // maxDate: new Date(self.max_eligible_date)
+
+                //     locale: {
+                //         cancelLabel: 'Clear',
+                //         format: "DD-MM-YYYY",
+                //         separator: " to ",
+                //     },
+                //     showDropdowns: false,
+                //     startDate: start_date,
+                //     endDate: end_date,
+                //     autoApply: true,
+                // });
                 // Booking Preference Conditions
                 $.each(self.trip.visits, function(key, value) {
                     setTimeout(function() {
@@ -282,40 +293,41 @@ app.component('eyatraTripForm', {
                     }, 800);
                 });
             } else {
-                setTimeout(function() {
-                    $(".daterange").daterangepicker({
-                        autoclose: true,
-                        // minDate: new Date(self.eligible_date),
-                        maxDate: new Date(self.max_eligible_date),
-                        locale: {
-                            cancelLabel: 'Clear',
-                            format: "DD-MM-YYYY",
-                            separator: " to ",
-                        },
-                        showDropdowns: false,
-                        autoApply: true,
-                    });
-                    var nowDate = new Date();
-                    nowDate.setDate(nowDate.getDate() - 100);
-                    var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
-                    $(".daterange.min-daterange").daterangepicker({
-                        autoclose: true,
-                        minDate: todayDate,
-                        // maxDate: new Date(self.max_eligible_date),
+                //DATERANGE DISABLED
+                // setTimeout(function() {
+                //     $(".daterange").daterangepicker({
+                //         autoclose: true,
+                //         // minDate: new Date(self.eligible_date),
+                //         maxDate: new Date(self.max_eligible_date),
+                //         locale: {
+                //             cancelLabel: 'Clear',
+                //             format: "DD-MM-YYYY",
+                //             separator: " to ",
+                //         },
+                //         showDropdowns: false,
+                //         autoApply: true,
+                //     });
+                //     var nowDate = new Date();
+                //     nowDate.setDate(nowDate.getDate() - 100);
+                //     var todayDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate(), 0, 0, 0, 0);
+                //     $(".daterange.min-daterange").daterangepicker({
+                //         autoclose: true,
+                //         minDate: todayDate,
+                //         // maxDate: new Date(self.max_eligible_date),
 
-                        locale: {
-                            cancelLabel: 'Clear',
-                            format: "DD-MM-YYYY",
-                            separator: " to ",
-                        },
-                        showDropdowns: false,
-                        startDate: start_date,
-                        endDate: end_date,
-                        autoApply: true,
-                    });
-                    // DATE RANGE VALUE INITIALLY SHOWN AS BLANK - SO DISABLED
-                    // $(".daterange").val('');
-                }, 500);
+                //         locale: {
+                //             cancelLabel: 'Clear',
+                //             format: "DD-MM-YYYY",
+                //             separator: " to ",
+                //         },
+                //         showDropdowns: false,
+                //         startDate: start_date,
+                //         endDate: end_date,
+                //         autoApply: true,
+                //     });
+                //     // DATE RANGE VALUE INITIALLY SHOWN AS BLANK - SO DISABLED
+                //     // $(".daterange").val('');
+                // }, 500);
             }
             $(".datepicker").datepicker({
                 todayHighlight: true,
@@ -377,10 +389,13 @@ app.component('eyatraTripForm', {
             $scope.showWallet = false;
         });
 
-        $("#start_date").on('change', function() {
-            self.trip.start_date;
-            self.trip.end_date;
-            $scope.onChange(self.trip.start_date, self.trip.end_date);
+        $scope.onChangeTripStartAndEndDate = () => {
+            const tripVisitLength = self.trip.visits.length;
+            for (var i = 0; i < tripVisitLength; i++) {
+                $('.datepicker_' + i).datepicker('destroy');
+                datecall(self.trip.start_date, self.trip.end_date, i);
+            }
+
             if (self.trip.visits && self.trip.visits.length > 0) {
                 $.each(self.trip.visits, function(index, value) {
                     //SET START DATE FOR FIRST INDEX
@@ -394,16 +409,6 @@ app.component('eyatraTripForm', {
                         self.trip.visits[index].departure_date = self.trip.start_date ? self.trip.start_date : '';
                     }
                 });
-            }
-        });
-
-        $scope.onChange = function(start_date, end_date) {
-            self.startDate = start_date;
-            self.endDate = end_date;
-            var arr_length = self.trip.visits.length;
-            for (var i = 0; i < arr_length; i++) {
-                $('.datepicker_' + i).datepicker('destroy');
-                datecall(self.startDate, self.endDate, i);
             }
         }
 
@@ -517,11 +522,12 @@ app.component('eyatraTripForm', {
                 from_city_details: trip_array[arr_vol].to_city_details,
             });
             $('.datepicker_' + arr_length).datepicker('destroy');
-            datecall(self.startDate, self.endDate, arr_length, self.trip.end_date);
+            datecall(self.trip.start_date, self.trip.end_date, arr_length, self.trip.end_date);
         }
 
         $scope.trip_mode = function(id) {
             var trip_array = self.trip.visits;
+            //SINGLE
             if (id == 1) {
                 var arr_length = self.trip.visits.length;
                 while (arr_length > 1) {
@@ -530,6 +536,7 @@ app.component('eyatraTripForm', {
                     arr_length = self.trip.visits.length;
                 }
             } else if (id == 2) {
+                //ROUND
                 var arr_length = self.trip.visits.length;
                 if (arr_length < 2) {
                     if (!(self.trip.visits[0].to_city_details)) {
@@ -555,10 +562,12 @@ app.component('eyatraTripForm', {
                 }
                 self.trip.visits[1].to_city_details = self.trip.visits[0].from_city_details;
             } else if (id == 3) {
+                //MULTIPLE
                 $('.add_multi_trip').hide();
             }
             //RESET START AND END DATE OF TRIP VISITS
-            $('.daterange').trigger("change");
+            // $('.daterange').trigger("change");
+            $scope.onChangeTripStartAndEndDate();
         }
 
         self.removeLodging = function(index, lodging_id) {
