@@ -390,8 +390,13 @@ app.component('eyatraTripClaimForm', {
                 self.lodgingCal();
                 self.boardingCal();
                 self.localTravelCal();
-
                 fileUpload();
+                $(".datepicker").datepicker({
+                    todayHighlight: true,
+                    startDate: self.trip.created_at,
+                    endDate: self.trip.end_date,
+                    autoclose: true,
+                });
             }, 500);
 
             $rootScope.loading = false;
