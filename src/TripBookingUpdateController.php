@@ -100,7 +100,7 @@ class TripBookingUpdateController extends Controller {
 	}
 
 	public function saveTripBookingUpdates(Request $r) {
-		// dd($r->all());
+		//dd($r->all());
 		DB::beginTransaction();
 		try {
 			$error_messages = [
@@ -173,9 +173,15 @@ class TripBookingUpdateController extends Controller {
 				$tax = $r->cgst + $r->sgst + $r->igst;
 				$tax_total = $tax ? $tax : 0;
 				$total_amount = $r->amount + $tax_total + $service_charge;
-
+                if(!empty($r->round_off) && ($r->round_off > 1 || $r->round_off < -1)){
+						return response()->json([
+											'success' => false,
+											'errors' => ['Round off amount limit is +1 Or -1'],
+										]);
+					}
 				$visit_bookings = new VisitBooking;
 				$visit_bookings->fill($r->all());
+				$visit_bookings->invoice_date = date('Y-m-d', strtotime($r->invoice_date));
 				$visit_bookings->service_charge = $service_charge;
 				$visit_bookings->total = $total_amount;
 				$visit_bookings->created_by = Auth::user()->id;
