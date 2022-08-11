@@ -251,19 +251,20 @@ app.component('eyatraTripBookingRequestsView', {
             }
         });
 
-        $scope.onChangeTravelMode = (index, travelModeId) => {
-            self.booking_method_list = [];
-            self.trip.agent_visits[index].booking.booking_method_id = '';
+        $scope.onChangeTravelMode = (index, travelModeId, visitId) => {
+            console.log(visitId);
+            //self.booking_method_list = [];
+            //self.trip.agent_visits[index].booking.booking_method_id = '';
             self.trip.agent_visits[index].booking.agent_service_charges = '';
             if (travelModeId) {
                 $http.get(
-                    getBookingMethodsByTravelMode + '/' + travelModeId
+                    getBookingMethodsByTravelMode + '/' + travelModeId + '/' + visitId
                 ).then(function(res) {
                     if (!res.data.success) {
                         custom_noty('error', res.data.error);
                         return;
                     }
-                    self.booking_method_list = res.data.booking_method_list;
+                    self.trip.agent_visits[index].booking.agent_service_charges = res.data.booking_method_list;
                 });
             }
         }
@@ -274,18 +275,22 @@ app.component('eyatraTripBookingRequestsView', {
 
         $scope.calculateTax = index => {
             if (self.trip.agent_visits[index].booking) {
-                self.trip.agent_visits[index].booking.gstin = '';
+                //self.trip.agent_visits[index].booking.gstin = '';
                 self.trip.agent_visits[index].booking.cgst = '';
                 self.trip.agent_visits[index].booking.sgst = '';
                 self.trip.agent_visits[index].booking.igst = '';
                 //enable if company gstin needed and self.trip.agent_visits[index].toCityGstCode inside if condition
                 //self.trip.agent_visits[index].booking.gstin = self.trip.agent_visits[index].toCityGstin;
-
+                const bookingGstin = self.trip.agent_visits[index].booking.gstin;
+                const gstCode = bookingGstin.substr(0, 2);
                 const cgstPercentage = sgstPercentage = 2.5;
                 const igstPercentage = 5;
-                if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
+
+                //if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
+                if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.travel_mode_id && self.trip.agent_visits[index].booking.travel_mode_id != 12) {
                     let taxableValue = self.trip.agent_visits[index].booking.amount;
-                    if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
+                    // if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
+                    if (self.trip.employee_gst_code === gstCode) {
                         self.trip.agent_visits[index].booking.cgst = parseFloat(taxableValue * (cgstPercentage / 100)).toFixed(2);
                         self.trip.agent_visits[index].booking.sgst = parseFloat(taxableValue * (sgstPercentage / 100)).toFixed(2);
                         self.trip.agent_visits[index].booking.igst = 0.00;

@@ -256,33 +256,25 @@ class AgentRequestController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function getBookingMethodsByTravelMode($travelTypeId) {
-		$travelType = Entity::select([
-			'id',
-		])
-			->join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')
-			->where('entities.entity_type_id', 502)
-			->where('travel_mode_category_type.category_id', 3403)
-			->where('entities.company_id', Auth::user()->company_id)
-			->where('entities.id', $travelTypeId)
-			->first();
+	public function getBookingMethodsByTravelMode($travelTypeId,$visitId) {
+		$visit = Visit::find($visitId);
+					$trip = Trip::find($visit->trip_id);
+					$state = $trip->employee->outlet->address->city->state;
+		$travelType = $service_charge = Agent::join('state_agent_travel_mode', 'state_agent_travel_mode.agent_id', 'agents.id')
+		                ->where('state_agent_travel_mode.agent_id', $visit->agent_id)
+						->where('state_agent_travel_mode.state_id', $state->id)
+						->where('state_agent_travel_mode.travel_mode_id', $travelTypeId)
+						->pluck('state_agent_travel_mode.service_charge')->first();
 		if (!$travelType) {
 			return response()->json([
 				'success' => false,
-				'error' => 'Travel mode not found',
+				'error' => 'Agent Service Charge not found',
 			]);
 		}
 
-		$bookingMethods = BookingMethod::select([
-			'id',
-			'name',
-		])
-			->where('travel_type_id', $travelTypeId)
-			->get();
-
 		return response()->json([
 			'success' => true,
-			'booking_method_list' => $bookingMethods,
+			'booking_method_list' => $travelType,
 		]);
 	}
 
