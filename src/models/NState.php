@@ -13,6 +13,9 @@ class NState extends Model {
 		'code',
 		'gstin_state_code',
 		'name',
+		'axapta_cgst_code',
+		'axapta_sgst_code',
+		'axapta_igst_code',
 		'created_by',
 	];
 	public function country() {
