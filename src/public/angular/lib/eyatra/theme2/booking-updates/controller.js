@@ -84,9 +84,28 @@ app.component('eyatraTripBookingUpdatesForm', {
             }
             self.visit = response.data.visit;
             console.log(self.visit);
+            $(".datepicker").datepicker({
+                todayHighlight: true,
+                startDate: self.visit.trip.created_at,
+                endDate: self.visit.trip.end_date,
+                autoclose: true,
+            });
             self.travel_mode_list = response.data.travel_mode_list;
             $rootScope.loading = false;
         });
+
+        $scope.roundOffCal = function() {
+            //alert();
+            let totalValue = 0.00;
+            const taxableValue = parseFloat(self.visit.amount) || 0.00;
+            const cgstValue = parseFloat(self.visit.cgst) || 0.00;
+            const sgstValue = parseFloat(self.visit.sgst) || 0.00;
+            const igstValue = parseFloat(self.visit.igst) || 0.00;
+            const roundOff = parseFloat(self.visit.round_off) || 0.00;
+            const invoiceAmount = parseFloat(self.visit.invoice_amount) || 0.00;
+            totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue).toFixed(2);
+            self.visit.round_off = parseFloat(invoiceAmount - totalValue).toFixed(2);
+        }
 
         $('input[type="file"]').imageuploadify();
         fileUpload();
@@ -165,20 +184,20 @@ app.component('eyatraTripBookingUpdatesForm', {
                     });
             },
         });
-        $scope.gstHelper = function () {
+        $scope.gstHelper = function() {
             var cgst = $('#cgst').val();
             var sgst = $('#sgst').val();
             var igst = $('#igst').val();
 
-            if(cgst == '' && sgst == ''){
+            if (cgst == '' && sgst == '') {
                 $('#igst').attr('readonly', false);
                 $('#igst').attr('placeholder', 'Eg:133.50');
             } else {
-                $('#igst').attr('readonly', true);                
+                $('#igst').attr('readonly', true);
                 $('#igst').attr('placeholder', 'N/A');
             }
 
-            if(igst == ''){
+            if (igst == '') {
                 $('#cgst').attr('readonly', false);
                 $('#sgst').attr('readonly', false);
                 $('#cgst').attr('placeholder', 'Eg:113.50');

@@ -2056,6 +2056,9 @@ class Trip extends Model {
 							$visit_booking->cgst = $visit_data['cgst'];
 							$visit_booking->sgst = $visit_data['sgst'];
 							$visit_booking->igst = $visit_data['igst'];
+							if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
+							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
+						}
 							$visit_booking->km_start = (isset($visit_data['km_start']) && !empty($visit_data['km_start'])) ? $visit_data['km_start'] : null;
 							$visit_booking->km_end = (isset($visit_data['km_end']) && !empty($visit_data['km_end'])) ? $visit_data['km_end'] : null;
 							$visit_booking->toll_fee = (isset($visit_data['toll_fee']) && !empty($visit_data['toll_fee'])) ? $visit_data['toll_fee'] : null;
@@ -2258,6 +2261,9 @@ class Trip extends Model {
 						} else {
 							$lodging->lodge_name = null;
 							$lodging->gstin = null;
+						}
+						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
+							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}
 						$lodging->fill($lodging_data);
 						$lodging->trip_id = $request->trip_id;
