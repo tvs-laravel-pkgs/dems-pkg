@@ -272,6 +272,18 @@ app.component('eyatraTripBookingRequestsView', {
         $scope.onChangeBookingMethod = index => {
             self.trip.agent_visits[index].booking.agent_service_charges = self.bookingMethods[self.trip.agent_visits[index].booking.booking_method_id];
         }
+        $scope.agentTax = index => {
+            console.log('test');
+            self.trip.agent_visits[index].booking.agent_cgst = '';
+            self.trip.agent_visits[index].booking.agent_sgst = '';
+            self.trip.agent_visits[index].booking.agent_igst = '';
+            const agentCgstPercentage = agentSgstPercentage = 9;
+            const agentIgstPercentage = self.trip.agent_visits[index].booking.agent_tax_percentage = 18;
+            const agentServiceCharge = self.trip.agent_visits[index].booking.agent_service_charges;
+            self.trip.agent_visits[index].booking.agent_cgst = parseFloat(agentServiceCharge * (agentCgstPercentage / 100)).toFixed(2);
+            self.trip.agent_visits[index].booking.agent_sgst = parseFloat(agentServiceCharge * (agentSgstPercentage / 100)).toFixed(2);
+            self.trip.agent_visits[index].booking.agent_igst = 0.00;
+        }
 
         $scope.calculateTax = index => {
             if (self.trip.agent_visits[index].booking) {
@@ -285,7 +297,6 @@ app.component('eyatraTripBookingRequestsView', {
                 const gstCode = bookingGstin.substr(0, 2);
                 const cgstPercentage = sgstPercentage = 2.5;
                 const igstPercentage = 5;
-
                 //if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
                 if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.travel_mode_id && self.trip.agent_visits[index].booking.travel_mode_id != 12) {
                     let taxableValue = self.trip.agent_visits[index].booking.amount;
