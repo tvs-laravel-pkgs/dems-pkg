@@ -547,7 +547,7 @@ class AgentClaimController extends Controller {
 				->first();
             // dd($visits);
 			if ($visits) {
-				$ticket_amount = $visits->amount + $visits->tax;
+				$ticket_amount = $visits->amount + $visits->tax+ $visits->other_charges;
 				$service_charge = $visits->service_charge;
 				$total_amount = $visits->paid_amount;
 				$other_charges = $visits->other_charges;
