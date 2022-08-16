@@ -226,6 +226,7 @@ app.component('eyatraTripClaimForm', {
                 return;
             }*/
             console.log(response.data);
+            self.grade_travel = response.data.grade_travel;
             self.cities_with_expenses = response.data.cities_with_expenses;
             self.employee = response.data.employee;
             self.gender = (response.data.employee.gender).toLowerCase();
@@ -1547,14 +1548,25 @@ app.component('eyatraTripClaimForm', {
             });
             console.log({ deviationTypes })
             self.deviationTypeName = deviationTypes.toString()
-
             if (self.deviationTypeName)
                 self.deviationTypeName += ' amount is greater than their eligible amount';
+            is_grade_travel_mode = false;
             $(self.trip.visits).each(function(key, visit) {
-                console.log(visit.travel_mode_id);
-                if (visit.travel_mode_id != visit.travel_mode.id)
-                    self.deviationTypeName += ' Travelmode is not eligible for this Grade';
+                $(self.grade_travel).each(function(key, travel) {
+                    var travelId = travel.id;
+                    if (visit.travel_mode_id == travelId && !is_grade_travel_mode) {
+                        is_grade_travel_mode = false;
+                    } else {
+                        is_grade_travel_mode = true;
+                        is_deviation = true
+                        //self.deviationTypeName += ' Travelmode is not eligible for this Grade';
+                    }
+                });
             });
+            if (is_grade_travel_mode = true) {
+                self.deviationTypeName += ' Travelmode is not eligible for this Grade';
+            }
+
 
             if (self.trip.trip_attachments.length == 0) {
                 is_deviation = true;
@@ -1597,33 +1609,33 @@ app.component('eyatraTripClaimForm', {
 
         // Calculate lodge stay days by Karthick T on 15-02-2022
         /*$scope.calculateLodgeDays = (index, lodging_id) => {
-    if (!lodging_id && !index) {
-        var check_in_date = self.trip.lodgings[index].check_in_date;
-        var check_in_time = self.trip.lodgings[index].check_in_time;
-        var check_out_date = self.trip.lodgings[index].checkout_date;
-        var check_out_time = self.trip.lodgings[index].checkout_time;
+            if (!lodging_id && !index) {
+                var check_in_date = self.trip.lodgings[index].check_in_date;
+                var check_in_time = self.trip.lodgings[index].check_in_time;
+                var check_out_date = self.trip.lodgings[index].checkout_date;
+                var check_out_time = self.trip.lodgings[index].checkout_time;
 
-        var stayed_days = '';
-        if (check_in_date && check_in_time && check_out_date && check_out_time) {
-            var date_1 = check_in_date.split("-");
-            var date_2 = check_out_date.split("-");
-            var check_in_date = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
-            var check_out_date = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
+                var stayed_days = '';
+                if (check_in_date && check_in_time && check_out_date && check_out_time) {
+                    var date_1 = check_in_date.split("-");
+                    var date_2 = check_out_date.split("-");
+                    var check_in_date = date_1[1] + '/' + date_1[0] + '/' + date_1[2];
+                    var check_out_date = date_2[1] + '/' + date_2[0] + '/' + date_2[2];
 
-            var timeDiff = (new Date(check_out_date + ' ' + check_out_time)) - (new Date(check_in_date + ' ' + check_in_time));
+                    var timeDiff = (new Date(check_out_date + ' ' + check_out_time)) - (new Date(check_in_date + ' ' + check_in_time));
 
-            var hours = Math.abs(timeDiff / 3600000);
-            if (hours > 24) {
-                var days = hours / 24;
-                stayed_days = parseInt(days);
-            } else {
-                stayed_days = 1;
+                    var hours = Math.abs(timeDiff / 3600000);
+                    if (hours > 24) {
+                        var days = hours / 24;
+                        stayed_days = parseInt(days);
+                    } else {
+                        stayed_days = 1;
+                    }
+                }
+
+                self.trip.lodgings[index].stayed_days = stayed_days;
             }
-        }
-
-        self.trip.lodgings[index].stayed_days = stayed_days;
-    }
-}*/
+        }*/
         // Calculate lodge stay days by Karthick T on 15-02-2022
 
         //LODGE STAY DAYS CALC
@@ -2821,10 +2833,10 @@ app.component('eyatraTripClaimForm', {
         //TRANSPORT FORM SUBMIT
         var form_transport_id = '#claim_transport_expense_form';
         /*$.validator.addClassRules({
-    maxlength_gstin: {
-        maxlength: 20,
-    }
-});*/
+            maxlength_gstin: {
+                maxlength: 20,
+            }
+        });*/
         var v = jQuery(form_transport_id).validate({
             ignore: "",
             rules: {},
@@ -2911,10 +2923,10 @@ app.component('eyatraTripClaimForm', {
         //LODGE FORM SUBMIT
         var form_lodge_id = '#claim_lodge_expense_form';
         /*$.validator.addClassRules({
-    maxlength_gstin: {
-        maxlength: 20,
-    }
-});*/
+            maxlength_gstin: {
+                maxlength: 20,
+            }
+        });*/
         var v = jQuery(form_lodge_id).validate({
             ignore: "",
             errorElement: "div", // default is 'label'

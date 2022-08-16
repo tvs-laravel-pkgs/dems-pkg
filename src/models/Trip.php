@@ -1464,12 +1464,20 @@ class Trip extends Model {
 			->pluck('nstates.gstin_state_code')->first();
 		$user_company_id = Auth::user()->company_id;
 		$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
+		$grade_travel=Entity::select('entities.id', 'entities.name')
+			->join('grade_travel_mode', 'grade_travel_mode.travel_mode_id', 'entities.id')
+			->join('employees', 'employees.grade_id', 'grade_travel_mode.grade_id')
+			->where('entities.entity_type_id', 502)
+			->where('employees.id', Auth::user()->entity_id)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
 		$km_end_twowheeler = VisitBooking::latest('id')->where('travel_mode_id', '=', 15)->pluck('km_end')->first();
 		$km_end_fourwheeler = VisitBooking::latest('id')->where('travel_mode_id', '=', 16)->pluck('km_end')->first();
 		$data['gstin_enable'] = $gstin_enable;
 		$data['trip'] = $trip;
 		$data['km_end_twowheeler'] = $km_end_twowheeler;
 		$data['km_end_fourwheeler'] = $km_end_fourwheeler;
+		$data['grade_travel'] = $grade_travel;
 		$data['state_code'] = $state_code;
 		$data['sbu_lists'] = Sbu::getSbuList();
 		return response()->json($data);
@@ -1770,6 +1778,7 @@ class Trip extends Model {
 		$lodging_total = floatval(preg_replace('/[^\d.]/', '', $lodging_total)) + floatval(preg_replace('/[^\d.]/', '', $lodging_round_off));
 		$boarding_total = floatval(preg_replace('/[^\d.]/', '', $boarding_basic)) + floatval(preg_replace('/[^\d.]/', '', $boarding_cgst)) + floatval(preg_replace('/[^\d.]/', '', $boarding_sgst)) + floatval(preg_replace('/[^\d.]/', '', $boarding_igst));
 		$local_travel_total = floatval(preg_replace('/[^\d.]/', '', $local_travel_basic)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_cgst)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_sgst)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_igst));
+		
 
 		$trip->transport_basic = $transport_basic;
 		$trip->transport_cgst = $transport_cgst;
@@ -3311,5 +3320,7 @@ request is not desired, then those may be rejected.';
 		return $pending_attachment_lists;
 	}
 	// For Attachment by Karthick T on 07-04-2022
+
+	
 
 }
