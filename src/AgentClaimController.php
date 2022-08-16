@@ -537,7 +537,7 @@ class AgentClaimController extends Controller {
 			}
 		}
 		if ($trip_status == 'booked') {
-			$visits = Trip::select('visit_bookings.other_charges as other_charges',DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.agent_service_charges) as service_charge'))
+			$visits = Trip::select('visit_bookings.other_charges as other_charges',DB::raw('SUM(visit_bookings.round_off) as round_off'),DB::raw('SUM(visit_bookings.amount) as amount'), DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), DB::raw('SUM(visit_bookings.tax) as tax'), DB::raw('SUM(visit_bookings.agent_service_charges) as service_charge'))
 				->join('visits', 'trips.id', 'visits.trip_id')
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.booking_method_id', 3042)
@@ -547,7 +547,7 @@ class AgentClaimController extends Controller {
 				->first();
             // dd($visits);
 			if ($visits) {
-				$ticket_amount = $visits->amount + $visits->tax+ $visits->other_charges;
+				$ticket_amount = $visits->amount + $visits->tax+ $visits->other_charges+$visits->round_off;
 				$service_charge = $visits->service_charge;
 				$total_amount = $visits->paid_amount;
 				$other_charges = $visits->other_charges;
