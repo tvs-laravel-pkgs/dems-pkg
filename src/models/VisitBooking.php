@@ -29,6 +29,7 @@ class VisitBooking extends Model {
 		'agent_cgst',
 		'agent_igst',
 		'agent_sgst',
+		'agent_total',
 		'invoice_amount',
 		'invoice_date',
 		'invoice_number',

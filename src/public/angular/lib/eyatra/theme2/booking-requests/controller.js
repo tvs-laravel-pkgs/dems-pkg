@@ -275,18 +275,24 @@ app.component('eyatraTripBookingRequestsView', {
         }
 
         $scope.agentTax = index => {
-            self.trip.agent_visits[index].booking.agent_cgst = '';
-            self.trip.agent_visits[index].booking.agent_sgst = '';
-            self.trip.agent_visits[index].booking.agent_igst = '';
+            self.trip.agent_visits[index].booking.agent_cgst = 0.00;
+            self.trip.agent_visits[index].booking.agent_sgst = 0.00;
+            self.trip.agent_visits[index].booking.agent_igst = 0.00;
+            self.trip.agent_visits[index].booking.agent_total = 0.00;
 
             const agentCgstPercentage = agentSgstPercentage = 9;
             const agentIgstPercentage = self.trip.agent_visits[index].booking.agent_tax_percentage = 18;
-            const agentServiceCharge = self.trip.agent_visits[index].booking.agent_service_charges;
+            let agentServiceCharge = parseFloat(self.trip.agent_visits[index].booking.agent_service_charges);
 
             if (agentServiceCharge) {
-                self.trip.agent_visits[index].booking.agent_cgst = parseFloat(agentServiceCharge * (agentCgstPercentage / 100)).toFixed(2);
-                self.trip.agent_visits[index].booking.agent_sgst = parseFloat(agentServiceCharge * (agentSgstPercentage / 100)).toFixed(2);
-                self.trip.agent_visits[index].booking.agent_igst = 0.00;
+                let agentCGST = parseFloat(agentServiceCharge * (agentCgstPercentage / 100));
+                let agentSGST = parseFloat(agentServiceCharge * (agentSgstPercentage / 100));
+                let agentIGST = 0.00;
+
+                self.trip.agent_visits[index].booking.agent_cgst = agentCGST.toFixed(2);
+                self.trip.agent_visits[index].booking.agent_sgst = agentSGST.toFixed(2);
+                self.trip.agent_visits[index].booking.agent_igst = agentIGST;
+                self.trip.agent_visits[index].booking.agent_total = parseFloat(agentServiceCharge + agentCGST + agentSGST + agentIGST).toFixed(2);
             }
         }
 
@@ -306,7 +312,7 @@ app.component('eyatraTripBookingRequestsView', {
                 //if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
                 if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.travel_mode_id && self.trip.agent_visits[index].booking.travel_mode_id != 12 && self.trip.agent_visits[index].booking.gstin) {
                     let enteredGstinCode = self.trip.agent_visits[index].booking.gstin.substr(0, 2);
-                    let taxableValue = self.trip.agent_visits[index].booking.amount;
+                    let taxableValue = parseFloat(self.trip.agent_visits[index].booking.amount);
 
                     // if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
                     if (self.trip.employee_gst_code === enteredGstinCode) {

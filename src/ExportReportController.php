@@ -20,6 +20,7 @@ use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Region;
+use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 
 class ExportReportController extends Controller {
@@ -113,14 +114,22 @@ class ExportReportController extends Controller {
 
 		try {
 
-			$agentTrips = Trip::select([
-				'trips.id as tripId',
+			$agentTripVisits = Visit::select([
+				'visits.id as visitId',
 				'employees.code as employeeCode',
 				'users.name as employeeName',
 				'agents.code as agentCode',
-				DB::raw('SUM(visit_bookings.total + visit_bookings.agent_service_charges) as totalAmount'),
-				DB::raw('SUM(visit_bookings.amount) as amountWitoutAgentServiceCharges'),
+				DB::raw('SUM(visit_bookings.total + visit_bookings.agent_total) as totalAmount'),
+				DB::raw('SUM(visit_bookings.amount) as ticketAmount'),
+				DB::raw('SUM(visit_bookings.tax_percentage) as ticketPercentage'),
+				DB::raw('SUM(visit_bookings.cgst) as ticketCgst'),
+				DB::raw('SUM(visit_bookings.sgst) as ticketSgst'),
+				DB::raw('SUM(visit_bookings.igst) as ticketIgst'),
 				DB::raw('SUM(visit_bookings.agent_service_charges) as agentServiceCharges'),
+				DB::raw('SUM(visit_bookings.agent_tax_percentage) as agentPercentage'),
+				DB::raw('SUM(visit_bookings.agent_cgst) as agentCgst'),
+				DB::raw('SUM(visit_bookings.agent_sgst) as agentSgst'),
+				DB::raw('SUM(visit_bookings.agent_igst) as agentIgst'),
 			])
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('users', function ($join) {
@@ -128,14 +137,19 @@ class ExportReportController extends Controller {
 						->where('users.user_type_id', 3121) //EMPLOYEE
 					;
 				})
-				->join('visits', 'visits.trip_id', 'trips.id')
+				->join('trips', 'trips.id', 'visits.trip_id')
 				->join('agents', 'agents.id', 'visits.agent_id')
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.booking_method_id', 3042) //AGENT
-				->groupBy('trips.id')
+				->where('visits.agent_ax_export_synced', 0) //NOT SYNCHED
+				->groupBy('visits.id')
 				->get();
 
-			dd($agentTrips);
+			dd($agentTripVisits);
+
+			if ($agentTripVisits->isNotEmpty()) {
+
+			}
 
 			$cronLog->status = "Completed";
 			$cronLog->updated_at = Carbon::now();
