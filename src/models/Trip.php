@@ -1800,7 +1800,7 @@ class Trip extends Model {
 		$trip->local_travel_amount = $local_travel_amount;
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
-
+        
 		if ($trip->employee->tripEmployeeClaim) {
 			if (($trip->employee->tripEmployeeClaim->is_justify_my_trip == 1) || ($trip->employee->tripEmployeeClaim->remarks != '')) {
 				$data['trip_justify'] = 1;
@@ -1814,7 +1814,7 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
-		// dd($request->all());
+		 //dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -2929,6 +2929,12 @@ class Trip extends Model {
 					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
 				} else {
 					$employee_claim->is_deviation = $request->is_deviation;
+				}
+				$grade_travel_mode_eligibility = DB::table('grade_travel_mode')->where('travel_mode_id', $request->travel_mode_id)->first();
+				if ($grade_travel_mode_eligibility && $grade_travel_mode_eligibility->deviation_eligiblity == 2) {
+					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+				} else {
+					$employee_claim->is_deviation = 1;
 				}
 
 				// If transport exist and attachment not found the claim will go to deviation

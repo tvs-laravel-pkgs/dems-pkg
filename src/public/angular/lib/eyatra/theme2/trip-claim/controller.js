@@ -1550,6 +1550,11 @@ app.component('eyatraTripClaimForm', {
 
             if (self.deviationTypeName)
                 self.deviationTypeName += ' amount is greater than their eligible amount';
+            $(self.trip.visits).each(function(key, visit) {
+                console.log(visit.travel_mode_id);
+                if (visit.travel_mode_id != visit.travel_mode.id)
+                    self.deviationTypeName += ' Travelmode is not eligible for this Grade';
+            });
 
             if (self.trip.trip_attachments.length == 0) {
                 is_deviation = true;
