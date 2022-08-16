@@ -172,13 +172,14 @@ class TripBookingUpdateController extends Controller {
 				//Total Amount of Booking Deails (include tax)
 				$tax = $r->cgst + $r->sgst + $r->igst;
 				$tax_total = $tax ? $tax : 0;
-				$total_amount = $r->amount + $tax_total + $service_charge;
-                if(!empty($r->round_off) && ($r->round_off > 1 || $r->round_off < -1)){
+				if(!empty($r->round_off) && ($r->round_off > 1 || $r->round_off < -1)){
 						return response()->json([
 											'success' => false,
 											'errors' => ['Round off amount limit is +1 Or -1'],
 										]);
 					}
+				$total_amount = $r->amount + $tax_total + $service_charge+$r->round_off;
+                
 				$visit_bookings = new VisitBooking;
 				$visit_bookings->fill($r->all());
 				$visit_bookings->invoice_date = date('Y-m-d', strtotime($r->invoice_date));
@@ -246,9 +247,8 @@ class TripBookingUpdateController extends Controller {
 					$amount = $value['ticket_amount'] ? $value['ticket_amount'] : 0;
 					$tax_total = $value['cgst'] + $value['sgst'] + $value['igst'];
 					$tax = $tax_total ? $tax_total : 0;
-
-					$total_amount = $amount + $tax + $service_charge;
-
+                    $round_off=$value['round_off'] ? $value['round_off']:0;
+					$total_amount = $amount + $tax + $service_charge+$round_off;
 					//Agent Claimed Amount
 					if ($r->booking_type == 'fresh_booking') {
 						$claim_amount = $total_amount;
