@@ -106,12 +106,12 @@ class ExportReportController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function cronGenerateTripReport($cronLogId) {
+	public function cronGenerateAgentAxReport($cronLogId) {
 		//CRON LOG SAVE
 		$cronLog = CronLog::firstOrNew([
 			'id' => $cronLogId,
 		]);
-		$cronLog->command = "generate:trip-ax-report";
+		$cronLog->command = "generate:agent-ax-report";
 		$cronLog->status = "Inprogress";
 		$cronLog->created_at = Carbon::now();
 		$cronLog->save();
@@ -135,7 +135,7 @@ class ExportReportController extends Controller {
 				'agents.code as agentCode',
 				'visit_bookings.gstin as enteredGstin',
 				'visit_bookings.invoice_number as invoiceNumber',
-				'visit_bookings.invoice_date as invoiceDate',
+				DB::raw('DATE_FORMAT(visit_bookings.invoice_date,"%d/%m/%Y") as invoiceDate'),
 				DB::raw('SUM(visit_bookings.total + visit_bookings.agent_total) as totalAmount'),
 				DB::raw('SUM(visit_bookings.amount) as ticketAmount'),
 				DB::raw('SUM(visit_bookings.tax_percentage) as ticketPercentage'),
@@ -228,12 +228,12 @@ class ExportReportController extends Controller {
 		$employeeCode = $trip->employee ? $trip->employee->code : '';
 		$employeeName = $trip->employee ? $trip->employee->name : '';
 		$purpose = $trip->purpose ? $trip->purpose->name : '';
+		$transactionDate = date('d/m/Y', strtotime($trip->created_at));
 		$txt = '';
 
 		//TOTAL AMOUNT ENTRY
 		if ($type == 1) {
 
-			$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
@@ -245,7 +245,6 @@ class ExportReportController extends Controller {
 		} elseif ($type == 2) {
 			//TICKET ENTRIES
 
-			$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
@@ -304,7 +303,6 @@ class ExportReportController extends Controller {
 		} elseif ($type == 3) {
 			//AGENT SERVICE CHARGE ENTRIES
 
-			$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
@@ -346,7 +344,6 @@ class ExportReportController extends Controller {
 		} elseif ($type == 4) {
 			//BANK DEBIT ENTRY
 
-			$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
@@ -359,7 +356,6 @@ class ExportReportController extends Controller {
 		} elseif ($type == 5) {
 			//BANK CREDIT ENTRY
 
-			$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
@@ -371,6 +367,212 @@ class ExportReportController extends Controller {
 
 			//BANK CREDIT ENTRY
 			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_CHQ", "D", $transactionDate, $accountType, $ledgerDimension, "COMMON-MDS", $txt, 0.00, $agentTripVisit->totalAmount, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+
+		}
+	}
+
+	public function cronGenerateEmployeeAxReport($cronLogId) {
+		//CRON LOG SAVE
+		$cronLog = CronLog::firstOrNew([
+			'id' => $cronLogId,
+		]);
+		$cronLog->command = "generate:employee-ax-report";
+		$cronLog->status = "Inprogress";
+		$cronLog->created_at = Carbon::now();
+		$cronLog->save();
+
+		try {
+			$axaptaAccountTypes = AxaptaAccountType::select([
+				'name',
+				'code',
+			])
+				->get();
+
+			$axaptaBankDetails = AxaptaBankDetail::select([
+				'name',
+				'code',
+			])
+				->get();
+
+			$employeeTrips = Trip::select([
+				'trips.id as tripId',
+				'employees.code as employeeCode',
+				'users.name as employeeName',
+				'entities.name as purpose',
+				DB::raw('DATE_FORMAT(trips.claimed_date,"%d/%m/%Y") as transactionDate'),
+				'sbus.name as sbu',
+				'outlets.code as outletCode',
+				'outlets.axapta_location_id as axaptaLocationId',
+				'ey_employee_claims.balance_amount as totalAmount',
+				'ey_employee_claims.number as invoiceNumber',
+				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d/%m/%Y") as invoiceDate'),
+			])
+				->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->join('employees', 'employees.id', 'trips.employee_id')
+				->join('sbus', 'sbus.id', 'employees.sbu_id')
+				->join('users', function ($join) {
+					$join->on('users.entity_id', '=', 'employees.id')
+						->where('users.user_type_id', 3121) //EMPLOYEE
+					;
+				})
+				->join('outlets', 'outlets.id', 'employees.outlet_id')
+				->join('entities', 'entities.id', 'trips.purpose_id')
+				->where('ey_employee_claims.status_id', 3026) //PAID
+				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
+				->groupBy('trips.id')
+				->get();
+
+			dd($employeeTrips);
+			$exceptionErrors = [];
+			if ($employeeTrips->isNotEmpty()) {
+				foreach ($employeeTrips as $key => $employeeTrip) {
+					DB::beginTransaction();
+					try {
+						//TOTAL AMOUNT ENTRY
+						$this->employeeAxaptaExportProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+
+						//TAXABLE VALUE AND GST SPLITUP ENTRIES
+						$this->employeeAxaptaExportProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+
+						//BANK DEBIT ENTRY
+						$this->employeeAxaptaExportProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+
+						//BANK CREDIT ENTRY
+						$this->employeeAxaptaExportProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+
+						//AX SYNCHED
+						Trip::where('id', $employeeTrip->tripId)->update([
+							'self_ax_export_synched' => 1,
+						]);
+
+						DB::commit();
+						continue;
+					} catch (\Exception $e) {
+						DB::rollBack();
+						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->tripId . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
+						continue;
+					}
+				}
+			}
+
+			$cronLog->status = "Completed";
+			if (!empty($exceptionErrors)) {
+				$cronLog->errors = json_encode($exceptionErrors);
+			}
+			$cronLog->updated_at = Carbon::now();
+			$cronLog->save();
+		} catch (\Exception $e) {
+			//CRON LOG SAVE
+			$cronLog->status = "Failed";
+			$cronLog->errors = $e;
+			$cronLog->updated_at = Carbon::now();
+			$cronLog->save();
+		}
+	}
+
+	public function employeeAxaptaExportProcess($type, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails) {
+		$employeeCode = $employeeTrip->employeeCode;
+		$employeeName = $employeeTrip->employeeName;
+		$purpose = $employeeTrip->purpose;
+		$defaultDimension = $employeeTrip->sbu . " - " . $employeeTrip->outletCode;
+		$transactionDate = $employeeTrip->transactionDate;
+		$txt = '';
+
+		//TOTAL AMOUNT ENTRY
+		if ($type == 1) {
+
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
+			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+
+			$this->saveAxaptaExport($trip->company_id, 3791, $employeeTrip->tripId, "TLX_ECR", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+		} elseif ($type == 2) {
+			//TICKET ENTRIES
+
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
+			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+
+			//TICKET TAXABLE AMOUNT ENTRY
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, "4572-COMMON-MDS", "COMMON-MDS", $txt, $agentTripVisit->ticketAmount, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+
+			//GST SPLITUPS
+			if ($trip->employee && $trip->employee->outlet && $trip->employee->outlet->address && $trip->employee->outlet->address->city && $trip->employee->outlet->address->city->state) {
+				$employeeGstCode = !empty($trip->employee->outlet->address->city->state->gstin_state_code) ? $trip->employee->outlet->address->city->state->gstin_state_code : '';
+
+				if (!empty($employeeGstCode) && !empty($agentTripVisit->enteredGstin)) {
+					$enteredGstinCode = substr($agentTripVisit->enteredGstin, 0, 2);
+					$enteredGstinState = Nstate::where('gstin_state_code', $enteredGstinCode)->first();
+
+					if ($enteredGstinState) {
+						//INTRA STATE (CGST AND SGST)
+						if ($enteredGstinCode == $employeeGstCode) {
+							$cgstPercentage = $sgstPercentage = ($agentTripVisit->ticketPercentage) / 2;
+							$cgstEntryTxt = '';
+							$sgstEntryTxt = '';
+							$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-COMMON-MDS";
+							$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-COMMON-MDS";
+
+							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+								$cgstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - CGST - " . $cgstPercentage . "%";
+							}
+							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+								$sgstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - SGST - " . $sgstPercentage . "%";
+							}
+
+							//CGST ENTRY
+							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, "COMMON-MDS", $cgstEntryTxt, $agentTripVisit->ticketCgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+
+							//SGST ENTRY
+							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, "COMMON-MDS", $sgstEntryTxt, $agentTripVisit->ticketSgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+
+						} else {
+							//INTER STATE (IGST)
+							$igstPercentage = $agentTripVisit->ticketPercentage;
+							$igstEntryTxt = '';
+							$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-COMMON-MDS";
+
+							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+								$igstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - IGST - " . $igstPercentage . "%";
+							}
+
+							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $igstLedgerDimension, "COMMON-MDS", $txt, $agentTripVisit->ticketIgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+						}
+					}
+				}
+			}
+
+		} elseif ($type == 3) {
+			//BANK DEBIT ENTRY
+
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
+			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+
+			//BANK DEBIT ENTRY
+			$this->saveAxaptaExport($trip->company_id, 3791, $employeeTrip->tripId, "TLX_CHQ", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+		} elseif ($type == 4) {
+			//BANK CREDIT ENTRY
+
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
+			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+
+			$axaptaBankDetail = $axaptaBankDetails->where('name', 'HDFC Bank')->first();
+			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';
+
+			//BANK CREDIT ENTRY
+			$this->saveAxaptaExport($trip->company_id, 3791, $employeeTrip->tripId, "TLX_CHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		}
 	}
