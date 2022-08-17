@@ -566,7 +566,7 @@ class ExportReportController extends Controller {
 				if ($employeeTrip->lodgings->isNotEmpty()) {
 					foreach ($employeeTrip->lodgings as $key => $lodging) {
 						//HAS MULTIPLE TAX INVOICE
-						if ($lodging->has_multiple_tax_invoice == 1) {
+						if ($lodging->has_multiple_tax_invoice == "Yes") {
 							//LODGE
 							if ($lodging->lodgingTaxInvoice) {
 								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
