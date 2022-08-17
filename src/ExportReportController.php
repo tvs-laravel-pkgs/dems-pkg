@@ -154,11 +154,9 @@ class ExportReportController extends Controller {
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.booking_method_id', 3042) //AGENT
 				->where('visits.agent_ax_export_synched', 0) //NOT SYNCHED
-			// ->where('visits.trip_id', 531)
 				->groupBy('visits.id')
 				->get();
 
-			// dd($agentTripVisits);
 			$exceptionErrors = [];
 			if ($agentTripVisits->isNotEmpty()) {
 				foreach ($agentTripVisits as $key => $agentTripVisit) {
@@ -299,7 +297,7 @@ class ExportReportController extends Controller {
 								$igstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - IGST - " . $igstPercentage . "%";
 							}
 
-							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $igstLedgerDimension, "COMMON-MDS", $txt, $agentTripVisit->ticketIgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $igstLedgerDimension, "COMMON-MDS", $igstEntryTxt, $agentTripVisit->ticketIgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 						}
 					}
 				}
@@ -426,11 +424,9 @@ class ExportReportController extends Controller {
 				->join('entities', 'entities.id', 'trips.purpose_id')
 				->where('ey_employee_claims.status_id', 3026) //PAID
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
-			// ->where('trips.id', 531)
 				->groupBy('trips.id')
 				->get();
 
-			// dd($employeeTrips);
 			$exceptionErrors = [];
 			if ($employeeTrips->isNotEmpty()) {
 				foreach ($employeeTrips as $key => $employeeTrip) {
@@ -664,7 +660,7 @@ class ExportReportController extends Controller {
 					$igstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - IGST - " . $igstPercentage . "%";
 				}
 
-				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $txt, $taxIgst, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $igstEntryTxt, $taxIgst, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			}
 		}
 	}
