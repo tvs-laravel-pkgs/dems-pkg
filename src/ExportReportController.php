@@ -135,18 +135,18 @@ class ExportReportController extends Controller {
 				'agents.code as agentCode',
 				'visit_bookings.gstin as enteredGstin',
 				'visit_bookings.invoice_number as invoiceNumber',
-				DB::raw('DATE_FORMAT(visit_bookings.invoice_date,"%d/%m/%Y") as invoiceDate'),
+				DB::raw('DATE_FORMAT(visit_bookings.invoice_date,"%Y-%m-%d") as invoiceDate'),
 				DB::raw('SUM(visit_bookings.total + visit_bookings.agent_total) as totalAmount'),
-				DB::raw('SUM(visit_bookings.amount) as ticketAmount'),
-				DB::raw('SUM(visit_bookings.tax_percentage) as ticketPercentage'),
-				DB::raw('SUM(visit_bookings.cgst) as ticketCgst'),
-				DB::raw('SUM(visit_bookings.sgst) as ticketSgst'),
-				DB::raw('SUM(visit_bookings.igst) as ticketIgst'),
-				DB::raw('SUM(visit_bookings.agent_service_charges) as agentServiceCharges'),
-				DB::raw('SUM(visit_bookings.agent_tax_percentage) as agentPercentage'),
-				DB::raw('SUM(visit_bookings.agent_cgst) as agentCgst'),
-				DB::raw('SUM(visit_bookings.agent_sgst) as agentSgst'),
-				DB::raw('SUM(visit_bookings.agent_igst) as agentIgst'),
+				DB::raw('SUM(visit_bookings.amount + visit_bookings.other_charges) as ticketAmount'),
+				'visit_bookings.tax_percentage as ticketPercentage',
+				'visit_bookings.cgst as ticketCgst',
+				'visit_bookings.sgst as ticketSgst',
+				'visit_bookings.igst as ticketIgst',
+				'visit_bookings.agent_service_charges as agentServiceCharges',
+				'visit_bookings.agent_tax_percentage as agentTaxPercentage',
+				'visit_bookings.agent_cgst as agentCgst',
+				'visit_bookings.agent_sgst as agentSgst',
+				'visit_bookings.agent_igst as agentIgst',
 				DB::raw('COALESCE(outlets.axapta_location_id, "") as axaptaLocationId'),
 			])
 				->join('agents', 'agents.id', 'visits.agent_id')
@@ -207,6 +207,10 @@ class ExportReportController extends Controller {
 						continue;
 					}
 				}
+				$cronLog->remarks = "Agent visits found";
+
+			} else {
+				$cronLog->remarks = "No agent visits found";
 			}
 
 			$cronLog->status = "Completed";
@@ -228,7 +232,7 @@ class ExportReportController extends Controller {
 		$employeeCode = $trip->employee ? $trip->employee->code : '';
 		$employeeName = $trip->employee ? $trip->employee->name : '';
 		$purpose = $trip->purpose ? $trip->purpose->name : '';
-		$transactionDate = date('d/m/Y', strtotime($trip->created_at));
+		$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 		$txt = '';
 
 		//TOTAL AMOUNT ENTRY
@@ -319,7 +323,7 @@ class ExportReportController extends Controller {
 
 				if ($enteredGstinState) {
 					//INTRA STATE (CGST AND SGST)
-					$cgstPercentage = $sgstPercentage = ($agentTripVisit->agentPercentage) / 2;
+					$cgstPercentage = $sgstPercentage = ($agentTripVisit->agentTaxPercentage) / 2;
 					$cgstEntryTxt = '';
 					$sgstEntryTxt = '';
 					$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-COMMON-MDS";
@@ -395,17 +399,19 @@ class ExportReportController extends Controller {
 				->get();
 
 			$employeeTrips = Trip::select([
-				'trips.id as tripId',
+				'trips.id',
+				'trips.company_id',
+				'trips.employee_id',
 				'employees.code as employeeCode',
 				'users.name as employeeName',
 				'entities.name as purpose',
-				DB::raw('DATE_FORMAT(trips.claimed_date,"%d/%m/%Y") as transactionDate'),
+				DB::raw('DATE_FORMAT(trips.claimed_date,"%Y-%m-%D") as transactionDate'),
 				'sbus.name as sbu',
 				'outlets.code as outletCode',
 				'outlets.axapta_location_id as axaptaLocationId',
 				'ey_employee_claims.balance_amount as totalAmount',
 				'ey_employee_claims.number as invoiceNumber',
-				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d/%m/%Y") as invoiceDate'),
+				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%Y-%m-%d") as invoiceDate'),
 			])
 				->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->join('employees', 'employees.id', 'trips.employee_id')
@@ -419,15 +425,17 @@ class ExportReportController extends Controller {
 				->join('entities', 'entities.id', 'trips.purpose_id')
 				->where('ey_employee_claims.status_id', 3026) //PAID
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
+				->where('trips.id', 531)
 				->groupBy('trips.id')
 				->get();
 
-			dd($employeeTrips);
+			// dd($employeeTrips);
 			$exceptionErrors = [];
 			if ($employeeTrips->isNotEmpty()) {
 				foreach ($employeeTrips as $key => $employeeTrip) {
 					DB::beginTransaction();
 					try {
+
 						//TOTAL AMOUNT ENTRY
 						$this->employeeAxaptaExportProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 
@@ -441,7 +449,7 @@ class ExportReportController extends Controller {
 						$this->employeeAxaptaExportProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 
 						//AX SYNCHED
-						Trip::where('id', $employeeTrip->tripId)->update([
+						Trip::where('id', $employeeTrip->id)->update([
 							'self_ax_export_synched' => 1,
 						]);
 
@@ -449,10 +457,13 @@ class ExportReportController extends Controller {
 						continue;
 					} catch (\Exception $e) {
 						DB::rollBack();
-						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->tripId . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
+						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
 						continue;
 					}
 				}
+				$cronLog->remarks = "Employee trips found";
+			} else {
+				$cronLog->remarks = "No employee trips found";
 			}
 
 			$cronLog->status = "Completed";
@@ -474,7 +485,7 @@ class ExportReportController extends Controller {
 		$employeeCode = $employeeTrip->employeeCode;
 		$employeeName = $employeeTrip->employeeName;
 		$purpose = $employeeTrip->purpose;
-		$defaultDimension = $employeeTrip->sbu . " - " . $employeeTrip->outletCode;
+		$defaultDimension = $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
 		$transactionDate = $employeeTrip->transactionDate;
 		$txt = '';
 
@@ -482,88 +493,126 @@ class ExportReportController extends Controller {
 		if ($type == 1) {
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
-				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
 
-			$this->saveAxaptaExport($trip->company_id, 3791, $employeeTrip->tripId, "TLX_ECR", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 2) {
-			//TICKET ENTRIES
+			//TAXABLE VALUE AND GST SPLITUP ENTRIES
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
-				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$ledgerDimension = "4572-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+
+			$employeeTransportAmount = 0.00;
+			$employeeTransportOtherCharges = 0.00;
+			$employeeTransportTaxableValue = 0.00;
+			$employeeLodgingTaxableValue = 0.00;
+			$employeeBoardingTaxableValue = 0.00;
+			$employeeLocalTravelTaxableValue = 0.00;
+			$employeeTotalTaxableValue = 0.00;
+
+			//FARE DETAILS
+			if ($employeeTrip->selfVisits->isNotEmpty()) {
+				foreach ($employeeTrip->selfVisits as $key => $selfVisit) {
+					if ($selfVisit->booking) {
+						$employeeTransportAmount += $selfVisit->booking->amount;
+						$employeeTransportOtherCharges += $selfVisit->booking->other_charges;
+					}
+				}
+			}
+			$employeeTransportTaxableValue = floatval($employeeTransportAmount + $employeeTransportOtherCharges);
+
+			//LODGING
+			if ($employeeTrip->lodgings->isNotEmpty()) {
+				$employeeLodgingTaxableValue = floatval($employeeTrip->lodgings()->sum('amount'));
+			}
+
+			//BOARDING
+			if ($employeeTrip->boardings->isNotEmpty()) {
+				$employeeBoardingTaxableValue = floatval($employeeTrip->boardings()->sum('amount'));
+			}
+
+			//LOCAL TRAVELS
+			if ($employeeTrip->localTravels->isNotEmpty()) {
+				$employeeLocalTravelTaxableValue = floatval($employeeTrip->localTravels()->sum('amount'));
+			}
+
+			$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue);
 
 			//TICKET TAXABLE AMOUNT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, "4572-COMMON-MDS", "COMMON-MDS", $txt, $agentTripVisit->ticketAmount, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//GST SPLITUPS
-			if ($trip->employee && $trip->employee->outlet && $trip->employee->outlet->address && $trip->employee->outlet->address->city && $trip->employee->outlet->address->city->state) {
-				$employeeGstCode = !empty($trip->employee->outlet->address->city->state->gstin_state_code) ? $trip->employee->outlet->address->city->state->gstin_state_code : '';
+			if ($employeeTrip->employee && $employeeTrip->employee->outlet && $employeeTrip->employee->outlet->address && $employeeTrip->employee->outlet->address->city && $employeeTrip->employee->outlet->address->city->state) {
+				$employeeGstCode = !empty($employeeTrip->employee->outlet->address->city->state->gstin_state_code) ? $employeeTrip->employee->outlet->address->city->state->gstin_state_code : '';
 
-				if (!empty($employeeGstCode) && !empty($agentTripVisit->enteredGstin)) {
-					$enteredGstinCode = substr($agentTripVisit->enteredGstin, 0, 2);
-					$enteredGstinState = Nstate::where('gstin_state_code', $enteredGstinCode)->first();
-
-					if ($enteredGstinState) {
-						//INTRA STATE (CGST AND SGST)
-						if ($enteredGstinCode == $employeeGstCode) {
-							$cgstPercentage = $sgstPercentage = ($agentTripVisit->ticketPercentage) / 2;
-							$cgstEntryTxt = '';
-							$sgstEntryTxt = '';
-							$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-COMMON-MDS";
-							$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-COMMON-MDS";
-
-							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
-								$cgstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - CGST - " . $cgstPercentage . "%";
-							}
-							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
-								$sgstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - SGST - " . $sgstPercentage . "%";
-							}
-
-							//CGST ENTRY
-							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, "COMMON-MDS", $cgstEntryTxt, $agentTripVisit->ticketCgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
-
-							//SGST ENTRY
-							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, "COMMON-MDS", $sgstEntryTxt, $agentTripVisit->ticketSgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
-
-						} else {
-							//INTER STATE (IGST)
-							$igstPercentage = $agentTripVisit->ticketPercentage;
-							$igstEntryTxt = '';
-							$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-COMMON-MDS";
-
-							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
-								$igstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - IGST - " . $igstPercentage . "%";
-							}
-
-							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, $igstLedgerDimension, "COMMON-MDS", $txt, $agentTripVisit->ticketIgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+				//FARE DETAILS GST SPLITUPS
+				if ($employeeTrip->selfVisits->isNotEmpty()) {
+					foreach ($employeeTrip->selfVisits as $key => $selfVisit) {
+						if ($selfVisit->booking && !empty($selfVisit->booking->gstin)) {
+							$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $selfVisit->booking->gstin, "Tra - Exp ", $transactionDate, $accountType, 5, $selfVisit->booking->cgst, $selfVisit->booking->sgst, $selfVisit->booking->igst);
 						}
 					}
 				}
+
+				//LODGING GST SPLITUPS
+				if ($employeeTrip->lodgings->isNotEmpty()) {
+					foreach ($employeeTrip->lodgings as $key => $lodging) {
+						//HAS MULTIPLE TAX INVOICE
+						if ($lodging->has_multiple_tax_invoice == 1) {
+							//LODGE
+							if ($lodging->lodgingTaxInvoice) {
+								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
+							}
+
+							//DRY WASH
+							if ($lodging->drywashTaxInvoice) {
+								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Dry Wash ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst);
+							}
+
+							//BOARDING
+							if ($lodging->boardingTaxInvoice) {
+								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Boarding ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst);
+							}
+
+							//OTHERS
+							if ($lodging->othersTaxInvoice) {
+								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Others", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst);
+							}
+
+						} else {
+							//SINGLE
+							$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
+						}
+					}
+				}
+
 			}
 
 		} elseif ($type == 3) {
 			//BANK DEBIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
-				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
 
 			//BANK DEBIT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3791, $employeeTrip->tripId, "TLX_CHQ", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 4) {
 			//BANK CREDIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
-				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
@@ -572,8 +621,50 @@ class ExportReportController extends Controller {
 			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';
 
 			//BANK CREDIT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3791, $employeeTrip->tripId, "TLX_CHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
+		}
+	}
+
+	public function axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $enteredGstin, $gstType, $transactionDate, $accountType, $taxPercentage, $taxCgst, $taxSgst, $taxIgst) {
+		$enteredGstinCode = substr($enteredGstin, 0, 2);
+		$enteredGstinState = Nstate::where('gstin_state_code', $enteredGstinCode)->first();
+		$gstDefaultDimension = $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+
+		if ($enteredGstinState) {
+			//INTRA STATE (CGST AND SGST)
+			if ($enteredGstinCode == $employeeGstCode) {
+				$cgstPercentage = $sgstPercentage = ($taxPercentage) / 2;
+				$cgstEntryTxt = '';
+				$sgstEntryTxt = '';
+				$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+				$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+
+				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
+					$cgstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - CGST - " . $cgstPercentage . "%";
+				}
+				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
+					$sgstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - SGST - " . $sgstPercentage . "%";
+				}
+
+				//CGST ENTRY
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, $gstDefaultDimension, $cgstEntryTxt, $taxCgst, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+				//SGST ENTRY
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, $gstDefaultDimension, $sgstEntryTxt, $taxSgst, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+			} else {
+				//INTER STATE (IGST)
+				$igstPercentage = $taxPercentage;
+				$igstEntryTxt = '';
+				$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+
+				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
+					$igstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - IGST - " . $igstPercentage . "%";
+				}
+
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $txt, $taxIgst, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			}
 		}
 	}
 
