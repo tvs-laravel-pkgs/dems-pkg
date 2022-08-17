@@ -2310,12 +2310,11 @@ class Trip extends Model {
 									],
 								]);
 							}
-
-							if (floatval($lodging_data['tax_invoice_amount']) != floatval($lodging_data['amount'])) {
+							if (floatval($lodging_data['invoice_amount']) != floatval($lodging_data['total'])) {
 								return response()->json([
 									'success' => false,
 									'errors' => [
-										"Lodge tax invoice amount not matched with the actual amount",
+										"Lodge invoice amount not matched with the total amount",
 									],
 								]);
 							}
