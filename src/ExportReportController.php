@@ -136,8 +136,8 @@ class ExportReportController extends Controller {
 				'visit_bookings.gstin as enteredGstin',
 				'visit_bookings.invoice_number as invoiceNumber',
 				DB::raw('DATE_FORMAT(visit_bookings.invoice_date,"%Y-%m-%d") as invoiceDate'),
-				DB::raw('SUM(visit_bookings.total + visit_bookings.agent_total) as totalAmount'),
-				DB::raw('SUM(visit_bookings.amount + visit_bookings.other_charges) as ticketAmount'),
+				DB::raw('SUM(COALESCE(visit_bookings.total, 0) + COALESCE(visit_bookings.agent_total, 0)) as totalAmount'),
+				DB::raw('SUM(COALESCE(visit_bookings.amount, 0) + COALESCE(visit_bookings.other_charges, 0)) as ticketAmount'),
 				'visit_bookings.tax_percentage as ticketPercentage',
 				'visit_bookings.cgst as ticketCgst',
 				'visit_bookings.sgst as ticketSgst',
@@ -154,10 +154,11 @@ class ExportReportController extends Controller {
 				->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 				->where('visits.booking_method_id', 3042) //AGENT
 				->where('visits.agent_ax_export_synched', 0) //NOT SYNCHED
+			// ->where('visits.trip_id', 531)
 				->groupBy('visits.id')
 				->get();
 
-			dd($agentTripVisits);
+			// dd($agentTripVisits);
 			$exceptionErrors = [];
 			if ($agentTripVisits->isNotEmpty()) {
 				foreach ($agentTripVisits as $key => $agentTripVisit) {
@@ -230,7 +231,7 @@ class ExportReportController extends Controller {
 
 	public function agentAxaptaExportProcess($type, $agentTripVisit, $trip, $axaptaAccountTypes, $axaptaBankDetails) {
 		$employeeCode = $trip->employee ? $trip->employee->code : '';
-		$employeeName = $trip->employee ? $trip->employee->name : '';
+		$employeeName = $trip->employee ? ($trip->employee->user ? $trip->employee->user->name : '') : '';
 		$purpose = $trip->purpose ? $trip->purpose->name : '';
 		$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 		$txt = '';
@@ -425,7 +426,7 @@ class ExportReportController extends Controller {
 				->join('entities', 'entities.id', 'trips.purpose_id')
 				->where('ey_employee_claims.status_id', 3026) //PAID
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
-				->where('trips.id', 531)
+			// ->where('trips.id', 531)
 				->groupBy('trips.id')
 				->get();
 
