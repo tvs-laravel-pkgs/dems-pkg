@@ -2192,9 +2192,13 @@ app.component('eyatraTripClaimForm', {
                     self.roundoffTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceRoundoffCgst").val();
                     self.roundoffTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceRoundoffSgst").val();
                     self.roundoffTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceRoundoffIgst").val();
-                    self.roundoffTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceRoundoffTotal").val();
-
+                    //self.roundoffTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceRoundoffTotal").val();
+                    self.roundoffTaxInvoice.total = 0;
                     //GRAND TOTAL
+                    self.grandTotalTaxInvoice.without_tax_amount = self.trip.lodgings[lodgingIndex].tax_without_tax_amount;
+                    self.grandTotalTaxInvoice.cgst = self.trip.lodgings[lodgingIndex].tax_cgst_amount;
+                    self.grandTotalTaxInvoice.sgst = self.trip.lodgings[lodgingIndex].tax_sgst_amount;
+                    self.grandTotalTaxInvoice.igst = self.trip.lodgings[lodgingIndex].tax_igst_amount;
                     self.grandTotalTaxInvoice.total = self.trip.lodgings[lodgingIndex].tax_invoice_amount;
 
                     $scope.calculateLodgeTaxInvoiceAmount();
@@ -2237,21 +2241,25 @@ app.component('eyatraTripClaimForm', {
             let lodgeIgst = 0;
             let lodgeTotal = 0;
             let drywashWithoutTaxAmount = parseFloat(self.drywashTaxInvoice.without_tax_amount) || 0;
-            let drywashCgst = parseFloat(self.drywashTaxInvoice.cgst) || 0;
-            let drywashSgst = parseFloat(self.drywashTaxInvoice.sgst) || 0;
-            let drywashIgst = parseFloat(self.drywashTaxInvoice.igst) || 0;
+            let drywashCgst = 0;
+            let drywashSgst = 0;
+            let drywashIgst = 0;
             let drywashTotal = 0;
             let boardingWithoutTaxAmount = parseFloat(self.boardingTaxInvoice.without_tax_amount) || 0;
-            let boardingCgst = parseFloat(self.boardingTaxInvoice.cgst) || 0;
-            let boardingSgst = parseFloat(self.boardingTaxInvoice.sgst) || 0;
-            let boardingIgst = parseFloat(self.boardingTaxInvoice.igst) || 0;
+            let boardingCgst = 0;
+            let boardingSgst = 0;
+            let boardingIgst = 0;
             let boardingTotal = 0;
             let othersWithoutTaxAmount = parseFloat(self.othersTaxInvoice.without_tax_amount) || 0;
-            let othersCgst = parseFloat(self.othersTaxInvoice.cgst) || 0;
-            let othersSgst = parseFloat(self.othersTaxInvoice.sgst) || 0;
-            let othersIgst = parseFloat(self.othersTaxInvoice.igst) || 0;
+            let othersCgst = 0;
+            let othersSgst = 0;
+            let othersIgst = 0;
             let othersTotal = 0;
-            let roundoffTotal = parseFloat(self.roundoffTaxInvoice.total) || 0;;
+            let roundoffTotal = 0;
+            let base = 0;
+            let cgst = 0;
+            let sgst = 0;
+            let igst = 0;
             let grandTotal = 0;
 
             //LODGE GST CALCULATION
@@ -2276,20 +2284,99 @@ app.component('eyatraTripClaimForm', {
                 lodgeIgst = lodgeWithoutTaxAmount * (lodgeIgstPerc / 100);
                 lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
             }
+            //DRYWASH GST CALCULATION
+            // drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+            if (drywashWithoutTaxAmount && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex] && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin']) {
+                const drywashGstin = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin'];
+                let drywashCgstPerc = drywashSgstPerc = drywashIgstPerc = 0;
+                const drywashGstCode = drywashGstin.substr(0, 2);
+                let drywashPercentage = 18;
 
-            drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
-            boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
-            othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
-            grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal + roundoffTotal;
+                if (drywashGstCode == self.state_code) {
+                    drywashCgstPerc = drywashSgstPerc = drywashPercentage / 2;
+                } else {
+                    drywashIgstPerc = drywashPercentage;
+                }
+
+                drywashCgst = drywashWithoutTaxAmount * (drywashCgstPerc / 100);
+                drywashSgst = drywashWithoutTaxAmount * (drywashSgstPerc / 100);
+                drywashIgst = drywashWithoutTaxAmount * (drywashIgstPerc / 100);
+                drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+            }
+            //boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
+            //Boarding GST CALCULATION
+            if (boardingWithoutTaxAmount && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex] && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin']) {
+                const boardingGstin = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin'];
+                let boardingCgstPerc = boardingSgstPerc = boardingIgstPerc = 0;
+                const boardingGstCode = boardingGstin.substr(0, 2);
+                let boardingPercentage = 5;
+
+                if (boardingGstCode == self.state_code) {
+                    boardingCgstPerc = boardingSgstPerc = boardingPercentage / 2;
+                } else {
+                    boardingIgstPerc = boardingPercentage;
+                }
+
+                boardingCgst = boardingWithoutTaxAmount * (boardingCgstPerc / 100);
+                boardingSgst = boardingWithoutTaxAmount * (boardingSgstPerc / 100);
+                boardingIgst = boardingWithoutTaxAmount * (boardingIgstPerc / 100);
+                boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
+            }
+            // othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+            //OTHERS GST CALCULATION
+            if (othersWithoutTaxAmount && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex] && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin']) {
+                const othersGstin = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin'];
+                let othersCgstPerc = othersSgstPerc = othersIgstPerc = 0;
+                const othersGstCode = othersGstin.substr(0, 2);
+                let othersPercentage = 18;
+
+                if (othersGstCode == self.state_code) {
+                    othersCgstPerc = othersSgstPerc = othersPercentage / 2;
+                } else {
+                    othersIgstPerc = othersPercentage;
+                }
+
+                othersCgst = othersWithoutTaxAmount * (othersCgstPerc / 100);
+                othersSgst = othersWithoutTaxAmount * (othersSgstPerc / 100);
+                othersIgst = othersWithoutTaxAmount * (othersIgstPerc / 100);
+                othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+            }
+            base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
+            cgst = lodgeCgst + drywashCgst + boardingCgst + othersCgst;
+            sgst = lodgeSgst + drywashSgst + boardingSgst + othersSgst;
+            igst = lodgeIgst + drywashIgst + boardingIgst + othersIgst;
+            grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal; //+ roundoffTotal;
+            roundoffTotal = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['invoice_amount'] - grandTotal;
+            console.log(self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['invoice_amount'], grandTotal);
 
             self.lodgingTaxInvoice.cgst = parseFloat(lodgeCgst).toFixed(2);
             self.lodgingTaxInvoice.sgst = parseFloat(lodgeSgst).toFixed(2);
             self.lodgingTaxInvoice.igst = parseFloat(lodgeIgst).toFixed(2);
             self.lodgingTaxInvoice.total = parseFloat(lodgeTotal).toFixed(2);
+            self.drywashTaxInvoice.cgst = parseFloat(drywashCgst).toFixed(2);
+            self.drywashTaxInvoice.sgst = parseFloat(drywashSgst).toFixed(2);
+            self.drywashTaxInvoice.igst = parseFloat(drywashIgst).toFixed(2);
             self.drywashTaxInvoice.total = parseFloat(drywashTotal).toFixed(2);
+            self.boardingTaxInvoice.cgst = parseFloat(boardingCgst).toFixed(2);
+            self.boardingTaxInvoice.sgst = parseFloat(boardingSgst).toFixed(2);
+            self.boardingTaxInvoice.igst = parseFloat(boardingIgst).toFixed(2);
             self.boardingTaxInvoice.total = parseFloat(boardingTotal).toFixed(2);
+            self.othersTaxInvoice.cgst = parseFloat(othersCgst).toFixed(2);
+            self.othersTaxInvoice.sgst = parseFloat(othersSgst).toFixed(2);
+            self.othersTaxInvoice.igst = parseFloat(othersIgst).toFixed(2);
             self.othersTaxInvoice.total = parseFloat(othersTotal).toFixed(2);
+            self.grandTotalTaxInvoice.without_tax_amount = parseFloat(base).toFixed(2);
+            self.grandTotalTaxInvoice.cgst = parseFloat(cgst).toFixed(2);
+            self.grandTotalTaxInvoice.sgst = parseFloat(sgst).toFixed(2);
+            self.grandTotalTaxInvoice.igst = parseFloat(igst).toFixed(2);
             self.grandTotalTaxInvoice.total = parseFloat(grandTotal).toFixed(2);
+            self.roundoffTaxInvoice.total = parseFloat(roundoffTotal).toFixed(2);
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['amount'] = self.grandTotalTaxInvoice.without_tax_amount;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['cgst'] = self.grandTotalTaxInvoice.cgst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['sgst'] = self.grandTotalTaxInvoice.sgst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['igst'] = self.grandTotalTaxInvoice.igst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['round_off'] = self.roundoffTaxInvoice.total;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['tax_percentage'] = '--';
         }
 
         $scope.onSubmitLodgeTaxInvoice = () => {
@@ -2334,6 +2421,10 @@ app.component('eyatraTripClaimForm', {
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffTotal").val(self.roundoffTaxInvoice.total);
 
             //GRAND TOTAL
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_without_tax_amount = self.grandTotalTaxInvoice.without_tax_amount;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_cgst_amount = self.grandTotalTaxInvoice.cgst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_sgst_amount = self.grandTotalTaxInvoice.sgst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_igst_amount = self.grandTotalTaxInvoice.igst;
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_invoice_amount = self.grandTotalTaxInvoice.total;
 
             self.lodgingTaxInvoiceModalIndex = '';
