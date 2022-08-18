@@ -16,6 +16,8 @@ class Lodging extends Model {
 		// 'checkout_date',
 		'stayed_days',
 		'stay_type_id',
+		'has_multiple_tax_invoice',
+		'tax_invoice_amount',
 		'amount',
 		'tax',
 		'gstin',

@@ -395,7 +395,7 @@ class Trip extends Model {
 				return response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'trip' => $trip]);
 			}
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
@@ -471,7 +471,7 @@ class Trip extends Model {
 			}
 		}
 		$data['trip'] = $trip;
-        $trip->today = Carbon::today()->format('d-m-Y');
+		$trip->today = Carbon::today()->format('d-m-Y');
 		if ($trip->advance_request_approval_status_id) {
 			if ($trip->advance_request_approval_status_id == 3260 || $trip->advance_request_approval_status_id == 3262) {
 				$trip_reject = 1;
@@ -1722,7 +1722,7 @@ class Trip extends Model {
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$board = Boarding::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
 		$other = LocalTravel::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
-		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst','boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst','local_travels.amount as local_basic', 'local_travels.cgst as local_cgst','local_travels.sgst as local_sgst','local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
+		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
 
 		if (count($visit) > 1) {
 			$transport_basic = number_format(array_sum(array_column($tax_details, 'transport_basic')), 2, '.', ',');
@@ -1936,8 +1936,10 @@ class Trip extends Model {
 					// dd($boarding_data);
 					$boardingEligibleAmount = (float) $boarding_data['eligible_amount'] * $boarding_data['days'];
 					$boardingAmount = (float) $boarding_data['amount'];
-					if ($boardingAmount > $boardingEligibleAmount)
+					if ($boardingAmount > $boardingEligibleAmount) {
 						return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
+					}
+
 				}
 			}
 			// Validate Boading amount by Karthick T on 04-08-2022
@@ -3054,7 +3056,7 @@ class Trip extends Model {
 
 			$request->session()->flash('success', 'Trip saved successfully!');
 			return response()->json(['success' => true]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
 			return response()->json([
 				'success' => false,

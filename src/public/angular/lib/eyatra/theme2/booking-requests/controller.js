@@ -252,7 +252,6 @@ app.component('eyatraTripBookingRequestsView', {
         });
 
         $scope.onChangeTravelMode = (index, travelModeId, visitId) => {
-            console.log(visitId);
             //self.booking_method_list = [];
             //self.trip.agent_visits[index].booking.booking_method_id = '';
             self.trip.agent_visits[index].booking.agent_service_charges = '';
@@ -265,6 +264,8 @@ app.component('eyatraTripBookingRequestsView', {
                         return;
                     }
                     self.trip.agent_visits[index].booking.agent_service_charges = res.data.booking_method_list;
+                    //CALCULATE AGENT TAX
+                    $scope.agentTax(index);
                 });
             }
         }
@@ -272,17 +273,27 @@ app.component('eyatraTripBookingRequestsView', {
         $scope.onChangeBookingMethod = index => {
             self.trip.agent_visits[index].booking.agent_service_charges = self.bookingMethods[self.trip.agent_visits[index].booking.booking_method_id];
         }
+
         $scope.agentTax = index => {
-            console.log('test');
-            self.trip.agent_visits[index].booking.agent_cgst = '';
-            self.trip.agent_visits[index].booking.agent_sgst = '';
-            self.trip.agent_visits[index].booking.agent_igst = '';
+            self.trip.agent_visits[index].booking.agent_cgst = 0.00;
+            self.trip.agent_visits[index].booking.agent_sgst = 0.00;
+            self.trip.agent_visits[index].booking.agent_igst = 0.00;
+            self.trip.agent_visits[index].booking.agent_total = 0.00;
+
             const agentCgstPercentage = agentSgstPercentage = 9;
             const agentIgstPercentage = self.trip.agent_visits[index].booking.agent_tax_percentage = 18;
-            const agentServiceCharge = self.trip.agent_visits[index].booking.agent_service_charges;
-            self.trip.agent_visits[index].booking.agent_cgst = parseFloat(agentServiceCharge * (agentCgstPercentage / 100)).toFixed(2);
-            self.trip.agent_visits[index].booking.agent_sgst = parseFloat(agentServiceCharge * (agentSgstPercentage / 100)).toFixed(2);
-            self.trip.agent_visits[index].booking.agent_igst = 0.00;
+            let agentServiceCharge = parseFloat(self.trip.agent_visits[index].booking.agent_service_charges);
+
+            if (agentServiceCharge) {
+                let agentCGST = parseFloat(agentServiceCharge * (agentCgstPercentage / 100));
+                let agentSGST = parseFloat(agentServiceCharge * (agentSgstPercentage / 100));
+                let agentIGST = 0.00;
+
+                self.trip.agent_visits[index].booking.agent_cgst = agentCGST.toFixed(2);
+                self.trip.agent_visits[index].booking.agent_sgst = agentSGST.toFixed(2);
+                self.trip.agent_visits[index].booking.agent_igst = agentIGST;
+                self.trip.agent_visits[index].booking.agent_total = parseFloat(agentServiceCharge + agentCGST + agentSGST + agentIGST).toFixed(2);
+            }
         }
 
         $scope.calculateTax = index => {
@@ -291,17 +302,20 @@ app.component('eyatraTripBookingRequestsView', {
                 self.trip.agent_visits[index].booking.cgst = '';
                 self.trip.agent_visits[index].booking.sgst = '';
                 self.trip.agent_visits[index].booking.igst = '';
+
                 //enable if company gstin needed and self.trip.agent_visits[index].toCityGstCode inside if condition
                 //self.trip.agent_visits[index].booking.gstin = self.trip.agent_visits[index].toCityGstin;
-                const bookingGstin = self.trip.agent_visits[index].booking.gstin;
-                const gstCode = bookingGstin.substr(0, 2);
+
                 const cgstPercentage = sgstPercentage = 2.5;
                 const igstPercentage = 5;
+
                 //if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
-                if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.travel_mode_id && self.trip.agent_visits[index].booking.travel_mode_id != 12) {
-                    let taxableValue = self.trip.agent_visits[index].booking.amount;
+                if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.travel_mode_id && self.trip.agent_visits[index].booking.travel_mode_id != 12 && self.trip.agent_visits[index].booking.gstin) {
+                    let enteredGstinCode = self.trip.agent_visits[index].booking.gstin.substr(0, 2);
+                    let taxableValue = parseFloat(self.trip.agent_visits[index].booking.amount);
+
                     // if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
-                    if (self.trip.employee_gst_code === gstCode) {
+                    if (self.trip.employee_gst_code === enteredGstinCode) {
                         self.trip.agent_visits[index].booking.cgst = parseFloat(taxableValue * (cgstPercentage / 100)).toFixed(2);
                         self.trip.agent_visits[index].booking.sgst = parseFloat(taxableValue * (sgstPercentage / 100)).toFixed(2);
                         self.trip.agent_visits[index].booking.igst = 0.00;
@@ -329,7 +343,7 @@ app.component('eyatraTripBookingRequestsView', {
             self.trip.agent_visits[index].booking.round_off = parseFloat(totalValue - invoiceAmount).toFixed(2);
         }
         $scope.fareDetailGstChange = (index, gst_number) => {
-            self.trip.agent_visits[index].booking.fare_gst_detail = '';
+            // self.trip.agent_visits[index].booking.fare_gst_detail = '';
             if (gst_number && gst_number.length == 15) {
                 $http({
                     url: laravel_routes['getGstInData'],

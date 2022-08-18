@@ -24,6 +24,7 @@ class Visit extends Model {
 		// 'prefered_departure_time',
 		'manager_verification_status_id',
 		'attachment_status',
+		'agent_ax_export_synched',
 	];
 
 	protected $dates = [

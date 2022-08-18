@@ -59,6 +59,8 @@ class EYatraConfigSeeder extends Seeder {
 
 			545 => 'Booking Categories',
 			546 => 'Lodging Tax Invoice Types ',
+
+			547 => 'Axapta Export Types',
 		];
 
 		$configs = [
@@ -1136,6 +1138,15 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 546,
 			],
 
+			// Axapta Export Types
+			3790 => [
+				'name' => 'Agent',
+				'config_type_id' => 547,
+			],
+			3791 => [
+				'name' => 'Self',
+				'config_type_id' => 547,
+			],
 		];
 
 		//SAVING CONFIG TYPES
