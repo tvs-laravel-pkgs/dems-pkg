@@ -2161,6 +2161,7 @@ app.component('eyatraTripClaimForm', {
                 if (self.trip.lodgings[lodgingIndex].gstin != '') {
                     //LODGE
                     self.lodgingTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceLodgingWithoutTaxAmount").val();
+                    self.lodgingTaxInvoice.tax_percentage = $("#" + lodgingIndex + "-taxInvoiceLodgingTaxPercentage").val();
                     self.lodgingTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceLodgingCgst").val();
                     self.lodgingTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceLodgingSgst").val();
                     self.lodgingTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceLodgingIgst").val();
@@ -2168,6 +2169,7 @@ app.component('eyatraTripClaimForm', {
 
                     //DRYWASH
                     self.drywashTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceDrywashWithoutTaxAmount").val();
+                    self.drywashTaxInvoice.tax_percentage = $("#" + lodgingIndex + "-taxInvoiceDrywashTaxPercentage").val();
                     self.drywashTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceDrywashCgst").val();
                     self.drywashTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceDrywashSgst").val();
                     self.drywashTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceDrywashIgst").val();
@@ -2175,6 +2177,7 @@ app.component('eyatraTripClaimForm', {
 
                     //BOARDING
                     self.boardingTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceBoardingWithoutTaxAmount").val();
+                    self.boardingTaxInvoice.tax_percentage = $("#" + lodgingIndex + "-taxInvoiceBoardingTaxPercentage").val();
                     self.boardingTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceBoardingCgst").val();
                     self.boardingTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceBoardingSgst").val();
                     self.boardingTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceBoardingIgst").val();
@@ -2182,6 +2185,7 @@ app.component('eyatraTripClaimForm', {
 
                     //OTHERS
                     self.othersTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceOthersWithoutTaxAmount").val();
+                    self.othersTaxInvoice.tax_percentage = $("#" + lodgingIndex + "-taxInvoiceOthersTaxPercentage").val();
                     self.othersTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceOthersCgst").val();
                     self.othersTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceOthersSgst").val();
                     self.othersTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceOthersIgst").val();
@@ -2269,7 +2273,7 @@ app.component('eyatraTripClaimForm', {
                 const lodgeGstCode = lodgeGstin.substr(0, 2);
 
                 let lodgePercentage = 12;
-                if (lodgeWithoutTaxAmount >= 7500) {
+                if (lodgeWithoutTaxAmount >= 10000) {
                     lodgePercentage = 18;
                 }
 
@@ -2278,11 +2282,11 @@ app.component('eyatraTripClaimForm', {
                 } else {
                     lodgeIgstPerc = lodgePercentage;
                 }
-
                 lodgeCgst = lodgeWithoutTaxAmount * (lodgeCgstPerc / 100);
                 lodgeSgst = lodgeWithoutTaxAmount * (lodgeSgstPerc / 100);
                 lodgeIgst = lodgeWithoutTaxAmount * (lodgeIgstPerc / 100);
                 lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
+                self.lodgingTaxInvoice.tax_percentage = lodgePercentage;
             }
             //DRYWASH GST CALCULATION
             // drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
@@ -2383,6 +2387,7 @@ app.component('eyatraTripClaimForm', {
             //LODGE
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingTypeId").val(3771);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingWithoutTaxAmount").val(self.lodgingTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingTaxPercentage").val(self.lodgingTaxInvoice.tax_percentage);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingCgst").val(self.lodgingTaxInvoice.cgst);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingSgst").val(self.lodgingTaxInvoice.sgst);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceLodgingIgst").val(self.lodgingTaxInvoice.igst);
