@@ -12,6 +12,7 @@ class LodgingTaxInvoice extends Model {
 		'lodging_id',
 		'type_id',
 		'without_tax_amount',
+		'tax_percentage',
 		'cgst',
 		'sgst',
 		'igst',

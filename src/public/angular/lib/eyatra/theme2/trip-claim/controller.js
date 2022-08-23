@@ -2158,7 +2158,7 @@ app.component('eyatraTripClaimForm', {
             self.lodgingTaxInvoiceModalIndex = lodgingIndex;
             $('#lodgingTaxInvoiceFormModal').modal('hide');
             if (val == 'Yes') {
-                if (self.trip.lodgings[lodgingIndex].gstin != '') {
+                if (self.trip.lodgings[lodgingIndex].gstin != '' && self.trip.lodgings[lodgingIndex].invoice_amount != '') {
                     //LODGE
                     self.lodgingTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceLodgingWithoutTaxAmount").val();
                     self.lodgingTaxInvoice.tax_percentage = $("#" + lodgingIndex + "-taxInvoiceLodgingTaxPercentage").val();
@@ -2209,7 +2209,7 @@ app.component('eyatraTripClaimForm', {
 
                     $('#lodgingTaxInvoiceFormModal').modal('show');
                 } else {
-                    custom_noty('error', "Kindly enter GSTIN and try after that");
+                    custom_noty('error', "Kindly enter GSTIN and invoice amount and try after that");
                     self.trip.lodgings[lodgingIndex].has_multiple_tax_invoice = "No";
                     self.trip.lodgings[lodgingIndex].tax_invoice_amount = '';
                     self.lodgingTaxInvoiceModalIndex = '';
@@ -2431,6 +2431,9 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_sgst_amount = self.grandTotalTaxInvoice.sgst;
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_igst_amount = self.grandTotalTaxInvoice.igst;
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_invoice_amount = self.grandTotalTaxInvoice.total;
+            if (self.roundoffTaxInvoice.total > 1 || self.roundoffTaxInvoice.total < -1) {
+                custom_noty('error', "Round Off Amount is with in +1 or -1");
+            }
 
             self.lodgingTaxInvoiceModalIndex = '';
             self.lodgingTaxInvoice = {};
