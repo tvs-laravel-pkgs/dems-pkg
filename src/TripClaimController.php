@@ -114,6 +114,9 @@ class TripClaimController extends Controller {
 	public function saveEYatraTripClaim(Request $request) {
 		return Trip::saveEYatraTripClaim($request);
 	}
+	public function saveVerifierClaim(Request $request) {
+		return Trip::saveVerifierClaim($request);
+	}
 
 	public function viewEYatraTripClaim($trip_id) {
 		return Trip::getClaimViewData($trip_id);

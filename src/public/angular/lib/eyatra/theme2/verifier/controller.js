@@ -183,6 +183,8 @@ app.component('eyatraOutstationClaimVerificationView', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_verification_one_view_url + '/' : eyatra_trip_claim_verification_one_view_url + '/' + $routeParams.trip_id;
         var self = this;
+        var transport_save = 0;
+        var lodging_save = 0;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         self.eyatra_trip_claim_verification_one_visit_attachment_url = eyatra_trip_claim_verification_one_visit_attachment_url;
@@ -201,7 +203,7 @@ app.component('eyatraOutstationClaimVerificationView', {
             self.travel_cities = response.data.travel_cities;
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.travel_dates = response.data.travel_dates;
-
+            self.state_code = response.data.state_code;
             self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
             if (response.data.trip.trip_attachments.length === 0 && response.data.trip.google_attachments.length === 0) {
@@ -232,6 +234,331 @@ app.component('eyatraOutstationClaimVerificationView', {
             $rootScope.loading = false;
 
         });
+        //nodel edit changes on 20-08-2022
+        $scope.travelCalculateTax = index => {
+            const visitGstin = self.trip.visits[index].self_booking.gstin;
+            const taxPercentage = self.trip.visits[index].self_booking.tax_percentage;
+            const invoiceAmount = self.trip.visits[index].self_booking.invoice_amount;
+            const gstCode = visitGstin.substr(0, 2);
+            if (self.trip.employee_gst_code && self.trip.visits[index].self_booking.amount) {
+                let amount = self.trip.visits[index].self_booking.amount;
+                if (self.trip.employee_gst_code === gstCode) {
+                    let cgstPercentage = taxPercentage / 2;
+                    let sgstPercentage = taxPercentage / 2;
+                    self.trip.visits[index].self_booking.cgst = parseFloat(amount * (cgstPercentage / 100)).toFixed(2);
+                    self.trip.visits[index].self_booking.sgst = parseFloat(amount * (sgstPercentage / 100)).toFixed(2);
+                    self.trip.visits[index].self_booking.igst = 0.00;
+                } else {
+                    let igstPercentage = taxPercentage;
+                    self.trip.visits[index].self_booking.cgst = 0.00;
+                    self.trip.visits[index].self_booking.sgst = 0.00;
+                    self.trip.visits[index].self_booking.igst = parseFloat(amount * (igstPercentage / 100)).toFixed(2);
+                }
+            }
+            const Total = self.trip.visits[index].self_booking.amount + self.trip.visits[index].self_booking.cgst + self.trip.visits[index].self_booking.sgst + self.trip.visits[index].self_booking.igst;
+            self.trip.visits[index].self_booking.round_off = parseFloat(invoiceAmount - Total).toFixed(2);
+        }
+        $scope.fareDetailGstChange = (index, gst_number) => {
+            self.trip.visits[index]['fare_gst_detail'] = '';
+            if (gst_number && gst_number.length == 15) {
+                $http({
+                    url: laravel_routes['getGstInData'],
+                    method: 'GET',
+                    params: { 'gst_number': gst_number }
+                }).then(function(res) {
+                    // console.log(res);
+                    if (!res.data.success) {
+                        var errors = '';
+                        if (res.data.errors) {
+                            for (var i in res.data.errors) {
+                                errors += '<li>' + res.data.errors[i] + '</li>';
+                            }
+                        }
+                        if (res.data.error) {
+                            errors += '<li>' + res.data.error + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.trip.visits[index]['fare_gst_detail'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                    }
+                });
+            }
+        }
+        $scope.lodgeDetailGstChange = (index, gst_number) => {
+            if (gst_number && gst_number.length == 15) {
+                $http({
+                    url: laravel_routes['getGstInData'],
+                    method: 'GET',
+                    params: { 'gst_number': gst_number }
+                }).then(function(res) {
+                    // console.log(res);
+                    if (!res.data.success) {
+                        var errors = '';
+                        if (res.data.errors) {
+                            for (var i in res.data.errors) {
+                                errors += '<li>' + res.data.errors[i] + '</li>';
+                            }
+                        }
+                        if (res.data.error) {
+                            errors += '<li>' + res.data.error + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.trip.lodgings[index].lodge_name = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                    }
+                });
+            }
+        }
+        $scope.lodgeCalculateTax = index => {
+            const visitGstin = self.trip.lodgings[index].gstin;
+            const taxPercentage = self.trip.lodgings[index].tax_percentage;
+            const invoiceAmount = self.trip.lodgings[index].invoice_amount;
+            const gstCode = visitGstin.substr(0, 2);
+            if (self.trip.employee_gst_code && self.trip.lodgings[index].amount) {
+                let amount = self.trip.lodgings[index].amount;
+                if (self.trip.employee_gst_code === gstCode) {
+                    let cgstPercentage = taxPercentage / 2;
+                    let sgstPercentage = taxPercentage / 2;
+                    self.trip.lodgings[index].cgst = parseFloat(amount * (cgstPercentage / 100)).toFixed(2);
+                    self.trip.lodgings[index].sgst = parseFloat(amount * (sgstPercentage / 100)).toFixed(2);
+                    self.trip.lodgings[index].igst = 0.00;
+                } else {
+                    let igstPercentage = taxPercentage;
+                    self.trip.lodgings[index].cgst = 0.00;
+                    self.trip.lodgings[index].sgst = 0.00;
+                    self.trip.lodgings[index].igst = parseFloat(amount * (igstPercentage / 100)).toFixed(2);
+                }
+            }
+            const Total = self.trip.lodgings[index].amount + self.trip.lodgings[index].cgst + self.trip.lodgings[index].sgst + self.trip.lodgings[index].igst;
+            self.trip.lodgings[index].round_off = parseFloat(invoiceAmount - Total).toFixed(2);
+        }
+        $scope.onClickHasMultipleTaxInvoice = (id, val, lodgingIndex) => {
+            //console.log(id);
+
+            self.lodgingTaxInvoiceModalIndex = lodgingIndex;
+            //$('#lodgingTaxInvoiceView').modal('hide');
+            if (val == 'Yes') {
+                if (self.trip.lodgings[lodgingIndex].gstin != '') {
+                    //LODGE
+                    self.lodgingTaxInvoice = {};
+                    self.drywashTaxInvoice = {};
+                    self.boardingTaxInvoice = {};
+                    self.othersTaxInvoice = {};
+                    self.roundoffTaxInvoice = {};
+                    self.grandTotalTaxInvoice = {};
+                    self.trip.lodgings[lodgingIndex].grandtotal_tax_invoice = {};
+                    //GRAND TOTAL
+                    self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_without_tax_amount = self.trip.lodgings[lodgingIndex].grandtotal_tax_invoice.without_tax_amount;
+                    self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_cgst_amount = self.trip.lodgings[lodgingIndex].grandtotal_tax_invoice.cgst;
+                    self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_sgst_amount = self.trip.lodgings[lodgingIndex].grandtotal_tax_invoice.sgst;
+                    self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_igst_amount = self.trip.lodgings[lodgingIndex].grandtotal_tax_invoice.igst;
+                    self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_invoice_amount = self.trip.lodgings[lodgingIndex].tax_invoice_amount;
+
+                    // $scope.calculateLodgeTaxInvoiceAmount();
+
+                    // $('#lodgingTaxInvoiceView').modal('show');
+                } else {
+                    custom_noty('error', "Kindly enter GSTIN and try after that");
+                    self.trip.lodgings[lodgingIndex].has_multiple_tax_invoice = "No";
+                    self.trip.lodgings[lodgingIndex].tax_invoice_amount = '';
+                    self.lodgingTaxInvoiceModalIndex = '';
+                    self.lodgingTaxInvoice = {};
+                    self.drywashTaxInvoice = {};
+                    self.boardingTaxInvoice = {};
+                    self.othersTaxInvoice = {};
+                    self.roundoffTaxInvoice = {};
+                    self.grandTotalTaxInvoice = {};
+                    $('#lodging_has_multiple_tax_invoice_active_' + lodgingIndex).attr('disabled', true);
+                    $('#lodging_has_multiple_tax_invoice_inactive_' + lodgingIndex).prop('checked', true);
+                }
+            } else {
+                //NO
+                $('#lodgingTaxInvoiceView').modal('show');
+                self.lodgingTaxInvoiceModalIndex = '';
+                self.lodgingTaxInvoice = {};
+                self.drywashTaxInvoice = {};
+                self.boardingTaxInvoice = {};
+                self.othersTaxInvoice = {};
+                self.roundoffTaxInvoice = {};
+                self.grandTotalTaxInvoice = {};
+            }
+        }
+        $scope.calculateLodgeTaxInvoiceAmount = (index) => {
+            let lodgeWithoutTaxAmount = parseFloat(self.trip.lodgings[index].lodging_tax_invoice.without_tax_amount) || 0;
+            let lodgeTaxPercentage = parseFloat(self.trip.lodgings[index].lodging_tax_invoice.tax_percentage) || 0;
+            let lodgeCgst = 0;
+            let lodgeSgst = 0;
+            let lodgeIgst = 0;
+            let lodgeTotal = 0;
+            let drywashWithoutTaxAmount = parseFloat(self.trip.lodgings[index].drywash_tax_invoice.without_tax_amount) || 0;
+            let drywashTaxPercentage = parseFloat(self.trip.lodgings[index].drywash_tax_invoice.tax_percentage) || 0;
+            let drywashCgst = 0;
+            let drywashSgst = 0;
+            let drywashIgst = 0;
+            let drywashTotal = 0;
+            let boardingWithoutTaxAmount = parseFloat(self.trip.lodgings[index].boarding_tax_invoice.without_tax_amount) || 0;
+            let boardingTaxPercentage = parseFloat(self.trip.lodgings[index].boarding_tax_invoice.tax_percentage) || 0;
+            let boardingCgst = 0;
+            let boardingSgst = 0;
+            let boardingIgst = 0;
+            let boardingTotal = 0;
+            let othersWithoutTaxAmount = parseFloat(self.trip.lodgings[index].others_tax_invoice.without_tax_amount) || 0;
+            let othersTaxPercentage = parseFloat(self.trip.lodgings[index].others_tax_invoice.tax_percentage) || 0;
+            let othersCgst = 0;
+            let othersSgst = 0;
+            let othersIgst = 0;
+            let othersTotal = 0;
+            let roundoffTotal = 0;
+            let base = 0;
+            let cgst = 0;
+            let sgst = 0;
+            let igst = 0;
+            let grandTotal = 0;
+
+            //LODGE GST CALCULATION
+            if (lodgeWithoutTaxAmount && self.trip.lodgings[index].gstin) {
+                const lodgeGstin = self.trip.lodgings[index].gstin;
+                let lodgeCgstPerc = lodgeSgstPerc = lodgeIgstPerc = 0;
+                const lodgeGstCode = lodgeGstin.substr(0, 2);
+                console.log(lodgeTaxPercentage, lodgeWithoutTaxAmount);
+                let lodgePercentage = 12;
+                if (lodgeWithoutTaxAmount >= 10000) {
+                    lodgePercentage = 18;
+                }
+
+                if (lodgeGstCode == self.state_code) {
+                    lodgeCgstPerc = lodgeSgstPerc = lodgePercentage / 2;
+                } else {
+                    lodgeIgstPerc = lodgePercentage;
+                }
+                lodgeCgst = lodgeWithoutTaxAmount * (lodgeCgstPerc / 100);
+                lodgeSgst = lodgeWithoutTaxAmount * (lodgeSgstPerc / 100);
+                lodgeIgst = lodgeWithoutTaxAmount * (lodgeIgstPerc / 100);
+                lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
+                self.trip.lodgings[index].lodging_tax_invoice.tax_percentage = lodgePercentage;
+            }
+            //DRYWASH GST CALCULATION
+            // drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+            console.log();
+            if (drywashWithoutTaxAmount && drywashTaxPercentage && self.trip.lodgings[index].gstin) {
+                const drywashGstin = self.trip.lodgings[index].gstin;
+                let drywashCgstPerc = drywashSgstPerc = drywashIgstPerc = 0;
+                const drywashGstCode = drywashGstin.substr(0, 2);
+                let drywashPercentage = drywashTaxPercentage;
+                console.log(drywashPercentage, drywashWithoutTaxAmount, self.state_code);
+                if (drywashGstCode == self.state_code) {
+                    drywashCgstPerc = drywashSgstPerc = drywashPercentage / 2;
+                } else {
+                    drywashIgstPerc = drywashPercentage;
+                }
+
+                drywashCgst = drywashWithoutTaxAmount * (drywashCgstPerc / 100);
+                drywashSgst = drywashWithoutTaxAmount * (drywashSgstPerc / 100);
+                drywashIgst = drywashWithoutTaxAmount * (drywashIgstPerc / 100);
+                drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+                console.log(drywashCgst, drywashSgst, drywashIgst);
+            }
+            //boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
+            //Boarding GST CALCULATION
+            if (boardingWithoutTaxAmount && boardingTaxPercentage && self.trip.lodgings[index].gstin) {
+                const boardingGstin = self.trip.lodgings[index].gstin;
+                let boardingCgstPerc = boardingSgstPerc = boardingIgstPerc = 0;
+                const boardingGstCode = boardingGstin.substr(0, 2);
+                let boardingPercentage = boardingTaxPercentage;
+
+                if (boardingGstCode == self.state_code) {
+                    boardingCgstPerc = boardingSgstPerc = boardingPercentage / 2;
+                } else {
+                    boardingIgstPerc = boardingPercentage;
+                }
+
+                boardingCgst = boardingWithoutTaxAmount * (boardingCgstPerc / 100);
+                boardingSgst = boardingWithoutTaxAmount * (boardingSgstPerc / 100);
+                boardingIgst = boardingWithoutTaxAmount * (boardingIgstPerc / 100);
+                boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
+            }
+            // othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+            //OTHERS GST CALCULATION
+            if (othersWithoutTaxAmount && othersTaxPercentage && self.trip.lodgings[index].gstin) {
+                const othersGstin = self.trip.lodgings[index].gstin;
+                let othersCgstPerc = othersSgstPerc = othersIgstPerc = 0;
+                const othersGstCode = othersGstin.substr(0, 2);
+                let othersPercentage = othersTaxPercentage;
+
+                if (othersGstCode == self.state_code) {
+                    othersCgstPerc = othersSgstPerc = othersPercentage / 2;
+                } else {
+                    othersIgstPerc = othersPercentage;
+                }
+
+                othersCgst = othersWithoutTaxAmount * (othersCgstPerc / 100);
+                othersSgst = othersWithoutTaxAmount * (othersSgstPerc / 100);
+                othersIgst = othersWithoutTaxAmount * (othersIgstPerc / 100);
+                othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+            }
+            base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
+            cgst = lodgeCgst + drywashCgst + boardingCgst + othersCgst;
+            sgst = lodgeSgst + drywashSgst + boardingSgst + othersSgst;
+            igst = lodgeIgst + drywashIgst + boardingIgst + othersIgst;
+            grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal; //+ roundoffTotal;
+            roundoffTotal = self.trip.lodgings[index].invoice_amount - grandTotal;
+            //console.log(self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['invoice_amount'], grandTotal);
+
+            self.trip.lodgings[index].grandtotal_tax_invoice = {};
+
+            self.trip.lodgings[index].lodging_tax_invoice.cgst = parseFloat(lodgeCgst).toFixed(2);
+            self.trip.lodgings[index].lodging_tax_invoice.sgst = parseFloat(lodgeSgst).toFixed(2);
+            self.trip.lodgings[index].lodging_tax_invoice.igst = parseFloat(lodgeIgst).toFixed(2);
+            self.trip.lodgings[index].lodging_tax_invoice.total = parseFloat(lodgeTotal).toFixed(2);
+            self.trip.lodgings[index].drywash_tax_invoice.cgst = parseFloat(drywashCgst).toFixed(2);
+            self.trip.lodgings[index].drywash_tax_invoice.sgst = parseFloat(drywashSgst).toFixed(2);
+            self.trip.lodgings[index].drywash_tax_invoice.igst = parseFloat(drywashIgst).toFixed(2);
+            self.trip.lodgings[index].drywash_tax_invoice.total = parseFloat(drywashTotal).toFixed(2);
+            self.trip.lodgings[index].boarding_tax_invoice.cgst = parseFloat(boardingCgst).toFixed(2);
+            self.trip.lodgings[index].boarding_tax_invoice.sgst = parseFloat(boardingSgst).toFixed(2);
+            self.trip.lodgings[index].boarding_tax_invoice.igst = parseFloat(boardingIgst).toFixed(2);
+            self.trip.lodgings[index].boarding_tax_invoice.total = parseFloat(boardingTotal).toFixed(2);
+            self.trip.lodgings[index].others_tax_invoice.cgst = parseFloat(othersCgst).toFixed(2);
+            self.trip.lodgings[index].others_tax_invoice.sgst = parseFloat(othersSgst).toFixed(2);
+            self.trip.lodgings[index].others_tax_invoice.igst = parseFloat(othersIgst).toFixed(2);
+            self.trip.lodgings[index].others_tax_invoice.total = parseFloat(othersTotal).toFixed(2);
+            self.trip.lodgings[index].grandtotal_tax_invoice.without_tax_amount = parseFloat(base).toFixed(2);
+            self.trip.lodgings[index].grandtotal_tax_invoice.cgst = parseFloat(cgst).toFixed(2);
+            self.trip.lodgings[index].grandtotal_tax_invoice.sgst = parseFloat(sgst).toFixed(2);
+            self.trip.lodgings[index].grandtotal_tax_invoice.igst = parseFloat(igst).toFixed(2);
+            self.trip.lodgings[index].tax_invoice_amount = parseFloat(grandTotal).toFixed(2);
+            self.trip.lodgings[index].roundoff_tax_invoice.total = parseFloat(roundoffTotal).toFixed(2);
+            //self.trip.lodgings[index].tax_invoice_amount = grandTotal;
+            self.trip.lodgings[index].amount = parseFloat(base).toFixed(2);
+            self.trip.lodgings[index].cgst = parseFloat(cgst).toFixed(2);
+            self.trip.lodgings[index].sgst = parseFloat(sgst).toFixed(2);
+            self.trip.lodgings[index].igst = parseFloat(igst).toFixed(2);
+            self.trip.lodgings[index].round_off = parseFloat(roundoffTotal).toFixed(2);
+            self.trip.lodgings[index].tax_percentage = '--';
+            self.trip.lodgings[index].total = parseFloat(self.trip.lodgings[index].tax_invoice_amount + self.trip.lodgings[index].round_off).toFixed(2);
+        }
+
+        $scope.onSubmitLodgeTaxInvoice = (index) => {
+            if (self.trip.lodgings[index].roundoff_tax_invoice.total > 1 || self.trip.lodgings[index].roundoff_tax_invoice.total < -1) {
+                custom_noty('error', "Round Off Amount is with in +1 or -1");
+            }
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_cgst_amount = self.trip.lodgings[index].grandtotal_tax_invoice.cgst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_sgst_amount = self.trip.lodgings[index].grandtotal_tax_invoice.sgst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_igst_amount = self.trip.lodgings[index].grandtotal_tax_invoice.igst;
+            self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_invoice_amount = self.trip.lodgings[index].tax_invoice_amount;
+
+            self.lodgingTaxInvoiceModalIndex = '';
+            self.lodgingTaxInvoice = {};
+            self.drywashTaxInvoice = {};
+            self.boardingTaxInvoice = {};
+            self.othersTaxInvoice = {};
+            self.roundoffTaxInvoice = {};
+            self.grandTotalTaxInvoice = {};
+
+            $('#lodgingTaxInvoiceView').modal('hide');
+        }
+        //end of nodel edit changes
+
         // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
         $scope.updateAttchementStatus = function(attchement_id) {
             if (attchement_id) {
@@ -269,6 +596,168 @@ app.component('eyatraOutstationClaimVerificationView', {
         $scope.tripClaimApproveOne = function(trip_id) {
             $('#modal_trip_id').val(trip_id);
         }
+        //nodel edit changes on 20-08-2022
+        $(document).on('click', '.claim_submit_btn', function() {
+            self.enable_switch_tab = false;
+            //GET ACTIVE FORM 
+            //alert();
+            transport_save = 1;
+            lodging_save = 1;
+            boarding_save = 1;
+            other_expense_save = 1;
+            trip_attachment_save = 1;
+
+            var current_form = $(this).attr('data-submit_type');
+            var next_form = $(this).attr('data-next_submit_type');
+            $('#claim_' + current_form + '_expense_form').submit();
+            // $timeout(function() {
+            // console.log(' == self.enable_switch_tab ==');
+            // console.log(self.enable_switch_tab);
+            if (self.enable_switch_tab) {
+                $('.tab_li').removeClass('active');
+                $('.tab_' + next_form).addClass('active');
+                $('.tab-pane').removeClass('in active');
+                $('#' + next_form + '-expenses').addClass('in active');
+            }
+            // }, 1000);
+        });
+        //TRANSPORT FORM SUBMIT
+        var form_transport_id = '#claim_transport_expense_form';
+        var v = jQuery(form_transport_id).validate({
+            ignore: "",
+            rules: {},
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
+            submitHandler: function(form) {
+                alert('test');
+                if (transport_save) {
+                    transport_save = 0;
+                    let formData = new FormData($(form_transport_id)[0]);
+                    $('#transport_submit').html('loading');
+                    $("#transport_submit").attr("disabled", true);
+                    self.enable_switch_tab = false;
+                    $.ajax({
+                            url: eyatra_trip_verifier_claim_save_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            async: false,
+                        })
+                        .done(function(res) {
+                            // console.log(res);
+                            if (!res.success) {
+                                $('#transport_submit').html('Save');
+                                $("#transport_submit").attr("disabled", false);
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                                self.enable_switch_tab = false;
+                                $scope.$apply()
+                            } else {
+
+                                custom_noty('success', 'Transport expenses saved successfully!');
+                                // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
+                                //     self.trip.lodgings[key].date_range_list = val;
+                                // });// $scope.$apply()
+                                // $('.tab_li').removeClass('active');
+                                // $('.tab_lodging').addClass('active');
+                                // $('.tab-pane').removeClass('in active');
+                                // $('#lodging-expenses').addClass('in active');
+                                self.transport_attachment_removal_ids = [];
+                                $('#transport_attach_removal_ids').val('');
+                                self.enable_switch_tab = true;
+                                $scope.$apply();
+                                //$('#transport_submit').html('Save & Next');
+                                $("#transport_submit").attr("disabled", false);
+                                //$('#claim_lodge_expense_form').trigger("reset");
+                                //$('#claim_board_expense_form').trigger("reset");
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#transport_submit').html('Save & Next');
+                            $("#transport_submit").attr("disabled", false);
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
+            },
+        });
+
+        //LODGING FORM SUBMIT
+        //TRANSPORT FORM SUBMIT
+        var form_lodge_id = '#claim_lodge_expense_form';
+        var v = jQuery(form_lodge_id).validate({
+            ignore: "",
+            rules: {},
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
+            submitHandler: function(form) {
+                if (lodging_save) {
+                    lodging_save = 0;
+                    let formData = new FormData($(form_lodge_id)[0]);
+                    $('#lodge_submit').html('loading');
+                    $("#lodge_submit").attr("disabled", true);
+                    //self.enable_switch_tab = false;
+                    $.ajax({
+                            url: eyatra_trip_verifier_claim_save_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            async: false,
+                        })
+                        .done(function(res) {
+                            // console.log(res);
+                            if (!res.success) {
+                                $('#lodge_submit').html('Save');
+                                $("#lodge_submit").attr("disabled", false);
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                                //self.enable_switch_tab = false;
+                                $scope.$apply()
+                            } else {
+
+                                custom_noty('success', 'Lodge expenses saved successfully!');
+                                // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
+                                //     self.trip.lodgings[key].date_range_list = val;
+                                // });// $scope.$apply()
+                                // $('.tab_li').removeClass('active');
+                                // $('.tab_lodging').addClass('active');
+                                // $('.tab-pane').removeClass('in active');
+                                // $('#lodging-expenses').addClass('in active');
+                                //REFRESH LODGINGS
+                                self.trip.lodgings = res.saved_lodgings.lodgings;
+                                self.lodgings_removal_id = [];
+                                self.lodgings_attachment_removal_ids = [];
+                                $('#lodgings_attach_removal_ids').val('');
+                                self.enable_switch_tab = true;
+                                $scope.$apply();
+                                //$('#lodge_submit').html('Save & Next');
+                                $("#lodge_submit").attr("disabled", false);
+                                //$('#claim_lodge_expense_form').trigger("reset");
+                                //$('#claim_board_expense_form').trigger("reset");
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#lodge_submit').html('Save & Next');
+                            $("#lodge_submit").attr("disabled", false);
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
+            },
+        });
+
+        // end of nodel edit changes on 20-08-2022
+
         //Approve
 
         $(document).on('click', '.outstation_verifier_btn', function() {
@@ -609,7 +1098,10 @@ app.component('eyatraLocalClaimVerificationView', {
             self.trip_claim_rejection_list = response.data.trip_claim_rejection_list;
             self.gender = (response.data.trip.employee.gender).toLowerCase();
             console.log(self.trip_reject_reasons);
+
         });
+
+
 
         var local_trip_approve = 0;
         self.approveTrip = function() {

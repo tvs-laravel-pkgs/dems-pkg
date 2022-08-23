@@ -430,7 +430,7 @@ class Trip extends Model {
 			'status',
 		])
 			->find($trip_id);
-		// dd($trip);
+		 //dd($trip);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -1610,15 +1610,13 @@ class Trip extends Model {
 			'tripAttachments.attachmentName',
 
 		])->find($trip_id);
-		//dd($trip->lodgings);
-
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
 		}
 
 		// Trip employee claim amount update by Karthick T on 22-08-2022
-		if (isset($trip->employee->tripEmployeeClaim) && $trip->employee->tripEmployeeClaim) {
+		/*if (isset($trip->employee->tripEmployeeClaim) && $trip->employee->tripEmployeeClaim) {
 			$tax_details = EmployeeClaim::select(
 					DB::raw('SUM(IFNULL(lodgings.cgst, 0) + IFNULL(lodgings.sgst, 0) + IFNULL(lodgings.igst, 0)) as lodging_tax'),
 					DB::raw('SUM(IFNULL(boardings.cgst, 0) + IFNULL(boardings.sgst, 0) + IFNULL(boardings.igst, 0)) as boarding_tax'),
@@ -1652,7 +1650,7 @@ class Trip extends Model {
 
 				$trip->employee->tripEmployeeClaim->total_amount = number_format($total_amount, 2, '.', '');
 			}
-		}
+		}*/
 		// Trip employee claim amount update by Karthick T on 22-08-2022
 
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
@@ -1816,7 +1814,15 @@ class Trip extends Model {
 		$lodging_total = floatval(preg_replace('/[^\d.]/', '', $lodging_total)) + floatval(preg_replace('/[^\d.]/', '', $lodging_round_off));
 		$boarding_total = floatval(preg_replace('/[^\d.]/', '', $boarding_basic)) + floatval(preg_replace('/[^\d.]/', '', $boarding_cgst)) + floatval(preg_replace('/[^\d.]/', '', $boarding_sgst)) + floatval(preg_replace('/[^\d.]/', '', $boarding_igst));
 		$local_travel_total = floatval(preg_replace('/[^\d.]/', '', $local_travel_basic)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_cgst)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_sgst)) + floatval(preg_replace('/[^\d.]/', '', $local_travel_igst));
-		
+		$trip->employee_gst_code = '';
+		if ($trip && $trip->employee && $trip->employee->outlet && $trip->employee->outlet->address && $trip->employee->outlet->address->city && $trip->employee->outlet->address->city->state) {
+			$trip->employee_gst_code = $trip->employee->outlet->address->city->state->gstin_state_code;
+		}
+		$state_code = NState::leftJoin('ncities', 'ncities.state_id', 'nstates.id')
+			->leftJoin('ey_addresses', 'ey_addresses.city_id', 'ncities.id')
+			->where('ey_addresses.address_of_id', 3160)
+			->where('ey_addresses.entity_id', $trip->outlet_id)
+			->pluck('nstates.gstin_state_code')->first();
 
 		$trip->transport_basic = $transport_basic;
 		$trip->transport_cgst = $transport_cgst;
@@ -1847,6 +1853,7 @@ class Trip extends Model {
 		$trip->local_travel_amount = $local_travel_amount;
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
+		$data['state_code'] = $state_code;
         
 		if ($trip->employee->tripEmployeeClaim) {
 			if (($trip->employee->tripEmployeeClaim->is_justify_my_trip == 1) || ($trip->employee->tripEmployeeClaim->remarks != '')) {
@@ -2139,7 +2146,7 @@ class Trip extends Model {
 							$visit_booking->save();
 							$transport_total = 0;
 							if ($visit_booking) {
-								$transport_total = $visit_booking->amount + $visit_booking->tax + $visit_booking->toll_fee;
+								$transport_total = $visit_booking->amount + $visit_booking->cgst + $visit_booking->sgst + $visit_booking->igst + $visit_booking->toll_fee + $visit_booking->round_off + $visit_booking->other_charges;
 								$transport_total_amount += $transport_total;
 							}
 						}
@@ -2255,7 +2262,7 @@ class Trip extends Model {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
-				//  dd($request->all());
+				 //dd($request->all());
 				//REMOVE LODGING AND THIER ATTACHMENTS
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
@@ -2332,7 +2339,7 @@ class Trip extends Model {
 
 						$lodging_total = 0;
 						if ($lodging) {
-							$lodging_total = $lodging->amount + $lodging->tax;
+							$lodging_total = $lodging->amount + $lodging->cgst + $lodging->sgst + $lodging->igst + $lodging->round_off;
 							$lodging_total_amount += $lodging_total;
 						}
 
@@ -2375,6 +2382,7 @@ class Trip extends Model {
 								$lodgeTaxInvoice->updated_at = Carbon::now();
 							}
 							$lodgeTaxInvoice->without_tax_amount = !empty($lodging_data['lodgingTaxInvoice']['without_tax_amount']) ? $lodging_data['lodgingTaxInvoice']['without_tax_amount'] : 0;
+							$lodgeTaxInvoice->tax_percentage = !empty($lodging_data['lodgingTaxInvoice']['tax_percentage']) ? $lodging_data['lodgingTaxInvoice']['tax_percentage'] : 0;
 							$lodgeTaxInvoice->cgst = !empty($lodging_data['lodgingTaxInvoice']['cgst']) ? $lodging_data['lodgingTaxInvoice']['cgst'] : 0;
 							$lodgeTaxInvoice->sgst = !empty($lodging_data['lodgingTaxInvoice']['sgst']) ? $lodging_data['lodgingTaxInvoice']['sgst'] : 0;
 							$lodgeTaxInvoice->igst = !empty($lodging_data['lodgingTaxInvoice']['igst']) ? $lodging_data['lodgingTaxInvoice']['igst'] : 0;
@@ -2393,6 +2401,7 @@ class Trip extends Model {
 								$drywashTaxInvoice->updated_at = Carbon::now();
 							}
 							$drywashTaxInvoice->without_tax_amount = !empty($lodging_data['drywashTaxInvoice']['without_tax_amount']) ? $lodging_data['drywashTaxInvoice']['without_tax_amount'] : 0;
+							$drywashTaxInvoice->tax_percentage = !empty($lodging_data['drywashTaxInvoice']['tax_percentage']) ? $lodging_data['drywashTaxInvoice']['tax_percentage'] : 0;
 							$drywashTaxInvoice->cgst = !empty($lodging_data['drywashTaxInvoice']['cgst']) ? $lodging_data['drywashTaxInvoice']['cgst'] : 0;
 							$drywashTaxInvoice->sgst = !empty($lodging_data['drywashTaxInvoice']['sgst']) ? $lodging_data['drywashTaxInvoice']['sgst'] : 0;
 							$drywashTaxInvoice->igst = !empty($lodging_data['drywashTaxInvoice']['igst']) ? $lodging_data['drywashTaxInvoice']['igst'] : 0;
@@ -2411,6 +2420,7 @@ class Trip extends Model {
 								$boardingTaxInvoice->updated_at = Carbon::now();
 							}
 							$boardingTaxInvoice->without_tax_amount = !empty($lodging_data['boardingTaxInvoice']['without_tax_amount']) ? $lodging_data['boardingTaxInvoice']['without_tax_amount'] : 0;
+							$boardingTaxInvoice->tax_percentage = !empty($lodging_data['boardingTaxInvoice']['tax_percentage']) ? $lodging_data['boardingTaxInvoice']['tax_percentage'] : 0;
 							$boardingTaxInvoice->cgst = !empty($lodging_data['boardingTaxInvoice']['cgst']) ? $lodging_data['boardingTaxInvoice']['cgst'] : 0;
 							$boardingTaxInvoice->sgst = !empty($lodging_data['boardingTaxInvoice']['sgst']) ? $lodging_data['boardingTaxInvoice']['sgst'] : 0;
 							$boardingTaxInvoice->igst = !empty($lodging_data['boardingTaxInvoice']['igst']) ? $lodging_data['boardingTaxInvoice']['igst'] : 0;
@@ -2429,6 +2439,7 @@ class Trip extends Model {
 								$othersTaxInvoice->updated_at = Carbon::now();
 							}
 							$othersTaxInvoice->without_tax_amount = !empty($lodging_data['othersTaxInvoice']['without_tax_amount']) ? $lodging_data['othersTaxInvoice']['without_tax_amount'] : 0;
+							$othersTaxInvoice->tax_percentage = !empty($lodging_data['othersTaxInvoice']['tax_percentage']) ? $lodging_data['othersTaxInvoice']['tax_percentage'] : 0;
 							$othersTaxInvoice->cgst = !empty($lodging_data['othersTaxInvoice']['cgst']) ? $lodging_data['othersTaxInvoice']['cgst'] : 0;
 							$othersTaxInvoice->sgst = !empty($lodging_data['othersTaxInvoice']['sgst']) ? $lodging_data['othersTaxInvoice']['sgst'] : 0;
 							$othersTaxInvoice->igst = !empty($lodging_data['othersTaxInvoice']['igst']) ? $lodging_data['othersTaxInvoice']['igst'] : 0;
@@ -2492,7 +2503,7 @@ class Trip extends Model {
 						}
 						$loding_attachment_exist = true;
 					}
-
+           
 					//SAVE EMPLOYEE CLAIMS
 					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 					$employee_claim->lodging_total = $lodging_total_amount;
@@ -3359,7 +3370,288 @@ request is not desired, then those may be rejected.';
 		return $pending_attachment_lists;
 	}
 	// For Attachment by Karthick T on 07-04-2022
+public static function saveVerifierClaim($request){
+	//dd($request->all());
+		DB::beginTransaction();
+		if (!empty($request->visits)) {
+			foreach ($request->visits as $visit_data) {
+				if (!empty($visit_data['id'])) {
+						$visit = Visit::find($visit_data['id']);
+						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
+							$visit_booking->visit_id = $visit_data['id'];
+							$visit_booking->amount = $visit_data['amount'];
+							$visit_booking->gstin = $visit_data['gstin'];
+							$visit_booking->tax_percentage = $visit_data['tax_percentage'];
+							//$visit_booking->tax = $visit_data['tax'];
+							$visit_booking->cgst = $visit_data['cgst'];
+							$visit_booking->sgst = $visit_data['sgst'];
+							$visit_booking->igst = $visit_data['igst'];
+						if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
+							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
+						}
+						$visit_booking->save();
+						$transport_total = 0;
+						$transport_total_amount=0;
+							if ($visit_booking) {
+								$transport_total = $visit_booking->amount + $visit_booking->cgst + $visit_booking->sgst + $visit_booking->igst + $visit_booking->toll_fee + $visit_booking->round_off + $visit_booking->other_charges;
+								$transport_total_amount += $transport_total;
+							}
+					$visit->save();
+					//SAVE EMPLOYEE CLAIMS
+				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
+				$employee_claim->trip_id = $request->trip_id;
+				$employee_claim->transport_total = $transport_total_amount;
+				//$employee_claim->employee_id = Auth::user()->entity_id;
+				$employee_claim->created_by = Auth::user()->id;
+				$employee_claim->total_amount = 0;
+				$employee_claim->save();
+               
+				$transport_amount = $employee_claim->transport_total;
+				$lodging_amount = $employee_claim->lodging_total;
+				$boarding_amount = $employee_claim->boarding_total;
+				$local_travel_amount = $employee_claim->local_travel_total;
+				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
 
+				//$employee_claim->total_trip_days = $request->trip_total_days;
+				$employee_claim->total_amount = $total_amount;
+				$employee_claim->save();
+                 $trip=Trip::where('id',$request->trip_id)->select('advance_received')->get()->first();
+				//To Find Amount to Pay Financier or Employee
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $total_amount) {
+						$balance_amount = $trip->advance_received - $total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$balance_amount = $total_amount - $trip->advance_received;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
+					$employee_claim->amount_to_pay = 1;
+				}
+
+				// dump($trip->advance_received);
+				// dump($request->claim_total_amount);
+
+				$employee_claim->save();
+				DB::commit();
+					return response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'visit' => $visit]);
+				}
+			}
+		}
+		if (!empty($request->lodgings)) {
+			//dd($request->all());
+		    foreach ($request->lodgings as $lodgeKey => $lodging_data) {
+                    if (!empty($lodging_data['id'])) {
+						if (isset($lodging_data['id'])) {
+							$lodging = Lodging::where('id', $lodging_data['id'])->first();
+							if (!$lodging) {
+								$lodging = new Lodging;
+							}
+						} else {
+							$lodging = new Lodging;
+						}
+							$lodging->id = $lodging_data['id'];
+							$lodging->amount = $lodging_data['amount'];
+							$lodging->gstin = $lodging_data['gstin'];
+							$lodging->tax_percentage = $lodging_data['tax_percentage'];
+							//$visit_booking->tax = $visit_data['tax'];
+							$lodging->cgst = $lodging_data['cgst'];
+							$lodging->sgst = $lodging_data['sgst'];
+							$lodging->igst = $lodging_data['igst'];
+						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
+							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
+						}else{
+						$lodging->round_off = $lodging_data['round_off'];
+					}
+					$lodging->lodge_name = $lodging_data['lodge_name'];
+						$lodging->save();
+					$lodging->save();
+					$lodging_total = 0;
+					$lodging_total_amount=0;
+						if ($lodging) {
+							$lodging_total = $lodging->amount + $lodging->cgst + $lodging->sgst + $lodging->igst + $lodging->round_off;
+							$lodging_total_amount += $lodging_total;
+						}
+					//LODGE TAX INVOICE SAVE
+
+						$lodging->taxInvoices()->forceDelete();
+
+						//ONLY FOR LODGE STAY TYPE
+						if ($lodging_data['stay_type_id'] == '3340' && $lodging_data['has_multiple_tax_invoice'] == "Yes") {
+							if (empty($lodging_data['tax_invoice_amount'])) {
+								return response()->json([
+									'success' => false,
+									'errors' => [
+										"Lodge tax invoice amount is required. Kindly fill in the tax invoice details form.",
+									],
+								]);
+							}
+							//dd($lodging_data['invoice_amount'],$lodging_data['total']);
+							/*if (floatval($lodging_data['invoice_amount']) != floatval($lodging_data['total'])) {
+								return response()->json([
+									'success' => false,
+									'errors' => [
+										"Lodge invoice amount not matched with the total amount",
+									],
+								]);
+							}*/
+
+							$lodging->has_multiple_tax_invoice = 1;
+							$lodging->tax_invoice_amount = !empty($lodging_data['tax_invoice_amount']) ? $lodging_data['tax_invoice_amount'] : NULL;
+							$lodging->save();
+
+					//SAVE LODGE TAX INVOICE
+							$lodgeTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3771,
+							]);
+							//NEW
+							if (!$lodgeTaxInvoice->exists) {
+								$lodgeTaxInvoice->created_at = Carbon::now();
+							} else {
+								$lodgeTaxInvoice->updated_at = Carbon::now();
+							}
+							$lodgeTaxInvoice->without_tax_amount = !empty($lodging_data['lodgingTaxInvoice']['without_tax_amount']) ? $lodging_data['lodgingTaxInvoice']['without_tax_amount'] : 0;
+							$lodgeTaxInvoice->tax_percentage = !empty($lodging_data['lodgingTaxInvoice']['tax_percentage']) ? $lodging_data['lodgingTaxInvoice']['tax_percentage'] : 0;
+							$lodgeTaxInvoice->cgst = !empty($lodging_data['lodgingTaxInvoice']['cgst']) ? $lodging_data['lodgingTaxInvoice']['cgst'] : 0;
+							$lodgeTaxInvoice->sgst = !empty($lodging_data['lodgingTaxInvoice']['sgst']) ? $lodging_data['lodgingTaxInvoice']['sgst'] : 0;
+							$lodgeTaxInvoice->igst = !empty($lodging_data['lodgingTaxInvoice']['igst']) ? $lodging_data['lodgingTaxInvoice']['igst'] : 0;
+							$lodgeTaxInvoice->total = !empty($lodging_data['lodgingTaxInvoice']['total']) ? $lodging_data['lodgingTaxInvoice']['total'] : 0;
+							$lodgeTaxInvoice->save();
+
+							//SAVE DRYWASH TAX INVOICE
+							$drywashTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3772,
+							]);
+							//NEW
+							if (!$drywashTaxInvoice->exists) {
+								$drywashTaxInvoice->created_at = Carbon::now();
+							} else {
+								$drywashTaxInvoice->updated_at = Carbon::now();
+							}
+							$drywashTaxInvoice->without_tax_amount = !empty($lodging_data['drywashTaxInvoice']['without_tax_amount']) ? $lodging_data['drywashTaxInvoice']['without_tax_amount'] : 0;
+							$drywashTaxInvoice->tax_percentage = !empty($lodging_data['drywashTaxInvoice']['tax_percentage']) ? $lodging_data['drywashTaxInvoice']['tax_percentage'] : 0;
+							$drywashTaxInvoice->cgst = !empty($lodging_data['drywashTaxInvoice']['cgst']) ? $lodging_data['drywashTaxInvoice']['cgst'] : 0;
+							$drywashTaxInvoice->sgst = !empty($lodging_data['drywashTaxInvoice']['sgst']) ? $lodging_data['drywashTaxInvoice']['sgst'] : 0;
+							$drywashTaxInvoice->igst = !empty($lodging_data['drywashTaxInvoice']['igst']) ? $lodging_data['drywashTaxInvoice']['igst'] : 0;
+							$drywashTaxInvoice->total = !empty($lodging_data['drywashTaxInvoice']['total']) ? $lodging_data['drywashTaxInvoice']['total'] : 0;
+							$drywashTaxInvoice->save();
+
+							//SAVE BOARDING TAX INVOICE
+							$boardingTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3773,
+							]);
+							//NEW
+							if (!$boardingTaxInvoice->exists) {
+								$boardingTaxInvoice->created_at = Carbon::now();
+							} else {
+								$boardingTaxInvoice->updated_at = Carbon::now();
+							}
+							$boardingTaxInvoice->without_tax_amount = !empty($lodging_data['boardingTaxInvoice']['without_tax_amount']) ? $lodging_data['boardingTaxInvoice']['without_tax_amount'] : 0;
+							$boardingTaxInvoice->tax_percentage = !empty($lodging_data['boardingTaxInvoice']['tax_percentage']) ? $lodging_data['boardingTaxInvoice']['tax_percentage'] : 0;
+							$boardingTaxInvoice->cgst = !empty($lodging_data['boardingTaxInvoice']['cgst']) ? $lodging_data['boardingTaxInvoice']['cgst'] : 0;
+							$boardingTaxInvoice->sgst = !empty($lodging_data['boardingTaxInvoice']['sgst']) ? $lodging_data['boardingTaxInvoice']['sgst'] : 0;
+							$boardingTaxInvoice->igst = !empty($lodging_data['boardingTaxInvoice']['igst']) ? $lodging_data['boardingTaxInvoice']['igst'] : 0;
+							$boardingTaxInvoice->total = !empty($lodging_data['boardingTaxInvoice']['total']) ? $lodging_data['boardingTaxInvoice']['total'] : 0;
+							$boardingTaxInvoice->save();
+
+							//SAVE OTHERS TAX INVOICE
+							$othersTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3774,
+							]);
+							//NEW
+							if (!$othersTaxInvoice->exists) {
+								$othersTaxInvoice->created_at = Carbon::now();
+							} else {
+								$othersTaxInvoice->updated_at = Carbon::now();
+							}
+							$othersTaxInvoice->without_tax_amount = !empty($lodging_data['othersTaxInvoice']['without_tax_amount']) ? $lodging_data['othersTaxInvoice']['without_tax_amount'] : 0;
+							$othersTaxInvoice->tax_percentage = !empty($lodging_data['othersTaxInvoice']['tax_percentage']) ? $lodging_data['othersTaxInvoice']['tax_percentage'] : 0;
+							$othersTaxInvoice->cgst = !empty($lodging_data['othersTaxInvoice']['cgst']) ? $lodging_data['othersTaxInvoice']['cgst'] : 0;
+							$othersTaxInvoice->sgst = !empty($lodging_data['othersTaxInvoice']['sgst']) ? $lodging_data['othersTaxInvoice']['sgst'] : 0;
+							$othersTaxInvoice->igst = !empty($lodging_data['othersTaxInvoice']['igst']) ? $lodging_data['othersTaxInvoice']['igst'] : 0;
+							$othersTaxInvoice->total = !empty($lodging_data['othersTaxInvoice']['total']) ? $lodging_data['othersTaxInvoice']['total'] : 0;
+							$othersTaxInvoice->save();
+
+							//SAVE ROUNDOFF TAX INVOICE
+							$roundoffTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3775,
+							]);
+							//NEW
+							if (!$roundoffTaxInvoice->exists) {
+								$roundoffTaxInvoice->created_at = Carbon::now();
+							} else {
+								$roundoffTaxInvoice->updated_at = Carbon::now();
+							}
+							$roundoffTaxInvoice->without_tax_amount = !empty($lodging_data['roundoffTaxInvoice']['without_tax_amount']) ? $lodging_data['roundoffTaxInvoice']['without_tax_amount'] : 0;
+							$roundoffTaxInvoice->cgst = !empty($lodging_data['roundoffTaxInvoice']['cgst']) ? $lodging_data['roundoffTaxInvoice']['cgst'] : 0;
+							$roundoffTaxInvoice->sgst = !empty($lodging_data['roundoffTaxInvoice']['sgst']) ? $lodging_data['roundoffTaxInvoice']['sgst'] : 0;
+							$roundoffTaxInvoice->igst = !empty($lodging_data['roundoffTaxInvoice']['igst']) ? $lodging_data['roundoffTaxInvoice']['igst'] : 0;
+							$roundoffTaxInvoice->total = !empty($lodging_data['roundoffTaxInvoice']['total']) ? $lodging_data['roundoffTaxInvoice']['total'] : 0;
+							$roundoffTaxInvoice->save();
+							//SAVE EMPLOYEE CLAIMS
+					
+                            //SAVE EMPLOYEE CLAIMS
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
+					$employee_claim->lodging_total = $lodging_total_amount;
+					//$employee_claim->employee_id = Auth::user()->entity_id;
+					$employee_claim->created_by = Auth::user()->id;
+
+					$employee_claim->save();
+
+				$transport_amount = $employee_claim->transport_total;
+				$lodging_amount = $employee_claim->lodging_total;
+				$boarding_amount = $employee_claim->boarding_total;
+				$local_travel_amount = $employee_claim->local_travel_total;
+				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+
+				// $employee_claim->total_trip_days = $request->trip_total_days;
+				$employee_claim->total_amount = $total_amount;
+                $employee_claim->save();
+				//To Find Amount to Pay Financier or Employee
+				$trip=Trip::where('id',$request->trip_id)->select('advance_received')->get()->first();
+				if ($trip->advance_received) {
+					if ($trip->advance_received > $total_amount) {
+						$balance_amount = $trip->advance_received - $total_amount;
+						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->amount_to_pay = 2;
+					} else {
+						$employee_claim->amount_to_pay = 1;
+					}
+				} else {
+					$employee_claim->amount_to_pay = 1;
+				}
+
+				$employee_claim->save();
+				
+				//GET SAVED LODGINGS
+				$saved_lodgings = Trip::with([
+					'lodgings',
+					'lodgings.lodgingTaxInvoice',
+					'lodgings.drywashTaxInvoice',
+					'lodgings.boardingTaxInvoice',
+					'lodgings.othersTaxInvoice',
+					'lodgings.roundoffTaxInvoice',
+					'lodging_attachments',
+					'lodgings.city',
+					'lodgings.stateType',
+					'lodgings.attachments',
+				])->find($request->trip_id);
+				DB::commit();
+				
+						}
+					return response()->json(['success' => true,'saved_lodgings'=>$saved_lodgings]);
+					}
+			}
+		}
+}
 	
 
 }
