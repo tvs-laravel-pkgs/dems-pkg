@@ -1617,6 +1617,44 @@ class Trip extends Model {
 			$data['message'] = 'Trip not found';
 		}
 
+		// Trip employee claim amount update by Karthick T on 22-08-2022
+		if (isset($trip->employee->tripEmployeeClaim) && $trip->employee->tripEmployeeClaim) {
+			$tax_details = EmployeeClaim::select(
+					DB::raw('SUM(IFNULL(lodgings.cgst, 0) + IFNULL(lodgings.sgst, 0) + IFNULL(lodgings.igst, 0)) as lodging_tax'),
+					DB::raw('SUM(IFNULL(boardings.cgst, 0) + IFNULL(boardings.sgst, 0) + IFNULL(boardings.igst, 0)) as boarding_tax'),
+					DB::raw('SUM(IFNULL(local_travels.cgst, 0) + IFNULL(local_travels.sgst, 0) + IFNULL(local_travels.igst, 0)) as local_travel_tax')
+				)->leftJoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')
+				->leftJoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')
+				->leftJoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')
+				->where('ey_employee_claims.trip_id', $trip->id)
+				->where('ey_employee_claims.employee_id', $trip->employee->id)
+				->get()
+				->toArray();
+			if (count($tax_details) > 0) {
+				$lodging_tax = array_sum(array_column($tax_details, 'lodging_tax'));
+				$boarding_tax = array_sum(array_column($tax_details, 'boarding_tax'));
+				$local_travel_tax = array_sum(array_column($tax_details, 'local_travel_tax'));
+
+				$local_travel_tax = number_format(array_sum(array_column($tax_details, 'local_travel_tax')), 2, '.', '');
+
+
+				$lodgingTotal = $trip->employee->tripEmployeeClaim->lodging_total + $lodging_tax;
+				$boardingTotal = $trip->employee->tripEmployeeClaim->boarding_total + $boarding_tax;
+				$localTravelTotal = $trip->employee->tripEmployeeClaim->local_travel_total + $local_travel_tax;
+
+				$trip->employee->tripEmployeeClaim->lodging_total = number_format($lodgingTotal, 2, '.', ',');
+				$trip->employee->tripEmployeeClaim->boarding_total = number_format($boardingTotal, 2, '.', ',');
+				$trip->employee->tripEmployeeClaim->local_travel_total = number_format($localTravelTotal, 2, '.', ',');
+				$total_amount = +$trip->employee->tripEmployeeClaim->transport_total
+							+ +$lodgingTotal
+							+ +$boardingTotal
+							+ +$localTravelTotal;
+
+				$trip->employee->tripEmployeeClaim->total_amount = number_format($total_amount, 2, '.', '');
+			}
+		}
+		// Trip employee claim amount update by Karthick T on 22-08-2022
+
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
 
