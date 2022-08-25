@@ -719,7 +719,8 @@ class LocalTrip extends Model {
 		$trip_visit_details = LocalTripVisitDetail::where('trip_id', $trip_id)->count();
 		if ($trip_visit_details > 0) {
 			if ($additional_approve == '1') {
-				$trip->status_id = 3036;
+				//$trip->status_id = 3036; 
+				$trip->status_id = 3026;
 			} else if ($financier_approve == '1') {
 				$trip->status_id = 3034;
 			} else {
