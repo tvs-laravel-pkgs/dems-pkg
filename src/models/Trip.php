@@ -1754,11 +1754,12 @@ class Trip extends Model {
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
-		$visit = Visit::select('id')->where('trip_id', $trip->id)->get()->toArray();
+		$visit = Visit::select('id')->where('trip_id', $trip->id)->where('booking_method_id',3040)->get()->toArray();
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$board = Boarding::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
 		$other = LocalTravel::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
 		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
+		//dd($tax_details);
 
 		if (count($visit) > 1) {
 			$transport_basic = number_format(array_sum(array_column($tax_details, 'transport_basic')), 2, '.', ',');
@@ -2642,7 +2643,7 @@ class Trip extends Model {
 
 						$boarding_total = 0;
 						if ($boarding) {
-							$boarding_total = $boarding->amount + $boarding->tax;
+							$boarding_total = $boarding->amount + $boarding->cgst+$boarding->sgst+$boarding->igst;
 							$boarding_total_amount += $boarding_total;
 						}
 
@@ -2870,7 +2871,7 @@ class Trip extends Model {
 
 						$local_amount_total = 0;
 						if ($local_travel) {
-							$local_amount_total = $local_travel->amount + $local_travel->tax;
+							$local_amount_total = $local_travel->amount + $local_travel->cgst + $local_travel->sgst+$local_travel->igst;
 							$local_total_amount += $local_amount_total;
 						}
 
