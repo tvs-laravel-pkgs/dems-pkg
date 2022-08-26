@@ -2615,6 +2615,7 @@ app.component('eyatraTripClaimForm', {
                 var travel_igst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_igst').val() || 0);
                 var travel_toll_fee = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
                 var travel_round_off = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_round_off').val() || 0);
+                var travel_other_charges = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_other_charges').val() || 0);
                 var travel_invoice_amount = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_invoice_amount').val() || 0);
                 console.log(travel_toll_fee, travel_round_off, travel_invoice_amount);
                 if (!$.isNumeric(travel_amount)) {
@@ -2638,7 +2639,7 @@ app.component('eyatraTripClaimForm', {
                 if (!$.isNumeric(travel_invoice_amount)) {
                     travel_invoice_amount = 0;
                 }
-                travel_current_total = travel_amount + travel_cgst + travel_igst + travel_sgst + travel_toll_fee;
+                travel_current_total = travel_amount + travel_cgst + travel_igst + travel_sgst + travel_toll_fee + travel_other_charges;
                 travel_round_off = parseFloat(travel_invoice_amount - travel_current_total).toFixed(2);
                 $(this).closest('.is_deviation_amount_row').find('.travel_round_off').val(travel_round_off);
             });
@@ -2653,8 +2654,10 @@ app.component('eyatraTripClaimForm', {
                 var travel_cgst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_cgst').val() || 0);
                 var travel_sgst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_sgst').val() || 0);
                 var travel_igst = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_igst').val() || 0);
+                var travel_other_charges = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_other_charges').val() || 0);
+                var travel_round_off = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_round_off').val() || 0);
                 var travel_toll_fee = parseFloat($(this).closest('.is_deviation_amount_row').find('.travel_toll_fee').val() || 0);
-                // console.log(travel_toll_fee);
+                console.log(travel_other_charges, travel_round_off);
                 if (!$.isNumeric(travel_amount)) {
                     travel_amount = 0;
                 }
@@ -2670,7 +2673,7 @@ app.component('eyatraTripClaimForm', {
                 if (!$.isNumeric(travel_toll_fee)) {
                     travel_toll_fee = 0;
                 }
-                travel_current_total = travel_amount + travel_cgst + travel_igst + travel_sgst + travel_toll_fee;
+                travel_current_total = travel_amount + travel_cgst + travel_igst + travel_sgst + travel_toll_fee + travel_other_charges + travel_round_off;
                 total_travel_amount += travel_current_total;
                 $(this).closest('tr').find('.visit_booking_total_amount').val(travel_current_total);
             });
