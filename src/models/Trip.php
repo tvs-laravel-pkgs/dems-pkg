@@ -2111,6 +2111,9 @@ class Trip extends Model {
 							$visit_booking->cgst = $visit_data['cgst'];
 							$visit_booking->sgst = $visit_data['sgst'];
 							$visit_booking->igst = $visit_data['igst'];
+							$visit_booking->invoice_number=$visit_data['invoice_number'];
+							$visit_booking->invoice_amount=$visit_data['invoice_amount'];
+							$visit_booking->invoice_date=date('Y-m-d', strtotime($visit_data['invoice_date']));
 							if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}
