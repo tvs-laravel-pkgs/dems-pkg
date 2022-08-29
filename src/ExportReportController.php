@@ -207,7 +207,81 @@ class ExportReportController extends Controller {
 					}
 				}
 				$cronLog->remarks = "Agent visits found";
-
+            $datas = DB::table('axapta_exports')->where('entity_type_id',3790)->get()->toArray();
+				$excel_header =[
+					'CurrencyCode',
+					'JournalName',
+					'JournalNum',
+					'LineNum',
+					'Voucher',
+					'ApproverPersonnelNumber',
+					'Approved',
+					'TransDate',
+					'AccountType',
+					'LedgerDimension',
+					'DefaultDimension',
+					'Txt',
+					'AmountCurDebit',
+					'AmountCurCredit',
+					'OffsetAccountType',
+					'OffsetLedgerDimension',
+					'OffsetDefaultDimension',
+					'PaymMode',
+					'TaxGroup',
+					'TaxItemGroup',
+					'Invoice',
+					'SalesTaxFormTypes_IN_FormType',
+					'TDSGroup_IN',
+					'DocumentNum',
+					'DocumentDate',
+					'LogisticsLocation_LocationId',
+					'Due',
+					'PaymReference',
+				];
+				foreach($datas as $data_key => $data){
+				$excel_details =[
+					$data->CurrencyCode,
+					$data->JournalName,
+					$data->JournalNum,
+					$data->LineNum,
+					$data->Voucher,
+					$data->ApproverPersonnelNumber,
+					$data->Approved,
+					$data->TransDate,
+					$data->AccountType,
+					$data->LedgerDimension,
+					$data->DefaultDimension,
+					$data->Txt,
+					$data->AmountCurDebit,
+					$data->AmountCurCredit,
+					$data->OffsetAccountType,
+					$data->OffsetLedgerDimension,
+					$data->OffsetDefaultDimension,
+					$data->PaymMode,
+					$data->TaxGroup,
+					$data->TaxItemGroup,
+					$data->Invoice,
+					$data->SalesTaxFormTypes_IN_FormType,
+					$data->TDSGroup_IN,
+					$data->DocumentNum,
+					$data->DocumentDate,
+					$data->LogisticsLocation_LocationId,
+					$data->Due,
+					$data->PaymReference,
+                ];
+              	$export_data[] = $excel_details;
+              	}
+            	$time_stamp = date('Y_m_d_h_i_s');
+		    	$outputfile = 'AgentAxaptaExport_' . $time_stamp;
+				$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
+					$excel->sheet('AgentAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
+						$sheet->fromArray($export_data, NULL, 'A1');
+						$sheet->row(1, $excel_header);
+						$sheet->row(1, function ($row) {
+						$row->setBackground('#07c63a');
+						});
+					});
+				})->store('xlsx', storage_path('app/public/agent_axapta_report/'));
 			} else {
 				$cronLog->remarks = "No agent visits found";
 			}
@@ -459,6 +533,81 @@ class ExportReportController extends Controller {
 					}
 				}
 				$cronLog->remarks = "Employee trips found";
+				$datas = DB::table('axapta_exports')->where('entity_type_id',3791)->get()->toArray();
+					$excel_header =[
+					'CurrencyCode',
+					'JournalName',
+					'JournalNum',
+					'LineNum',
+					'Voucher',
+					'ApproverPersonnelNumber',
+					'Approved',
+					'TransDate',
+					'AccountType',
+					'LedgerDimension',
+					'DefaultDimension',
+					'Txt',
+					'AmountCurDebit',
+					'AmountCurCredit',
+					'OffsetAccountType',
+					'OffsetLedgerDimension',
+					'OffsetDefaultDimension',
+					'PaymMode',
+					'TaxGroup',
+					'TaxItemGroup',
+					'Invoice',
+					'SalesTaxFormTypes_IN_FormType',
+					'TDSGroup_IN',
+					'DocumentNum',
+					'DocumentDate',
+					'LogisticsLocation_LocationId',
+					'Due',
+					'PaymReference',
+					];
+				foreach($datas as $data_key => $data){
+					$excel_details =[
+					$data->CurrencyCode,
+					$data->JournalName,
+					$data->JournalNum,
+					$data->LineNum,
+					$data->Voucher,
+					$data->ApproverPersonnelNumber,
+					$data->Approved,
+					$data->TransDate,
+					$data->AccountType,
+					$data->LedgerDimension,
+					$data->DefaultDimension,
+					$data->Txt,
+					$data->AmountCurDebit,
+					$data->AmountCurCredit,
+					$data->OffsetAccountType,
+					$data->OffsetLedgerDimension,
+					$data->OffsetDefaultDimension,
+					$data->PaymMode,
+					$data->TaxGroup,
+					$data->TaxItemGroup,
+					$data->Invoice,
+					$data->SalesTaxFormTypes_IN_FormType,
+					$data->TDSGroup_IN,
+					$data->DocumentNum,
+					$data->DocumentDate,
+					$data->LogisticsLocation_LocationId,
+					$data->Due,
+					$data->PaymReference,
+                	];
+              		$export_data[] = $excel_details;
+              	}
+            	$time_stamp = date('Y_m_d_h_i_s');
+		    	$outputfile = 'EmployeeAxaptaExport_' . $time_stamp;
+				$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
+						$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
+						$sheet->fromArray($export_data, NULL, 'A1');
+						$sheet->row(1, $excel_header);
+						$sheet->row(1, function ($row) {
+						$row->setBackground('#07c63a');
+						});
+					});
+				})->store('xlsx', storage_path('app/public/employee_axapta_report/'));
 			} else {
 				$cronLog->remarks = "No employee trips found";
 			}
@@ -696,18 +845,6 @@ class ExportReportController extends Controller {
 		//UPDATE LINENUM
 		$axaptaExport->LineNum = $axaptaExport->id;
 		$axaptaExport->save();
-		$title = 'AxaptaExport_' . Carbon::now();
-		$sheet_name = 'AxaptaExport';
-		Excel::create($title, function ($excel) use ($data,$sheet_name) {
-			$excel->sheet($sheet_name, function ($sheet) use ($data) {
-				$sheet->fromArray($export_details, NULL, 'A1');
-				$sheet->row(1, $excel_headers);
-				$sheet->row(1, function ($row) {
-					$row->setBackground('#c4c4c4');
-				});
-			});
-			$excel->setActiveSheetIndex(0);
-		})->download('xlsx');
 	}
 
 	// Bank statement report
@@ -1227,13 +1364,13 @@ class ExportReportController extends Controller {
 		$from_date = date('Y-m-d', strtotime($date[0]));
 		$to_date = date('Y-m-d', strtotime($date[1]));
 		$business_ids = $r->businesses;
-		/*if ($r->businesses) {
+		if ($r->businesses) {
 			if (in_array('-1', json_decode($r->businesses))) {
 				$business_ids = Business::pluck('id')->toArray();
 			} else {
 				$business_ids = json_decode($r->businesses);
 			}
-		}*/
+		}
 		ini_set('max_execution_time', 0);
 		$excel_headers = [
 			'Business GSTIN',
@@ -1323,7 +1460,7 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
-			->where('departments.business_id', '=', $business_ids)
+			->whereIn('departments.business_id', $business_ids)
 			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_lodgings = EmployeeClaim::select(
@@ -1371,10 +1508,9 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
-			->where('departments.business_id', '=', $business_ids)
+			->whereIn('departments.business_id', $business_ids)
 			->groupBy('trips.id')
 			->get()->toArray();
-			//dd($gst_lodgings);
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
 		//dd($gst_datas);
 		if (count($gst_datas) == 0) {
