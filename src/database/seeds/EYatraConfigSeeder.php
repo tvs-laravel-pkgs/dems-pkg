@@ -1119,18 +1119,22 @@ class EYatraConfigSeeder extends Seeder {
 			// Lodging Tax Invoice Types
 			3771 => [
 				'name' => 'Lodging',
+				'hsn_code' => 996311,
 				'config_type_id' => 546,
 			],
 			3772 => [
 				'name' => 'Drywash',
+				'hsn_code' => 999719,
 				'config_type_id' => 546,
 			],
 			3773 => [
 				'name' => 'Boarding',
+				'hsn_code' => 996332,
 				'config_type_id' => 546,
 			],
 			3774 => [
 				'name' => 'Others',
+				'hsn_code' => 999719,
 				'config_type_id' => 546,
 			],
 			3775 => [

@@ -112,12 +112,13 @@ class TravelModeController extends Controller {
 	}
 
 	public function saveEYatraTravelMode(Request $request) {
-		// dd($request->all());
+		 //dd($request->all());
 
 		try {
 			$error_messages = [
 				'name.required' => 'Name is required',
 				'name.unique' => 'Name has already been taken',
+				'hsn_code'=>'HSN code already taken',
 			];
 
 			$validator = Validator::make($request->all(), [
@@ -157,6 +158,7 @@ class TravelModeController extends Controller {
 			$entity->company_id = Auth::user()->company_id;
 			$entity->entity_type_id = 502;
 			$entity->name = $request->name;
+			$entity->hsn_code=$request->hsn_code;
 
 			if ($request->status == 0) {
 				$entity->deleted_at = date('Y-m-d H:i:s');

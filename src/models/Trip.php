@@ -2141,11 +2141,20 @@ class Trip extends Model {
 										]);
 									}
 									$visit_booking->gstin = $response['gstin'];
+									$visit_booking->gstin_name = $visit_data['gstin_name'];
+									$visit_booking->gstin_state_code = $visit_data['gstin_state_code'];
+									$visit_booking->gstin_address = $visit_data['gstin_address'];
 								} else {
 									$visit_booking->gstin = NULL;
+									$visit_booking->gstin_name = NULL;
+									$visit_booking->gstin_state_code = NULL;
+									$visit_booking->gstin_address = NULL;
 								}
 							} else {
 								$visit_booking->gstin = NULL;
+								$visit_booking->gstin_name = NULL;
+								$visit_booking->gstin_state_code = NULL;
+								$visit_booking->gstin_address = NULL;
 							}
 							$visit_booking->save();
 							$transport_total = 0;
@@ -2315,10 +2324,14 @@ class Trip extends Model {
 								}
 								$lodging->lodge_name = $lodging_data['gstin'];
 								$lodging->gstin = $lodging_data['lodge_name'];
+								$lodging->gstin_state_code = $lodging_data['gstin_state_code'];
+								$lodging->gstin_address = $lodging_data['gstin_address'];
 							}
 						} else {
-							$lodging->lodge_name = null;
 							$lodging->gstin = null;
+							$lodging->lodge_name = null;
+							$lodging->gstin_state_code = null;
+							$lodging->gstin_address = null;
 						}
 						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);

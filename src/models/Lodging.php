@@ -25,6 +25,8 @@ class Lodging extends Model {
 		'reference_number',
 		'description',
 		'lodge_name',
+		'gstin_address',
+		'gstin_state_code',
 		'eligible_amount',
 		'remarks',
 		'tax_percentage',

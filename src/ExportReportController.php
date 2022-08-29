@@ -696,6 +696,18 @@ class ExportReportController extends Controller {
 		//UPDATE LINENUM
 		$axaptaExport->LineNum = $axaptaExport->id;
 		$axaptaExport->save();
+		$title = 'AxaptaExport_' . Carbon::now();
+		$sheet_name = 'AxaptaExport';
+		Excel::create($title, function ($excel) use ($data,$sheet_name) {
+			$excel->sheet($sheet_name, function ($sheet) use ($data) {
+				$sheet->fromArray($export_details, NULL, 'A1');
+				$sheet->row(1, $excel_headers);
+				$sheet->row(1, function ($row) {
+					$row->setBackground('#c4c4c4');
+				});
+			});
+			$excel->setActiveSheetIndex(0);
+		})->download('xlsx');
 	}
 
 	// Bank statement report
@@ -1197,6 +1209,279 @@ class ExportReportController extends Controller {
 		}
 		$title = 'GST_REPORT_' . Carbon::now();
 		$sheet_name = 'GST REPORT';
+		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
+			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+				$sheet->fromArray($export_details, NULL, 'A1');
+				$sheet->row(1, $excel_headers);
+				$sheet->row(1, function ($row) {
+					$row->setBackground('#c4c4c4');
+				});
+			});
+			$excel->setActiveSheetIndex(0);
+		})->download('xlsx');
+	}
+   //GST REPORT NEW ONE
+	public function employeeGstrReport(Request $r) {
+		ob_end_clean();
+		$date = explode(' to ', $r->period);
+		$from_date = date('Y-m-d', strtotime($date[0]));
+		$to_date = date('Y-m-d', strtotime($date[1]));
+		$business_ids = $r->businesses;
+		/*if ($r->businesses) {
+			if (in_array('-1', json_decode($r->businesses))) {
+				$business_ids = Business::pluck('id')->toArray();
+			} else {
+				$business_ids = json_decode($r->businesses);
+			}
+		}*/
+		ini_set('max_execution_time', 0);
+		$excel_headers = [
+			'Business GSTIN',
+			'Business Unit',
+			'Tax Period',
+			'Doc Type',
+			'Purchase Type',
+			'Doc No',
+			'Doc Date',
+			'ERP Reference No',
+			'Supplier GSTIN',
+			'Supplier Name',
+			'Supplier Address',
+			'Supplier State',
+			'Place of Supply',
+			'Bill Of Entry Date',
+			'Bill Of Entry No',
+			'Port Code',
+			'Reference Doc No',
+			'Reference Doc Date',
+			'Reverse Charge',
+			'Discount',
+			'Other Charges',
+			'Round Off',
+			'Doc Value',
+			'Doc Tags',
+			'Keywords',
+			'Doc Label1',
+			'Doc Label2',
+			'Doc Label3',
+			'ItemType',
+			'Item Description',
+			'HSN Code',
+			'Hsn Description',
+			'Unit Of Measure',
+			'Qty',
+			'Item Taxable Value',
+			'Tax Category',
+			'GST Rate',
+			'IGST',
+			'CGST',
+			'SGST',
+			'Cess Rate',
+			'Cess',
+		];
+		$gst_transports = EmployeeClaim::select(
+			DB::raw('COALESCE(operating_states.gst_number, "") as business_gstin'),
+			DB::raw('COALESCE(sbus.name, "") as business_unit'),
+			DB::raw('COALESCE(visit_bookings.invoice_number, "") as doc_number'),
+			DB::raw('COALESCE(DATE_FORMAT(visit_bookings.invoice_date,"%d-%m-%Y"), "") as doc_date'),
+			DB::raw('COALESCE(visit_bookings.gstin, "") as supplier_gstin'),
+			DB::raw('COALESCE(visit_bookings.gstin_name, "") as supplier_name'),
+			DB::raw('COALESCE(visit_bookings.gstin_address, "") as supplier_address'),
+			DB::raw('COALESCE(visit_bookings.gstin_state_code, "") as supplier_state'),
+			DB::raw('COALESCE(entities.name, "") as item_description'),
+			DB::raw('COALESCE(entities.hsn_code, "") as hsn_code'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as item_taxable_amount'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.tax_percentage, 0)),2,"en_IN") as tax_percentage'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.cgst, 0)),2,"en_IN") as cgst'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.sgst, 0)),2,"en_IN") as sgst'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.round_off, 0)),2,"en_IN") as round_off'),
+			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as tax_period')
+		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
+			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftJoin('users', function ($user_q) {
+				$user_q->on('employees.id', 'users.entity_id')
+					->where('users.user_type_id', 3121);
+			})
+			->leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
+			->leftJoin('visits', 'visits.trip_id', 'trips.id')
+			->leftJoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+			->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
+			->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
+			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
+			->leftJoin('ey_addresses as a', function ($join) {
+				$join->on('a.entity_id', '=', 'outlets.id')
+					->where('a.address_of_id', 3160);
+			})
+			->leftJoin('ncities as city', 'city.id', 'a.city_id')
+			->leftJoin('nstates as s', 's.id', 'city.state_id')
+			->join('operating_states','operating_states.nstate_id','s.id')
+			->join('departments', 'departments.id', 'employees.department_id')
+			->join('businesses', 'businesses.id', 'departments.business_id')
+			->where('entities.entity_type_id',502)
+			->where('ey_employee_claims.status_id', 3026)
+			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
+			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
+			->where('departments.business_id', '=', $business_ids)
+			->groupBy('trips.id')
+			->get()->toArray();
+		$gst_lodgings = EmployeeClaim::select(
+			DB::raw('COALESCE(operating_states.gst_number, "") as business_gstin'),
+			DB::raw('COALESCE(sbus.name, "") as business_unit'),
+			DB::raw('COALESCE(lodgings.reference_number, "") as doc_number'),
+			DB::raw('COALESCE(DATE_FORMAT(lodgings.invoice_date,"%d-%m-%Y"), "") as doc_date'),
+			DB::raw('COALESCE(lodgings.gstin, "") as supplier_gstin'),
+			DB::raw('COALESCE(lodgings.lodge_name, "") as supplier_name'),
+			DB::raw('COALESCE(lodgings.gstin_address, "") as supplier_address'),
+			DB::raw('COALESCE(lodgings.gstin_state_code, "") as supplier_state'),
+			DB::raw('COALESCE(configs.name, "") as item_description'),
+			DB::raw('COALESCE(configs.hsn_code, "") as hsn_code'),
+			DB::raw('format(ROUND(IFNULL(lodgings.amount, 0)),2,"en_IN") as item_taxable_amount'),
+			DB::raw('format(ROUND(IFNULL(lodgings.tax_percentage, 0)),2,"en_IN") as tax_percentage'),
+			DB::raw('format(ROUND(IFNULL(lodgings.cgst, 0)),2,"en_IN") as cgst'),
+			DB::raw('format(ROUND(IFNULL(lodgings.sgst, 0)),2,"en_IN") as sgst'),
+			DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
+			DB::raw('format(ROUND(IFNULL(lodgings.round_off, 0)),2,"en_IN") as round_off'),
+			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as tax_period')
+		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
+			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftJoin('users', function ($user_q) {
+				$user_q->on('employees.id', 'users.entity_id')
+					->where('users.user_type_id', 3121);
+			})
+			->leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
+			->leftJoin('visits', 'visits.trip_id', 'trips.id')
+			->leftJoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+			->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
+			->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
+			->leftJoin('lodging_tax_invoices','lodging_tax_invoices.lodging_id','lodgings.id')
+			->leftJoin('configs','configs.id','lodging_tax_invoices.type_id')
+			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
+			->leftJoin('ey_addresses as a', function ($join) {
+				$join->on('a.entity_id', '=', 'outlets.id')
+					->where('a.address_of_id', 3160);
+			})
+			->leftJoin('ncities as city', 'city.id', 'a.city_id')
+			->leftJoin('nstates as s', 's.id', 'city.state_id')
+			->join('operating_states','operating_states.nstate_id','s.id')
+			->join('departments', 'departments.id', 'employees.department_id')
+			->join('businesses', 'businesses.id', 'departments.business_id')
+			->where('configs.config_type_id',546)
+			->where('ey_employee_claims.status_id', 3026)
+			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
+			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
+			->where('departments.business_id', '=', $business_ids)
+			->groupBy('trips.id')
+			->get()->toArray();
+			//dd($gst_lodgings);
+		$gst_datas = array_merge($gst_transports,$gst_lodgings);
+		//dd($gst_datas);
+		if (count($gst_datas) == 0) {
+			Session()->flash('error', 'No Data Found');
+			//return redirect()->to('/#!/gst/report');
+		}
+		$export_details = [];
+		$s_no = 1;
+		//foreach($gst_datas as $gst_data_key => $gst_data){
+		$s_no++;
+		foreach ($gst_transports as $gst_transport_key => $gst_transport) {
+			$transport_data = [
+				$gst_transport['business_gstin'],
+				$gst_transport['business_unit'],
+				$gst_transport['tax_period'],
+				'Invoice',
+				'STD',
+				$gst_transport['doc_number'],
+				$gst_transport['doc_date'],
+				' ',
+				$gst_transport['supplier_gstin'],
+				$gst_transport['supplier_name'],
+				$gst_transport['supplier_address'],
+				$gst_transport['supplier_state'],
+				$gst_transport['supplier_state'],
+				' ',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				$gst_transport['other_charges'],
+				$gst_transport['round_off'],
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'S',
+				$gst_transport['item_description'],
+				$gst_transport['hsn_code'],
+				'',
+				'OTH',
+				'1',
+				$gst_transport['item_taxable_amount'],
+				'TAX',
+				$gst_transport['tax_percentage'],
+				$gst_transport['igst'],
+				$gst_transport['cgst'],
+				$gst_transport['sgst'],
+				'0',
+				'0',
+			];
+			$export_details[] = $transport_data;
+		}
+		foreach($gst_lodgings as $gst_lodging_key => $gst_lodging){
+			$lodging_data = [
+				$gst_lodging['business_gstin'],
+				$gst_lodging['business_unit'],
+				$gst_lodging['tax_period'],
+				'Invoice',
+				'STD',
+				$gst_lodging['doc_number'],
+				$gst_lodging['doc_date'],
+				' ',
+				$gst_lodging['supplier_gstin'],
+				$gst_lodging['supplier_name'],
+				$gst_lodging['supplier_address'],
+				$gst_lodging['supplier_state'],
+				$gst_lodging['supplier_state'],
+				' ',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				$gst_lodging['round_off'],
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'S',
+				$gst_lodging['item_description'],
+				$gst_lodging['hsn_code'],
+				'',
+				'OTH',
+				'1',
+				$gst_lodging['item_taxable_amount'],
+				'TAX',
+				$gst_lodging['tax_percentage'],
+				$gst_lodging['igst'],
+				$gst_lodging['cgst'],
+				$gst_lodging['sgst'],
+				'0',
+				'0',
+			];
+			$export_details[] = $lodging_data;
+		}
+	//}
+		$title = 'GSTR2_REPORT_' . Carbon::now();
+		$sheet_name = 'GSTR2 REPORT';
 		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
 			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
 				$sheet->fromArray($export_details, NULL, 'A1');

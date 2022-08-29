@@ -2040,7 +2040,9 @@ app.component('eyatraTripClaimForm', {
         }
 
         $scope.fareDetailGstChange = (index, gst_number) => {
-            self.trip.visits[index]['fare_gst_detail'] = '';
+            self.trip.visits[index]['gstin_name'] = '';
+            self.trip.visits[index]['gstin_address'] = '';
+            self.trip.visits[index]['gstin_state_code'] = '';
             if (gst_number && gst_number.length == 15) {
                 $http({
                     url: laravel_routes['getGstInData'],
@@ -2060,7 +2062,10 @@ app.component('eyatraTripClaimForm', {
                         }
                         custom_noty('error', errors);
                     } else {
-                        self.trip.visits[index]['fare_gst_detail'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        console.log(res.data.gst_data);
+                        self.trip.visits[index]['gstin_address'] = res.data.gst_data;
+                        self.trip.visits[index]['gstin_state_code'] = res.data.gst_data.StateCode;
+                        self.trip.visits[index]['gstin_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
                     }
                 });
             }
@@ -2450,6 +2455,8 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings[index].has_multiple_tax_invoice = "No";
 
             self.trip.lodgings[index]['lodge_name'] = '';
+            self.trip.lodgings[index]['gstin_address'] = '';
+            self.trip.lodgings[index]['gstin_state_code'] = '';
             if (gst_number.length == 15) {
                 $http({
                     url: laravel_routes['getGstInData'],
@@ -2469,6 +2476,8 @@ app.component('eyatraTripClaimForm', {
                         }
                         custom_noty('error', errors);
                     } else {
+                        self.trip.lodgings[index]['gstin_address'] = res.data.gst_data;
+                        self.trip.lodgings[index]['gstin_state_code'] = res.data.gst_data.StateCode;
                         self.trip.lodgings[index]['lodge_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
 
                         //IF STAY TYPE IS LODGE STAY AND GSTIN FILLED AND VALID THEN ENABLE HAS MULTIPLE TAX INVOICE YES OPTION
