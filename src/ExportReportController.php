@@ -1434,7 +1434,7 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.round_off, 0)),2,"en_IN") as round_off'),
-			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as tax_period')
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -1458,8 +1458,8 @@ class ExportReportController extends Controller {
 			->join('businesses', 'businesses.id', 'departments.business_id')
 			->where('entities.entity_type_id',502)
 			->where('ey_employee_claims.status_id', 3026)
-			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
-			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
 			->whereNotNull('visit_bookings.gstin')
 			->groupBy('trips.id')
@@ -1481,7 +1481,7 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(lodgings.sgst, 0)),2,"en_IN") as sgst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.round_off, 0)),2,"en_IN") as round_off'),
-			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as tax_period')
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -1507,8 +1507,8 @@ class ExportReportController extends Controller {
 			->join('businesses', 'businesses.id', 'departments.business_id')
 			->where('configs.config_type_id',546)
 			->where('ey_employee_claims.status_id', 3026)
-			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
-			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
 			->whereNotNull('lodgings.gstin')
 			->groupBy('trips.id')
