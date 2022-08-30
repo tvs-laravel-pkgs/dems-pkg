@@ -29,6 +29,7 @@ app.component('eyatraTripBookingRequests', {
                     d.employee = $('#employee_name').val();
                     //alert($('#status').val());
                     d.status = $('#status').val();
+                    d.booking_status = $('#booking_status_name').val();
                 }
             },
             columns: [
@@ -66,6 +67,7 @@ app.component('eyatraTripBookingRequests', {
             // console.log(response);
             self.employee_list = response.data.employee_list;
             self.status_list = response.data.status_list;
+            self.booking_status_list = response.data.booking_status_list;
             $rootScope.loading = false;
         });
         var dataTableFilter = $('#eyatra_trip_booking_requests_table').dataTable();
@@ -77,10 +79,15 @@ app.component('eyatraTripBookingRequests', {
             $('#status').val(id);
             dataTableFilter.fnFilter();
         }
+        $scope.onselectBookingStatus = function(id) {
+            $('#booking_status_name').val(id);
+            dataTableFilter.fnFilter();
+        }
 
         $scope.resetForm = function() {
             $('#employee_name').val(null);
             $('#status').val(null);
+            $('#booking_status_name').val(null);
             dataTableFilter.fnFilter();
         }
 

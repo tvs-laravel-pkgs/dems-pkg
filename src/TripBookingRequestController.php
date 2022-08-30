@@ -20,6 +20,7 @@ class TripBookingRequestController extends Controller {
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)->get();
 		$this->data['status_list'] = $status_list = Config::select('name', 'id')->where('config_type_id', 512)->get();
+		$this->data['booking_status_list'] = $booking_status_list = Config::select('name', 'id')->where('config_type_id', 503)->get();
 
 		return response()->json($this->data);
 	}
@@ -34,6 +35,11 @@ class TripBookingRequestController extends Controller {
 			$status = $r->status;
 		} else {
 			$status = null;
+		}
+		if (!empty($r->booking_status)) {
+			$booking_status = $r->booking_status;
+		} else {
+			$booking_status = null;
 		}
 
 		$visits = Trip::select([
@@ -63,6 +69,11 @@ class TripBookingRequestController extends Controller {
 			->where(function ($query) use ($r, $status) {
 				if (!empty($status)) {
 					$query->where('status.id', $status);
+				}
+			})
+			->where(function ($query) use ($r, $booking_status) {
+				if (!empty($booking_status)) {
+					$query->where('bs.id', $booking_status);
 				}
 			})
 			->groupBy('v.trip_id')
