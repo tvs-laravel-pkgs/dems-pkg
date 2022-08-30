@@ -1461,6 +1461,7 @@ class ExportReportController extends Controller {
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
+			->whereNotNull('visit_bookings.gstin')
 			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_lodgings = EmployeeClaim::select(
@@ -1509,6 +1510,7 @@ class ExportReportController extends Controller {
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
+			->whereNotNull('lodgings.gstin')
 			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);

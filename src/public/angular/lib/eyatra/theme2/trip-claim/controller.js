@@ -2063,9 +2063,9 @@ app.component('eyatraTripClaimForm', {
                         custom_noty('error', errors);
                     } else {
                         console.log(res.data.gst_data);
-                        self.trip.visits[index]['gstin_address'] = res.data.gst_data;
                         self.trip.visits[index]['gstin_state_code'] = res.data.gst_data.StateCode;
                         self.trip.visits[index]['gstin_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        self.trip.visits[index]['gstin_address'] = self.trip.visits[index]['gstin_name'] + ',' + res.data.gst_data.AddrLoc + ',' + res.data.gst_data.AddrSt + ',' + res.data.gst_data.AddrFlno + ',' + res.data.gst_data.AddrPncd;
                     }
                 });
             }
@@ -2476,10 +2476,9 @@ app.component('eyatraTripClaimForm', {
                         }
                         custom_noty('error', errors);
                     } else {
-                        self.trip.lodgings[index]['gstin_address'] = res.data.gst_data;
                         self.trip.lodgings[index]['gstin_state_code'] = res.data.gst_data.StateCode;
                         self.trip.lodgings[index]['lodge_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
-
+                        self.trip.lodgings[index]['gstin_address'] = self.trip.visits[index]['gstin_name'] + ',' + res.data.gst_data.AddrLoc + ',' + res.data.gst_data.AddrSt + ',' + res.data.gst_data.AddrFlno + ',' + res.data.gst_data.AddrPncd;
                         //IF STAY TYPE IS LODGE STAY AND GSTIN FILLED AND VALID THEN ENABLE HAS MULTIPLE TAX INVOICE YES OPTION
                         if (self.trip.lodgings[index]['stay_type_id'] == 3340) {
                             $('#lodging_has_multiple_tax_invoice_active_' + index).attr('disabled', false);
