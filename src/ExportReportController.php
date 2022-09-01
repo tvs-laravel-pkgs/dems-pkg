@@ -1472,6 +1472,7 @@ class ExportReportController extends Controller {
 		$gst_lodgings = EmployeeClaim::select(
 			DB::raw('COALESCE(operating_states.gst_number, "") as business_gstin'),
 			DB::raw('COALESCE(sbus.name, "") as business_unit'),
+			DB::raw('COALESCE(lodgings.id, "") as id'),
 			DB::raw('COALESCE(lodgings.reference_number, "") as doc_number'),
 			DB::raw('COALESCE(DATE_FORMAT(lodgings.invoice_date,"%d-%m-%Y"), "") as doc_date'),
 			DB::raw('COALESCE(lodgings.gstin, "") as supplier_gstin'),
@@ -1486,7 +1487,8 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(lodgings.sgst, 0)),2,"en_IN") as sgst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.round_off, 0)),2,"en_IN") as round_off'),
-			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period')
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period'),
+			DB::raw('COALESCE(lodgings.has_multiple_tax_invoice, "") as has_multiple_tax_invoice')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -1517,14 +1519,12 @@ class ExportReportController extends Controller {
 			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
-		//dd($gst_datas);
 		if (count($gst_datas) == 0) {
 			Session()->flash('error', 'No Data Found');
 			//return redirect()->to('/#!/gst/report');
 		}
 		$export_details = [];
 		$s_no = 1;
-		//foreach($gst_datas as $gst_data_key => $gst_data){
 		$s_no++;
 		foreach ($gst_transports as $gst_transport_key => $gst_transport) {
 			$transport_data = [
@@ -1619,8 +1619,67 @@ class ExportReportController extends Controller {
 				'0',
 			];
 			$export_details[] = $lodging_data;
+			if($gst_lodging['has_multiple_tax_invoice'] == 1){
+			$multiple_taxs=LodgingTaxInvoice::select(
+			DB::raw('COALESCE(configs.name, "") as multiple_description'),
+			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.without_tax_amount, 0)),2,"en_IN") as multiple_amount'),
+			DB::raw('COALESCE(lodging_tax_invoices.tax_percentage, "") as multilple_tax_percentage'),
+			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.cgst, 0)),2,"en_IN") as multilple_cgst'),
+			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.sgst, 0)),2,"en_IN") as multilple_sgst'),
+			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.igst, 0)),2,"en_IN") as multilple_igst'))
+			->leftJoin('lodgings','lodgings.id','lodging_tax_invoices.lodging_id')
+			->leftJoin('configs','configs.id','lodging_tax_invoices.type_id')
+			->where('lodging_tax_invoices.lodging_id',$gst_lodging['id'])
+			->get()->toArray();
+				foreach($multiple_taxs as $multiple_tax_key => $multiple_tax){
+					$multiple_lodging_data = [
+					    $gst_lodging['business_gstin'],
+						$gst_lodging['business_unit'],
+						$gst_lodging['tax_period'],
+						'Invoice',
+						'STD',
+						$gst_lodging['doc_number'],
+						$gst_lodging['doc_date'],
+						' ',
+						$gst_lodging['supplier_gstin'],
+						$gst_lodging['supplier_name'],
+						$gst_lodging['supplier_address'],
+						$gst_lodging['supplier_state'],
+						$gst_lodging['supplier_state'],
+						' ',
+						'',
+						'',
+						'',
+						'',
+						'',
+						'',
+						'',
+						$gst_lodging['round_off'],
+						'',
+						'',
+						'',
+						'',
+						'',
+						'',
+						'S',
+						$multiple_tax['multiple_description'],
+						$gst_lodging['hsn_code'],
+						'',
+						'OTH',
+						'1',
+						$multiple_tax['multiple_amount'],
+						'TAX',
+						$multiple_tax['multilple_tax_percentage'] ."%",
+						$multiple_tax['multilple_igst'],
+						$multiple_tax['multilple_cgst'],
+						$multiple_tax['multilple_sgst'],
+						'0',
+						'0',
+					];
+			   		$export_details[] = $multiple_lodging_data;
+		    	}
+	        }
 		}
-	//}
 		$title = 'GSTR2_REPORT_' . Carbon::now();
 		$sheet_name = 'GSTR2 REPORT';
 		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
