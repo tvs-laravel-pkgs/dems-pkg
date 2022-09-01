@@ -209,6 +209,7 @@ class ExportReportController extends Controller {
 				$cronLog->remarks = "Agent visits found";
             $datas = DB::table('axapta_exports')->where('entity_type_id',3790)->get()->toArray();
 				$excel_header =[
+					'EntityId',
 					'CurrencyCode',
 					'JournalName',
 					'JournalNum',
@@ -240,6 +241,7 @@ class ExportReportController extends Controller {
 				];
 				foreach($datas as $data_key => $data){
 				$excel_details =[
+					$data->entity_id,
 					$data->CurrencyCode,
 					$data->JournalName,
 					$data->JournalNum,
@@ -535,6 +537,7 @@ class ExportReportController extends Controller {
 				$cronLog->remarks = "Employee trips found";
 				$datas = DB::table('axapta_exports')->where('entity_type_id',3791)->get()->toArray();
 					$excel_header =[
+					'EntityId',
 					'CurrencyCode',
 					'JournalName',
 					'JournalNum',
@@ -566,6 +569,7 @@ class ExportReportController extends Controller {
 					];
 				foreach($datas as $data_key => $data){
 					$excel_details =[
+					$data->entity_id,
 					$data->CurrencyCode,
 					$data->JournalName,
 					$data->JournalNum,
