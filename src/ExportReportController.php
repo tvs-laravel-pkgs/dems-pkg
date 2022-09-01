@@ -1440,7 +1440,7 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(visit_bookings.round_off, 0)),2,"en_IN") as round_off'),
 			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
-			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
 				$user_q->on('employees.id', 'users.entity_id')
 					->where('users.user_type_id', 3121);
@@ -1467,6 +1467,7 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('visit_bookings.gstin')
+			->where('visits.booking_method_id',3040)
 			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_lodgings = EmployeeClaim::select(
@@ -1488,7 +1489,7 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(lodgings.round_off, 0)),2,"en_IN") as round_off'),
 			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
-			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
 				$user_q->on('employees.id', 'users.entity_id')
 					->where('users.user_type_id', 3121);
