@@ -1428,7 +1428,7 @@ class ExportReportController extends Controller {
 			DB::raw('COALESCE(entities.name, "") as item_description'),
 			DB::raw('COALESCE(entities.hsn_code, "") as hsn_code'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as item_taxable_amount'),
-			DB::raw('format(ROUND(IFNULL(visit_bookings.tax_percentage, 0)),2,"en_IN") as tax_percentage'),
+			DB::raw('COALESCE(visit_bookings.tax_percentage, "") as tax_percentage'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.cgst, 0)),2,"en_IN") as cgst'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.sgst, 0)),2,"en_IN") as sgst'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
@@ -1457,12 +1457,13 @@ class ExportReportController extends Controller {
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->where('entities.entity_type_id',502)
-			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
+			->where('ey_employee_claims.status_id', 3026)
+			->where('trips.status_id', 3026)
 			->whereNotNull('visit_bookings.gstin')
-			->groupBy('ey_employee_claims.id')
+			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_lodgings = EmployeeClaim::select(
 			DB::raw('COALESCE(operating_states.gst_number, "") as business_gstin'),
@@ -1476,7 +1477,7 @@ class ExportReportController extends Controller {
 			DB::raw('COALESCE(configs.name, "") as item_description'),
 			DB::raw('COALESCE(configs.hsn_code, "") as hsn_code'),
 			DB::raw('format(ROUND(IFNULL(lodgings.amount, 0)),2,"en_IN") as item_taxable_amount'),
-			DB::raw('format(ROUND(IFNULL(lodgings.tax_percentage, 0)),2,"en_IN") as tax_percentage'),
+			DB::raw('COALESCE(lodgings.tax_percentage, "") as tax_percentage'),
 			DB::raw('format(ROUND(IFNULL(lodgings.cgst, 0)),2,"en_IN") as cgst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.sgst, 0)),2,"en_IN") as sgst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
@@ -1506,12 +1507,13 @@ class ExportReportController extends Controller {
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->where('configs.config_type_id',546)
-			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
+			->where('ey_employee_claims.status_id', 3026)
+			->where('trips.status_id', 3026)
 			->whereNotNull('lodgings.gstin')
-			->groupBy('ey_employee_claims.id')
+			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
 		//dd($gst_datas);
@@ -1561,7 +1563,7 @@ class ExportReportController extends Controller {
 				'1',
 				$gst_transport['item_taxable_amount'],
 				'TAX',
-				$gst_transport['tax_percentage'],
+				$gst_transport['tax_percentage'] . "%",
 				$gst_transport['igst'],
 				$gst_transport['cgst'],
 				$gst_transport['sgst'],
@@ -1608,7 +1610,7 @@ class ExportReportController extends Controller {
 				'1',
 				$gst_lodging['item_taxable_amount'],
 				'TAX',
-				$gst_lodging['tax_percentage'],
+				$gst_lodging['tax_percentage'] . "%",
 				$gst_lodging['igst'],
 				$gst_lodging['cgst'],
 				$gst_lodging['sgst'],
