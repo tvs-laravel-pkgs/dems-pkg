@@ -1449,7 +1449,6 @@ class ExportReportController extends Controller {
 			->leftJoin('visits', 'visits.trip_id', 'trips.id')
 			->leftJoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
-			->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
 			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
 			->leftJoin('ey_addresses as a', function ($join) {
 				$join->on('a.entity_id', '=', 'outlets.id')
@@ -1495,9 +1494,6 @@ class ExportReportController extends Controller {
 					->where('users.user_type_id', 3121);
 			})
 			->leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
-			->leftJoin('visits', 'visits.trip_id', 'trips.id')
-			->leftJoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
-			->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
 			->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
 			->leftJoin('lodging_tax_invoices','lodging_tax_invoices.lodging_id','lodgings.id')
 			->leftJoin('configs','configs.id','lodging_tax_invoices.type_id')
