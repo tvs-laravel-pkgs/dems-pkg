@@ -1453,16 +1453,16 @@ class ExportReportController extends Controller {
 			})
 			->leftJoin('ncities as city', 'city.id', 'a.city_id')
 			->leftJoin('nstates as s', 's.id', 'city.state_id')
-			->join('operating_states','operating_states.nstate_id','s.id')
-			->join('departments', 'departments.id', 'employees.department_id')
-			->join('businesses', 'businesses.id', 'departments.business_id')
+			->leftjoin('operating_states','operating_states.nstate_id','s.id')
+			->leftjoin('departments', 'departments.id', 'employees.department_id')
+			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->where('entities.entity_type_id',502)
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
 			->whereNotNull('visit_bookings.gstin')
-			->groupBy('trips.id')
+			->groupBy('ey_employee_claims.id')
 			->get()->toArray();
 		$gst_lodgings = EmployeeClaim::select(
 			DB::raw('COALESCE(operating_states.gst_number, "") as business_gstin'),
@@ -1502,16 +1502,16 @@ class ExportReportController extends Controller {
 			})
 			->leftJoin('ncities as city', 'city.id', 'a.city_id')
 			->leftJoin('nstates as s', 's.id', 'city.state_id')
-			->join('operating_states','operating_states.nstate_id','s.id')
-			->join('departments', 'departments.id', 'employees.department_id')
-			->join('businesses', 'businesses.id', 'departments.business_id')
+			->leftjoin('operating_states','operating_states.nstate_id','s.id')
+			->leftjoin('departments', 'departments.id', 'employees.department_id')
+			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->where('configs.config_type_id',546)
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
 			->whereNotNull('lodgings.gstin')
-			->groupBy('trips.id')
+			->groupBy('ey_employee_claims.id')
 			->get()->toArray();
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
 		//dd($gst_datas);
