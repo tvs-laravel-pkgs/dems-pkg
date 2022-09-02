@@ -1466,7 +1466,6 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('visit_bookings.gstin')
-			->where('visits.booking_method_id',3040)
 			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_lodgings = EmployeeClaim::select(
