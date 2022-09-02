@@ -484,7 +484,7 @@ class ExportReportController extends Controller {
 				'sbus.name as sbu',
 				'outlets.code as outletCode',
 				'outlets.axapta_location_id as axaptaLocationId',
-				'trips.claim_amount as totalAmount',
+				'ey_employee_claims.balance_amount as totalAmount',
 				'ey_employee_claims.number as invoiceNumber',
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%Y-%m-%d") as invoiceDate'),
 			])
