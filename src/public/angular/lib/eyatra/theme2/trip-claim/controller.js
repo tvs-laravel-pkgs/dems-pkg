@@ -2770,7 +2770,7 @@ app.component('eyatraTripClaimForm', {
                 // Added round off amount
                 currentTotal = parseFloat(lodgingAmount + lodgingCgst + lodgingSgst + lodgingIgst);
                 // Added round off amount
-                currentTotal = parseFloat(currentTotal + lodgingRoundOff);
+                currentTotal = parseFloat(currentTotal + lodgingRoundOff).toFixed(2);
                 lodging.total = currentTotal;
                 totalLodgingAmount += currentTotal;
             });
