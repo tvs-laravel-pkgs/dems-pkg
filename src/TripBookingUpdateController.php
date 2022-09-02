@@ -120,7 +120,7 @@ class TripBookingUpdateController extends Controller {
 				'ticket_booking.*.reference_number' => [
 					'required:true',
 				],
-				// 'ticket_booking.*.attachments' => 'required|mimes:jpeg,png,jpg,gif,svg,pdf',
+			 'ticket_booking.*.attachments' => 'required|mimes:jpeg,jpg,txt,pdf',
 			], $error_messages);
 
 			if ($validator->fails()) {
@@ -380,7 +380,7 @@ class TripBookingUpdateController extends Controller {
 					'integer',
 					'exists:visits,id',
 				],
-				'proof_attachment' => 'required',
+				'proof_attachment' => 'required|mimes:jpeg,jpg,txt,pdf',
 			]);
 
 			if ($validator->fails()) {

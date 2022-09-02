@@ -294,8 +294,8 @@ class TripController extends Controller {
 		//Booking Status
 		//3061 => Booking
 		//3062 => Cancel
-
-		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+$visit_booking= VisitBooking::select('is_proof_attached')->where('visit_id',$visit_id)->get()->first();
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062 || $visit_booking->is_proof_attached == 1) {
 			$relations[] = 'bookings';
 			$relations[] = 'bookings.attachments';
 			$relations[] = 'bookings.type';
@@ -308,7 +308,7 @@ class TripController extends Controller {
 
 		$this->data['visit'] = $visit;
 		$this->data['trip'] = $visit->trip;
-		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062) {
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062 || $visit_booking->is_proof_attached == 1) {
 			$this->data['bookings'] = $visit->bookings;
 			//dd($this->data['bookings'][0]->total, IND_money_format($this->data['bookings'][0]->total));
 		} else {
