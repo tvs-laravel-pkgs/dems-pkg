@@ -844,9 +844,15 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-gst-report></eyatra-gst-report>',
         title: 'GST Report',
     }).
+
     when('/employee/gstr/report', {
         template: '<eyatra-employee-gstr-report></eyatra-employee-gstr-report>',
         title: 'GSTR2 Report',
+    }).
+
+    when('/agent/report', {
+        template: '<eyatra-agent-report></eyatra-agent-report>',
+        title: 'Agent Report',
     }).
     when('/report/list', {
         template: '<eyatra-report-list></eyatra-report-list>',
