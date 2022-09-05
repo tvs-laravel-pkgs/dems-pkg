@@ -631,7 +631,6 @@ app.component('eyatraOutstationClaimVerificationView', {
                 error.insertAfter(element.parent())
             },
             submitHandler: function(form) {
-                alert('test');
                 if (transport_save) {
                     transport_save = 0;
                     let formData = new FormData($(form_transport_id)[0]);
