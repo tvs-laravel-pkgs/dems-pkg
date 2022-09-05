@@ -148,8 +148,10 @@ app.component('eyatraAgentReport', {
         var v = jQuery(form_id).validate({
             ignore: '',
             rules: {
-                'period': {
-                    required: true,
+                /*'businesses': {
+    required: true,
+}, */
+'period': {                   required: true,
                 },
             },
             errorPlacement: function(error, element) {

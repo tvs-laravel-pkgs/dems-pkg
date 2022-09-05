@@ -1720,6 +1720,14 @@ class ExportReportController extends Controller {
         $date = explode(' to ', $r->period);
 		$from_date = date('Y-m-d', strtotime($date[0]));
 		$to_date = date('Y-m-d', strtotime($date[1]));
+		$business_ids = $r->businesses;
+		if ($r->businesses) {
+			if (in_array('-1', json_decode($r->businesses))) {
+				$business_ids = Business::pluck('id')->toArray();
+			} else {
+				$business_ids = json_decode($r->businesses);
+			}
+		}
         $excel_headers = [
             'Sl.No',
             'Name',
@@ -1749,15 +1757,17 @@ class ExportReportController extends Controller {
             'Ref',
         ];
         $booking_details = Trip::select(
-                DB::raw('COALESCE(users.name, "") as name'),
-                DB::raw('COALESCE(employees.code, "") as ecode'),
+        		DB::raw('COALESCE(visits.id, "") as id'),
+        		DB::raw('COALESCE(visit_bookings.id, "") as visit_booking_id'),
+                DB::raw('COALESCE(users.name, "") as emp_name'),
+                DB::raw('COALESCE(employees.code, "") as emp_code'),
                 DB::raw('COALESCE(sbus.name, "") as sbu'),
                 DB::raw('COALESCE(nstates.name, "") as state'),
                 DB::raw('COALESCE(DATE_FORMAT(trips.created_at,"%d-%m-%Y"), "") as date_of_request'),
                 DB::raw('COALESCE(DATE_FORMAT(visit_bookings.created_at,"%d-%m-%Y"), "") as date_of_booking'),
                 DB::raw('COALESCE(DATE_FORMAT(visits.departure_date,"%d-%m-%Y"), "") as date_of_travel'),
-                DB::raw('COALESCE(ncities.name, "") as from'),
-                DB::raw('COALESCE(ncities.name, "") as to'),
+                'ncities.name as from',
+                'ncty.name as to',
                 DB::raw('COALESCE(entities.name, "") as mode'),
                 DB::raw('COALESCE(visit_bookings.reference_number, "") as reference_number'),
                 DB::raw('COALESCE(visit_bookings.amount, "") as ticket_base_amount'),
@@ -1767,13 +1777,10 @@ class ExportReportController extends Controller {
                 DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
                 DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as total_ticket_amount'),
                 DB::raw('format(ROUND(IFNULL(visit_bookings.agent_service_charges, 0)),2,"en_IN") as booking_charge'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as total_amount'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.reference_number, 0)),2,"en_IN") as original_reference_number'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as original_ticket_amount'),
-               DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as cancel_charges'),
-                DB::raw('COALESCE(DATE_FORMAT(visit_bookings.created_at,"%d-%m-%Y"), "") as origin_booking_date'),
+                DB::raw('SUM(COALESCE(visit_bookings.total, 0) + COALESCE(visit_bookings.agent_total, 0)) as total_amount'),
                 DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
-                DB::raw('COALESCE(visit_bookings.reference_number, "") as ref')
+                DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'),
+                DB::raw('COALESCE(visit_bookings.type_id, "") as type')
             )
             ->leftJoin('employees', 'employees.id', 'trips.employee_id')
             ->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -1784,57 +1791,100 @@ class ExportReportController extends Controller {
             ->leftJoin('visits','visits.trip_id','trips.id')
             ->leftJoin('visit_bookings', 'visit_bookings.visit_id','visits.id')
             ->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
+			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
             ->leftJoin('ncities', 'ncities.id', 'visits.from_city_id')
+            ->leftJoin('ncities as ncty', 'ncty.id', 'visits.to_city_id')
             ->leftJoin('nstates', 'nstates.id', 'ncities.state_id')
             ->leftjoin('departments','departments.id','employees.department_id')
             ->leftjoin('businesses','businesses.id','departments.business_id')
-            ->where('visit_bookings.type_id', 3100)
+            ->where('visits.booking_method_id',3042)
+            ->whereIn('visit_bookings.type_id', [3100,3101])
             ->whereDate('visit_bookings.created_at', '>=', $from_date)
-            ->whereDate('visit_bookings.created_at', '<=', $to_date)
-            ->where('departments.business_id','=',$r->business_ids)
-            ->groupBy('visit_bookings.id')
-            ->get()->toArray();
-         dd($booking_details);
+			->whereDate('visit_bookings.created_at', '<=', $to_date)
+			//->whereIn('departments.business_id', $business_ids)
+            ->groupBy('visit_bookings.id')->get()->toArray();
+        
         if (count($booking_details) == 0) {
             Session()->flash('error', 'No Data Found');
             //return redirect()->to('/#!/gst/report');
         }
         $export_details = [];
         $s_no = 1;
-        foreach ($booking_details as $booking_detail_key => $gst_detail) {
-            $export_data = [
-                $s_no++,
-                $gst_detail->emp_name,
-                $gst_detail->emp_code,
-                $gst_detail->sbu,
-                $gst_detail->state,
-                $gst_detail->date_of_request,
-                $gst_detail->date_of_booking,
-                $gst_detail->date_of_travel,
-                $gst_detail->from,
-                $gst_detail->to,
-                $gst_detail->mode,
-                $gst_detail->reference_number,
-                $gst_detail->ticket_base_amount,
-                $gst_detail->cgst,
-                $gst_detail->sgst,
-                $gst_detail->igst,
-                $gst_detail->other_charges,
-                $gst_detail->total_ticket_amount,
-                $gst_detail->booking_charge,
-                $gst_detail->total_amount,
-                $gst_detail->original_refernce_number,
-                $gst_detail->original_ticket_amount,
-                $gst_detail->cancel_charges,
-                $gst_detail->original_booking_date,
-                $gst_detail->cr_amount,
-                $gst_detail->ref,
-            ];
-
-            $export_details[] = $export_data;
+        foreach ($booking_details as $booking_detail_key => $booking_detail) {
+        	$cancel_datas = VisitBooking::select(
+        		DB::raw('COALESCE(visit_bookings.id, "") as visit_booking_id'),
+        		DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
+                DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'))
+        	  ->leftJoin('visits','visits.id','visit_bookings.visit_id')
+        	  ->where('visits.id',$booking_detail['id'])->where('visit_bookings.type_id',3101)->get()->toArray();
+        	  if(count($cancel_datas)>0){
+        	foreach($cancel_datas as $cancel_data_key => $cancel_data){
+        		$export_data = [
+        			$s_no++,
+	                $booking_detail['emp_name'],
+	                $booking_detail['emp_code'],
+	                $booking_detail['sbu'],
+	                $booking_detail['state'],
+	                $booking_detail['date_of_request'],
+	                $booking_detail['date_of_booking'],
+	                $booking_detail['date_of_travel'],
+	                $booking_detail['from'],
+	                $booking_detail['to'],
+	                $booking_detail['mode'],
+	                $booking_detail['reference_number'],
+	                $booking_detail['ticket_base_amount'],
+	                $booking_detail['cgst'],
+	                $booking_detail['sgst'],
+	                $booking_detail['igst'],
+	                $booking_detail['other_charges'],
+	                $booking_detail['total_ticket_amount'],
+	                $booking_detail['booking_charge'],
+	                $booking_detail['total_amount'],
+        		$booking_detail['reference_number'],
+	                $booking_detail['total_ticket_amount'],
+	                '0.00',
+	                $booking_detail['date_of_booking'],
+	                $cancel_data['cr_amount'],
+	                $cancel_data['ref'],
+	            ];
+	            $export_details[]=$export_data;
         }
-        $title = 'GST_REPORT_' . Carbon::now();
-        $sheet_name = 'GST REPORT';
+    }else{
+    	$export_data = [
+        			$s_no++,
+	                $booking_detail['emp_name'],
+	                $booking_detail['emp_code'],
+	                $booking_detail['sbu'],
+	                $booking_detail['state'],
+	                $booking_detail['date_of_request'],
+	                $booking_detail['date_of_booking'],
+	                $booking_detail['date_of_travel'],
+	                $booking_detail['from'],
+	                $booking_detail['to'],
+	                $booking_detail['mode'],
+	                $booking_detail['reference_number'],
+	                $booking_detail['ticket_base_amount'],
+	                $booking_detail['cgst'],
+	                $booking_detail['sgst'],
+	                $booking_detail['igst'],
+	                $booking_detail['other_charges'],
+	                $booking_detail['total_ticket_amount'],
+	                $booking_detail['booking_charge'],
+	                $booking_detail['total_amount'],
+        		   '',
+        		   '',
+        		   '',
+        		   '',
+        		   '',
+        		   '',
+	            ];
+	            $export_details[]=$export_data;
+
+    }
+            //$export_details[]=$export_data;
+       	}
+        $title = 'Agent_Report_' . Carbon::now();
+        $sheet_name = 'Agent Report';
         Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
             $excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
                 $sheet->fromArray($export_details, NULL, 'A1');
