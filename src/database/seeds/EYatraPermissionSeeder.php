@@ -1171,14 +1171,15 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'GST Report',
 			],
 
-			5707 => [
+			5706 => [
 				'display_order' => 1,
 				'parent_id' => 5680,
 				'name' => 'eyatra-employee-gstr-report',
 				'display_name' => 'GSTR2 Report',
+			],
 
 			// MASTERS -> AGENT Report
-			5706 => [
+			5707 => [
 				'display_order' => 1,
 				'parent_id' => 5680,
 				'name' => 'eyatra-agent-report',
