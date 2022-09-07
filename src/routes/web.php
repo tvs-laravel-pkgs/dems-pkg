@@ -95,6 +95,8 @@ Route::group(['middleware' => ['api']], function () {
 
 		//PROFILE IMAGE SAVE
 		Route::post('/profile/save/image', 'Uitoux\EYatra\Api\ProfileController@saveImage')->name('profileSaveImage');
+		Route::get('/profile/Getvehicle-detail', 'Uitoux\EYatra\Api\ProfileController@getVehicleData')->name('getVehicleData');
+	    Route::post('/profile/save/vehicle-detail', 'Uitoux\EYatra\Api\ProfileController@saveVehicleDetails')->name('saveVehicleDetails');
 
 		//NOTIFICATION
 		Route::post('notification/get-list', 'Uitoux\EYatra\Api\DashboardController@getNotification');
