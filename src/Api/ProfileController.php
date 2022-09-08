@@ -3,9 +3,13 @@
 namespace Uitoux\EYatra\Api;
 use App\Http\Controllers\Controller;
 use App\User;
+use Validator;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Uitoux\EYatra\Employee;
+use Uitoux\EYatra\VehicleDetails;
+use Carbon\Carbon;
 
 class ProfileController extends Controller {
 	public $successStatus = 200;
