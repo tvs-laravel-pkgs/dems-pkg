@@ -1487,7 +1487,7 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('visit_bookings.gstin')
-			->groupBy('trips.id')
+			->groupBy('visits.id')
 			->get()->toArray();
 		$gst_lodgings = EmployeeClaim::select(
 			DB::raw('COALESCE(operating_states.gst_number, "") as business_gstin'),
@@ -1536,7 +1536,7 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('lodgings.gstin')
-			->groupBy('trips.id')
+			->groupBy('lodgings.id')
 			->get()->toArray();
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
 		if (count($gst_datas) == 0) {
