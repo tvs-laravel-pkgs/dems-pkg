@@ -89,6 +89,9 @@ class Employee extends Model {
 	public function paymentMode() {
 		return $this->belongsTo('Uitoux\EYatra\Config', 'payment_mode_id');
 	}
+	public function vehicleDetails() {
+		return $this->hasMany('Uitoux\EYatra\VehicleDetails');
+	}
 
 	public function user() {
 		return $this->hasOne('App\User', 'entity_id')->where('user_type_id', 3121)->withTrashed();

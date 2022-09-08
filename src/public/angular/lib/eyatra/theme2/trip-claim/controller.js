@@ -2071,6 +2071,29 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
+        $scope.transportCalculateTax = (index) => {
+            const amount = self.trip.visits[index].self_booking['amount'];
+            const gst_number = self.trip.visits[index].self_booking['gstin'];
+            const travel_mode_id = self.trip.visits[index]['travel_mode_id'];
+            var cgst_percentage = sgst_percentage = igst_percentage = 0;
+            if (amount != undefined && amount && amount >= 1 && gst_number && gst_number.length == 15 && travel_mode_id != 12) {
+                const gst_state_code = gst_number.substr(0, 2);
+                const cgst_percentage = sgst_percentage = 2.5;
+                const igst_percentage = 5;
+                if (self.state_code === gst_state_code) {
+                    self.trip.visits[index].self_booking['cgst'] = parseFloat(amount * (cgst_percentage / 100)).toFixed(2);
+                    self.trip.visits[index].self_booking['sgst'] = parseFloat(amount * (sgst_percentage / 100)).toFixed(2);
+                    self.trip.visits[index].self_booking['igst'] = 0.00;
+                    self.trip.visits[index].self_booking['tax_percentage'] = 5;
+                } else {
+                    self.trip.visits[index].self_booking['cgst'] = 0.00;
+                    self.trip.visits[index].self_booking['sgst'] = 0.00;
+                    self.trip.visits[index].self_booking['igst'] = parseFloat(amount * (igst_percentage / 100)).toFixed(2);
+                    self.trip.visits[index].self_booking['tax_percentage'] = 5;
+                }
+            }
+        }
+
         $scope.onChangeStayType = (lodgingIndex, lodgeStayTypeId) => {
             //OTHER THAN LODGE STAY
             if (lodgeStayTypeId != 3340) {

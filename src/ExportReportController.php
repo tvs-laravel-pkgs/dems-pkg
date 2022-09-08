@@ -1459,7 +1459,7 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.round_off, 0)),2,"en_IN") as round_off'),
-			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period')
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%m-%Y"), "") as tax_period')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -1507,7 +1507,7 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(lodgings.sgst, 0)),2,"en_IN") as sgst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.round_off, 0)),2,"en_IN") as round_off'),
-			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as tax_period'),
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%m-%Y"), "") as tax_period'),
 			DB::raw('COALESCE(lodgings.has_multiple_tax_invoice, "") as has_multiple_tax_invoice')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
@@ -1568,7 +1568,7 @@ class ExportReportController extends Controller {
 				'',
 				'',
 				'',
-				$gst_transport['other_charges'],
+				'',
 				$gst_transport['round_off'],
 				'',
 				'',
@@ -1584,7 +1584,7 @@ class ExportReportController extends Controller {
 				'1',
 				$gst_transport['item_taxable_amount'],
 				'TAX',
-				$gst_transport['tax_percentage'] . "%",
+				$gst_transport['tax_percentage'],
 				$gst_transport['igst'],
 				$gst_transport['cgst'],
 				$gst_transport['sgst'],
@@ -1594,6 +1594,7 @@ class ExportReportController extends Controller {
 			$export_details[] = $transport_data;
 		}
 		foreach($gst_lodgings as $gst_lodging_key => $gst_lodging){
+			if($gst_lodging['has_multiple_tax_invoice'] == 0){
 			$lodging_data = [
 				$gst_lodging['business_gstin'],
 				$gst_lodging['business_unit'],
@@ -1631,7 +1632,7 @@ class ExportReportController extends Controller {
 				'1',
 				$gst_lodging['item_taxable_amount'],
 				'TAX',
-				$gst_lodging['tax_percentage'] . "%",
+				$gst_lodging['tax_percentage'],
 				$gst_lodging['igst'],
 				$gst_lodging['cgst'],
 				$gst_lodging['sgst'],
@@ -1639,6 +1640,7 @@ class ExportReportController extends Controller {
 				'0',
 			];
 			$export_details[] = $lodging_data;
+		}
 			if($gst_lodging['has_multiple_tax_invoice'] == 1){
 			$multiple_taxs=LodgingTaxInvoice::select(
 			DB::raw('COALESCE(configs.name, "") as multiple_description'),
@@ -1650,6 +1652,7 @@ class ExportReportController extends Controller {
 			->leftJoin('lodgings','lodgings.id','lodging_tax_invoices.lodging_id')
 			->leftJoin('configs','configs.id','lodging_tax_invoices.type_id')
 			->where('lodging_tax_invoices.lodging_id',$gst_lodging['id'])
+			->where('lodging_tax_invoices.type_id','!=',3775)
 			->get()->toArray();
 				foreach($multiple_taxs as $multiple_tax_key => $multiple_tax){
 					$multiple_lodging_data = [
@@ -1689,7 +1692,7 @@ class ExportReportController extends Controller {
 						'1',
 						$multiple_tax['multiple_amount'],
 						'TAX',
-						$multiple_tax['multilple_tax_percentage'] ."%",
+						$multiple_tax['multilple_tax_percentage'],
 						$multiple_tax['multilple_igst'],
 						$multiple_tax['multilple_cgst'],
 						$multiple_tax['multilple_sgst'],
