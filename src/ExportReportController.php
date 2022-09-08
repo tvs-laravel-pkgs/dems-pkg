@@ -1594,54 +1594,6 @@ class ExportReportController extends Controller {
 			$export_details[] = $transport_data;
 		}
 		foreach($gst_lodgings as $gst_lodging_key => $gst_lodging){
-			if($gst_lodging['has_multiple_tax_invoice'] == 0){
-			$lodging_data = [
-				$gst_lodging['business_gstin'],
-				$gst_lodging['business_unit'],
-				$gst_lodging['tax_period'],
-				'Invoice',
-				'STD',
-				$gst_lodging['doc_number'],
-				$gst_lodging['doc_date'],
-				' ',
-				$gst_lodging['supplier_gstin'],
-				$gst_lodging['supplier_name'],
-				$gst_lodging['supplier_address'],
-				$gst_lodging['supplier_state'],
-				$gst_lodging['supplier_state'],
-				' ',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				$gst_lodging['round_off'],
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'S',
-				$gst_lodging['item_description'],
-				$gst_lodging['hsn_code'],
-				'',
-				'OTH',
-				'1',
-				$gst_lodging['item_taxable_amount'],
-				'TAX',
-				$gst_lodging['tax_percentage'],
-				$gst_lodging['igst'],
-				$gst_lodging['cgst'],
-				$gst_lodging['sgst'],
-				'0',
-				'0',
-			];
-			$export_details[] = $lodging_data;
-		}
-			if($gst_lodging['has_multiple_tax_invoice'] == 1){
 			$multiple_taxs=LodgingTaxInvoice::select(
 			DB::raw('COALESCE(configs.name, "") as multiple_description'),
 			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.without_tax_amount, 0)),2,"en_IN") as multiple_amount'),
@@ -1654,6 +1606,7 @@ class ExportReportController extends Controller {
 			->where('lodging_tax_invoices.lodging_id',$gst_lodging['id'])
 			->where('lodging_tax_invoices.type_id','!=',3775)
 			->get()->toArray();
+			if($gst_lodging['has_multiple_tax_invoice'] == 1){
 				foreach($multiple_taxs as $multiple_tax_key => $multiple_tax){
 					$multiple_lodging_data = [
 					    $gst_lodging['business_gstin'],
@@ -1701,7 +1654,54 @@ class ExportReportController extends Controller {
 					];
 			   		$export_details[] = $multiple_lodging_data;
 		    	}
+	        }else{
+	        	$lodging_data = [
+				$gst_lodging['business_gstin'],
+				$gst_lodging['business_unit'],
+				$gst_lodging['tax_period'],
+				'Invoice',
+				'STD',
+				$gst_lodging['doc_number'],
+				$gst_lodging['doc_date'],
+				' ',
+				$gst_lodging['supplier_gstin'],
+				$gst_lodging['supplier_name'],
+				$gst_lodging['supplier_address'],
+				$gst_lodging['supplier_state'],
+				$gst_lodging['supplier_state'],
+				' ',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				$gst_lodging['round_off'],
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'S',
+				$gst_lodging['item_description'],
+				$gst_lodging['hsn_code'],
+				'',
+				'OTH',
+				'1',
+				$gst_lodging['item_taxable_amount'],
+				'TAX',
+				$gst_lodging['tax_percentage'],
+				$gst_lodging['igst'],
+				$gst_lodging['cgst'],
+				$gst_lodging['sgst'],
+				'0',
+				'0',
+			];
+			$export_details[] = $lodging_data;
 	        }
+			
 		}
 		$title = 'GSTR2_REPORT_' . Carbon::now();
 		$sheet_name = 'GSTR2 REPORT';
