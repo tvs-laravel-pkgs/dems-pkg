@@ -1536,7 +1536,7 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('lodgings.gstin')
-			->groupBy('lodgings.id')
+			->groupBy('trips.id')
 			->get()->toArray();
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
 		if (count($gst_datas) == 0) {
@@ -1609,6 +1609,7 @@ class ExportReportController extends Controller {
 			if($gst_lodging['has_multiple_tax_invoice'] == 1){
 				foreach($multiple_taxs as $multiple_tax_key => $multiple_tax){
 					$multiple_lodging_data = [
+						$gst_lodging['id'],
 					    $gst_lodging['business_gstin'],
 						$gst_lodging['business_unit'],
 						$gst_lodging['tax_period'],
@@ -1656,6 +1657,7 @@ class ExportReportController extends Controller {
 		    	}
 	        }else{
 	        	$lodging_data = [
+	        	$gst_lodging['id'],
 				$gst_lodging['business_gstin'],
 				$gst_lodging['business_unit'],
 				$gst_lodging['tax_period'],
