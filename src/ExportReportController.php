@@ -1529,14 +1529,14 @@ class ExportReportController extends Controller {
 			->leftjoin('operating_states','operating_states.nstate_id','s.id')
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
-			->where('configs.config_type_id',546)
+			//->where('configs.config_type_id',546)
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('lodgings.gstin')
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
-			->groupBy('trips.id')
+			->groupBy('lodgings.id')
 			->get()->toArray();
 			//dd($gst_lodgings);
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
@@ -1607,6 +1607,53 @@ class ExportReportController extends Controller {
 			->where('lodging_tax_invoices.lodging_id',$gst_lodging['id'])
 			->where('lodging_tax_invoices.type_id','!=',3775)
 			->get()->toArray();
+			if($gst_lodging['has_multiple_tax_invoice'] == 0){
+	        $lodging_data = [
+				$gst_lodging['business_gstin'],
+				$gst_lodging['business_unit'],
+				$gst_lodging['tax_period'],
+				'Invoice',
+				'STD',
+				$gst_lodging['doc_number'],
+				$gst_lodging['doc_date'],
+				' ',
+				$gst_lodging['supplier_gstin'],
+				$gst_lodging['supplier_name'],
+				$gst_lodging['supplier_address'],
+				$gst_lodging['supplier_state'],
+				$gst_lodging['supplier_state'],
+				' ',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				$gst_lodging['round_off'],
+				'',
+				'',
+				'',
+				'',
+				'',
+				'',
+				'S',
+				$gst_lodging['item_description'],
+				$gst_lodging['hsn_code'],
+				'',
+				'OTH',
+				'1',
+				$gst_lodging['item_taxable_amount'],
+				'TAX',
+				$gst_lodging['tax_percentage'],
+				$gst_lodging['igst'],
+				$gst_lodging['cgst'],
+				$gst_lodging['sgst'],
+				'0',
+				'0',
+			];
+			$export_details[] = $lodging_data;
+		}
 			if($gst_lodging['has_multiple_tax_invoice'] == 1){
 				foreach($multiple_taxs as $multiple_tax_key => $multiple_tax){
 					$multiple_lodging_data = [
@@ -1656,51 +1703,6 @@ class ExportReportController extends Controller {
 			   		$export_details[] = $multiple_lodging_data;
 		    	}
 	        }
-	        $lodging_data = [
-				$gst_lodging['business_gstin'],
-				$gst_lodging['business_unit'],
-				$gst_lodging['tax_period'],
-				'Invoice',
-				'STD',
-				$gst_lodging['doc_number'],
-				$gst_lodging['doc_date'],
-				' ',
-				$gst_lodging['supplier_gstin'],
-				$gst_lodging['supplier_name'],
-				$gst_lodging['supplier_address'],
-				$gst_lodging['supplier_state'],
-				$gst_lodging['supplier_state'],
-				' ',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				$gst_lodging['round_off'],
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'S',
-				$gst_lodging['item_description'],
-				$gst_lodging['hsn_code'],
-				'',
-				'OTH',
-				'1',
-				$gst_lodging['item_taxable_amount'],
-				'TAX',
-				$gst_lodging['tax_percentage'],
-				$gst_lodging['igst'],
-				$gst_lodging['cgst'],
-				$gst_lodging['sgst'],
-				'0',
-				'0',
-			];
-			$export_details[] = $lodging_data;
 			
 		}
 		$title = 'GSTR2_REPORT_' . Carbon::now();
