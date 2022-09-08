@@ -1530,14 +1530,15 @@ class ExportReportController extends Controller {
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->where('configs.config_type_id',546)
-			->whereDate('trips.claimed_date', '>=', $from_date)
-			->whereDate('trips.claimed_date', '<=', $to_date)
-			->whereIn('departments.business_id', $business_ids)
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('lodgings.gstin')
+			->whereDate('trips.claimed_date', '>=', $from_date)
+			->whereDate('trips.claimed_date', '<=', $to_date)
+			->whereIn('departments.business_id', $business_ids)
 			->groupBy('trips.id')
 			->get()->toArray();
+			//dd($gst_lodgings);
 		$gst_datas = array_merge($gst_transports,$gst_lodgings);
 		if (count($gst_datas) == 0) {
 			Session()->flash('error', 'No Data Found');
@@ -1609,7 +1610,6 @@ class ExportReportController extends Controller {
 			if($gst_lodging['has_multiple_tax_invoice'] == 1){
 				foreach($multiple_taxs as $multiple_tax_key => $multiple_tax){
 					$multiple_lodging_data = [
-						$gst_lodging['id'],
 					    $gst_lodging['business_gstin'],
 						$gst_lodging['business_unit'],
 						$gst_lodging['tax_period'],
@@ -1655,9 +1655,8 @@ class ExportReportController extends Controller {
 					];
 			   		$export_details[] = $multiple_lodging_data;
 		    	}
-	        }else{
-	        	$lodging_data = [
-	        	$gst_lodging['id'],
+	        }
+	        $lodging_data = [
 				$gst_lodging['business_gstin'],
 				$gst_lodging['business_unit'],
 				$gst_lodging['tax_period'],
@@ -1702,7 +1701,6 @@ class ExportReportController extends Controller {
 				'0',
 			];
 			$export_details[] = $lodging_data;
-	        }
 			
 		}
 		$title = 'GSTR2_REPORT_' . Carbon::now();
