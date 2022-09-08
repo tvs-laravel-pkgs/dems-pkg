@@ -351,6 +351,9 @@ app.component('eyatraTripBookingRequestsView', {
         }
         $scope.fareDetailGstChange = (index, gst_number) => {
             // self.trip.agent_visits[index].booking.fare_gst_detail = '';
+            self.trip.agent_visits[index].booking['gstin_name'] = '';
+            self.trip.agent_visits[index].booking['gstin_address'] = '';
+            self.trip.agent_visits[index].booking['gstin_state_code'] = '';
             if (gst_number && gst_number.length == 15) {
                 $http({
                     url: laravel_routes['getGstInData'],
@@ -370,7 +373,9 @@ app.component('eyatraTripBookingRequestsView', {
                         }
                         custom_noty('error', errors);
                     } else {
-                        self.trip.agent_visits[index].booking.fare_gst_detail = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        self.trip.agent_visits[index].booking['gstin_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        self.trip.agent_visits[index].booking['gstin_address'] = self.trip.agent_visits[index].booking['gstin_name'] + ',' + res.data.gst_data.AddrLoc + ',' + res.data.gst_data.AddrSt + ',' + res.data.gst_data.AddrFlno + ',' + res.data.gst_data.AddrPncd;
+                        self.trip.agent_visits[index].booking['gstin_state_code'] = res.data.gst_data.StateCode;
                     }
                 });
             }
