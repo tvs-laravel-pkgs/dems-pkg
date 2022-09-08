@@ -2111,6 +2111,7 @@ class Trip extends Model {
 							$visit_booking->cgst = $visit_data['cgst'];
 							$visit_booking->sgst = $visit_data['sgst'];
 							$visit_booking->igst = $visit_data['igst'];
+							$visit_booking->tax_percentage = $visit_data['tax_percentage'];
 							$visit_booking->invoice_number=$visit_data['invoice_number'];
 							$visit_booking->invoice_amount=$visit_data['invoice_amount'];
 							$visit_booking->invoice_date=date('Y-m-d', strtotime($visit_data['invoice_date']));
