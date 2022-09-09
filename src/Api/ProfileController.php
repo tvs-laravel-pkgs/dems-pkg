@@ -55,8 +55,8 @@ class ProfileController extends Controller {
 					'required:true',
 					'unique:vehicle_details,registration_number,' . $request->registration_number . ',id',
                 ],
-                'vehicle_attachment' => 'required|mimes:jpeg,jpg|max:1024',
-				'kilometer_attachment' => 'required|mimes:jpeg,jpg|max:1024',
+                //'vehicle_attachment' => 'required|mimes:jpeg,jpg|max:1024',
+				//'kilometer_attachment' => 'required|mimes:jpeg,jpg|max:1024',
 			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
