@@ -63,7 +63,7 @@ class ProfileController extends Controller {
 			}
 		$user = User::where('id', $request->user_id)->first();
 		$employee = Employee::where('code',$user->username)->first();
-		$type=VehicleDetails::select('vehicle_type','id')->get()->toArray();
+		$type=VehicleDetails::select('vehicle_type','id')->where('employee_id',$employee->id)->get()->toArray();
 			if(count($type) == 2){
 				return response()->json(['success' => false, 'errors' => ['The vehicle max limit is two']]); 
 			}
