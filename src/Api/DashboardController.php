@@ -113,6 +113,7 @@ class DashboardController extends Controller {
 			'employee_details.sbu',
 			'employee_details.sbu.lob',
 			'roles',
+			'employee_details.vehicleDetails',
 		])
 			->find(Auth::user()->id);
 		$user->permissions = $user->permissions($only_mobile = true);
