@@ -107,6 +107,73 @@ app.component('eyatraTripBookingUpdatesForm', {
             self.visit.round_off = parseFloat(invoiceAmount - totalValue).toFixed(2);
         }
 
+        $scope.calculateTax = index => {
+            if (self.visit) {
+                //self.visit.gstin = '';
+                self.visit.cgst = '';
+                self.visit.sgst = '';
+                self.visit.igst = '';
+
+                //enable if company gstin needed and self.trip.agent_visits[index].toCityGstCode inside if condition
+                //self.trip.agent_visits[index].booking.gstin = self.trip.agent_visits[index].toCityGstin;
+
+                const cgstPercentage = sgstPercentage = 2.5;
+                const igstPercentage = 5;
+                console.log(self.visit.employee_gst_code, self.visit.amount);
+                //if (self.trip.employee_gst_code && self.trip.agent_visits[index].booking.amount && self.trip.agent_visits[index].booking.booking_method_id && self.trip.agent_visits[index].booking.booking_method_id != 13) {
+                if (self.visit.employee_gst_code && self.visit.amount && self.visit.travel_mode_id && self.visit.travel_mode_id != 12 && self.visit.gstin) {
+                    let enteredGstinCode = self.visit.gstin.substr(0, 2);
+                    let taxableValue = parseFloat(self.visit.amount);
+
+                    // if (self.trip.employee_gst_code === self.trip.agent_visits[index].toCityGstCode) {
+                    if (self.visit.employee_gst_code === enteredGstinCode) {
+                        self.visit.cgst = parseFloat(taxableValue * (cgstPercentage / 100)).toFixed(2);
+                        self.visit.sgst = parseFloat(taxableValue * (sgstPercentage / 100)).toFixed(2);
+                        self.visit.igst = 0.00;
+                        self.visit.tax_percentage = cgstPercentage + sgstPercentage;
+                    } else {
+                        self.visit.cgst = 0.00;
+                        self.visit.sgst = 0.00;
+                        sself.visit.igst = parseFloat(taxableValue * (igstPercentage / 100)).toFixed(2);
+                        self.visit.tax_percentage = igstPercentage;
+                    }
+                }
+            }
+        }
+
+        $scope.fareDetailGstChange = (gst_number) => {
+            console.log(gst_number);
+            self.visit.gstin_name = '';
+            self.visit.gstin_address = '';
+            self.visit.gstin_state_code = '';
+            if (gst_number && gst_number.length == 15) {
+                $http({
+                    url: laravel_routes['getGstInData'],
+                    method: 'GET',
+                    params: { 'gst_number': gst_number }
+                }).then(function(res) {
+                    // console.log(res);
+                    if (!res.data.success) {
+                        var errors = '';
+                        if (res.data.errors) {
+                            for (var i in res.data.errors) {
+                                errors += '<li>' + res.data.errors[i] + '</li>';
+                            }
+                        }
+                        if (res.data.error) {
+                            errors += '<li>' + res.data.error + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.visit.gstin_name = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        self.visit.gstin_address = self.visit.gstin_name + ',' + res.data.gst_data.AddrLoc + ',' + res.data.gst_data.AddrSt + ',' + res.data.gst_data.AddrFlno + ',' + res.data.gst_data.AddrPncd;
+                        self.visit.gstin_state_code = res.data.gst_data.StateCode;
+                    }
+                });
+            }
+        }
+
+
         $('input[type="file"]').imageuploadify();
         fileUpload();
 

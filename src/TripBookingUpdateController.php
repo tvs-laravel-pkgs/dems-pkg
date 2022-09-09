@@ -96,6 +96,11 @@ class TripBookingUpdateController extends Controller {
 		$grade = Auth::user()->entity;
 		$this->data['travel_mode_list'] = DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get();
 		$this->data['success'] = true;
+		$visit->employee_gst_code = NState::leftJoin('ncities', 'ncities.state_id', 'nstates.id')
+			->leftJoin('ey_addresses', 'ey_addresses.city_id', 'ncities.id')
+			->where('ey_addresses.address_of_id', 3160)
+			->where('ey_addresses.entity_id', $visit->trip->outlet_id)
+			->pluck('nstates.gstin_state_code')->first();
 		return response()->json($this->data);
 	}
 
