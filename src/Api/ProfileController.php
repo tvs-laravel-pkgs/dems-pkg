@@ -15,6 +15,7 @@ class ProfileController extends Controller {
 	public $successStatus = 200;
 
 	public function saveImage(Request $request) {
+		//dd($request->all());
 		$user = User::where('id', $request->id)->first();
 		if ($user) {
 			$profile_images = storage_path('app/public/profile/');
@@ -40,7 +41,7 @@ class ProfileController extends Controller {
 		return app('App\Http\Controllers\AngularController')->verifyVehicleDtails($r->registration_number);
 	}
 	public function saveVehicleDetails(Request $request) {
-		//dd($request->all());
+		dd($request->all());
 		try {
 			$error_messages = [
 				'registration_number.required' => "Registration Number is Required",
@@ -114,7 +115,7 @@ class ProfileController extends Controller {
 			DB::commit();
 
 				// $path = url('') . '/storage/app/public/profile/' . $name;
-			return response()->json(['success' => true, 'message' => 'Vehicle Details saved successfully!', 'employee' => $employee]);
+			return response()->json(['success' => true, 'message' => 'Vehicle Details saved successfully!', 'vehicle_details' => $vehicle_details]);
 			
 		} else {
 			return response()->json(['success' => false, 'message' => 'User Not Found!']);
