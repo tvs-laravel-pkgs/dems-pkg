@@ -422,7 +422,7 @@ app.component('eyatraOutstationClaimVerificationView', {
                 const lodgeGstCode = lodgeGstin.substr(0, 2);
                 console.log(lodgeTaxPercentage, lodgeWithoutTaxAmount);
                 let lodgePercentage = 12;
-                if (lodgeWithoutTaxAmount >= 10000) {
+                if (lodgeWithoutTaxAmount >= 7500) {
                     lodgePercentage = 18;
                 }
 

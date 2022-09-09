@@ -2301,7 +2301,7 @@ app.component('eyatraTripClaimForm', {
                 const lodgeGstCode = lodgeGstin.substr(0, 2);
 
                 let lodgePercentage = 12;
-                if (lodgeWithoutTaxAmount >= 10000) {
+                if (lodgeWithoutTaxAmount >= 7500) {
                     lodgePercentage = 18;
                 }
 
@@ -2519,7 +2519,7 @@ app.component('eyatraTripClaimForm', {
             if (amount != undefined && amount && amount >= 1 && gst_number && gst_number.length == 15) {
                 const gst_state_code = gst_number.substr(0, 2);
                 percentage = 12;
-                if (amount >= 10000)
+                if (amount >= 7500)
                     percentage = 18;
                 if (gst_state_code == self.state_code) {
                     cgst_percentage = sgst_percentage = percentage / 2;
