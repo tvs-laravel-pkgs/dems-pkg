@@ -47,7 +47,7 @@ class ProfileController extends Controller {
 				'registration_number.required' => "Registration Number is Required",
 				'registration_number.unique' => "Registration Number is already taken",
 				'vehicle_attachment.required' => "Vehicle Attachment is Required",
-				//'kilometer_attachment.required' => "Kilometer Attachment is Required",
+				'kilometer_attachment.required' => "Kilometer Attachment is Required",
 				
 			];
 
@@ -100,7 +100,7 @@ class ProfileController extends Controller {
 				$vehicle_details->save();
 			}
 
-				/*$kilometer_images = storage_path('app/public/vehicle/');
+				$kilometer_images = storage_path('app/public/vehicle/');
 			   Storage::makeDirectory($kilometer_images, 0777);
 			   if ($request->hasFile('kilometer_attachment')) {
 				$value = rand(1, 100);
@@ -111,7 +111,7 @@ class ProfileController extends Controller {
 				$image->move($des_path, $name);
                 $vehicle_details->kilometer_image = $name;
 				$vehicle_details->save();
-			}*/
+			}
 			DB::commit();
 
 				// $path = url('') . '/storage/app/public/profile/' . $name;
