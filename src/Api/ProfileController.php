@@ -41,7 +41,7 @@ class ProfileController extends Controller {
 		return app('App\Http\Controllers\AngularController')->verifyVehicleDtails($r->registration_number);
 	}
 	public function saveVehicleDetails(Request $request) {
-		dd($request->all());
+		//dd($request->all());
 		try {
 			$error_messages = [
 				'registration_number.required' => "Registration Number is Required",
