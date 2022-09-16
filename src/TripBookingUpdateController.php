@@ -112,7 +112,7 @@ class TripBookingUpdateController extends Controller {
 				'ticket_booking.*.travel_mode_id.required' => 'Ticket booking mode is required',
 				'ticket_booking.*.ticket_amount.required' => 'Ticket amount is required',
 				'ticket_booking.*.reference_number.required' => 'Ticket reference_number is required',
-				'ticket_booking.*.attachments.required' => 'Ticket attachments is required',
+				 //'ticket_booking.*.attachments.required' => 'Ticket attachments is required',
 			];
 
 			$validator = Validator::make($r->all(), [
@@ -125,7 +125,7 @@ class TripBookingUpdateController extends Controller {
 				'ticket_booking.*.reference_number' => [
 					'required:true',
 				],
-			 'ticket_booking.*.attachments' => 'required|mimes:jpeg,jpg,txt,pdf',
+			 //'ticket_booking.*.attachments' => 'required|mimes:jpeg,jpg,txt,pdf',
 			], $error_messages);
 
 			if ($validator->fails()) {
