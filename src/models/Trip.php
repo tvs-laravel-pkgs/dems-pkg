@@ -3398,8 +3398,10 @@ request is not desired, then those may be rejected.';
 	}
 	// For Attachment by Karthick T on 07-04-2022
 public static function saveVerifierClaim($request){
+	//dd($request->all());
+	try {
 		DB::beginTransaction();
-		if (!empty($request->visits)) {
+		if (!empty($request->visits) && $request->booked_by == 'Self') {
 			foreach ($request->visits as $visit_data) {
 				if (!empty($visit_data['id'])) {
 						$visit = Visit::find($visit_data['id']);
@@ -3412,6 +3414,10 @@ public static function saveVerifierClaim($request){
 							$visit_booking->cgst = $visit_data['cgst'];
 							$visit_booking->sgst = $visit_data['sgst'];
 							$visit_booking->igst = $visit_data['igst'];
+							$visit_booking->igst = $visit_data['gstin_name'];
+							$visit_booking->igst = $visit_data['gstin_state_code'];
+							$visit_booking->igst = $visit_data['gstin_address'];
+
 						if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}else{
@@ -3497,6 +3503,8 @@ public static function saveVerifierClaim($request){
 							$lodging->cgst = $lodging_data['cgst'];
 							$lodging->sgst = $lodging_data['sgst'];
 							$lodging->igst = $lodging_data['igst'];
+							$lodging->igst = $lodging_data['gstin_state_code'];
+							$lodging->igst = $lodging_data['gstin_address'];
 						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}else{
@@ -3651,7 +3659,6 @@ public static function saveVerifierClaim($request){
 				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
 				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
 				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
-
 				// $employee_claim->total_trip_days = $request->trip_total_days;
 				$employee_claim->total_amount = $total_amount;
                 $employee_claim->save();
@@ -3691,6 +3698,10 @@ public static function saveVerifierClaim($request){
 					return response()->json(['success' => true,'saved_lodgings'=>$saved_lodgings]);
 					}
 			}
+		}
+	}catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 }
 	

@@ -268,7 +268,10 @@ app.component('eyatraOutstationClaimVerificationView', {
             console.log(self.trip.visits[index].self_booking.round_off);
         }
         $scope.fareDetailGstChange = (index, gst_number) => {
-            self.trip.visits[index]['fare_gst_detail'] = '';
+            //self.trip.visits[index]['fare_gst_detail'] = '';
+            self.trip.visits[index]['gstin_name'] = '';
+            self.trip.visits[index]['gstin_address'] = '';
+            self.trip.visits[index]['gstin_state_code'] = '';
             if (gst_number && gst_number.length == 15) {
                 $http({
                     url: laravel_routes['getGstInData'],
@@ -288,12 +291,18 @@ app.component('eyatraOutstationClaimVerificationView', {
                         }
                         custom_noty('error', errors);
                     } else {
-                        self.trip.visits[index]['fare_gst_detail'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        self.trip.visits[index]['gstin_state_code'] = res.data.gst_data.StateCode;
+                        self.trip.visits[index]['gstin_name'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        self.trip.visits[index]['gstin_address'] = self.trip.visits[index]['gstin_name'] + ',' + res.data.gst_data.AddrLoc + ',' + res.data.gst_data.AddrSt + ',' + res.data.gst_data.AddrFlno + ',' + res.data.gst_data.AddrPncd;
+                        //self.trip.visits[index]['fare_gst_detail'] = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
                     }
                 });
             }
         }
         $scope.lodgeDetailGstChange = (index, gst_number) => {
+            self.trip.lodgings[index].lodge_name = '';
+            self.trip.lodgings[index].gstin_address = '';
+            self.trip.lodgings[index].gstin_state_code = '';
             if (gst_number && gst_number.length == 15) {
                 $http({
                     url: laravel_routes['getGstInData'],
@@ -313,7 +322,10 @@ app.component('eyatraOutstationClaimVerificationView', {
                         }
                         custom_noty('error', errors);
                     } else {
+                        self.trip.lodgings[index].gstin_state_code = res.data.gst_data.StateCode;
                         self.trip.lodgings[index].lodge_name = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
+                        self.trip.lodgings[index].gstin_address = self.trip.visits[index].gstin_name + ',' + res.data.gst_data.AddrLoc + ',' + res.data.gst_data.AddrSt + ',' + res.data.gst_data.AddrFlno + ',' + res.data.gst_data.AddrPncd;
+                        //self.trip.lodgings[index].lodge_name = res.data.gst_data.LegalName ? res.data.gst_data.LegalName : res.data.gst_data.TradeName;
                     }
                 });
             }
@@ -453,7 +465,6 @@ app.component('eyatraOutstationClaimVerificationView', {
             }
             //DRYWASH GST CALCULATION
             // drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
-            console.log();
             if (drywashWithoutTaxAmount && drywashTaxPercentage && self.trip.lodgings[index].gstin) {
                 const drywashGstin = self.trip.lodgings[index].gstin;
                 let drywashCgstPerc = drywashSgstPerc = drywashIgstPerc = 0;
@@ -681,9 +692,9 @@ app.component('eyatraOutstationClaimVerificationView', {
                                 // $('.tab_lodging').addClass('active');
                                 // $('.tab-pane').removeClass('in active');
                                 // $('#lodging-expenses').addClass('in active');
-                                self.transport_attachment_removal_ids = [];
+                                //self.transport_attachment_removal_ids = [];
                                 $('#transport_attach_removal_ids').val('');
-                                self.enable_switch_tab = true;
+                                //self.enable_switch_tab = true;
                                 $scope.$apply();
                                 //$('#transport_submit').html('Save & Next');
                                 $("#transport_submit").attr("disabled", false);
@@ -692,8 +703,8 @@ app.component('eyatraOutstationClaimVerificationView', {
                             }
                         })
                         .fail(function(xhr) {
-                            $('#transport_submit').html('Save & Next');
-                            $("#transport_submit").attr("disabled", false);
+                            //$('#transport_submit').html('Save & Next');
+                            //$("#transport_submit").attr("disabled", false);
                             custom_noty('error', 'Something went wrong at server');
                         });
                 }
@@ -752,7 +763,7 @@ app.component('eyatraOutstationClaimVerificationView', {
                                 self.lodgings_removal_id = [];
                                 self.lodgings_attachment_removal_ids = [];
                                 $('#lodgings_attach_removal_ids').val('');
-                                self.enable_switch_tab = true;
+                                //self.enable_switch_tab = true;
                                 $scope.$apply();
                                 //$('#lodge_submit').html('Save & Next');
                                 $("#lodge_submit").attr("disabled", false);
@@ -761,8 +772,8 @@ app.component('eyatraOutstationClaimVerificationView', {
                             }
                         })
                         .fail(function(xhr) {
-                            $('#lodge_submit').html('Save & Next');
-                            $("#lodge_submit").attr("disabled", false);
+                            //$('#lodge_submit').html('Save & Next');
+                            //$("#lodge_submit").attr("disabled", false);
                             custom_noty('error', 'Something went wrong at server');
                         });
                 }
