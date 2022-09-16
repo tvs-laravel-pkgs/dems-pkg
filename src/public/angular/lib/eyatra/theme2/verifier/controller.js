@@ -237,8 +237,10 @@ app.component('eyatraOutstationClaimVerificationView', {
         //nodel edit changes on 20-08-2022
         $scope.travelCalculateTax = index => {
             const visitGstin = self.trip.visits[index].self_booking.gstin;
+            const visitOtherCharges = parseFloat(self.trip.visits[index].self_booking.other_charges) || 0.00;
             const taxPercentage = self.trip.visits[index].self_booking.tax_percentage;
             const invoiceAmount = self.trip.visits[index].self_booking.invoice_amount;
+            console.log(invoiceAmount);
             const gstCode = visitGstin.substr(0, 2);
             if (self.trip.employee_gst_code && self.trip.visits[index].self_booking.amount) {
                 let amount = self.trip.visits[index].self_booking.amount;
@@ -255,8 +257,15 @@ app.component('eyatraOutstationClaimVerificationView', {
                     self.trip.visits[index].self_booking.igst = parseFloat(amount * (igstPercentage / 100)).toFixed(2);
                 }
             }
-            const Total = self.trip.visits[index].self_booking.amount + self.trip.visits[index].self_booking.cgst + self.trip.visits[index].self_booking.sgst + self.trip.visits[index].self_booking.igst;
+            const transportAmount = parseFloat(self.trip.visits[index].self_booking.amount) || 0.00;
+            const transportCgst = parseFloat(self.trip.visits[index].self_booking.cgst) || 0.00;
+            const transportSgst = parseFloat(self.trip.visits[index].self_booking.sgst) || 0.00;
+            const transportIgst = parseFloat(self.trip.visits[index].self_booking.igst) || 0.00;
+
+            const Total = parseFloat(transportAmount + transportCgst + transportSgst + transportIgst + visitOtherCharges).toFixed(2);
+            console.log(Total, transportAmount, transportCgst, transportSgst, transportIgst);
             self.trip.visits[index].self_booking.round_off = parseFloat(invoiceAmount - Total).toFixed(2);
+            console.log(self.trip.visits[index].self_booking.round_off);
         }
         $scope.fareDetailGstChange = (index, gst_number) => {
             self.trip.visits[index]['fare_gst_detail'] = '';
@@ -329,8 +338,13 @@ app.component('eyatraOutstationClaimVerificationView', {
                     self.trip.lodgings[index].igst = parseFloat(amount * (igstPercentage / 100)).toFixed(2);
                 }
             }
-            const Total = self.trip.lodgings[index].amount + self.trip.lodgings[index].cgst + self.trip.lodgings[index].sgst + self.trip.lodgings[index].igst;
+            const lodgingAmount = parseFloat(self.trip.lodgings[index].amount) || 0.00;
+            const lodgingCgst = parseFloat(self.trip.lodgings[index].cgst) || 0.00;
+            const lodgingSgst = parseFloat(self.trip.lodgings[index].sgst) || 0.00;
+            const lodgingIgst = parseFloat(self.trip.lodgings[index].igst) || 0.00;
+            const Total = parseFloat(lodgingAmount + lodgingCgst + lodgingSgst + lodgingIgst).toFixed(2);
             self.trip.lodgings[index].round_off = parseFloat(invoiceAmount - Total).toFixed(2);
+            console.log(Total, self.trip.lodgings[index].round_off);
         }
         $scope.onClickHasMultipleTaxInvoice = (id, val, lodgingIndex) => {
             //console.log(id);
