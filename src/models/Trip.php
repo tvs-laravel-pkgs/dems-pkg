@@ -1758,24 +1758,21 @@ class Trip extends Model {
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$board = Boarding::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$other = LocalTravel::where('trip_id', $trip->id)->pluck('trip_id')->count();
-		$tax_details = Trip::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')
-		      ->leftjoin('lodgings', 'lodgings.trip_id', 'trips.id')
-		      ->leftjoin('visits', 'visits.trip_id', 'trips.id')
-		      ->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
-		      ->leftjoin('boardings', 'boardings.trip_id', 'trips.id')
-		      ->leftjoin('local_travels', 'local_travels.trip_id', 'trips.id')
+		$tax_details = Trip::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off','boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')
+		      ->join('lodgings', 'lodgings.trip_id', 'trips.id')
+		      ->join('boardings', 'boardings.trip_id', 'trips.id')
+		      ->join('local_travels', 'local_travels.trip_id', 'trips.id')
 		      ->where('trips.id', $trip->id)
-		      ->where('trips.employee_id', $trip->employee->id)
+		      //->where('trips.employee_id', $trip->employee->id)
 		      ->get()->toArray();
+		      //dd($tax_details);
         $transport_tax_details = Trip::select('visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst')
 		      ->leftjoin('visits', 'visits.trip_id', 'trips.id')
 		      ->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 		      ->where('visits.booking_method_id',3040)
 		      ->where('trips.id', $trip->id)
-		      ->where('trips.employee_id', $trip->employee->id)
+		      //->where('trips.employee_id', $trip->employee->id)
 		      ->get()->toArray();
-		//dd($tax_details);
-		      //dd($transport_tax_details);
 
 		if (count($visit) > 1) {
 			$transport_basic = number_format(array_sum(array_column($transport_tax_details, 'transport_basic')), 2, '.', ',');
