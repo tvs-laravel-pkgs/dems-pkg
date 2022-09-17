@@ -1767,8 +1767,8 @@ class Trip extends Model {
 		      ->get()->toArray();
 		      //dd($tax_details);
         $transport_tax_details = Trip::select('visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst')
-		      ->leftjoin('visits', 'visits.trip_id', 'trips.id')
-		      ->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+		      ->join('visits', 'visits.trip_id', 'trips.id')
+		      ->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 		      ->where('visits.booking_method_id',3040)
 		      ->where('trips.id', $trip->id)
 		      //->where('trips.employee_id', $trip->employee->id)
