@@ -273,7 +273,7 @@ class ExportReportController extends Controller {
 					$data->PaymReference,
                 ];
               	$export_data[] = $excel_details;
-              	}
+              }
 		    	$outputfile = 'AgentAxaptaExport_' . $time_stamp;
 				$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
 					$excel->sheet('AgentAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
@@ -285,13 +285,13 @@ class ExportReportController extends Controller {
 					});
 				})->store('xlsx', storage_path('app/public/agent_axapta_report/'));
 			$report_details = new ReportDetail;
-			$report_details->company_id = $datas->company_id;
+			$report_details->company_id = $data->company_id;
 			$report_details->type_id = 3790;
 			$report_details->name = $file->filename;
 			$report_details->path = 'storage/app/public/agent_axapta_report/' . $outputfile . '.xlsx';
 			$report_details->batch = NULL;
 			$report_details->no_of_credits = NULL;
-			$report_details->bank_date = $datas->TransDate;
+			$report_details->bank_date = $data->TransDate;
 			$report_details->credit_total_amount = NULL;
 			$report_details->save();
 			} else {
@@ -624,13 +624,13 @@ class ExportReportController extends Controller {
 				})->store('xlsx', storage_path('app/public/employee_axapta_report/'));
 				//SAVE TRAVELEX REPORTS
 			$report_details = new ReportDetail;
-			$report_details->company_id = $datas->company_id;
+			$report_details->company_id = $data->company_id;
 			$report_details->type_id = 3791;
 			$report_details->name = $file->filename;
 			$report_details->path = 'storage/app/public/employee_axapta_report/' . $outputfile . '.xlsx';
 			$report_details->batch = NULL;
 			$report_details->no_of_credits = NULL;
-			$report_details->bank_date = $datas->TransDate;
+			$report_details->bank_date = $data->TransDate;
 			$report_details->credit_total_amount = null;
 			$report_details->save();
 			} else {
