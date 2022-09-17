@@ -2130,7 +2130,10 @@ class Trip extends Model {
 							$visit_booking->invoice_date=date('Y-m-d', strtotime($visit_data['invoice_date']));
 							if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
+						}else{
+							$visit_booking->round_off=$visit_data['round_off'];
 						}
+						    $visit_booking->other_charges=$visit_data['other_charges'];
 							$visit_booking->km_start = (isset($visit_data['km_start']) && !empty($visit_data['km_start'])) ? $visit_data['km_start'] : null;
 							$visit_booking->km_end = (isset($visit_data['km_end']) && !empty($visit_data['km_end'])) ? $visit_data['km_end'] : null;
 							$visit_booking->toll_fee = (isset($visit_data['toll_fee']) && !empty($visit_data['toll_fee'])) ? $visit_data['toll_fee'] : null;
@@ -3411,12 +3414,12 @@ request is not desired, then those may be rejected.';
 	}
 	// For Attachment by Karthick T on 07-04-2022
 public static function saveVerifierClaim($request){
-	//dd($request->all());
+	//dd($request->booked_by);
 	try {
 		DB::beginTransaction();
-		if (!empty($request->visits) && $request->booked_by == 'Self') {
+		if (!empty($request->visits)) {
 			foreach ($request->visits as $visit_data) {
-				if (!empty($visit_data['id'])) {
+				if (!empty($visit_data['id'] && $visit_data['booked_by'] == 'Self')) {
 						$visit = Visit::find($visit_data['id']);
 						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
 							$visit_booking->visit_id = $visit_data['id'];
@@ -3432,9 +3435,9 @@ public static function saveVerifierClaim($request){
 							$visit_booking->igst = $visit_data['gstin_address'];
 
 						if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
-							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
+								return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}else{
-                          $visit_booking->round_off = $visit_data['round_off'];
+	                          $visit_booking->round_off = $visit_data['round_off'];
 						}
 						$visit_booking->other_charges = $visit_data['other_charges'];
 						$visit_booking->save();
@@ -3442,57 +3445,57 @@ public static function saveVerifierClaim($request){
 						$transport_total_amount=0;
 							if ($visit_booking) {
 								$transport_total = $visit_booking->amount + $visit_booking->cgst + $visit_booking->sgst + $visit_booking->igst + $visit_booking->toll_fee + $visit_booking->round_off + $visit_booking->other_charges;
-								$transport_total_amount += $transport_total;
+								 $transport_total_amount += $transport_total;
 							}
-				$visit_booking->total = $transport_total_amount;
-				$visit_booking->save();		
-				$visit->save();
-				$total_transport_amount = VisitBooking::select(
-	                    	DB::raw("SUM(visit_bookings.total) as total"))
-				           ->join('visits','visits.id','visit_bookings.visit_id')
-				           ->where('visits.booking_method_id',3040)
-				           ->where('visits.trip_id',$request->trip_id)
-				           ->get()->first();
-					//SAVE EMPLOYEE CLAIMS
-				$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
-				$employee_claim->trip_id = $request->trip_id;
-				$employee_claim->transport_total = $total_transport_amount->total;
-				//$employee_claim->employee_id = Auth::user()->entity_id;
-				$employee_claim->created_by = Auth::user()->id;
-				$employee_claim->total_amount = 0;
-				$employee_claim->save();
-				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
-				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
-				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
-				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
-				$total_amount =  $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+						$visit_booking->total = $transport_total_amount ? $transport_total_amount : 0;
+						$visit_booking->save();
+						$visit->save();
+						$total_transport_amount = Visit::select(
+		                    	DB::raw('SUM(COALESCE(visit_bookings.total ,0)) as total'))
+					           ->join('visit_bookings','visit_bookings.visit_id','visits.id')
+					           ->where('visits.booking_method_id',3040)
+					           ->where('visits.trip_id',$request->trip_id)
+					           ->get()->first();
+						//SAVE EMPLOYEE CLAIMS
+					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
+					$employee_claim->trip_id = $request->trip_id;
+					$employee_claim->transport_total = $total_transport_amount->total;
+					//$employee_claim->employee_id = Auth::user()->entity_id;
+					$employee_claim->created_by = Auth::user()->id;
+					$employee_claim->total_amount = 0;
+					$employee_claim->save();
+					$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+					$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+					$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+					$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+					$total_amount =  $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
 
-				$employee_claim->total_trip_days = $request->trip_total_days;
-				$employee_claim->total_amount = $total_amount;
-				$employee_claim->save();
-                 $trip=Trip::where('id',$request->trip_id)->select('advance_received')->get()->first();
-				//To Find Amount to Pay Financier or Employee
-				if ($trip->advance_received) {
-					if ($trip->advance_received > $total_amount) {
-						$balance_amount = $trip->advance_received - $total_amount;
-						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-						$employee_claim->amount_to_pay = 2;
+					$employee_claim->total_trip_days = $request->trip_total_days;
+					$employee_claim->total_amount = $total_amount;
+					$employee_claim->save();
+	                 $trip=Trip::where('id',$request->trip_id)->select('advance_received')->get()->first();
+					//To Find Amount to Pay Financier or Employee
+					if ($trip->advance_received) {
+						if ($trip->advance_received > $total_amount) {
+							$balance_amount = $trip->advance_received - $total_amount;
+							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+							$employee_claim->amount_to_pay = 2;
+						} else {
+							$balance_amount = $total_amount - $trip->advance_received;
+							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+							$employee_claim->amount_to_pay = 1;
+						}
 					} else {
-						$balance_amount = $total_amount - $trip->advance_received;
-						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+						$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
 						$employee_claim->amount_to_pay = 1;
 					}
-				} else {
-					$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
-					$employee_claim->amount_to_pay = 1;
-				}
 
-				// dump($trip->advance_received);
-				// dump($request->claim_total_amount);
+					// dump($trip->advance_received);
+					// dump($request->claim_total_amount);
 
-				$employee_claim->save();
-				DB::commit();
-					return response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'visit' => $visit]);
+					$employee_claim->save();
+					DB::commit();
+						return response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'visit' => $visit]);
 				}
 			}
 		}
@@ -3512,35 +3515,33 @@ public static function saveVerifierClaim($request){
 							$lodging->amount = $lodging_data['amount'];
 							$lodging->gstin = $lodging_data['gstin'];
 							$lodging->tax_percentage = $lodging_data['tax_percentage'];
-							//$visit_booking->tax = $visit_data['tax'];
 							$lodging->cgst = $lodging_data['cgst'];
 							$lodging->sgst = $lodging_data['sgst'];
 							$lodging->igst = $lodging_data['igst'];
-							$lodging->igst = $lodging_data['gstin_state_code'];
-							$lodging->igst = $lodging_data['gstin_address'];
+							$lodging->gstin_state_code = $lodging_data['gstin_state_code'];
+							$lodging->gstin_address = $lodging_data['gstin_address'];
 						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}else{
-						$lodging->round_off = $lodging_data['round_off'];
-					}
+						$lodging->round_off = $lodging_data['round_off'] ? $lodging_data['round_off']: 0;
+					    }
 					$lodging->lodge_name = $lodging_data['lodge_name'];
-						$lodging->save();
 					$lodging->save();
 					$lodging_total = 0;
 					$lodging_total_amount=0;
 						if ($lodging) {
 							$lodging_total = $lodging->amount + $lodging->cgst + $lodging->sgst + $lodging->igst + $lodging->round_off;
-							$lodging_total_amount += $lodging_total;
+							$lodging_total_amount += $lodging_total ? $lodging_total : 0 ;
 						}
-					$lodging->total=$lodging_total_amount;
+					$lodging->total=$lodging_total_amount ? $lodging_total_amount : 0;
 					$lodging->save();
 					//LODGE TAX INVOICE SAVE
 
 						$lodging->taxInvoices()->forceDelete();
 
 						//ONLY FOR LODGE STAY TYPE
-						if ($lodging_data['stay_type_id'] == '3340' && $lodging_data['has_multiple_tax_invoice'] == "Yes") {
-							 if (empty($lodging_data['tax_invoice_amount'])) {
+					if ($lodging_data['stay_type_id'] == '3340' && $lodging_data['has_multiple_tax_invoice'] == 'Yes') {
+							if (empty($lodging_data['tax_invoice_amount'])) {
 								return response()->json([
 									'success' => false,
 									'errors' => [
@@ -3562,7 +3563,7 @@ public static function saveVerifierClaim($request){
 							$lodging->tax_invoice_amount = !empty($lodging_data['tax_invoice_amount']) ? $lodging_data['tax_invoice_amount'] : NULL;
 							$lodging->save();
 
-					//SAVE LODGE TAX INVOICE
+					   //SAVE LODGE TAX INVOICE
 							$lodgeTaxInvoice = LodgingTaxInvoice::firstOrNew([
 								'lodging_id' => $lodging->id,
 								'type_id' => 3771,
@@ -3656,9 +3657,9 @@ public static function saveVerifierClaim($request){
 							$roundoffTaxInvoice->total = !empty($lodging_data['roundoffTaxInvoice']['total']) ? $lodging_data['roundoffTaxInvoice']['total'] : 0;
 							$roundoffTaxInvoice->save();
 					}
-							//SAVE EMPLOYEE CLAIMS
+						//SAVE EMPLOYEE CLAIMS
 					$total_lodge_amount = Lodging::select(
-	                    	DB::raw("SUM(total) as total"))->where('trip_id',$request->trip_id)->get()->first();
+	                    	DB::raw('SUM(COALESCE(total,0)) as total'))->where('trip_id',$request->trip_id)->get()->first();
                             //SAVE EMPLOYEE CLAIMS
 					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
 					$employee_claim->lodging_total = $total_lodge_amount->total;
