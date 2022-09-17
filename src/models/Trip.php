@@ -1756,21 +1756,37 @@ class Trip extends Model {
 		}
 		$visit = Visit::select('id')->where('trip_id', $trip->id)->where('booking_method_id',3040)->get()->toArray();
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
-		$board = Boarding::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
-		$other = LocalTravel::select('trip_id')->where('trip_id', $trip->id)->get()->toArray();
-		$tax_details = EmployeeClaim::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')->leftjoin('lodgings', 'lodgings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visits', 'visits.trip_id', 'ey_employee_claims.trip_id')->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->leftjoin('boardings', 'boardings.trip_id', 'ey_employee_claims.trip_id')->leftjoin('local_travels', 'local_travels.trip_id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.trip_id', $trip->id)->where('ey_employee_claims.employee_id', $trip->employee->id)->get()->toArray();
+		$board = Boarding::where('trip_id', $trip->id)->pluck('trip_id')->count();
+		$other = LocalTravel::where('trip_id', $trip->id)->pluck('trip_id')->count();
+		$tax_details = Trip::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')
+		      ->leftjoin('lodgings', 'lodgings.trip_id', 'trips.id')
+		      ->leftjoin('visits', 'visits.trip_id', 'trips.id')
+		      ->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+		      ->leftjoin('boardings', 'boardings.trip_id', 'trips.id')
+		      ->leftjoin('local_travels', 'local_travels.trip_id', 'trips.id')
+		      ->where('trips.id', $trip->id)
+		      ->where('trips.employee_id', $trip->employee->id)
+		      ->get()->toArray();
+        $transport_tax_details = Trip::select('visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst')
+		      ->leftjoin('visits', 'visits.trip_id', 'trips.id')
+		      ->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+		      ->where('visits.booking_method_id',3040)
+		      ->where('trips.id', $trip->id)
+		      ->where('trips.employee_id', $trip->employee->id)
+		      ->get()->toArray();
 		//dd($tax_details);
+		      //dd($transport_tax_details);
 
 		if (count($visit) > 1) {
-			$transport_basic = number_format(array_sum(array_column($tax_details, 'transport_basic')), 2, '.', ',');
-			$transport_cgst = number_format(array_sum(array_column($tax_details, 'transport_cgst')), 2, '.', ',');
-			$transport_sgst = number_format(array_sum(array_column($tax_details, 'transport_sgst')), 2, '.', ',');
-			$transport_igst = number_format(array_sum(array_column($tax_details, 'transport_igst')), 2, '.', ',');
+			$transport_basic = number_format(array_sum(array_column($transport_tax_details, 'transport_basic')), 2, '.', ',');
+			$transport_cgst = number_format(array_sum(array_column($transport_tax_details, 'transport_cgst')), 2, '.', ',');
+			$transport_sgst = number_format(array_sum(array_column($transport_tax_details, 'transport_sgst')), 2, '.', ',');
+			$transport_igst = number_format(array_sum(array_column($transport_tax_details, 'transport_igst')), 2, '.', ',');
 		} else {
-			$transport_basic = isset($tax_details[0]['transport_basic']) ? $tax_details[0]['transport_basic'] : 0;
-			$transport_cgst = isset($tax_details[0]['transport_cgst']) ? $tax_details[0]['transport_cgst'] : 0;
-			$transport_sgst = isset($tax_details[0]['transport_sgst']) ? $tax_details[0]['transport_sgst'] : 0;
-			$transport_igst = isset($tax_details[0]['transport_igst']) ? $tax_details[0]['transport_igst'] : 0;
+			$transport_basic = isset($transport_tax_details[0]['transport_basic']) ? $transport_tax_details[0]['transport_basic'] : 0;
+			$transport_cgst = isset($transport_tax_details[0]['transport_cgst']) ? $transport_tax_details[0]['transport_cgst'] : 0;
+			$transport_sgst = isset($transport_tax_details[0]['transport_sgst']) ? $transport_tax_details[0]['transport_sgst'] : 0;
+			$transport_igst = isset($transport_tax_details[0]['transport_igst']) ? $transport_tax_details[0]['transport_igst'] : 0;
 		}
 		if ($lodge > 1) {
 			$lodging_basic = number_format(array_sum(array_column($tax_details, 'lodging_basic')), 2, '.', ',');
@@ -1785,7 +1801,7 @@ class Trip extends Model {
 			$lodging_igst = isset($tax_details[0]['lodging_igst']) ? $tax_details[0]['lodging_igst'] : 0;
 			$lodging_round_off = isset($tax_details[0]['lodging_round_off']) ? $tax_details[0]['lodging_round_off'] : 0;
 		}
-		if (count($board) > 1) {
+		if ($board > 1) {
 			$boarding_basic = number_format(array_sum(array_column($tax_details, 'boarding_basic')), 2, '.', ',');
 			$boarding_cgst = number_format(array_sum(array_column($tax_details, 'boarding_cgst')), 2, '.', ',');
 			$boarding_sgst = number_format(array_sum(array_column($tax_details, 'boarding_sgst')), 2, '.', ',');
@@ -1797,7 +1813,7 @@ class Trip extends Model {
 			$boarding_igst = isset($tax_details[0]['boarding_igst']) ? $tax_details[0]['boarding_igst'] : 0;
 
 		}
-		if (count($other) > 1) {
+		if ($other > 1) {
 			$local_travel_basic = number_format(array_sum(array_column($tax_details, 'local_basic')), 2, '.', ',');
 			$local_travel_cgst = number_format(array_sum(array_column($tax_details, 'local_cgst')), 2, '.', ',');
 			$local_travel_sgst = number_format(array_sum(array_column($tax_details, 'local_sgst')), 2, '.', ',');
@@ -3431,8 +3447,8 @@ public static function saveVerifierClaim($request){
 								$transport_total = $visit_booking->amount + $visit_booking->cgst + $visit_booking->sgst + $visit_booking->igst + $visit_booking->toll_fee + $visit_booking->round_off + $visit_booking->other_charges;
 								$transport_total_amount += $transport_total;
 							}
-							$visit_booking->total = $transport_total_amount;
-				                $visit_booking->save();
+				$visit_booking->total = $transport_total_amount;
+				$visit_booking->save();		
 				$visit->save();
 				$total_transport_amount = VisitBooking::select(
 	                    	DB::raw("SUM(visit_bookings.total) as total"))
