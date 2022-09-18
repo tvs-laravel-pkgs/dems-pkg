@@ -134,7 +134,6 @@ class TripBookingUpdateController extends Controller {
 					'errors' => $validator->errors()->all(),
 				]);
 			}
-
 			//Check Booking Method Agent of Self
 			if ($r->booking_method == 'self') {
 				//Unique validation
@@ -328,6 +327,10 @@ class TripBookingUpdateController extends Controller {
 						$image = $value['attachments'];
 						// foreach ($r->file('attachments') as $image) {
 						$extension = $image->getClientOriginalExtension();
+						if($extension != 'jpeg' && $extension != 'jpg' && $extension != 'txt' && $extension != 'pdf'){
+							return response()->json(['success' => false,'errors' => ['Invalid File Format'],
+										]);
+						}
 						$value = rand(1, 100);
 						$name = $visit_bookings->id . '_ticket_booking_attachment' . $value . '.' . $extension;
 						$des_path = storage_path('app/public/visit/booking-updates/attachments/');
