@@ -328,7 +328,7 @@ class TripBookingUpdateController extends Controller {
 						// foreach ($r->file('attachments') as $image) {
 						$extension = $image->getClientOriginalExtension();
 						if($extension != 'jpeg' && $extension != 'jpg' && $extension != 'txt' && $extension != 'pdf'){
-							return response()->json(['success' => false,'errors' => ['Invalid File Format'],
+							return response()->json(['success' => false,'errors' => ['Valid File format are jpeg , jpg,txt,pdf.'],
 										]);
 						}
 						$value = rand(1, 100);
