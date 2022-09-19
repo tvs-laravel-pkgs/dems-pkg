@@ -207,8 +207,8 @@ class ExportReportController extends Controller {
 					}
 				}
 				$cronLog->remarks = "Agent visits found";
-				$time_stamp = date('Y_m_d_h_i_s');
-             $datas = DB::table('axapta_exports')->where('entity_type_id',3790)->get()->toArray();
+				$time_stamp = date('Y_m_d');
+             $datas = DB::table('axapta_exports')->where('entity_type_id',3790)->whereDate('created_at',$time_stamp)->get()->toArray();
 				$excel_header =[
 					'EntityId',
 					'CurrencyCode',
@@ -545,8 +545,8 @@ class ExportReportController extends Controller {
 					}
 				}
 				$cronLog->remarks = "Employee trips found";
-				$time_stamp = date('Y_m_d_h_i_s');
-				$datas = DB::table('axapta_exports')->where('entity_type_id',3791)->get()->toArray();
+				$time_stamp = date('Y_m_d');
+				$datas = DB::table('axapta_exports')->where('entity_type_id',3791)->whereDate('created_at',$time_stamp)->get()->toArray();
 					$excel_header =[
 					'EntityId',
 					'CurrencyCode',
