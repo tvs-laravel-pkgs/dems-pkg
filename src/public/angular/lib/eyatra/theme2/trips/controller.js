@@ -234,8 +234,8 @@ app.component('eyatraTripForm', {
                     $('.datepicker.tripStartDate').datepicker('destroy');
                     $(".datepicker.tripStartDate").datepicker({
                         setDate: self.trip.start_date,
-                        startDate: self.trip.start_date,
-                        endDate: self.trip.end_date,
+                        //startDate: self.trip.start_date,
+                        //endDate: self.trip.end_date,
                         autoclose: true,
                     });
 
@@ -243,8 +243,8 @@ app.component('eyatraTripForm', {
                     $('.datepicker.tripEndDate').datepicker('destroy');
                     $(".datepicker.tripEndDate").datepicker({
                         setDate: self.trip.end_date,
-                        startDate: self.trip.start_date,
-                        endDate: self.trip.end_date,
+                        //startDate: self.trip.start_date,
+                        // endDate: self.trip.end_date,
                         autoclose: true,
                     });
                 }, 800);
