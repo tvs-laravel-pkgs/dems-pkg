@@ -223,6 +223,10 @@ class TripBookingUpdateController extends Controller {
 					$value = rand(1, 100);
 					$image = $r->attachment;
 					$extension = $image->getClientOriginalExtension();
+					if($extension != 'jpeg' && $extension != 'jpg' && $extension != 'txt' && $extension != 'pdf'){
+							return response()->json(['success' => false,'errors' => ['Valid File format are jpeg , jpg,txt,pdf.'],
+										]);
+						}
 					$name = $visit_bookings->id . '_ticket_booking_attachment' . $value . '.' . $extension;
 					$des_path = storage_path('app/public/visit/booking-updates/attachments/');
 					$image->move($des_path, $name);
