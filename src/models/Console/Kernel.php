@@ -26,9 +26,9 @@ class Kernel extends ConsoleKernel {
 			->withoutOverlapping()
 			->everyMinute();
 
-		$schedule->command('mail:notification')
+		//$schedule->command('mail:notification')
 		//->withoutOverlapping()
-			->dailyAt('09:00');
+			//->dailyAt('09:00');
 	}
 
 	/**
