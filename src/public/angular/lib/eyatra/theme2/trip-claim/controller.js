@@ -1417,8 +1417,10 @@ app.component('eyatraTripClaimForm', {
                         var eligible_amount = parseFloat(self.trip.boardings[index].eligible_amount);
                         if (eligible_amount) {
                             var actual_amount = eligible_amount;
-                            if (hours < 12) {
-                                actual_amount = eligible_amount / 2;
+                            if (departure_date == arrival_date) {
+                                if (hours < 12) {
+                                    actual_amount = eligible_amount / 2;
+                                }
                             }
                             $scope.eligibleAmountCalc(actual_amount, index);
                             // self.trip.boardings[index].amount = actual_amount;
