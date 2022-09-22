@@ -3444,7 +3444,7 @@ public static function saveVerifierClaim($request){
 						$transport_total = 0;
 						$transport_total_amount=0;
 							if ($visit_booking) {
-								$transport_total = $visit_booking->amount + $visit_booking->cgst + $visit_booking->sgst + $visit_booking->igst + $visit_booking->toll_fee + $visit_booking->round_off + $visit_booking->other_charges;
+								$transport_total = (float)$visit_booking->amount + (float)$visit_booking->cgst + (float)$visit_booking->sgst + (float)$visit_booking->igst + (float)$visit_booking->toll_fee + (float)$visit_booking->round_off + (float)$visit_booking->other_charges;
 								 $transport_total_amount += $transport_total;
 							}
 						$visit_booking->total = $transport_total_amount ? $transport_total_amount : 0;
@@ -3715,7 +3715,7 @@ public static function saveVerifierClaim($request){
 		}
 	}catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage().$e->getLine()]]);
 		}
 }
 	
