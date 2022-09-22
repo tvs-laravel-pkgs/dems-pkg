@@ -38,7 +38,24 @@ class ProfileController extends Controller {
 		}
 	}
 	public function getVehicleData(Request $r) {
-		return app('App\Http\Controllers\AngularController')->verifyVehicleDtails($r->registration_number);
+		try{
+				$registration_number_exist = VehicleDetails::where('registration_number',$r->registration_number)->pluck('registration_number')->first();
+				if(!empty($registration_number_exist)){
+					return response()->json(['success' => false, 'errors' => ['Registration Number Already Exists']]);
+				}
+				$user = User::where('id', $r->user_id)->first();
+			    $employee = Employee::where('code',$user->username)->first();
+
+			    $type=VehicleDetails::select('vehicle_type','id')->where('employee_id',$employee->id)->get()->toArray();
+			if(count($type) > 1){
+				return response()->json(['success' => false, 'errors' => ['The vehicle max limit is two']]); 
+			}
+	               return app('App\Http\Controllers\AngularController')->verifyVehicleDtails($r->registration_number);
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		}
+	}
 	}
 	public function saveVehicleDetails(Request $request) {
 		//dd($request->all());
@@ -52,10 +69,8 @@ class ProfileController extends Controller {
 			];
 
 			$validator = Validator::make($request->all(), [
-				'registration_number' => [
-					'required:true',
-					'unique:vehicle_details,registration_number,' . $request->registration_number . ',id',
-                ],
+				'registration_number' => 'required',
+					'registration_number' => 'required|unique:vehicle_details,registration_number,' . $request->id . ',id',
                 //'vehicle_attachment' => 'required|mimes:jpeg,jpg|max:1024',
 				//'kilometer_attachment' => 'required|mimes:jpeg,jpg|max:1024',
 			], $error_messages);
@@ -64,10 +79,6 @@ class ProfileController extends Controller {
 			}
 		$user = User::where('id', $request->user_id)->first();
 		$employee = Employee::where('code',$user->username)->first();
-		$type=VehicleDetails::select('vehicle_type','id')->where('employee_id',$employee->id)->get()->toArray();
-			if(count($type) == 2){
-				return response()->json(['success' => false, 'errors' => ['The vehicle max limit is two']]); 
-			}
 		if ($user && $employee) {
 			DB::beginTransaction();
 			if (!$request->id) {
