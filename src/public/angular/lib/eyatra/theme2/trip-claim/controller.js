@@ -1553,8 +1553,10 @@ app.component('eyatraTripClaimForm', {
             if (self.deviationTypeName)
                 self.deviationTypeName += ' amount is greater than their eligible amount';
             is_grade_travel_mode = false;
-            $(self.trip.visits).each(function(key, visit) {
+            /*$(self.trip.visits).each(function(key, visit) {
                 $(self.grade_travel).each(function(key, travel) {
+                    console.log('visit' + visit.travel_mode_id);
+                    console.log('grade' + travel.id);
                     var travelId = travel.id;
                     if (visit.travel_mode_id == travelId && !is_grade_travel_mode) {
                         is_grade_travel_mode = false;
@@ -1567,8 +1569,27 @@ app.component('eyatraTripClaimForm', {
             });
             if (is_grade_travel_mode = true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
+            }*/
+            var grade_travel_ids = []
+            $(self.grade_travel).each(function(key, travel) {
+                if (jQuery.inArray(travel.id, grade_travel_ids) == -1) // Not in array
+                    grade_travel_ids.push(travel.id);
+            });
+            console.log({ grade_travel_ids })
+            is_grade_travel_mode = false;
+            $(self.trip.visits).each(function(key, visit) {
+                console.log(visit.travel_mode_id);
+                console.log(jQuery.inArray(visit.travel_mode_id, grade_travel_ids) == -1);
+                if (jQuery.inArray(visit.travel_mode_id, grade_travel_ids) == -1) { // Not in array
+                    console.log('test');
+                    is_grade_travel_mode = true;
+                    is_deviation = true;
+                }
+            });
+            console.log({ is_grade_travel_mode })
+            if (is_grade_travel_mode == true) {
+                self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }
-
 
             if (self.trip.trip_attachments.length == 0) {
                 is_deviation = true;
