@@ -2850,18 +2850,33 @@ app.component('eyatraTripClaimForm', {
         self.localTravelCal = () => {
             let totalLocalTravelAmount = 0;
             let localTravelAmount = 0;
-            let localTravelTax = 0;
+            //let localTravelTax = 0;
+            let localTravelCgst = 0;
+            let localTravelSgst = 0;
+            let localTravelIgst = 0;
             let currentLocalTravelTotal = 0;
             jQuery.each(self.trip.local_travels, (index, localTravel) => {
                 localTravelAmount = parseFloat(localTravel.amount || 0);
                 if (!$.isNumeric(localTravelAmount)) {
                     localTravelAmount = 0;
                 }
-                localTravelTax = parseFloat(localTravel.tax || 0);
-                if (!$.isNumeric(localTravelTax)) {
+                //localTravelTax = parseFloat(localTravel.tax || 0);
+                /*if (!$.isNumeric(localTravelTax)) {
                     localTravelTax = 0;
+                }*/
+                localTravelCgst = parseFloat(localTravel.cgst || 0);
+                if (!$.isNumeric(localTravelCgst)) {
+                    localTravelCgst = 0;
                 }
-                currentLocalTravelTotal = parseFloat(localTravelAmount + localTravelTax);
+                localTravelSgst = parseFloat(localTravel.sgst || 0);
+                if (!$.isNumeric(localTravelSgst)) {
+                    localTravelSgst = 0;
+                }
+                localTravelIgst = parseFloat(localTravel.igst || 0);
+                if (!$.isNumeric(localTravelIgst)) {
+                    localTravelIgst = 0;
+                }
+                currentLocalTravelTotal = parseFloat(localTravelAmount + localTravelCgst + localTravelSgst + localTravelIgst);
                 totalLocalTravelAmount += currentLocalTravelTotal;
             });
             $('.local_expenses').text('₹ ' + totalLocalTravelAmount.toFixed(2));
