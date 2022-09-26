@@ -50,12 +50,11 @@ class ProfileController extends Controller {
 			if(count($type) > 1){
 				return response()->json(['success' => false, 'errors' => ['The vehicle max limit is two']]); 
 			}
-	               return app('App\Http\Controllers\AngularController')->verifyVehicleDtails($r->registration_number);
+	            return app('App\Http\Controllers\AngularController')->verifyVehicleDtails($r->registration_number);
 		} catch (Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
-	}
 	}
 	public function saveVehicleDetails(Request $request) {
 		//dd($request->all());
