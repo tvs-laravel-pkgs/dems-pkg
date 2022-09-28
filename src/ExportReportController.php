@@ -259,7 +259,7 @@ class ExportReportController extends Controller {
 					$data->AmountCurCredit,
 					$data->OffsetAccountType,
 					$data->OffsetLedgerDimension,
-					$data->OffsetDefaultDimension,
+					'',
 					$data->PaymMode,
 					$data->TaxGroup,
 					$data->TaxItemGroup,
@@ -327,7 +327,7 @@ class ExportReportController extends Controller {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, 0.00, $agentTripVisit->totalAmount, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
@@ -338,10 +338,10 @@ class ExportReportController extends Controller {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//TICKET TAXABLE AMOUNT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, "4572-COMMON-MDS", "COMMON-MDS", $txt, $agentTripVisit->ticketAmount, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, "4572-MDS-COMMON", "COMMON-MDS", $txt, $agentTripVisit->ticketAmount, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 			//GST SPLITUPS
 			if ($trip->employee && $trip->employee->outlet && $trip->employee->outlet->address && $trip->employee->outlet->address->city && $trip->employee->outlet->address->city->state) {
@@ -357,8 +357,8 @@ class ExportReportController extends Controller {
 							$cgstPercentage = $sgstPercentage = ($agentTripVisit->ticketPercentage) / 2;
 							$cgstEntryTxt = '';
 							$sgstEntryTxt = '';
-							$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-COMMON-MDS";
-							$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-COMMON-MDS";
+							$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-MDS-COMMON";
+							$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-MDS-COMMON";
 
 							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 								$cgstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - CGST - " . $cgstPercentage . "%";
@@ -377,7 +377,7 @@ class ExportReportController extends Controller {
 							//INTER STATE (IGST)
 							$igstPercentage = $agentTripVisit->ticketPercentage;
 							$igstEntryTxt = '';
-							$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-COMMON-MDS";
+							$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-MDS-COMMON";
 
 							if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 								$igstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - IGST - " . $igstPercentage . "%";
@@ -396,10 +396,10 @@ class ExportReportController extends Controller {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//AGENT SERVICE CHARGE ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, "4572-COMMON-MDS", "COMMON-MDS", $txt, $agentTripVisit->agentServiceCharges, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_ECR", "D", $transactionDate, $accountType, "4572-MDS-COMMON", "COMMON-MDS", $txt, $agentTripVisit->agentServiceCharges, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 			//GST SPLITUPS
 			if (!empty($agentTripVisit->enteredGstin)) {
@@ -411,8 +411,8 @@ class ExportReportController extends Controller {
 					$cgstPercentage = $sgstPercentage = ($agentTripVisit->agentTaxPercentage) / 2;
 					$cgstEntryTxt = '';
 					$sgstEntryTxt = '';
-					$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-COMMON-MDS";
-					$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-COMMON-MDS";
+					$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-MDS-COMMON";
+					$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-MDS-COMMON";
 
 					if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 						$cgstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - CGST - " . $cgstPercentage . "%";
@@ -437,10 +437,10 @@ class ExportReportController extends Controller {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//BANK DEBIT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_CHQ", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, $agentTripVisit->totalAmount, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLX_CHQ", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, $agentTripVisit->totalAmount, 0.00, $agentTripVisit->invoiceNumber . "-1", $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 		} elseif ($type == 5) {
 			//BANK CREDIT ENTRY
@@ -449,7 +449,7 @@ class ExportReportController extends Controller {
 				$txt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			$axaptaBankDetail = $axaptaBankDetails->where('name', 'HDFC Bank')->first();
 			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';
@@ -597,7 +597,7 @@ class ExportReportController extends Controller {
 					$data->AmountCurCredit,
 					$data->OffsetAccountType,
 					$data->OffsetLedgerDimension,
-					$data->OffsetDefaultDimension,
+					'',
 					$data->PaymMode,
 					$data->TaxGroup,
 					$data->TaxItemGroup,
@@ -667,9 +667,9 @@ class ExportReportController extends Controller {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 2) {
 			//TAXABLE VALUE AND GST SPLITUP ENTRIES
@@ -678,8 +678,8 @@ class ExportReportController extends Controller {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
-			$ledgerDimension = "4572-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
+			$ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			$employeeTransportAmount = 0.00;
 			$employeeTransportOtherCharges = 0.00;
@@ -774,10 +774,10 @@ class ExportReportController extends Controller {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//BANK DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "V", $transactionDate, $accountType, $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 4) {
 			//BANK CREDIT ENTRY
@@ -786,7 +786,7 @@ class ExportReportController extends Controller {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
-			$accountType = $axaptaAccountType ? $axaptaAccountType->code : '';
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			$axaptaBankDetail = $axaptaBankDetails->where('name', 'HDFC Bank')->first();
 			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';
