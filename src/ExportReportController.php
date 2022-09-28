@@ -808,8 +808,8 @@ class ExportReportController extends Controller {
 				$cgstPercentage = $sgstPercentage = ($taxPercentage) / 2;
 				$cgstEntryTxt = '';
 				$sgstEntryTxt = '';
-				$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
-				$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+				$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+				$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
 					$cgstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - CGST - " . $cgstPercentage . "%";
@@ -828,7 +828,7 @@ class ExportReportController extends Controller {
 				//INTER STATE (IGST)
 				$igstPercentage = $taxPercentage;
 				$igstEntryTxt = '';
-				$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-" . $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+				$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
 					$igstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - IGST - " . $igstPercentage . "%";
