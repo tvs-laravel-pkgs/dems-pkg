@@ -696,7 +696,7 @@ app.component('eyatraOutstationClaimVerificationView', {
                                 $('#transport_attach_removal_ids').val('');
                                 //self.enable_switch_tab = true;
                                 $scope.$apply();
-                                //$('#transport_submit').html('Save & Next');
+                                $('#transport_submit').html('Save');
                                 $("#transport_submit").attr("disabled", false);
                                 //$('#claim_lodge_expense_form').trigger("reset");
                                 //$('#claim_board_expense_form').trigger("reset");
@@ -765,7 +765,7 @@ app.component('eyatraOutstationClaimVerificationView', {
                                 $('#lodgings_attach_removal_ids').val('');
                                 //self.enable_switch_tab = true;
                                 $scope.$apply();
-                                //$('#lodge_submit').html('Save & Next');
+                                $('#lodge_submit').html('Save');
                                 $("#lodge_submit").attr("disabled", false);
                                 //$('#claim_lodge_expense_form').trigger("reset");
                                 //$('#claim_board_expense_form').trigger("reset");
