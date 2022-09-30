@@ -396,6 +396,18 @@ app.component('eyatraTripForm', {
                 datecall(self.trip.start_date, self.trip.end_date, i);
             }
 
+            if (self.trip.start_date > self.trip.end_date) {
+                console.log(self.trip.start_date, self.trip.end_date);
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: 'Please enter value greater than start Date',
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 5000);
+            }
+
             if (self.trip.visits && self.trip.visits.length > 0) {
                 $.each(self.trip.visits, function(index, value) {
                     //SET START DATE FOR FIRST INDEX
