@@ -74,7 +74,7 @@ class TripController extends Controller {
 		// dd($request->visits);
 		$size = sizeof($request->visits);
 		for ($i = 0; $i < $size; $i++) {
-			if (!(($request->visits[$i]['date'] >= $request->start_date) && ($request->visits[$i]['date'] <= $request->end_date))) {
+			if (!((date("Y-m-d", strtotime($request->visits[$i]['date'])) >= date("Y-m-d", strtotime($request->start_date))) && (date("Y-m-d", strtotime($request->visits[$i]['date'])) <= date("Y-m-d", strtotime($request->end_date))))) {
 				return response()->json(['success' => false, 'errors' => ["Departure date should be within Trip Period"]]);
 
 			}
@@ -82,7 +82,7 @@ class TripController extends Controller {
 			$next_key = $i + 1;
 			if (!($next_key >= $size)) {
 				//dump($next_key);
-				if ($request->visits[$next_key]['date'] < $request->visits[$i]['date']) {
+				if (date("Y-m-d", strtotime($request->visits[$next_key]['date'])) < date("Y-m-d", strtotime($request->visits[$i]['date']))) {
 					return response()->json(['success' => false, 'errors' => ["Return Date Should Be Greater Than Or Equal To Departure Date"]]);
 				}
 			}
