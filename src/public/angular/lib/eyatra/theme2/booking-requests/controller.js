@@ -210,10 +210,12 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.checkDetail(id, 'book');
             setTimeout(function() {
                 fileUpload();
+                var endDate = new Date(self.trip.created_at);
+                endDate.setDate(endDate.getDate() + 30);
                 $(".datepicker").datepicker({
                     todayHighlight: true,
                     startDate: self.trip.created_at,
-                    endDate: date,
+                    endDate: endDate,
                     autoclose: true,
                 });
             }, 800);
