@@ -3322,7 +3322,8 @@ app.component('eyatraTripClaimForm', {
                 error.insertAfter(element.parent())
             },
             invalidHandler: function(event, validator) {
-                custom_noty('error', 'You have errors in all tabs');
+                //custom_noty('error', 'You have errors in all tabs');
+                custom_noty('error', 'Justify the trip');
             },
             submitHandler: function(form) {
                 //console.log(self.item);
