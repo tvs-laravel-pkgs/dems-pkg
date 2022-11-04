@@ -210,8 +210,12 @@ app.component('eyatraTripBookingRequestsView', {
             $scope.checkDetail(id, 'book');
             setTimeout(function() {
                 fileUpload();
-                var endDate = new Date(self.trip.created_at);
-                endDate.setDate(endDate.getDate() + 30);
+                console.log(date);
+                var stringDate = date;
+                var splitDate = stringDate.split('-');
+                var convertedDate = new Date(splitDate[2], splitDate[1] - 1, splitDate[0]);
+                convertedDate.setDate(convertedDate.getDate() + 5);
+                var endDate = new Date(convertedDate.getFullYear(), convertedDate.getMonth(), convertedDate.getDate(), 0, 0, 0, 0);
                 $(".datepicker").datepicker({
                     todayHighlight: true,
                     startDate: self.trip.created_at,
@@ -349,7 +353,7 @@ app.component('eyatraTripBookingRequestsView', {
             const invoiceAmount = parseFloat(self.trip.agent_visits[index].booking.invoice_amount) || 0.00;
             totalValue = parseFloat(taxableValue + cgstValue + sgstValue + igstValue + otherCharges).toFixed(2);
             self.trip.agent_visits[index].booking.total = totalValue;
-            self.trip.agent_visits[index].booking.round_off = parseFloat(totalValue - invoiceAmount).toFixed(2);
+            self.trip.agent_visits[index].booking.round_off = parseFloat(invoiceAmount - totalValue).toFixed(2);
         }
         $scope.fareDetailGstChange = (index, gst_number) => {
             // self.trip.agent_visits[index].booking.fare_gst_detail = '';

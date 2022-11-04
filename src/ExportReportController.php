@@ -525,6 +525,9 @@ class ExportReportController extends Controller {
 						//TAXABLE VALUE AND GST SPLITUP ENTRIES
 						$this->employeeAxaptaExportProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 
+						//ROUND OFF
+						$this->employeeAxaptaExportProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+
 						//BANK DEBIT ENTRY
 						$this->employeeAxaptaExportProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 
@@ -767,7 +770,20 @@ class ExportReportController extends Controller {
 
 			}
 
-		} elseif ($type == 3) {
+		} elseif ($type == 5) {
+				$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
+			//ROUND OFF ENTRY
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
+			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
+			$ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+
+			//ROUND OFF ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+		}elseif ($type == 3) {
 			//BANK DEBIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
@@ -874,8 +890,14 @@ class ExportReportController extends Controller {
 
 	// Bank statement report
 	public function bankStatement(Request $r) {
-		$business_ids = explode(',', $r->business_ids);
-		//dd($r);
+		//$business_ids = explode(',', $r->business_ids);
+		if ($r->business_ids) {
+			if (in_array('-1', json_decode($r->business_ids))) {
+				$business_ids = Business::pluck('id')->toArray();
+			} else {
+				$business_ids = json_decode($r->business_ids);
+			}
+		}
 		$time_stamp = date('Y_m_d_h_i_s');
 		foreach ($business_ids as $business_id) {
 			$outstations = Employee::select(
@@ -909,8 +931,6 @@ class ExportReportController extends Controller {
 				->where('departments.business_id', '=', $business_id)
 				->groupBy('eyec.id')
 				->get()->toArray();
-
-			//dd($outstations);
 			$advance_amount = Employee::select(
 				'employees.code as Account_Number',
 				'u.name as Name',
@@ -940,7 +960,6 @@ class ExportReportController extends Controller {
 				->where('departments.business_id', '=', $business_id)
 				->groupBy('t.id')
 				->get()->toArray();
-			//dd($advance_amount);
 			$claims = Employee::select(
 				'employees.code as Account_Number',
 				'u.name as Name',
@@ -987,7 +1006,7 @@ class ExportReportController extends Controller {
 				'Batch',
 				'Bank Date',
 			];
-			$travelex_header = [
+			/*$travelex_header = [
 				'LINENUM',
 				'INVOICE',
 				'DOCUMENTNUM',
@@ -1011,7 +1030,7 @@ class ExportReportController extends Controller {
 				'OFFSETLEDGERDIAMENSION',
 				'PERSONNELNUMBER',
 				'LOGISTICSLOCATION',
-			];
+			];*/
 			if (count($locals) > 0) {
 				$local_trips = array();
 				$travelex_details = array();
@@ -1052,7 +1071,7 @@ class ExportReportController extends Controller {
 						$batch,
 						$time_stamp,
 					];
-					$travelex_local = [
+					/*$travelex_local = [
 						$s_no++,
 						'AC-' . $local['invoice'],
 						$local['documentnum'],
@@ -1101,17 +1120,17 @@ class ExportReportController extends Controller {
 						$offsetledgerdiamension = '0',
 						$personnelnumber = 'INTG01',
 						$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
-					];
+					];*/
 					$local_trips[] = $local_trip;
-					$travelex_details[] = $travelex_local;
-					$travelex_details[] = $travelex_detail;
+					/*$travelex_details[] = $travelex_local;
+					$travelex_details[] = $travelex_detail;*/
 				}
 			} else {
 				Session()->flash('error', 'No Data Found');
 				// return Redirect::to('/#!/report/list');
 			}
 
-			$consolidation_local = [
+			/*$consolidation_local = [
 				$s_no++,
 				'CC-' . $local['invoice'],
 				'0001',
@@ -1162,13 +1181,13 @@ class ExportReportController extends Controller {
 				$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
 			];
 			$travelex_details[] = $consolidation_local;
-			$travelex_details[] = $consolidation_detail;
+			$travelex_details[] = $consolidation_detail;*/
 			// ob_end_clean();
 			// ob_start();
 			$business_name = Business::where('id', '=', $business_id)->pluck('name')->first();
 			//dd($business_name);
-			$outputfile = $business_name . '_travelex_report_' . $time_stamp;
-			$file = Excel::create($outputfile, function ($excel) use ($travelex_header, $travelex_details) {
+			//$outputfile = $business_name . '_travelex_report_' . $time_stamp;
+			/*$file = Excel::create($outputfile, function ($excel) use ($travelex_header, $travelex_details) {
 				$excel->sheet('travelex_', function ($sheet) use ($travelex_header, $travelex_details) {
 					$sheet->fromArray($travelex_details, NULL, 'A1');
 					$sheet->row(1, $travelex_header);
@@ -1176,10 +1195,10 @@ class ExportReportController extends Controller {
 						$row->setBackground('#07c63a');
 					});
 				});
-			})->store('xlsx', storage_path('app/public/travelex_report/'));
+			})->store('xlsx', storage_path('app/public/travelex_report/'));*/
 			//dd($file);
 			//SAVE TRAVELEX REPORTS
-			$report_details = new ReportDetail;
+			/*$report_details = new ReportDetail;
 			$report_details->company_id = $local['company_id'];
 			$report_details->type_id = 3722;
 			$report_details->name = $file->filename;
@@ -1193,7 +1212,7 @@ class ExportReportController extends Controller {
 			$batch_wise_reports->report_detail_id = $report_details->id;
 			$batch_wise_reports->name = $report_details->batch;
 			$batch_wise_reports->date = $time_stamp;
-			$batch_wise_reports->save();
+			$batch_wise_reports->save();*/
 			$outputfile_bank = $business_name . '_bank_statement_' . $time_stamp;
 			$file_one = Excel::create($outputfile_bank, function ($excel) use ($local_trips_header, $local_trips) {
 				$excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header, $local_trips) {
