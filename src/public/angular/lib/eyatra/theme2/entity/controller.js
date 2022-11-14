@@ -222,7 +222,7 @@ app.component('eyatraEntityForm', {
             rules: {
                 'name': {
                     required: true,
-                    minlength: 3,
+                    minlength: 1,
                     maxlength: 191,
                 },
 
