@@ -336,14 +336,14 @@ class OutletController extends Controller {
 				'pincode.required' => 'Pincode is Required',
 				'code.unique' => "Outlet Code is already taken",
 				'outlet_name.unique' => "Outlet Name is already taken",
-				//'cashier_id.required' => "Cashier Name is Required",
+				'cashier_id.required' => "Cashier Name is Required",
 			];
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'outlet_name' => 'required',
 				'line_1' => 'required',
-				//'cashier_id' => 'required',
-				//'nodel_id'=>'required',
+				'cashier_id' => 'required',
+				'nodel_id'=>'required',
 				// 'amount_eligible' => 'required',
 				// 'country_id' => 'required',
 				// 'state_id' => 'required',
