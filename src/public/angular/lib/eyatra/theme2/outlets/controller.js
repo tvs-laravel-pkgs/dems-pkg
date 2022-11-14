@@ -530,18 +530,18 @@ app.component('eyatraOutletForm', {
                     minlength: 3,
                     maxlength: 191,
                 },
-                'lob_id': {
-                    required: true,
-                },
-                'sbu_id': {
-                    required: true,
-                },
-                'cashier_id': {
-                    required: true,
-                },
-                'nodel_id': {
-                    required: true,
-                },
+                /*'lob_id': {
+    required: true,
+},
+'sbu_id': {
+    required: true,
+},
+'cashier_id': {
+    required: true,
+},
+'nodel_id': {
+    required: true,
+},*/
                 'amount_limit': {
                     required: true,
                     number: true,
