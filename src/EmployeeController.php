@@ -197,6 +197,7 @@ class EmployeeController extends Controller {
 		} else {
 			$this->data['action'] = 'Edit';
 			$employee = Employee::withTrashed()->with('sbu', 'department', 'bankDetail', 'reportingTo', 'walletDetail', 'user', 'chequeDetail')->find($employee_id);
+			$employee->reporting_to_name = $employee->reportingTo ? $employee->reportingTo->user : '';
 			//dd($employee);
 			if (!$employee) {
 				$this->data['success'] = false;
