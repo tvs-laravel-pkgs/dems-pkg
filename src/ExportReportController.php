@@ -801,11 +801,12 @@ class ExportReportController extends Controller {
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
-			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
+			//$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
-
-			$axaptaBankDetail = $axaptaBankDetails->where('name', 'HDFC Bank')->first();
-			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';
+            $ledgerDimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+			/*$axaptaBankDetail = $axaptaBankDetails->where('name', 'HDFC Bank')->first();
+			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';*/
 
 			//BANK CREDIT ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
