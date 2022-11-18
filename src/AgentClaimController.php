@@ -15,8 +15,7 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class AgentClaimController extends Controller {
-	public function listEYatraAgentClaimList(Request $r) {
-
+    public function listEYatraAgentClaimList(Request $r) {
 		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
 			'ey_agent_claims.number',
@@ -72,9 +71,9 @@ class AgentClaimController extends Controller {
 			$agent_claim = AgentClaim::find($agent_claim_id);
 			$this->data['action'] = 'Edit';
 
-			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.paid_amount)'),
+			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.total as paid_amount)'),
 				'visit_bookings.id',
-				'visit_bookings.paid_amount',
+				'visit_bookings.total as paid_amount',
 				'configs.name as status',
 				'trips.number as trip_number',
 				'trips.id as trip_id',
@@ -98,7 +97,7 @@ class AgentClaimController extends Controller {
 			$this->data['attachment'] = [];
 
 			$this->data['booking_list'] = $booking_list = VisitBooking::select(
-				DB::raw('SUM(visit_bookings.paid_amount) as paid_amount'), //DB::raw('SUM(visit_bookings.paid_amount) as total_amount'),
+				DB::raw('SUM(visit_bookings.total) as paid_amount'), DB::raw('SUM(visit_bookings.total) as total_ticket_amount'),
 				'trips.id as trip_id', 'visits.id as visit_id', 'employees.code as employee_code',
 				'users.name as employee_name', 'configs.name as status', 'trips.number as trip_number',
 				'visit_bookings.invoice_date',
@@ -168,7 +167,8 @@ class AgentClaimController extends Controller {
 				'invoice_number.required' => 'Invoice Number is Required',
 				'invoice_number.unique' => 'Invoice Number is already taken',
 				'date.required' => 'Invoice Date is Required',
-				'net_amount.required' => 'Net Amount is Required',
+				'net_amount.required' => 'Total Service Charge Amount is Required',
+				'net_ticket_amount.required' => 'Total Ticket Amount is Required'
 				// 'tax.required' => 'Tax is Required',
 				// 'invoice_amount.required' => 'Invoice Amount is Required',
 			];
@@ -179,6 +179,7 @@ class AgentClaimController extends Controller {
 				],
 				'date' => "required",
 				'net_amount' => "required",
+				'net_ticket_amount'=>"required",
 				// 'tax' => "required",
 				// 'invoice_amount' => "required",
 			]);
@@ -228,6 +229,7 @@ class AgentClaimController extends Controller {
 			$agentClaim->agent_id = Auth::user()->entity_id;
 			$agentClaim->invoice_date = $invoice_date;
 			$agentClaim->net_amount = $request->net_amount;
+			$agentClaim->net_ticket_amount = $request->net_ticket_amount;
 			$agentClaim->tax = $request->tax;
 			$agentClaim->cgst_tax = $request->cgst_tax;
 			$agentClaim->sgst_tax = $request->sgst_tax;

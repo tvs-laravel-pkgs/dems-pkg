@@ -3061,7 +3061,13 @@ class Trip extends Model {
 				if ($lodging_count > 0 && $lodge_attachment_count == 0) {
 					$employee_claim->is_deviation = 1;
 				}
-
+				if($grade_advance_eligibility->deviation_eligiblity == 1){
+                if ($employee_claim->deviation_reason == NULL) {
+					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+				} else {
+					$employee_claim->is_deviation = 1;
+				}
+			}
 				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
 				// Changed deviation by Karthick T on 21-01-2022
 

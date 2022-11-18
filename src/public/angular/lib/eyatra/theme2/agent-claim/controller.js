@@ -123,12 +123,13 @@ app.component('eyatraAgentClaimForm', {
             }
 
             self.agent_claim = response.data.agent_claim;
+            console.log(response.data.agent_claim);
             self.booking_list = response.data.booking_list;
             self.action = response.data.action;
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             self.gstin_tax = response.data.gstin_tax;
-            console.log(response.data.agent_claim);
+            console.log(response.data.booking_list);
 
             if (self.action == 'Edit') {
                 self.trips_count = response.data.trips_count;
@@ -160,6 +161,7 @@ app.component('eyatraAgentClaimForm', {
         // });
         $(document).on('keyup', '.tax_calculate', function() {
             var net_amt = parseFloat($(".net_amount").val());
+            var ticket_amt = parseFloat($(".net_ticket_amount").val());
             var cgst_tax = parseFloat($("#cgst_tax").val())
             cgst_tax = cgst_tax ? cgst_tax : 0
             var sgst_tax = parseFloat($("#sgst_tax").val())
@@ -168,7 +170,7 @@ app.component('eyatraAgentClaimForm', {
             igst_tax = igst_tax ? igst_tax : 0
             var tax = parseFloat(cgst_tax + sgst_tax + igst_tax)
             // var tax = parseFloat($("#tax").val());
-            total = (net_amt + tax);
+            total = (net_amt + tax + ticket_amt);
             $("#invoice_amount").val(total.toFixed(2));
             $("#tax").val(tax.toFixed(2));
         });
@@ -188,26 +190,32 @@ app.component('eyatraAgentClaimForm', {
             var total_amount = 0;
             var count = 0;
             var amount = 0;
+            var ticket_amount = 0;
             if (event.target.checked == true) {
                 $.each($('.booking_list:checked'), function() {
                     count++;
                     amount += parseFloat($(this).attr('data-amount'));
+                    ticket_amount += parseFloat($(this).attr('data-ticketamount'));
+                    console.log(amount, ticket_amount);
                 });
             } else {
                 $.each($('.booking_list:checked'), function() {
                     count++;
                     amount += parseFloat($(this).attr('data-amount'));
+                    ticket_amount += parseFloat($(this).attr('data-ticketamount'));
                 });
                 self.total_amount = 0;
             }
             $(".amount").html(amount.toFixed(2));
             $(".net_amount").val(amount.toFixed(2));
+            $(".net_ticket_amount").val(ticket_amount.toFixed(2));
             $("#count").html(count);
 
             if ($("#tax").val() != '') {
                 var net_amt = parseFloat($(".net_amount").val());
+                var ticket_amt = parseFloat($(".net_ticket_amount").val());
                 var tax = parseFloat($("#tax").val());
-                var total_amount = (net_amt + tax);
+                var total_amount = (net_amt + tax + ticket_amt);
                 $("#invoice_amount").val(total_amount.toFixed(2));
             }
             if (count > 0) {
@@ -230,22 +238,26 @@ app.component('eyatraAgentClaimForm', {
             var total_amount = 0;
             var count = 0;
             var amount = 0;
+            var ticket_amount = 0;
             if (event.target.checked == true) {
                 $('.booking_list').prop('checked', true);
                 $.each($('.booking_list:checked'), function() {
                     count++;
                     amount += parseFloat($(this).attr('data-amount'));
+                    ticket_amount += parseFloat($(this).attr('data-ticketamount'));
                 });
             } else {
                 $('.booking_list').prop('checked', false);
                 $.each($('.booking_list:checked'), function() {
                     count++;
                     amount += parseFloat($(this).attr('data-amount'));
+                    ticket_amount += parseFloat($(this).attr('data-ticketamount'));
                 });
                 self.total_amount = 0;
             }
             $(".amount").html(amount.toFixed(2));
             $(".net_amount").val(amount.toFixed(2));
+            $(".net_ticket_amount").val(ticket_amount.toFixed(2));
             $("#count").html(count);
             $(".payment-btn").prop('disabled', true);
             if (count > 0) {
