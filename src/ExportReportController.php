@@ -1828,7 +1828,7 @@ class ExportReportController extends Controller {
             ->whereIn('visit_bookings.type_id', [3100,3101])
             ->whereDate('visit_bookings.created_at', '>=', $from_date)
 			->whereDate('visit_bookings.created_at', '<=', $to_date)
-			->whereIn('departments.business_id', $business_ids)
+			//->whereIn('departments.business_id', $business_ids)
             ->groupBy('visit_bookings.id')->get()->toArray();
         
         if (count($booking_details) == 0) {
