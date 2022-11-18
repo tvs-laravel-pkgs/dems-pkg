@@ -2350,10 +2350,18 @@ class Trip extends Model {
 							$lodging->gstin_state_code = null;
 							$lodging->gstin_address = null;
 						}
+						if($lodging_data['stay_type_id'] == 3340 || $lodging_data['stay_type_id'] == 3341){
+							if($lodging_data['amount'] == 0){
+								return response()->json(['success' => false, 'errors' => ['Please Enter Before Tax Amount']]);
+							}
+						}
 						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}
 						$lodging->fill($lodging_data);
+						if($lodging_data['stay_type_id'] == 3342){
+							$lodging->amount = 0.00;
+						}
 						$lodging->trip_id = $request->trip_id;
 
 						//CONCATENATE DATE & TIME
