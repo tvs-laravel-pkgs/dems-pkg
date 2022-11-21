@@ -3429,17 +3429,17 @@ app.component('eyatraTripClaimView', {
             self.trip_justify = response.data.trip_justify;
             if (self.trip.advance_received) {
                 if (parseFloat(self.total_amount) > parseFloat(self.trip.advance_received)) {
-                    self.pay_to_employee = (parseFloat(self.total_amount) - parseFloat(self.trip.advance_received)).toFixed(2);
+                    self.pay_to_employee = Math.round(parseFloat(self.total_amount) - parseFloat(self.trip.advance_received)).toFixed(2);
                     self.pay_to_company = '0.00';
                 } else if (parseFloat(self.total_amount) < parseFloat(self.trip.advance_received)) {
                     self.pay_to_employee = '0.00';
-                    self.pay_to_company = (parseFloat(self.trip.advance_received) - parseFloat(self.total_amount)).toFixed(2);
+                    self.pay_to_company = Math.round(parseFloat(self.trip.advance_received) - parseFloat(self.total_amount)).toFixed(2);
                 } else {
                     self.pay_to_employee = '0.00';
                     self.pay_to_company = '0.00';
                 }
             } else {
-                self.pay_to_employee = parseFloat(self.total_amount).toFixed(2);
+                self.pay_to_employee = Math.round(parseFloat(self.total_amount)).toFixed(2);
                 self.pay_to_company = '0.00';
             }
             $rootScope.loading = false;

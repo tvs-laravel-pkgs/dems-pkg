@@ -3137,16 +3137,16 @@ class Trip extends Model {
 				//To Find Amount to Pay Financier or Employee
 				if ($trip->advance_received) {
 					if ($trip->advance_received > $total_amount) {
-						$balance_amount = $trip->advance_received - $total_amount;
+						$balance_amount = round($trip->advance_received - $total_amount);
 						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
 						$employee_claim->amount_to_pay = 2;
 					} else {
-						$balance_amount = $total_amount - $trip->advance_received;
+						$balance_amount = round($total_amount - $trip->advance_received);
 						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
 						$employee_claim->amount_to_pay = 1;
 					}
 				} else {
-					$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
+					$employee_claim->balance_amount = round($total_amount) ? round($total_amount) : 0;
 					$employee_claim->amount_to_pay = 1;
 				}
 

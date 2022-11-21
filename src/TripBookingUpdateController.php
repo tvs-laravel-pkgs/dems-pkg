@@ -319,7 +319,8 @@ class TripBookingUpdateController extends Controller {
 					//$visit_bookings->other_charges = $value['other_charges'];
 					$visit_bookings->service_charge = $service_charge;
 					// $visit_bookings->total = $total_amount;
-					//$visit_bookings->total = $value['total'];
+					$visit_bookings->total = round($value['total']);
+					//dd($visit_bookings->total,$value['total']);
 					$visit_bookings->paid_amount = $claim_amount;
 					$visit_bookings->status_id = $r->status_id;
 					$visit_bookings->created_by = Auth::user()->id;

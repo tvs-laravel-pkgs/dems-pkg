@@ -169,18 +169,18 @@ app.component('eyatraTripClaimVerificationTwoView', {
                 $scope.visitTwo = false;
             }
             if (self.trip.advance_received) {
-                if (parseInt(self.total_amount) > parseInt(self.trip.advance_received)) {
-                    self.pay_to_employee = (parseInt(self.total_amount) - parseInt(self.trip.advance_received)).toFixed(2);
+                if (parseFloat(self.total_amount) > parseFloat(self.trip.advance_received)) {
+                    self.pay_to_employee = Math.round(parseFloat(self.total_amount) - parseFloat(self.trip.advance_received)).toFixed(2);
                     self.pay_to_company = '0.00';
-                } else if (parseInt(self.total_amount) < parseInt(self.trip.advance_received)) {
+                } else if (parseFloat(self.total_amount) < parseFloat(self.trip.advance_received)) {
                     self.pay_to_employee = '0.00';
-                    self.pay_to_company = (parseInt(self.trip.advance_received) - parseInt(self.total_amount)).toFixed(2);
+                    self.pay_to_company = Math.round(parseFloat(self.trip.advance_received) - parseFloat(self.total_amount)).toFixed(2);
                 } else {
                     self.pay_to_employee = '0.00';
                     self.pay_to_company = '0.00';
                 }
             } else {
-                self.pay_to_employee = parseInt(self.total_amount).toFixed(2);
+                self.pay_to_employee = Math.round(parseFloat(self.total_amount)).toFixed(2);
                 self.pay_to_company = '0.00';
             }
             $scope.visitTwo = response.data.approval_status;
