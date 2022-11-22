@@ -15,7 +15,7 @@ app.component('eyatraTripApprovals', {
                 { data: 'title', searchable: false, class: 'title' },
                 { data: 'claim_number', name: 'ey_employee_claims.number', searchable: true },
                 { data: 'number', name: 'trips.number', searchable: true },
-                { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ecode', name: 'employee.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: false },
                 { data: 'start_date', name: 'trips.start_date', searchable: false },
                 { data: 'end_date', name: 'trips.end_date', searchable: false },
