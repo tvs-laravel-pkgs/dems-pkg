@@ -2145,7 +2145,7 @@ class Trip extends Model {
 							// $gstin = $visit_data['gstin'];
 							$user_company_id = Auth::user()->company_id;
 							$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
-							if ($gstin_enable == 1) {
+							if ($gstin_enable == 1 && !empty($visit_data['gstin'])) {
 								if ($visit_data['travel_mode_id'] != '15' || $visit_data['travel_mode_id'] != '16' || $visit_data['travel_mode_id'] != '17' || $visit_data['travel_mode_id'] != '12') {
 									$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($visit_data['gstin'], "", false);
 									//dd($response);
