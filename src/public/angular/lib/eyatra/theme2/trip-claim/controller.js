@@ -2162,7 +2162,7 @@ app.component('eyatraTripClaimForm', {
             if (fareDetailStartingKm && fareDetailEndingKm && fareDetailElibleAmount) {
                 fareDetailTotalKm = fareDetailElibleAmount * (fareDetailEndingKm - fareDetailStartingKm);
             }
-            self.fareDetailsKmModalValues.totalKm = parseFloat(fareDetailTotalKm).toFixed(2);
+            self.fareDetailsKmModalValues.totalKm = fareDetailTotalKm;
         }
 
         $scope.onSubmitFareDetailKmModal = () => {
@@ -2181,7 +2181,8 @@ app.component('eyatraTripClaimForm', {
             $("#" + self.fareDetailsKmModalIndex + "-fareDetailStartingKm").val(self.fareDetailsKmModalValues.kmStart);
             $("#" + self.fareDetailsKmModalIndex + "-fareDetailEndingKm").val(self.fareDetailsKmModalValues.kmEnd);
             $("#" + self.fareDetailsKmModalIndex + "-fareDetailTollFee").val(self.fareDetailsKmModalValues.tollFee);
-            self.trip.visits[self.fareDetailsKmModalIndex].self_booking.amount = self.fareDetailsKmModalValues.totalKm;
+            let Tollfee = parseFloat(self.fareDetailsKmModalValues.tollFee) || 0;
+            self.trip.visits[self.fareDetailsKmModalIndex].self_booking.amount = parseFloat(self.fareDetailsKmModalValues.totalKm + Tollfee).toFixed(2);
 
             self.fareDetailsKmModalIndex = '';
             self.fareDetailsKmModalValues = {};
