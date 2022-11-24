@@ -2139,14 +2139,14 @@ app.component('eyatraTripClaimForm', {
                 if (travelModeId == '16' || travelModeId == '15') {
                     self.fareDetailsKmModalValues.kmStart = $("#" + index + "-fareDetailStartingKm").val();
                     self.fareDetailsKmModalValues.kmEnd = $("#" + index + "-fareDetailEndingKm").val();
-                    self.fareDetailsKmModalValues.tollFee = $("#" + index + "-fareDetailTollFee").val();
+                    //self.fareDetailsKmModalValues.tollFee = $("#" + index + "-fareDetailTollFee").val();
 
                     $scope.calculateFareDetailTotalKM();
                     $('#fareDetailKmModal').modal('show');
                 } else {
                     $("#" + index + "-fareDetailStartingKm").val('');
                     $("#" + index + "-fareDetailEndingKm").val('');
-                    $("#" + index + "-fareDetailTollFee").val('');
+                    // $("#" + index + "-fareDetailTollFee").val('');
                     self.trip.visits[index].self_booking.amount = '';
                 }
                 $scope.$apply()
@@ -2162,7 +2162,7 @@ app.component('eyatraTripClaimForm', {
             if (fareDetailStartingKm && fareDetailEndingKm && fareDetailElibleAmount) {
                 fareDetailTotalKm = fareDetailElibleAmount * (fareDetailEndingKm - fareDetailStartingKm);
             }
-            self.fareDetailsKmModalValues.totalKm = fareDetailTotalKm;
+            self.fareDetailsKmModalValues.totalKm = parseFloat(fareDetailTotalKm).toFixed(2);
         }
 
         $scope.onSubmitFareDetailKmModal = () => {
@@ -2174,15 +2174,15 @@ app.component('eyatraTripClaimForm', {
                 custom_noty('error', "Ending KM is required");
                 return;
             }
-            if (!self.fareDetailsKmModalValues.tollFee) {
+            /*if (!self.fareDetailsKmModalValues.tollFee) {
                 custom_noty('error', "Toll Fee is required");
                 return;
-            }
+            }*/
             $("#" + self.fareDetailsKmModalIndex + "-fareDetailStartingKm").val(self.fareDetailsKmModalValues.kmStart);
             $("#" + self.fareDetailsKmModalIndex + "-fareDetailEndingKm").val(self.fareDetailsKmModalValues.kmEnd);
-            $("#" + self.fareDetailsKmModalIndex + "-fareDetailTollFee").val(self.fareDetailsKmModalValues.tollFee);
-            let Tollfee = parseFloat(self.fareDetailsKmModalValues.tollFee) || 0;
-            self.trip.visits[self.fareDetailsKmModalIndex].self_booking.amount = parseFloat(self.fareDetailsKmModalValues.totalKm + Tollfee).toFixed(2);
+            //$("#" + self.fareDetailsKmModalIndex + "-fareDetailTollFee").val(self.fareDetailsKmModalValues.tollFee);
+            /*let Tollfee = parseFloat(self.fareDetailsKmModalValues.tollFee) || 0;*/
+            self.trip.visits[self.fareDetailsKmModalIndex].self_booking.amount = self.fareDetailsKmModalValues.totalKm;
 
             self.fareDetailsKmModalIndex = '';
             self.fareDetailsKmModalValues = {};
