@@ -259,9 +259,19 @@ class LocalTrip extends Model {
 		}
 
 		$data['travel_values'] = $values;
-
+	        $travel_mode= Entity::select('entities.id', 'entities.name')
+			->whereIn('entities.id',[15,16,17,84])
+			->where('entities.entity_type_id', 502)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
+			$local_travel_mode = Entity::select('entities.id', 'entities.name')
+			->whereIn('entities.id',[18,19,20,63,173])
+			->where('entities.entity_type_id', 503)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
 		$data['extras'] = [
-			'travel_mode_list' => collect(Entity::uiClaimTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode'])),
+			//'travel_mode_list' => collect(Entity::uiClaimTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode'])),
+			'travel_mode_list' => collect($travel_mode->merge($local_travel_mode)->prepend(['id' => '', 'name' => 'Select Travel Mode'])),
 			'eligible_travel_mode_list' => DB::table('local_travel_mode_category_type')->where('category_id', 3561)->pluck('travel_mode_id')->toArray(),
 			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
 			'travel_values' => $values,
