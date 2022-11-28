@@ -332,6 +332,12 @@ app.component('eyatraTripClaimForm', {
                 // Added empty lodging if no record exist
                 if (self.trip.lodgings.length == 0)
                     self.lodgingAdd()
+                if (self.trip.boardings.length == 0)
+                    self.addNewBoardings();
+
+                if (self.trip.local_travels.length == 0)
+                    self.addNewLocalTralvels();
+
             } else {
                 $timeout(function() {
                     // $scope.stayDaysEach();
