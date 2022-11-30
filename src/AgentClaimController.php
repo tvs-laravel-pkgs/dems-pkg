@@ -78,7 +78,7 @@ class AgentClaimController extends Controller {
 
 	public function eyatraAgentTripClaimList($agent_claim_id = NULL,Request $r){
 		if ($agent_claim_id) {
-			if (!empty($employee)) {
+			if (!empty($r->employee)) {
 				$employee = $r->employee;
 			} else {
 				$employee = null;
@@ -111,7 +111,7 @@ class AgentClaimController extends Controller {
 				->where('visit_bookings.agent_claim_id', $agent_claim_id)
 				->where(function ($query) use ($r, $employee) {
 					if (!empty($employee)) {
-						$query->where('e.id', $employee);
+						$query->where('employees.id', $employee);
 					}
 				})
 				->where(function ($query) use ($r, $business) {
@@ -137,7 +137,7 @@ class AgentClaimController extends Controller {
 				})
 			->make(true);
 		} else {
-			if (!empty($employee)) {
+			if (!empty($r->employee)) {
 				$employee = $r->employee;
 			} else {
 				$employee = null;
@@ -173,7 +173,7 @@ class AgentClaimController extends Controller {
 				->where('visit_bookings.status_id', 3240)
 				->where(function ($query) use ($r, $employee) {
 					if (!empty($employee)) {
-						$query->where('e.id', $employee);
+						$query->where('employees.id', $employee);
 					}
 				})
 				->where(function ($query) use ($r, $business) {
