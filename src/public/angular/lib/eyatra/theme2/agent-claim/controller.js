@@ -128,7 +128,7 @@ app.component('eyatraAgentClaimForm', {
                 }
             },
             columns: [
-                { data: 'checkbox', searchable: false, class: 'checkbox' },
+                { data: 'checkbox', searchable: false, class: '' },
                 { data: 'trip_number', name: 'trips.number', searchable: false },
                 { data: 'employee_code', name: 'employees.code', searchable: true },
                 { data: 'employee_name', name: 'users.name', searchable: true },
