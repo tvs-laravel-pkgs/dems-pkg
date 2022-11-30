@@ -101,6 +101,81 @@ app.component('eyatraAgentClaimForm', {
         $form_data_url = typeof($routeParams.agent_claim_id) == 'undefined' ? eyatra_agent_claim_form_data_url : eyatra_agent_claim_form_data_url + '/' + $routeParams.agent_claim_id;
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        var dataTable = $('#agent_trip_claim_list').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate_2,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            //pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: false,
+            ordering: false,
+            ajax: {
+                url: laravel_routes['eyatraAgentTripClaimList'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.employee = $('#employee_name').val();
+                    d.business = $('#business_name').val();
+                }
+            },
+            columns: [
+                { data: 'checkbox', searchable: false, class: 'checkbox' },
+                { data: 'trip_number', name: 'trips.number', searchable: false },
+                { data: 'employee_code', name: 'employees.code', searchable: true },
+                { data: 'employee_name', name: 'users.name', searchable: true },
+                { data: 'business_name', name: 'businesses.name', searchable: true },
+                { data: 'invoice_date', name: 'visit_bookings.invoice_date', searchable: true },
+                { data: 'paid_amount', searchable: false },
+                { data: 'service_charge', name: 'visit_bookings.agent_service_charges', searchable: true },
+                { data: 'status', name: 'configs.name', searchable: true },
+                { data: 'action', searchable: false, class: 'action' },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+        $('.dataTables_length select').select2();
+
+        /* Search Block */
+        setTimeout(function() {
+            var x = $('.separate-page-header-inner.search .custom-filter').position();
+            var d = document.getElementById('agent_trip_claim_list_filter');
+            x.left = x.left + 15;
+            d.style.left = x.left + 'px';
+        }, 500);
+        //Filter
+        $http.get(
+            eyatra_agent_claim_filter_url
+        ).then(function(response) {
+            self.employee_list = response.data.employee_list;
+            self.business_list = response.data.business_list;
+            //console.log(self.employee.id);
+            $rootScope.loading = false;
+        });
+        var dataTableFilter = $('#agent_trip_claim_list').dataTable();
+        $scope.onselectEmployee = function(id) {
+            $('#employee_name').val(id);
+            dataTableFilter.fnFilter();
+        }
+        $scope.onselectBookingSbu = function(id) {
+            $('#business_name').val(id);
+            dataTableFilter.fnFilter();
+        }
+
+        $scope.resetForm = function() {
+            $('#employee_name').val(null);
+            $('#business_name').val(null);
+            dataTableFilter.fnFilter();
+        }
         self.angular_routes = angular_routes;
         $http.get(
             $form_data_url
@@ -129,7 +204,7 @@ app.component('eyatraAgentClaimForm', {
             self.invoice_date = response.data.invoice_date;
             self.attachment = response.data.attachment;
             self.gstin_tax = response.data.gstin_tax;
-            console.log(response.data.booking_list);
+            console.log(self.gstin_tax[0].gstin);
 
             if (self.action == 'Edit') {
                 self.trips_count = response.data.trips_count;
@@ -176,7 +251,6 @@ app.component('eyatraAgentClaimForm', {
         });
 
         $(document).on("click", ".booking_list", function() {
-
             if ($('.booking_list:checked').length > 0) {
                 $('.booking_all_list').prop('checked', true);
             } else {
@@ -186,7 +260,6 @@ app.component('eyatraAgentClaimForm', {
 
 
         $(document).on('click', '.booking_list', function() {
-
             var total_amount = 0;
             var count = 0;
             var amount = 0;

@@ -7,6 +7,8 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Storage;
+use Uitoux\EYatra\Business;
+use Uitoux\EYatra\Department;
 use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\AgentClaim;
 use Uitoux\EYatra\Config;
@@ -15,6 +17,15 @@ use Validator;
 use Yajra\Datatables\Datatables;
 
 class AgentClaimController extends Controller {
+
+	public function filterEYatraDepartment() {
+		$this->data['employee_list'] = $employee_list = Employee::select(DB::raw('concat(employees.code, "-" ,users.name) as name,employees.id'))
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)->get();
+		$this->data['business_list']= $business_list = Business::select('id','name')->get();
+		return response()->json($this->data);
+	}
     public function listEYatraAgentClaimList(Request $r) {
 		$agent_claim_list = AgentClaim::select(
 			'ey_agent_claims.id',
@@ -65,13 +76,138 @@ class AgentClaimController extends Controller {
 			->make(true);
 	}
 
-	public function eyatraAgentClaimFormData($agent_claim_id = NULL) {
+	public function eyatraAgentTripClaimList($agent_claim_id = NULL,Request $r){
+		if ($agent_claim_id) {
+			if (!empty($employee)) {
+				$employee = $r->employee;
+			} else {
+				$employee = null;
+			}
+			if (!empty($r->business)) {
+				$business = $r->business;
+			} else {
+				$business = null;
+			}
+			$agent_claim = AgentClaim::find($agent_claim_id);
+			$this->data['action'] = 'Edit';
 
+			 $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.total) as paid_amount'),
+				'visit_bookings.id',
+				'visit_bookings.total as paid_amount',
+				'configs.name as status',
+				'trips.number as trip_number',
+				'trips.id as trip_id',
+				'employees.code as employee_code',
+				'businesses.name as business_name',
+				'users.name as employee_name')
+				->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
+				->leftJoin('trips', 'trips.id', 'visits.trip_id')
+				->leftJoin('employees', 'employees.id', 'trips.employee_id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->leftJoin('departments','departments.id','employees.department_id')
+				->leftJoin('businesses','businesses.id','departments.business_id')
+				->where('users.user_type_id', 3121)
+				->join('configs', 'configs.id', 'trips.status_id')
+				->where('visit_bookings.agent_claim_id', $agent_claim_id)
+				->where(function ($query) use ($r, $employee) {
+					if (!empty($employee)) {
+						$query->where('e.id', $employee);
+					}
+				})
+				->where(function ($query) use ($r, $business) {
+					if (!empty($business)) {
+						$query->where('businesses.id', $business);
+					}
+				})
+				->groupBy('trips.id');
+				//->get();
+				//dd($booking_list);
+				return Datatables::of($booking_list)
+			->addColumn('action', function ($booking_list) {
+                $img2 = asset('public/img/content/table/eye.svg');
+				$img2_active = asset('public/img/content/table/eye-active.svg');
+				    return '
+						<a href="#!/trips/booking/view/' . $booking_list->trip_id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>';
+				})
+			->addColumn('checkbox', function ($booking_list) {
+          			return '<input id="role_' . $booking_list->trip_id . '" type="checkbox" class="check-bottom-layer booking_list" name="booking_list[]" value="' . $booking_list->trip_id . '" data-amount="' . $booking_list->total_amount . '" data-ticketamount="' . $booking_list->total_ticket_amount .'">
+                        <label for="role_"'. $booking_list->trip_id . '"></label>';
+				})
+			->make(true);
+		} else {
+			if (!empty($employee)) {
+				$employee = $r->employee;
+			} else {
+				$employee = null;
+			}
+			if (!empty($r->business)) {
+				$business = $r->business;
+			} else {
+				$business = null;
+			}
+			$this->data['action'] = 'New';
+			$agent_claim = new AgentClaim;
+
+			$this->data['attachment'] = [];
+
+			 $booking_list = VisitBooking::select(
+				DB::raw('SUM(visit_bookings.total) as paid_amount'), DB::raw('SUM(visit_bookings.total) as total_ticket_amount'),
+				'trips.id as trip_id', 'visits.id as visit_id', 'employees.code as employee_code',
+				'users.name as employee_name', 'configs.name as status', 'trips.number as trip_number',
+				'visit_bookings.invoice_date',
+				'businesses.name as business_name',
+				DB::raw('SUM(visit_bookings.agent_service_charges) as service_charge'),
+				DB::raw('SUM(visit_bookings.agent_service_charges) as total_amount')
+				)
+				->join('visits', 'visits.id', 'visit_bookings.visit_id')
+				->join('trips', 'trips.id', 'visits.trip_id')
+				->join('employees', 'employees.id', 'trips.employee_id')
+				->join('configs', 'configs.id', 'trips.status_id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->leftJoin('departments','departments.id','employees.department_id')
+				->leftJoin('businesses','businesses.id','departments.business_id')
+				->where('users.user_type_id', 3121)
+				->where('visit_bookings.created_by', Auth::user()->id)
+				->where('visit_bookings.status_id', 3240)
+				->where(function ($query) use ($r, $employee) {
+					if (!empty($employee)) {
+						$query->where('e.id', $employee);
+					}
+				})
+				->where(function ($query) use ($r, $business) {
+					if (!empty($business)) {
+						$query->where('businesses.id', $business);
+					}
+				})
+				->groupBy('trips.id')
+				->orderBy('trips.created_at', 'desc');
+				//->get();
+				//dd($booking_list);
+			return Datatables::of($booking_list)
+			->addColumn('action', function ($booking_list) {
+                $img2 = asset('public/img/content/table/eye.svg');
+				$img2_active = asset('public/img/content/table/eye-active.svg');
+				return '
+						<a href="#!/trips/booking/view/' . $booking_list->trip_id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>';
+			})
+			->addColumn('checkbox', function ($booking_list) {
+          			return '<input id="role_' . $booking_list->trip_id . '" type="checkbox" class="check-bottom-layer booking_list" name="booking_list[]" value="' . $booking_list->trip_id . '" data-amount="' . $booking_list->total_amount . '" data-ticketamount="' . $booking_list->total_ticket_amount .'">
+                        <label for="role_"'. $booking_list->trip_id . '"></label>';
+				})
+			->make(true);
+		}
+	}
+
+	public function eyatraAgentClaimFormData($agent_claim_id = NULL) {
 		if ($agent_claim_id) {
 			$agent_claim = AgentClaim::find($agent_claim_id);
 			$this->data['action'] = 'Edit';
 
-			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.total as paid_amount)'),
+			$this->data['booking_list'] = $booking_list = VisitBooking::select(DB::raw('SUM(visit_bookings.total) as paid_amount'),
 				'visit_bookings.id',
 				'visit_bookings.total as paid_amount',
 				'configs.name as status',
@@ -88,7 +224,10 @@ class AgentClaimController extends Controller {
 				->where('visit_bookings.agent_claim_id', $agent_claim_id)
 				->groupBy('trips.id')
 				->get();
-			$date = date('d-m-Y', strtotime($agent_claim->invoice_date));
+			if(isset($agent_claim->invoice_date) && $agent_claim->invoice_date)
+				$date = date('d-m-Y', strtotime($agent_claim->invoice_date));
+			else
+				$date = date('d-m-Y');
 			$this->data['trips_count'] = count($booking_list);
 		} else {
 			$this->data['action'] = 'New';
@@ -155,7 +294,11 @@ class AgentClaimController extends Controller {
 		$this->data['agent_claim'] = $agent_claim;
 		$this->data['invoice_date'] = $date;
 		$this->data['success'] = true;
-
+		$this->data['employee_list'] = $employee_list = Employee::select(DB::raw('concat(employees.code, "-" ,users.name) as name,employees.id'))
+			->leftJoin('users', 'users.entity_id', 'employees.id')
+			->where('users.user_type_id', 3121)
+			->where('employees.company_id', Auth::user()->company_id)->get();
+		$this->data['business_list']= $business_list = Business::select('id','name')->get();
 		return response()->json($this->data);
 	}
 
@@ -571,7 +714,7 @@ class AgentClaimController extends Controller {
 		$this->data['total_amount'] = $total_amount;
 		$this->data['ticket_amount'] = $ticket_amount;
 		$this->data['service_charge'] = $service_charge;
-		$this->data['other_charges'] = $other_charges;
+		//$this->data['other_charges'] = $other_charges;
 		$this->data['attach_path'] = url('storage/app/public/visit/booking-updates/attachments/');
 		$this->data['success'] = true;
 		return response()->json($this->data);
