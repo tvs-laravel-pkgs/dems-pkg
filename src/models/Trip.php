@@ -2103,14 +2103,14 @@ class Trip extends Model {
 										],
 									]);
 								}
-								if (!isset($visit_data['toll_fee']) || (isset($visit_data['toll_fee']) && empty($visit_data['toll_fee']))) {
+								/*if (!isset($visit_data['toll_fee']) || (isset($visit_data['toll_fee']) && empty($visit_data['toll_fee']))) {
 									return response()->json([
 										'success' => false,
 										'errors' => [
 											'Toll Fee is required',
 										],
 									]);
-								}
+								}*/
 							}
 
 							$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
