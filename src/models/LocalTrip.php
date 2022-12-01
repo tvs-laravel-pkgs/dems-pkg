@@ -222,6 +222,8 @@ class LocalTrip extends Model {
 				$data['success'] = false;
 				$data['message'] = 'Trip not found';
 			}
+			$km_details = LocalTripVisitDetail::select('from_km','to_km')->where('trip_id',$trip_id)->get();
+			$trip->visit_details = $km_details;
 			$grade_id = Employee::where('id',$trip->employee_id)->pluck('grade_id')->first();
 			$employee_id = $trip->employee_id;
 
@@ -332,11 +334,13 @@ class LocalTrip extends Model {
             	}
             }
            $local_trip_attachment=false;
+           if(!empty($request->expense_detail)){
             foreach($request->expense_detail as $data){
             	if($data['attachment_status'] == '1'){
                   	$local_trip_attachment=true;
                   }
             }
+      }
             
             if(!isset($request->other_expense_attachments) && !$request->other_expense_attachments){
             	if($local_trip_attachment){
