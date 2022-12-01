@@ -2180,6 +2180,10 @@ app.component('eyatraTripClaimForm', {
                 custom_noty('error', "Ending KM is required");
                 return;
             }
+            if (self.fareDetailsKmModalValues.kmStart > self.fareDetailsKmModalValues.kmEnd) {
+                custom_noty('error', "Enter value grater than starting KM");
+                return;
+            }
             /*if (!self.fareDetailsKmModalValues.tollFee) {
                 custom_noty('error', "Toll Fee is required");
                 return;
