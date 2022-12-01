@@ -133,7 +133,7 @@ class AgentClaimController extends Controller {
 				})
 			->addColumn('checkbox', function ($booking_list) {
           			return '<input id="role_' . $booking_list->trip_id . '" type="checkbox" class="check-bottom-layer booking_list" name="booking_list[]" value="' . $booking_list->trip_id . '" data-amount="' . $booking_list->total_amount . '" data-ticketamount="' . $booking_list->total_ticket_amount .'">
-                        <label for="role_"'. $booking_list->trip_id . '"></label>';
+                        <label for="role_'. $booking_list->trip_id . '"></label>';
 				})
 			->make(true);
 		} else {
@@ -196,7 +196,7 @@ class AgentClaimController extends Controller {
 			})
 			->addColumn('checkbox', function ($booking_list) {
           			return '<input id="role_' . $booking_list->trip_id . '" type="checkbox" class="check-bottom-layer booking_list" name="booking_list[]" value="' . $booking_list->trip_id . '" data-amount="' . $booking_list->total_amount . '" data-ticketamount="' . $booking_list->total_ticket_amount .'">
-                        <label for="role_"'. $booking_list->trip_id . '"></label>';
+                        <label for="role_'. $booking_list->trip_id . '"></label>';
 				})
 			->make(true);
 		}
