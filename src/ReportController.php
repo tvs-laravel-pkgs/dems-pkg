@@ -40,7 +40,7 @@ class ReportController extends Controller {
 		$data['outstation_start_date'] = $outstation_start_date;
 		$data['outstation_end_date'] = $outstation_end_date;
 		$data['filter_outlet_id'] = $filter_outlet_id = session('outstation_outlet_id') ? intval(session('outstation_outlet_id')) : '-1';
-		$data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : '3034';
+		$data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : 3034;
 
 		$data['success'] = true;
 		return response()->json($data);
