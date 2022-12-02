@@ -706,7 +706,7 @@ class ReportController extends Controller {
 		$this->data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 
 		$this->data['filter_employee_id'] = $filter_employee_id = session('outstation_manager_filter_employee_id') ? intval(session('outstation_manager_filter_employee_id')) : '-1';
-		$this->data['filter_type_id'] = $filter_type_id = session('outstation_manager_filter_type_id') ? intval(session('outstation_manager_filter_type_id')) : '3600';
+		$this->data['filter_type_id'] = $filter_type_id = session('outstation_manager_filter_type_id') ? intval(session('outstation_manager_filter_type_id')) : 3600;
 		$this->data['filter_purpose_id'] = $filter_purpose_id = session('outstation_manager_filter_purpose_id') ? intval(session('outstation_manager_filter_purpose_id')) : '-1';
 
 		$manager_filter_start_date = session('outstation_manager_filter_start_date');

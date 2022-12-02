@@ -504,8 +504,8 @@ app.component('eyatraOutstationTripList', {
         $scope.reset_filter = function(query) {
             self.filter_employee_id = '-1';
             self.filter_purpose_id = '-1';
-            self.filter_type_id = 3600;
-            $('#type_id').val(3600);
+            self.filter_type_id = '';
+            $('#type_id').val('');
             self.trip_periods = '';
             $('#employee_id').val('-1');
             $('#purpose_id').val('-1');
@@ -602,7 +602,7 @@ app.component('eyatraOutstationClaimView', {
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url = eyatra_trip_claim_verification_one_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
-        
+
         $http.get(
             $form_data_url
         ).then(function(response) {
