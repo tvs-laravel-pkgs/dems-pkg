@@ -81,6 +81,9 @@ class Employee extends Model {
 	public function reportingTo() {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id')->withTrashed();
 	}
+	public function deviationApprover() {
+		return $this->belongsTo('Uitoux\EYatra\Employee')->withTrashed();
+	}
 
 	public function manager() {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'reporting_to_id')->withTrashed();
