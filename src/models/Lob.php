@@ -8,10 +8,11 @@ class Lob extends Model {
 	protected $fillable = [
 		// 'id',
 		'name',
+		'company_id',
 	];
 
 	public function sbus() {
-		return $this->hasMany('Uitoux\EYatra\Sbu');
+		return $this->hasMany('Uitoux\EYatra\Sbu','lob_id');
 	}
 
 }

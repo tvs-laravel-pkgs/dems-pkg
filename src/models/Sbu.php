@@ -12,6 +12,7 @@ class Sbu extends Model {
 		// 'id',
 		'lob_id',
 		'name',
+		'company_id',
 	];
 
 	public function lob() {
