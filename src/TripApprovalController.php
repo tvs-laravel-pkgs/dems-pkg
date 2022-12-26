@@ -9,11 +9,12 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\AlternateApprove;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
+use Uitoux\EYatra\DeviationApprover;
+use Uitoux\EYatra\DeviationApproverSbu;
 
 class TripApprovalController extends Controller {
 
 	public function getList(Request $request) {
-
 		$fromDate = NULL;
 		$toDate = NULL;
 		if (!empty($request->from_date)) {
@@ -42,7 +43,11 @@ class TripApprovalController extends Controller {
 			->join('visits', 'visits.trip_id', 'trips.id')
 			->join('employees as employee', 'employee.id', 'trips.employee_id')
 			->leftjoin('employees as trip_manager_employee', 'trip_manager_employee.id', 'trips.manager_id')
-			->leftjoin('employees as senior_manager_employee', 'senior_manager_employee.id', 'trip_manager_employee.reporting_to_id')
+			->leftJoin('sbus','sbus.id','employee.sbu_id')
+			->leftJoin('deviation_approver_sbus','deviation_approver_sbus.sbu_id','sbus.id')
+            ->leftjoin('deviation_approvers', 'deviation_approvers.id', 'deviation_approver_sbus.deviation_approver_id')
+            
+			//->leftjoin('employees as senior_manager_employee', 'senior_manager_employee.id', 'trip_manager_employee.reporting_to_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
@@ -73,9 +78,7 @@ class TripApprovalController extends Controller {
 			})
 			->where('users.user_type_id', 3121)
 			->orderBy('trips.created_at', 'desc')
-			->groupBy('trips.id')
-		;
-
+			->groupBy('trips.id');
 		if (Auth::user()->entity_id) {
 			$sub_employee_id = AlternateApprove::select('employee_id')
 				->where('from', '<=', date('Y-m-d'))
@@ -85,7 +88,6 @@ class TripApprovalController extends Controller {
 				->toArray();
 			$ids = array_column($sub_employee_id, 'employee_id');
 			array_push($ids, Auth::user()->entity_id);
-
 			//OUTSTATION TRIP CLIAM VERIFICATION ONE
 			if(Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && !Entrust::can('eyatra-indv-employee-claims-verification2')) {
 				if(count($sub_employee_id) > 0) {
@@ -108,7 +110,7 @@ class TripApprovalController extends Controller {
        				 ->whereIn('trips.status_id', [3021,3023]);
     				})
     				->orWhere(function($seniorQ) use ($ids) {
-        			$seniorQ->where('senior_manager_employee.id', $ids)
+        			$seniorQ->where('deviation_approvers.deviation_employee_id', $ids)
         			->whereIn('trips.status_id', [3029]);
     				});
 				})
@@ -120,7 +122,7 @@ class TripApprovalController extends Controller {
         			->whereIn('trips.status_id', [3021,3023]);
     				})
     				->orWhere(function($seniorQ) use ($ids) {
-        			$seniorQ->where('senior_manager_employee.id', Auth::user()->entity_id)
+        			$seniorQ->where('deviation_approvers.deviation_employee_id', Auth::user()->entity_id)
         			->whereIn('trips.status_id', [3029]);
     				});
 					})

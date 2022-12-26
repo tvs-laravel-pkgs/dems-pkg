@@ -398,9 +398,8 @@ app.component('eyatraGradeForm', {
 
                 'discount_percentage': {
                     required: true,
-                    min: 1,
-                    max: 100,
-                },
+                    /*min: 1,
+    max: 100, */   },
             },
 
             submitHandler: function(form) {
