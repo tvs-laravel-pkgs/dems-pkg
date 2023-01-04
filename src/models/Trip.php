@@ -1728,8 +1728,8 @@ class Trip extends Model {
 		$trip->lodging_tax_amount = $lodging_tax_amount;
 
 		$current_year_arr = calculateFinancialYearForDate(date('m'));
-		$to_date = $current_year_arr['from_fy'];
-		$from_date = $current_year_arr['to_fy'];
+		$to_date = $current_year_arr['to_fy'];
+		$from_date = $current_year_arr['from_fy'];
 		$emp_fy_amounts = EmployeeClaim::select(
 			'ey_employee_claims.total_amount',
 			'ey_employee_claims.transport_total',
