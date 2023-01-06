@@ -13,9 +13,11 @@ class AddSelfAxExortSynchedInLocalTripsTable extends Migration
      */
     public function up()
     {
-        Schema::table('local_trips', function (Blueprint $table) {
-            $table->unsignedTinyInteger('self_ax_export_synched')->default(0)->comment('0-no,1-yes')->after('rejection_remarks');
-        });
+        if (!Schema::hasColumn('local_trips', 'self_ax_export_synched')) {
+            Schema::table('local_trips', function (Blueprint $table) {
+                $table->unsignedTinyInteger('self_ax_export_synched')->default(0)->comment('0-no,1-yes')->after('rejection_remarks');
+            });
+        }
     }
 
     /**
@@ -25,8 +27,10 @@ class AddSelfAxExortSynchedInLocalTripsTable extends Migration
      */
     public function down()
     {
-        Schema::table('local_trips', function (Blueprint $table) {
-            $table->dropColumn('self_ax_export_synched');
-        });
+        if (Schema::hasColumn('local_trips', 'self_ax_export_synched')) {
+            Schema::table('local_trips', function (Blueprint $table) {
+                $table->dropColumn('self_ax_export_synched');
+            });
+        }
     }
 }
