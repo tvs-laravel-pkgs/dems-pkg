@@ -774,7 +774,7 @@ class ExportReportController extends Controller {
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, 'CE-'.$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 2) {
 			//TAXABLE VALUE AND GST SPLITUP ENTRIES
@@ -823,7 +823,7 @@ class ExportReportController extends Controller {
 			$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue);
 
 			//TICKET TAXABLE AMOUNT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, 'CE-'.$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//GST SPLITUPS
 			if ($employeeTrip->employee && $employeeTrip->employee->outlet && $employeeTrip->employee->outlet->address && $employeeTrip->employee->outlet->address->city && $employeeTrip->employee->outlet->address->city->state) {
@@ -883,7 +883,7 @@ class ExportReportController extends Controller {
 			$ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			//ROUND OFF ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, $employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, 'CE-'.$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		}elseif ($type == 3) {
 			//BANK DEBIT ENTRY
