@@ -549,6 +549,7 @@ class ExportReportController extends Controller {
 				->join('entities', 'entities.id', 'local_trips.purpose_id')
 				->where('local_trips.status_id', 3026)
 				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
+				->whereNotNull('local_trips.claim_amount')
 				->groupBy('local_trips.id')
 				->get();
 
@@ -639,12 +640,14 @@ class ExportReportController extends Controller {
 				//CONSOLIDATION ENTRY
 				$consolidated_txt = 'Consolidation for payment';
 				$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
-				$consolidated_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
-				$this->saveAxaptaExport(4, 3791, null, "TLX_CHQ", "V", date('Y-m-d'), $consolidated_account_type,'1215-MDS-ITS', 'ITS-MDS', $consolidated_txt, 0.00, $tot_consolidated_amount, null, null, null);
-
+				$consolidated_deb_acc_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 				$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
-				$consolidated_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
-				$this->saveAxaptaExport(4, 3791, null, "TLX_CHQ", "D", date('Y-m-d'), $consolidated_account_type,'TMD-012', 'ITS-MDS', $consolidated_txt, $tot_consolidated_amount, 0.00, null, null, null);
+				$consolidated_cre_acc_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+
+				if($tot_consolidated_amount && $tot_consolidated_amount != '0.00'){
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLX_CHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-MDS-ITS', 'ITS-MDS', $consolidated_txt, 0.00, $tot_consolidated_amount, null, null, null);
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLX_CHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'ITS-MDS', $consolidated_txt, $tot_consolidated_amount, 0.00, null, null, null);
+				}
 
 				$cronLog->remarks = "Employee trips found";
 				$time_stamp = date('Y_m_d');
