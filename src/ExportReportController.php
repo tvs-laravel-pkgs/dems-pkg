@@ -26,6 +26,8 @@ use Uitoux\EYatra\Region;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
+use Uitoux\EYatra\LocalTrip;
+use Uitoux\EYatra\ApprovalLog;
 
 class ExportReportController extends Controller {
 	// Report list filter
@@ -494,11 +496,18 @@ class ExportReportController extends Controller {
 				'sbus.name as sbu',
 				'outlets.code as outletCode',
 				'outlets.axapta_location_id as axaptaLocationId',
-				'ey_employee_claims.balance_amount as totalAmount',
+				// 'ey_employee_claims.balance_amount as totalAmount',
+				'ey_employee_claims.total_amount as totalAmount',
 				'ey_employee_claims.number as invoiceNumber',
+				'ey_employee_claims.amount_to_pay',
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%Y-%m-%d") as invoiceDate'),
+				'trips.advance_received',
+				'ey_employee_claims.status_id as ey_employee_claim_status_id',
+				'trips.status_id as trip_status_id',
+				'ey_employee_claims.balance_amount',
 			])
-				->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				// ->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('sbus', 'sbus.id', 'employees.sbu_id')
 				->join('users', function ($join) {
@@ -508,16 +517,76 @@ class ExportReportController extends Controller {
 				})
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'trips.purpose_id')
-				->where('ey_employee_claims.status_id', 3026) //PAID
+				// ->where('ey_employee_claims.status_id', 3026) //PAID
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->groupBy('trips.id')
 				->get();
 
+			//LOCAL TRIPS
+			$employeeLocalTrips = LocalTrip::select([
+				'local_trips.id',
+				'local_trips.company_id',
+				'local_trips.employee_id',
+				'employees.code as employeeCode',
+				'users.name as employeeName',
+				'entities.name as purpose',
+				DB::raw('DATE_FORMAT(local_trips.claimed_date,"%Y-%m-%D") as transactionDate'),
+				'sbus.name as sbu',
+				'outlets.code as outletCode',
+				'outlets.axapta_location_id as axaptaLocationId',
+				'local_trips.claim_amount as totalAmount',
+				'local_trips.number as invoiceNumber',
+			])
+				->join('employees', 'employees.id', 'local_trips.employee_id')
+				->join('sbus', 'sbus.id', 'employees.sbu_id')
+				->join('users', function ($join) {
+					$join->on('users.entity_id', '=', 'employees.id')
+						->where('users.user_type_id', 3121) //EMPLOYEE
+					;
+				})
+				->join('outlets', 'outlets.id', 'employees.outlet_id')
+				->join('entities', 'entities.id', 'local_trips.purpose_id')
+				->where('local_trips.status_id', 3026)
+				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
+				->groupBy('local_trips.id')
+				->get();
+
+			$tot_consolidated_amount = 0;
 			$exceptionErrors = [];
-			if ($employeeTrips->isNotEmpty()) {
+			if ($employeeTrips->isNotEmpty() || $employeeLocalTrips->isNotEmpty()) {
+				foreach ($employeeLocalTrips as $employeeLocalTrip) {
+					DB::beginTransaction();
+					try {
+						$res = $this->employeeAxaptaExportProcess(8, $employeeLocalTrip, $axaptaAccountTypes, $axaptaBankDetails);
+						$tot_consolidated_amount += $res;
+
+						//AX SYNCHED
+						LocalTrip::where('id', $employeeLocalTrip->id)->update([
+							'self_ax_export_synched' => 1,
+						]);
+						DB::commit();
+						continue;
+					} catch (\Exception $e) {
+						DB::rollBack();
+						$exceptionErrors[] = "Trip ID ( " . $employeeLocalTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
+						continue;
+					}
+				}
+
 				foreach ($employeeTrips as $key => $employeeTrip) {
 					DB::beginTransaction();
 					try {
+
+						if($employeeTrip->ey_employee_claim_status_id = 3026 || $employeeTrip->trip_status_id == 3028){
+							//PAID || MANAGER APPROVED
+							if($employeeTrip->advance_received && $employeeTrip->advance_received != '0.00'){
+								//ADVANCE TRIP AMOUNT
+								$res = $this->employeeAxaptaExportProcess(6, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+								$tot_consolidated_amount += $res;
+							}
+						}else{
+							continue;
+						}
 
 						//TOTAL AMOUNT ENTRY
 						$this->employeeAxaptaExportProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
@@ -529,10 +598,19 @@ class ExportReportController extends Controller {
 						$this->employeeAxaptaExportProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 
 						//BANK DEBIT ENTRY
-						$this->employeeAxaptaExportProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+						$res = $this->employeeAxaptaExportProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+						$tot_consolidated_amount += $res;
 
 						//BANK CREDIT ENTRY
 						$this->employeeAxaptaExportProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+
+						//TRIP ADVANCE COMPANY TO EMPLOYEE BALANCE PAYMENT
+						if($employeeTrip->amount_to_pay == 1){
+							if($employeeTrip->balance_amount && $employeeTrip->balance_amount != '0.00'){
+								$res = $this->employeeAxaptaExportProcess(7, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+								$tot_consolidated_amount += $res;
+							}
+						}
 
 						//AX SYNCHED
 						Trip::where('id', $employeeTrip->id)->update([
@@ -547,6 +625,17 @@ class ExportReportController extends Controller {
 						continue;
 					}
 				}
+
+				//CONSOLIDATION ENTRY
+				$consolidated_txt = 'Consolidation for payment';
+				$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
+				$consolidated_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+				$this->saveAxaptaExport(4, 3791, null, "TLX_CHQ", "V", date('Y-m-d'), $consolidated_account_type,'1215-MDS-ITS', 'ITS-MDS', $consolidated_txt, 0.00, $tot_consolidated_amount, null, null, null);
+
+				$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
+				$consolidated_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+				$this->saveAxaptaExport(4, 3791, null, "TLX_CHQ", "D", date('Y-m-d'), $consolidated_account_type,'TMD-012', 'ITS-MDS', $consolidated_txt, $tot_consolidated_amount, 0.00, null, null, null);
+
 				$cronLog->remarks = "Employee trips found";
 				$time_stamp = date('Y_m_d');
 				$datas = DB::table('axapta_exports')->where('entity_type_id',3791)->whereDate('created_at',$time_stamp)->get()->toArray();
@@ -795,6 +884,8 @@ class ExportReportController extends Controller {
 			//BANK DEBIT ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
+			$consolidated_amount = $employeeTrip->totalAmount;
+			return $consolidated_amount;
 		} elseif ($type == 4) {
 			//BANK CREDIT ENTRY
 
@@ -811,7 +902,84 @@ class ExportReportController extends Controller {
 			//BANK CREDIT ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
+		} elseif ($type == 6) {
+			//TRIP ADVANCE DEBIT AND CREDIT ENTRY
+			$advance_amount = $employeeTrip->advance_received;
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
+			$deb_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
+			$cre_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+
+			$deb_ledger_dimension = "Emp_" . $employeeCode;
+			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+
+			$trip_approved_log = ApprovalLog::where('type_id',3581)
+				->where('entity_id',$employeeTrip->id)
+				->where('approval_type_id',3600)
+				->first();
+			if($trip_approved_log){
+				$trip_approved_date = date('Y-m-d', strtotime($trip_approved_log->approved_at);
+			}else{
+				$trip_approved_date = null;
+			}
+
+			//DEBIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "V", $trip_approved_date, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $advance_amount, 0.00, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			//CREDIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "D", $trip_approved_date, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $advance_amount, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$consolidated_amount = $advance_amount;
+			return $consolidated_amount;
+		} elseif ($type == 7) {
+			$balance_amount = $employeeTrip->balance_amount;
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
+			$deb_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
+			$cre_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+
+			$deb_ledger_dimension = "Emp_" . $employeeCode;
+			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+
+			//DEBIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $balance_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+			//CREDIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $balance_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$consolidated_amount = $balance_amount;
+			return $consolidated_amount;
+		} elseif ($type == 8) {
+			$claim_amount = $employeeTrip->totalAmount;
+			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
+				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
+			}
+			
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
+			$deb_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+
+			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
+			$cre_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
+
+			$deb_ledger_dimension = "Emp_" . $employeeCode;
+			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+
+			//DEBIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+			//CREDIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_CHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$consolidated_amount = $claim_amount;
+			return $consolidated_amount;
 		}
+
 	}
 
 	public function axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $enteredGstin, $gstType, $transactionDate, $accountType, $taxPercentage, $taxCgst, $taxSgst, $taxIgst) {
