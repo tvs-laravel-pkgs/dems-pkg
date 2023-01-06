@@ -1730,6 +1730,8 @@ class Trip extends Model {
 		$current_year_arr = calculateFinancialYearForDate(date('m'));
 		$to_date = $current_year_arr['to_fy'];
 		$from_date = $current_year_arr['from_fy'];
+		$emp_amount_financial_year_from = date('Y', strtotime($from_date));
+        $emp_amount_financial_year_to = date('Y', strtotime($to_date));
 		$emp_fy_amounts = EmployeeClaim::select(
 			'ey_employee_claims.total_amount',
 			'ey_employee_claims.transport_total',
@@ -1865,6 +1867,8 @@ class Trip extends Model {
 		$trip->lodging_amount = $lodging_amount;
 		$trip->boarding_amount = $boarding_amount;
 		$trip->local_travel_amount = $local_travel_amount;
+		$trip->emp_amount_financial_year_from = $emp_amount_financial_year_from;
+        $trip->emp_amount_financial_year_to = $emp_amount_financial_year_to;
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
 		$data['state_code'] = $state_code;
