@@ -505,6 +505,7 @@ class ExportReportController extends Controller {
 				'ey_employee_claims.status_id as ey_employee_claim_status_id',
 				'trips.status_id as trip_status_id',
 				'ey_employee_claims.balance_amount',
+				'trips.advance_ax_export_sync',
 			])
 				// ->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
@@ -577,9 +578,9 @@ class ExportReportController extends Controller {
 					DB::beginTransaction();
 					try {
 
-						if($employeeTrip->ey_employee_claim_status_id = 3026 || $employeeTrip->trip_status_id == 3028){
+						if($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028){
 							//PAID || MANAGER APPROVED
-							if($employeeTrip->advance_received && $employeeTrip->advance_received != '0.00'){
+							if($employeeTrip->advance_ax_export_sync == 0 && $employeeTrip->advance_received && $employeeTrip->advance_received != '0.00'){
 								//ADVANCE TRIP AMOUNT
 								$res = $this->employeeAxaptaExportProcess(6, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$tot_consolidated_amount += $res;
@@ -588,21 +589,23 @@ class ExportReportController extends Controller {
 							continue;
 						}
 
-						//TOTAL AMOUNT ENTRY
-						$this->employeeAxaptaExportProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+						if($employeeTrip->ey_employee_claim_status_id == 3026){
+							//TOTAL AMOUNT ENTRY
+							$this->employeeAxaptaExportProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+							
+							//TAXABLE VALUE AND GST SPLITUP ENTRIES
+							$this->employeeAxaptaExportProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 
-						//TAXABLE VALUE AND GST SPLITUP ENTRIES
-						$this->employeeAxaptaExportProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-
-						//ROUND OFF
-						$this->employeeAxaptaExportProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-
-						//BANK DEBIT ENTRY
-						$res = $this->employeeAxaptaExportProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-						$tot_consolidated_amount += $res;
-
-						//BANK CREDIT ENTRY
-						$this->employeeAxaptaExportProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+							//ROUND OFF
+							$this->employeeAxaptaExportProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+							
+							//BANK DEBIT ENTRY
+							$res = $this->employeeAxaptaExportProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+							$tot_consolidated_amount += $res;
+							
+							//BANK CREDIT ENTRY
+							$this->employeeAxaptaExportProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+						}
 
 						//TRIP ADVANCE COMPANY TO EMPLOYEE BALANCE PAYMENT
 						if($employeeTrip->amount_to_pay == 1){
@@ -612,10 +615,17 @@ class ExportReportController extends Controller {
 							}
 						}
 
-						//AX SYNCHED
-						Trip::where('id', $employeeTrip->id)->update([
-							'self_ax_export_synched' => 1,
-						]);
+						if($employeeTrip->ey_employee_claim_status_id == 3026){
+							//AX SYNCHED
+							Trip::where('id', $employeeTrip->id)->update([
+								'self_ax_export_synched' => 1,
+							]);
+						}else{
+							Trip::where('id', $employeeTrip->id)->update([
+								'advance_ax_export_sync' => 1,
+							]);
+						}
+
 
 						DB::commit();
 						continue;
@@ -923,7 +933,7 @@ class ExportReportController extends Controller {
 				->where('approval_type_id',3600)
 				->first();
 			if($trip_approved_log){
-				$trip_approved_date = date('Y-m-d', strtotime($trip_approved_log->approved_at);
+				$trip_approved_date = date('Y-m-d', strtotime($trip_approved_log->approved_at));
 			}else{
 				$trip_approved_date = null;
 			}
