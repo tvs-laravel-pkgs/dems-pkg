@@ -112,7 +112,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//CLAIM STATUS
 			3023 => [
-				'name' => 'Claim Requested',
+				'name' => 'Claim Pending',
 				'config_type_id' => 535,
 			],
 			3024 => [
@@ -124,7 +124,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 535,
 			],
 			3026 => [
-				'name' => 'Paid',
+				'name' => 'Completed',
 				'config_type_id' => 535,
 			],
 			3027 => [
@@ -1103,6 +1103,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3755 => [
 				'name' => 'Self Booking Attachments',
+				'config_type_id' => 541,
+			],
+			3756 =>[
+				'name' => 'Guest House Approval',
 				'config_type_id' => 541,
 			],
 
