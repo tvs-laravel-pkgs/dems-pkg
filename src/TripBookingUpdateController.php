@@ -478,7 +478,7 @@ class TripBookingUpdateController extends Controller {
 
 	public function sendTicketNotificationMail($type, $visit) {
 		$from_mail = env('MAIL_FROM_ADDRESS', 'travelex@tvs.in');
-		$from_name = env('MAIL_USERNAME', 'Tvsnsons');
+		$from_name = env('MAIL_USERNAME', 'DEMS-Admin');
 		$to_user = $visit->trip->employee->user;
 		$employee_details = $visit->trip->employee;
 		$visit_details = Visit::select(
