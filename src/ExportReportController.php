@@ -885,7 +885,7 @@ class ExportReportController extends Controller {
 			//ROUND OFF ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLX_ECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, 'CE-'.$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
-		}elseif ($type == 3) {
+		}elseif ($type == 3 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
 			//BANK DEBIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
@@ -899,7 +899,7 @@ class ExportReportController extends Controller {
 
 			$consolidated_amount = $employeeTrip->totalAmount;
 			return $consolidated_amount;
-		} elseif ($type == 4) {
+		} elseif ($type == 4 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
 			//BANK CREDIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
