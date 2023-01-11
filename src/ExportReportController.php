@@ -645,8 +645,8 @@ class ExportReportController extends Controller {
 				$consolidated_cre_acc_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 				if($tot_consolidated_amount && $tot_consolidated_amount != '0.00'){
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-MDS-ITS', 'ITS-MDS', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "-1", date("dmY"). "-1", $employeeTrip->transactionDate);
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'ITS-MDS', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "-1", date("dmY"). "-1", $employeeTrip->transactionDate);
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-MDS-ITS', 'ITS-MDS', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "-1", $employeeTrip->transactionDate);
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'ITS-MDS', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "-1", $employeeTrip->transactionDate);
 				}
 
 				$cronLog->remarks = "Employee trips found";
@@ -885,7 +885,7 @@ class ExportReportController extends Controller {
 			//ROUND OFF ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
-		}elseif ($type == 3 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
+		}elseif ($type == 10 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
 			//BANK DEBIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
@@ -899,7 +899,7 @@ class ExportReportController extends Controller {
 
 			$consolidated_amount = $employeeTrip->totalAmount;
 			return $consolidated_amount;
-		} elseif ($type == 4 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
+		} elseif ($type == 10 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
 			//BANK CREDIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
