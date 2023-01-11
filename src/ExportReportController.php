@@ -895,7 +895,7 @@ class ExportReportController extends Controller {
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//BANK DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, "CC-".$employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			$consolidated_amount = $employeeTrip->totalAmount;
 			return $consolidated_amount;
@@ -913,7 +913,7 @@ class ExportReportController extends Controller {
 			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';*/
 
 			//BANK CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, "CC-".$employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 6) {
 			//TRIP ADVANCE DEBIT AND CREDIT ENTRY
