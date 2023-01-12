@@ -321,7 +321,7 @@ class ExportReportController extends Controller {
 		$purpose = $trip->purpose ? $trip->purpose->name : '';
 		$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 		$txt = '';
-
+        $documentNumber = $agentTripVisit->invoiceNumber;
 		//TOTAL AMOUNT ENTRY
 		if ($type == 1) {
 
@@ -331,7 +331,7 @@ class ExportReportController extends Controller {
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, 0.00, $agentTripVisit->totalAmount, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, 0.00, $agentTripVisit->totalAmount, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 		} elseif ($type == 2) {
 			//TICKET ENTRIES
@@ -343,7 +343,7 @@ class ExportReportController extends Controller {
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//TICKET TAXABLE AMOUNT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, "4572-MDS-COMMON", "COMMON-MDS", $txt, $agentTripVisit->ticketAmount, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, "4572-MDS-COMMON", "COMMON-MDS", $txt, $agentTripVisit->ticketAmount, 0.00, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 			//GST SPLITUPS
 			if ($trip->employee && $trip->employee->outlet && $trip->employee->outlet->address && $trip->employee->outlet->address->city && $trip->employee->outlet->address->city->state) {
@@ -370,10 +370,10 @@ class ExportReportController extends Controller {
 							}
 
 							//CGST ENTRY
-							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, "COMMON-MDS", $cgstEntryTxt, $agentTripVisit->ticketCgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, "COMMON-MDS", $cgstEntryTxt, $agentTripVisit->ticketCgst, 0.00, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 							//SGST ENTRY
-							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, "COMMON-MDS", $sgstEntryTxt, $agentTripVisit->ticketSgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, "COMMON-MDS", $sgstEntryTxt, $agentTripVisit->ticketSgst, 0.00, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 						} else {
 							//INTER STATE (IGST)
@@ -385,7 +385,7 @@ class ExportReportController extends Controller {
 								$igstEntryTxt = "Tra - Exp " . $employeeCode . " - " . $employeeName . " - " . $purpose . " - IGST - " . $igstPercentage . "%";
 							}
 
-							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $igstLedgerDimension, "COMMON-MDS", $igstEntryTxt, $agentTripVisit->ticketIgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+							$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $igstLedgerDimension, "COMMON-MDS", $igstEntryTxt, $agentTripVisit->ticketIgst, 0.00, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 						}
 					}
 				}
@@ -401,7 +401,7 @@ class ExportReportController extends Controller {
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//AGENT SERVICE CHARGE ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, "4572-MDS-COMMON", "COMMON-MDS", $txt, $agentTripVisit->agentServiceCharges, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, "4572-MDS-COMMON", "COMMON-MDS", $txt, $agentTripVisit->agentServiceCharges, 0.00, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 			//GST SPLITUPS
 			if (!empty($agentTripVisit->enteredGstin)) {
@@ -424,10 +424,10 @@ class ExportReportController extends Controller {
 					}
 
 					//CGST ENTRY
-					$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, "COMMON-MDS", $cgstEntryTxt, $agentTripVisit->agentCgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+					$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, "COMMON-MDS", $cgstEntryTxt, $agentTripVisit->agentCgst, 0.00, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 					//SGST ENTRY
-					$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, "COMMON-MDS", $sgstEntryTxt, $agentTripVisit->agentSgst, 0.00, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+					$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, "COMMON-MDS", $sgstEntryTxt, $agentTripVisit->agentSgst, 0.00, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 				}
 			}
@@ -442,7 +442,7 @@ class ExportReportController extends Controller {
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//BANK DEBIT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXCHQ", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, $agentTripVisit->totalAmount, 0.00, $agentTripVisit->invoiceNumber . "-1", $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXCHQ", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, $agentTripVisit->totalAmount, 0.00, $agentTripVisit->invoiceNumber . "-1", $documentNumber,$agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 		} elseif ($type == 5) {
 			//BANK CREDIT ENTRY
@@ -457,7 +457,7 @@ class ExportReportController extends Controller {
 			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';
 
 			//BANK CREDIT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXCHQ", "D", $transactionDate, $accountType, $ledgerDimension, "COMMON-MDS", $txt, 0.00, $agentTripVisit->totalAmount, $agentTripVisit->invoiceNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXCHQ", "D", $transactionDate, $accountType, $ledgerDimension, "COMMON-MDS", $txt, 0.00, $agentTripVisit->totalAmount, $agentTripVisit->invoiceNumber, $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 		}
 	}
