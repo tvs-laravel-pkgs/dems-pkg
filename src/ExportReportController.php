@@ -876,7 +876,7 @@ class ExportReportController extends Controller {
 			}
 
 		} elseif ($type == 5) {
-				$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
+			$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
 			//ROUND OFF ENTRY
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
@@ -886,7 +886,9 @@ class ExportReportController extends Controller {
 			$ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			//ROUND OFF ENTRY
+			if($employeeLodgingRoundoff != 0){
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+		}
 
 		}elseif ($type == 10 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
 			//BANK DEBIT ENTRY
