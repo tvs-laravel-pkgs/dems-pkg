@@ -498,7 +498,9 @@ class ExportReportController extends Controller {
 				'outlets.axapta_location_id as axaptaLocationId',
 				// 'ey_employee_claims.balance_amount as totalAmount',
 				'ey_employee_claims.total_amount as totalAmount',
-				'ey_employee_claims.number as invoiceNumber',
+				//'ey_employee_claims.number as invoiceNumber',
+				'trips.number as invoiceNumber',
+				'ey_employee_claims.number as documentNumber',
 				'ey_employee_claims.amount_to_pay',
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%Y-%m-%d") as invoiceDate'),
 				'trips.advance_received',
@@ -537,6 +539,7 @@ class ExportReportController extends Controller {
 				'outlets.axapta_location_id as axaptaLocationId',
 				'local_trips.claim_amount as totalAmount',
 				'local_trips.number as invoiceNumber',
+				'local_trips.claim_number as documentNumber',
 			])
 				->join('employees', 'employees.id', 'local_trips.employee_id')
 				->join('sbus', 'sbus.id', 'employees.sbu_id')
@@ -774,7 +777,7 @@ class ExportReportController extends Controller {
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 2) {
 			//TAXABLE VALUE AND GST SPLITUP ENTRIES
@@ -823,7 +826,7 @@ class ExportReportController extends Controller {
 			$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue);
 
 			//TICKET TAXABLE AMOUNT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//GST SPLITUPS
 			if ($employeeTrip->employee && $employeeTrip->employee->outlet && $employeeTrip->employee->outlet->address && $employeeTrip->employee->outlet->address->city && $employeeTrip->employee->outlet->address->city->state) {
@@ -883,7 +886,7 @@ class ExportReportController extends Controller {
 			$ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			//ROUND OFF ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		}elseif ($type == 10 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
 			//BANK DEBIT ENTRY
@@ -963,10 +966,10 @@ class ExportReportController extends Controller {
 			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			//DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $balance_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $balance_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $balance_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $balance_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $balance_amount;
 			return $consolidated_amount;
 		} elseif ($type == 8) {
@@ -988,7 +991,7 @@ class ExportReportController extends Controller {
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $claim_amount;
 			return $consolidated_amount;
 		}
@@ -1037,7 +1040,7 @@ class ExportReportController extends Controller {
 		}
 	}
 
-	public function saveAxaptaExport($companyId, $entityTypeId, $entityId, $journalName, $voucher, $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $amountCurDebit, $amountCurCredit, $invoiceNumber, $invoiceDate, $axaptaLocationId) {
+	public function saveAxaptaExport($companyId, $entityTypeId, $entityId, $journalName, $voucher, $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $amountCurDebit, $amountCurCredit, $invoiceNumber, $documentNumber, $invoiceDate, $axaptaLocationId) {
 		$data = array(
 			'company_id' => $companyId,
 			'entity_type_id' => $entityTypeId,
@@ -1057,7 +1060,7 @@ class ExportReportController extends Controller {
 			'OffsetDefaultDimension' => $defaultDimension,
 			'PaymMode' => 'ENET',
 			'Invoice' => $invoiceNumber,
-			'DocumentNum' => $invoiceNumber,
+			'DocumentNum' => $documentNumber,
 			'DocumentDate' => $invoiceDate,
 			'LogisticsLocation_LocationId' => $axaptaLocationId,
 		);
