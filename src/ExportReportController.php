@@ -846,32 +846,34 @@ class ExportReportController extends Controller {
 				//LODGING GST SPLITUPS
 				if ($employeeTrip->lodgings->isNotEmpty()) {
 					foreach ($employeeTrip->lodgings as $key => $lodging) {
+						if($lodging->stay_type_id == 3340){
 						//HAS MULTIPLE TAX INVOICE
-						if ($lodging->has_multiple_tax_invoice == "Yes") {
-							//LODGE
-							if ($lodging->lodgingTaxInvoice) {
-								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
-							}
+							if ($lodging->has_multiple_tax_invoice == "Yes") {
+								//LODGE
+								if ($lodging->lodgingTaxInvoice) {
+									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
+								}
 
-							//DRY WASH
-							if ($lodging->drywashTaxInvoice) {
-								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Dry Wash ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst);
-							}
+								//DRY WASH
+								if ($lodging->drywashTaxInvoice) {
+									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Dry Wash ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst);
+								}
 
-							//BOARDING
-							if ($lodging->boardingTaxInvoice) {
-								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Boarding ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst);
-							}
+								//BOARDING
+								if ($lodging->boardingTaxInvoice) {
+									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Boarding ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst);
+								}
 
-							//OTHERS
-							if ($lodging->othersTaxInvoice) {
-								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Others", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst);
-							}
+								//OTHERS
+								if ($lodging->othersTaxInvoice) {
+									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Others", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst);
+								}
 
-						} else {
-							//SINGLE
-							$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
-						}
+							} else {
+								//SINGLE
+								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
+							}
+					    }
 					}
 				}
 
