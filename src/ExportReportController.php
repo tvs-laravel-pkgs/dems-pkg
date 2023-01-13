@@ -766,7 +766,8 @@ class ExportReportController extends Controller {
 		$employeeName = $employeeTrip->employeeName;
 		$purpose = $employeeTrip->purpose;
 		$defaultDimension = $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
-		$transactionDate = $employeeTrip->transactionDate;
+		//$transactionDate = $employeeTrip->transactionDate;
+		$transactionDate = $time_stamp = date('Y_m_d_h_i_s');
 		$txt = '';
 
 		//TOTAL AMOUNT ENTRY
