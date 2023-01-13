@@ -492,6 +492,7 @@ class ExportReportController extends Controller {
 				'employees.code as employeeCode',
 				'users.name as employeeName',
 				'entities.name as purpose',
+				DB::raw('DATE_FORMAT(trips.created_at,"%Y-%m-%D") as createdAtDate'),
 				DB::raw('DATE_FORMAT(trips.claimed_date,"%Y-%m-%D") as transactionDate'),
 				'sbus.name as sbu',
 				'outlets.code as outletCode',
@@ -947,9 +948,9 @@ class ExportReportController extends Controller {
 			}
 
 			//DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $trip_approved_date, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $advance_amount, 0.00, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $trip_approved_date, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $advance_amount, 0.00, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $trip_approved_date, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $advance_amount, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $trip_approved_date, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $advance_amount, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $advance_amount;
 			return $consolidated_amount;
 		} elseif ($type == 7) {
