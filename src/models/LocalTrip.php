@@ -237,7 +237,7 @@ class LocalTrip extends Model {
 		}
 		$data['beta_amount'] = $beta_amount;
 
-		$employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km','gae.local_trip_amount','sbus.id as sbu_id','sbus.name as sbu_name')
+		$employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation_name', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km','gae.local_trip_amount','sbus.id as sbu_id','sbus.name as sbu_name')
 			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
@@ -245,6 +245,9 @@ class LocalTrip extends Model {
 			->leftJoin('sbus','sbus.id','employees.sbu_id')
 			->where('employees.id', $employee_id)
 			->where('users.user_type_id', 3121)->first();
+	      $destination_array = User::with([
+			'employee_details.designation',
+		])->find(Auth::user()->id);
 			
 		//Get Own Vehicle details
 		$vehicle_details = Entity::join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')->where('travel_mode_category_type.category_id', 3400)->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 502)->select('entities.name', 'entities.id')->get();
@@ -279,6 +282,7 @@ class LocalTrip extends Model {
 			'travel_values' => $values,
 		];
 		$trip->employee=$employee;
+		$trip->employee->designation=$destination_array->employee_details->designation;
 		$data['trip'] = $trip;
             
 		$data['success'] = true;
