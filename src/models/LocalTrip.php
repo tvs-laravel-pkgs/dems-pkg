@@ -1066,7 +1066,6 @@ class LocalTrip extends Model {
 			'employee_details.paymentMode',
 			'employee_details.grade',
 			'employee_details.designation',
-		])->find(Auth::user()->id);
 			'employee_details.bankDetail',
 			'employee_details.chequeDetail',
 			'employee_details.walletDetail',
