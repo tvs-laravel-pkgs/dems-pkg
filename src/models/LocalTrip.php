@@ -998,4 +998,127 @@ class LocalTrip extends Model {
 	}
 	// Pending local trip mail by Karthick T on 15-02-2022
 
+
+	public static function getLocalTripApiFormData($trip_id) {
+		$data = [];
+		if (!$trip_id) {
+			$data['action'] = 'New';
+			$trip = new LocalTrip;
+			$trip->visit_details = [];
+			$data['success'] = true;
+
+			$user = Auth::user()->entity;
+			if(!$user)
+			{
+				if (!$trip) {
+					$data['success'] = false;
+					$data['message'] = 'Employee Grade not found';
+				}
+			}
+			$grade_id = $user->grade_id;
+			$employee_id = $user->id;
+		} else {
+			$data['action'] = 'Edit';
+			$data['success'] = true;
+
+			// $trip = LocalTrip::find($trip_id);
+
+			$trip = LocalTrip::withTrashed()->with([
+				'purpose',
+				'visitDetails',
+				'expense',
+				'expenseAttachments',
+				'otherExpenseAttachments'
+			])->find($trip_id);
+
+			if (!$trip) {
+				$data['success'] = false;
+				$data['message'] = 'Trip not found';
+			}
+			$km_details = LocalTripVisitDetail::select('from_km','to_km')->where('trip_id',$trip_id)->get();
+			$trip->visit_details = $km_details;
+			$grade_id = Employee::where('id',$trip->employee_id)->pluck('grade_id')->first();
+			$employee_id = $trip->employee_id;
+
+		}
+		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('local_trip_amount')->where('grade_id', $grade_id)->first();
+
+		if ($grade_eligibility) {
+			$beta_amount = $grade_eligibility->local_trip_amount;
+		} else {
+			$beta_amount = 0;
+		}
+		$data['beta_amount'] = $beta_amount;
+
+
+		$employee_old = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km','gae.local_trip_amount','sbus.id as sbu_id','sbus.name as sbu_name')
+			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
+			->leftjoin('designations', 'designations.id', 'employees.designation_id')
+			->leftjoin('users', 'users.entity_id', 'employees.id')
+			->leftjoin('entities', 'entities.id', 'employees.grade_id')
+			->leftJoin('sbus','sbus.id','employees.sbu_id')
+			->where('employees.id', $employee_id)
+			->where('users.user_type_id', 3121)->first();
+		$employee = User::with([
+			'employee_details',
+			'employee_details.reportingTo',
+			'employee_details.reportingTo.user',
+			'employee_details.paymentMode',
+			'employee_details.grade',
+			'employee_details.designation',
+		])->find(Auth::user()->id);
+			'employee_details.bankDetail',
+			'employee_details.chequeDetail',
+			'employee_details.walletDetail',
+			'employee_details.walletDetail.type',
+			'employee_details.sbu',
+			'employee_details.sbu.lob',
+			'roles',
+			'employee_details.vehicleDetails',
+		])
+			->find(Auth::user()->id);
+		//Get Own Vehicle details
+		$vehicle_details = Entity::join('travel_mode_category_type', 'travel_mode_category_type.travel_mode_id', 'entities.id')->where('travel_mode_category_type.category_id', 3400)->where('entities.company_id', Auth::user()->company_id)->where('entities.entity_type_id', 502)->select('entities.name', 'entities.id')->get();
+		$values = [];
+		foreach ($vehicle_details as $key => $value) {
+			$stripped = strtolower(preg_replace('/\s/', '', $value->name));
+			if ($stripped == 'twowheeler') {
+				$values[$value->id] = $employee->two_wheeler_per_km;
+			} elseif ($stripped == 'fourwheeler') {
+				$values[$value->id] = $employee->four_wheeler_per_km;
+			} else {
+				$values[$value->id] = '0';
+			}
+		}
+
+		$data['travel_values'] = $values;
+	        $travel_mode= Entity::select('entities.id', 'entities.name')
+			->whereIn('entities.id',[15,16,17,84])
+			->where('entities.entity_type_id', 502)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
+			$local_travel_mode = Entity::select('entities.id', 'entities.name')
+			->whereIn('entities.id',[18,19,20,63,173])
+			->where('entities.entity_type_id', 503)
+			->where('entities.company_id', Auth::user()->company_id)
+			->get();
+		$data['extras'] = [
+			//'travel_mode_list' => collect(Entity::uiClaimTravelModeList()->prepend(['id' => '', 'name' => 'Select Travel Mode'])),
+			'travel_mode_list' => collect($travel_mode->merge($local_travel_mode)->prepend(['id' => '', 'name' => 'Select Travel Mode'])),
+			'eligible_travel_mode_list' => DB::table('local_travel_mode_category_type')->where('category_id', 3561)->pluck('travel_mode_id')->toArray(),
+			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_trip_purpose.grade_id', $grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
+			'travel_values' => $values,
+		];
+		$trip->employee=$employee;
+		$data['trip'] = $trip;
+            
+		$data['success'] = true;
+		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-10 days"));
+		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+30 days"));
+
+		$data['sbu_lists'] = Sbu::getSbuList();
+
+		return response()->json($data);
+	}
+
 }

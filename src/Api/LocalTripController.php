@@ -21,7 +21,7 @@ class LocalTripController extends Controller {
 	}
 
 	public function getTripFormData(Request $request) {
-		return LocalTrip::getLocalTripFormData($request->trip_id);
+		return LocalTrip::getLocalTripApiFormData($request->trip_id);
 	}
 
 	public function saveLocalTrip(Request $request) {
