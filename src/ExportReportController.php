@@ -521,7 +521,7 @@ class ExportReportController extends Controller {
 				})
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'trips.purpose_id')
-				->where('ey_employee_claims.status_id', 3026) //PAID
+				//->where('ey_employee_claims.status_id', 3026) //PAID
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->groupBy('trips.id')
 				->get();
