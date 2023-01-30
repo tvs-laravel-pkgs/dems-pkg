@@ -521,7 +521,7 @@ class ExportReportController extends Controller {
 				})
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'trips.purpose_id')
-				// ->where('ey_employee_claims.status_id', 3026) //PAID
+				->where('ey_employee_claims.status_id', 3026) //PAID
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->groupBy('trips.id')
 				->get();
@@ -559,6 +559,7 @@ class ExportReportController extends Controller {
 
 			$tot_consolidated_amount = 0;
 			$exceptionErrors = [];
+			$export_data=[];
 			if ($employeeTrips->isNotEmpty() || $employeeLocalTrips->isNotEmpty()) {
 				foreach ($employeeLocalTrips as $employeeLocalTrip) {
 					DB::beginTransaction();
@@ -745,7 +746,7 @@ class ExportReportController extends Controller {
 			} else {
 				$cronLog->remarks = "No employee trips found";
 			}
-
+            
 			$cronLog->status = "Completed";
 			if (!empty($exceptionErrors)) {
 				$cronLog->errors = json_encode($exceptionErrors);
@@ -759,6 +760,7 @@ class ExportReportController extends Controller {
 			$cronLog->updated_at = Carbon::now();
 			$cronLog->save();
 		}
+		DB::commit();
 	}
 
 	public function employeeAxaptaExportProcess($type, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails) {
