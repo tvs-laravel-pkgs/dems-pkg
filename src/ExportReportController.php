@@ -981,6 +981,7 @@ class ExportReportController extends Controller {
 			$consolidated_amount = $balance_amount;
 			return $consolidated_amount;
 		} elseif ($type == 8) {
+			$employeeTrip->invoiceDate = $employeeTrip->transactionDate;
 			$claim_amount = $employeeTrip->totalAmount;
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
