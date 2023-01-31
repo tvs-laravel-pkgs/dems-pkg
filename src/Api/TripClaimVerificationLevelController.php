@@ -225,16 +225,18 @@ class TripClaimVerificationLevelController extends Controller {
 
 	public function approveTripClaimVerificationOne(Request $r) {
 		$additional_approve = Auth::user()->company->additional_approve;
-		$trip = Trip::find($r->trip_id);
+		$financier_approve = Auth::user()->company->financier_approve;
+		$trip_id=$r->trip_id;
+		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
 		$trip->verification_one_remarks=$r->verification_one_remarks;
-		$employee_claim = EmployeeClaim::where('trip_id', $r->trip_id)->first();
+		$employee_claim = EmployeeClaim::where('trip_id', $trip_id)->first();
 		if (!$employee_claim) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 		}
-		$gstin_available= Lodging::select('lodgings.gstin as lodging_gstin','visit_bookings.gstin as transport_gstin')->join('visits','visits.trip_id','lodgings.trip_id')->join('visit_bookings','visit_bookings.visit_id','visits.id')->where('lodgings.trip_id',$trip)->get()->first();
+		$gstin_available= Lodging::select('lodgings.gstin as lodging_gstin','visit_bookings.gstin as transport_gstin')->join('visits','visits.trip_id','lodgings.trip_id')->join('visit_bookings','visit_bookings.visit_id','visits.id')->where('lodgings.trip_id',$trip_id)->get()->first();
 		if ($employee_claim->is_deviation == 0) {
 			if ($additional_approve == '1' && ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
 				$employee_claim->status_id = 3036; //Claim Verification Pending
