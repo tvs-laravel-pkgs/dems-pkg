@@ -521,8 +521,24 @@ app.component('eyatraTripForm', {
                 $('.btn-submit').prop('disabled', false);
             }
         }
+        $scope.onChangeFromTrip = function(cityId, fromCityIndex) {
+            var cityIndex = fromCityIndex + 1;
+            cityId = (!cityId) ? '' : cityId;
+            if (cityIndex <= self.trip.visits.length && self.trip.visits[cityIndex]) {
+                if (self.trip.visits.length > 1) {
+                    $.each(self.extras.city_list, function(index, city) {
+                        if (city.id == cityId) {
+                            self.trip.visits[cityIndex] = {
+                                ...self.trip.visits[cityIndex],
+                                to_city_details: city
+                            }
+                        }
+                    })
+                }
+            }
+        }
 
-        $scope.addVisit = function(visit_array) {
+        $scope.addVisit = async function(visit_array) {
             var trip_array = self.trip.visits;
             var arr_length = trip_array.length;
             arr_vol = arr_length - 1;
@@ -530,16 +546,26 @@ app.component('eyatraTripForm', {
                 custom_noty('error', "Please Select To City in Last Visit");
                 return;
             }
-            self.trip.visits.push({
+            var toCityDetails = null
+            var prevCityId = trip_array[arr_vol].from_city_id
+            if (prevCityId) {
+                await $.each(self.extras.city_list, function(index, city) {
+                    if (city.id == prevCityId)
+                        toCityDetails = city
+                })
+            }
+            await self.trip.visits.push({
                 from_city_id: trip_array[arr_vol].to_city_details.id,
-                to_city_id: trip_array[arr_vol].from_city_id,
+                // to_city_id: trip_array[arr_vol].from_city_id,
+                to_city_details: toCityDetails,
                 booking_method_name: 'Agent',
                 preferred_travel_modes: '',
                 departure_date: self.trip.end_date ? self.trip.end_date : '',
                 from_city_details: trip_array[arr_vol].to_city_details,
             });
             $('.datepicker_' + arr_length).datepicker('destroy');
-            datecall(self.trip.start_date, self.trip.end_date, arr_length, self.trip.end_date);
+            await datecall(self.trip.start_date, self.trip.end_date, arr_length, self.trip.end_date);
+            await $scope.$apply()
         }
 
         $scope.trip_mode = function(id) {
@@ -577,6 +603,7 @@ app.component('eyatraTripForm', {
                         arr_length = self.trip.visits.length;
                     }
                 }
+                $scope.visitRoundReUpdate()
                 self.trip.visits[1].to_city_details = self.trip.visits[0].from_city_details;
             } else if (id == 3) {
                 //MULTIPLE
@@ -585,6 +612,23 @@ app.component('eyatraTripForm', {
             //RESET START AND END DATE OF TRIP VISITS
             // $('.daterange').trigger("change");
             $scope.onChangeTripStartAndEndDate();
+        }
+        $scope.visitRoundReUpdate = async () => {
+            var prevCityId = self.trip.visits[0]?.from_city_id
+            if (prevCityId && self.trip.visits[1]) {
+                var toCityDetail = null
+                await $.each(self.extras.city_list, function(index, city) {
+                    if (city.id == prevCityId) {
+                        toCityDetail = city
+                    }
+                })
+                if (toCityDetail) {
+                    self.trip.visits[1] = {
+                        ...self.trip.visits[1],
+                        to_city_details: toCityDetail
+                    }
+                }
+            }
         }
 
         self.removeLodging = function(index, lodging_id) {
