@@ -234,8 +234,8 @@ class AuthController extends Controller {
 			$user->otp = $otp_no;
 			$user->save();
 			//$message = "Your OTP is " . $otp_no . " to reset Mpin in DEMS Application. Please enter OTP to verify your mobile number.";
-			$message = str_replace('XXXXXX', $otp_no, config('custom.SMS_TEMPLATES.DEMS_MOBILE_APPLICATION_OTP'));
-			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);
+			/*$message = str_replace('XXXXXX', $otp_no, config('custom.SMS_TEMPLATES.DEMS_MOBILE_APPLICATION_OTP'));
+			sendTxtMsg($user->id, $message, $mobile_number, $sender_id);*/
 			$result = 1;
 			$user_id = $user->id;
 		}else{
@@ -344,6 +344,9 @@ class AuthController extends Controller {
 		$empl_save_otp = 0;
 		$otp_no = null;
 		$user = User::where('mobile_number', $request->mobile)->first();
+		if(!$user->mobile_number){
+            return response()->json(['success' => 'true', 'message' => "Mobile Number Does not Exists"], $this->successStatus);
+		}
 		if ($user) {
 			$sender_id = config('custom.sms_sender_id');
 			$mobile_number = $user->mobile_number;
