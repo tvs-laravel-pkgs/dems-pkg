@@ -182,7 +182,7 @@ class Trip extends Model {
 	}
 
 	public static function saveTrip($request) {
-		// dd($request->all());
+		 //dd($request->all());
 		try {
 			//validation
 			$validator = Validator::make($request->all(), [
@@ -288,7 +288,8 @@ class Trip extends Model {
 					// dd(Auth::user()->entity->outlet->address);
 					$visit_count = $i + 1;
 					if ($i == 0) {
-						$from_city_id = Auth::user()->entity->outlet->address->city->id;
+						//$from_city_id = Auth::user()->entity->outlet->address->city->id;
+						$from_city_id = $visit_data['from_city_id'];
 					} else {
 						$previous_value = $request->visits[$key - 1];
 						$from_city_id = $previous_value['to_city_id'];
