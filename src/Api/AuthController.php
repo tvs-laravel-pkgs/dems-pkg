@@ -344,7 +344,7 @@ class AuthController extends Controller {
 		$empl_save_otp = 0;
 		$otp_no = null;
 		$user = User::where('mobile_number', $request->mobile)->first();
-		if(!$user->mobile_number){
+		if(empty($user->mobile_number)){
             return response()->json(['success' => 'true', 'message' => "Mobile Number Does not Exists"], $this->successStatus);
 		}
 		if ($user) {
