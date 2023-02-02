@@ -367,7 +367,8 @@ app.component('eyatraTripForm', {
             self.extras = response.data.extras;
             self.action = response.data.action;
             if (self.action == 'New') {
-                self.trip.trip_type = 'single';
+                // self.trip.trip_type = 'single';
+                self.trip.trip_type = 'round'
                 self.booking_method_name = 'Agent';
                 self.trip.visits = [];
                 arr_ind = 1;
@@ -382,6 +383,7 @@ app.component('eyatraTripForm', {
                 self.checked = true;
                 $scope.round_trip = false;
                 $scope.multi_trip = false;
+                $scope.trip_mode(2)
             }
             $rootScope.loading = false;
             $scope.showBank = false;
