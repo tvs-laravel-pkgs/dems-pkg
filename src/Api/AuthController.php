@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 use Illuminate\Support\Facades\Hash;
+use Uitoux\EYatra\Company;
 
 class AuthController extends Controller {
 	public $successStatus = 200;
@@ -465,6 +466,17 @@ class AuthController extends Controller {
 			}
 		}
 
+	}
+
+	public function getVersion() {
+		$version = Company::where('code', 'TMD')->first();
+			if ($version->app_version > 0) {
+				$this->data['app_version'] = $version->app_version;
+				$this->data['status'] = 'true';
+				return response()->json($this->data);
+			} else {
+				return response()->json(['status' => 'false', 'error' => 'Invalid version'], $this->successStatus);
+			}
 	}
 
 }

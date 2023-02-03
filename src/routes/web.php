@@ -13,7 +13,7 @@ Route::post('eyatra/api/changePassword', 'Uitoux\EYatra\Api\AuthController@chang
 Route::post('eyatra/api/checkMobileNumber', 'Uitoux\EYatra\Api\AuthController@checkMobileNumber');
 Route::post('eyatra/api/confirmOTPForm', 'Uitoux\EYatra\Api\AuthController@confirmOTPForm');
 Route::post('eyatra/api/setMpinForm', 'Uitoux\EYatra\Api\AuthController@setMpinForm');
-
+Route::get('eyatra/api/getVersion', 'Uitoux\EYatra\Api\AuthController@getVersion');
 //LOGOUT
 Route::post('eyatra/api/logout', 'Uitoux\EYatra\Api\AuthController@logout');
 
