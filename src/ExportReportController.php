@@ -485,6 +485,7 @@ class ExportReportController extends Controller {
 			])
 				->get();
 
+			// DB::beginTransaction();
 			$employeeTrips = Trip::select([
 				'trips.id',
 				'trips.company_id',
@@ -562,7 +563,7 @@ class ExportReportController extends Controller {
 			$export_data=[];
 			if ($employeeTrips->isNotEmpty() || $employeeLocalTrips->isNotEmpty()) {
 				foreach ($employeeLocalTrips as $employeeLocalTrip) {
-					DB::beginTransaction();
+					// DB::beginTransaction();
 					try {
 						$res = $this->employeeAxaptaExportProcess(8, $employeeLocalTrip, $axaptaAccountTypes, $axaptaBankDetails);
 						$tot_consolidated_amount += $res;
@@ -571,17 +572,17 @@ class ExportReportController extends Controller {
 						LocalTrip::where('id', $employeeLocalTrip->id)->update([
 							'self_ax_export_synched' => 1,
 						]);
-						DB::commit();
+						// DB::commit();
 						continue;
 					} catch (\Exception $e) {
-						DB::rollBack();
+						// DB::rollBack();
 						$exceptionErrors[] = "Trip ID ( " . $employeeLocalTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
 						continue;
 					}
 				}
 
 				foreach ($employeeTrips as $key => $employeeTrip) {
-					DB::beginTransaction();
+					// DB::beginTransaction();
 					try {
 
 						if($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028){
@@ -633,10 +634,10 @@ class ExportReportController extends Controller {
 						}
 
 
-						DB::commit();
+						// DB::commit();
 						continue;
 					} catch (\Exception $e) {
-						DB::rollBack();
+						// DB::rollBack();
 						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
 						continue;
 					}
@@ -760,7 +761,7 @@ class ExportReportController extends Controller {
 			$cronLog->updated_at = Carbon::now();
 			$cronLog->save();
 		}
-		DB::commit();
+		// DB::commit();
 	}
 
 	public function employeeAxaptaExportProcess($type, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails) {
