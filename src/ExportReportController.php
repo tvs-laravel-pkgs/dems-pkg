@@ -658,8 +658,8 @@ class ExportReportController extends Controller {
 				$consolidated_cre_acc_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 				if($tot_consolidated_amount && $tot_consolidated_amount != '0.00'){
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-MDS-ITS', 'ITS-MDS', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "1","0001",$employeeTrip->transactionDate,'');
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'ITS-MDS', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "1", "0001",$employeeTrip->transactionDate,'');
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-TVM-F&A', 'F&A-TVM', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "1","0001",date('Y_m_d'),'');
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'F&A-TVM', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "1", "0001",date('Y_m_d'),'');
 				}
 
 				$cronLog->remarks = "Employee trips found";
