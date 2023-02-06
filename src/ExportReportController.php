@@ -486,6 +486,7 @@ class ExportReportController extends Controller {
 				->get();
 
 			// DB::beginTransaction();
+			$business_ids = [1];
 			$employeeTrips = Trip::select([
 				'trips.id',
 				'trips.company_id',
@@ -515,6 +516,8 @@ class ExportReportController extends Controller {
 				->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('sbus', 'sbus.id', 'employees.sbu_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->join('users', function ($join) {
 					$join->on('users.entity_id', '=', 'employees.id')
 						->where('users.user_type_id', 3121) //EMPLOYEE
@@ -523,6 +526,7 @@ class ExportReportController extends Controller {
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'trips.purpose_id')
 				//->where('ey_employee_claims.status_id', 3026) //PAID
+				->whereIn('departments.business_id',$business_ids)
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->groupBy('trips.id')
 				->get();
@@ -545,6 +549,8 @@ class ExportReportController extends Controller {
 			])
 				->join('employees', 'employees.id', 'local_trips.employee_id')
 				->join('sbus', 'sbus.id', 'employees.sbu_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->join('users', function ($join) {
 					$join->on('users.entity_id', '=', 'employees.id')
 						->where('users.user_type_id', 3121) //EMPLOYEE
@@ -553,6 +559,7 @@ class ExportReportController extends Controller {
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'local_trips.purpose_id')
 				->where('local_trips.status_id', 3026)
+				->whereIn('departments.business_id',$business_ids)
 				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->whereNotNull('local_trips.claim_amount')
 				->groupBy('local_trips.id')
@@ -1093,8 +1100,9 @@ class ExportReportController extends Controller {
 				$business_ids = json_decode($r->business_ids);
 			}
 		}*/
+		$business_ids = [1,2,3];
 		$time_stamp = date('Y_m_d_h_i_s');
-		//foreach ($business_ids as $business_id) {
+		foreach ($business_ids as $business_id) {
 			$outstations = Trip::select(
 				'employees.code as Account_Number',
 				'u.name as Name',
@@ -1116,14 +1124,14 @@ class ExportReportController extends Controller {
 				->leftjoin('outlets as ol', 'ol.id', 'trips.outlet_id')
 				->join('sbus as s', 's.id', 'employees.sbu_id')
 				->leftjoin('sbus as eyec_s', 'eyec_s.id', 'eyec.sbu_id')
-				//->join('departments', 'departments.id', 'employees.department_id')
-				//->join('businesses', 'businesses.id', 'departments.business_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->where('trips.status_id', 3026)
 				->where('eyec.status_id', 3026)
 				->where('eyec.amount_to_pay', 1)
 				->where('eyec.batch', 0)
 				->where('trips.batch', 0)
-				//->where('departments.business_id', '=', $business_id)
+				->where('departments.business_id', '=', $business_id)
 				->groupBy('trips.id')
 				->get()->toArray();
 			$advance_amount = Employee::select(
@@ -1143,16 +1151,16 @@ class ExportReportController extends Controller {
 				->join('users as u', 'u.entity_id', 'employees.id')
 				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
 				->join('trips as t', 't.employee_id', 'employees.id')
-				->join('ey_employee_claims as eyec', 'eyec.employee_id', 'employees.id')
+				->leftjoin('ey_employee_claims as eyec', 'eyec.employee_id', 'employees.id')
 				->leftjoin('outlets as ol', 'ol.id', 't.outlet_id')
 				->join('sbus as s', 's.id', 'employees.sbu_id')
 				->leftjoin('sbus as eyec_s', 'eyec_s.id', 'eyec.sbu_id')
-				//->join('departments', 'departments.id', 'employees.department_id')
-				//->join('businesses', 'businesses.id', 'departments.business_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->where('t.status_id', 3028)
 				->where('t.advance_received', '>', 0)
 				->where('t.batch', 0)
-				//->where('departments.business_id', '=', $business_id)
+				->where('departments.business_id', '=', $business_id)
 				->groupBy('t.id')
 				->get()->toArray();
 			$claims = Employee::select(
@@ -1175,17 +1183,17 @@ class ExportReportController extends Controller {
 				->leftjoin('outlets as ol', 'ol.id', 'lt.outlet_id')
 				->leftjoin('sbus as s', 's.id', 'employees.sbu_id')
 				->leftjoin('sbus as lt_s', 'lt_s.id', 'lt.sbu_id')
-				//->join('departments', 'departments.id', 'employees.department_id')
-				//->join('businesses', 'businesses.id', 'departments.business_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->where('lt.status_id', '=', '3026')
 				->where('lt.batch', 0)
-				//->where('departments.business_id', '=', $business_id)
+				->where('departments.business_id', '=', $business_id)
 				->groupBy('lt.id')
 				->get()->toArray();
 			$locals = array_merge($claims, $outstations, $advance_amount);
-			/*if (count($locals) == 0) {
+			if (count($locals) == 0) {
 				continue;
-			}*/
+			}
 			//dd($locals);
 			$batch_id = BatchWiseReport::where('date', '=', date('Y-m-d'))->orderBy('id', 'DESC')->pluck('name')->first();
 			$batch = ((int) $batch_id ?: '0') + 1;
@@ -1379,7 +1387,7 @@ class ExportReportController extends Controller {
 			$travelex_details[] = $consolidation_detail;*/
 			// ob_end_clean();
 			// ob_start();
-			//$business_name = Business::where('id', '=', $business_id)->pluck('name')->first();
+			$business_name = Business::where('id', '=', $business_id)->pluck('name')->first();
 			//dd($business_name);
 			//$outputfile = $business_name . '_travelex_report_' . $time_stamp;
 			/*$file = Excel::create($outputfile, function ($excel) use ($travelex_header, $travelex_details) {
@@ -1408,8 +1416,8 @@ class ExportReportController extends Controller {
 			$batch_wise_reports->name = $report_details->batch;
 			$batch_wise_reports->date = $time_stamp;
 			$batch_wise_reports->save();*/
-			//$outputfile_bank = $business_name . '_bank_statement_' . $time_stamp;
-			$outputfile_bank = 'bank_statement_' . $time_stamp;
+			$outputfile_bank = $business_name . '_bank_statement_' . $time_stamp;
+			//$outputfile_bank = 'bank_statement_' . $time_stamp;
 			$file_one = Excel::create($outputfile_bank, function ($excel) use ($local_trips_header, $local_trips) {
 				$excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header, $local_trips) {
 					$sheet->fromArray($local_trips, NULL, 'A1');
@@ -1450,7 +1458,7 @@ class ExportReportController extends Controller {
 				Session()->flash('error', 'No Data Found');
 				// return Redirect::to('/#!/report/list');
 			}
-		//}
+		}
 		return Redirect::to('/#!/report/list');
 	}
 
