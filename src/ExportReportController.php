@@ -658,8 +658,8 @@ class ExportReportController extends Controller {
 				$consolidated_cre_acc_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 				if($tot_consolidated_amount && $tot_consolidated_amount != '0.00'){
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-TVM-F&A', 'F&A-TVM', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "1","0001",date('Y_m_d'),'');
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'F&A-TVM', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "1", "0001",date('Y_m_d'),'');
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-TVM-F&A', 'F&A-TVM', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "-1","0001",date('Y_m_d'),'');
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'F&A-TVM', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "-1", "0001",date('Y_m_d'),'');
 				}
 
 				$cronLog->remarks = "Employee trips found";
@@ -1004,17 +1004,18 @@ class ExportReportController extends Controller {
 			$deb_ledger_dimension = "Emp_" . $employeeCode;
 			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
+			$ecre_ledger_dimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+			//CREDIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $cre_account_type, $ecre_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
 			//DEBIT ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//CREDIT ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
-			$ecre_ledger_dimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
-
-			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $cre_account_type, $ecre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $claim_amount;
 			return $consolidated_amount;
 		}
