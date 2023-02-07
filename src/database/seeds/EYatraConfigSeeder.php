@@ -61,6 +61,7 @@ class EYatraConfigSeeder extends Seeder {
 			546 => 'Lodging Tax Invoice Types ',
 
 			547 => 'Axapta Export Types',
+			548 => 'Trip Mode',
 		];
 
 		$configs = [
@@ -1154,6 +1155,16 @@ class EYatraConfigSeeder extends Seeder {
 			3791 => [
 				'name' => 'Self',
 				'config_type_id' => 547,
+			],
+
+			// trip mode
+			3792 => [
+				'name' => 'Short Distance',
+				'config_type_id' => 548,
+			],
+			3793 => [
+				'name' => 'Over Night Journey',
+				'config_type_id' => 548,
 			],
 		];
 

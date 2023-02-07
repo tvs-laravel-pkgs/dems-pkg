@@ -569,6 +569,7 @@ class Trip extends Model {
 			'employee_city' => Auth::user()->entity->outlet->address->city,
 			'frequently_travelled' => Visit::join('ncities', 'ncities.id', 'visits.to_city_id')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->where('ncities.company_id', Auth::user()->company_id)->select('ncities.id', DB::raw('CONCAT(ncities.name," - ",nstates.name) as name'))->distinct()->limit(10)->get(),
 			'claimable_travel_mode_list' => DB::table('travel_mode_category_type')->where('category_id', 3403)->pluck('travel_mode_id'),
+			'trip_mode' => collect(Config::select('name', 'id')->where('config_type_id', 548)->get())->prepend(['id' => '-1', 'name' => 'Select Trip Mode']),
 		];
 		$data['trip'] = $trip;
 

@@ -656,20 +656,30 @@ app.component('eyatraTripForm', {
                 self.trip.visits[index].self_booking_approval = "1";
             }
         }
-
+        console.log("success")
+        $scope.onChangeTripMode = (value, index) => {
+            console.log(value+' - '+index)
+            if (value == "3792") {
+                self.trip.visits[index].booking_method_name = "Self";
+            }
+            else if (value == "3793") {
+                self.trip.visits[index].booking_method_name = "Agent";
+            }
+        }
         $scope.onChangeTravelMode = (id, key) => {
             if (self.claimable_travel_mode_list.includes(id)) {
                 self.trip.visits[key].booking_method_name = "Agent";
-                $('#inactive_' + key).attr('disabled', false);
+                // $('#inactive_' + key).attr('disabled', false);
             } else {
                 self.trip.visits[key].booking_method_name = "Self";
                 self.trip.visits[key].self_booking_approval = "1";
                 $('#active_' + key).prop('checked', true);
-                $('#inactive_' + key).attr('disabled', true);
+                // $('#inactive_' + key).attr('disabled', true);
             }
         }
 
         $scope.onChangeSelfBookingApproval = (value, index) => {
+            return true;
             if (value == "No") {
                 $('#inactive_' + index).prop('checked', true);
                 self.trip.visits[index].booking_method_name = "Agent";
