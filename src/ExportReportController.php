@@ -485,6 +485,8 @@ class ExportReportController extends Controller {
 			])
 				->get();
 
+			// DB::beginTransaction();
+			$business_ids = [1];
 			$employeeTrips = Trip::select([
 				'trips.id',
 				'trips.company_id',
@@ -514,6 +516,8 @@ class ExportReportController extends Controller {
 				->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('sbus', 'sbus.id', 'employees.sbu_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->join('users', function ($join) {
 					$join->on('users.entity_id', '=', 'employees.id')
 						->where('users.user_type_id', 3121) //EMPLOYEE
@@ -522,6 +526,7 @@ class ExportReportController extends Controller {
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'trips.purpose_id')
 				//->where('ey_employee_claims.status_id', 3026) //PAID
+				->whereIn('departments.business_id',$business_ids)
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->groupBy('trips.id')
 				->get();
@@ -544,6 +549,8 @@ class ExportReportController extends Controller {
 			])
 				->join('employees', 'employees.id', 'local_trips.employee_id')
 				->join('sbus', 'sbus.id', 'employees.sbu_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->join('users', function ($join) {
 					$join->on('users.entity_id', '=', 'employees.id')
 						->where('users.user_type_id', 3121) //EMPLOYEE
@@ -552,6 +559,7 @@ class ExportReportController extends Controller {
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'local_trips.purpose_id')
 				->where('local_trips.status_id', 3026)
+				->whereIn('departments.business_id',$business_ids)
 				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->whereNotNull('local_trips.claim_amount')
 				->groupBy('local_trips.id')
@@ -562,7 +570,7 @@ class ExportReportController extends Controller {
 			$export_data=[];
 			if ($employeeTrips->isNotEmpty() || $employeeLocalTrips->isNotEmpty()) {
 				foreach ($employeeLocalTrips as $employeeLocalTrip) {
-					DB::beginTransaction();
+					// DB::beginTransaction();
 					try {
 						$res = $this->employeeAxaptaExportProcess(8, $employeeLocalTrip, $axaptaAccountTypes, $axaptaBankDetails);
 						$tot_consolidated_amount += $res;
@@ -571,17 +579,17 @@ class ExportReportController extends Controller {
 						LocalTrip::where('id', $employeeLocalTrip->id)->update([
 							'self_ax_export_synched' => 1,
 						]);
-						DB::commit();
+						// DB::commit();
 						continue;
 					} catch (\Exception $e) {
-						DB::rollBack();
+						// DB::rollBack();
 						$exceptionErrors[] = "Trip ID ( " . $employeeLocalTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
 						continue;
 					}
 				}
 
 				foreach ($employeeTrips as $key => $employeeTrip) {
-					DB::beginTransaction();
+					// DB::beginTransaction();
 					try {
 
 						if($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028){
@@ -633,10 +641,10 @@ class ExportReportController extends Controller {
 						}
 
 
-						DB::commit();
+						// DB::commit();
 						continue;
 					} catch (\Exception $e) {
-						DB::rollBack();
+						// DB::rollBack();
 						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
 						continue;
 					}
@@ -650,8 +658,8 @@ class ExportReportController extends Controller {
 				$consolidated_cre_acc_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 				if($tot_consolidated_amount && $tot_consolidated_amount != '0.00'){
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-MDS-ITS', 'ITS-MDS', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "1","0001",$employeeTrip->transactionDate,'');
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'ITS-MDS', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "1", "0001",$employeeTrip->transactionDate,'');
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-TVM-F&A', 'F&A-TVM', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "1","0001",date('Y_m_d'),'');
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'F&A-TVM', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "1", "0001",date('Y_m_d'),'');
 				}
 
 				$cronLog->remarks = "Employee trips found";
@@ -760,7 +768,7 @@ class ExportReportController extends Controller {
 			$cronLog->updated_at = Carbon::now();
 			$cronLog->save();
 		}
-		DB::commit();
+		// DB::commit();
 	}
 
 	public function employeeAxaptaExportProcess($type, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails) {
@@ -953,9 +961,9 @@ class ExportReportController extends Controller {
 			}
 
 			//DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $trip_approved_date, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $advance_amount, 0.00, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $trip_approved_date, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $advance_amount, 0.00, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $trip_approved_date, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $advance_amount, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $trip_approved_date, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $advance_amount, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $advance_amount;
 			return $consolidated_amount;
 		} elseif ($type == 7) {
@@ -1001,6 +1009,12 @@ class ExportReportController extends Controller {
 
 			//CREDIT ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+			$ecre_ledger_dimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+			//CREDIT ENTRY
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $cre_account_type, $ecre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $claim_amount;
 			return $consolidated_amount;
 		}
@@ -1092,8 +1106,9 @@ class ExportReportController extends Controller {
 				$business_ids = json_decode($r->business_ids);
 			}
 		}*/
+		$business_ids = [1,2,3];
 		$time_stamp = date('Y_m_d_h_i_s');
-		//foreach ($business_ids as $business_id) {
+		foreach ($business_ids as $business_id) {
 			$outstations = Trip::select(
 				'employees.code as Account_Number',
 				'u.name as Name',
@@ -1115,14 +1130,14 @@ class ExportReportController extends Controller {
 				->leftjoin('outlets as ol', 'ol.id', 'trips.outlet_id')
 				->join('sbus as s', 's.id', 'employees.sbu_id')
 				->leftjoin('sbus as eyec_s', 'eyec_s.id', 'eyec.sbu_id')
-				//->join('departments', 'departments.id', 'employees.department_id')
-				//->join('businesses', 'businesses.id', 'departments.business_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->where('trips.status_id', 3026)
 				->where('eyec.status_id', 3026)
 				->where('eyec.amount_to_pay', 1)
 				->where('eyec.batch', 0)
 				->where('trips.batch', 0)
-				//->where('departments.business_id', '=', $business_id)
+				->where('departments.business_id', '=', $business_id)
 				->groupBy('trips.id')
 				->get()->toArray();
 			$advance_amount = Employee::select(
@@ -1142,16 +1157,16 @@ class ExportReportController extends Controller {
 				->join('users as u', 'u.entity_id', 'employees.id')
 				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
 				->join('trips as t', 't.employee_id', 'employees.id')
-				->join('ey_employee_claims as eyec', 'eyec.employee_id', 'employees.id')
+				->leftjoin('ey_employee_claims as eyec', 'eyec.employee_id', 'employees.id')
 				->leftjoin('outlets as ol', 'ol.id', 't.outlet_id')
 				->join('sbus as s', 's.id', 'employees.sbu_id')
 				->leftjoin('sbus as eyec_s', 'eyec_s.id', 'eyec.sbu_id')
-				//->join('departments', 'departments.id', 'employees.department_id')
-				//->join('businesses', 'businesses.id', 'departments.business_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->where('t.status_id', 3028)
 				->where('t.advance_received', '>', 0)
 				->where('t.batch', 0)
-				//->where('departments.business_id', '=', $business_id)
+				->where('departments.business_id', '=', $business_id)
 				->groupBy('t.id')
 				->get()->toArray();
 			$claims = Employee::select(
@@ -1174,17 +1189,17 @@ class ExportReportController extends Controller {
 				->leftjoin('outlets as ol', 'ol.id', 'lt.outlet_id')
 				->leftjoin('sbus as s', 's.id', 'employees.sbu_id')
 				->leftjoin('sbus as lt_s', 'lt_s.id', 'lt.sbu_id')
-				//->join('departments', 'departments.id', 'employees.department_id')
-				//->join('businesses', 'businesses.id', 'departments.business_id')
+				->join('departments', 'departments.id', 'employees.department_id')
+				->join('businesses', 'businesses.id', 'departments.business_id')
 				->where('lt.status_id', '=', '3026')
 				->where('lt.batch', 0)
-				//->where('departments.business_id', '=', $business_id)
+				->where('departments.business_id', '=', $business_id)
 				->groupBy('lt.id')
 				->get()->toArray();
 			$locals = array_merge($claims, $outstations, $advance_amount);
-			/*if (count($locals) == 0) {
+			if (count($locals) == 0) {
 				continue;
-			}*/
+			}
 			//dd($locals);
 			$batch_id = BatchWiseReport::where('date', '=', date('Y-m-d'))->orderBy('id', 'DESC')->pluck('name')->first();
 			$batch = ((int) $batch_id ?: '0') + 1;
@@ -1378,7 +1393,7 @@ class ExportReportController extends Controller {
 			$travelex_details[] = $consolidation_detail;*/
 			// ob_end_clean();
 			// ob_start();
-			//$business_name = Business::where('id', '=', $business_id)->pluck('name')->first();
+			$business_name = Business::where('id', '=', $business_id)->pluck('name')->first();
 			//dd($business_name);
 			//$outputfile = $business_name . '_travelex_report_' . $time_stamp;
 			/*$file = Excel::create($outputfile, function ($excel) use ($travelex_header, $travelex_details) {
@@ -1407,8 +1422,8 @@ class ExportReportController extends Controller {
 			$batch_wise_reports->name = $report_details->batch;
 			$batch_wise_reports->date = $time_stamp;
 			$batch_wise_reports->save();*/
-			//$outputfile_bank = $business_name . '_bank_statement_' . $time_stamp;
-			$outputfile_bank = 'bank_statement_' . $time_stamp;
+			$outputfile_bank = $business_name . '_bank_statement_' . $time_stamp;
+			//$outputfile_bank = 'bank_statement_' . $time_stamp;
 			$file_one = Excel::create($outputfile_bank, function ($excel) use ($local_trips_header, $local_trips) {
 				$excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header, $local_trips) {
 					$sheet->fromArray($local_trips, NULL, 'A1');
@@ -1449,7 +1464,7 @@ class ExportReportController extends Controller {
 				Session()->flash('error', 'No Data Found');
 				// return Redirect::to('/#!/report/list');
 			}
-		//}
+		}
 		return Redirect::to('/#!/report/list');
 	}
 
