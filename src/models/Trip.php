@@ -358,6 +358,7 @@ class Trip extends Model {
 					$visit->to_city_id = $visit_data['to_city_id'];
 					$visit->other_city = $visit_data['other_city'] ? $visit_data['other_city'] : NULL;
 					$visit->travel_mode_id = $visit_data['travel_mode_id'];
+					$visit->trip_mode_id = $visit_data['trip_mode_id'];
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
