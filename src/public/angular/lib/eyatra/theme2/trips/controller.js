@@ -616,7 +616,7 @@ app.component('eyatraTripForm', {
             $scope.onChangeTripStartAndEndDate();
         }
         $scope.visitRoundReUpdate = async () => {
-            var prevCityId = self.trip.visits[0]?.from_city_id
+            var prevCityId = self.trip.visits[0] ? self.trip.visits[0] : from_city_id
             if (prevCityId && self.trip.visits[1]) {
                 var toCityDetail = null
                 await $.each(self.extras.city_list, function(index, city) {
@@ -790,11 +790,13 @@ app.component('eyatraTripView', {
 
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        self.pending_trip_status = false;
         $http.get(
             trip_view_url + '/' + $routeParams.trip_id
         ).then(function(response) {
             self.trip = response.data.trip;
             self.claim_status = response.data.claim_status;
+            self.pending_trip_status = response.data.pending_trip_status;
         });
 
 
@@ -842,6 +844,8 @@ app.component('eyatraTripView', {
 
         $scope.onClickClaimButton = () => {
             if (self.trip && self.trip.visits && self.trip.visits.length > 0) {
+                if (self.pending_trip_status)
+                    return custom_noty('error', "Previous Trip Claim is not Completed");
                 let agentVisitsBookedLength = 0;
                 let agentVisitsLength = 0;
                 const tripVisits = self.trip.visits;

@@ -1556,9 +1556,14 @@ app.component('eyatraTripClaimForm', {
             });
             console.log({ deviationTypes })
             self.deviationTypeName = deviationTypes.toString()
-            if (self.deviationTypeName)
-                self.deviationTypeName += ' amount is greater than their eligible amount';
-            is_grade_travel_mode = false;
+            if (self.trip.visits)
+                $(self.trip.visits).each(function(key, visit) {
+                    if (visit.travel_mode_id != 15 || visit.travel_mode_id != 16) {
+                        if (self.deviationTypeName)
+                            self.deviationTypeName += 'amount is greater than their eligible amount';
+                        is_grade_travel_mode = false;
+                    }
+                });
             /*$(self.trip.visits).each(function(key, visit) {
                 $(self.grade_travel).each(function(key, travel) {
                     console.log('visit' + visit.travel_mode_id);
@@ -1630,7 +1635,7 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
                 $(self.trip.lodgings).each(function(key, lodge) {
                     console.log(lodge.stay_type_id);
-                    if (lodge.stay_type_id != 3342) {   // 3342 -> Office Guest house
+                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
                         if (lodge.city_id) {
                             var guestHouseStatus = 0
                             $(self.extras.city_list).each(function(cityKey, city) {

@@ -440,6 +440,11 @@ class Trip extends Model {
 		}
 
 		$employee = Employee::find($trip->employee_id);
+		$pending_trip = Trip::where('trips.employee_id', Auth::user()->entity_id)
+		              ->where('trips.id','<', $trip->id)
+		              ->whereIn('trips.status_id',[3021,3028])
+		              ->orderBy('trips.id','desc')->first();
+		$pending_trip_status =!!$pending_trip;
 		$sbu_name = Sbu::where('id', $trip->employee->sbu_id)->pluck('name')->first();
 		$trip->sbu_name = $sbu_name;
 		if ((!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) && $employee->reporting_to_id != Auth::user()->entity_id) {
@@ -485,7 +490,8 @@ class Trip extends Model {
 
 		$data['trip_reject'] = $trip_reject;
 		$data['approval_status'] = Trip::validateAttachment($trip_id);
-
+        $data['pending_trip_status'] = $pending_trip_status;
+        $data['pending_trip'] = $pending_trip;
 		$data['success'] = true;
 		return response()->json($data);
 
