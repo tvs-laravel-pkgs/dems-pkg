@@ -121,6 +121,7 @@ class TripClaimVerificationController extends Controller {
 			})
 
 			->where('ey_employee_claims.status_id', 3036) //CLAIM REQUESTED
+			->where('e.outlet_id',Auth::user()->entity->outlet_id)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
