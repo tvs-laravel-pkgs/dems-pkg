@@ -399,7 +399,7 @@ class Trip extends Model {
 
 		} catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage().$e->getLine()]]);
 		}
 	}
 
@@ -1965,7 +1965,7 @@ class Trip extends Model {
 					->toArray();
 				if (!in_array(3750, $attachement_types)) {
 					// All Type
-					$visit_count = Visit::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+					$visit_count = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->where('visit_bookings.travel_mode_id','!=',[15,16,17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type
 						$validations['fare_detail_doc'] = 'required';
@@ -1985,7 +1985,8 @@ class Trip extends Model {
 						// Others Type
 						$validations['other_doc'] = 'required';
 					}
-					$self_booking = Visit::where('trip_id', $trip->id)->where('self_booking_approval', 1)->count();
+					//$self_booking = Visit::where('trip_id', $trip->id)->where('self_booking_approval', 1)->count();
+					$self_booking = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->where('visit_bookings.travel_mode_id','!=',[15,16,17])->where('visits.trip_id', $trip->id)->where('visits.self_booking_approval', 1)->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
 						$validations['self_booking_doc'] = 'required';
