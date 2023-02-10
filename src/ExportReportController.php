@@ -528,6 +528,7 @@ class ExportReportController extends Controller {
 				//->where('ey_employee_claims.status_id', 3026) //PAID
 				->whereIn('departments.business_id',$business_ids)
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
+				->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
 				->groupBy('trips.id')
 				->get();
 
@@ -562,6 +563,7 @@ class ExportReportController extends Controller {
 				->whereIn('departments.business_id',$business_ids)
 				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->whereNotNull('local_trips.claim_amount')
+				->whereDate('local_trips.updated_at', '<', date('Y-m-d'))
 				->groupBy('local_trips.id')
 				->get();
 
@@ -860,22 +862,26 @@ class ExportReportController extends Controller {
 						//HAS MULTIPLE TAX INVOICE
 							if ($lodging->has_multiple_tax_invoice == "Yes") {
 								//LODGE
-								if ($lodging->lodgingTaxInvoice) {
+								// if ($lodging->lodgingTaxInvoice) {
+								if ($lodging->lodgingTaxInvoice && (($lodging->lodgingTaxInvoice->cgst != '0.00' && $lodging->lodgingTaxInvoice->sgst != '0.00') || ($lodging->lodgingTaxInvoice->igst != '0.00'))) {
 									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
 								}
 
 								//DRY WASH
-								if ($lodging->drywashTaxInvoice) {
+								// if ($lodging->drywashTaxInvoice) {
+								if ($lodging->drywashTaxInvoice && (($lodging->drywashTaxInvoice->cgst != '0.00' && $lodging->drywashTaxInvoice->sgst != '0.00') || ($lodging->drywashTaxInvoice->igst != '0.00'))) {
 									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Dry Wash ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst);
 								}
 
 								//BOARDING
-								if ($lodging->boardingTaxInvoice) {
+								// if ($lodging->boardingTaxInvoice) {
+								if ($lodging->boardingTaxInvoice && (($lodging->boardingTaxInvoice->cgst != '0.00' && $lodging->boardingTaxInvoice->sgst != '0.00') || ($lodging->boardingTaxInvoice->igst != '0.00'))) {
 									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Boarding ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst);
 								}
 
 								//OTHERS
-								if ($lodging->othersTaxInvoice) {
+								// if ($lodging->othersTaxInvoice) {
+								if ($lodging->othersTaxInvoice && (($lodging->othersTaxInvoice->cgst != '0.00' && $lodging->othersTaxInvoice->sgst != '0.00') || ($lodging->othersTaxInvoice->igst != '0.00'))) {
 									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Others", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst);
 								}
 
@@ -897,7 +903,8 @@ class ExportReportController extends Controller {
 			}
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
-			$ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+			// $ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+			$ledgerDimension = "3198-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			//ROUND OFF ENTRY
 			if($employeeLodgingRoundoff != 0){
