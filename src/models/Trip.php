@@ -1948,7 +1948,7 @@ class Trip extends Model {
 				}
 
 				foreach ($request->visits as $visit_info) {
-					if(isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16){
+					if(isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16)){
 						if($visit_info['travel_mode_id'] == 15){
 							//TWO WHEELER
 							$mode_two_wheeler = true;
