@@ -1427,15 +1427,25 @@ class Trip extends Model {
 					$cities_with_expenses[$key]['lodge']['home']['perc'] = $percentage;
 					$cities_with_expenses[$key]['lodge']['normal']['eligible_amount'] = $lodge_expense_type->eligible_amount;
 				}
-				$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $trip->employee->grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+				$board_expense_type = DB::table('grade_expense_type')
+					->where('grade_id', $trip->employee->grade_id)
+					->where('expense_type_id', 3002)
+					->where('city_category_id', $city_category_id->category_id)
+					->first();
 				if (!$board_expense_type) {
 					$cities_with_expenses[$key]['board']['id'] = 3002;
 					$cities_with_expenses[$key]['board']['grade_id'] = $trip->employee->grade_id;
 					$cities_with_expenses[$key]['board']['eligible_amount'] = '0.00';
+					$cities_with_expenses[$key]['board']['less_than_240_ea'] = '0.00';
+					$cities_with_expenses[$key]['board']['less_than_480_ea'] = '0.00';
+					$cities_with_expenses[$key]['board']['less_than_1440_ea'] = '0.00';
 				} else {
 					$cities_with_expenses[$key]['board']['id'] = 3002;
 					$cities_with_expenses[$key]['board']['grade_id'] = $trip->employee->grade_id;
 					$cities_with_expenses[$key]['board']['eligible_amount'] = $board_expense_type->eligible_amount;
+					$cities_with_expenses[$key]['board']['less_than_240_ea'] = $board_expense_type->less_than_240;
+					$cities_with_expenses[$key]['board']['less_than_480_ea'] = $board_expense_type->less_than_480;
+					$cities_with_expenses[$key]['board']['less_than_1440_ea'] = $board_expense_type->less_than_1440;
 				}
 			} else {
 				$cities_with_expenses[$key]['transport'] = [];
