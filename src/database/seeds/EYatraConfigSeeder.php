@@ -62,6 +62,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			547 => 'Axapta Export Types',
 			548 => 'Trip Mode',
+			549 => 'Boarding Batta Types',
 		];
 
 		$configs = [
@@ -1165,6 +1166,22 @@ class EYatraConfigSeeder extends Seeder {
 			3793 => [
 				'name' => 'Over Night Journey',
 				'config_type_id' => 548,
+			],
+			3800 => [
+				'name' => 'Less than 240',
+				'config_type_id' => 549,
+			],
+			3801 => [
+				'name' => '240 to 480',
+				'config_type_id' => 549,
+			],
+			3802 => [
+				'name' => '480 to 1440',
+				'config_type_id' => 549,
+			],
+			3803 => [
+				'name' => 'More than 1440',
+				'config_type_id' => 549,
 			],
 		];
 
