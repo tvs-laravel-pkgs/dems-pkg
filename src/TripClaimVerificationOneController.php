@@ -270,7 +270,8 @@ class TripClaimVerificationOneController extends Controller {
 		}
         $gstin_available= Lodging::select('lodgings.gstin as lodging_gstin','visit_bookings.gstin as transport_gstin')->join('visits','visits.trip_id','lodgings.trip_id')->join('visit_bookings','visit_bookings.visit_id','visits.id')->where('lodgings.trip_id',$trip_id)->get()->first();
 		if ($employee_claim->is_deviation == 0) {
-			if ($additional_approve == '1'&& ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
+			// if ($additional_approve == '1'&& ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
+			if ($additional_approve == '1' && $gstin_available && ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
 				$employee_claim->status_id = 3036; //Claim Verification Pending
 				$trip->status_id = 3036; //Claim Verification Pending
 			} else if ($financier_approve == '1') {
