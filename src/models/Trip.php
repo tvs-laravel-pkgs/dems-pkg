@@ -1912,6 +1912,11 @@ class Trip extends Model {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
 			DB::beginTransaction();
+			$mode_two_wheeler = false;
+			$mode_four_wheeler = false;
+			$two_wheeler_total_km = 0;
+			$four_wheeler_total_km = 0;
+
 			// dd($request->all());
 			//starting ending Km validation
 			if (!empty($request->visits)) {
@@ -1941,6 +1946,22 @@ class Trip extends Model {
 						}
 					}
 				}
+
+				foreach ($request->visits as $visit_info) {
+					if(isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16){
+						if($visit_info['travel_mode_id'] == 15){
+							//TWO WHEELER
+							$mode_two_wheeler = true;
+							$two_wheeler_total_km += ($visit_info['km_end'] - $visit_info['km_start']);
+						}
+
+						if($visit_info['travel_mode_id'] == 16){
+							//FOUR WHEELER
+							$mode_four_wheeler = true;
+							$four_wheeler_total_km += ($visit_info['km_end'] - $visit_info['km_start']);
+						}
+					}
+				}
 			}
 			//starting ending km validation
 
@@ -1953,6 +1974,52 @@ class Trip extends Model {
 			if (!$trip) {
 				return response()->json(['success' => false, 'errors' => ['Trip not found']]);
 			}
+
+			//TWO WHEELER AND FOUR WHEELER TOTAL KM VALIDATION
+			if(($mode_two_wheeler == true || $mode_four_wheeler == true) && !empty($trip->employee->grade_id)){
+				$employee_grade_data = DB::table('grade_advanced_eligibility')->select([
+					'id',
+					'two_wheeler_limit',
+					'four_wheeler_limit',
+				])
+					->where('grade_id', $trip->employee->grade_id)
+					->first();
+
+				$two_wheeler_km_limit = $employee_grade_data ? $employee_grade_data->two_wheeler_limit : 0;
+				$four_wheeler_km_limit = $employee_grade_data ? $employee_grade_data->four_wheeler_limit : 0;
+
+				if($mode_two_wheeler == true){
+					if(empty($two_wheeler_km_limit)){
+						return response()->json([
+							'success' => false,
+							'errors' => ['Two wheeler KM limit is not updated kindly contact Admin']
+						]);
+					}
+					if(round($two_wheeler_total_km) > round($two_wheeler_km_limit)){
+						return response()->json([
+							'success' => false,
+							'errors' => ['Two wheeler total KM should be less than or equal to Two wheeler total KM limit : '. $two_wheeler_km_limit]
+						]);
+					}
+				}
+
+				if($mode_four_wheeler == true){
+					if(empty($four_wheeler_km_limit)){
+						return response()->json([
+							'success' => false,
+							'errors' => ['Four wheeler KM limit is not updated kindly contact Admin']
+						]);
+					}
+
+					if(round($four_wheeler_total_km) > round($four_wheeler_km_limit)){
+						return response()->json([
+							'success' => false,
+							'errors' => ['Four wheeler total KM should be less than or equal to Four wheeler total KM limit : '. $four_wheeler_km_limit]
+						]);
+					}
+				}
+			}
+
 			// Attachment validation by Karthick T on 08-04-2022
 			if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
 				// dd('final save validation');
