@@ -2042,7 +2042,11 @@ class Trip extends Model {
 						// Fare Detail Type
 						$validations['fare_detail_doc'] = 'required';
 					}
-					$lodging_count = Lodging::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+
+					// $lodging_count = Lodging::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+					$lodging_count = Lodging::where('trip_id', $trip->id)->where('attachment_status', 1)
+						->where('stay_type_id', 3340) //LODGE STAY
+						->count();
 					if ($lodging_count > 0 && !in_array(3752, $attachement_types)) {
 						// Loding Type
 						$validations['lodging_doc'] = 'required';

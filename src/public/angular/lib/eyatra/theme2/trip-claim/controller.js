@@ -1531,6 +1531,18 @@ app.component('eyatraTripClaimForm', {
         self.deviationTypeName = '';
         $scope.isDeviation = function() {
             var is_deviation = false;
+
+            //LODGING
+            var check_lodge_attachment = false;
+            if((self.trip.lodgings).length > 0){
+                $(self.trip.lodgings).each(function(lodge_key, lodge_data) {
+                    if (lodge_data.stay_type_id == 3340){
+                        //LODGE STAY
+                        check_lodge_attachment = true;
+                    }
+                });
+            }
+
             var deviationTypes = [];
             $('.is_deviation_amount').each(function() {
                 var amount_entered = $(this).val();
@@ -1624,7 +1636,8 @@ app.component('eyatraTripClaimForm', {
                         self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
                     }
                     // Lodging detail document validation
-                    if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
+                    // if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
+                    if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
                         is_deviation = true;
                         attachmentError = 'Lodging detail document not uploaded'
                         self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
