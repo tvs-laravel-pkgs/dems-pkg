@@ -2160,10 +2160,10 @@ app.component('eyatraTripClaimForm', {
 
         // Lodgings
         self.lodgingAdd = function() {
-            var proof_upload_status = 'Yes';
-            if(self.is_grade_leader == true){
-                proof_upload_status = 'No';
-            }
+            // var proof_upload_status = 'Yes';
+            // if(self.is_grade_leader == true){
+            //     proof_upload_status = 'No';
+            // }
 
             self.trip.lodgings.push({
                 id: '',
@@ -2181,8 +2181,8 @@ app.component('eyatraTripClaimForm', {
                 reference_number: '',
                 lodge_name: '',
                 remarks: '',
-                // attachment_status: 'Yes',
-                attachment_status: proof_upload_status,
+                attachment_status: 'Yes',
+                // attachment_status: proof_upload_status,
             });
         }
         //REMOVE LODGING
