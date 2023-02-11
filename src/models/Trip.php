@@ -2092,9 +2092,9 @@ class Trip extends Model {
 			}
 			// Attachment validation by Karthick T on 08-04-2022
 
-			$check_boarding_amount = true;
+			$is_grade_leader = false;
 			if(!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1','L2','L3','L4','L5','L6','L7','L8','L9'])){
-				$check_boarding_amount = false;
+				$is_grade_leader = true;
 			}
 
 			// Validate Boading amount by Karthick T on 04-08-2022
@@ -2107,7 +2107,7 @@ class Trip extends Model {
 					// 	return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
 					// }
 
-					if($check_boarding_amount == true){
+					if($is_grade_leader == false){
 						if ($boardingAmount > $boardingEligibleAmount) {
 							return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
 						}
@@ -3167,7 +3167,8 @@ class Trip extends Model {
 					foreach ($self_booking_count as $key => $value) {
 						$transport_count = VisitBooking::where('visit_id', $value->id)->count();
 					}
-					if ($transport_count > 0 && $transport_attachment_count == 0) {
+					// if ($transport_count > 0 && $transport_attachment_count == 0) {
+					if ($transport_count > 0 && $transport_attachment_count == 0 && $is_grade_leader == false) {
 						$employee_claim->is_deviation = 1;
 					}
 				}
@@ -3179,10 +3180,12 @@ class Trip extends Model {
 					->where('entity_id', $request->trip_id)
 					->count();
 				$lodging_count = Lodging::where('trip_id', $request->trip_id)->count();
-				if ($lodging_count > 0 && $lodge_attachment_count == 0) {
+				// if ($lodging_count > 0 && $lodge_attachment_count == 0) {
+				if ($lodging_count > 0 && $lodge_attachment_count == 0 && $is_grade_leader == false) {
 					$employee_claim->is_deviation = 1;
 				}
-				if($grade_advance_eligibility->deviation_eligiblity == 1){
+				// if($grade_advance_eligibility->deviation_eligiblity == 1){
+				if($grade_advance_eligibility->deviation_eligiblity == 1 && $is_grade_leader == false){
                 if ($employee_claim->deviation_reason == NULL) {
 					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
 				} else {

@@ -1594,6 +1594,11 @@ app.component('eyatraTripClaimForm', {
                 });
             }
 
+            var is_grade_leader = false;
+            if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
+                is_grade_leader = true;
+            }
+
             var deviationTypes = [];
             $scope.travel_mode_check = false;
             $(self.trip.visits).each(function(key, visit) {
@@ -1625,7 +1630,7 @@ app.component('eyatraTripClaimForm', {
                     // }
 
 
-                    if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) == -1){
+                    if(is_grade_leader == false){
                         if (amount_entered > default_eligible_amount) {
                             is_deviation = true;
 
@@ -1686,9 +1691,14 @@ app.component('eyatraTripClaimForm', {
             }
             if ($scope.travel_mode_check) {
                 if (self.trip.trip_attachments.length == 0) {
-                    is_deviation = true;
-                    attachmentError = 'Fare detail document not uploaded'
-                    self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                    // is_deviation = true;
+                    // attachmentError = 'Fare detail document not uploaded'
+                    // self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                    if(is_grade_leader == false){
+                        is_deviation = true;
+                        attachmentError = 'Fare detail document not uploaded'
+                        self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                    }
                 } else {
                     var tripAttachmentTypeIds = []
                     $(self.trip.trip_attachments).each(function(key, tripAttachment) {
@@ -1701,14 +1711,16 @@ app.component('eyatraTripClaimForm', {
                     */
                     if (jQuery.inArray(3750, tripAttachmentTypeIds) == -1) {
                         // Fare detail document validation
-                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
+                        // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
+                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && is_grade_leader == false) {
                             is_deviation = true;
                             attachmentError = 'Fare detail document not uploaded'
                             self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
                         }
                         // Lodging detail document validation
                         // if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
-                            if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
+                            // if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
+                            if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1 && is_grade_leader == false) {
                             is_deviation = true;
                             attachmentError = 'Lodging detail document not uploaded'
                             self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
@@ -1716,6 +1728,9 @@ app.component('eyatraTripClaimForm', {
                     }
                 }
             }
+
+            console.log("is_grade_leader : "+is_grade_leader)
+
             // Guest house approved document validate
             if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
                 $(self.trip.lodgings).each(function(key, lodge) {
@@ -1728,7 +1743,8 @@ app.component('eyatraTripClaimForm', {
                                     guestHouseStatus = city.guest_house_status
                                 }
                             });
-                            if (guestHouseStatus == 1) {
+                            // if (guestHouseStatus == 1) {
+                            if (guestHouseStatus == 1 && is_grade_leader == false) {
                                 is_deviation = true;
                                 attachmentError = 'Guest House Approval document not uploaded'
                                 self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
