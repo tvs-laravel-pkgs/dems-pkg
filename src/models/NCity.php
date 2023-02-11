@@ -28,16 +28,36 @@ class NCity extends Model {
 		$option = new NCity;
 		$option->name = 'Select City';
 		$option->id = NULL;
-		if (!$state_id) {
-			$city_list = NCity::leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name," - ",nstates.name) as name'))->where('company_id', Auth::user()->company_id)->get();
-			$data = $city_list->prepend($option);
-			return $data;
-			// return NCity::select('id', 'name')->get();
-		} else {
-			$city_list = NCity::leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))->where('company_id', Auth::user()->company_id)->where('ncities.state_id', $state_id)->get();
-			$data = $city_list->prepend($option);
-			return $data;
-		}
+		// if (!$state_id) {
+		// 	$city_list = NCity::leftJoin('nstates', 'ncities.state_id', 'nstates.id')
+		// 		->select('ncities.id', DB::raw('CONCAT(ncities.name," - ",nstates.name) as name'))
+		// 		->where('company_id', Auth::user()->company_id)
+		// 		->get();
+		// 	$data = $city_list->prepend($option);
+		// 	return $data;
+		// 	// return NCity::select('id', 'name')->get();
+		// } else {
+		// 	$city_list = NCity::leftJoin('nstates', 'ncities.state_id', 'nstates.id')
+		// 		->select('ncities.id', DB::raw('CONCAT(ncities.name,"/",nstates.name) as name'))
+		// 		->where('company_id', Auth::user()->company_id)
+		// 		->where('ncities.state_id', $state_id)
+		// 		->get();
+		// 	$data = $city_list->prepend($option);
+		// 	return $data;
+		// }
+		$company_id = Auth::user()->company_id;
+		$city_list = NCity::leftJoin('nstates', 'ncities.state_id', 'nstates.id')
+			->select(
+				'ncities.id', 
+				DB::raw('IF(ncities.id=4100,ncities.name,CONCAT(ncities.name," - ",nstates.name)) as name')
+			)->where(function($q) use ($state_id, $company_id) {
+				if ($state_id)
+					$q->where('ncities.state_id', $state_id);
+				$q->where('company_id', Auth::user()->company_id);
+			})
+			->get();
+		$data = $city_list->prepend($option);
+		return $data;
 	}
 
 }
