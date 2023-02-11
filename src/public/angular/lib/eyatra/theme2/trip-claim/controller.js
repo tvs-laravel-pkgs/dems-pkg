@@ -269,6 +269,7 @@ app.component('eyatraTripClaimForm', {
                 self.is_grade_leader = true;
             }
 
+            $scope.otherCityId = 4100
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
@@ -276,7 +277,7 @@ app.component('eyatraTripClaimForm', {
                 $('.custom-city-change').addClass('ng-hide');
                 var custom_city_show = false;
                 $(self.trip.visits).each(function(key, visit) {
-                    if ((visit.from_city_id == 879 || visit.to_city.id == 879) && custom_city_show == false) {
+                    if ((visit.from_city_id == $scope.otherCityId || visit.to_city.id == $scope.otherCityId) && custom_city_show == false) {
                         custom_city_show = true;
                     }
 
@@ -364,7 +365,7 @@ app.component('eyatraTripClaimForm', {
             $('.custom-city-change').addClass('ng-hide');
             var custom_city_show = false;
             $(self.trip.visits).each(function(key, visit) {
-                if ((visit.from_city_id == 879 || visit.to_city_id == 879) && custom_city_show == false) {
+                if ((visit.from_city_id == $scope.otherCityId || visit.to_city_id == $scope.otherCityId) && custom_city_show == false) {
                     custom_city_show = true;
                 }
             });
