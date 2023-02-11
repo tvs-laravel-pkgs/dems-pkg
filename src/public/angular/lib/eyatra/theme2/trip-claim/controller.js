@@ -2697,7 +2697,7 @@ app.component('eyatraTripClaimForm', {
                 tax: '',
                 remarks: '',
                 eligible_amount: '0.00',
-                attachment_status: 'Yes',
+                attachment_status: 'No',
                 attachments: [],
             });
         }
@@ -2735,7 +2735,7 @@ app.component('eyatraTripClaimForm', {
                 amount: '',
                 tax: '',
                 description: '',
-                attachment_status: 'Yes',
+                attachment_status: 'No',
                 // eligible_amount: '0.00',
             });
         }
