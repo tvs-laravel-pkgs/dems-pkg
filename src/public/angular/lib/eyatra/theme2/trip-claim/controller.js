@@ -1557,13 +1557,25 @@ app.component('eyatraTripClaimForm', {
                 } else {
                     default_eligible_amount = parseInt(default_eligible_amount);
                 }
-                if (amount_entered > default_eligible_amount) {
-                    is_deviation = true;
 
-                    var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+                // if (amount_entered > default_eligible_amount) {
+                //     is_deviation = true;
 
-                    if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
-                        deviationTypes[deviationTypes.length] = isDeviationType;
+                //     var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+
+                //     if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
+                //         deviationTypes[deviationTypes.length] = isDeviationType;
+                // }
+
+                if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8']) == -1){
+                    if (amount_entered > default_eligible_amount) {
+                        is_deviation = true;
+
+                        var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+
+                        if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
+                            deviationTypes[deviationTypes.length] = isDeviationType;
+                    }
                 }
             });
             console.log({ deviationTypes })
