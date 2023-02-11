@@ -280,7 +280,8 @@ app.component('eyatraTripClaimForm', {
                         custom_city_show = true;
                     }
 
-                    if(self.is_grade_leader == true){
+                    if(visit.booking_method_id == 3040 && self.is_grade_leader == true){
+                        //SELF AND LEADER GRADE
                        visit.attachment_status = 'Yes'; 
                     }
                 });
