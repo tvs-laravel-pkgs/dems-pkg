@@ -1043,29 +1043,55 @@ app.component('eyatraTripClaimForm', {
                 } else if (type_id == 3002) { // BOARDING EXPENSE
                     // self.trip.boardings[index].eligible_amount = self.cities_with_expenses[city_id].board.eligible_amount;
                     var eligibleAmount = 0;
-                    $(self.trip.visits).each(function(visit_index, visit) {
-                        if (visit.to_city_id == city_id && visit.departure_time != '' && typeof visit.departure_time !== "undefined" && visit.arrival_time != '' && typeof visit.arrival_time !== "undefined") {
-                            var date_1 = visit.departure_date.split("-")
-                            var date_2 = visit.arrival_date.split("-")
-                            var visit_departure_date_format = date_1[1] + '/' + date_1[0] + '/' + date_1[2]
-                            var visit_arrival_date_format = date_2[1] + '/' + date_2[0] + '/' + date_2[2]
+                    // $(self.trip.visits).each(function(visit_index, visit) {
+                    //     if (visit.to_city_id == city_id && visit.departure_time != '' && typeof visit.departure_time !== "undefined" && visit.arrival_time != '' && typeof visit.arrival_time !== "undefined") {
+                    //         var date_1 = visit.departure_date.split("-")
+                    //         var date_2 = visit.arrival_date.split("-")
+                    //         var visit_departure_date_format = date_1[1] + '/' + date_1[0] + '/' + date_1[2]
+                    //         var visit_arrival_date_format = date_2[1] + '/' + date_2[0] + '/' + date_2[2]
     
-                            var visit_departure_time = visit.departure_time
-                            var visit_arrival_time = visit.arrival_time
+                    //         var visit_departure_time = visit.departure_time
+                    //         var visit_arrival_time = visit.arrival_time
     
-                            var timeDiff = (new Date(visit_arrival_date_format + ' ' + visit_arrival_time)) - (new Date(visit_departure_date_format + ' ' + visit_departure_time))
-                            // var mins = (timeDiff / (1000 * 60)); in mins
-                            var mins = Math.abs(timeDiff / 60000)
-                            if (mins < 240)
-                                eligibleAmount = self.cities_with_expenses[city_id].board.less_than_240_ea
-                            else if (mins < 480)
-                                eligibleAmount = self.cities_with_expenses[city_id].board.less_than_480_ea
-                            else if (mins < 1440)
-                                eligibleAmount = self.cities_with_expenses[city_id].board.less_than_1440_ea
-                            else if (mins >= 1440)
-                                eligibleAmount = self.cities_with_expenses[city_id].board.eligible_amount
-                        }
-                    })
+                    //         var timeDiff = (new Date(visit_arrival_date_format + ' ' + visit_arrival_time)) - (new Date(visit_departure_date_format + ' ' + visit_departure_time))
+                    //         // var mins = (timeDiff / (1000 * 60)); in mins
+                    //         var mins = Math.abs(timeDiff / 60000)
+                    //         if (mins <= 240)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.less_than_240_ea
+                    //         else if (mins <= 480)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.less_than_480_ea
+                    //         else if (mins <= 1440)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.less_than_1440_ea
+                    //         else if (mins > 1440)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.eligible_amount
+                    //     }
+                    // })
+                    let visitStartDateTime = visitEndDateTime = ''
+                    if (self.trip.visits && self.trip.visits.length > 0) {
+                        let firstTripId = 0
+                        var visitStartDate = self.trip.visits[firstTripId].departure_date.split("-")
+                        visitStartDate = visitStartDate[1] + '/' + visitStartDate[0] + '/' + visitStartDate[2]
+                        visitStartDateTime = visitStartDate + ' ' + self.trip.visits[firstTripId].departure_time
+
+                        let lastTripId = self.trip.visits.length - 1
+                        var visitEndDate = self.trip.visits[lastTripId].arrival_date.split("-")
+                        visitEndDate = visitEndDate[1] + '/' + visitEndDate[0] + '/' + visitEndDate[2]
+                        visitEndDateTime = visitEndDate + ' ' + self.trip.visits[lastTripId].arrival_time                        
+                    }
+                    console.log({ visitStartDateTime, visitEndDateTime })
+                    if (visitStartDateTime && visitEndDateTime) {
+                        var timeDiff = (new Date(visitEndDateTime)) - (new Date(visitStartDateTime))
+                        // var mins = (timeDiff / (1000 * 60)); in mins
+                        var mins = Math.abs(timeDiff / 60000)
+                        if (mins <= 240)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.less_than_240_ea
+                        else if (mins <= 480)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.less_than_480_ea
+                        else if (mins <= 1440)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.less_than_1440_ea
+                        else if (mins > 1440)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.eligible_amount
+                    }
                     self.trip.boardings[index].eligible_amount = eligibleAmount
                     $timeout(function() {
                         $scope.boardDaysEach();
