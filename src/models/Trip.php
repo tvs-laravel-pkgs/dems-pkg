@@ -2473,7 +2473,8 @@ class Trip extends Model {
 							$lodging->gstin_state_code = null;
 							$lodging->gstin_address = null;
 						}
-						if($lodging_data['stay_type_id'] == 3340 || $lodging_data['stay_type_id'] == 3341){
+						// if($lodging_data['stay_type_id'] == 3340 || $lodging_data['stay_type_id'] == 3341){
+						if($lodging_data['stay_type_id'] == 3340){
 							if($lodging_data['amount'] == 0){
 								return response()->json(['success' => false, 'errors' => ['Please Enter Before Tax Amount']]);
 							}
