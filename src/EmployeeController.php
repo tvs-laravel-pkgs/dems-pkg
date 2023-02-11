@@ -279,8 +279,8 @@ class EmployeeController extends Controller {
 				'username.required' => "Username is Required",
 				'mobile_number.unique' => "Mobile Number is already taken",
 				'username.unique' => "Username is already taken",
-				'aadhar_no.unique' => "Aadhar Number is already taken",
-				'pan_no.unique' => "PAN Number is already taken",
+				// 'aadhar_no.unique' => "Aadhar Number is already taken",
+				// 'pan_no.unique' => "PAN Number is already taken",
 				// 'email.unique' => "Email is already taken",
 			];
 
@@ -307,12 +307,12 @@ class EmployeeController extends Controller {
 
 				// ],
 				'aadhar_no' => [
-					'required:true',
+					// 'required:true',
 					'unique:employees,aadhar_no,' . $request->id . ',id',
 
 				],
 				'pan_no' => [
-					'required:true',
+					// 'required:true',
 					'unique:employees,pan_no,' . $request->id . ',id',
 
 				],
