@@ -255,9 +255,9 @@ class LocalTripController extends Controller {
 				->where('end_date', '>=', date("Y-m-d", strtotime($request->start_date)))
 				->where('status_id','!=',3032)
 				->first();
-		if($date_lessthan_previous_trip){
-		 return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
-		}
+		// if($date_lessthan_previous_trip){
+		//  return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
+		// }
 
 		if ($request->trip_detail) {
 			$size = sizeof($request->trip_detail);
