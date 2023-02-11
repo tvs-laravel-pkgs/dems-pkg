@@ -872,13 +872,13 @@ app.component('eyatraTripView', {
                 //AGENT VISITS EXISTS
                 if (agentVisitsLength > 0) {
                     //IF ALL VISITS ARE BOOKED THEN ENABLE CLAIM
-                    if (agentVisitsLength === agentVisitsBookedLength) {
+                    // if (agentVisitsLength === agentVisitsBookedLength) {
                         window.location = "#!/trip/claim/add/" + self.trip.id;
                         return;
-                    } else {
-                        custom_noty('error', "To enable claim kindly get the ticket from agent");
-                        return;
-                    }
+                    // } else {
+                    //     custom_noty('error', "To enable claim kindly get the ticket from agent");
+                    //     return;
+                    // }
                 } else {
                     window.location = "#!/trip/claim/add/" + self.trip.id;
                     return;

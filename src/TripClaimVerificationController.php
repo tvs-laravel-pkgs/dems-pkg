@@ -72,7 +72,8 @@ class TripClaimVerificationController extends Controller {
 
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->join('employees as e', 'e.id', 'trips.employee_id')
-			->join('outlets', 'outlets.id', 'e.outlet_id')
+			// ->join('outlets', 'outlets.id', 'e.outlet_id')
+			->join('outlets', 'outlets.id', 'trips.outlet_id')
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
@@ -121,7 +122,8 @@ class TripClaimVerificationController extends Controller {
 			})
 
 			->where('ey_employee_claims.status_id', 3036) //CLAIM REQUESTED
-			->where('e.outlet_id',Auth::user()->entity->outlet_id)
+			// ->where('e.outlet_id',Auth::user()->entity->outlet_id)
+			->where('outlets.nodel_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 			->orderBy('trips.created_at', 'desc');
 
