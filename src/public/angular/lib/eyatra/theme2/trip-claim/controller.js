@@ -1493,7 +1493,7 @@ app.component('eyatraTripClaimForm', {
                         // console.log('hours ==' + hours);
                         var eligible_amount = parseFloat(self.trip.boardings[index].eligible_amount);
                         if (eligible_amount) {
-                            var actual_amount = eligible_amount;
+                            var actual_amount = (!!self.is_grade_leader) ? 0 : eligible_amount;
                             // if (departure_date == arrival_date) {
                             //     if (hours < 12) {
                             //         actual_amount = eligible_amount / 2;
