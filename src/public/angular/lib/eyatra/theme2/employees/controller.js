@@ -543,19 +543,20 @@ app.component('eyatraEmployeeForm', {
                 'date_of_joining': {
                     required: true,
                 },
-                'aadhar_no': {
-                    required: true,
-                    maxlength: 12,
-                    minlength: 12,
-                },
-                'pan_no': {
-                    required: true,
-                    maxlength: 10,
-                    minlength: 8,
-                },
+                // 'aadhar_no': {
+                //     required: true,
+                //     maxlength: 12,
+                //     minlength: 12,
+                // },
+                // 'pan_no': {
+                //     required: true,
+                //     maxlength: 10,
+                //     minlength: 8,
+                // },
                 'bank_name': {
 
                     required: function(element) {
+                        return false;
                         if ($("#bank").is(':checked')) {
                             return true;
                         } else {
@@ -567,6 +568,7 @@ app.component('eyatraEmployeeForm', {
                 },
                 'branch_name': {
                     required: function(element) {
+                        return false;
                         if ($("#bank").is(':checked')) {
                             return true;
                         } else {
@@ -578,6 +580,7 @@ app.component('eyatraEmployeeForm', {
                 },
                 'account_name': {
                     required: function(element) {
+                        return false;
                         if ($("#bank").is(':checked')) {
                             return true;
                         } else {
@@ -589,6 +592,7 @@ app.component('eyatraEmployeeForm', {
                 },
                 'account_number': {
                     required: function(element) {
+                        return false;
                         if ($("#bank").is(':checked')) {
                             return true;
                         } else {
@@ -603,6 +607,7 @@ app.component('eyatraEmployeeForm', {
                 },
                 'ifsc_code': {
                     required: function(element) {
+                        return false;
                         if ($("#bank").is(':checked')) {
                             return true;
                         } else {
@@ -614,6 +619,7 @@ app.component('eyatraEmployeeForm', {
                 },
                 'cheque_favour': {
                     required: function(element) {
+                        return false;
                         if ($("#cheque").is(':checked')) {
                             return true;
                         } else {
@@ -625,6 +631,7 @@ app.component('eyatraEmployeeForm', {
                 },
                 'type_id': {
                     required: function(element) {
+                        return false;
                         if ($("#wallet").is(':checked')) {
                             return true;
                         } else {
@@ -634,6 +641,7 @@ app.component('eyatraEmployeeForm', {
                 },
                 'value': {
                     required: function(element) {
+                        return false;
                         if ($("#wallet").is(':checked')) {
                             return true;
                         } else {
