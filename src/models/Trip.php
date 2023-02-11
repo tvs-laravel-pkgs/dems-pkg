@@ -358,6 +358,7 @@ class Trip extends Model {
 					$visit->to_city_id = $visit_data['to_city_id'];
 					$visit->other_city = $visit_data['other_city'] ? $visit_data['other_city'] : NULL;
 					$visit->travel_mode_id = $visit_data['travel_mode_id'];
+					$visit->trip_mode_id = $visit_data['trip_mode_id'];
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
@@ -398,6 +399,7 @@ class Trip extends Model {
 
 		} catch (\Exception $e) {
 			DB::rollBack();
+
 			// return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 			return response()->json([
 				'success' => false,
@@ -1427,15 +1429,25 @@ class Trip extends Model {
 					$cities_with_expenses[$key]['lodge']['home']['perc'] = $percentage;
 					$cities_with_expenses[$key]['lodge']['normal']['eligible_amount'] = $lodge_expense_type->eligible_amount;
 				}
-				$board_expense_type = DB::table('grade_expense_type')->where('grade_id', $trip->employee->grade_id)->where('expense_type_id', 3002)->where('city_category_id', $city_category_id->category_id)->first();
+				$board_expense_type = DB::table('grade_expense_type')
+					->where('grade_id', $trip->employee->grade_id)
+					->where('expense_type_id', 3002)
+					->where('city_category_id', $city_category_id->category_id)
+					->first();
 				if (!$board_expense_type) {
 					$cities_with_expenses[$key]['board']['id'] = 3002;
 					$cities_with_expenses[$key]['board']['grade_id'] = $trip->employee->grade_id;
 					$cities_with_expenses[$key]['board']['eligible_amount'] = '0.00';
+					$cities_with_expenses[$key]['board']['less_than_240_ea'] = '0.00';
+					$cities_with_expenses[$key]['board']['less_than_480_ea'] = '0.00';
+					$cities_with_expenses[$key]['board']['less_than_1440_ea'] = '0.00';
 				} else {
 					$cities_with_expenses[$key]['board']['id'] = 3002;
 					$cities_with_expenses[$key]['board']['grade_id'] = $trip->employee->grade_id;
 					$cities_with_expenses[$key]['board']['eligible_amount'] = $board_expense_type->eligible_amount;
+					$cities_with_expenses[$key]['board']['less_than_240_ea'] = $board_expense_type->less_than_240;
+					$cities_with_expenses[$key]['board']['less_than_480_ea'] = $board_expense_type->less_than_480;
+					$cities_with_expenses[$key]['board']['less_than_1440_ea'] = $board_expense_type->less_than_1440;
 				}
 			} else {
 				$cities_with_expenses[$key]['transport'] = [];
@@ -2037,7 +2049,7 @@ class Trip extends Model {
 					->toArray();
 				if (!in_array(3750, $attachement_types)) {
 					// All Type
-					$visit_count = Visit::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
+					$visit_count = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->where('visit_bookings.travel_mode_id','!=',[15,16,17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type
 						$validations['fare_detail_doc'] = 'required';
@@ -2061,7 +2073,8 @@ class Trip extends Model {
 						// Others Type
 						$validations['other_doc'] = 'required';
 					}
-					$self_booking = Visit::where('trip_id', $trip->id)->where('self_booking_approval', 1)->count();
+					//$self_booking = Visit::where('trip_id', $trip->id)->where('self_booking_approval', 1)->count();
+					$self_booking = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->where('visit_bookings.travel_mode_id','!=',[15,16,17])->where('visits.trip_id', $trip->id)->where('visits.self_booking_approval', 1)->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
 						$validations['self_booking_doc'] = 'required';
@@ -2093,6 +2106,7 @@ class Trip extends Model {
 					// if ($boardingAmount > $boardingEligibleAmount) {
 					// 	return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
 					// }
+
 					if($check_boarding_amount == true){
 						if ($boardingAmount > $boardingEligibleAmount) {
 							return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);

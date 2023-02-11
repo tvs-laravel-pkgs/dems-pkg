@@ -1041,7 +1041,58 @@ app.component('eyatraTripClaimForm', {
                         $scope.stayDaysEach();
                     }, 100);
                 } else if (type_id == 3002) { // BOARDING EXPENSE
-                    self.trip.boardings[index].eligible_amount = self.cities_with_expenses[city_id].board.eligible_amount;
+                    // self.trip.boardings[index].eligible_amount = self.cities_with_expenses[city_id].board.eligible_amount;
+                    var eligibleAmount = 0;
+                    // $(self.trip.visits).each(function(visit_index, visit) {
+                    //     if (visit.to_city_id == city_id && visit.departure_time != '' && typeof visit.departure_time !== "undefined" && visit.arrival_time != '' && typeof visit.arrival_time !== "undefined") {
+                    //         var date_1 = visit.departure_date.split("-")
+                    //         var date_2 = visit.arrival_date.split("-")
+                    //         var visit_departure_date_format = date_1[1] + '/' + date_1[0] + '/' + date_1[2]
+                    //         var visit_arrival_date_format = date_2[1] + '/' + date_2[0] + '/' + date_2[2]
+    
+                    //         var visit_departure_time = visit.departure_time
+                    //         var visit_arrival_time = visit.arrival_time
+    
+                    //         var timeDiff = (new Date(visit_arrival_date_format + ' ' + visit_arrival_time)) - (new Date(visit_departure_date_format + ' ' + visit_departure_time))
+                    //         // var mins = (timeDiff / (1000 * 60)); in mins
+                    //         var mins = Math.abs(timeDiff / 60000)
+                    //         if (mins <= 240)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.less_than_240_ea
+                    //         else if (mins <= 480)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.less_than_480_ea
+                    //         else if (mins <= 1440)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.less_than_1440_ea
+                    //         else if (mins > 1440)
+                    //             eligibleAmount = self.cities_with_expenses[city_id].board.eligible_amount
+                    //     }
+                    // })
+                    let visitStartDateTime = visitEndDateTime = ''
+                    if (self.trip.visits && self.trip.visits.length > 0) {
+                        let firstTripId = 0
+                        var visitStartDate = self.trip.visits[firstTripId].departure_date.split("-")
+                        visitStartDate = visitStartDate[1] + '/' + visitStartDate[0] + '/' + visitStartDate[2]
+                        visitStartDateTime = visitStartDate + ' ' + self.trip.visits[firstTripId].departure_time
+
+                        let lastTripId = self.trip.visits.length - 1
+                        var visitEndDate = self.trip.visits[lastTripId].arrival_date.split("-")
+                        visitEndDate = visitEndDate[1] + '/' + visitEndDate[0] + '/' + visitEndDate[2]
+                        visitEndDateTime = visitEndDate + ' ' + self.trip.visits[lastTripId].arrival_time                        
+                    }
+                    console.log({ visitStartDateTime, visitEndDateTime })
+                    if (visitStartDateTime && visitEndDateTime) {
+                        var timeDiff = (new Date(visitEndDateTime)) - (new Date(visitStartDateTime))
+                        // var mins = (timeDiff / (1000 * 60)); in mins
+                        var mins = Math.abs(timeDiff / 60000)
+                        if (mins <= 240)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.less_than_240_ea
+                        else if (mins <= 480)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.less_than_480_ea
+                        else if (mins <= 1440)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.less_than_1440_ea
+                        else if (mins > 1440)
+                            eligibleAmount = self.cities_with_expenses[city_id].board.eligible_amount
+                    }
+                    self.trip.boardings[index].eligible_amount = eligibleAmount
                     $timeout(function() {
                         $scope.boardDaysEach();
                     }, 100);
@@ -1423,11 +1474,11 @@ app.component('eyatraTripClaimForm', {
                         var eligible_amount = parseFloat(self.trip.boardings[index].eligible_amount);
                         if (eligible_amount) {
                             var actual_amount = eligible_amount;
-                            if (departure_date == arrival_date) {
-                                if (hours < 12) {
-                                    actual_amount = eligible_amount / 2;
-                                }
-                            }
+                            // if (departure_date == arrival_date) {
+                            //     if (hours < 12) {
+                            //         actual_amount = eligible_amount / 2;
+                            //     }
+                            // }
                             $scope.eligibleAmountCalc(actual_amount, index);
                             // self.trip.boardings[index].amount = actual_amount;
                         }
@@ -1544,50 +1595,58 @@ app.component('eyatraTripClaimForm', {
             }
 
             var deviationTypes = [];
-            $('.is_deviation_amount').each(function() {
-                var amount_entered = $(this).val();
-                var default_eligible_amount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
-                if (!$.isNumeric(amount_entered)) {
-                    amount_entered = 0;
-                } else {
-                    amount_entered = parseInt(amount_entered);
-                }
-                if (!$.isNumeric(default_eligible_amount)) {
-                    default_eligible_amount = 0;
-                } else {
-                    default_eligible_amount = parseInt(default_eligible_amount);
-                }
-
-                // if (amount_entered > default_eligible_amount) {
-                //     is_deviation = true;
-
-                //     var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
-
-                //     if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
-                //         deviationTypes[deviationTypes.length] = isDeviationType;
-                // }
-
-                if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) == -1){
-                    if (amount_entered > default_eligible_amount) {
-                        is_deviation = true;
-
-                        var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
-
-                        if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
-                            deviationTypes[deviationTypes.length] = isDeviationType;
-                    }
+            $scope.travel_mode_check = false;
+            $(self.trip.visits).each(function(key, visit) {
+                if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17) {
+                    $scope.travel_mode_check = true;
                 }
             });
+            if ($scope.travel_mode_check) {
+                $('.is_deviation_amount').each(function() {
+                    var amount_entered = $(this).val();
+                    var default_eligible_amount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
+                    if (!$.isNumeric(amount_entered)) {
+                        amount_entered = 0;
+                    } else {
+                        amount_entered = parseInt(amount_entered);
+                    }
+                    if (!$.isNumeric(default_eligible_amount)) {
+                        default_eligible_amount = 0;
+                    } else {
+                        default_eligible_amount = parseInt(default_eligible_amount);
+                    }
+                    // if (amount_entered > default_eligible_amount) {
+                    //     is_deviation = true;
+
+                    //     var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+
+                    //     if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
+                    //         deviationTypes[deviationTypes.length] = isDeviationType;
+                    // }
+
+
+                    if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) == -1){
+                        if (amount_entered > default_eligible_amount) {
+                            is_deviation = true;
+
+                            var isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+
+                            if (jQuery.inArray(isDeviationType, deviationTypes) == -1)
+                                deviationTypes[deviationTypes.length] = isDeviationType;
+                        }
+                    }
+
+                });
+            }
             console.log({ deviationTypes })
             self.deviationTypeName = deviationTypes.toString()
             if (self.trip.visits)
-                $(self.trip.visits).each(function(key, visit) {
-                    if (visit.travel_mode_id != 15 || visit.travel_mode_id != 16) {
-                        if (self.deviationTypeName)
-                            self.deviationTypeName += 'amount is greater than their eligible amount';
-                        is_grade_travel_mode = false;
-                    }
-                });
+                if ($scope.travel_mode_check) {
+                    if (self.deviationTypeName)
+                        self.deviationTypeName += 'amount is greater than their eligible amount';
+                    is_grade_travel_mode = false;
+                }
+
             /*$(self.trip.visits).each(function(key, visit) {
                 $(self.grade_travel).each(function(key, travel) {
                     console.log('visit' + visit.travel_mode_id);
@@ -1625,34 +1684,35 @@ app.component('eyatraTripClaimForm', {
             if (is_grade_travel_mode == true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }
-
-            if (self.trip.trip_attachments.length == 0) {
-                is_deviation = true;
-                attachmentError = 'Fare detail document not uploaded'
-                self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
-            } else {
-                var tripAttachmentTypeIds = []
-                $(self.trip.trip_attachments).each(function(key, tripAttachment) {
-                    tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id
-                })
-                /*  
-                    3750 -> ALL Document type
-                    3751 -> Fare detail document type
-                    3752 -> Lodging detail document type
-                */
-                if (jQuery.inArray(3750, tripAttachmentTypeIds) == -1) {
-                    // Fare detail document validation
-                    if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
-                        is_deviation = true;
-                        attachmentError = 'Fare detail document not uploaded'
-                        self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
-                    }
-                    // Lodging detail document validation
-                    // if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
-                    if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
-                        is_deviation = true;
-                        attachmentError = 'Lodging detail document not uploaded'
-                        self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+            if ($scope.travel_mode_check) {
+                if (self.trip.trip_attachments.length == 0) {
+                    is_deviation = true;
+                    attachmentError = 'Fare detail document not uploaded'
+                    self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                } else {
+                    var tripAttachmentTypeIds = []
+                    $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                        tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id
+                    })
+                    /*  
+                        3750 -> ALL Document type
+                        3751 -> Fare detail document type
+                        3752 -> Lodging detail document type
+                    */
+                    if (jQuery.inArray(3750, tripAttachmentTypeIds) == -1) {
+                        // Fare detail document validation
+                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
+                            is_deviation = true;
+                            attachmentError = 'Fare detail document not uploaded'
+                            self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                        }
+                        // Lodging detail document validation
+                        // if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
+                            if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
+                            is_deviation = true;
+                            attachmentError = 'Lodging detail document not uploaded'
+                            self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                        }
                     }
                 }
             }
@@ -2650,7 +2710,7 @@ app.component('eyatraTripClaimForm', {
                 tax: '',
                 remarks: '',
                 eligible_amount: '0.00',
-                attachment_status: 'Yes',
+                attachment_status: 'No',
                 attachments: [],
             });
         }
@@ -2688,7 +2748,7 @@ app.component('eyatraTripClaimForm', {
                 amount: '',
                 tax: '',
                 description: '',
-                attachment_status: 'Yes',
+                attachment_status: 'No',
                 // eligible_amount: '0.00',
             });
         }
