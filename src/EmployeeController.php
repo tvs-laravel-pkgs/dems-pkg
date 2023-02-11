@@ -306,16 +306,16 @@ class EmployeeController extends Controller {
 				// 	'unique:users,email,' . $request->user_id . ',id',
 
 				// ],
-				'aadhar_no' => [
-					// 'required:true',
-					'unique:employees,aadhar_no,' . $request->id . ',id',
+				// 'aadhar_no' => [
+				// 	'required:true',
+				// 	'unique:employees,aadhar_no,' . $request->id . ',id',
 
-				],
-				'pan_no' => [
-					// 'required:true',
-					'unique:employees,pan_no,' . $request->id . ',id',
+				// ],
+				// 'pan_no' => [
+				// 	'required:true',
+				// 	'unique:employees,pan_no,' . $request->id . ',id',
 
-				],
+				// ],
 
 			], $error_messages);
 			if ($validator->fails()) {
