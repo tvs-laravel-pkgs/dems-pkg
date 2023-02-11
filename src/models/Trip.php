@@ -3164,7 +3164,10 @@ class Trip extends Model {
 				if ($grade_travel_mode_eligibility && $grade_travel_mode_eligibility->deviation_eligiblity == 2) {
 					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
 				} else {
-					$employee_claim->is_deviation = 1;
+					// $employee_claim->is_deviation = 1;
+					if($is_grade_leader == false){
+						$employee_claim->is_deviation = 1;
+					}
 				}
 
 				// If transport exist and attachment not found the claim will go to deviation
