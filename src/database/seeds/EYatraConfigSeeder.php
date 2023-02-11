@@ -1163,7 +1163,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 548,
 			],
 			3793 => [
-				'name' => 'Over Night Journey',
+				'name' => 'Overnight',
 				'config_type_id' => 548,
 			],
 		];
