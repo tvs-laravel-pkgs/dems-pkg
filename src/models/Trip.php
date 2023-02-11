@@ -2080,7 +2080,7 @@ class Trip extends Model {
 			// Attachment validation by Karthick T on 08-04-2022
 
 			$check_boarding_amount = true;
-			if(!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1','L2','L3','L4','L5','L6','L7','L8'])){
+			if(!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1','L2','L3','L4','L5','L6','L7','L8','L9'])){
 				$check_boarding_amount = false;
 			}
 

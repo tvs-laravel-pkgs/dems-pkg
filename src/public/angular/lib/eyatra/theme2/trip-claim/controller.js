@@ -1567,7 +1567,7 @@ app.component('eyatraTripClaimForm', {
                 //         deviationTypes[deviationTypes.length] = isDeviationType;
                 // }
 
-                if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8']) == -1){
+                if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) == -1){
                     if (amount_entered > default_eligible_amount) {
                         is_deviation = true;
 
