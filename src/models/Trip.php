@@ -530,8 +530,18 @@ class Trip extends Model {
 				$b_name = Config::where('id', $trip->visits[$key]->booking_method_id)->select('name')->first();
 				$trip->visits[$key]->booking_method_name = $b_name->name;
 				$key_val = ($key - 1 < 0) ? 0 : $key - 1;
-				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"-",nstates.name) as name'))->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
-				$trip->visits[$key]->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->select('ncities.id', DB::raw('CONCAT(ncities.name,"-",nstates.name) as name'))->where('ncities.id', $trip->visits[$key_val]->from_city_id)->first();
+				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')
+					->select(
+						'ncities.id', 
+						DB::raw('IF(ncities.id=4100,ncities.name,CONCAT(ncities.name," - ",nstates.name)) as name')
+						// DB::raw('CONCAT(ncities.name,"-",nstates.name) as name')
+					)->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
+				$trip->visits[$key]->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')
+					->select(
+						'ncities.id', 
+						DB::raw('IF(ncities.id=4100,ncities.name,CONCAT(ncities.name," - ",nstates.name)) as name')
+						// DB::raw('CONCAT(ncities.name,"-",nstates.name) as name')
+					)->where('ncities.id', $trip->visits[$key_val]->from_city_id)->first();
 			}
 
 			//dd($t_visits, $trip->visits, $key_val);
