@@ -264,6 +264,11 @@ app.component('eyatraTripClaimForm', {
             self.roundoffTaxInvoice = {};
             self.grandTotalTaxInvoice = {};
 
+            self.is_grade_leader = false;
+            if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
+                self.is_grade_leader = true;
+            }
+
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
                 // self.trip.local_travels = [];
@@ -273,6 +278,10 @@ app.component('eyatraTripClaimForm', {
                 $(self.trip.visits).each(function(key, visit) {
                     if ((visit.from_city_id == 879 || visit.to_city.id == 879) && custom_city_show == false) {
                         custom_city_show = true;
+                    }
+
+                    if(self.is_grade_leader == true){
+                       visit.attachment_status = 'Yes'; 
                     }
                 });
                 $scope.custom_city_show = custom_city_show
@@ -395,10 +404,10 @@ app.component('eyatraTripClaimForm', {
             }
             self.document_type_id = null;
 
-            self.is_grade_leader = false;
-            if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
-                self.is_grade_leader = true;
-            }
+            // self.is_grade_leader = false;
+            // if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
+            //     self.is_grade_leader = true;
+            // }
                 
             setTimeout(function() {
                 self.travelCal();
