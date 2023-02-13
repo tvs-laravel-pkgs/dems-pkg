@@ -1342,6 +1342,18 @@ class ExportReportController extends Controller {
 					/*$travelex_details[] = $travelex_local;
 					$travelex_details[] = $travelex_detail;*/
 				}
+				$local_trips[] = [
+					$l_no++,
+					'',
+					'',
+					'',
+					'',
+					'',
+					$total_amount,
+					'',
+					'',
+					'',
+				];
 			/*} else {
 				Session()->flash('error', 'No Data Found');
 				// return Redirect::to('/#!/report/list');
