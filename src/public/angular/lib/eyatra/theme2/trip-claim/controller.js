@@ -341,6 +341,8 @@ app.component('eyatraTripClaimForm', {
                 //         });
                 //     });
                 // });
+
+                $scope.proofUploadHandler();
                 // Added empty lodging if no record exist
                 if (self.trip.lodgings.length == 0)
                     self.lodgingAdd()
@@ -361,6 +363,7 @@ app.component('eyatraTripClaimForm', {
                 self.boardingCal();
                 self.localTravelCal();
                 fileUpload();
+                $scope.proofUploadHandler();
             }
             $('.custom-city-change').addClass('ng-hide');
             var custom_city_show = false;
@@ -482,6 +485,7 @@ app.component('eyatraTripClaimForm', {
                             self.document_type_id = null;
                             $("#upload_document").val('').trigger('change');
                             $scope.isDeviation()
+                            $scope.proofUploadHandler();
                             $scope.$apply();
                         }
                     })
@@ -506,6 +510,7 @@ app.component('eyatraTripClaimForm', {
                     self.document_type_id = null;
                     $("#upload_document").val('').trigger('change');
                     $scope.isDeviation()
+                    $scope.proofUploadHandler();
                     $scope.$apply();
                 });
             } else {
@@ -1817,11 +1822,149 @@ app.component('eyatraTripClaimForm', {
             }
         }
 
+        $scope.proofUploadHandler = function(){
+            if(self.is_grade_leader == false){
+                return;
+            }
+
+            var leader_proof_error = [];
+            if((self.trip.visits).length > 0){
+                $(self.trip.visits).each(function(index, visit) {
+                    if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17){
+                        //proof upload yes and booking method self and travel mode not equal to two Wheeler, four wheeler, office vehicle
+                        if ((self.trip.trip_attachments).length == 0) {
+                            leader_proof_error.push('Fare detail document not uploaded');
+                        }else {
+                            var tripAttachmentTypeIds = [];
+                            $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                                tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id;
+                            });
+
+                            // 3750 : all
+                            // 3751 : fare doc
+                            // 3755 : self doc
+                            if ($.inArray(3750, tripAttachmentTypeIds) == -1) {
+                                if ($.inArray(3751, tripAttachmentTypeIds) == -1) {
+                                    leader_proof_error.push('Fare detail document not uploaded');
+                                }
+ 
+                                if ($.inArray(3755, tripAttachmentTypeIds) == -1) {
+                                    leader_proof_error.push('Self booking attachment not uploaded');
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if((self.trip.lodgings).length > 0){
+                $(self.trip.lodgings).each(function(index, lodge) {
+                    if(lodge.attachment_status == 'Yes'){
+                        // 3340 : lodge stay 
+                        if ((self.trip.trip_attachments).length == 0 && lodge.stay_type_id == 3340) {
+                            leader_proof_error.push('Lodging detail document not uploaded');
+                        }
+
+                        if((self.trip.trip_attachments).length > 0){
+                            var tripAttachmentTypeIds = [];
+                            $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                                tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id;
+                            });
+
+                            //3750 : all
+                            //3752 : lodge
+                            //3756 : guest house
+                            if ($.inArray(3750, tripAttachmentTypeIds) == -1) {
+                                if ($.inArray(3752, tripAttachmentTypeIds) == -1 && lodge.stay_type_id == 3340) {
+                                    leader_proof_error.push('Lodging detail document not uploaded');
+                                }
+
+                                if ($.inArray(3756, tripAttachmentTypeIds) == -1) {
+                                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                                        if (lodge.city_id) {
+                                            var guestHouseStatus = 0;
+                                            $(self.extras.city_list).each(function(city_key, city) {
+                                                if (city.id == lodge.city_id) {
+                                                    guestHouseStatus = city.guest_house_status;
+                                                }
+                                            });
+                                            if (guestHouseStatus == 1) {
+                                                leader_proof_error.push('Guest House Approval document not uploaded');
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if((self.trip.boardings).length > 0){
+                $(self.trip.boardings).each(function(index, boarding) {
+                    if(boarding.attachment_status == 'Yes'){
+                        if (self.trip.trip_attachments.length == 0) {
+                            leader_proof_error.push('Boarding detail document not uploaded');
+                        }else {
+                            var tripAttachmentTypeIds = [];
+                            $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                                tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id;
+                            });
+
+                            //3750 : all
+                            //3753 : boarding
+                            if ($.inArray(3750, tripAttachmentTypeIds) == -1) {
+                                if ($.inArray(3753, tripAttachmentTypeIds) == -1) {
+                                    leader_proof_error.push('Boarding detail document not uploaded');
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if((self.trip.local_travels).length > 0){
+                $(self.trip.local_travels).each(function(index, other) {
+                    if(other.attachment_status == 'Yes'){
+                        if (self.trip.trip_attachments.length == 0) {
+                            leader_proof_error.push('Other detail document not uploaded');
+                        }else {
+                            var tripAttachmentTypeIds = [];
+                            $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                                tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id;
+                            });
+
+                            //3750 : all
+                            //3754 : other
+                            if ($.inArray(3750, tripAttachmentTypeIds) == -1) {
+                                if ($.inArray(3754, tripAttachmentTypeIds) == -1) {
+                                    leader_proof_error.push('Other detail document not uploaded');
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            self.leader_proof_upload_error = null;
+            self.leader_proof_upload_info = false;
+            if((leader_proof_error).length > 0){
+                var unique_error = leader_proof_error.filter(function(item, i, a) {
+                    return i == a.indexOf(item);
+                });
+                self.leader_proof_upload_error = unique_error.join(',');
+                self.leader_proof_upload_info = true;
+            }
+            setTimeout(function() {
+                $scope.$apply();
+            }, 500);
+        }
+
         // Calculate lodge stay days by Karthick T on 15-02-2022
         /*$scope.calculateLodgeDays = (index, lodging_id) => {
             if (!lodging_id && !index) {
-                var check_in_date = self.trip.lodgings[index].check_in_date;
-                var check_in_time = self.trip.lodgings[index].check_in_time;
+                var check_in_date = self.trip.lodgings.push(eck_in_date;
+                var check_in_time )= self.trip.lodgings[index].check_in_time;
                 var check_out_date = self.trip.lodgings[index].checkout_date;
                 var check_out_time = self.trip.lodgings[index].checkout_time;
 
@@ -3153,6 +3296,7 @@ app.component('eyatraTripClaimForm', {
                 other_expense_save = 1;
                 trip_attachment_save = 1;
                 $('#claim_' + active_tab_type + '_expense_form').submit();
+                $scope.proofUploadHandler();
             } else {
                 self.enable_switch_tab = true;
             }

@@ -2042,8 +2042,14 @@ class Trip extends Model {
 				}
 			}
 
+			$is_grade_leader = false;
+			if(!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1','L2','L3','L4','L5','L6','L7','L8','L9'])){
+				$is_grade_leader = true;
+			}
+
 			// Attachment validation by Karthick T on 08-04-2022
-			if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
+			// if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
+			if (isset($request->is_attachment_trip) && $request->is_attachment_trip && $is_grade_leader == false) {
 				// dd('final save validation');
 				$error_messages = [
 					'fare_detail_doc.required' => 'Fare detail document is required',
@@ -2060,7 +2066,7 @@ class Trip extends Model {
 					->toArray();
 				if (!in_array(3750, $attachement_types)) {
 					// All Type
-					$visit_count = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->where('visit_bookings.travel_mode_id','!=',[15,16,17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
+					$visit_count = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15,16,17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type
 						$validations['fare_detail_doc'] = 'required';
@@ -2085,7 +2091,7 @@ class Trip extends Model {
 						$validations['other_doc'] = 'required';
 					}
 					//$self_booking = Visit::where('trip_id', $trip->id)->where('self_booking_approval', 1)->count();
-					$self_booking = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->where('visit_bookings.travel_mode_id','!=',[15,16,17])->where('visits.trip_id', $trip->id)->where('visits.self_booking_approval', 1)->count();
+					$self_booking = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15,16,17])->where('visits.trip_id', $trip->id)->where('visits.self_booking_approval', 1)->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
 						$validations['self_booking_doc'] = 'required';
@@ -2126,10 +2132,10 @@ class Trip extends Model {
 			}
 			// Attachment validation by Karthick T on 08-04-2022
 
-			$is_grade_leader = false;
-			if(!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1','L2','L3','L4','L5','L6','L7','L8','L9'])){
-				$is_grade_leader = true;
-			}
+			// $is_grade_leader = false;
+			// if(!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1','L2','L3','L4','L5','L6','L7','L8','L9'])){
+			// 	$is_grade_leader = true;
+			// }
 
 			// Validate Boading amount by Karthick T on 04-08-2022
 			if ($request->boardings) {
