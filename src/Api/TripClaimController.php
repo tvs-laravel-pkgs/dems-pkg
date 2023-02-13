@@ -48,6 +48,11 @@ class TripClaimController extends Controller {
 	}
 
 	public function saveClaim(Request $request) {
+		return response()->json([
+			'success' => false, 
+			'errors' => "Currently this feature is disabled. Please use outstation trip from web portal",
+		]);
+		
 		return Trip::saveEYatraTripClaim($request);
 	}
 	public function getEligibleAmtBasedonCitycategoryGrade(Request $request) {
