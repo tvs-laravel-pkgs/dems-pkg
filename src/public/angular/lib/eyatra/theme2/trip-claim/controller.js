@@ -1134,6 +1134,15 @@ app.component('eyatraTripClaimForm', {
                 } else if (type_id == 3003) { // LOCAL TRAVEL EXPENSE
                 }
             }
+            if (type_id == 3001 && stay_type_id == 3341) { // LODGING EXPENSE AND STAY TYPE AS FLAT CLAIM
+                console.log(self.trip.lodgings[index].eligible_amount)
+                self.trip.lodgings[index].amount = (self.trip.lodgings[index].eligible_amount || 0).toFixed(2);
+                self.trip.lodgings[index].invoice_amount = (self.trip.lodgings[index].eligible_amount || 0).toFixed(2);
+                self.roundOff();
+                $scope.calculateTax(index);
+                self.lodgingCal();
+                $scope.isDeviation();
+            }
         }
 
 
@@ -1712,7 +1721,16 @@ app.component('eyatraTripClaimForm', {
             if (is_grade_travel_mode == true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }
+            // Toll fee expense type is selected
+            // let tollFeeExpenseType = false;
+            // jQuery.each(self.trip.local_travels, (index, localTravel) => {
+            //     if (localTravel.mode_id == 63)
+            //         tollFeeExpenseType = true
+            // })
+            // Toll fee expense type is selected
+            console.log({ 'travel mode: ' :$scope.travel_mode_check, tollFeeExpenseType})
             if ($scope.travel_mode_check) {
+                console.log(`trpdd : ${self.trip.trip_attachments.length} `)
                 if (self.trip.trip_attachments.length == 0) {
                     // is_deviation = true;
                     // attachmentError = 'Fare detail document not uploaded'
@@ -1722,6 +1740,11 @@ app.component('eyatraTripClaimForm', {
                         attachmentError = 'Fare detail document not uploaded'
                         self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
                     }
+                    // if(!self.is_grade_leader && !!tollFeeExpenseType) { // Toll fee expense is selected in others 
+                    //     is_deviation = true;
+                    //     attachmentError = 'Toll fee document not uploaded'
+                    //     self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                    // }
                 } else {
                     var tripAttachmentTypeIds = []
                     $(self.trip.trip_attachments).each(function(key, tripAttachment) {
@@ -1731,6 +1754,7 @@ app.component('eyatraTripClaimForm', {
                         3750 -> ALL Document type
                         3751 -> Fare detail document type
                         3752 -> Lodging detail document type
+                        3754 -> Other document type
                     */
                     if (jQuery.inArray(3750, tripAttachmentTypeIds) == -1) {
                         // Fare detail document validation
@@ -1743,11 +1767,17 @@ app.component('eyatraTripClaimForm', {
                         // Lodging detail document validation
                         // if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
                             // if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
-                            if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false) {
+                        if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false) {
                             is_deviation = true;
                             attachmentError = 'Lodging detail document not uploaded'
                             self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
                         }
+                        // if (!self.is_grade_leader && !!tollFeeExpenseType && jQuery.inArray(3754, tripAttachmentTypeIds) == -1) {
+                        //     // Toll fee expense is selected in others 
+                        //     is_deviation = true;
+                        //     attachmentError = 'Toll fee document not uploaded'
+                        //     self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                        // }
                     }
                 }
             }
@@ -2723,9 +2753,9 @@ app.component('eyatraTripClaimForm', {
             total_tax += sgst = amount * (sgst_percentage / 100);
             total_tax += igst = amount * (igst_percentage / 100);
 
-            cgst = Number.parseFloat(cgst).toFixed(2);
-            sgst = Number.parseFloat(sgst).toFixed(2);
-            igst = Number.parseFloat(igst).toFixed(2);
+            cgst = Number.parseFloat(cgst || 0).toFixed(2);
+            sgst = Number.parseFloat(sgst || 0).toFixed(2);
+            igst = Number.parseFloat(igst || 0).toFixed(2);
 
             total_tax = Number.parseFloat(total_tax).toFixed(2);
 
