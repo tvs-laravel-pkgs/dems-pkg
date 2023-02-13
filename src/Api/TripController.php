@@ -26,9 +26,9 @@ class TripController extends Controller {
 		 //dd($request->all());
 		return response()->json([
 			'success' => false, 
-			'errors' => "Currently this feature is disabled. Please use outstation trip from web portal",
+			'errors' => ["Currently this feature is disabled. Please use outstation trip from web portal"],
 		]);
-		
+
        if ($request->advance_received > 0) {
        	    $get_previous_trips = Trip::select('id')
 			        ->where('employee_id', Auth::user()->entity_id)
