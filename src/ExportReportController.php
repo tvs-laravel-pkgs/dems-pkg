@@ -528,7 +528,19 @@ class ExportReportController extends Controller {
 				//->where('ey_employee_claims.status_id', 3026) //PAID
 				->whereIn('departments.business_id',$business_ids)
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
-				->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
+				// ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
+				->where(function($q) {
+					$q->where(function($nonAdvanceQ) {
+						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
+							// ->whereIn('trips.advance_received', [0, null])
+							->where('ey_employee_claims.status_id', 3026); // PAID
+					})->orWhere(function($advanceQ) {
+						$advanceQ->whereDate('trips.updated_at', '<', date('Y-m-d'))
+							->where('trips.advance_received', '>', 0)
+							->where('trips.status_id', 3028) // Manager Approved
+							->where('trips.advance_ax_export_sync', 0);
+					});
+				})
 				->groupBy('trips.id')
 				->get();
 
