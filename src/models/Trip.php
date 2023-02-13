@@ -2051,6 +2051,7 @@ class Trip extends Model {
 					'boarding_doc.required' => 'Boarding document is required',
 					'other_doc.required' => 'Others document is required',
 					'self_booking_doc.required' => 'Self Booking Approval Email is required',
+					'toll_fee_doc.required' => 'Toll fee document is required',
 				];
 				$validations = [];
 				$attachement_types = Attachment::where('attachment_type_id', 3200)
@@ -2089,7 +2090,30 @@ class Trip extends Model {
 						// Others Type
 						$validations['self_booking_doc'] = 'required';
 					}
+					// Toll fee doc required
+					$tollFeeLocalTravelCount = LocalTravel::where('trip_id', $request->trip_id)
+						->where('mode_id', 63)	// 63 -> Toll Fee
+						->count();
+					if ($tollFeeLocalTravelCount > 0 && !in_array(3754, $attachement_types)) {
+						// Toll Fee Document
+						$validations['toll_fee_doc'] = 'required';
+					}
 					$validator = Validator::make($request->all(), $validations, $error_messages);
+
+					// // If toll fee exist and attachment not found the claim will go to deviation
+					// if ($is_grade_leader == false) {
+					// 	$tollFeeAttachmentCount = Attachment::where('attachment_type_id', 3200)
+					// 		->whereIn('attachment_of_id', [3750, 3754])	// 3750-> All, 3754->Others
+					// 		->where('entity_id', $request->trip_id)
+					// 		->count();
+					// 	$tollFeeLocalTravelCount = LocalTravel::where('trip_id', $request->trip_id)
+					// 		->where('mode_id', 63)	// 63 -> Toll Fee
+					// 		->count();
+					// 	if ($tollFeeLocalTravelCount > 0 && $tollFeeAttachmentCount == 0) {
+					// 		$employee_claim->is_deviation = 1;
+					// 	}
+					// }
+					// If toll fee exist and attachment not found the claim will go to deviation
 
 					if ($validator->fails()) {
 						return response()->json([
@@ -2505,7 +2529,13 @@ class Trip extends Model {
 
 						$lodging_total = 0;
 						if ($lodging) {
-							$lodging_total = $lodging->amount + $lodging->cgst + $lodging->sgst + $lodging->igst + $lodging->round_off;
+							$lodgingAmount = ($lodging->amount && $lodging->amount != 'NaN') ? $lodging->amount : 0;
+							$lodgingCgstAmount = ($lodging->cgst && $lodging->cgst != 'NaN') ? $lodging->cgst : 0;
+							$lodgingSgstAmount = ($lodging->sgst && $lodging->sgst != 'NaN') ? $lodging->sgst : 0;
+							$lodgingIgstAmount = ($lodging->igst && $lodging->igst != 'NaN') ? $lodging->igst : 0;
+							$lodgingRoundOffAmount = ($lodging->round_off && $lodging->round_off != 'NaN') ? $lodging->round_off : 0;
+							// $lodging_total = $lodging->amount + $lodging->cgst + $lodging->sgst + $lodging->igst + $lodging->round_off;
+							$lodging_total = $lodgingAmount + $lodgingCgstAmount + $lodgingSgstAmount + $lodgingIgstAmount + $lodgingRoundOffAmount;
 							$lodging_total_amount += $lodging_total;
 						}
 
