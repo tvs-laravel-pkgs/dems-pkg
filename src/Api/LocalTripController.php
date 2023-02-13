@@ -26,6 +26,12 @@ class LocalTripController extends Controller {
 
 	public function saveLocalTrip(Request $request) {
 		// dd($request->all());
+
+		return response()->json([
+			'success' => false, 
+			'errors' => "Currently this feature is disabled. Please use outstation trip from web portal",
+		]);
+
 		if ($request->id) {
 			$trip_start_date_data = LocalTrip::where('employee_id', Auth::user()->entity_id)
 				->where('id', '!=', $request->id)
