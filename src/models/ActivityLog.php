@@ -9,6 +9,14 @@ use Uitoux\EYatra\Config;
 class ActivityLog extends Model {
 	public $timestamps = false;
 
+	public function user() {
+		return $this->hasOne('App\User', 'id', 'user_id')->withTrashed();
+	}
+	protected $appends = ['log_date'];
+	public function getLogDateAttribute() {
+		return !empty($this->date_time) ? date('d-m-Y h:m:i A', strtotime($this->date_time)) : '';
+	}
+
 	public static function saveLog($data) {
 		$activities_config_type = DB::table('config_types')->where(DB::raw('name'), 'Activity Log Activities - EYatra')->first();
 		$entities_config_type = DB::table('config_types')->where(DB::raw('name'), 'Activity Log Entity Types - EYatra')->first();

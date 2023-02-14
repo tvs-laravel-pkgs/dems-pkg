@@ -166,6 +166,12 @@ class Trip extends Model {
 	public function pendingTripAttachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_type_id', 3200)->where('attachment_of_id', '!=', 3185)->where('view_status', 0);
 	}
+	public function managerApprovedTripLog() {
+		return $this->hasOne('Uitoux\EYatra\ActivityLog', 'entity_id', 'id')
+			->where('entity_type_id', 3300)
+			->where('activity_id', 3323)
+			->orderBy('date_time', 'DESC');
+	}
 
 	public static function generate($employee, $trip_number, $faker, $trip_status_id, $admin) {
 		$trip = new Trip();
@@ -438,6 +444,8 @@ class Trip extends Model {
 			'employee.grade.gradeEligibility',
 			'purpose',
 			'status',
+			'managerApprovedTripLog',
+			'managerApprovedTripLog.user',
 		])
 			->find($trip_id);
 		 //dd($trip);
