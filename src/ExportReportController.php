@@ -1217,6 +1217,7 @@ class ExportReportController extends Controller {
 				->where('lt.status_id', '=', '3026')
 				->where('lt.batch', 0)
 				->where('departments.business_id', '=', $business_id)
+				->whereDate('lt.updated_at', '<', date('Y-m-d'))
 				->groupBy('lt.id')
 				->get()->toArray();
 			$locals = array_merge($claims, $outstations, $advance_amount);
