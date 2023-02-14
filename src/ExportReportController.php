@@ -574,7 +574,8 @@ class ExportReportController extends Controller {
 				->where('local_trips.status_id', 3026)
 				->whereIn('departments.business_id',$business_ids)
 				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
-				->whereNotNull('local_trips.claim_amount')
+				// ->whereNotNull('local_trips.claim_amount')
+				->where('local_trips.claim_amount', '>' ,0)
 				->whereDate('local_trips.updated_at', '<', date('Y-m-d'))
 				->groupBy('local_trips.id')
 				->get();
@@ -1156,8 +1157,9 @@ class ExportReportController extends Controller {
 				->where('eyec.status_id', 3026)
 				->where('eyec.amount_to_pay', 1)
 				->where('eyec.batch', 0)
-				->where('trips.batch', 0)
+				// ->where('trips.batch', 0)
 				->where('departments.business_id', '=', $business_id)
+				->whereDate('eyec.updated_at', '<', date('Y-m-d'))
 				->groupBy('trips.id')
 				->get()->toArray();
 			$advance_amount = Employee::select(
@@ -1186,6 +1188,7 @@ class ExportReportController extends Controller {
 				->where('t.status_id', 3028)
 				->where('t.advance_received', '>', 0)
 				->where('t.batch', 0)
+				->whereDate('t.updated_at', '<', date('Y-m-d'))
 				->where('departments.business_id', '=', $business_id)
 				->groupBy('t.id')
 				->get()->toArray();

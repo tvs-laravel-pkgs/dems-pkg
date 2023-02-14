@@ -1201,6 +1201,18 @@ class EYatraPermissionSeeder extends Seeder {
 				'display_name' => 'Report List',
 			],
 
+			9010 => [
+				'display_order' => 8,
+				'parent_id' => 5000,
+				'name' => 'claims',
+				'display_name' => 'Claims',
+			],
+			9011 => [
+				'display_order' => 1,
+				'parent_id' => 9010,
+				'name' => 'claim-edit',
+				'display_name' => 'Edit Claim',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

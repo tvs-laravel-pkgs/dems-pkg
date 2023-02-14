@@ -95,7 +95,8 @@ class TripController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
+				// if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
+				if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022') {
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
 						$edit_class = "";
@@ -199,7 +200,7 @@ class TripController extends Controller {
 			->where('status_id', '!=', 3032)
 			->first();
 		if ($date_lessthan_previous_trip) {
-			return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
+			// return response()->json(['success' => false, 'errors' => "Trip date should be Greater than your previous trip"]);
 		}
 
 		$size = sizeof($request->visits);

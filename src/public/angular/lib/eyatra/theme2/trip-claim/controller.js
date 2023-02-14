@@ -225,6 +225,20 @@ app.component('eyatraTripClaimForm', {
                 $scope.$apply()
                 return;
             }*/
+
+            if (response.data && !response.data.success) {
+                $noty = new Noty({
+                    type: 'error',
+                    layout: 'topRight',
+                    text: response.data.error,
+                }).show();
+                setTimeout(function() {
+                    $noty.close();
+                }, 1000);
+                $scope.$apply();
+                return;
+            }
+
             console.log(response.data);
             self.grade_travel = response.data.grade_travel;
             self.cities_with_expenses = response.data.cities_with_expenses;

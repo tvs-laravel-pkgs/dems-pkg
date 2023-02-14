@@ -28,6 +28,7 @@ use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\LodgingTaxInvoice;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Sbu;
+use Uitoux\EYatra\EmployeeClaim;
 use Validator;
 
 class Trip extends Model {
@@ -524,6 +525,13 @@ class Trip extends Model {
 			$data['success'] = true;
 
 			$trip = Trip::find($trip_id);
+
+			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021,3022,3032]))) {
+				$data['success'] = false;
+				$data['error'] = 'Not possible to update the Trip details';
+				return response()->json($data);
+			}
+
 			$trip->visits = $t_visits = $trip->visits;
 			//dd($trip->visits);
 			foreach ($t_visits as $key => $t_visit) {
@@ -1285,6 +1293,14 @@ class Trip extends Model {
 				'tripAttachments.attachmentName',
 			])->find($trip_id);
 		//dd($trip->lodgings);
+
+		$ey_employee_data = EmployeeClaim::where('trip_id', $trip_id)->first();
+		if (!empty($ey_employee_data) && (!Entrust::can('claim-edit') || (!in_array($trip->status_id, [3023,3024,3033])))) {
+			$data['success'] = false;
+			$data['error'] = 'Not possible to update the Claim details';
+			return response()->json($data);
+		}
+
 		$data['attachment_type_lists'] = Trip::getAttachmentList($trip_id);
 		$data['upload'] = URL::asset('public/img/content/file-icon.svg');
 		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');

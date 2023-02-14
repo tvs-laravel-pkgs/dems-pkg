@@ -11,6 +11,7 @@ use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Storage;
 use Validator;
+use Entrust;
 
 class TripClaimController extends Controller {
 	public function listEYatraTripClaimList(Request $r) {
@@ -94,7 +95,8 @@ class TripClaimController extends Controller {
 
 				$action = '';
 
-				if ($trip->status_id == 3023 || $trip->status_id == 3024 || $trip->status_id == 3033) {
+				// if ($trip->status_id == 3023 || $trip->status_id == 3024 || $trip->status_id == 3033) {
+				if (Entrust::can('claim-edit') && ($trip->status_id == 3023 || $trip->status_id == 3024 || $trip->status_id == 3033)) {
 					$action .= ' <a href="#!/trip/claim/edit/' . $trip->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 				}
 
