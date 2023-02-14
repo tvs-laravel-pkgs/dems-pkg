@@ -170,6 +170,7 @@ class Trip extends Model {
 		return $this->hasOne('Uitoux\EYatra\ActivityLog', 'entity_id', 'id')
 			->where('entity_type_id', 3300)
 			->where('activity_id', 3323)
+			->where('details', 'Trip is Approved by Manager')
 			->orderBy('date_time', 'DESC');
 	}
 
