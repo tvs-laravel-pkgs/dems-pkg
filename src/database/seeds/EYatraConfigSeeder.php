@@ -62,6 +62,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			547 => 'Axapta Export Types',
 			548 => 'Trip Mode',
+			549 => 'Lodge Sharing Types',
 		];
 
 		$configs = [
@@ -1165,6 +1166,20 @@ class EYatraConfigSeeder extends Seeder {
 			3793 => [
 				'name' => 'Overnight',
 				'config_type_id' => 548,
+			],
+
+			//LODGE SHARE TYPE
+			3810 => [
+				'name' => 'Single',
+				'config_type_id' => 549,
+			],
+			3811 => [
+				'name' => 'Sharing With Claim',
+				'config_type_id' => 549,
+			],
+			3812 => [
+				'name' => 'Sharing With No Claim',
+				'config_type_id' => 549,
 			],
 		];
 
