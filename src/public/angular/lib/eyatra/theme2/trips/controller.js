@@ -329,8 +329,19 @@ app.component('eyatraTripForm', {
                 //     // $(".daterange").val('');
                 // }, 500);
             }
-            $(".datepicker").datepicker({
-                todayHighlight: true,
+            // $(".datepicker").datepicker({
+            //     todayHighlight: true,
+            //     autoclose: true,
+            // });
+
+            $(".datepicker.tripStartDate").datepicker({
+                startDate: '-5d',
+                //endDate: self.trip.end_date,
+                autoclose: true,
+            });
+
+            //TRIP END DATE
+            $(".datepicker.tripEndDate").datepicker({
                 autoclose: true,
             });
 

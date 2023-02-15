@@ -534,6 +534,7 @@ class ExportReportController extends Controller {
 					$q->where(function($nonAdvanceQ) {
 						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
 							// ->whereIn('trips.advance_received', [0, null])
+							->where('ey_employee_claims.total_amount','>',0)
 							->where('ey_employee_claims.status_id', 3026); // PAID
 					})->orWhere(function($advanceQ) {
 						$advanceQ->whereDate('trips.updated_at', '<', date('Y-m-d'))
@@ -1158,6 +1159,7 @@ class ExportReportController extends Controller {
 				->where('eyec.status_id', 3026)
 				->where('eyec.amount_to_pay', 1)
 				->where('eyec.batch', 0)
+				->where('eyec.balance_amount', '>', 0)
 				// ->where('trips.batch', 0)
 				->where('departments.business_id', '=', $business_id)
 				->whereDate('eyec.updated_at', '<', date('Y-m-d'))
@@ -1217,6 +1219,7 @@ class ExportReportController extends Controller {
 				->join('businesses', 'businesses.id', 'departments.business_id')
 				->where('lt.status_id', '=', '3026')
 				->where('lt.batch', 0)
+				->where('lt.claim_amount', '>', 0)
 				->where('departments.business_id', '=', $business_id)
 				->whereDate('lt.updated_at', '<', date('Y-m-d'))
 				->groupBy('lt.id')
