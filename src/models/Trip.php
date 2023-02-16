@@ -483,17 +483,30 @@ class Trip extends Model {
 
 		$claim_last_date = strtotime("+" . $claim_date . " day", strtotime($trip->end_date));
 
+		$trip_start_date = strtotime($trip->start_date);
 		$trip_end_date = strtotime($trip->end_date);
 
-		if ($current_date < $trip_end_date) {
-			$data['claim_status'] = 0;
-		} else {
+		// if ($current_date < $trip_end_date) {
+		// 	$data['claim_status'] = 0;
+		// } else {
+		// 	if ($current_date <= $claim_last_date) {
+		// 		$data['claim_status'] = 1;
+		// 	} else {
+		// 		$data['claim_status'] = 0;
+		// 	}
+		// }
+
+		$data['claim_status'] = 0;
+		if (($current_date >= $trip_start_date) && ($current_date <= $trip_end_date)){
+		    $data['claim_status'] = 1;
+		}
+
+		if($current_date > $trip_end_date){
 			if ($current_date <= $claim_last_date) {
 				$data['claim_status'] = 1;
-			} else {
-				$data['claim_status'] = 0;
 			}
 		}
+
 		$data['trip'] = $trip;
 		$trip->today = Carbon::today()->format('d-m-Y');
 		if ($trip->advance_request_approval_status_id) {
@@ -1332,9 +1345,14 @@ class Trip extends Model {
 			$travel_dates_list[0]['id'] = '';
 			$travel_dates_list[0]['name'] = 'Select Date';
 			foreach ($date_range as $range_key => $range_val) {
-				$range_key++;
-				$travel_dates_list[$range_key]['id'] = $range_val;
-				$travel_dates_list[$range_key]['name'] = $range_val;
+				// $range_key++;
+				// $travel_dates_list[$range_key]['id'] = $range_val;
+				// $travel_dates_list[$range_key]['name'] = $range_val;
+				if(strtotime($range_val) <= strtotime(date('d-m-Y'))){
+					$range_key++;
+					$travel_dates_list[$range_key]['id'] = $range_val;
+					$travel_dates_list[$range_key]['name'] = $range_val;
+				}
 			}
 		}
 		// Calculating Lodging days by Karthick T on 21-01-2022

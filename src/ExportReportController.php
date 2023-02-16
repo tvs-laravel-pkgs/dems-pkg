@@ -486,8 +486,8 @@ class ExportReportController extends Controller {
 				->get();
 
 			// DB::beginTransaction();
-			// $business_ids = [1];
-			$business_ids = [1,2,3];
+			$business_ids = [1];
+			// $business_ids = [1,2,3];
 			$employeeTrips = Trip::select([
 				'trips.id',
 				'trips.company_id',

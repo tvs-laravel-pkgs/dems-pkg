@@ -22,7 +22,8 @@ class ReportController extends Controller {
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
 		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
-		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->where('id', '!=', 3027)->where('id', '!=', 3033)->where('id', '!=', 3035)->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		// $data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->where('id', '!=', 3027)->where('id', '!=', 3033)->where('id', '!=', 3035)->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->whereNotIn('id',[3025, 3027,3030, 3031, 3033, 3034, 3035, 3037])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 
 		$outstation_start_date = session('outstation_start_date');
 		$outstation_end_date = session('outstation_end_date');
@@ -40,7 +41,8 @@ class ReportController extends Controller {
 		$data['outstation_start_date'] = $outstation_start_date;
 		$data['outstation_end_date'] = $outstation_end_date;
 		$data['filter_outlet_id'] = $filter_outlet_id = session('outstation_outlet_id') ? intval(session('outstation_outlet_id')) : '-1';
-		$data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : 3034;
+		// $data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : 3034;
+		$data['filter_status_id'] = $filter_status_id = session('outstation_status_id') ? intval(session('outstation_status_id')) : null;
 
 		$data['success'] = true;
 		return response()->json($data);
