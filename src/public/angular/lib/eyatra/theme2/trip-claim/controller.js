@@ -358,13 +358,13 @@ app.component('eyatraTripClaimForm', {
 
                 $scope.proofUploadHandler();
                 // Added empty lodging if no record exist
-                if (self.trip.lodgings.length == 0)
-                    self.lodgingAdd()
-                if (self.trip.boardings.length == 0)
-                    self.addNewBoardings();
+                // if (self.trip.lodgings.length == 0)
+                //     self.lodgingAdd()
+                // if (self.trip.boardings.length == 0)
+                //     self.addNewBoardings();
 
-                if (self.trip.local_travels.length == 0)
-                    self.addNewLocalTralvels();
+                // if (self.trip.local_travels.length == 0)
+                //     self.addNewLocalTralvels();
 
             } else {
                 $timeout(function() {
@@ -415,12 +415,12 @@ app.component('eyatraTripClaimForm', {
             // if (self.trip.lodgings.length == 0) {
             //     self.addNewLodgings();
             // }
-            if (!self.trip.boardings.length) {
-                self.addNewBoardings();
-            }
-            if (self.trip.local_travels.length == 0) {
-                self.addNewLocalTralvels();
-            }
+            // if (!self.trip.boardings.length) {
+            //     self.addNewBoardings();
+            // }
+            // if (self.trip.local_travels.length == 0) {
+            //     self.addNewLocalTralvels();
+            // }
             self.document_type_id = null;
 
             // self.is_grade_leader = false;
