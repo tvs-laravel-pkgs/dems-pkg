@@ -161,10 +161,17 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_of_id', 3185)->where('attachment_type_id', 3200)->where('view_status', 0);
 	}
 	public function tripAttachments() {
-		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_type_id', 3200)->where('attachment_of_id', '!=', 3185);
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')
+			->where('attachment_type_id', 3200)
+			->whereIn('attachment_of_id', [3750, 3751, 3752, 3753, 3754, 3755, 3756]);
+			// ->where('attachment_of_id', '!=', 3185);
 	}
 	public function pendingTripAttachments() {
-		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')->where('attachment_type_id', 3200)->where('attachment_of_id', '!=', 3185)->where('view_status', 0);
+		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')
+			->where('attachment_type_id', 3200)
+			// ->where('attachment_of_id', '!=', 3185)
+			->whereIn('attachment_of_id', [3750, 3751, 3752, 3753, 3754, 3755, 3756])
+			->where('view_status', 0);
 	}
 	public function managerApprovedTripLog() {
 		return $this->hasOne('Uitoux\EYatra\ActivityLog', 'entity_id', 'id')

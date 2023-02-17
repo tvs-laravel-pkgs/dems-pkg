@@ -1213,6 +1213,12 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'claim-edit',
 				'display_name' => 'Edit Claim',
 			],
+			9012 => [
+				'display_order' => 2,
+				'parent_id' => 9010,
+				'name' => 'claim-delete-attachment',
+				'display_name' => 'Delete Claim Attachment',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
