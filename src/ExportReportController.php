@@ -1148,7 +1148,8 @@ class ExportReportController extends Controller {
 				'trips.number as t_documentnum',
 				'eyec.number as documentnum',
 				'eyec_s.name as ledgerdiamension',
-				's.name as sbuname'
+				's.name as sbuname',
+				DB::raw("'Outstation Claim' as category")
 			)
 				->join('users as u', 'u.entity_id', 'trips.employee_id')
 				->join('bank_details as bd', 'bd.entity_id', 'trips.employee_id')
@@ -1182,7 +1183,8 @@ class ExportReportController extends Controller {
 				't.advance_received as Amount',
 				't.number as documentnum',
 				DB::raw('COALESCE(eyec_s.name, "") as ledgerdiamension'),
-				DB::raw('COALESCE(s.name, "") as sbuname')
+				DB::raw('COALESCE(s.name, "") as sbuname'),
+				DB::raw("'Advance Payment' as category")
 			)
 				->join('users as u', 'u.entity_id', 'employees.id')
 				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
@@ -1212,7 +1214,8 @@ class ExportReportController extends Controller {
 				'lt.claimed_date as documentdate',
 				'lt.number as documentnum',
 				'lt_s.name as ledgerdiamension',
-				's.name as sbuname'
+				's.name as sbuname',
+				DB::raw("'Local Trip Claim' as category")
 			)
 				->join('users as u', 'u.entity_id', 'employees.id')
 				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
@@ -1245,6 +1248,8 @@ class ExportReportController extends Controller {
 				'Created Date and Time',
 				'Amount',
 				'Document Number',
+				'Document Date',
+				'Category',
 				'Posted',
 				'Batch',
 				'Bank Date',
@@ -1311,6 +1316,8 @@ class ExportReportController extends Controller {
 						$local['Created_Date_and_Time'],
 						$local['Amount'],
 						$local['documentnum'],
+						$local['documentdate'],
+						$local['category'],
 						$posted,
 						$batch,
 						$time_stamp,
@@ -1377,6 +1384,7 @@ class ExportReportController extends Controller {
 					'',
 					'',
 					$total_amount,
+					'',
 					'',
 					'',
 					'',
