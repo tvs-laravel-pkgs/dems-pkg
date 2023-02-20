@@ -1145,7 +1145,8 @@ class ExportReportController extends Controller {
 				'trips.id as invoice',
 				'eyec.balance_amount as Amount',
 				// 'eyec.total_amount as Amount',
-				'trips.number as documentnum',
+				'trips.number as t_documentnum',
+				'eyec.number as documentnum',
 				'eyec_s.name as ledgerdiamension',
 				's.name as sbuname'
 			)
@@ -1243,6 +1244,7 @@ class ExportReportController extends Controller {
 				'Purpose',
 				'Created Date and Time',
 				'Amount',
+				'Document Number',
 				'Posted',
 				'Batch',
 				'Bank Date',
@@ -1308,6 +1310,7 @@ class ExportReportController extends Controller {
 						'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
 						$local['Created_Date_and_Time'],
 						$local['Amount'],
+						$local['documentnum'],
 						$posted,
 						$batch,
 						$time_stamp,
@@ -1374,6 +1377,7 @@ class ExportReportController extends Controller {
 					'',
 					'',
 					$total_amount,
+					'',
 					'',
 					'',
 					'',
