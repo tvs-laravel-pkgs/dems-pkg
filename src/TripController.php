@@ -96,7 +96,7 @@ class TripController extends Controller {
 				$action = '';
 
 				// if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
-				if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022') {
+				if (($trip->status_id == '3032' && !empty($trip->approve_remarks)) || $trip->status_id == '3021' || $trip->status_id == '3022') {
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
 						$edit_class = "";

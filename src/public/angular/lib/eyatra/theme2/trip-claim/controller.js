@@ -1650,7 +1650,8 @@ app.component('eyatraTripClaimForm', {
             var deviationTypes = [];
             $scope.travel_mode_check = false;
             $(self.trip.visits).each(function(key, visit) {
-                if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17) {
+                // if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17) {
+                if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272) {
                     $scope.travel_mode_check = true;
                 }
             });
@@ -1747,7 +1748,7 @@ app.component('eyatraTripClaimForm', {
             //         tollFeeExpenseType = true
             // })
             // Toll fee expense type is selected
-            console.log({ 'travel mode: ' :$scope.travel_mode_check, tollFeeExpenseType})
+            // console.log({ 'travel mode: ' :$scope.travel_mode_check, tollFeeExpenseType})
             if ($scope.travel_mode_check) {
                 console.log(`trpdd : ${self.trip.trip_attachments.length} `)
                 if (self.trip.trip_attachments.length == 0) {
@@ -1844,7 +1845,8 @@ app.component('eyatraTripClaimForm', {
             var leader_proof_error = [];
             if((self.trip.visits).length > 0){
                 $(self.trip.visits).each(function(index, visit) {
-                    if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17){
+                    // if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17){
+                    if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272){
                         //proof upload yes and booking method self and travel mode not equal to two Wheeler, four wheeler, office vehicle
                         if ((self.trip.trip_attachments).length == 0) {
                             leader_proof_error.push('Fare detail document not uploaded');
@@ -2739,8 +2741,9 @@ app.component('eyatraTripClaimForm', {
                 let othersCgstPerc = othersSgstPerc = othersIgstPerc = 0;
                 const othersGstCode = othersGstin.substr(0, 2);
                 let othersPercentage = 18;
+                othersPercentage = 0
 
-                if (othersGstCode == self.state_code) {
+                if (othersPercentage > 0 && othersGstCode == self.state_code) {
                     othersCgstPerc = othersSgstPerc = othersPercentage / 2;
                 } else {
                     othersIgstPerc = othersPercentage;
@@ -3798,6 +3801,7 @@ app.component('eyatraTripClaimView', {
                 self.pay_to_employee = Math.round(parseFloat(self.total_amount)).toFixed(2);
                 self.pay_to_company = '0.00';
             }
+            self.view = response.data.view
             $rootScope.loading = false;
 
         });

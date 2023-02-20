@@ -531,6 +531,7 @@ class Trip extends Model {
         $data['pending_trip_status'] = $pending_trip_status;
         $data['pending_trip'] = $pending_trip;
 		$data['success'] = true;
+		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
 		return response()->json($data);
 
 	}
