@@ -640,8 +640,8 @@ class ExportReportController extends Controller {
 
 						//TRIP ADVANCE COMPANY TO EMPLOYEE BALANCE PAYMENT
 						if($employeeTrip->amount_to_pay == 1){
-							// if($employeeTrip->balance_amount && $employeeTrip->balance_amount != '0.00'){
-							if($employeeTrip->totalAmount && $employeeTrip->totalAmount != '0.00'){
+							if($employeeTrip->balance_amount && $employeeTrip->balance_amount != '0.00'){
+							// if($employeeTrip->totalAmount && $employeeTrip->totalAmount != '0.00'){
 								$res = $this->employeeAxaptaExportProcess(7, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$tot_consolidated_amount += $res;
 							}
@@ -990,8 +990,8 @@ class ExportReportController extends Controller {
 			$consolidated_amount = $advance_amount;
 			return $consolidated_amount;
 		} elseif ($type == 7) {
-			// $balance_amount = $employeeTrip->balance_amount;
-			$balance_amount = $employeeTrip->totalAmount;
+			$balance_amount = $employeeTrip->balance_amount;
+			// $balance_amount = $employeeTrip->totalAmount;
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
@@ -1143,8 +1143,8 @@ class ExportReportController extends Controller {
 				'trips.company_id as company_id',
 				'trips.claimed_date as documentdate',
 				'trips.id as invoice',
-				// 'eyec.balance_amount as Amount',
-				'eyec.total_amount as Amount',
+				'eyec.balance_amount as Amount',
+				// 'eyec.total_amount as Amount',
 				'trips.number as documentnum',
 				'eyec_s.name as ledgerdiamension',
 				's.name as sbuname'
@@ -1162,8 +1162,8 @@ class ExportReportController extends Controller {
 				->where('eyec.status_id', 3026)
 				->where('eyec.amount_to_pay', 1)
 				->where('eyec.batch', 0)
-				// ->where('eyec.balance_amount', '>', 0)
-				->where('eyec.total_amount', '>', 0)
+				->where('eyec.balance_amount', '>', 0)
+				// ->where('eyec.total_amount', '>', 0)
 				// ->where('trips.batch', 0)
 				->where('departments.business_id', '=', $business_id)
 				->whereDate('eyec.updated_at', '<', date('Y-m-d'))
