@@ -2732,7 +2732,8 @@ app.component('eyatraTripClaimForm', {
                 boardingCgst = boardingWithoutTaxAmount * (boardingCgstPerc / 100);
                 boardingSgst = boardingWithoutTaxAmount * (boardingSgstPerc / 100);
                 boardingIgst = boardingWithoutTaxAmount * (boardingIgstPerc / 100);
-                boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
+                // boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
+                boardingTotal = Math.round(boardingWithoutTaxAmount * 100)/ 100 + Math.round(boardingCgst * 100)/ 100 + Math.round(boardingSgst * 100)/ 100 + Math.round(boardingIgst * 100)/ 100;
             }
             // othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
             //OTHERS GST CALCULATION
