@@ -18,7 +18,8 @@ class Entity extends Model {
 	];
 
 	public function expenseTypes() {
-		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id')->withPivot('eligible_amount', 'city_category_id');
+		// return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id')->withPivot('eligible_amount', 'city_category_id');
+		return $this->belongsToMany('Uitoux\EYatra\Config', 'grade_expense_type', 'grade_id', 'expense_type_id')->withPivot('eligible_amount', 'city_category_id', 'less_than_240', 'less_than_480', 'less_than_1440');
 	}
 
 	public function tripPurposes() {
