@@ -2693,7 +2693,8 @@ app.component('eyatraTripClaimForm', {
                 lodgeCgst = lodgeWithoutTaxAmount * (lodgeCgstPerc / 100);
                 lodgeSgst = lodgeWithoutTaxAmount * (lodgeSgstPerc / 100);
                 lodgeIgst = lodgeWithoutTaxAmount * (lodgeIgstPerc / 100);
-                lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
+                // lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
+                lodgeTotal = Math.round(lodgeWithoutTaxAmount * 100)/ 100 + Math.round(lodgeCgst * 100)/ 100 + Math.round(lodgeSgst * 100)/ 100 + Math.round(lodgeIgst * 100)/ 100;
                 self.lodgingTaxInvoice.tax_percentage = lodgePercentage;
             }
             //DRYWASH GST CALCULATION
@@ -2713,7 +2714,8 @@ app.component('eyatraTripClaimForm', {
                 drywashCgst = drywashWithoutTaxAmount * (drywashCgstPerc / 100);
                 drywashSgst = drywashWithoutTaxAmount * (drywashSgstPerc / 100);
                 drywashIgst = drywashWithoutTaxAmount * (drywashIgstPerc / 100);
-                drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+                // drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+                drywashTotal = Math.round(drywashWithoutTaxAmount * 100)/ 100 + Math.round(drywashCgst * 100)/ 100 + Math.round(drywashSgst * 100)/ 100 + Math.round(drywashIgst * 100)/ 100;
             }
             //boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
             //Boarding GST CALCULATION
@@ -2753,7 +2755,8 @@ app.component('eyatraTripClaimForm', {
                 othersCgst = othersWithoutTaxAmount * (othersCgstPerc / 100);
                 othersSgst = othersWithoutTaxAmount * (othersSgstPerc / 100);
                 othersIgst = othersWithoutTaxAmount * (othersIgstPerc / 100);
-                othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+                // othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+                othersTotal = Math.round(othersWithoutTaxAmount * 100)/ 100 + Math.round(othersCgst * 100)/ 100 + Math.round(othersSgst * 100)/ 100 + Math.round(othersIgst * 100)/ 100;
             }
             base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
             cgst = lodgeCgst + drywashCgst + boardingCgst + othersCgst;
