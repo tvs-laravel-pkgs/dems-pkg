@@ -3469,7 +3469,8 @@ class Trip extends Model {
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-				->whereDate('trips.created_at', $date)
+				// ->whereDate('trips.created_at', $date)
+				->whereDate('trips.end_date', $date)
 				->where('trips.status_id', '=', 3021)
 				->get();
 		} elseif ($status == 'Claim Generation') {
@@ -3504,7 +3505,8 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				->whereDate('ey_employee_claims.created_at', $date)
+				// ->whereDate('ey_employee_claims.created_at', $date)
+				->whereDate('trips.end_date', $date)
 				->where('trips.status_id', '=', 3023) //Claim Requested
 				->get();
 
@@ -3522,7 +3524,8 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				->whereDate('ey_employee_claims.created_at', $date)
+				// ->whereDate('ey_employee_claims.created_at', $date)
+				->whereDate('trips.end_date', $date)
 				->where('trips.status_id', '=', 3029) //Senior Manager Approval Pending
 				->get();
 		}
