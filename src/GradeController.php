@@ -139,7 +139,12 @@ class GradeController extends Controller {
 				foreach ($grade->expenseTypes as $expense_type) {
 					$expense_type_list[$expense_type->id]->checked = true;
 					if ($expense_type->pivot->city_category_id) {
-						$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = $expense_type->pivot->eligible_amount;
+						$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = [
+							'eligible_amount' => $expense_type->pivot->eligible_amount,
+							'less_than_240' => $expense_type->pivot->less_than_240,
+							'less_than_480' => $expense_type->pivot->less_than_480,
+							'less_than_1440' => $expense_type->pivot->less_than_1440
+						];
 					}
 				}
 			}
@@ -269,7 +274,16 @@ class GradeController extends Controller {
 					// dd($pivot_data);
 					foreach ($pivot_data as $city_id => $eligible_amount) {
 						if (!empty($eligible_amount['eligible_amount'])) {
-							$data = [$expense_type_id => ['eligible_amount' => $eligible_amount['eligible_amount'], 'city_category_id' => $city_id]];
+							// $data = [$expense_type_id => ['eligible_amount' => $eligible_amount['eligible_amount'], 'city_category_id' => $city_id]];
+							$data = [
+								$expense_type_id => [
+									'eligible_amount' => $eligible_amount['eligible_amount'], 
+									'city_category_id' => $city_id,
+									'less_than_240' => $eligible_amount['less_than_240'],
+									'less_than_480' => $eligible_amount['less_than_480'],
+									'less_than_1440' => $eligible_amount['less_than_1440']
+								]
+							];
 							$grade->expenseTypes()->attach($data);
 						}
 					}
@@ -313,7 +327,13 @@ class GradeController extends Controller {
 			foreach ($grade->expenseTypes as $expense_type) {
 				$expense_type_list[$expense_type->id]->checked = true;
 				if ($expense_type->pivot->city_category_id) {
-					$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = $expense_type->pivot->eligible_amount;
+					// $expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = $expense_type->pivot->eligible_amount;
+					$expense_type_list[$expense_type->id]->{$expense_type->pivot->city_category_id} = [
+						'eligible_amount' => $expense_type->pivot->eligible_amount,
+						'less_than_240' => $expense_type->pivot->less_than_240,
+						'less_than_480' => $expense_type->pivot->less_than_480,
+						'less_than_1440' => $expense_type->pivot->less_than_1440
+					];
 				}
 			}
 		}

@@ -1207,7 +1207,7 @@ app.component('eyatraTripClaimForm', {
 
 
         //ASSIGN ELIGIBLE AMOUNT BASED ON CITY & EXPENSE & GRADE
-        $scope.assignEligibleAmount = function(city_id, type_id, index, stay_type_id) {
+        $scope.assignEligibleAmount = function(city_id, type_id, index, stay_type_id, init=false) {
             if (city_id) {
                 if (type_id == 3000) { //TRANSPORT EXPENSES
                     self.trip.visits[index].eligible_amount = self.cities_with_expenses[city_id].transport.eligible_amount;
@@ -1300,7 +1300,7 @@ app.component('eyatraTripClaimForm', {
                 } else if (type_id == 3003) { // LOCAL TRAVEL EXPENSE
                 }
             }
-            if (type_id == 3001 && stay_type_id == 3341) { // LODGING EXPENSE AND STAY TYPE AS FLAT CLAIM
+            if (!init && type_id == 3001 && stay_type_id == 3341) { // LODGING EXPENSE AND STAY TYPE AS FLAT CLAIM
                 console.log(self.trip.lodgings[index].eligible_amount)
                 self.trip.lodgings[index].amount = (self.trip.lodgings[index].eligible_amount || 0).toFixed(2);
                 self.trip.lodgings[index].invoice_amount = (self.trip.lodgings[index].eligible_amount || 0).toFixed(2);
@@ -2840,7 +2840,8 @@ app.component('eyatraTripClaimForm', {
                 lodgeCgst = lodgeWithoutTaxAmount * (lodgeCgstPerc / 100);
                 lodgeSgst = lodgeWithoutTaxAmount * (lodgeSgstPerc / 100);
                 lodgeIgst = lodgeWithoutTaxAmount * (lodgeIgstPerc / 100);
-                lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
+                // lodgeTotal = lodgeWithoutTaxAmount + lodgeCgst + lodgeSgst + lodgeIgst;
+                lodgeTotal = Math.round(lodgeWithoutTaxAmount * 100)/ 100 + Math.round(lodgeCgst * 100)/ 100 + Math.round(lodgeSgst * 100)/ 100 + Math.round(lodgeIgst * 100)/ 100;
                 self.lodgingTaxInvoice.tax_percentage = lodgePercentage;
             }
             //DRYWASH GST CALCULATION
@@ -2860,7 +2861,8 @@ app.component('eyatraTripClaimForm', {
                 drywashCgst = drywashWithoutTaxAmount * (drywashCgstPerc / 100);
                 drywashSgst = drywashWithoutTaxAmount * (drywashSgstPerc / 100);
                 drywashIgst = drywashWithoutTaxAmount * (drywashIgstPerc / 100);
-                drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+                // drywashTotal = drywashWithoutTaxAmount + drywashCgst + drywashSgst + drywashIgst;
+                drywashTotal = Math.round(drywashWithoutTaxAmount * 100)/ 100 + Math.round(drywashCgst * 100)/ 100 + Math.round(drywashSgst * 100)/ 100 + Math.round(drywashIgst * 100)/ 100;
             }
             //boardingTotal = boardingWithoutTaxAmount + boardingCgst + boardingSgst + boardingIgst;
             //Boarding GST CALCULATION
@@ -2900,7 +2902,8 @@ app.component('eyatraTripClaimForm', {
                 othersCgst = othersWithoutTaxAmount * (othersCgstPerc / 100);
                 othersSgst = othersWithoutTaxAmount * (othersSgstPerc / 100);
                 othersIgst = othersWithoutTaxAmount * (othersIgstPerc / 100);
-                othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+                // othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
+                othersTotal = Math.round(othersWithoutTaxAmount * 100)/ 100 + Math.round(othersCgst * 100)/ 100 + Math.round(othersSgst * 100)/ 100 + Math.round(othersIgst * 100)/ 100;
             }
             base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
             cgst = lodgeCgst + drywashCgst + boardingCgst + othersCgst;
