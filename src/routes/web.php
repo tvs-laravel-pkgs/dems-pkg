@@ -609,8 +609,8 @@ Route::group(['middleware' => ['web']], function () {
 		// Upload document in trip by Karthick T in 07-04-2022
 		Route::post('eyatra/trip/document-upload', 'Uitoux\EYatra\TripClaimController@uploadTripDocument')->name('uploadTripDocument');
 		Route::post('eyatra/trip/document-delete', 'Uitoux\EYatra\TripClaimController@deleteTripDocument')->name('deleteTripDocument');
-		Route::post('trip-claim/lodge-share/search-employee', 'Uitoux\EYatra\TripClaimController@searchLodgeShareEmployee')->name('searchLodgeShareEmployees');
-		Route::post('trip-claim/lodge-share/get-employee', 'Uitoux\EYatra\TripClaimController@getLodgeShareEmployee')->name('getLodgeShareEmployees');
+		Route::post('trip-claim/lodge-share/search-employee', 'Uitoux\EYatra\TripClaimController@searchLodgeSharingEmployee')->name('searchLodgeSharingEmployees');
+		Route::post('trip-claim/lodge-share/get-employee', 'Uitoux\EYatra\TripClaimController@getLodgeSharingEmployee')->name('getLodgeSharingEmployees');
 		// MASTER >> DEVIATION APPROVAL
 		Route::get('eyatra/deviation-approval/get-list', 'Uitoux\EYatra\DeviationController@list')->name('listEYatraDeviationApproval');
 		// MASTER >> TRAVELX AUTO CANCEL
