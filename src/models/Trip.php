@@ -1534,6 +1534,7 @@ class Trip extends Model {
 		$local_travel_mode_list = collect($local_travels_expense_types->prepend(['id' => '', 'name' => 'Select Local Travel / Expense Type']));
 		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$boarding_type_list = collect(Config::getBoardingTypeList()->prepend(['id' => '', 'name' => 'Select Type']));
+		$sharing_type_list = collect(Config::where('config_type_id', 549)->select('id', 'name')->get());
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
@@ -1543,6 +1544,7 @@ class Trip extends Model {
 			'boarding_type_list' => $boarding_type_list,
 			'booking_type_list' => $booking_type_list,
 			'travel_cities_list' => $travel_cities_list,
+			'sharing_type_list' => $sharing_type_list,
 		];
 		$state_code = NState::leftJoin('ncities', 'ncities.state_id', 'nstates.id')
 			->leftJoin('ey_addresses', 'ey_addresses.city_id', 'ncities.id')
@@ -4060,6 +4062,120 @@ public static function saveVerifierClaim($request){
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage().$e->getLine()]]);
 		}
 }
+
+	public static function searchLodgeShareEmployee($request) {
+		$key = $request->key;
+		$data['search_data'] = Employee::select(
+			'employees.id',
+			'users.name',
+			'employees.code'
+		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->where(function ($q) use ($key) {
+				$q->where('employees.code', 'like', '%' . $key . '%')
+					->orWhere('users.name', 'like', '%' . $key . '%')
+				;
+			})
+			->where('users.user_type_id', 3121) //EMPLOYEE
+			->where('users.id', '!=', Auth::id())
+			->where('employees.company_id', Auth::user()->company_id)
+			->get();
+		return response()->json($data);
+	}
+
+	public static function getLodgeShareEmployee($request) {
+		try{
+			$validator = Validator::make($request->all(), [
+				'employee_id' => [
+					'required',
+					'exists:employees,id',
+				],
+				'city_id' => [
+					'required',
+					'exists:ncities,id',
+				],
+			]);
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'errors' => $validator->errors()->all(),
+				]);
+			}
+
+			// $data['employee'] = Employee::with([
+			// 	'outlet',
+			// 	'user',
+			// ])->find($request->employee_id);
+
+			$data['employee'] = Employee::select([
+				'employees.id as employee_id',
+				'employees.code as employee_code',
+				'employees.grade_id',
+				'outlets.code as outlet_code',
+				'outlets.name as outlet_name',
+				'users.name as user_name',
+			])
+				->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+				->join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('employees.id',$request->employee_id)
+				->first();
+
+			$city_category_id = NCity::where('id', $request->city_id)->pluck('category_id')->first();
+
+			$data['employee']['home'] = [
+				'eligible_amount' => 0, 
+				'perc' => 0, 
+			];
+			$data['employee']['normal'] = [
+				'eligible_amount' => 0,  
+			];
+			if($city_category_id){
+				$lodge_expense_type = DB::table('grade_expense_type')
+					->where('grade_id', $data['employee']->grade_id)
+					->where('expense_type_id', 3001)
+					->where('city_category_id', $city_category_id)
+					->first();
+				if ($lodge_expense_type) {
+					$grade_stay_type = DB::table('grade_advanced_eligibility')->where('grade_id', $data['employee']->grade_id)->first();
+					if ($grade_stay_type) {
+						if ($grade_stay_type->stay_type_disc) {
+							$percentage = (int) $grade_stay_type->stay_type_disc;
+							$totalWidth = $lodge_expense_type->eligible_amount;
+							$home_eligible_amount = ($percentage / 100) * $totalWidth;
+						} else {
+							$percentage = 0;
+							$home_eligible_amount = $lodge_expense_type->eligible_amount;
+						}
+					} else {
+						$percentage = 0;
+						$home_eligible_amount = $lodge_expense_type->eligible_amount;
+					}
+
+					$data['employee']['home'] = [
+						'eligible_amount' => $home_eligible_amount, 
+						'perc' => $percentage, 
+					];
+					$data['employee']['normal'] = [
+						'eligible_amount' => $lodge_expense_type->eligible_amount,  
+					];
+				}
+			}
+
+			return response()->json([
+                'success' => true,
+                'data' => $data,
+            ]);
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
+	}
 	
 
 }

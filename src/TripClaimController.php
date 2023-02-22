@@ -417,4 +417,12 @@ class TripClaimController extends Controller {
 		}
 	}
 
+	public function searchLodgeShareEmployee(Request $request) {
+		return Trip::searchLodgeShareEmployee($request);
+	}
+
+	public function getLodgeShareEmployee(Request $request) {
+		return Trip::getLodgeShareEmployee($request);
+	}
+
 }

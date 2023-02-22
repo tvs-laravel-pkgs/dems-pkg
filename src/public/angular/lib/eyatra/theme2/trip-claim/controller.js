@@ -379,6 +379,9 @@ app.component('eyatraTripClaimForm', {
                 fileUpload();
                 $scope.proofUploadHandler();
             }
+            self.sharing_detail = [];
+            // self.lodge_share_employees = [];
+
             $('.custom-city-change').addClass('ng-hide');
             var custom_city_show = false;
             $(self.trip.visits).each(function(key, visit) {
@@ -465,6 +468,146 @@ app.component('eyatraTripClaimForm', {
                 });
             }, 500);
         });
+
+        $scope.sharingTypeHandler = function(index, sharing_type_id){
+            self.sharing_detail = [];
+            if(sharing_type_id == 3811 || sharing_type_id == 3812){
+                //SHARING WITH CLIAM OR SHARING WITH NO CLAIM
+                self.sharing_detail.index = index;
+                self.sharing_detail.no_of_sharing = self.trip.lodgings[index].no_of_sharing;
+                self.sharing_detail.lodge_share_employees = self.trip.lodgings[index].lodge_share_employees;
+                $('#sharing-detail-modal').modal('show');
+            }else{
+                //SINGLE
+                self.trip.lodgings[index].no_of_sharing = '';
+                self.trip.lodgings[index].lodge_share_employees = [];
+                self.trip.lodgings[index].sharing_home_eligible_amt = 0;
+                self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+                $('#sharing-detail-modal').modal('hide');
+                $scope.assignEligibleAmount(self.trip.lodgings[index].city_id, 3001, index, self.trip.lodgings[index].stay_type_id);
+            }
+        }
+
+        $scope.searchEmployees = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            laravel_routes['searchLodgeShareEmployees'], {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            resolve(response.data.search_data);
+                        });
+                });
+            } else {
+                return [];
+            }
+        }
+
+        $scope.noOfSharingHandler = function(){
+            self.sharing_detail.lodge_share_employees = [];
+        }
+
+        $scope.employeeChangeHandler = function (employee_id){
+            if(employee_id){
+                var employee_exist = false;
+                if((self.sharing_detail.lodge_share_employees).length > 0){
+                    $(self.sharing_detail.lodge_share_employees).each(function(key, data) {
+                        if(data.employee_id == employee_id){
+                            employee_exist = true;
+                        }
+                    });
+                }
+                if(employee_exist == true){
+                    custom_noty('error', 'Employee already added');
+                    return;
+                }
+
+                if(Math.round((self.sharing_detail.lodge_share_employees).length) == Math.round(self.sharing_detail.no_of_sharing)){
+                    custom_noty('error', 'Sharing employee details limit reached');
+                    return;
+                }
+
+                var index = self.sharing_detail.index;
+                $.ajax({
+                    url: laravel_routes['getLodgeShareEmployees'],
+                    method: 'POST',
+                    data: {
+                        'city_id': self.trip.lodgings[index].city_id,
+                        'employee_id': employee_id,
+                    },
+                })
+                .done(function (response) {
+                    if (!response.success) {
+                        var errors = '';
+                        for (var i in response.errors) {
+                            errors += '<li>' + response.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        self.sharing_detail.lodge_share_employees.push(response.data.employee);
+                        self.sharing_detail.lodge_share_employees = self.sharing_detail.lodge_share_employees;
+                    }
+                    $scope.$apply();
+                })
+                .fail(function (xhr) {
+                    custom_noty('error', 'Something went wrong at server.');
+                });
+            }
+        }
+
+        self.removeSharingEmployee = function(index, sharing_id) {
+            if (sharing_id) {
+                // self.trips.lodgings[index].sharing_removal_id.push(sharing_id);
+                // $('#lodgings_removal_id').val(JSON.stringify(self.lodgings_removal_id));
+            }
+            self.sharing_detail.lodge_share_employees.splice(index, 1);
+        }
+
+        $scope.shareDetailSave = function(){
+            if (!self.sharing_detail.no_of_sharing) {
+                custom_noty('error', "No of Sharing is required");
+                return;
+            }
+            if ((self.sharing_detail.lodge_share_employees).length == 0) {
+                custom_noty('error', "Kindly add the sharing employee details");
+                return;
+            }
+
+            $('#sharing-detail-save').button('loading');
+            var index = self.sharing_detail.index;
+            var city_id = self.trip.lodgings[index].city_id;
+            var stay_type_id = self.trip.lodgings[index].stay_type_id;
+
+            var total_sharing_home_eligible_amt = 0;
+            var total_sharing_normal_eligible_amt = 0;
+            $(self.sharing_detail.lodge_share_employees).each(function(key, data) {
+                if(data.home.eligible_amount){
+                    total_sharing_home_eligible_amt += parseFloat(data.home.eligible_amount);
+                }
+                if(data.normal.eligible_amount){
+                    total_sharing_normal_eligible_amt += parseFloat(data.normal.eligible_amount);
+                }
+            });
+
+            self.trip.lodgings[index].no_of_sharing = self.sharing_detail.no_of_sharing;
+            self.trip.lodgings[index].lodge_share_employees = self.sharing_detail.lodge_share_employees;
+            self.trip.lodgings[index].sharing_home_eligible_amt = total_sharing_home_eligible_amt;
+            self.trip.lodgings[index].sharing_normal_eligible_amt = total_sharing_normal_eligible_amt;
+            $scope.assignEligibleAmount(city_id, 3001, index, stay_type_id);
+            $('#sharing-detail-save').button('reset');
+            $('#sharing-detail-modal').modal('hide');
+        }
+
+        $scope.updateSharingType = function(index){
+            self.trip.lodgings[index].sharing_type_id = '';
+            self.trip.lodgings[index].no_of_sharing = '';
+            self.trip.lodgings[index].lodge_share_employees = [];
+            self.trip.lodgings[index].sharing_home_eligible_amt = 0;
+            self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+        }
 
         // Proof document by Karthick T on 07-04-2022
         $scope.uploadDocument = (document_type_id, id) => {
@@ -1070,9 +1213,13 @@ app.component('eyatraTripClaimForm', {
                     self.trip.visits[index].eligible_amount = self.cities_with_expenses[city_id].transport.eligible_amount;
                 } else if (type_id == 3001) { // LODGING EXPENSE
                     if (stay_type_id == 3341) {
-                        self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.home.eligible_amount;
+                        // self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.home.eligible_amount;
+                        var sharing_home_eligible_amt = self.trip.lodgings[index].sharing_home_eligible_amt ? self.trip.lodgings[index].sharing_home_eligible_amt : 0
+                        self.trip.lodgings[index].eligible_amount = parseFloat(self.cities_with_expenses[city_id].lodge.home.eligible_amount) + parseFloat(sharing_home_eligible_amt);
                     } else if (stay_type_id == 3340) {
-                        self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.normal.eligible_amount;
+                        // self.trip.lodgings[index].eligible_amount = self.cities_with_expenses[city_id].lodge.normal.eligible_amount;
+                        var sharing_normal_eligible_amt = self.trip.lodgings[index].sharing_normal_eligible_amt ? self.trip.lodgings[index].sharing_normal_eligible_amt : 0;
+                        self.trip.lodgings[index].eligible_amount = parseFloat(self.cities_with_expenses[city_id].lodge.normal.eligible_amount) + parseFloat(sharing_normal_eligible_amt);
                     } else {
                         self.trip.lodgings[index].eligible_amount = '0.00';
                     }
