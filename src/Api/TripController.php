@@ -74,7 +74,7 @@ class TripController extends Controller {
 				->where('status_id','!=',3032)
 				->first();
 		if($date_lessthan_previous_trip){
-		//  return response()->json(['success' => false, 'errors' => ["Trip date should be Greater than your previous trip"]]);
+		 return response()->json(['success' => false, 'errors' => ["Trip date should be Greater than your previous trip"]]);
 		}
 		// dd($request->visits);
 		$size = sizeof($request->visits);
