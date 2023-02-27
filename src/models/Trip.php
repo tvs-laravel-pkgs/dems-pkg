@@ -3552,6 +3552,9 @@ request is not desired, then those may be rejected.';
 						}
 						//dd($mobile_number);
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3021)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_REMINDER'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3560,6 +3563,9 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3021)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_WARNING'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 8, $message);
@@ -3595,6 +3601,9 @@ request is not desired, then those may be cancelled.';
 							$employee_id= $value['id'];
 						}
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3028)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
 		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3603,6 +3612,9 @@ request is not desired, then those may be cancelled.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3028)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
 		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
 		 				$message = str_replace('ZZZ', 12, $message);
@@ -3639,6 +3651,9 @@ request is not desired, then those may be rejected.';
 							$employee_id = $value['id'];
 						}
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3023)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3647,6 +3662,9 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3023)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 8, $message);
@@ -3684,6 +3702,9 @@ request is not desired, then those may be rejected.';
 							$employee_id = $value['id'];
 						}
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3029)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3692,6 +3713,9 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3029)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 5, $message);
