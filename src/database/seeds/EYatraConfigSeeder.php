@@ -111,6 +111,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Cancelled',
 				'config_type_id' => 501,
 			],
+			3038 => [
+				'name' => 'Auto Cancelled',
+				'config_type_id' => 501,
+			],
 
 			//CLAIM STATUS
 			3023 => [

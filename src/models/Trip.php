@@ -3469,8 +3469,8 @@ class Trip extends Model {
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-				// ->whereDate('trips.created_at', $date)
-				->whereDate('trips.end_date', $date)
+				->whereDate('trips.created_at', $date)
+				// ->whereDate('trips.end_date', $date)
 				->where('trips.status_id', '=', 3021)
 				->get();
 		} elseif ($status == 'Claim Generation') {
@@ -3611,7 +3611,8 @@ request is not desired, then those may be cancelled.';
 						}
 					}
 					if ($title == 'Cancelled') {
-						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
+						// $status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3038, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
 		 				$message = str_replace('ZZZ', 15, $message);
