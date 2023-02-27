@@ -362,14 +362,24 @@ app.component('eyatraTripForm', {
                 var start_date_trip = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
                 if (start_date_trip >= d2) {
                     $("#advance").show().prop('disabled', false);
-                    $("#advance_amount").prop('readonly', false);
+                    // $("#advance_amount").prop('readonly', false);
+                    if (self.advance_eligibility == 0) {
+                        $("#advance_amount").prop('readonly', true);
+                    } else {
+                        $("#advance_amount").prop('readonly', false);
+                    }
                 } else {
                     if (self.trip_advance_amount_employee_edit == 1) {
                         $("#advance").hide().prop('disabled', true);
                         self.trip.advance_received = '0.00';
                     } else {
                         $("#advance").show().prop('disabled', false);
-                        $("#advance_amount").prop('readonly', false);
+                        // $("#advance_amount").prop('readonly', false);
+                        if (self.advance_eligibility == 0) {
+                            $("#advance_amount").prop('readonly', true);
+                        } else {
+                            $("#advance_amount").prop('readonly', false);
+                        }
                     }
                 }
             }
