@@ -170,6 +170,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Financier Approved',
 				'config_type_id' => 535,
 			],
+			3039 => [
+				'name' => 'Claim Auto Cancelled',
+				'config_type_id' => 535,
+			],
 
 			//TRIP BOOKING METHOD
 			3040 => [
