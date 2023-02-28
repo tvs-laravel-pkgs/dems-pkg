@@ -1138,6 +1138,7 @@ class ExportReportController extends Controller {
 				'employees.code as Account_Number',
 				'u.name as Name',
 				'bd.account_number as Bank_Account_Number',
+				'bd.ifsc_code',
 				'trips.description as Purpose',
 				'trips.created_at as Created_Date_and_Time',
 				'trips.company_id as company_id',
@@ -1175,6 +1176,7 @@ class ExportReportController extends Controller {
 				'employees.code as Account_Number',
 				'u.name as Name',
 				'bd.account_number as Bank_Account_Number',
+				'bd.ifsc_code',
 				't.description as Purpose',
 				't.created_at as Created_Date_and_Time',
 				't.company_id as company_id',
@@ -1206,6 +1208,7 @@ class ExportReportController extends Controller {
 				'employees.code as Account_Number',
 				'u.name as Name',
 				'bd.account_number as Bank_Account_Number',
+				'bd.ifsc_code',
 				'lt.description as Purpose',
 				'lt.created_at as Created_Date_and_Time',
 				'lt.company_id as company_id',
@@ -1239,21 +1242,56 @@ class ExportReportController extends Controller {
 			//dd($locals);
 			$batch_id = BatchWiseReport::where('date', '=', date('Y-m-d'))->orderBy('id', 'DESC')->pluck('name')->first();
 			$batch = ((int) $batch_id ?: '0') + 1;
-			$local_trips_header = [
-				'SNo',
-				'Account Number',
-				'Name',
-				'Bank Account Number',
-				'Purpose',
-				'Created Date and Time',
-				'Amount',
-				'Document Number',
-				'Document Date',
-				'Category',
-				'Posted',
-				'Batch',
-				'Bank Date',
-			];
+			// $local_trips_header = [
+			// 	'SNo',
+			// 	'Account Number',
+			// 	'Name',
+			// 	'Bank Account Number',
+			// 	'Purpose',
+			// 	'Created Date and Time',
+			// 	'Amount',
+			// 	'Document Number',
+			// 	'Document Date',
+			// 	'Category',
+			// 	'Posted',
+			// 	'Batch',
+			// 	'Bank Date',
+			// ];
+
+			if(in_array($business_id, [2,3])){
+				//HONDA AND OESL
+				$local_trips_header = [
+					'Parent',
+					'Srl.No',
+					'E.Code',
+					'CIP Code',
+					'Cust ID',
+					'Debit Account',
+					'Payment Type',
+					'Blance',
+					'Date',
+					'Amount',
+					'Beneficiary Name',
+					'IFSC Code',
+					'Beneficiay A/c No',
+				];
+			}else{
+				$local_trips_header = [
+					'SNo',
+					'Account Number',
+					'Name',
+					'Bank Account Number',
+					'Purpose',
+					'Created Date and Time',
+					'Amount',
+					'Document Number',
+					'Document Date',
+					'Category',
+					'Posted',
+					'Batch',
+					'Bank Date',
+				];
+			}
 			/*$travelex_header = [
 				'LINENUM',
 				'INVOICE',
@@ -1307,21 +1345,66 @@ class ExportReportController extends Controller {
 				$l_no = 1;
 				foreach ($locals as $key => $local) {
 					$total_amount += $local['Amount'];
-					$local_trip = [
-						$l_no++,
-						'EMP_' . $local['Account_Number'],
-						$local['Name'],
-						$local['Bank_Account_Number'],
-						'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
-						$local['Created_Date_and_Time'],
-						$local['Amount'],
-						$local['documentnum'],
-						$local['documentdate'],
-						$local['category'],
-						$posted,
-						$batch,
-						$time_stamp,
-					];
+					// $local_trip = [
+					// 	$l_no++,
+					// 	'EMP_' . $local['Account_Number'],
+					// 	$local['Name'],
+					// 	$local['Bank_Account_Number'],
+					// 	'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
+					// 	$local['Created_Date_and_Time'],
+					// 	$local['Amount'],
+					// 	$local['documentnum'],
+					// 	$local['documentdate'],
+					// 	$local['category'],
+					// 	$posted,
+					// 	$batch,
+					// 	$time_stamp,
+					// ];
+
+					if(in_array($business_id, [2,3])){
+						//HONDA AND OESL
+						$payment_type = '';
+						if(!empty($local['ifsc_code']) && $local['ifsc_code'] != '-'){
+							if(substr($local['ifsc_code'], 0, 3) == "SBI" || substr($local['ifsc_code'], 0, 3) === "sbi"){
+								$payment_type = 'DCR';
+							}else{
+								$payment_type = 'NEFT';
+							}
+						}
+
+						$local_trip = [
+							'P',
+							$l_no++,
+							$local['Account_Number'],
+							'295723',
+							'MOBILITY',
+							'40711975675',
+							$payment_type,
+							'',
+							date('d-m-Y', strtotime($local['Created_Date_and_Time'])),
+							$local['Amount'],
+							$local['Name'],
+							$local['ifsc_code'],
+							$local['Bank_Account_Number'],
+						];
+					}else{
+						$local_trip = [
+							$l_no++,
+							'EMP_' . $local['Account_Number'],
+							$local['Name'],
+							$local['Bank_Account_Number'],
+							'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
+							$local['Created_Date_and_Time'],
+							$local['Amount'],
+							$local['documentnum'],
+							$local['documentdate'],
+							$local['category'],
+							$posted,
+							$batch,
+							$time_stamp,
+						];
+					}
+
 					/*$travelex_local = [
 						$s_no++,
 						'AC-' . $local['invoice'],
@@ -1376,20 +1459,54 @@ class ExportReportController extends Controller {
 					/*$travelex_details[] = $travelex_local;
 					$travelex_details[] = $travelex_detail;*/
 				}
-				$local_trips[] = [
-					$l_no++,
-					'',
-					'',
-					'',
-					'',
-					'',
-					$total_amount,
-					'',
-					'',
-					'',
-					'',
-					'',
-				];
+				// $local_trips[] = [
+				// 	$l_no++,
+				// 	'',
+				// 	'',
+				// 	'',
+				// 	'',
+				// 	'',
+				// 	$total_amount,
+				// 	'',
+				// 	'',
+				// 	'',
+				// 	'',
+				// 	'',
+				// ];
+				if(in_array($business_id, [2,3])){
+					//HONDA AND OESL
+					$local_trips[] = [
+						'',
+						$l_no++,
+						'',
+						'',
+						'',
+						'',
+						'',
+						'',
+						'',
+						$total_amount,
+						'',
+						'',
+						'',
+					];
+				}else{
+					$local_trips[] = [
+						$l_no++,
+						'',
+						'',
+						'',
+						'',
+						'',
+						$total_amount,
+						'',
+						'',
+						'',
+						'',
+						'',
+					];
+				}
+
 			/*} else {
 				Session()->flash('error', 'No Data Found');
 				// return Redirect::to('/#!/report/list');
@@ -1509,12 +1626,36 @@ class ExportReportController extends Controller {
 			$batch_wise_reports->save();
 
 			foreach ($locals as $local) {
-				$batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3028')->where('batch', '0')->update(['batch' => 1]);
+				// $batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3028')->where('batch', '0')->update(['batch' => 1]);
 
-				$batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
-				$batch_update = DB::table('ey_employee_claims')->where('trip_id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
+				// $batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
+				// $batch_update = DB::table('ey_employee_claims')->where('trip_id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
 
-				$batch_update = DB::table('local_trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
+				// $batch_update = DB::table('local_trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
+				
+				if($local['category'] == 'Local Trip Claim'){
+					$batch_update = DB::table('local_trips')
+						->where('id', $local['invoice'])
+						->where('status_id', '=', '3026')
+						->where('batch', '0')
+						->update(['batch' => 1]);
+				}elseif($local['category'] == 'Outstation Claim' || $local['category'] == 'Advance Payment'){
+					$batch_update = DB::table('trips')
+						->where('id', $local['invoice'])
+						->where('status_id', '=', '3028')
+						->where('batch', '0')
+						->update(['batch' => 1]);
+					$batch_update = DB::table('trips')
+						->where('id', $local['invoice'])
+						->where('status_id', '=', '3026')
+						->where('batch', '0')
+						->update(['batch' => 1]);
+					$batch_update = DB::table('ey_employee_claims')
+						->where('trip_id', $local['invoice'])
+						->where('status_id', '=', '3026')
+						->where('batch', '0')
+						->update(['batch' => 1]);
+				}
 			}
 			} else {
 				Session()->flash('error', 'No Data Found');
