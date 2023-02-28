@@ -1274,6 +1274,22 @@ class ExportReportController extends Controller {
 					'Beneficiary Name',
 					'IFSC Code',
 					'Beneficiay A/c No',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'Srl. No',
+					'',
+					'',
+					'',
+					'Amount',
+					'',
+					'',
 				];
 			}else{
 				$local_trips_header = [
@@ -1343,6 +1359,7 @@ class ExportReportController extends Controller {
 				$total_amount = 0;
 				$s_no = 1;
 				$l_no = 1;
+				$sl_no = 1001;
 				foreach ($locals as $key => $local) {
 					$total_amount += $local['Amount'];
 					// $local_trip = [
@@ -1386,6 +1403,20 @@ class ExportReportController extends Controller {
 							$local['Name'],
 							$local['ifsc_code'],
 							$local['Bank_Account_Number'],
+							'',
+							'',
+							'',
+							'',
+							'',
+							'',
+							'',
+							'',
+							'',
+							$sl_no++,
+							'',
+							'',
+							'',
+							$local['Amount'],
 						];
 					}else{
 						$local_trip = [
@@ -1475,21 +1506,21 @@ class ExportReportController extends Controller {
 				// ];
 				if(in_array($business_id, [2,3])){
 					//HONDA AND OESL
-					$local_trips[] = [
-						'',
-						$l_no++,
-						'',
-						'',
-						'',
-						'',
-						'',
-						'',
-						'',
-						$total_amount,
-						'',
-						'',
-						'',
-					];
+					// $local_trips[] = [
+					// 	'',
+					// 	$l_no++,
+					// 	'',
+					// 	'',
+					// 	'',
+					// 	'',
+					// 	'',
+					// 	'',
+					// 	'',
+					// 	$total_amount,
+					// 	'',
+					// 	'',
+					// 	'',
+					// ];
 				}else{
 					$local_trips[] = [
 						$l_no++,
