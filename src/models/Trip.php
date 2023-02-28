@@ -3471,14 +3471,24 @@ class Trip extends Model {
 				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
-				'tocity.name as tocity_name'
+				'tocity.name as tocity_name',
+				DB::raw('DATE_FORMAT(trips.created_at,"%Y-%m-%d") as trip_date')
 			)->leftjoin('users', 'trips.employee_id', 'users.entity_id')
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-				->whereDate('trips.created_at', $date)
-				// ->whereDate('trips.end_date', $date)
-				->where('trips.status_id', '=', 3021)
+				// ->whereDate('trips.created_at', $date)
+				// // ->whereDate('trips.end_date', $date)
+				// ->where('trips.status_id', '=', 3021)
+				->where(function($q) use ($date, $title) {
+					$q->where('trips.status_id', '=', 3021);
+					if ($title == 'Cancelled') {
+						$q->whereDate('trips.created_at', '<=', $date);
+					} else {
+						$q->whereDate('trips.created_at', $date);
+					}
+				})
+				->groupBy('trips.id')
 				->get();
 		} elseif ($status == 'Claim Generation') {
 			$pending_trips = Trip::select(
@@ -3488,15 +3498,26 @@ class Trip extends Model {
 				DB::raw('DATE_FORMAT(trips.end_date,"%d/%m/%Y") as end_date'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
-				'tocity.name as tocity_name'
+				'tocity.name as tocity_name',
+				DB::raw('DATE_FORMAT(trips.end_date,"%Y-%m-%d") as trip_date')
 			)->leftjoin('users', 'trips.employee_id', 'users.entity_id')
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				->where('trips.end_date', $date)
-				->whereNull('ey_employee_claims.number')
-				->where('trips.status_id', '=', 3028)
+				// ->where('trips.end_date', $date)
+				// ->whereNull('ey_employee_claims.number')
+				// ->where('trips.status_id', '=', 3028)
+				->where(function($q) use ($date, $title) {
+					$q->where('trips.status_id', '=', 3028)
+					->whereNull('ey_employee_claims.number');
+					if ($title == 'Cancelled') {
+						$q->whereDate('trips.end_date', '<=', $date);
+					} else {
+						$q->whereDate('trips.end_date', $date);
+					}
+				})
+				->groupBy('trips.id')
 				->get();
 		} elseif ($status == 'Pending Claim Approval') {
 			$pending_trips = Trip::select(
@@ -3506,15 +3527,25 @@ class Trip extends Model {
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d/%m/%Y") as created_at'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
-				'tocity.name as tocity_name'
+				'tocity.name as tocity_name',
+				DB::raw('DATE_FORMAT(trips.end_date,"%Y-%m-%d") as trip_date')
 			)->leftjoin('users', 'trips.employee_id', 'users.entity_id')
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				// ->whereDate('ey_employee_claims.created_at', $date)
-				->whereDate('trips.end_date', $date)
-				->where('trips.status_id', '=', 3023) //Claim Requested
+				// // ->whereDate('ey_employee_claims.created_at', $date)
+				// ->whereDate('trips.end_date', $date)
+				// ->where('trips.status_id', '=', 3023) //Claim Requested
+				->where(function($q) use ($date, $title) {
+					$q->where('trips.status_id', '=', 3023);		//Claim Requested
+					if ($title == 'Cancelled') {
+						$q->whereDate('trips.end_date', '<=', $date);
+					} else {
+						$q->whereDate('trips.end_date', $date);
+					}
+				})
+				->groupBy('trips.id')
 				->get();
 
 		} elseif ($status == 'Pending Divation Claim Approval') {
@@ -3525,19 +3556,30 @@ class Trip extends Model {
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d/%m/%Y") as created_at'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
-				'tocity.name as tocity_name'
+				'tocity.name as tocity_name',
+				DB::raw('DATE_FORMAT(trips.end_date,"%Y-%m-%d") as trip_date')
 			)->leftjoin('users', 'trips.employee_id', 'users.entity_id')
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				// ->whereDate('ey_employee_claims.created_at', $date)
-				->whereDate('trips.end_date', $date)
-				->where('trips.status_id', '=', 3029) //Senior Manager Approval Pending
+				// ->whereDate('trips.end_date', $date)
+				// ->where('trips.status_id', '=', 3029) //Senior Manager Approval Pending
+				->where(function($q) use ($date, $title) {
+					$q->where('trips.status_id', '=', 3029);		//Senior Manager Approval Pending
+					if ($title == 'Cancelled') {
+						$q->whereDate('trips.end_date', '<=', $date);
+					} else {
+						$q->whereDate('trips.end_date', $date);
+					}
+				})
+				->groupBy('trips.id')
 				->get();
 		}
 		if (count($pending_trips) > 0) {
 			foreach ($pending_trips as $trip_key => $pending_trip) {
+				$sendSmsAndMail = $pending_trip->trip_date == $date;
 				if ($status == 'Pending Requsation Approval') {
 					$detail = 'You have the following Travel Requisition(s) waiting for Approval and is / are
 pending for more than 2 days. Please approve. In case any of the below travel
@@ -3585,7 +3627,7 @@ request is not desired, then those may be rejected.';
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 10, $message);
-						if ($mobile_number) {
+						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
@@ -3635,7 +3677,7 @@ request is not desired, then those may be cancelled.';
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
 		 				$message = str_replace('ZZZ', 15, $message);
-						if ($mobile_number) {
+						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
@@ -3684,7 +3726,7 @@ request is not desired, then those may be rejected.';
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 10, $message);
-						if ($mobile_number) {
+						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
@@ -3735,7 +3777,7 @@ request is not desired, then those may be rejected.';
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 10, $message);
-						if ($mobile_number) {
+						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
@@ -3749,11 +3791,13 @@ request is not desired, then those may be rejected.';
 					$email_to = $value['email'];
 				}
 				$view_name = 'mail.report_mail';
-				Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $email_to) {
-					$message->to($email_to)->subject($subject);
-					$message->cc($cc_email)->subject($subject);
-					$message->from('travelex@tvs.in');
-				});
+				if ($sendSmsAndMail) {
+					Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $email_to) {
+						$message->to($email_to)->subject($subject);
+						$message->cc($cc_email)->subject($subject);
+						$message->from('travelex@tvs.in');
+					});
+				}
 			}
 			\Log::info('Pending Outstation trip mail completed');
 		} else {
