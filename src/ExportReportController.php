@@ -2458,7 +2458,6 @@ class ExportReportController extends Controller {
 				DB::raw('DATE_FORMAT(trips.claimed_date,"%Y-%m-%d") as transactionDate'),
 				'sbus.name as sbu',
 				'outlets.code as outletCode',
-				'outlets.axapta_location_id as axaptaLocationId',
 				'ey_employee_claims.total_amount as totalAmount',
 				'trips.number as invoiceNumber',
 				'ey_employee_claims.number as documentNumber',
@@ -2500,16 +2499,14 @@ class ExportReportController extends Controller {
 					});
 				})
 				->groupBy('trips.id')
+				->orderBy('trips.id','ASC')
 				->get();
-
-			// dd($employeeTrips);
 
 			$exceptionErrors = [];
 			$export_data = [];
 			if ($employeeTrips->isNotEmpty()) {
 				foreach ($employeeTrips as $employeeTrip) {
 					try {
-						// dd($employeeTrip);
 						if($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028){
 							//COMPLETED OR MANAGER APPROVED
 							if($employeeTrip->advance_ax_export_sync == 0 && $employeeTrip->advance_received > 0){
@@ -2547,8 +2544,8 @@ class ExportReportController extends Controller {
 						continue;
 					}
 				}
-
 				$cronLog->remarks = "Employee trips found";
+				
 				$time_stamp = date('Y_m_d');
 				$datas = DB::table('honda_axapta_exports')
 					->where('entity_type_id',3791)
@@ -2658,10 +2655,6 @@ class ExportReportController extends Controller {
 				$report_details->type_id = 3791;
 				$report_details->name = $file->filename;
 				$report_details->path = 'storage/app/public/honda_oesl_employee_axapta_report/' . $outputfile . '.xlsx';
-				$report_details->batch = NULL;
-				$report_details->no_of_credits = NULL;
-				$report_details->bank_date = NULL;
-				$report_details->credit_total_amount = null;
 				$report_details->save();
 			} else {
 				$cronLog->remarks = "No employee trips found";
