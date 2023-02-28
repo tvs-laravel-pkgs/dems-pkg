@@ -2638,6 +2638,7 @@ app.component('eyatraTripClaimForm', {
 
         $scope.calculateFareDetailTotalKM = () => {
             let fareDetailTotalKm = 0;
+            let fare_detail_total_kilo_meter = 0;
             let fareDetailStartingKm = parseFloat(self.fareDetailsKmModalValues.kmStart) || 0;
             let fareDetailEndingKm = parseFloat(self.fareDetailsKmModalValues.kmEnd) || 0;
             let fareDetailElibleAmount = parseFloat($(".twoWheelerEligibleAmount-" + self.fareDetailsKmModalIndex).val()) || 0;
@@ -2645,6 +2646,12 @@ app.component('eyatraTripClaimForm', {
             if (fareDetailStartingKm && fareDetailEndingKm && fareDetailElibleAmount) {
                 fareDetailTotalKm = fareDetailElibleAmount * (fareDetailEndingKm - fareDetailStartingKm);
             }
+
+            if (fareDetailStartingKm && fareDetailEndingKm) {
+                fare_detail_total_kilo_meter = (fareDetailEndingKm - fareDetailStartingKm);
+            }
+
+            self.fareDetailsKmModalValues.total_kilo_meter = parseFloat(fare_detail_total_kilo_meter).toFixed(2);
             self.fareDetailsKmModalValues.totalKm = parseFloat(fareDetailTotalKm).toFixed(2);
         }
 

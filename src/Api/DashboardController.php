@@ -30,7 +30,8 @@ class DashboardController extends Controller {
 
 		$total_claims_pending = Trip::where('employee_id', Auth::user()->entity_id)->whereIN('trips.status_id', [3023, 3024, 3025, 3029, 3030, 3034, 3036])->count();
 
-		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3028)->where('start_date', '>', date('Y-m-d'))->count();
+		// $total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3028)->where('start_date', '>', date('Y-m-d'))->count();
+		$total_upcoming_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('start_date', '>', date('Y-m-d'))->count();
 		$trips_pending=Trip::where('status_id', '=', '3021')->where('employee_id', Auth::user()->entity_id)
 			->count();
 		$trips_approved=Trip::where('status_id', '=', '3028')->where('employee_id', Auth::user()->entity_id)

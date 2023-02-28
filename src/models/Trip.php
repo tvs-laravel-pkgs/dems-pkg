@@ -3592,8 +3592,8 @@ class Trip extends Model {
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-				// ->whereDate('trips.created_at', $date)
-				->whereDate('trips.end_date', $date)
+				->whereDate('trips.created_at', $date)
+				// ->whereDate('trips.end_date', $date)
 				->where('trips.status_id', '=', 3021)
 				->get();
 		} elseif ($status == 'Claim Generation') {
@@ -3675,6 +3675,9 @@ request is not desired, then those may be rejected.';
 						}
 						//dd($mobile_number);
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3021)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_REMINDER'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3683,6 +3686,9 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3021)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_WARNING'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 8, $message);
@@ -3691,7 +3697,7 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Cancelled') {
-						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3021)->update(['status_id' => 3032, 'reason' => 'Your Trip not approved,So system Cancelled Automatically']);
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3021)->update(['status_id' => 3038, 'reason' => 'Your Trip not approved,So system Cancelled Automatically', 'updated_at' => Carbon::now()]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 10, $message);
@@ -3718,6 +3724,9 @@ request is not desired, then those may be cancelled.';
 							$employee_id= $value['id'];
 						}
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3028)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
 		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3726,6 +3735,9 @@ request is not desired, then those may be cancelled.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3028)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
 		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
 		 				$message = str_replace('ZZZ', 12, $message);
@@ -3734,7 +3746,8 @@ request is not desired, then those may be cancelled.';
 						}
 					}
 					if ($title == 'Cancelled') {
-						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
+						// $status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3038, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically', 'updated_at' => Carbon::now()]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
 		 				$message = str_replace('ZZZ', 15, $message);
@@ -3761,6 +3774,9 @@ request is not desired, then those may be rejected.';
 							$employee_id = $value['id'];
 						}
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3023)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3769,6 +3785,9 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3023)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 8, $message);
@@ -3777,7 +3796,7 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Cancelled') {
-						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3023)->update(['status_id' => 3024, 'status_id' => 3024, 'reason' => 'Your claim is not Approved,So system Rejected Automatically']);
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3023)->update(['status_id' => 3039, 'reason' => 'Your claim is not Approved,So system Rejected Automatically', 'updated_at' => Carbon::now()]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 10, $message);
@@ -3806,6 +3825,9 @@ request is not desired, then those may be rejected.';
 							$employee_id = $value['id'];
 						}
 					if ($title == 'Remainder'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3029)
+							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 2, $message);
@@ -3814,6 +3836,9 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Warning'){
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3029)
+							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 5, $message);
@@ -3822,7 +3847,7 @@ request is not desired, then those may be rejected.';
 						}
 					}
 					if ($title == 'Cancelled') {
-						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3029)->update(['status_id' => 3024, 'reason' => 'Your claim is not Approved by senior Manager,So system Rejected Automatically']);
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3029)->update(['status_id' => 3039, 'reason' => 'Your claim is not Approved by senior Manager,So system Rejected Automatically', 'updated_at' => Carbon::now()]);
 		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
 		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
 		 				$message = str_replace('ZZZ', 10, $message);
