@@ -44,7 +44,8 @@ class ExportReportController extends Controller {
 			'report_details.name',
 			'report_details.path',
 			DB::raw('DATE_FORMAT(report_details.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
-			'configs.name as type'
+			// 'configs.name as type'
+			DB::raw("(CASE when configs.name = 'Self' then 'Axapta Import' else configs.name end) as type")
 		)->join('configs', 'configs.id', 'report_details.type_id')
 			->where(function ($query) use ($r) {
 				if ($r->type_id && $r->type_id != '<%$ctrl.filter_type_id%>') {
