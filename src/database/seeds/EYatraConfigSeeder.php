@@ -112,7 +112,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 501,
 			],
 			3038 => [
-				'name' => 'Auto Cancelled',
+				'name' => 'Trip Auto Cancel',
 				'config_type_id' => 501,
 			],
 
@@ -171,7 +171,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 535,
 			],
 			3039 => [
-				'name' => 'Claim Auto Cancelled',
+				'name' => 'Claim Auto Cancel',
 				'config_type_id' => 535,
 			],
 
