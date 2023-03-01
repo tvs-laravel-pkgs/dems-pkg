@@ -3744,7 +3744,7 @@ request is not desired, then those may be rejected.';
 						->join('employees as se_manager_employee', 'se_manager_employee.id', 'trip_manager_employee.reporting_to_id')
 						->join('users', 'users.entity_id', 'se_manager_employee.id')
 						->where('users.user_type_id', 3121)
-						->select('users.email as email', 'users.name as name')
+						->select('e.id', 'users.email as email', 'users.name as name', 'users.mobile_number')
 						->get()->toArray();
 						foreach($to_email as $key =>$value){
 							$mobile_number = $value['mobile_number'];
@@ -3788,10 +3788,11 @@ request is not desired, then those may be rejected.';
 				$arr['status'] = $status;
 				foreach ($to_email as $key => $value) {
 					$arr['name'] = $value['name'];
-					$email_to = $value['email'];
+					if ($value['email'] && $value['email'] != '-')
+						$email_to = $value['email'];
 				}
 				$view_name = 'mail.report_mail';
-				if ($sendSmsAndMail) {
+				if ($sendSmsAndMail && count($email_to) > 0) {
 					Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $email_to) {
 						$message->to($email_to)->subject($subject);
 						$message->cc($cc_email)->subject($subject);
