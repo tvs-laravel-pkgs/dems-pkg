@@ -2642,7 +2642,7 @@ class ExportReportController extends Controller {
 		              		$export_data[] = $excel_details;
 		              	}
 
-				    	$outputfile = $business_name.'EmployeeAxaptaExport_' . $time_stamp;
+				    	$outputfile = $business_name.'_EmployeeAxaptaExport_' . $time_stamp;
 						$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
 							$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
 								$sheet->fromArray($export_data, NULL, 'A1');
