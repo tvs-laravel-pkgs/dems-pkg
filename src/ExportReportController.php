@@ -2804,10 +2804,10 @@ class ExportReportController extends Controller {
 				->first();
 
 			//DEBIT ENTRY
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '5100652016', 2, $employeeCode.' : '.$employeeName.' : '.$toCity, $employeeTrip->advance_received, 0.00, 'C', $employeeTrip->outletCode, '',  $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '5100652016', 2, $employeeCode.' : '.$employeeName.' : '.$toCity.' - Advance', $employeeTrip->advance_received, 0.00, 'C', $employeeTrip->outletCode, '',  $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
 
 			//CREDIT ENTRY
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode.' : '.$employeeName.' : '.$toCity, 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode.' : '.$employeeName.' : '.$toCity .' - Advance', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
 		}else if($type == 2) {
 			//TRAVEL EXPENSES
 			// $toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
