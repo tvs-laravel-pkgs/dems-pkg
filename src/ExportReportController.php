@@ -807,7 +807,7 @@ class ExportReportController extends Controller {
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, round($employeeTrip->totalAmount, 2), "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 2) {
 			//TAXABLE VALUE AND GST SPLITUP ENTRIES
@@ -843,14 +843,17 @@ class ExportReportController extends Controller {
 				$employeeLodgingTaxableValue = floatval($employeeTrip->lodgings()->sum('amount'));
 			}
 
+			$employeeClaim = EmployeeClaim::where('trip_id', '=', $employeeTrip->id)->first();
 			//BOARDING
 			if ($employeeTrip->boardings->isNotEmpty()) {
-				$employeeBoardingTaxableValue = floatval($employeeTrip->boardings()->sum('amount'));
+				// $employeeBoardingTaxableValue = floatval($employeeTrip->boardings()->sum('amount'));
+				$employeeBoardingTaxableValue = floatval($employeeClaim->boarding_total);
 			}
 
 			//LOCAL TRAVELS
 			if ($employeeTrip->localTravels->isNotEmpty()) {
-				$employeeLocalTravelTaxableValue = floatval($employeeTrip->localTravels()->sum('amount'));
+				// $employeeLocalTravelTaxableValue = floatval($employeeTrip->localTravels()->sum('amount'));
+				$employeeLocalTravelTaxableValue = floatval($employeeClaim->local_travel_total);
 			}
 
 			$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue);
@@ -903,7 +906,9 @@ class ExportReportController extends Controller {
 
 							} else {
 								//SINGLE
-								$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
+								if ($lodging && (($lodging->cgst != '0.00' && $lodging->sgst != '0.00') || ($lodging->igst != '0.00'))) {
+									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
+								}
 							}
 					    }
 					}
