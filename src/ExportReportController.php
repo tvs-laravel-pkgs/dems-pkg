@@ -2468,7 +2468,6 @@ class ExportReportController extends Controller {
 				'trips.status_id as trip_status_id',
 				'ey_employee_claims.balance_amount',
 				'trips.advance_ax_export_sync',
-				'businesses.name as business_name',
 				'businesses.ax_company_code',
 				'departments.business_id'
 			])
@@ -2545,117 +2544,236 @@ class ExportReportController extends Controller {
 					}
 				}
 				$cronLog->remarks = "Employee trips found";
-				
-				$time_stamp = date('Y_m_d');
-				$datas = DB::table('honda_axapta_exports')
-					->where('entity_type_id',3791)
-					->whereDate('created_at', date('Y-m-d'))
-					->get()
-					->toArray();
-				$excel_header = [
-					'brcd',
-					'doctype',
-					'docno',
-					'docdt',
-					'Account',
-					'Acctype',
-					'trantxt',
-					'dbtamt',
-					'crdamt',
-					'Dept',
-					'CostCenter',
-					'Employee',
-					'VIN',
-					'RO',
-					'Purpose',
-					'BudgetCode',
-					'Supinvno',
-					'Supinvdate',
-					'Refno',
-					'Refdate',
-					'Commcd',
-					'vatper',
-					'Company',
-					'intercobr',
-					'interco',
-					'costprice',
-					'HSNCODE',
-					'Shiptoadd',
-					'shipstate',
-					'Unregflag',
-					'reversechrgind',
-					'Cnreason',
-					'LrDate',
-					'LsOS',
-					'GrnNo',
-					'Qty',
-					'GSTIN',
-					'Paymref',
-				];
-				foreach($datas as $data){
-					$excel_details = [
-						$data->brcd,
-						$data->doc_type,
-						$data->doc_no,
-						date('d-m-Y', strtotime($data->doc_date)),
-						$data->account,
-						$data->acc_type,
-						$data->tran_txt,
-						$data->dbt_amt,
-						$data->crd_amt,
-						$data->dept,
-						$data->cost_center,
-						$data->employee,
-						$data->vin,
-						$data->ro,
-						$data->purpose,
-						$data->budget_code,
-						$data->sup_inv_no,
-						date('d-m-Y', strtotime($data->sup_inv_date)),
-						$data->ref_no,
-						$data->ref_date ? date('d-m-Y', strtotime($data->ref_date)) : '',
-						$data->commcd,
-						$data->vatper,
-						$data->company,
-						$data->intercobr,
-						$data->interco,
-						$data->cost_price,
-						$data->hsn_code,
-						$data->ship_to_add,
-						$data->ship_state,
-						$data->unreg_flag,
-						$data->reversechrgind,
-						$data->cn_reason,
-						$data->lr_no,
-						$data->lr_date ? date('d-m-Y', strtotime($data->lr_date)) : '',
-						$data->ls_os,
-						$data->grn_no,
-						$data->grn_date ? date('d-m-Y', strtotime($data->grn_date)) : '',
-						$data->qty,
-						$data->gstin,
-						$data->paymemt_ref,
-                	];
-              		$export_data[] = $excel_details;
-              	}
 
-		    	$outputfile = 'EmployeeAxaptaExport_' . $time_stamp;
-				$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
-					$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
-						$sheet->fromArray($export_data, NULL, 'A1');
-						$sheet->row(1, $excel_header);
-						$sheet->row(1, function ($row) {
-						$row->setBackground('#07c63a');
-						});
-					});
-				})->store('xlsx', storage_path('app/public/honda_oesl_employee_axapta_report/'));
+				foreach ($business_ids as $business) {
+					$business_name = Business::where('id', $business)->pluck('name')->first();
+					$time_stamp = date('Y_m_d');
+					$datas = DB::table('honda_axapta_exports')
+						->where('entity_type_id', 3791)
+						->where('business_id', $business)
+						->whereDate('created_at', date('Y-m-d'))
+						->get()
+						->toArray();
+					$excel_header = [
+						'brcd',
+						'doctype',
+						'docno',
+						'docdt',
+						'Account',
+						'Acctype',
+						'trantxt',
+						'dbtamt',
+						'crdamt',
+						'Dept',
+						'CostCenter',
+						'Employee',
+						'VIN',
+						'RO',
+						'Purpose',
+						'BudgetCode',
+						'Supinvno',
+						'Supinvdate',
+						'Refno',
+						'Refdate',
+						'Commcd',
+						'vatper',
+						'Company',
+						'intercobr',
+						'interco',
+						'costprice',
+						'HSNCODE',
+						'Shiptoadd',
+						'shipstate',
+						'Unregflag',
+						'reversechrgind',
+						'Cnreason',
+						'LrDate',
+						'LsOS',
+						'GrnNo',
+						'Qty',
+						'GSTIN',
+						'Paymref',
+					];
 
-				//SAVE TRAVELEX REPORTS
-				$report_details = new ReportDetail;
-				$report_details->company_id = $data->company_id;
-				$report_details->type_id = 3791;
-				$report_details->name = $file->filename;
-				$report_details->path = 'storage/app/public/honda_oesl_employee_axapta_report/' . $outputfile . '.xlsx';
-				$report_details->save();
+					if($datas && count($datas) > 0){
+						foreach($datas as $data){
+							$excel_details = [
+								$data->brcd,
+								$data->doc_type,
+								$data->doc_no,
+								date('d-m-Y', strtotime($data->doc_date)),
+								$data->account,
+								$data->acc_type,
+								$data->tran_txt,
+								$data->dbt_amt,
+								$data->crd_amt,
+								$data->dept,
+								$data->cost_center,
+								$data->employee,
+								$data->vin,
+								$data->ro,
+								$data->purpose,
+								$data->budget_code,
+								$data->sup_inv_no,
+								date('d-m-Y', strtotime($data->sup_inv_date)),
+								$data->ref_no,
+								$data->ref_date ? date('d-m-Y', strtotime($data->ref_date)) : '',
+								$data->commcd,
+								$data->vatper,
+								$data->company,
+								$data->intercobr,
+								$data->interco,
+								$data->cost_price,
+								$data->hsn_code,
+								$data->ship_to_add,
+								$data->ship_state,
+								$data->unreg_flag,
+								$data->reversechrgind,
+								$data->cn_reason,
+								$data->lr_no,
+								$data->lr_date ? date('d-m-Y', strtotime($data->lr_date)) : '',
+								$data->ls_os,
+								$data->grn_no,
+								$data->grn_date ? date('d-m-Y', strtotime($data->grn_date)) : '',
+								$data->qty,
+								$data->gstin,
+								$data->paymemt_ref,
+		                	];
+		              		$export_data[] = $excel_details;
+		              	}
+
+				    	$outputfile = $business_name.'EmployeeAxaptaExport_' . $time_stamp;
+						$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
+							$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
+								$sheet->fromArray($export_data, NULL, 'A1');
+								$sheet->row(1, $excel_header);
+								$sheet->row(1, function ($row) {
+								$row->setBackground('#07c63a');
+								});
+							});
+						})->store('xlsx', storage_path('app/public/honda_oesl_employee_axapta_report/'));
+
+						//SAVE TRAVELEX REPORTS
+						$report_details = new ReportDetail;
+						$report_details->company_id = $data->company_id;
+						$report_details->type_id = 3791;
+						$report_details->name = $file->filename;
+						$report_details->path = 'storage/app/public/honda_oesl_employee_axapta_report/' . $outputfile . '.xlsx';
+						$report_details->save();
+		            }
+				}
+
+				// $time_stamp = date('Y_m_d');
+				// $datas = DB::table('honda_axapta_exports')
+				// 	->where('entity_type_id',3791)
+				// 	->whereDate('created_at', date('Y-m-d'))
+				// 	->get()
+				// 	->toArray();
+				// $excel_header = [
+				// 	'brcd',
+				// 	'doctype',
+				// 	'docno',
+				// 	'docdt',
+				// 	'Account',
+				// 	'Acctype',
+				// 	'trantxt',
+				// 	'dbtamt',
+				// 	'crdamt',
+				// 	'Dept',
+				// 	'CostCenter',
+				// 	'Employee',
+				// 	'VIN',
+				// 	'RO',
+				// 	'Purpose',
+				// 	'BudgetCode',
+				// 	'Supinvno',
+				// 	'Supinvdate',
+				// 	'Refno',
+				// 	'Refdate',
+				// 	'Commcd',
+				// 	'vatper',
+				// 	'Company',
+				// 	'intercobr',
+				// 	'interco',
+				// 	'costprice',
+				// 	'HSNCODE',
+				// 	'Shiptoadd',
+				// 	'shipstate',
+				// 	'Unregflag',
+				// 	'reversechrgind',
+				// 	'Cnreason',
+				// 	'LrDate',
+				// 	'LsOS',
+				// 	'GrnNo',
+				// 	'Qty',
+				// 	'GSTIN',
+				// 	'Paymref',
+				// ];
+				// foreach($datas as $data){
+				// 	$excel_details = [
+				// 		$data->brcd,
+				// 		$data->doc_type,
+				// 		$data->doc_no,
+				// 		date('d-m-Y', strtotime($data->doc_date)),
+				// 		$data->account,
+				// 		$data->acc_type,
+				// 		$data->tran_txt,
+				// 		$data->dbt_amt,
+				// 		$data->crd_amt,
+				// 		$data->dept,
+				// 		$data->cost_center,
+				// 		$data->employee,
+				// 		$data->vin,
+				// 		$data->ro,
+				// 		$data->purpose,
+				// 		$data->budget_code,
+				// 		$data->sup_inv_no,
+				// 		date('d-m-Y', strtotime($data->sup_inv_date)),
+				// 		$data->ref_no,
+				// 		$data->ref_date ? date('d-m-Y', strtotime($data->ref_date)) : '',
+				// 		$data->commcd,
+				// 		$data->vatper,
+				// 		$data->company,
+				// 		$data->intercobr,
+				// 		$data->interco,
+				// 		$data->cost_price,
+				// 		$data->hsn_code,
+				// 		$data->ship_to_add,
+				// 		$data->ship_state,
+				// 		$data->unreg_flag,
+				// 		$data->reversechrgind,
+				// 		$data->cn_reason,
+				// 		$data->lr_no,
+				// 		$data->lr_date ? date('d-m-Y', strtotime($data->lr_date)) : '',
+				// 		$data->ls_os,
+				// 		$data->grn_no,
+				// 		$data->grn_date ? date('d-m-Y', strtotime($data->grn_date)) : '',
+				// 		$data->qty,
+				// 		$data->gstin,
+				// 		$data->paymemt_ref,
+                // 	];
+              	// 	$export_data[] = $excel_details;
+              	// }
+
+		    	// $outputfile = 'EmployeeAxaptaExport_' . $time_stamp;
+				// $file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
+				// 	$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
+				// 		$sheet->fromArray($export_data, NULL, 'A1');
+				// 		$sheet->row(1, $excel_header);
+				// 		$sheet->row(1, function ($row) {
+				// 		$row->setBackground('#07c63a');
+				// 		});
+				// 	});
+				// })->store('xlsx', storage_path('app/public/honda_oesl_employee_axapta_report/'));
+
+				// //SAVE TRAVELEX REPORTS
+				// $report_details = new ReportDetail;
+				// $report_details->company_id = $data->company_id;
+				// $report_details->type_id = 3791;
+				// $report_details->name = $file->filename;
+				// $report_details->path = 'storage/app/public/honda_oesl_employee_axapta_report/' . $outputfile . '.xlsx';
+				// $report_details->save();
+
 			} else {
 				$cronLog->remarks = "No employee trips found";
 			}
@@ -2692,10 +2810,10 @@ class ExportReportController extends Controller {
 			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode.' : '.$employeeName.' : '.$toCity, 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
 		}else if($type == 2) {
 			//TRAVEL EXPENSES
-			$toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
-				->where('visits.trip_id', $employeeTrip->id)
-				->pluck('ncities.name')
-				->first();
+			// $toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
+			// 	->where('visits.trip_id', $employeeTrip->id)
+			// 	->pluck('ncities.name')
+			// 	->first();
 
 			$lodgingGstValue = 0;
 			$travelExpenseTotalValue = 0;
@@ -2705,7 +2823,7 @@ class ExportReportController extends Controller {
 					$lodgingCity = !empty($lodging->city->name) ? $lodging->city->name : '';
 
 					if($lodging->amount > 0){
-						$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.' : '.$employeeName.' : '.$lodgingCity.' : Room Rent - '.$lodging->gstin, $lodging->amount, '0.00', 'C', $employeeTrip->outletCode, '901_22',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+						$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.' : '.$employeeName.' : '.$lodgingCity.' : Room Rent : '.$lodging->gstin, $lodging->amount, '0.00', 'C', $employeeTrip->outletCode, '901_22',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 						$travelExpenseTotalValue += $lodging->amount;
 					}
 
@@ -2771,6 +2889,8 @@ class ExportReportController extends Controller {
 					if ($selfVisit->booking) {
 						$transportTaxableValue = floatval($selfVisit->booking->amount + $selfVisit->booking->other_charges);
 						$travelExpenseTotalValue += $transportTaxableValue;
+
+						$toCity = !empty($selfVisit->toCity->name) ? $selfVisit->toCity->name : '';
 						$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.' : '.$employeeName.' : '.$toCity.' : Ticket', $transportTaxableValue, '0.00', 'C', $employeeTrip->outletCode, '901_07',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 					}
 				}
@@ -2779,7 +2899,7 @@ class ExportReportController extends Controller {
 			if ($employeeTrip->localTravels->isNotEmpty()) {
 				foreach ($employeeTrip->localTravels as $localTravel) {
 					if($localTravel->amount > 0){
-						$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.' : '.$employeeName.' : '.$localTravel->to.' : local convence', $localTravel->amount, '0.00', 'C', $employeeTrip->outletCode, '901_12',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+						$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.' : '.$employeeName.' : '.$localTravel->to.' : local conveyance', $localTravel->amount, '0.00', 'C', $employeeTrip->outletCode, '901_12',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 						$travelExpenseTotalValue += $localTravel->amount;
 					}
 				}
