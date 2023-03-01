@@ -1600,7 +1600,7 @@ class Trip extends Model {
 							->where('expense_type_id', 3001) //LODGING EXPENSES
 							->where('city_category_id', $lodge_city_category_id)
 							->first();
-						if ($lodge_expense_config) {
+						if (!empty($lodge_expense_config)) {
 							$lodge_share_data[$share_key]['normal'] = [
 								'eligible_amount' => $lodge_expense_config->eligible_amount,  
 							];
@@ -2775,14 +2775,13 @@ class Trip extends Model {
 						if($lodging_data['sharing_type_id'] == 3811){
 							//SHARING WITH CLAIM
 							$lodge_share_details = json_decode($lodging_data['sharing_employees'], true);
-							if(count($lodge_share_details) == 0){
+							if(empty($lodge_share_details) || count($lodge_share_details) == 0){
 								return response()->json([
 									'success' => false,
 									'errors' => ['Lodge sharing employee details is required']
 								]);
 							}
 							foreach ($lodge_share_details as $share_detail) {
-								// dd($share_detail);
 								$lodge_share_detail = LodgingShareDetail::firstOrNew([
 									'lodging_id' => $lodging->id,
 									'employee_id' => $share_detail['employee_id'],
@@ -2935,7 +2934,7 @@ class Trip extends Model {
 									->where('expense_type_id', 3001) //LODGING EXPENSES
 									->where('city_category_id', $lodge_city_category_id)
 									->first();
-								if ($lodge_expense_config) {
+								if (!empty($lodge_expense_config)) {
 									$lodge_share_data[$share_key]['normal'] = [
 										'eligible_amount' => $lodge_expense_config->eligible_amount,  
 									];

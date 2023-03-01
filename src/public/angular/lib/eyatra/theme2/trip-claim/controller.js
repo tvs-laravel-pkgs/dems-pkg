@@ -585,6 +585,15 @@ app.component('eyatraTripClaimForm', {
             $('#sharing-detail-modal').modal('hide');
         }
 
+        $scope.sharingModalCloseHanlder = function(){
+            var index = self.sharing_detail.index;
+            self.sharing_detail = [];
+            self.trip.lodgings[index].no_of_sharing = null;
+            self.trip.lodgings[index].sharing_employees = [];
+            self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+            $scope.assignEligibleAmount(self.trip.lodgings[index].city_id, 3001, index, self.trip.lodgings[index].stay_type_id);
+        }
+
         $scope.updateSharingType = function(index){
             self.trip.lodgings[index].sharing_type_id = '';
             self.trip.lodgings[index].no_of_sharing = '';
@@ -2507,6 +2516,7 @@ app.component('eyatraTripClaimForm', {
                 city_id: '',
                 lodge_name: '',
                 stay_type_id: '',
+                sharing_type_id: 3812,
                 has_multiple_tax_invoice: 'No',
                 eligible_amount: '0.00',
                 check_in_date: '',
