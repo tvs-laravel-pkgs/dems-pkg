@@ -127,6 +127,10 @@ class Lodging extends Model {
 		return $this->hasOne('Uitoux\EYatra\LodgingTaxInvoice', 'lodging_id')->where('type_id', 3775);
 	}
 
+	public function sharingType() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'sharing_type_id');
+	}
+
 	public function shareDetails() {
 		return $this->hasMany('Uitoux\EYatra\LodgingShareDetail', 'lodging_id');
 	}

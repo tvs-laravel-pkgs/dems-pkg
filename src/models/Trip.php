@@ -1579,13 +1579,21 @@ class Trip extends Model {
 						'outlets.code as outlet_code',
 						'outlets.name as outlet_name',
 						'users.name as user_name',
+						'grades.name as grade',
+						'designations.name as designation',
+						'sbus.name as sbu',
 					])
 						->join('employees', 'employees.id', 'lodging_share_details.employee_id')
-						->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+						->join('outlets', 'outlets.id', 'employees.outlet_id')
+						->join('entities as grades', 'grades.id', 'employees.grade_id')
+						->leftjoin('designations', 'designations.id', 'employees.designation_id')
+						->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 						->join('users', 'users.entity_id', 'employees.id')
 						->where('users.user_type_id', 3121) //EMPLOYEE
 						->where('lodging_share_details.id',$share_data->id)
 						->first();
+
+					$lodge_share_data[$share_key]->eligible_amount = 0.00;
 
 					$lodge_city_category_id = NCity::where('id', $lodge_data->city_id)
 						->pluck('category_id')
@@ -1604,6 +1612,7 @@ class Trip extends Model {
 							$lodge_share_data[$share_key]['normal'] = [
 								'eligible_amount' => $lodge_expense_config->eligible_amount,  
 							];
+							$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 						}
 					}
 				}
@@ -1720,6 +1729,14 @@ class Trip extends Model {
 			'lodgings.city',
 			'lodgings.stateType',
 			'lodgings.attachments',
+			'lodgings.sharingType',
+			'lodgings.shareDetails',
+			'lodgings.shareDetails.employee',
+			'lodgings.shareDetails.employee.user',
+			'lodgings.shareDetails.employee.outlet',
+			'lodgings.shareDetails.employee.grade',
+			'lodgings.shareDetails.employee.designation',
+			'lodgings.shareDetails.employee.Sbu',
 			'boardings',
 			'boardings.stateType',
 			'boardings.city',
@@ -2913,13 +2930,20 @@ class Trip extends Model {
 								'outlets.code as outlet_code',
 								'outlets.name as outlet_name',
 								'users.name as user_name',
+								'grades.name as grade',
+								'designations.name as designation',
+								'sbus.name as sbu',
 							])
 								->join('employees', 'employees.id', 'lodging_share_details.employee_id')
-								->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+								->join('outlets', 'outlets.id', 'employees.outlet_id')
+								->join('entities as grades', 'grades.id', 'employees.grade_id')
+								->leftjoin('designations', 'designations.id', 'employees.designation_id')
+								->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 								->join('users', 'users.entity_id', 'employees.id')
 								->where('users.user_type_id', 3121) //EMPLOYEE
 								->where('lodging_share_details.id',$share_data->id)
 								->first();
+							$lodge_share_data[$share_key]->eligible_amount = 0.00;
 
 							$lodge_city_category_id = NCity::where('id', $lodge_data->city_id)
 								->pluck('category_id')
@@ -2938,6 +2962,7 @@ class Trip extends Model {
 									$lodge_share_data[$share_key]['normal'] = [
 										'eligible_amount' => $lodge_expense_config->eligible_amount,  
 									];
+									$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 								}
 							}
 						}
@@ -4257,12 +4282,19 @@ public static function saveVerifierClaim($request){
 				'outlets.code as outlet_code',
 				'outlets.name as outlet_name',
 				'users.name as user_name',
+				'grades.name as grade',
+				'designations.name as designation',
+				'sbus.name as sbu',
 			])
-				->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+				->join('outlets', 'outlets.id', 'employees.outlet_id')
+				->join('entities as grades', 'grades.id', 'employees.grade_id')
+				->leftjoin('designations', 'designations.id', 'employees.designation_id')
+				->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 				->join('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)//EMPLOYEE
 				->where('employees.id',$request->employee_id)
 				->first();
+			$data['employee']->eligible_amount = 0.00;
 			$city_category_id = NCity::where('id', $request->city_id)
 				->pluck('category_id')
 				->first();
@@ -4279,6 +4311,7 @@ public static function saveVerifierClaim($request){
 					$data['employee']['normal'] = [
 						'eligible_amount' => $lodge_expense_type->eligible_amount,  
 					];
+					$data['employee']->eligible_amount = $lodge_expense_type->eligible_amount;
 				}
 			}
 

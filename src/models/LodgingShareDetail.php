@@ -13,4 +13,8 @@ class LodgingShareDetail extends Model {
 		'lodging_id',
 		'employee_id',
 	];
+
+	public function employee() {
+		return $this->belongsTo('Uitoux\EYatra\Employee')->withTrashed();
+	}
 }

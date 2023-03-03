@@ -568,12 +568,20 @@ app.component('eyatraTripClaimForm', {
                 return;
             }
 
+            if(Math.round((self.sharing_detail.sharing_employees).length) != Math.round(self.sharing_detail.no_of_sharing)){
+                custom_noty('error', 'Kindly add the balance employee detail');
+                return;
+            }
+
             $('#sharing-detail-save').button('loading');
             var index = self.sharing_detail.index;
             var total_sharing_normal_eligible_amt = 0;
             $(self.sharing_detail.sharing_employees).each(function(key, data) {
-                if(data.normal.eligible_amount){
-                    total_sharing_normal_eligible_amt += parseFloat(data.normal.eligible_amount);
+                // if(data.normal.eligible_amount){
+                //     total_sharing_normal_eligible_amt += parseFloat(data.normal.eligible_amount);
+                // }
+                if(data.eligible_amount){
+                    total_sharing_normal_eligible_amt += parseFloat(data.eligible_amount);
                 }
             });
 
@@ -595,11 +603,19 @@ app.component('eyatraTripClaimForm', {
         }
 
         $scope.updateSharingType = function(index){
-            self.trip.lodgings[index].sharing_type_id = '';
+            // self.trip.lodgings[index].sharing_type_id = '';
             self.trip.lodgings[index].no_of_sharing = '';
             self.trip.lodgings[index].sharing_employees = [];
             self.trip.lodgings[index].sharing_home_eligible_amt = 0;
             self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+            if(self.trip.lodgings[index].stay_type_id == 3340){
+                //LODGE STAY
+                if(!self.trip.lodgings[index].sharing_type_id){
+                    self.trip.lodgings[index].sharing_type_id = 3812; //SHARING WITH NO CLAIM
+                }
+            }else{
+                self.trip.lodgings[index].sharing_type_id = '';
+            }
         }
 
         // Proof document by Karthick T on 07-04-2022
@@ -2516,7 +2532,7 @@ app.component('eyatraTripClaimForm', {
                 city_id: '',
                 lodge_name: '',
                 stay_type_id: '',
-                sharing_type_id: 3812,
+                // sharing_type_id: 3812,
                 has_multiple_tax_invoice: 'No',
                 eligible_amount: '0.00',
                 check_in_date: '',
