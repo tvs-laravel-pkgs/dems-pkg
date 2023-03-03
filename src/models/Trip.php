@@ -2791,6 +2791,30 @@ class Trip extends Model {
 						//LODGE SHARE SAVE
 						if($lodging_data['sharing_type_id'] == 3811){
 							//SHARING WITH CLAIM
+
+							if(isset($lodging_data['gstin']) && isset($lodging_data['reference_number']) && isset($lodging_data['invoice_date'])){
+								$claim_share_exist_check = Lodging::select([
+									'lodgings.id',
+									'ey_employee_claims.number',
+								])
+									->join('trips','trips.id','lodgings.trip_id')
+									->join('ey_employee_claims','ey_employee_claims.trip_id','trips.id')
+									->where('lodgings.trip_id','!=', $request->trip_id)
+									->where('lodgings.gstin', $lodging_data['gstin'])
+									->where('lodgings.reference_number', $lodging_data['reference_number'])
+									->where('lodgings.invoice_date', date('Y-m-d', strtotime($lodging_data['invoice_date'])))
+									->whereNotIn('trips.status_id', [3032,3038]) //CANCEL , AUTO CANCEL
+									->whereNotIn('ey_employee_claims.status_id', [3039]) //AUTO CANCEL
+									->first();
+
+								if(!empty($claim_share_exist_check)){
+									return response()->json([
+										'success' => false,
+										'errors' => ['Claim already shared for this details. Claim number : '.$claim_share_exist_check->number]
+									]);
+								}
+							}
+
 							$lodge_share_details = json_decode($lodging_data['sharing_employees'], true);
 							if(empty($lodge_share_details) || count($lodge_share_details) == 0){
 								return response()->json([

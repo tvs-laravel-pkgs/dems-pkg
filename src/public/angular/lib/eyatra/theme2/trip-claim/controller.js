@@ -370,7 +370,8 @@ app.component('eyatraTripClaimForm', {
                     // $scope.stayDaysEach();
                     // $scope.boardDaysEach();
                 }, 1000);
-                self.is_deviation = self.trip.employee.trip_employee_claim.is_deviation;
+                // self.is_deviation = self.trip.employee.trip_employee_claim.is_deviation;
+                self.is_deviation = self.trip.employee.trip_employee_claim ? self.trip.employee.trip_employee_claim.is_deviation : 0;
                 self.travelCal();
                 self.lodgingCal();
                 self.boardingCal();
@@ -473,6 +474,7 @@ app.component('eyatraTripClaimForm', {
                 self.sharing_detail.index = index;
                 self.sharing_detail.no_of_sharing = self.trip.lodgings[index].no_of_sharing ? self.trip.lodgings[index].no_of_sharing : null;
                 self.sharing_detail.sharing_employees = self.trip.lodgings[index].sharing_employees ? self.trip.lodgings[index].sharing_employees : [];
+                $scope.sharingEmployeeEligibleCalculation();
                 $('#sharing-detail-modal').modal('show');
             }else{
                 self.trip.lodgings[index].no_of_sharing = null;
@@ -503,6 +505,7 @@ app.component('eyatraTripClaimForm', {
 
         $scope.noOfSharingHandler = function(){
             self.sharing_detail.sharing_employees = [];
+            self.sharing_detail.total_eligible_amount = 0;
         }
 
         $scope.sharingEmployeeChangeHandler = function (employee_id){
@@ -545,6 +548,7 @@ app.component('eyatraTripClaimForm', {
                         self.sharing_detail.employee = [];
                         self.sharing_detail.sharing_employees.push(response.data.employee);
                         self.sharing_detail.sharing_employees = self.sharing_detail.sharing_employees;
+                        $scope.sharingEmployeeEligibleCalculation();
                     }
                     $scope.$apply();
                 })
@@ -556,6 +560,7 @@ app.component('eyatraTripClaimForm', {
 
         self.removeSharingEmployee = function(index) {
             self.sharing_detail.sharing_employees.splice(index, 1);
+            $scope.sharingEmployeeEligibleCalculation();
         }
 
         $scope.sharingDetailSave = function(){
@@ -616,6 +621,16 @@ app.component('eyatraTripClaimForm', {
             }else{
                 self.trip.lodgings[index].sharing_type_id = '';
             }
+        }
+
+        $scope.sharingEmployeeEligibleCalculation = function(){
+            var total_eligible_amount = 0;
+            $(self.sharing_detail.sharing_employees).each(function(index, employee) {
+                if(employee.eligible_amount){
+                    total_eligible_amount += parseFloat(employee.eligible_amount);
+                }
+            });
+            self.sharing_detail.total_eligible_amount = total_eligible_amount.toFixed(2);
         }
 
         // Proof document by Karthick T on 07-04-2022
