@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
+use Uitoux\EYatra\LodgingShareDetail;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Storage;
 use Validator;
@@ -424,5 +425,74 @@ class TripClaimController extends Controller {
 	public function getLodgeSharingEmployee(Request $request) {
 		return Trip::getLodgeSharingEmployee($request);
 	}
+
+	public function getSharedClaim() {
+		try {
+			$lodge_sharing_details = LodgingShareDetail::select([
+				'lodging_share_details.id',
+				'users.name as employee_name',
+				'lodgings.invoice_date',
+			])
+				->join('lodgings','lodgings.id','lodging_share_details.lodging_id')
+				->join('trips','trips.id','lodgings.trip_id')
+				->join('ey_employee_claims','ey_employee_claims.trip_id','trips.id')
+				->join('employees','employees.id','ey_employee_claims.employee_id')
+				->join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121) //EMPLOYEE
+				->where('lodging_share_details.is_shared_claim_ok', 0) //NO
+				->where('lodging_share_details.employee_id', Auth::user()->entity_id)
+				->get();
+			$user = Auth::user();
+			return response()->json([
+				'success' => true,
+				'data' => compact('lodge_sharing_details','user'),
+			]);
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
+	}
+
+	public function sharedClaimUpdate(Request $request){
+		// dd($request->all());
+        try {
+            $validator = Validator::make($request->all(), [
+                'id' => [
+                    'required',
+                    'exists:lodging_share_details,id',
+                ],
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+					'message' => 'Validation Errors',
+                    'errors' => $validator->errors()->all(),
+                ]);
+			}
+        	DB::beginTransaction();
+       
+            $lodge_share_detail = LodgingShareDetail::find($request->id);
+            $lodge_share_detail->is_shared_claim_ok = 1; //YES
+            $lodge_share_detail->save();
+            $message = 'Details updated successfully!';
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+        }
+    }
 
 }

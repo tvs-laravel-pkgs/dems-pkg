@@ -4018,3 +4018,89 @@ app.component('eyatraTripClaimView', {
 
     }
 });
+
+
+app.component('sharedClaimDetail', {
+    templateUrl: eyatra_shared_claim_detail_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        $.ajax({
+            url: laravel_routes['getSharedClaimDetails'],
+            method: "get",
+        })
+        .done(function (res) {
+            if (!res.success) {
+                var errors = '';
+                for (var i in res.errors) {
+                    errors += '<li>' + res.errors[i] + '</li>';
+                }
+                custom_noty('error', errors);
+                return;
+            }
+            self.user = res.data.user;
+            self.shared_claim_details = res.data.lodge_sharing_details;
+
+            if((self.shared_claim_details).length > 0){
+                $('#shared-claim-detail-modal').modal('show');
+            }else{
+                $scope.updateLaterHandler();
+            }
+            $scope.$apply();
+        })
+        .fail(function (xhr) {
+            custom_noty('error', 'Something went wrong at server');
+        });
+
+        $scope.okHandler = function(id, index){
+            $('#'+index+'_shared_claim_btn').prop('disabled', true);
+            $.ajax({
+                url: laravel_routes['sharedClaimUpdateStatus'],
+                method: 'POST',
+                data: {
+                    'id': id,
+                },
+            })
+            .done(function (response) {
+                $('#'+index+'_shared_claim_btn').prop('disabled', false);
+                if (!response.success) {
+                    var errors = '';
+                    for (var i in response.errors) {
+                        errors += '<li>' + response.errors[i] + '</li>';
+                    }
+                    custom_noty('error', errors);
+                    return;
+                } else {
+                    self.shared_claim_details.splice(index, 1);
+
+                    if((self.shared_claim_details).length == 0){
+                        $scope.updateLaterHandler();
+                    }
+                }
+                $scope.$apply();
+            })
+            .fail(function (xhr) {
+                $('#'+index+'_shared_claim_btn').prop('disabled', false);
+                custom_noty('error', 'Something went wrong at server');
+            });
+        }
+
+        $scope.updateLaterHandler = function(){
+            $('#shared-claim-detail-modal').modal('hide');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+
+            if(self.hasPermission('eyatra-indv-trip-approval')){
+                $location.path('/trip/approvals');
+            }else{
+                if(self.user.user_type_id == 3121 && self.user.mail_mob_update == 0){
+                    $location.path('/profile');
+                }else{
+                    $location.path('/dashboard');
+                }
+            }
+        }
+
+        $rootScope.loading = false;
+    }
+});

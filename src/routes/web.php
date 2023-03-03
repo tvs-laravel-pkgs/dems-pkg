@@ -617,6 +617,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/travelx-cancel/get-list', 'Uitoux\EYatra\TravelxAutoCancelController@list')->name('listEYatraTravelxCancel');
 		// MASTER >> TRAVELX AUTO CANCEL
 		Route::get('eyatra/master-sms/get-list', 'Uitoux\EYatra\MasterSmsController@list')->name('listEYatraMasterSms');
+
+		Route::get('shared-claim/details', 'Uitoux\EYatra\TripClaimController@getSharedClaim')->name('getSharedClaimDetails');
+		Route::post('shared-claim/update-status', 'Uitoux\EYatra\TripClaimController@sharedClaimUpdate')->name('sharedClaimUpdateStatus');
 	});
 });
 
