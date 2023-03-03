@@ -510,6 +510,11 @@ app.component('eyatraTripClaimForm', {
 
         $scope.sharingEmployeeChangeHandler = function (employee_id){
             if(employee_id){
+                if(Math.round(self.sharing_detail.no_of_sharing) == 0){
+                    custom_noty('error', 'Enter the number of sharing employee');
+                    return;
+                }
+
                 var employee_exist = false;
                 if((self.sharing_detail.sharing_employees).length > 0){
                     $(self.sharing_detail.sharing_employees).each(function(key, data) {
@@ -519,7 +524,7 @@ app.component('eyatraTripClaimForm', {
                     });
                 }
                 if(employee_exist == true){
-                    custom_noty('error', 'Employee already added in queue');
+                    custom_noty('error', 'Sharing Employee already added in queue');
                     return;
                 }
 
@@ -564,8 +569,9 @@ app.component('eyatraTripClaimForm', {
         }
 
         $scope.sharingDetailSave = function(){
-            if (!self.sharing_detail.no_of_sharing) {
-                custom_noty('error', "No of sharing is required");
+            // if (!self.sharing_detail.no_of_sharing) {
+            if (Math.round(self.sharing_detail.no_of_sharing) == 0) {
+                custom_noty('error', "Enter the number of sharing employee");
                 return;
             }
             if ((self.sharing_detail.sharing_employees).length == 0) {
@@ -574,7 +580,7 @@ app.component('eyatraTripClaimForm', {
             }
 
             if(Math.round((self.sharing_detail.sharing_employees).length) != Math.round(self.sharing_detail.no_of_sharing)){
-                custom_noty('error', 'Kindly add the balance employee detail');
+                custom_noty('error', 'Kindly add the balance sharing employee detail');
                 return;
             }
 
@@ -611,7 +617,7 @@ app.component('eyatraTripClaimForm', {
             // self.trip.lodgings[index].sharing_type_id = '';
             self.trip.lodgings[index].no_of_sharing = '';
             self.trip.lodgings[index].sharing_employees = [];
-            self.trip.lodgings[index].sharing_home_eligible_amt = 0;
+            // self.trip.lodgings[index].sharing_home_eligible_amt = 0;
             self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
             if(self.trip.lodgings[index].stay_type_id == 3340){
                 //LODGE STAY

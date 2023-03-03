@@ -1598,9 +1598,9 @@ class Trip extends Model {
 					$lodge_city_category_id = NCity::where('id', $lodge_data->city_id)
 						->pluck('category_id')
 						->first();
-					$lodge_share_data[$share_key]['normal'] = [
-						'eligible_amount' => 0,  
-					];
+					// $lodge_share_data[$share_key]['normal'] = [
+					// 	'eligible_amount' => 0,  
+					// ];
 
 					if($lodge_city_category_id){
 						$lodge_expense_config = DB::table('grade_expense_type')
@@ -1609,9 +1609,9 @@ class Trip extends Model {
 							->where('city_category_id', $lodge_city_category_id)
 							->first();
 						if (!empty($lodge_expense_config)) {
-							$lodge_share_data[$share_key]['normal'] = [
-								'eligible_amount' => $lodge_expense_config->eligible_amount,  
-							];
+							// $lodge_share_data[$share_key]['normal'] = [
+							// 	'eligible_amount' => $lodge_expense_config->eligible_amount,  
+							// ];
 							$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 						}
 					}
@@ -2972,9 +2972,9 @@ class Trip extends Model {
 							$lodge_city_category_id = NCity::where('id', $lodge_data->city_id)
 								->pluck('category_id')
 								->first();
-							$lodge_share_data[$share_key]['normal'] = [
-								'eligible_amount' => 0,  
-							];
+							// $lodge_share_data[$share_key]['normal'] = [
+							// 	'eligible_amount' => 0,  
+							// ];
 
 							if($lodge_city_category_id){
 								$lodge_expense_config = DB::table('grade_expense_type')
@@ -2983,9 +2983,9 @@ class Trip extends Model {
 									->where('city_category_id', $lodge_city_category_id)
 									->first();
 								if (!empty($lodge_expense_config)) {
-									$lodge_share_data[$share_key]['normal'] = [
-										'eligible_amount' => $lodge_expense_config->eligible_amount,  
-									];
+									// $lodge_share_data[$share_key]['normal'] = [
+									// 	'eligible_amount' => $lodge_expense_config->eligible_amount,  
+									// ];
 									$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 								}
 							}
@@ -4322,9 +4322,9 @@ public static function saveVerifierClaim($request){
 			$city_category_id = NCity::where('id', $request->city_id)
 				->pluck('category_id')
 				->first();
-			$data['employee']['normal'] = [
-				'eligible_amount' => 0,  
-			];
+			// $data['employee']['normal'] = [
+			// 	'eligible_amount' => 0,  
+			// ];
 			if($city_category_id){
 				$lodge_expense_type = DB::table('grade_expense_type')
 					->where('grade_id', $data['employee']->grade_id)
@@ -4332,9 +4332,9 @@ public static function saveVerifierClaim($request){
 					->where('city_category_id', $city_category_id)
 					->first();
 				if ($lodge_expense_type) {
-					$data['employee']['normal'] = [
-						'eligible_amount' => $lodge_expense_type->eligible_amount,  
-					];
+					// $data['employee']['normal'] = [
+					// 	'eligible_amount' => $lodge_expense_type->eligible_amount,  
+					// ];
 					$data['employee']->eligible_amount = $lodge_expense_type->eligible_amount;
 				}
 			}
