@@ -3256,15 +3256,15 @@ class Trip extends Model {
 				} else {
 					$employee_claim->is_deviation = $request->is_deviation;
 				}
-				$grade_travel_mode_eligibility = DB::table('grade_travel_mode')->where('travel_mode_id', $request->travel_mode_id)->first();
-				if ($grade_travel_mode_eligibility && $grade_travel_mode_eligibility->deviation_eligiblity == 2) {
-					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
-				} else {
-					// $employee_claim->is_deviation = 1;
-					if($is_grade_leader == false){
-						$employee_claim->is_deviation = 1;
-					}
-				}
+				// $grade_travel_mode_eligibility = DB::table('grade_travel_mode')->where('travel_mode_id', $request->travel_mode_id)->first();
+				// if ($grade_travel_mode_eligibility && $grade_travel_mode_eligibility->deviation_eligiblity == 2) {
+				// 	$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+				// } else {
+				// 	// $employee_claim->is_deviation = 1;
+				// 	if($is_grade_leader == false){
+				// 		$employee_claim->is_deviation = 1;
+				// 	}
+				// }
 
 				// If transport exist and attachment not found the claim will go to deviation
 				$transport_attachment_count = Attachment::where('attachment_of_id', 3751)
