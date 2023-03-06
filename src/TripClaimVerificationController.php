@@ -174,7 +174,7 @@ class TripClaimVerificationController extends Controller {
 		//Approval Log
 		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3622, Auth::user()->entity_id, Carbon::now());
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
-		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
+		// $notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
 
 		return response()->json(['success' => true]);
 	}

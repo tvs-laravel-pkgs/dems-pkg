@@ -620,6 +620,10 @@ Route::group(['middleware' => ['web']], function () {
 
 		Route::get('shared-claim/details', 'Uitoux\EYatra\TripClaimController@getSharedClaim')->name('getSharedClaimDetails');
 		Route::post('shared-claim/update-status', 'Uitoux\EYatra\TripClaimController@sharedClaimUpdate')->name('sharedClaimUpdateStatus');
+
+		// MASTER >> REPORTING MANAGER
+		Route::get('eyatra/master-reporting/employee-list', 'Uitoux\EYatra\EmployeeController@reportingEmployees')->name('reportingEmployees');
+		Route::post('eyatra/master-reporting/employee', 'Uitoux\EYatra\EmployeeController@saveEYatraReportingEmployees')->name('saveEYatraReportingEmployees');
 	});
 });
 
