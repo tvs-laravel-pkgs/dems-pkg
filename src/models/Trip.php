@@ -2587,6 +2587,24 @@ class Trip extends Model {
 					//Delete previous entries
 					$lodgings = Lodging::where('trip_id', $request->trip_id)->forceDelete();
 
+					$lodging_unique_share_with_claims = [];
+					foreach($request->lodgings as $lodge_info) {
+						if($lodge_info['sharing_type_id'] == 3811){
+							//SHARING WITH CLAIM
+							if(isset($lodge_info['gstin']) && isset($lodge_info['reference_number']) && isset($lodge_info['invoice_date'])){
+							    $logding_row = $lodge_info['gstin'] . "|" . $lodge_info['reference_number'] . "|" . $lodge_info['invoice_date'];
+							    isset($lodging_unique_share_with_claims[$logding_row]) or $lodging_unique_share_with_claims[$logding_row] = $lodge_info;
+							}
+						}
+					}
+
+					if(count($lodging_unique_share_with_claims) > 0  && count($request->lodgings) != count(array_values($lodging_unique_share_with_claims))){
+						return response()->json([
+							'success' => false,
+							'errors' => ['Cannot enter the same GSTIN, Invoice number, Invoice Date for sharing claim']
+						]);
+					}
+
 					$lodging_total_amount = 0;
 					foreach ($request->lodgings as $lodgeKey => $lodging_data) {
 
@@ -2810,8 +2828,8 @@ class Trip extends Model {
 									->where('lodgings.gstin', $lodging_data['gstin'])
 									->where('lodgings.reference_number', $lodging_data['reference_number'])
 									->where('lodgings.invoice_date', date('Y-m-d', strtotime($lodging_data['invoice_date'])))
-									->whereNotIn('trips.status_id', [3032,3038]) //CANCEL , AUTO CANCEL
-									->whereNotIn('ey_employee_claims.status_id', [3039]) //AUTO CANCEL
+									->whereNotIn('trips.status_id', [3032,3038,3022]) //CANCEL , AUTO CANCEL, MANAGER REJECTED
+									->whereNotIn('ey_employee_claims.status_id', [3032,3039,3024]) //CANCEL, AUTO CANCEL, CLAIM REJECTED
 									->first();
 
 								if(!empty($claim_share_exist_check)){
