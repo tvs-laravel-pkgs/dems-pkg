@@ -26,6 +26,7 @@ use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\LodgingTaxInvoice;
+use Uitoux\EYatra\LodgingShareDetail;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\EmployeeClaim;
@@ -1301,6 +1302,7 @@ class Trip extends Model {
 				'lodgings.stateType',
 				'lodgings.city',
 				'lodgings.attachments',
+				'lodgings.shareDetails',
 				'boardings',
 				'boardings.stateType',
 				'boardings.city',
@@ -1534,6 +1536,7 @@ class Trip extends Model {
 		$local_travel_mode_list = collect($local_travels_expense_types->prepend(['id' => '', 'name' => 'Select Local Travel / Expense Type']));
 		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$boarding_type_list = collect(Config::getBoardingTypeList()->prepend(['id' => '', 'name' => 'Select Type']));
+		$sharing_type_list = collect(Config::whereIn('id', [3811,3812])->select('id', 'name')->get());
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
@@ -1543,6 +1546,7 @@ class Trip extends Model {
 			'boarding_type_list' => $boarding_type_list,
 			'booking_type_list' => $booking_type_list,
 			'travel_cities_list' => $travel_cities_list,
+			'sharing_type_list' => $sharing_type_list,
 		];
 		$state_code = NState::leftJoin('ncities', 'ncities.state_id', 'nstates.id')
 			->leftJoin('ey_addresses', 'ey_addresses.city_id', 'ncities.id')
@@ -1561,6 +1565,61 @@ class Trip extends Model {
 		$km_end_twowheeler = VisitBooking::latest('id')->where('travel_mode_id', '=', 15)->pluck('km_end')->first();
 		$km_end_fourwheeler = VisitBooking::latest('id')->where('travel_mode_id', '=', 16)->pluck('km_end')->first();
 		$data['gstin_enable'] = $gstin_enable;
+
+		//LODGE SHARE DETAILS
+		if(count($trip->lodgings) > 0){
+			foreach ($trip->lodgings as $lodge_data) {
+				$lodge_share_data = [];
+				foreach ($lodge_data->shareDetails as $share_key => $share_data) {
+					$lodge_share_data[$share_key] = LodgingShareDetail::select([
+						'lodging_share_details.id',
+						'employees.id as employee_id',
+						'employees.code as employee_code',
+						'employees.grade_id',
+						'outlets.code as outlet_code',
+						'outlets.name as outlet_name',
+						'users.name as user_name',
+						'grades.name as grade',
+						'designations.name as designation',
+						'sbus.name as sbu',
+					])
+						->join('employees', 'employees.id', 'lodging_share_details.employee_id')
+						->join('outlets', 'outlets.id', 'employees.outlet_id')
+						->join('entities as grades', 'grades.id', 'employees.grade_id')
+						->leftjoin('designations', 'designations.id', 'employees.designation_id')
+						->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+						->join('users', 'users.entity_id', 'employees.id')
+						->where('users.user_type_id', 3121) //EMPLOYEE
+						->where('lodging_share_details.id',$share_data->id)
+						->first();
+
+					$lodge_share_data[$share_key]->eligible_amount = 0.00;
+
+					$lodge_city_category_id = NCity::where('id', $lodge_data->city_id)
+						->pluck('category_id')
+						->first();
+					// $lodge_share_data[$share_key]['normal'] = [
+					// 	'eligible_amount' => 0,  
+					// ];
+
+					if($lodge_city_category_id){
+						$lodge_expense_config = DB::table('grade_expense_type')
+							->where('grade_id', $lodge_share_data[$share_key]->grade_id)
+							->where('expense_type_id', 3001) //LODGING EXPENSES
+							->where('city_category_id', $lodge_city_category_id)
+							->first();
+						if (!empty($lodge_expense_config)) {
+							// $lodge_share_data[$share_key]['normal'] = [
+							// 	'eligible_amount' => $lodge_expense_config->eligible_amount,  
+							// ];
+							$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
+						}
+					}
+				}
+				$lodge_data['sharing_employees'] = $lodge_share_data;
+			}
+		}
+
 		$data['trip'] = $trip;
 		$data['km_end_twowheeler'] = $km_end_twowheeler;
 		$data['km_end_fourwheeler'] = $km_end_fourwheeler;
@@ -1670,6 +1729,14 @@ class Trip extends Model {
 			'lodgings.city',
 			'lodgings.stateType',
 			'lodgings.attachments',
+			'lodgings.sharingType',
+			'lodgings.shareDetails',
+			'lodgings.shareDetails.employee',
+			'lodgings.shareDetails.employee.user',
+			'lodgings.shareDetails.employee.outlet',
+			'lodgings.shareDetails.employee.grade',
+			'lodgings.shareDetails.employee.designation',
+			'lodgings.shareDetails.employee.Sbu',
 			'boardings',
 			'boardings.stateType',
 			'boardings.city',
@@ -1973,7 +2040,7 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
-		 //dd($request->all());
+		 // dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -2590,6 +2657,8 @@ class Trip extends Model {
 						$lodging->created_by = Auth::user()->id;
 						$lodging->has_multiple_tax_invoice = 0;
 						$lodging->tax_invoice_amount = NULL;
+						$lodging->no_of_sharing = $lodging_data['no_of_sharing'];
+						$lodging->sharing_type_id = $lodging_data['sharing_type_id'];
 						$lodging->save();
 
 						$lodging_total = 0;
@@ -2726,6 +2795,54 @@ class Trip extends Model {
 							$roundoffTaxInvoice->save();
 						}
 
+						//LODGE SHARE SAVE
+						if($lodging_data['sharing_type_id'] == 3811){
+							//SHARING WITH CLAIM
+
+							if(isset($lodging_data['gstin']) && isset($lodging_data['reference_number']) && isset($lodging_data['invoice_date'])){
+								$claim_share_exist_check = Lodging::select([
+									'lodgings.id',
+									'ey_employee_claims.number',
+								])
+									->join('trips','trips.id','lodgings.trip_id')
+									->join('ey_employee_claims','ey_employee_claims.trip_id','trips.id')
+									->where('lodgings.trip_id','!=', $request->trip_id)
+									->where('lodgings.gstin', $lodging_data['gstin'])
+									->where('lodgings.reference_number', $lodging_data['reference_number'])
+									->where('lodgings.invoice_date', date('Y-m-d', strtotime($lodging_data['invoice_date'])))
+									->whereNotIn('trips.status_id', [3032,3038]) //CANCEL , AUTO CANCEL
+									->whereNotIn('ey_employee_claims.status_id', [3039]) //AUTO CANCEL
+									->first();
+
+								if(!empty($claim_share_exist_check)){
+									return response()->json([
+										'success' => false,
+										'errors' => ['Claim already shared for this details. Claim number : '.$claim_share_exist_check->number]
+									]);
+								}
+							}
+
+							$lodge_share_details = json_decode($lodging_data['sharing_employees'], true);
+							if(empty($lodge_share_details) || count($lodge_share_details) == 0){
+								return response()->json([
+									'success' => false,
+									'errors' => ['Lodge sharing employee details is required']
+								]);
+							}
+							foreach ($lodge_share_details as $share_detail) {
+								$lodge_share_detail = LodgingShareDetail::firstOrNew([
+									'lodging_id' => $lodging->id,
+									'employee_id' => $share_detail['employee_id'],
+								]);
+								if (!$lodge_share_detail->exists) {
+									$lodge_share_detail->created_at = Carbon::now();
+								} else {
+									$lodge_share_detail->updated_at = Carbon::now();
+								}
+								$lodge_share_detail->save();
+							}
+						}
+
 						//STORE ATTACHMENT
 						// $item_images = storage_path('app/public/trip/lodgings/attachments/');
 						// Storage::makeDirectory($item_images, 0777);
@@ -2828,7 +2945,61 @@ class Trip extends Model {
 					'lodgings.city',
 					'lodgings.stateType',
 					'lodgings.attachments',
+					'lodgings.shareDetails',
 				])->find($request->trip_id);
+
+				//LODGE SHARE DETAILS
+				if(count($saved_lodgings->lodgings) > 0){
+					foreach ($saved_lodgings->lodgings as $lodge_data) {
+						$lodge_share_data = [];
+						foreach ($lodge_data->shareDetails as $share_key => $share_data) {
+							$lodge_share_data[$share_key] = LodgingShareDetail::select([
+								'lodging_share_details.id',
+								'employees.id as employee_id',
+								'employees.code as employee_code',
+								'employees.grade_id',
+								'outlets.code as outlet_code',
+								'outlets.name as outlet_name',
+								'users.name as user_name',
+								'grades.name as grade',
+								'designations.name as designation',
+								'sbus.name as sbu',
+							])
+								->join('employees', 'employees.id', 'lodging_share_details.employee_id')
+								->join('outlets', 'outlets.id', 'employees.outlet_id')
+								->join('entities as grades', 'grades.id', 'employees.grade_id')
+								->leftjoin('designations', 'designations.id', 'employees.designation_id')
+								->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+								->join('users', 'users.entity_id', 'employees.id')
+								->where('users.user_type_id', 3121) //EMPLOYEE
+								->where('lodging_share_details.id',$share_data->id)
+								->first();
+							$lodge_share_data[$share_key]->eligible_amount = 0.00;
+
+							$lodge_city_category_id = NCity::where('id', $lodge_data->city_id)
+								->pluck('category_id')
+								->first();
+							// $lodge_share_data[$share_key]['normal'] = [
+							// 	'eligible_amount' => 0,  
+							// ];
+
+							if($lodge_city_category_id){
+								$lodge_expense_config = DB::table('grade_expense_type')
+									->where('grade_id', $lodge_share_data[$share_key]->grade_id)
+									->where('expense_type_id', 3001) //LODGING EXPENSES
+									->where('city_category_id', $lodge_city_category_id)
+									->first();
+								if (!empty($lodge_expense_config)) {
+									// $lodge_share_data[$share_key]['normal'] = [
+									// 	'eligible_amount' => $lodge_expense_config->eligible_amount,  
+									// ];
+									$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
+								}
+							}
+						}
+						$lodge_data['sharing_employees'] = $lodge_share_data;
+					}
+				}
 
 				// dd($saved_lodgings);
 				//BOARDING CITIES LIST ==> NOT BEEN USED NOW
@@ -4140,6 +4311,99 @@ public static function saveVerifierClaim($request){
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage().$e->getLine()]]);
 		}
 }
+
+	public static function searchLodgeSharingEmployee($request) {
+		$key = $request->key;
+		$data['search_data'] = Employee::select(
+			'employees.id',
+			'users.name',
+			'employees.code'
+		)
+			->join('users', 'users.entity_id', 'employees.id')
+			->where(function ($q) use ($key) {
+				$q->where('employees.code', 'like', '%' . $key . '%')
+					->orWhere('users.name', 'like', '%' . $key . '%')
+				;
+			})
+			->where('users.user_type_id', 3121) //EMPLOYEE
+			->where('users.id', '!=', Auth::id())
+			->where('employees.company_id', Auth::user()->company_id)
+			->get();
+		return response()->json($data);
+	}
+
+	public static function getLodgeSharingEmployee($request) {
+		try{
+			$validator = Validator::make($request->all(), [
+				'employee_id' => [
+					'required',
+					'exists:employees,id',
+				],
+				'city_id' => [
+					'required',
+					'exists:ncities,id',
+				],
+			]);
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'errors' => $validator->errors()->all(),
+				]);
+			}
+
+			$data['employee'] = Employee::select([
+				'employees.id as employee_id',
+				'employees.code as employee_code',
+				'employees.grade_id',
+				'outlets.code as outlet_code',
+				'outlets.name as outlet_name',
+				'users.name as user_name',
+				'grades.name as grade',
+				'designations.name as designation',
+				'sbus.name as sbu',
+			])
+				->join('outlets', 'outlets.id', 'employees.outlet_id')
+				->join('entities as grades', 'grades.id', 'employees.grade_id')
+				->leftjoin('designations', 'designations.id', 'employees.designation_id')
+				->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+				->join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)//EMPLOYEE
+				->where('employees.id',$request->employee_id)
+				->first();
+			$data['employee']->eligible_amount = 0.00;
+			$city_category_id = NCity::where('id', $request->city_id)
+				->pluck('category_id')
+				->first();
+			// $data['employee']['normal'] = [
+			// 	'eligible_amount' => 0,  
+			// ];
+			if($city_category_id){
+				$lodge_expense_type = DB::table('grade_expense_type')
+					->where('grade_id', $data['employee']->grade_id)
+					->where('expense_type_id', 3001) //LODGE EXPENSE
+					->where('city_category_id', $city_category_id)
+					->first();
+				if ($lodge_expense_type) {
+					// $data['employee']['normal'] = [
+					// 	'eligible_amount' => $lodge_expense_type->eligible_amount,  
+					// ];
+					$data['employee']->eligible_amount = $lodge_expense_type->eligible_amount;
+				}
+			}
+
+			return response()->json([
+                'success' => true,
+                'data' => $data,
+            ]);
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
+	}
 	
 
 }
