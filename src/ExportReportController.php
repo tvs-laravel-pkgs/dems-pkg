@@ -2595,9 +2595,11 @@ class ExportReportController extends Controller {
 						'Unregflag',
 						'reversechrgind',
 						'Cnreason',
+						'LrNo',
 						'LrDate',
 						'LsOS',
 						'GrnNo',
+						'GrnDate',
 						'Qty',
 						'GSTIN',
 						'Paymref',
@@ -2883,7 +2885,7 @@ class ExportReportController extends Controller {
 
 			//LODGING GST TOTAL
 			if($lodgingGstValue && $lodgingGstValue > 0){
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':GSTClaim', '0.00', $lodgingGstValue, '', '', '', '', '', $employeeTrip->ax_company_code);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':GSTClaim', '0.00', $lodgingGstValue, 'C', '', '', '', '', $employeeTrip->ax_company_code);
 				$travelExpenseTotalValue += $lodgingGstValue;
 			}
 
@@ -2948,7 +2950,7 @@ class ExportReportController extends Controller {
 			}
 
 			if($travelExpenseTotalValue && $travelExpenseTotalValue > 0){
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode.':TravelExpTo:'.$employeeName, '0.00', $travelExpenseTotalValue, '', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '');
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode.':TravelExpTo:'.$employeeName, '0.00', $travelExpenseTotalValue, 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			}
 		}elseif($type == 3){
 			//PAYMENT JOURNAL
@@ -2982,7 +2984,7 @@ class ExportReportController extends Controller {
 				return $taxCgst + $taxSgst;
 			} else {
 				//INTER STATE (IGST)
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', '', '', '',  '', '', $employeeTrip->ax_company_code);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', 'C', '', '',  '', '', $employeeTrip->ax_company_code);
 				return $taxIgst;
 			}
 		}
@@ -3009,6 +3011,8 @@ class ExportReportController extends Controller {
 			'sup_inv_no' => $supInvNo,
 			'sup_inv_date' => $supInvDate,
 			'company' => $company,
+			'ref_no' => $supInvNo,
+			'ref_date' => $supInvDate,
 		);
 		$axaptaExport = new HondaAxaptaExport;
 		$axaptaExport->fill($data);
