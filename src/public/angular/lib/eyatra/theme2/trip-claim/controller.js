@@ -261,6 +261,7 @@ app.component('eyatraTripClaimForm', {
             self.gstin_enable = response.data.gstin_enable;
             self.km_end = response.data.km_end;
             self.state_code = response.data.state_code;
+            self.operating_states = response.data.operating_states;
             self.sbu_lists = response.data.sbu_lists;
             self.attachment_type_lists = response.data.attachment_type_lists;
             self.upload = response.data.upload;
@@ -2916,7 +2917,14 @@ app.component('eyatraTripClaimForm', {
                 if (gst_state_code == self.state_code) {
                     cgst_percentage = sgst_percentage = percentage / 2;
                 } else {
-                    igst_percentage = percentage;
+                    // igst_percentage = percentage;
+                    if($.inArray(gst_state_code, self.operating_states) !== -1)
+                    {
+                        cgst_percentage = sgst_percentage = percentage / 2;
+                        self.trip.lodgings[index]['igst_readonly'] = true;
+                    }else{
+                        igst_percentage = percentage;
+                    }
                 }
             }
             total_tax = 0;
