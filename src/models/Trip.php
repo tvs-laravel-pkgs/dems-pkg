@@ -30,6 +30,7 @@ use Uitoux\EYatra\LodgingShareDetail;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\EmployeeClaim;
+use Uitoux\EYatra\OperatingStates;
 use Validator;
 
 class Trip extends Model {
@@ -1626,6 +1627,10 @@ class Trip extends Model {
 		$data['grade_travel'] = $grade_travel;
 		$data['state_code'] = $state_code;
 		$data['sbu_lists'] = Sbu::getSbuList();
+		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
+			->where('operating_states.company_id', Auth::user()->company_id)
+			->pluck('nstates.gstin_state_code');
+
 		return response()->json($data);
 	}
 
