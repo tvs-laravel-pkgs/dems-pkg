@@ -3088,10 +3088,21 @@ app.component('eyatraTripClaimForm', {
             const amount = self.trip.lodgings[index]['amount'];
             const gst_number = self.trip.lodgings[index]['gstin'];
             var cgst_percentage = sgst_percentage = igst_percentage = 0;
+            const stayed_days = self.trip.lodgings[index]['stayed_days'];
+            let lodge_per_day_amt = 0;
+
             if (amount != undefined && amount && amount >= 1 && gst_number && gst_number.length == 15) {
                 const gst_state_code = gst_number.substr(0, 2);
                 percentage = 12;
-                if (amount >= 7500)
+
+                if(stayed_days && stayed_days > 0){
+                    lodge_per_day_amt = (amount / stayed_days);
+                }else{
+                    lodge_per_day_amt = amount;
+                }
+
+                // if (amount >= 7500)
+                if (lodge_per_day_amt >= 7500)
                     percentage = 18;
                 if (gst_state_code == self.state_code) {
                     cgst_percentage = sgst_percentage = percentage / 2;
