@@ -609,13 +609,18 @@ Route::group(['middleware' => ['web']], function () {
 		// Upload document in trip by Karthick T in 07-04-2022
 		Route::post('eyatra/trip/document-upload', 'Uitoux\EYatra\TripClaimController@uploadTripDocument')->name('uploadTripDocument');
 		Route::post('eyatra/trip/document-delete', 'Uitoux\EYatra\TripClaimController@deleteTripDocument')->name('deleteTripDocument');
-
+		Route::post('trip-claim/lodge-share/search-employee', 'Uitoux\EYatra\TripClaimController@searchLodgeSharingEmployee')->name('searchLodgeSharingEmployees');
+		Route::post('trip-claim/lodge-share/get-employee', 'Uitoux\EYatra\TripClaimController@getLodgeSharingEmployee')->name('getLodgeSharingEmployees');
 		// MASTER >> DEVIATION APPROVAL
 		Route::get('eyatra/deviation-approval/get-list', 'Uitoux\EYatra\DeviationController@list')->name('listEYatraDeviationApproval');
 		// MASTER >> TRAVELX AUTO CANCEL
 		Route::get('eyatra/travelx-cancel/get-list', 'Uitoux\EYatra\TravelxAutoCancelController@list')->name('listEYatraTravelxCancel');
 		// MASTER >> TRAVELX AUTO CANCEL
 		Route::get('eyatra/master-sms/get-list', 'Uitoux\EYatra\MasterSmsController@list')->name('listEYatraMasterSms');
+
+		Route::get('shared-claim/details', 'Uitoux\EYatra\TripClaimController@getSharedClaim')->name('getSharedClaimDetails');
+		Route::post('shared-claim/update-status', 'Uitoux\EYatra\TripClaimController@sharedClaimUpdate')->name('sharedClaimUpdateStatus');
+
 		// MASTER >> REPORTING MANAGER
 		Route::get('eyatra/master-reporting/employee-list', 'Uitoux\EYatra\EmployeeController@reportingEmployees')->name('reportingEmployees');
 		Route::post('eyatra/master-reporting/employee', 'Uitoux\EYatra\EmployeeController@saveEYatraReportingEmployees')->name('saveEYatraReportingEmployees');
