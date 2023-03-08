@@ -404,6 +404,8 @@ class TripBookingUpdateController extends Controller {
 			}
 
 			$visit = Visit::find($request->visit_id);
+			$visit->booking_status_id = 3065;	// Ticket Uploaded
+			$visit->save();
 			$trip = Trip::find($visit->trip_id);
 
 			//SAVE VISIT BOOKING
