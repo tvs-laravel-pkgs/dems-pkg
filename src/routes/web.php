@@ -616,6 +616,9 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/travelx-cancel/get-list', 'Uitoux\EYatra\TravelxAutoCancelController@list')->name('listEYatraTravelxCancel');
 		// MASTER >> TRAVELX AUTO CANCEL
 		Route::get('eyatra/master-sms/get-list', 'Uitoux\EYatra\MasterSmsController@list')->name('listEYatraMasterSms');
+		// MASTER >> REPORTING MANAGER
+		Route::get('eyatra/master-reporting/employee-list', 'Uitoux\EYatra\EmployeeController@reportingEmployees')->name('reportingEmployees');
+		Route::post('eyatra/master-reporting/employee', 'Uitoux\EYatra\EmployeeController@saveEYatraReportingEmployees')->name('saveEYatraReportingEmployees');
 	});
 });
 

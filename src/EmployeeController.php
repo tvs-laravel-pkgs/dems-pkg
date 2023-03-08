@@ -758,5 +758,89 @@ class EmployeeController extends Controller {
 		}
 		return response()->json(['success' => true, 'message' => $sms]);
 	}
+	// For Reporting Manager
+	public function reportingEmployees(Request $r) {
+		// dd($r->all());
+		$employeeDetails = [];
+		if ($r->id) {
+			$employeeDetails = Employee::select(
+					'employees.id',
+					'employees.code',
+					'users.name',
+					'users.email',
+					'users.mobile_number'
+				)->join('users', 'users.entity_id', 'employees.id')
+				->where('users.user_type_id', 3121)
+				->where('users.company_id', Auth::user()->company_id)
+				->where('employees.reporting_to_id', $r->id)
+				->groupBy('employees.id')
+				->get();
+		}
+		return response()->json($employeeDetails);
+	}
+	public function saveEYatraReportingEmployees(Request $r) {
+		// dd($r->all());
+		try {
+			$error_messages = [
+				'from_reporting_manager_id.required' => 'From manager is required',
+				'from_reporting_manager_id.exists' => 'From manager is not exist',
+				'to_reporting_manager_id.required' => 'From manager is required',
+				'to_reporting_manager_id.exists' => 'From manager is not exist',
+			];
+
+			$validator = Validator::make($r->all(), [
+				'from_reporting_manager_id' => [
+					'required:true',
+					'exists:employees,id',
+				],
+				'to_reporting_manager_id' => [
+					'required:true',
+					'exists:employees,id',
+				],
+			], $error_messages);
+
+			if ($validator->fails())
+				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+
+			if ($r->from_reporting_manager_id == $r->to_reporting_manager_id)
+				throw new \Exception('From manager and to manager both are same');
+			if (empty($r->employee_ids) || count($r->employee_ids) == 0)
+				throw new \Exception('Kindly select employees');
+
+			foreach ($r->employee_ids as $key => $employee_id) {
+				$employee = Employee::find($employee_id);
+				if (!$employee)
+					throw new \Exception('Selected employee not found');
+			}
+
+			DB::beginTransaction();
+			foreach ($r->employee_ids as $key => $employee_id) {
+				$employee = Employee::find($employee_id);
+				if ($employee) {
+					$employee->reporting_to_id = $r->to_reporting_manager_id;
+					$employee->updated_by = Auth::user()->id;
+					$employee->updated_at = Carbon::now();
+					$employee->save();
+
+					$activity['entity_id'] = $employee->id;
+					$activity['entity_type'] = 'Employee';
+					$activity['details'] = 'Reporting mananger updated to ' . $employee->reporting_to_id;
+					$activity['activity'] = 'Edit';
+					$activity_log = ActivityLog::saveLog($activity);
+				}
+			}
+			DB::commit();
+			return response()->json(['success' => true, 'message' => ['Reporting manager updated successfully']]);
+		} catch (Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+		} catch (\Throwable $e) {
+			DB::rollBack();
+			return response()->json(['success' => false, 'errors' => ['Throwable Error' => $e->getMessage()]]);
+		}
+	}
 
 }

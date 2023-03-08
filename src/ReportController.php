@@ -23,7 +23,8 @@ class ReportController extends Controller {
 		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
 		// $data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->where('id', '!=', 3027)->where('id', '!=', 3033)->where('id', '!=', 3035)->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
-		$data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->whereNotIn('id',[3025, 3027,3030, 3031, 3033, 3034, 3035, 3037])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		// $data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->whereNotIn('id',[3025, 3027,3030, 3031, 3033, 3034, 3035, 3037])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
+		$data['trip_status_list'] = collect(Config::select('name', 'id')->whereIn('config_type_id', [501, 535])->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->whereNotIn('id',[3025, 3027,3030, 3031, 3033, 3034, 3035, 3037])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 
 		$outstation_start_date = session('outstation_start_date');
 		$outstation_end_date = session('outstation_end_date');
@@ -66,7 +67,7 @@ class ReportController extends Controller {
 		return response()->json($data);
 	}
 
-	public function listOutstationTripReport(Request $r) {
+	public function listOutstationTripReportOld(Request $r) {
 		
 		if ($r->from_date != '<%$ctrl.start_date%>') {
 			Session::put('outstation_start_date', $r->from_date);
@@ -146,6 +147,105 @@ class ReportController extends Controller {
 				$img2 = asset('public/img/content/yatra/table/view.svg');
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 
+				return '
+				<a href="#!/trip/claim/view/' . $trip->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				</a>';
+
+			})
+			->make(true);
+	}
+	public function listOutstationTripReport(Request $r) {
+		
+		if ($r->from_date != '<%$ctrl.start_date%>') {
+			Session::put('outstation_start_date', $r->from_date);
+			Session::put('outstation_end_date', $r->to_date);
+		}
+		if ($r->employee_id != '<%$ctrl.filter_employee_id%>') {
+			Session::put('outstation_employee_id', $r->employee_id);
+			Session::put('outstation_purpose_id', $r->purpose_id);
+		}
+		if ($r->outlet_id != '<%$ctrl.filter_outlet_id%>') {
+			Session::put('outstation_outlet_id', $r->outlet_id);
+		}
+		if ($r->status_id != '<%$ctrl.filter_status_id%>') {
+			Session::put('outstation_status_id', $r->status_id);
+		}
+
+		$trips = Trip::leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->leftJoin('visits as v', 'v.trip_id', 'trips.id')
+			->leftJoin('ncities as c', 'c.id', 'v.from_city_id')
+			->leftJoin('employees as e', 'e.id', 'trips.employee_id')
+			->leftJoin('outlets', 'outlets.id', 'e.outlet_id')
+			->leftJoin('entities as purpose', 'purpose.id', 'trips.purpose_id')
+			->leftJoin('configs as status', 'status.id', 'trips.status_id')
+			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
+			->where('users.user_type_id', 3121)
+			->select(
+				'trips.id',
+				'trips.number',
+				'ey_employee_claims.id as claim_id',
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y %h:%i %p") as created_date'),
+				'e.code as ecode',
+				'users.name as ename',
+				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
+				'purpose.name as purpose',
+				'ey_employee_claims.total_amount', DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name'),
+				'status.name as status',
+				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
+			)
+			->where('e.company_id', Auth::user()->company_id)
+			->where(function ($query) use ($r) {
+				if ($r->get('employee_id')) {
+					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('purpose_id')) {
+					$query->where("purpose.id", $r->get('purpose_id'))->orWhere(DB::raw("-1"), $r->get('purpose_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->from_date && $r->from_date != '<%$ctrl.start_date%>') {
+					$date = date('Y-m-d', strtotime($r->from_date));
+					$query->where("trips.start_date", '>=', $date)->orWhere(DB::raw("-1"), $r->from_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->to_date && $r->to_date != '<%$ctrl.end_date%>') {
+					$date = date('Y-m-d', strtotime($r->to_date));
+					$query->where("trips.end_date", '<=', $date)->orWhere(DB::raw("-1"), $r->to_date);
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('outlet_id') && $r->get('employee_id') != '<%$ctrl.filter_outlet_id%>') {
+					$query->where("e.outlet_id", $r->get('outlet_id'))->orWhere(DB::raw("-1"), $r->get('outlet_id'));
+				}
+			})
+			->where(function ($query) use ($r) {
+				if ($r->get('status_id') && (($r->get('status_id') != '<%$ctrl.filter_status_id%>') && ($r->get('status_id') != -1))) {
+					$query->where("trips.status_id", $r->get('status_id'));
+				}
+			})
+			->where(function($q) {
+				$q->whereNotNull('ey_employee_claims.id')
+				->orWhere('trips.advance_received', '>', 0);
+			})
+			->groupBy('trips.id')
+			->orderBy('trips.created_at', 'desc');
+
+		return Datatables::of($trips)
+			->addColumn('action', function ($trip) {
+
+				$img2 = asset('public/img/content/yatra/table/view.svg');
+				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
+
+				if (!$trip->claim_id) {
+					return '
+					<a href="#!/trip/view/' . $trip->id . '">
+						<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+					</a>';
+				}
 				return '
 				<a href="#!/trip/claim/view/' . $trip->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
