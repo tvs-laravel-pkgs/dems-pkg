@@ -4317,6 +4317,14 @@ public static function saveVerifierClaim($request){
 					'lodgings.city',
 					'lodgings.stateType',
 					'lodgings.attachments',
+					'lodgings.sharingType',
+					'lodgings.shareDetails',
+					'lodgings.shareDetails.employee',
+					'lodgings.shareDetails.employee.user',
+					'lodgings.shareDetails.employee.outlet',
+					'lodgings.shareDetails.employee.grade',
+					'lodgings.shareDetails.employee.designation',
+					'lodgings.shareDetails.employee.Sbu',
 				])->find($request->trip_id);
 				DB::commit();
 				
