@@ -861,6 +861,10 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/report/view', {
         template: '<eyatra-report-view></eyatra-report-view>',
         title: 'Report View',
+    }).
+    when('/shared-claim/detail', {
+        template: '<shared-claim-detail></shared-claim-detail>',
+        title: 'Shared Claim Detail',
     });
 
 

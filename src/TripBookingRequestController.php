@@ -118,13 +118,16 @@ class TripBookingRequestController extends Controller {
 				$bookings = Visit::where('trip_id', $visit->trip_id)
 					->where('booking_status_id', 3060)
 					->count();
+				$ticketBooked = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_status_id', 3065)
+					->count();
 				// if ($bookings) {
 				// 	return "Pending";
 				// } else {
 				// 	return "Booked";
 				// }
 				// dd($bookings);
-				return $bookings ? "Pending" : "Booked";
+				return $bookings ? "Pending" : ($ticketBooked ? "Ticket Uploaded" : "Booked");
 			})
 			->addColumn('trip_status', function ($visit) {
 				if ($visit->status_id == '3032') {

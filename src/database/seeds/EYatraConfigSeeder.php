@@ -206,6 +206,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Visit Rescheduled',
 				'config_type_id' => 503,
 			],
+			3065 => [
+				'name' => 'Ticket Uploaded',
+				'config_type_id' => 503,
+			],
 
 			//MANAGER VERIFICATION STATUSES
 			3080 => [
