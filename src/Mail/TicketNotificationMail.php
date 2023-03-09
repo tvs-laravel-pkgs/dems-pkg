@@ -5,6 +5,7 @@ namespace Uitoux\EYatra\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\URL;
 
 class TicketNotificationMail extends Mailable {
 	use Queueable, SerializesModels;
@@ -37,6 +38,7 @@ class TicketNotificationMail extends Mailable {
 		}else{
 			$attach =  '';
 		}
+		$this->data['base_url'] = URL::to('/');
 		$this->data['body'] = $this->arr['body'];
 		if (($this->arr['to_email'] != "")) {
 			if($attach!=''){
