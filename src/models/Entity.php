@@ -104,10 +104,10 @@ class Entity extends Model {
 		//changes on 11-08-2022 list all travel modes with out grade filter
 		//$employee=Employee::where('id',Auth::user()->entity_id)->first();
 		return Entity::select('entities.id', 'entities.name')
-			//->join('grade_travel_mode', 'grade_travel_mode.travel_mode_id', 'entities.id')
-			//->join('employees', 'employees.grade_id', 'grade_travel_mode.grade_id')
+			->join('grade_travel_mode', 'grade_travel_mode.travel_mode_id', 'entities.id')
+			->join('employees', 'employees.grade_id', 'grade_travel_mode.grade_id')
 			->where('entities.entity_type_id', 502)
-			//->where('employees.id', Auth::user()->entity_id)
+			->where('employees.id', Auth::user()->entity_id)
 			->where('entities.company_id', Auth::user()->company_id)
 			->get();
 	}
