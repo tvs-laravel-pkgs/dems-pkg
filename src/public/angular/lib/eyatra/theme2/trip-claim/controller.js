@@ -3111,7 +3111,7 @@ app.component('eyatraTripClaimForm', {
                     if($.inArray(gst_state_code, self.operating_states) !== -1)
                     {
                         cgst_percentage = sgst_percentage = percentage / 2;
-                        self.trip.lodgings[index]['igst_readonly'] = true;
+                        // self.trip.lodgings[index]['igst_readonly'] = true;
                     }else{
                         igst_percentage = percentage;
                     }
