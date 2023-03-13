@@ -2838,6 +2838,7 @@ class Trip extends Model {
 									->where('lodgings.invoice_date', date('Y-m-d', strtotime($lodging_data['invoice_date'])))
 									->whereNotIn('trips.status_id', [3032,3038,3022]) //CANCEL , AUTO CANCEL, MANAGER REJECTED
 									->whereNotIn('ey_employee_claims.status_id', [3032,3039,3024]) //CANCEL, AUTO CANCEL, CLAIM REJECTED
+									->where('lodgings.sharing_type_id', 3811) //SHARING WITH CLAIM
 									->first();
 
 								if(!empty($claim_share_exist_check)){
