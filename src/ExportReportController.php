@@ -810,7 +810,8 @@ class ExportReportController extends Controller {
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, round($employeeTrip->totalAmount, 2), "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			// $this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, round($employeeTrip->totalAmount, 2), "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, round($employeeTrip->totalAmount), "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 2) {
 			//TAXABLE VALUE AND GST SPLITUP ENTRIES
