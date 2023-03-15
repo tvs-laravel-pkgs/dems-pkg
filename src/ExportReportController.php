@@ -886,31 +886,36 @@ class ExportReportController extends Controller {
 								//LODGE
 								// if ($lodging->lodgingTaxInvoice) {
 								if ($lodging->lodgingTaxInvoice && (($lodging->lodgingTaxInvoice->cgst != '0.00' && $lodging->lodgingTaxInvoice->sgst != '0.00') || ($lodging->lodgingTaxInvoice->igst != '0.00'))) {
-									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
+									// $this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
+									$this->axaptaExportDlobGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst);
 								}
 
 								//DRY WASH
 								// if ($lodging->drywashTaxInvoice) {
 								if ($lodging->drywashTaxInvoice && (($lodging->drywashTaxInvoice->cgst != '0.00' && $lodging->drywashTaxInvoice->sgst != '0.00') || ($lodging->drywashTaxInvoice->igst != '0.00'))) {
-									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Dry Wash ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst);
+									// $this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Dry Wash ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst);
+									$this->axaptaExportDlobGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Dry Wash ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst);
 								}
 
 								//BOARDING
 								// if ($lodging->boardingTaxInvoice) {
 								if ($lodging->boardingTaxInvoice && (($lodging->boardingTaxInvoice->cgst != '0.00' && $lodging->boardingTaxInvoice->sgst != '0.00') || ($lodging->boardingTaxInvoice->igst != '0.00'))) {
-									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Boarding ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst);
+									// $this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Boarding ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst);
+									$this->axaptaExportDlobGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Boarding ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst);
 								}
 
 								//OTHERS
 								// if ($lodging->othersTaxInvoice) {
 								if ($lodging->othersTaxInvoice && (($lodging->othersTaxInvoice->cgst != '0.00' && $lodging->othersTaxInvoice->sgst != '0.00') || ($lodging->othersTaxInvoice->igst != '0.00'))) {
-									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Others", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst);
+									// $this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Others", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst);
+									$this->axaptaExportDlobGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging - Others", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst);
 								}
 
 							} else {
 								//SINGLE
 								if ($lodging && (($lodging->cgst != '0.00' && $lodging->sgst != '0.00') || ($lodging->igst != '0.00'))) {
-									$this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
+									// $this->axaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
+									$this->axaptaExportDlobGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
 								}
 							}
 					    }
@@ -1081,6 +1086,46 @@ class ExportReportController extends Controller {
 				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, $gstDefaultDimension, $sgstEntryTxt, $taxSgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			} else {
+				//INTER STATE (IGST)
+				$igstPercentage = $taxPercentage;
+				$igstEntryTxt = '';
+				$igstLedgerDimension = $enteredGstinState->axapta_igst_code . "-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+
+				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
+					$igstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - IGST - " . $igstPercentage . "%";
+				}
+
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $igstEntryTxt, $taxIgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			}
+		}
+	}
+
+	public function axaptaExportDlobGstSplitupEntries($employeeTrip, $employeeGstCode, $enteredGstin, $gstType, $transactionDate, $accountType, $taxPercentage, $taxCgst, $taxSgst, $taxIgst) {
+		$enteredGstinCode = substr($enteredGstin, 0, 2);
+		$enteredGstinState = Nstate::where('gstin_state_code', $enteredGstinCode)->first();
+		$gstDefaultDimension = $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
+
+		if (!empty($enteredGstinState)) {
+			if($taxCgst > 0 && $taxSgst > 0){
+				$cgstPercentage = $sgstPercentage = ($taxPercentage) / 2;
+				$cgstEntryTxt = '';
+				$sgstEntryTxt = '';
+				$cgstLedgerDimension = $enteredGstinState->axapta_cgst_code . "-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+				$sgstLedgerDimension = $enteredGstinState->axapta_sgst_code . "-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+
+				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
+					$cgstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - CGST - " . $cgstPercentage . "%";
+				}
+				if (!empty($employeeTrip->employeeCode) && !empty($employeeTrip->employeeName) && !empty($employeeTrip->purpose)) {
+					$sgstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - SGST - " . $sgstPercentage . "%";
+				}
+
+				//CGST ENTRY
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, $gstDefaultDimension, $cgstEntryTxt, $taxCgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+
+				//SGST ENTRY
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, $gstDefaultDimension, $sgstEntryTxt, $taxSgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			}elseif($taxIgst > 0){
 				//INTER STATE (IGST)
 				$igstPercentage = $taxPercentage;
 				$igstEntryTxt = '';
@@ -3141,17 +3186,32 @@ class ExportReportController extends Controller {
 	public function hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $enteredGstin, $taxCgst, $taxSgst, $taxIgst, $taxInvoiceType) {
 		$enteredGstinCode = substr($enteredGstin, 0, 2);
 		$enteredGstinState = Nstate::where('gstin_state_code', $enteredGstinCode)->first();
+		// if ($enteredGstinState) {
+		// 	//INTRA STATE (CGST AND SGST)
+		// 	if ($enteredGstinCode == $employeeGstCode) {
+		// 		//SGST
+		// 		$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146030', 0, $taxInvoiceType.'-SGST', $taxSgst, '0.00', 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
-		if ($enteredGstinState) {
-			//INTRA STATE (CGST AND SGST)
-			if ($enteredGstinCode == $employeeGstCode) {
+		// 		//CGST
+		// 		$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType.'-CGST', $taxCgst, '0.00', 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+		// 		return $taxCgst + $taxSgst;
+		// 	} else {
+		// 		//INTER STATE (IGST)
+		// 		$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', 'C', '', '',  '', '', $employeeTrip->ax_company_code);
+		// 		return $taxIgst;
+		// 	}
+		// }
+
+		if (!empty($enteredGstinState)) {
+			if($taxCgst > 0 && $taxSgst > 0){
+				//INTRA STATE (CGST AND SGST)
 				//SGST
 				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146030', 0, $taxInvoiceType.'-SGST', $taxSgst, '0.00', 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
 				//CGST
 				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType.'-CGST', $taxCgst, '0.00', 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 				return $taxCgst + $taxSgst;
-			} else {
+			}elseif($taxIgst > 0){
 				//INTER STATE (IGST)
 				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', 'C', '', '',  '', '', $employeeTrip->ax_company_code);
 				return $taxIgst;
@@ -3163,8 +3223,26 @@ class ExportReportController extends Controller {
 		$enteredGstinCode = substr($enteredGstin, 0, 2);
 		$enteredGstinState = Nstate::where('gstin_state_code', $enteredGstinCode)->first();
 
-		if ($enteredGstinState) {
-			if ($enteredGstinCode == $employeeGstCode) {
+		// if ($enteredGstinState) {
+		// 	if ($enteredGstinCode == $employeeGstCode) {
+		// 		//INTRA STATE
+		// 		//SGST
+		// 		$intraTaxPercentage = $taxPercentage / 2;
+		// 		$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146030', 0, $taxInvoiceType.'-SGST', $taxSgst, '0.00', 'F', '', '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code,'','',$intraTaxPercentage);
+
+		// 		//CGST
+		// 		$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType.'-CGST', $taxCgst, '0.00', 'F', '', '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code, '', '' , $intraTaxPercentage);
+		// 		return $taxCgst + $taxSgst;
+		// 	} else {
+		// 		//INTER STATE (IGST)
+		// 		$interTaxPercentage = $taxPercentage;
+		// 		$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', 'F', '', '',  '', '', $employeeTrip->ax_company_code,'','',$interTaxPercentage);
+		// 		return $taxIgst;
+		// 	}
+		// }
+
+		if(!empty($enteredGstinState)){
+			if($taxCgst > 0 && $taxSgst > 0){
 				//INTRA STATE
 				//SGST
 				$intraTaxPercentage = $taxPercentage / 2;
@@ -3173,7 +3251,7 @@ class ExportReportController extends Controller {
 				//CGST
 				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType.'-CGST', $taxCgst, '0.00', 'F', '', '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code, '', '' , $intraTaxPercentage);
 				return $taxCgst + $taxSgst;
-			} else {
+			}elseif($taxIgst > 0){
 				//INTER STATE (IGST)
 				$interTaxPercentage = $taxPercentage;
 				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', 'F', '', '',  '', '', $employeeTrip->ax_company_code,'','',$interTaxPercentage);

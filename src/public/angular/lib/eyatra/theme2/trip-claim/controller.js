@@ -2875,7 +2875,13 @@ app.component('eyatraTripClaimForm', {
                 if (lodgeGstCode == self.state_code) {
                     lodgeCgstPerc = lodgeSgstPerc = lodgePercentage / 2;
                 } else {
-                    lodgeIgstPerc = lodgePercentage;
+                    // lodgeIgstPerc = lodgePercentage;
+                    if($.inArray(lodgeGstCode, self.operating_states) !== -1)
+                    {
+                        lodgeCgstPerc = lodgeSgstPerc = lodgePercentage / 2;
+                    }else{
+                        lodgeIgstPerc = lodgePercentage;
+                    }
                 }
                 lodgeCgst = lodgeWithoutTaxAmount * (lodgeCgstPerc / 100);
                 lodgeSgst = lodgeWithoutTaxAmount * (lodgeSgstPerc / 100);
@@ -2895,7 +2901,13 @@ app.component('eyatraTripClaimForm', {
                 if (drywashGstCode == self.state_code) {
                     drywashCgstPerc = drywashSgstPerc = drywashPercentage / 2;
                 } else {
-                    drywashIgstPerc = drywashPercentage;
+                    // drywashIgstPerc = drywashPercentage;
+                    if($.inArray(drywashGstCode, self.operating_states) !== -1)
+                    {
+                        drywashCgstPerc = drywashSgstPerc = drywashPercentage / 2;
+                    }else{
+                        drywashIgstPerc = drywashPercentage;
+                    }
                 }
 
                 drywashCgst = drywashWithoutTaxAmount * (drywashCgstPerc / 100);
@@ -2915,7 +2927,13 @@ app.component('eyatraTripClaimForm', {
                 if (boardingGstCode == self.state_code) {
                     boardingCgstPerc = boardingSgstPerc = boardingPercentage / 2;
                 } else {
-                    boardingIgstPerc = boardingPercentage;
+                    // boardingIgstPerc = boardingPercentage;
+                    if($.inArray(boardingGstCode, self.operating_states) !== -1)
+                    {
+                        boardingCgstPerc = boardingSgstPerc = boardingPercentage / 2;
+                    }else{
+                        boardingIgstPerc = boardingPercentage;
+                    }
                 }
 
                 boardingCgst = boardingWithoutTaxAmount * (boardingCgstPerc / 100);
@@ -2936,7 +2954,13 @@ app.component('eyatraTripClaimForm', {
                 if (othersPercentage > 0 && othersGstCode == self.state_code) {
                     othersCgstPerc = othersSgstPerc = othersPercentage / 2;
                 } else {
-                    othersIgstPerc = othersPercentage;
+                    // othersIgstPerc = othersPercentage;
+                    if($.inArray(othersGstCode, self.operating_states) !== -1)
+                    {
+                        othersCgstPerc = othersSgstPerc = othersPercentage / 2;
+                    }else{
+                        othersIgstPerc = othersPercentage;
+                    }
                 }
 
                 othersCgst = othersWithoutTaxAmount * (othersCgstPerc / 100);
