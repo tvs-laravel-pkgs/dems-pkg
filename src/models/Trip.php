@@ -1535,7 +1535,20 @@ class Trip extends Model {
 
 		// $local_travel_mode_list = collect(Entity::uiClaimLocaTravelModeList()->prepend(['id' => '', 'name' => 'Select Local Travel Mode']));
 		$local_travel_mode_list = collect($local_travels_expense_types->prepend(['id' => '', 'name' => 'Select Local Travel / Expense Type']));
-		$stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
+		$showOfficeGuestHouse = true;
+		if (!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['W00','W01','W02','W03','W04','W05','W06','W07','S00','S01','S02','S03','S04','S05','S06','S07'])) {
+			$showOfficeGuestHouse = false;
+		}
+		// $stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
+		$stay_type_list = collect(
+				Config::where('config_type_id', 521)
+				->select('id', 'name')
+				->where(function ($q) use ($showOfficeGuestHouse) {
+					if (!$showOfficeGuestHouse) 
+						$q->whereNotIn('id', [3342]);
+				})
+				->get()
+			->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$boarding_type_list = collect(Config::getBoardingTypeList()->prepend(['id' => '', 'name' => 'Select Type']));
 		$sharing_type_list = collect(Config::whereIn('id', [3811,3812])->select('id', 'name')->get());
 		$data['extras'] = [
