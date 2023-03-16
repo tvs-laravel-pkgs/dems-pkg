@@ -936,6 +936,9 @@ class ExportReportController extends Controller {
 			// $ledgerDimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 			$ledgerDimension = "3198-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
+			$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
+			$employeeLodgingRoundoff += floatval($roundOffAmt); 
+
 			//ROUND OFF ENTRY
 			if($employeeLodgingRoundoff != 0){
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
