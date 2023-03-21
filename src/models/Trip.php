@@ -2088,7 +2088,8 @@ class Trip extends Model {
 						if ($visit_key == 0) {
 							$validate_end_km = $visit_val['km_end'];
 						}
-						if ($visit_key > 0 && $validate_end_km > $visit_val['km_start'] && $visit_val['travel_mode_id'] == 15) {
+						// if ($visit_key > 0 && $validate_end_km > $visit_val['km_start'] && $visit_val['travel_mode_id'] == 15) {
+						if ($visit_key > 0 && $validate_end_km > $visit_val['km_start'] && isset($visit_val['travel_mode_id']) && $visit_val['travel_mode_id'] == 15) {
 							return response()->json(['success' => false, 'errors' => ['Start KM should be grater then previous end KM']]);
 						}
 					}
@@ -2099,7 +2100,8 @@ class Trip extends Model {
 						if ($visit_key == 0) {
 							$validate_end_km = $visit_val['km_end'];
 						}
-						if ($visit_key > 0 && $validate_end_km > $visit_val['km_start'] && $visit_val['travel_mode_id'] == 16) {
+						// if ($visit_key > 0 && $validate_end_km > $visit_val['km_start'] && $visit_val['travel_mode_id'] == 16) {
+						if ($visit_key > 0 && $validate_end_km > $visit_val['km_start'] && isset($visit_val['travel_mode_id']) && $visit_val['travel_mode_id'] == 16) {
 							return response()->json(['success' => false, 'errors' => ['Start KM should be grater then previous end KM']]);
 						}
 					}
