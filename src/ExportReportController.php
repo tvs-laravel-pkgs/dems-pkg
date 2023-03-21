@@ -939,6 +939,16 @@ class ExportReportController extends Controller {
 			$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
 			$employeeLodgingRoundoff += floatval($roundOffAmt); 
 
+			$selfVisitTotalRoundOff = 0;
+			if ($employeeTrip->selfVisits->isNotEmpty()) {
+				foreach ($employeeTrip->selfVisits as $selfVisit) {
+					if ($selfVisit->booking) {
+						$selfVisitTotalRoundOff += $selfVisit->booking->round_off;
+					}
+				}
+			}
+			$employeeLodgingRoundoff += floatval($selfVisitTotalRoundOff);
+
 			//ROUND OFF ENTRY
 			if($employeeLodgingRoundoff != 0){
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
