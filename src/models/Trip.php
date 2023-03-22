@@ -467,10 +467,16 @@ class Trip extends Model {
 		}
 
 		$employee = Employee::find($trip->employee_id);
+		// $pending_trip = Trip::where('trips.employee_id', Auth::user()->entity_id)
+		//               ->where('trips.id','<', $trip->id)
+		//               ->whereIn('trips.status_id',[3021,3028])
+		//               ->orderBy('trips.id','desc')->first();
+		$tripStartDate = date("Y-m-d", strtotime($trip->start_date));
 		$pending_trip = Trip::where('trips.employee_id', Auth::user()->entity_id)
-		              ->where('trips.id','<', $trip->id)
+		              ->where('trips.id','!=', $trip->id)
+		              ->where('trips.start_date','<=', $tripStartDate)
 		              ->whereIn('trips.status_id',[3021,3028])
-		              ->orderBy('trips.id','desc')->first();
+		              ->first();
 		$pending_trip_status =!!$pending_trip;
 		$sbu_name = Sbu::where('id', $trip->employee->sbu_id)->pluck('name')->first();
 		$trip->sbu_name = $sbu_name;
