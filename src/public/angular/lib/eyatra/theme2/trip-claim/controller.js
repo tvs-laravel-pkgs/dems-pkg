@@ -1440,7 +1440,7 @@ app.component('eyatraTripClaimForm', {
 
 
         //GET CLAIM STATUS BY TRNASPORT MODE IN TRANSPORT EXPENSES
-        $scope.getVisitTrnasportModeClaimStatus = function(travel_mode_id, key) {
+        $scope.getVisitTrnasportModeClaimStatus = function(travel_mode_id, key, init=false) {
 
             //Get Travel Mode KM
             if (travel_mode_id == 15 || travel_mode_id == 16) {
@@ -1626,6 +1626,12 @@ app.component('eyatraTripClaimForm', {
                             self.trip.visits[key].self_booking.km_start = '';
                             self.trip.visits[key].self_booking.km_end = '';
                             self.trip.visits[key].self_booking.toll_fee = '';
+                        }
+                        if (!!init && category_type != 3400) {
+                            var toCityId = self.trip.visits[key].to_city_id
+                            var eligibleAmount = self.cities_with_expenses[toCityId].transport.eligible_amount
+                            self.trip.visits[key].eligible_amount = eligibleAmount
+                            $(".ratePerKMamount_" + key).val(eligibleAmount);
                         }
 
                         //Old Method for Claim and Not Claim Vehicle Method
@@ -1838,6 +1844,7 @@ app.component('eyatraTripClaimForm', {
                 $('.is_deviation_amount').each(function() {
                     var amount_entered = $(this).val();
                     var default_eligible_amount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
+                    var travelModeId = $(this).closest('.is_deviation_amount_row').find('.travel_mode_id').val();
                     if (!$.isNumeric(amount_entered)) {
                         amount_entered = 0;
                     } else {
@@ -1847,6 +1854,10 @@ app.component('eyatraTripClaimForm', {
                         default_eligible_amount = 0;
                     } else {
                         default_eligible_amount = parseInt(default_eligible_amount);
+                    }
+                    if (travelModeId && (travelModeId == 15 || travelModeId == 16)) {
+                        // If travel mode was two wheeler or four wheeler
+                        default_eligible_amount = amount_entered
                     }
                     // if (amount_entered > default_eligible_amount) {
                     //     is_deviation = true;
@@ -1876,7 +1887,7 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.visits)
                 if ($scope.travel_mode_check) {
                     if (self.deviationTypeName)
-                        self.deviationTypeName += 'amount is greater than their eligible amount';
+                        self.deviationTypeName += ' amount is greater than their eligible amount';
                     is_grade_travel_mode = false;
                 }
 
@@ -2627,8 +2638,8 @@ app.component('eyatraTripClaimForm', {
         }
 
         $scope.transportCalculateTax = (index) => {
-            const amount = self.trip.visits[index].self_booking['amount'];
-            const gst_number = self.trip.visits[index].self_booking['gstin'];
+            const amount = self.trip.visits[index]?.self_booking && self.trip.visits[index]?.self_booking['amount'];
+            const gst_number = self.trip.visits[index]?.self_booking && self.trip.visits[index]?.self_booking['gstin'];
             const travel_mode_id = self.trip.visits[index]['travel_mode_id'];
             var cgst_percentage = sgst_percentage = igst_percentage = 0;
             if (amount != undefined && amount && amount >= 1 && gst_number && gst_number.length == 15 && travel_mode_id != 12) {
@@ -2680,6 +2691,7 @@ app.component('eyatraTripClaimForm', {
                     $("#" + index + "-fareDetailEndingKm").val('');
                     // $("#" + index + "-fareDetailTollFee").val('');
                     self.trip.visits[index].self_booking.amount = '';
+                    self.trip.visits[index].self_booking.invoice_amount = '';
                 }
                 $scope.$apply()
             }, 500);
@@ -2726,6 +2738,7 @@ app.component('eyatraTripClaimForm', {
             //$("#" + self.fareDetailsKmModalIndex + "-fareDetailTollFee").val(self.fareDetailsKmModalValues.tollFee);
             /*let Tollfee = parseFloat(self.fareDetailsKmModalValues.tollFee) || 0;*/
             self.trip.visits[self.fareDetailsKmModalIndex].self_booking.amount = self.fareDetailsKmModalValues.totalKm;
+            self.trip.visits[self.fareDetailsKmModalIndex].self_booking.invoice_amount = self.fareDetailsKmModalValues.totalKm;
 
             self.fareDetailsKmModalIndex = '';
             self.fareDetailsKmModalValues = {};
@@ -2733,6 +2746,7 @@ app.component('eyatraTripClaimForm', {
 
             setTimeout(function() {
                 self.travelCal();
+                self.travelRoundOff()
             }, 500);
         }
 
