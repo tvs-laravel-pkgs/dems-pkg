@@ -2467,7 +2467,7 @@ class Trip extends Model {
 							$visit_booking->tax_percentage = $visit_data['tax_percentage'];
 							$visit_booking->invoice_number=$visit_data['invoice_number'];
 							$visit_booking->invoice_amount=$visit_data['invoice_amount'];
-							$visit_booking->invoice_date=date('Y-m-d', strtotime($visit_data['invoice_date']));
+							$visit_booking->invoice_date=$visit_data['invoice_date'] ? date('Y-m-d', strtotime($visit_data['invoice_date'])) : null;
 							if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}else{
