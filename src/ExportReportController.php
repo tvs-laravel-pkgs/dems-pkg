@@ -832,11 +832,13 @@ class ExportReportController extends Controller {
 			$employeeTotalTaxableValue = 0.00;
 
 			//FARE DETAILS
+			$selfVisitTotalRoundOff = 0;
 			if ($employeeTrip->selfVisits->isNotEmpty()) {
 				foreach ($employeeTrip->selfVisits as $key => $selfVisit) {
 					if ($selfVisit->booking) {
 						$employeeTransportAmount += $selfVisit->booking->amount;
 						$employeeTransportOtherCharges += $selfVisit->booking->other_charges;
+						$selfVisitTotalRoundOff += floatval($selfVisit->booking->round_off);
 					}
 				}
 			}
@@ -860,7 +862,8 @@ class ExportReportController extends Controller {
 				$employeeLocalTravelTaxableValue = floatval($employeeClaim->local_travel_total);
 			}
 
-			$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue);
+			// $employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue);
+			$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue + $selfVisitTotalRoundOff);
 
 			//TICKET TAXABLE AMOUNT ENTRY
 			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
@@ -939,15 +942,15 @@ class ExportReportController extends Controller {
 			$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
 			$employeeLodgingRoundoff += floatval($roundOffAmt); 
 
-			$selfVisitTotalRoundOff = 0;
-			if ($employeeTrip->selfVisits->isNotEmpty()) {
-				foreach ($employeeTrip->selfVisits as $selfVisit) {
-					if ($selfVisit->booking) {
-						$selfVisitTotalRoundOff += $selfVisit->booking->round_off;
-					}
-				}
-			}
-			$employeeLodgingRoundoff += floatval($selfVisitTotalRoundOff);
+			// $selfVisitTotalRoundOff = 0;
+			// if ($employeeTrip->selfVisits->isNotEmpty()) {
+			// 	foreach ($employeeTrip->selfVisits as $selfVisit) {
+			// 		if ($selfVisit->booking) {
+			// 			$selfVisitTotalRoundOff += $selfVisit->booking->round_off;
+			// 		}
+			// 	}
+			// }
+			// $employeeLodgingRoundoff += floatval($selfVisitTotalRoundOff);
 
 			//ROUND OFF ENTRY
 			if($employeeLodgingRoundoff != 0){
@@ -1264,7 +1267,8 @@ class ExportReportController extends Controller {
 				->leftjoin('sbus as eyec_s', 'eyec_s.id', 'eyec.sbu_id')
 				->join('departments', 'departments.id', 'employees.department_id')
 				->join('businesses', 'businesses.id', 'departments.business_id')
-				->where('t.status_id', 3028)
+				// ->where('t.status_id', 3028)
+				->whereIn('t.status_id', [3028,3026])
 				->where('t.advance_received', '>', 0)
 				->where('t.batch', 0)
 				->whereDate('t.updated_at', '<', date('Y-m-d'))
