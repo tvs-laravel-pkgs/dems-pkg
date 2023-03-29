@@ -332,16 +332,23 @@ class TripClaimController extends Controller {
                 $file_name = str_replace(' ', '_', $file_name);
 
 				$image->move(storage_path('app/public/trip/claim/' . $trip->id . '/'), $file_name);
-				$attachement_transport = Attachment::firstOrNew([
-					'attachment_of_id' => $r->document_type_id,
-					'attachment_type_id' => 3200,
-					'entity_id' => $trip->id,
-				]);
-				$attachement_transport->attachment_of_id = $r->document_type_id;
-				$attachement_transport->attachment_type_id = 3200;
-				$attachement_transport->entity_id = $trip->id;
-				$attachement_transport->name = $file_name;
-				$attachement_transport->save();
+				$attachement_transport = null;
+				if ($r->document_type_id == 3754) {		// 3754 -> Others
+					$attachement_transport = new Attachment;
+				} else {
+					$attachement_transport = Attachment::firstOrNew([
+						'attachment_of_id' => $r->document_type_id,
+						'attachment_type_id' => 3200,
+						'entity_id' => $trip->id,
+					]);
+				}
+				if ($attachement_transport) {
+					$attachement_transport->attachment_of_id = $r->document_type_id;
+					$attachement_transport->attachment_type_id = 3200;
+					$attachement_transport->entity_id = $trip->id;
+					$attachement_transport->name = $file_name;
+					$attachement_transport->save();
+				}
 			}
 
 			DB::commit();
