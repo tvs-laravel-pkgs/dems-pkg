@@ -2601,6 +2601,7 @@ class ExportReportController extends Controller {
 							if($employeeTrip->business_id == 2){
 								//OESL
 								$this->hondaOeslEmployeeAxaptaProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+								$this->hondaOeslEmployeeAxaptaProcess(9, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 							}elseif($employeeTrip->business_id == 3){
 								//HONDA
 								$this->hondaOeslEmployeeAxaptaProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
@@ -2627,6 +2628,9 @@ class ExportReportController extends Controller {
 								if($employeeTrip->business_id == 3){
 									//HONDA
 									$this->hondaOeslEmployeeAxaptaProcess(7, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+								}elseif($employeeTrip->business_id == 2){
+									//OESL
+									$this->hondaOeslEmployeeAxaptaProcess(8, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								}
 							}
 						}
@@ -2980,7 +2984,7 @@ class ExportReportController extends Controller {
 
 			//LODGING GST TOTAL
 			if($lodgingGstValue && $lodgingGstValue > 0){
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':GSTClaim', '0.00', $lodgingGstValue, 'C', '', '', '', null , $employeeTrip->ax_company_code);
+				// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':GSTClaim', '0.00', $lodgingGstValue, 'C', '', '', '', null , $employeeTrip->ax_company_code);
 				$travelExpenseTotalValue += $lodgingGstValue;
 			}
 
@@ -3198,6 +3202,21 @@ class ExportReportController extends Controller {
 			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '191', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode.':'.$employeeName.'-TravelExp', 0.00, $employeeTrip->balance_amount , 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			//CREDIT ENTRY
 			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '191', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode.':'.$employeeName.'-TravelExp', $employeeTrip->balance_amount, 0.00, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+		}else if($type == 8){
+			//OESL ADVANCE BALANCE AMOUNT PAID BY EMPLOYEE TO COMPANY
+			//DEBIT
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.'-TravelExp', $employeeTrip->balance_amount, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			//CREDIT
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode.':'.$employeeName.'-TravelExp', 0.00, $employeeTrip->balance_amount , 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+		}elseif ($type == 9) {
+			//OESL ROUND OFF ENTRY
+			$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
+			$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
+			$employeeLodgingRoundoff += floatval($roundOffAmt);
+
+			if($employeeLodgingRoundoff != 0){
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.'-Roff', $employeeLodgingRoundoff, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			}
 		}
 	}
 
