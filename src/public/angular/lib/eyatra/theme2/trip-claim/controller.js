@@ -3936,8 +3936,8 @@ app.component('eyatraTripClaimForm', {
                 if (trip_attachment_save) {
                     trip_attachment_save = 0;
                     let formData = new FormData($(form_attachment_id)[0]);
-                    $('#modal_attachment_submit').html('loading');
-                    $("#modal_attachment_submit").attr("disabled", true);
+                    // $('#modal_attachment_submit').html('loading');
+                    $("#modal_attachment_submit").prop("disabled", true);
                     $.ajax({
                             url: eyatra_trip_claim_save_url,
                             method: "POST",
@@ -3948,8 +3948,8 @@ app.component('eyatraTripClaimForm', {
                         })
                         .done(function(res) {
                             //console.log(res.success);
-                            $('#modal_attachment_submit').html('Submit');
-                            $("#modal_attachment_submit").attr("disabled", false);
+                            // $('#modal_attachment_submit').html('Submit');
+                            $("#modal_attachment_submit").prop("disabled", false);
                             if (!res.success) {
                                 var errors = '';
                                 for (var i in res.errors) {
@@ -3979,8 +3979,8 @@ app.component('eyatraTripClaimForm', {
                             }
                         })
                         .fail(function(xhr) {
-                            $('#modal_attachment_submit').html('Submit');
-                            $("#modal_attachment_submit").attr("disabled", false);
+                            // $('#modal_attachment_submit').html('Submit');
+                            $("#modal_attachment_submit").prop("disabled", false);
                             custom_noty('error', 'Something went wrong at server');
                         });
                 }
