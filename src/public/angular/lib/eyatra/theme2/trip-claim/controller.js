@@ -3949,13 +3949,14 @@ app.component('eyatraTripClaimForm', {
                         .done(function(res) {
                             //console.log(res.success);
                             // $('#modal_attachment_submit').html('Submit');
-                            $("#modal_attachment_submit").prop("disabled", false);
+                            // $("#modal_attachment_submit").prop("disabled", false);
                             if (!res.success) {
                                 var errors = '';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
                                 }
                                 custom_noty('error', errors);
+                                $("#modal_attachment_submit").prop("disabled", false);
                             } else {
 
                                 self.enable_switch_tab = true;
