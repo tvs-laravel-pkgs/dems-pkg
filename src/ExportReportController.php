@@ -534,12 +534,12 @@ class ExportReportController extends Controller {
 				// ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
 				->where(function($q) {
 					$q->where(function($nonAdvanceQ) {
-						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<=', date('Y-m-d'))
+						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
 							// ->whereIn('trips.advance_received', [0, null])
 							->where('ey_employee_claims.total_amount','>',0)
 							->where('ey_employee_claims.status_id', 3026); // PAID
 					})->orWhere(function($advanceQ) {
-						$advanceQ->whereDate('trips.updated_at', '<=', date('Y-m-d'))
+						$advanceQ->whereDate('trips.updated_at', '<', date('Y-m-d'))
 							->where('trips.advance_received', '>', 0)
 							->where('trips.status_id', 3028) // Manager Approved
 							->where('trips.advance_ax_export_sync', 0);
@@ -580,7 +580,7 @@ class ExportReportController extends Controller {
 				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
 				// ->whereNotNull('local_trips.claim_amount')
 				->where('local_trips.claim_amount', '>' ,0)
-				->whereDate('local_trips.updated_at', '<=', date('Y-m-d'))
+				->whereDate('local_trips.updated_at', '<', date('Y-m-d'))
 				->groupBy('local_trips.id')
 				->get();
 
@@ -1239,7 +1239,7 @@ class ExportReportController extends Controller {
 				// ->where('eyec.total_amount', '>', 0)
 				// ->where('trips.batch', 0)
 				->where('departments.business_id', '=', $business_id)
-				->whereDate('eyec.updated_at', '<=', date('Y-m-d'))
+				->whereDate('eyec.updated_at', '<', date('Y-m-d'))
 				->groupBy('trips.id')
 				->get()->toArray();
 			$advance_amount = Employee::select(
@@ -1271,7 +1271,7 @@ class ExportReportController extends Controller {
 				->whereIn('t.status_id', [3028,3026])
 				->where('t.advance_received', '>', 0)
 				->where('t.batch', 0)
-				->whereDate('t.updated_at', '<=', date('Y-m-d'))
+				->whereDate('t.updated_at', '<', date('Y-m-d'))
 				->where('departments.business_id', '=', $business_id)
 				->groupBy('t.id')
 				->get()->toArray();
@@ -1303,7 +1303,7 @@ class ExportReportController extends Controller {
 				->where('lt.batch', 0)
 				->where('lt.claim_amount', '>', 0)
 				->where('departments.business_id', '=', $business_id)
-				->whereDate('lt.updated_at', '<=', date('Y-m-d'))
+				->whereDate('lt.updated_at', '<', date('Y-m-d'))
 				->groupBy('lt.id')
 				->get()->toArray();
 			$locals = array_merge($claims, $outstations, $advance_amount);
@@ -2559,11 +2559,11 @@ class ExportReportController extends Controller {
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->where(function($q) {
 					$q->where(function($nonAdvanceQ) {
-						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<=', date('Y-m-d'))
+						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
 							->where('ey_employee_claims.total_amount','>',0)
 							->where('ey_employee_claims.status_id', 3026); //COMPLETED
 					})->orWhere(function($advanceQ) {
-						$advanceQ->whereDate('trips.updated_at', '<=', date('Y-m-d'))
+						$advanceQ->whereDate('trips.updated_at', '<', date('Y-m-d'))
 							->where('trips.advance_received', '>', 0)
 							->where('trips.status_id', 3028) //MANAGER APPROVED
 							->where('trips.advance_ax_export_sync', 0);
