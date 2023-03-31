@@ -2559,11 +2559,11 @@ class ExportReportController extends Controller {
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
 				->where(function($q) {
 					$q->where(function($nonAdvanceQ) {
-						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
+						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<=', date('Y-m-d'))
 							->where('ey_employee_claims.total_amount','>',0)
 							->where('ey_employee_claims.status_id', 3026); //COMPLETED
 					})->orWhere(function($advanceQ) {
-						$advanceQ->whereDate('trips.updated_at', '<', date('Y-m-d'))
+						$advanceQ->whereDate('trips.updated_at', '<=', date('Y-m-d'))
 							->where('trips.advance_received', '>', 0)
 							->where('trips.status_id', 3028) //MANAGER APPROVED
 							->where('trips.advance_ax_export_sync', 0);
