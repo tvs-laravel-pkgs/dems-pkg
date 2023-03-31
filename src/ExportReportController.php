@@ -1239,7 +1239,7 @@ class ExportReportController extends Controller {
 				// ->where('eyec.total_amount', '>', 0)
 				// ->where('trips.batch', 0)
 				->where('departments.business_id', '=', $business_id)
-				->whereDate('eyec.updated_at', '<', date('Y-m-d'))
+				->whereDate('eyec.updated_at', '<=', date('Y-m-d'))
 				->groupBy('trips.id')
 				->get()->toArray();
 			$advance_amount = Employee::select(
@@ -1271,7 +1271,7 @@ class ExportReportController extends Controller {
 				->whereIn('t.status_id', [3028,3026])
 				->where('t.advance_received', '>', 0)
 				->where('t.batch', 0)
-				->whereDate('t.updated_at', '<', date('Y-m-d'))
+				->whereDate('t.updated_at', '<=', date('Y-m-d'))
 				->where('departments.business_id', '=', $business_id)
 				->groupBy('t.id')
 				->get()->toArray();
@@ -1303,7 +1303,7 @@ class ExportReportController extends Controller {
 				->where('lt.batch', 0)
 				->where('lt.claim_amount', '>', 0)
 				->where('departments.business_id', '=', $business_id)
-				->whereDate('lt.updated_at', '<', date('Y-m-d'))
+				->whereDate('lt.updated_at', '<=', date('Y-m-d'))
 				->groupBy('lt.id')
 				->get()->toArray();
 			$locals = array_merge($claims, $outstations, $advance_amount);
