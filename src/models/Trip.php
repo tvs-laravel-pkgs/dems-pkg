@@ -2278,7 +2278,12 @@ class Trip extends Model {
 						$validations['other_doc'] = 'required';
 					}
 					//$self_booking = Visit::where('trip_id', $trip->id)->where('self_booking_approval', 1)->count();
-					$self_booking = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15,16,17])->where('visits.trip_id', $trip->id)->where('visits.self_booking_approval', 1)->count();
+					$self_booking = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')
+						->whereNotIn('visit_bookings.travel_mode_id', [15,16,17])
+						->where('visits.trip_id', $trip->id)
+						->where('visits.self_booking_approval', 1)
+						->where('visits.trip_mode_id', 3793)	// 3793 -> Overnight
+						->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
 						$validations['self_booking_doc'] = 'required';
