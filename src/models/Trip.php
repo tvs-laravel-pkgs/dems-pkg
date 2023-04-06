@@ -218,6 +218,37 @@ class Trip extends Model {
 				]);
 			}
 
+			//EMPLOYEE MOBILE NUMBER AND EMAIL VALIDATION
+			$authUser = Auth::user();
+			if($authUser){
+				$employeeData = [];
+				$employeeData['mobile_number'] = $authUser->mobile_number;
+				$employeeData['email_id'] = $authUser->email;
+				$employeeErrorMessages = [
+					'mobile_number.required' => 'The employee mobile number is required',
+					'mobile_number.digits' => 'The employee mobile number must be 10 digits',
+					'email_id.required' => 'The employee email is required',
+					'email_id.email' => 'The employee email id must be a valid email address',
+				];
+				$employeeValidator = Validator::make($employeeData, [
+	                'mobile_number' => [
+	                    'required',
+    					'digits:10',
+	                ],
+	                'email_id' => [
+	                    'required',
+	                    'email',
+	                ],
+	            ], $employeeErrorMessages);
+	            if ($employeeValidator->fails()) {
+	                return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => $employeeValidator->errors()->all(),
+	                ]);
+	            }
+			}
+			
 			DB::beginTransaction();
 			if (!$request->id) {
 				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
