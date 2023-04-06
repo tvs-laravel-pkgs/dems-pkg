@@ -570,10 +570,12 @@ app.component('eyatraTripClaimVerificationThreeView', {
         //APPROVE
         $(document).on('click', '.btn-approve', function() {
             $trip_id = $('#trip_id').val();
+            $('.btn-approve').button('loading');
             $http.get(
                 eyatra_trip_claim_verification_three_approve_url + '/' + $trip_id,
             ).then(function(response) {
                 if (!response.data.success) {
+                    $('.btn-approve').button('reset');
                     var errors = '';
                     for (var i in res.errors) {
                         errors += '<li>' + res.errors[i] + '</li>';
