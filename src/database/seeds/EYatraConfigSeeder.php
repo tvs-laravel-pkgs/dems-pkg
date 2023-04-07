@@ -64,6 +64,7 @@ class EYatraConfigSeeder extends Seeder {
 			548 => 'Trip Mode',
 			549 => 'Lodge Sharing Types',
 			550 => 'Oracle Transaction Type',
+			551 => 'Company Business Unit',
 		];
 
 		$configs = [
@@ -1202,6 +1203,20 @@ class EYatraConfigSeeder extends Seeder {
 			3832 => [
 				'name' => 'Travelx Invoice',
 				'config_type_id' => 550,
+			],
+
+			//COMPANY BUSINESS UNITS
+			3841 => [
+				'name' => 'OEM',
+				'config_type_id' => 551,
+			],
+			3842 => [
+				'name' => 'OES',
+				'config_type_id' => 551,
+			],
+			3843 => [
+				'name' => 'BPCL',
+				'config_type_id' => 551,
 			],
 		];
 
