@@ -1196,7 +1196,11 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3831 => [
-				'name' => 'Travelx',
+				'name' => 'Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			3832 => [
+				'name' => 'Travelx Invoice',
 				'config_type_id' => 550,
 			],
 		];
