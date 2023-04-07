@@ -63,6 +63,7 @@ class EYatraConfigSeeder extends Seeder {
 			547 => 'Axapta Export Types',
 			548 => 'Trip Mode',
 			549 => 'Lodge Sharing Types',
+			550 => 'Oracle Transaction Type',
 		];
 
 		$configs = [
@@ -1192,6 +1193,11 @@ class EYatraConfigSeeder extends Seeder {
 			3812 => [
 				'name' => 'Sharing With No Claim',
 				'config_type_id' => 549,
+			],
+
+			3831 => [
+				'name' => 'Travelx',
+				'config_type_id' => 550,
 			],
 		];
 
