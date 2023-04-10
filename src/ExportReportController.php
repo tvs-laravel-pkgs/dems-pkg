@@ -3328,4 +3328,73 @@ class ExportReportController extends Controller {
 		$axaptaExport->fill($data);
 		$axaptaExport->save();
 	}
+
+	public function tripOracleSync($id = null){
+		$advance_amount_trips = Trip::select([
+        	'id',
+        	DB::raw("'Advance amount' as category")
+        ])
+        	->where(function ($query) use ($id) {
+        		if($id){
+					$query->where('id', $id);
+        		}
+			})
+			->where('advance_received', '>', 0)
+        	->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
+        	->where('oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
+        	->groupBy('trips.id')
+        	->get()
+        	->toArray();
+
+        $claimed_trips = Trip::select(
+			'id',
+			DB::raw("'Trip claim' as category")
+		)
+			->where(function ($query) use ($id) {
+        		if($id){
+					$query->where('id', $id);
+        		}
+			})
+        	->where('self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
+        	->where('oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
+			->where('eyec.balance_amount', '>', 0)
+			->groupBy('trips.id')
+			->get()
+			->toArray();
+
+        $trip_details = array_merge($advance_amount_trips, $claimed_trips);
+    	foreach ($trip_details as $trip_detail) {
+    		try{
+    			DB::beginTransaction();
+    			$trip = Trip::find($trip_detail['id']);
+
+    			//ADVANCE AMOUNT SYNC
+    			if($trip_detail->category == 'Advance amount'){
+	    			$r = $trip->generatePrePaymentArOracleAxapta();
+			        if (!$r['success']) {
+			            dump($r);
+			        }else{
+			        	$trip->oracle_pre_payment_sync_status = 1; //SYNCED
+			        	$trip->save();
+			        }
+    			}
+
+    			//TRIP CLAIM SYNC
+    			if($trip_detail->category == 'Trip claim'){
+	    			$r = $trip->generateInvoiceArOracleAxapta();
+			        if (!$r['success']) {
+			            dump($r);
+			        }else{
+			        	$trip->oracle_invoice_sync_status = 1; //SYNCED
+			        	$trip->save();
+			        }
+    			}
+		        DB::commit();
+			} catch (\Exception $e) {
+				DB::rollBack();
+    			dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
+    			continue;
+			}
+    	}
+    }
 }
