@@ -1873,7 +1873,7 @@ class ExportReportController extends Controller {
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
 			->where('departments.business_id', '=', $r->business_ids)
-			->groupBy('lodgings.reference_number')
+			->groupBy('lodgings.id')
 			->get();
 		// dd(count($gst_details));
 		if (count($gst_details) == 0) {
