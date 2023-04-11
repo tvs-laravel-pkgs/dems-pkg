@@ -726,6 +726,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Grade',
 				'config_type_id' => 523,
 			],
+			3384 => [
+				'name' => 'Emp Delete',
+				'config_type_id' => 523,
+			],
 
 			//TRAVEL MODE CATEGORY TYPE
 			3400 => [
@@ -1188,11 +1192,11 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 549,
 			],
 			3811 => [
-				'name' => 'Sharing With Claim',
+				'name' => 'Yes',
 				'config_type_id' => 549,
 			],
 			3812 => [
-				'name' => 'Sharing With No Claim',
+				'name' => 'No',
 				'config_type_id' => 549,
 			],
 
