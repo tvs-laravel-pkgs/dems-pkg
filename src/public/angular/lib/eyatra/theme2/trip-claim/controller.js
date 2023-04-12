@@ -3420,11 +3420,19 @@ app.component('eyatraTripClaimForm', {
                     lodge_per_day_amt = lodge_data.amount;
                 }
 
-                if(lodge_per_day_amt < 1000){
-                    self.trip.lodgings[index].gstin_readonly = true;
-                }else{
-                    self.trip.lodgings[index].gstin_readonly = false;
-                }
+                // if(lodge_per_day_amt < 1000){
+                //     self.trip.lodgings[index].gstin_readonly = true;
+                // }else{
+                //     self.trip.lodgings[index].gstin_readonly = false;
+                // }
+            }
+
+            console.log("lodge_per_day_amt")
+            console.log(lodge_per_day_amt)
+            if(lodge_per_day_amt < 1000){
+                self.trip.lodgings[index].gstin_readonly = true;
+            }else{
+                self.trip.lodgings[index].gstin_readonly = false;
             }
         }
 
