@@ -3409,6 +3409,25 @@ app.component('eyatraTripClaimForm', {
             });
         }
 
+        $scope.gstinCheck = function(index){
+            let lodge_per_day_amt = 0;
+            let lodge_data = self.trip.lodgings[index];
+
+            if(lodge_data && lodge_data.amount && !isNaN(lodge_data.amount)){
+                if (lodge_data.stayed_days && lodge_data.stayed_days > 0) {
+                    lodge_per_day_amt = (lodge_data.amount / lodge_data.stayed_days);
+                } else {
+                    lodge_per_day_amt = lodge_data.amount;
+                }
+
+                if(lodge_per_day_amt < 1000){
+                    self.trip.lodgings[index].gstin_readonly = true;
+                }else{
+                    self.trip.lodgings[index].gstin_readonly = false;
+                }
+            }
+        }
+
         self.lodgingCal = () => {
             let totalLodgingAmount = 0;
             let currentTotal = 0;
