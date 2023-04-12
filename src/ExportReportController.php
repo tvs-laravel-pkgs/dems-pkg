@@ -1806,12 +1806,14 @@ class ExportReportController extends Controller {
 			'CLAIM NUMBER',
 			'CLAIM DATE',
 			'INVOICE NUMBER',
-			'TRANSPORT GSTIN',
-			'TRANSPORT AMOUNT',
-			'TRANSPORT TAX',
+			//'TRANSPORT GSTIN',
+			//'TRANSPORT AMOUNT',
+			//'TRANSPORT TAX',
 			'LODGING GST NUMBER',
+			'LODGING INVOICE NUMBER',
+			'LODGING INVOICE DATE',
 			'SUPPLIER NAME',
-			'INVOICE AMOUNT',
+  			'INVOICE AMOUNT',
 			'TAX PERCENTAGE',
 			'CGST AMOUNT',
 			'SGST AMOUNT',
@@ -1827,6 +1829,8 @@ class ExportReportController extends Controller {
 			DB::raw('COALESCE(ey_employee_claims.number, "") as claim_number'),
 			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as claim_date'),
 			DB::raw('COALESCE(lodgings.gstin, "") as gst_number'),
+			DB::raw('COALESCE(lodgings.reference_number, "") as reference_number'),
+			DB::raw('COALESCE(DATE_FORMAT(lodgings.invoice_date,"%d-%m-%Y"), "") as invoice_date'),
 			DB::raw('COALESCE(lodgings.lodge_name, "") as supplier_name'),
 			DB::raw('COALESCE(visit_bookings.gstin, "") as transport_gst_number'),
 			DB::raw('COALESCE(trips.number, "") as invoice_number'),
@@ -1869,7 +1873,7 @@ class ExportReportController extends Controller {
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
 			->where('departments.business_id', '=', $r->business_ids)
-			->groupBy('ey_employee_claims.id')
+			->groupBy('lodgings.id')
 			->get();
 		// dd(count($gst_details));
 		if (count($gst_details) == 0) {
@@ -1888,10 +1892,12 @@ class ExportReportController extends Controller {
 				$gst_detail->claim_number,
 				$gst_detail->claim_date,
 				$gst_detail->invoice_number,
-				$gst_detail->transport_gst_number,
-				$gst_detail->transport_amount,
-				$gst_detail->tax,
+				//$gst_detail->transport_gst_number,
+				//$gst_detail->transport_amount,
+				//$gst_detail->tax,
 				$gst_detail->gst_number,
+				$gst_detail->reference_number,
+				$gst_detail->invoice_date,
 				$gst_detail->supplier_name,
 				$gst_detail->invoice_amount,
 				$gst_detail->tax_percentage,
