@@ -3413,26 +3413,22 @@ app.component('eyatraTripClaimForm', {
             let lodge_per_day_amt = 0;
             let lodge_data = self.trip.lodgings[index];
 
-            if(lodge_data && lodge_data.amount && !isNaN(lodge_data.amount)){
-                if (lodge_data.stayed_days && lodge_data.stayed_days > 0) {
-                    lodge_per_day_amt = (lodge_data.amount / lodge_data.stayed_days);
-                } else {
-                    lodge_per_day_amt = lodge_data.amount;
+            if(lodge_data && lodge_data.stay_type_id == 3340){
+                if(lodge_data.amount && !isNaN(lodge_data.amount)){
+                    if (lodge_data.stayed_days && !isNaN(lodge_data.stayed_days) && lodge_data.stayed_days > 0) {
+                        lodge_per_day_amt = (lodge_data.amount / lodge_data.stayed_days);
+                    } else {
+                        lodge_per_day_amt = lodge_data.amount;
+                    }
                 }
 
-                // if(lodge_per_day_amt < 1000){
-                //     self.trip.lodgings[index].gstin_readonly = true;
-                // }else{
-                //     self.trip.lodgings[index].gstin_readonly = false;
-                // }
-            }
-
-            console.log("lodge_per_day_amt")
-            console.log(lodge_per_day_amt)
-            if(lodge_per_day_amt < 1000){
-                self.trip.lodgings[index].gstin_readonly = true;
-            }else{
-                self.trip.lodgings[index].gstin_readonly = false;
+                console.log("lodge_per_day_amt")
+                console.log(lodge_per_day_amt)
+                if(lodge_per_day_amt < 1000){
+                    self.trip.lodgings[index].gstin_readonly = true;
+                }else{
+                    self.trip.lodgings[index].gstin_readonly = false;
+                }
             }
         }
 
