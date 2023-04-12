@@ -3137,10 +3137,11 @@ app.component('eyatraTripClaimForm', {
                             $('#lodging_has_multiple_tax_invoice_active_' + index).attr('disabled', false);
                         }
 
+                        $scope.calculateTax(index);
                     }
                 });
             }
-            $scope.calculateTax(index);
+            // $scope.calculateTax(index);
         }
         $scope.calculateTax = (index) => {
             const amount = self.trip.lodgings[index]['amount'];
