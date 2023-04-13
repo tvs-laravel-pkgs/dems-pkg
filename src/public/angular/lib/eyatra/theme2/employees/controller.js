@@ -564,7 +564,7 @@ app.component('eyatraEmployeeForm', {
                         }
                     },
                     maxlength: 100,
-                    minlength: 3,
+                    // minlength: 3,
                 },
                 'branch_name': {
                     required: function(element) {
@@ -576,7 +576,7 @@ app.component('eyatraEmployeeForm', {
                         }
                     },
                     maxlength: 50,
-                    minlength: 3,
+                    // minlength: 3,
                 },
                 'account_name': {
                     required: function(element) {
@@ -588,7 +588,7 @@ app.component('eyatraEmployeeForm', {
                         }
                     },
                     maxlength: 50,
-                    minlength: 3,
+                    // minlength: 3,
                 },
                 'account_number': {
                     required: function(element) {
@@ -600,8 +600,8 @@ app.component('eyatraEmployeeForm', {
                         }
                     },
                     maxlength: 20,
-                    minlength: 3,
-                    min: 1,
+                    // minlength: 3,
+                    // min: 1,
                     number: true,
                     // positiveNumber: true,
                 },
