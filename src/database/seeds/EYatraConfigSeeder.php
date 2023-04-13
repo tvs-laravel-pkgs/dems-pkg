@@ -65,6 +65,8 @@ class EYatraConfigSeeder extends Seeder {
 			549 => 'Lodge Sharing Types',
 			550 => 'Oracle Transaction Type',
 			551 => 'Company Business Unit',
+			552 => 'Trip Advance - Pre Payment Invoice Natural Account',
+			553 => 'Claim - Invoice Natural Account',
 		];
 
 		$configs = [
@@ -1125,7 +1127,7 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Self Booking Attachments',
 				'config_type_id' => 541,
 			],
-			3756 =>[
+			3756 => [
 				'name' => 'Guest House Approval',
 				'config_type_id' => 541,
 			],
@@ -1221,6 +1223,16 @@ class EYatraConfigSeeder extends Seeder {
 			3843 => [
 				'name' => 'BPCL',
 				'config_type_id' => 551,
+			],
+
+			//ORACLE NATURAL ACCOUNT
+			3860 => [
+				'name' => '413401',
+				'config_type_id' => 552,
+			],
+			3861 => [
+				'name' => '413401',
+				'config_type_id' => 553,
 			],
 		];
 
