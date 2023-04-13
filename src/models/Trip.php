@@ -2269,6 +2269,21 @@ class Trip extends Model {
 			// if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
 			if (isset($request->is_attachment_trip) && $request->is_attachment_trip && $is_grade_leader == false) {
 				// dd('final save validation');
+				// // Throwing an error if details added with 0 value
+				// $employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
+				// $errors = [];
+				// if (count($trip->visits) > 0 && $employee_claim->transport_total == 0)
+				// 	$errors[] = 'Transport amount should be greater than 0';
+				// if (count($trip->lodgings) > 0 && $employee_claim->lodging_total == 0)
+				// 	$errors[] = 'Lodging amount should be greater than 0';
+				// if (count($trip->boardings) > 0 && $employee_claim->boarding_total == 0)
+				// 	$errors[] = 'Boarding amount should be greater than 0';
+				// if (count($trip->localTravels) > 0 && $employee_claim->local_travel_total == 0)
+				// 	$errors[] = 'Local travel amount should be greater than 0';
+
+				// if (count($errors) > 0) return response()->json(['success' => false, 'errors' => $errors]);
+				// // Throwing an error if details added with 0 value
+
 				$error_messages = [
 					'fare_detail_doc.required' => 'Fare detail document is required',
 					'lodging_doc.required' => 'Lodging document is required',
@@ -3593,12 +3608,12 @@ class Trip extends Model {
 				}
 				// if($grade_advance_eligibility->deviation_eligiblity == 1){
 				if($grade_advance_eligibility->deviation_eligiblity == 1 && $is_grade_leader == false){
-                if ($employee_claim->deviation_reason == NULL) {
-					$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
-				} else {
-					$employee_claim->is_deviation = 1;
+					if ($employee_claim->deviation_reason == NULL) {
+						$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
+					} else {
+						$employee_claim->is_deviation = 1;
+					}
 				}
-			}
 				// if (isset($loding_attachment_exist) && $loding_attachment_exist == false && $employee_claim->is_deviation == 0)
 				// Changed deviation by Karthick T on 21-01-2022
 
