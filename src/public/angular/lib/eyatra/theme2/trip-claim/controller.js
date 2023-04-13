@@ -3137,10 +3137,11 @@ app.component('eyatraTripClaimForm', {
                             $('#lodging_has_multiple_tax_invoice_active_' + index).attr('disabled', false);
                         }
 
+                        $scope.calculateTax(index);
                     }
                 });
             }
-            $scope.calculateTax(index);
+            // $scope.calculateTax(index);
         }
         $scope.calculateTax = (index) => {
             const amount = self.trip.lodgings[index]['amount'];
@@ -3406,6 +3407,29 @@ app.component('eyatraTripClaimForm', {
                 // Added round off amount
 
             });
+        }
+
+        $scope.gstinCheck = function(index){
+            let lodge_per_day_amt = 0;
+            let lodge_data = self.trip.lodgings[index];
+
+            if(lodge_data && lodge_data.stay_type_id == 3340){
+                if(lodge_data.amount && !isNaN(lodge_data.amount)){
+                    if (lodge_data.stayed_days && !isNaN(lodge_data.stayed_days) && lodge_data.stayed_days > 0) {
+                        lodge_per_day_amt = (lodge_data.amount / lodge_data.stayed_days);
+                    } else {
+                        lodge_per_day_amt = lodge_data.amount;
+                    }
+                }
+
+                console.log("lodge_per_day_amt")
+                console.log(lodge_per_day_amt)
+                if(lodge_per_day_amt < 1000){
+                    self.trip.lodgings[index].gstin_readonly = true;
+                }else{
+                    self.trip.lodgings[index].gstin_readonly = false;
+                }
+            }
         }
 
         self.lodgingCal = () => {
