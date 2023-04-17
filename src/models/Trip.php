@@ -4607,6 +4607,7 @@ request is not desired, then those may be rejected.';
 		}
 		$location = $outletCode;
 		$naturalAccount = Config::where('id', 3860)->first()->name;
+		$supplierSiteName = $outletCode;
 
 		$bpas_portal = Portal::select([
 			'db_host_name',
@@ -4650,6 +4651,7 @@ request is not desired, then those may be rejected.';
 			'invoice_number' => $invoiceNumber,
 			'invoice_date' => $invoiceDate,
 			'supplier_number' => $supplierNumber,
+			'supplier_site_name' => $supplierSiteName,
 			'invoice_type' => $invoiceType,
 			'description' => $description,
 			'amount' => $amount,
@@ -5147,6 +5149,7 @@ request is not desired, then those may be rejected.';
 		}
 		$location = $outletCode;
 		$naturalAccount = Config::where('id', 3861)->first()->name;
+		$supplierSiteName = $outletCode;
 
 		$bpas_portal = Portal::select([
 			'db_host_name',
@@ -5279,6 +5282,7 @@ request is not desired, then those may be rejected.';
 			'invoice_amount' => $invoiceAmount,
 			'invoice_date' => $invoiceDate,
 			'supplier_number' => $supplierNumber,
+			'supplier_site_name' => $supplierSiteName,
 			'invoice_type' => $invoiceType,
 			'description' => $description,
 			'amount' => $amount,
@@ -5317,6 +5321,7 @@ request is not desired, then those may be rejected.';
 						'pre_payment_invoice_number' => $tripNumber,
 						'pre_payment_invoice_date' => $tripDate,
 						'supplier_number' => $supplierNumber,
+						'supplier_site_name' => $supplierSiteName,
 						'invoice_type' => $invoiceType,
 						'description' => $description,
 						'amount' => $employeeClaim->balance_amount,
