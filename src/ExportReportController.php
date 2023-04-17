@@ -617,6 +617,10 @@ class ExportReportController extends Controller {
 								//ADVANCE TRIP AMOUNT
 								$res = $this->employeeAxaptaExportProcess(6, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$tot_consolidated_amount += $res;
+
+								Trip::where('id', $employeeTrip->id)->update([
+									'advance_ax_export_sync' => 1,
+								]);
 							}
 						} else {
 							continue;
@@ -655,9 +659,9 @@ class ExportReportController extends Controller {
 								'self_ax_export_synched' => 1,
 							]);
 						} else {
-							Trip::where('id', $employeeTrip->id)->update([
-								'advance_ax_export_sync' => 1,
-							]);
+							// Trip::where('id', $employeeTrip->id)->update([
+							// 	'advance_ax_export_sync' => 1,
+							// ]);
 						}
 
 						// DB::commit();
@@ -1811,7 +1815,7 @@ class ExportReportController extends Controller {
 			'LODGING INVOICE NUMBER',
 			'LODGING INVOICE DATE',
 			'SUPPLIER NAME',
-  			'INVOICE AMOUNT',
+			'INVOICE AMOUNT',
 			'TAX PERCENTAGE',
 			'CGST AMOUNT',
 			'SGST AMOUNT',
@@ -2594,6 +2598,10 @@ class ExportReportController extends Controller {
 									//HONDA
 									$this->hondaOeslEmployeeAxaptaProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								}
+
+								Trip::where('id', $employeeTrip->id)->update([
+									'advance_ax_export_sync' => 1,
+								]);
 							}
 						} else {
 							continue;
@@ -2645,9 +2653,9 @@ class ExportReportController extends Controller {
 								'self_ax_export_synched' => 1,
 							]);
 						} else {
-							Trip::where('id', $employeeTrip->id)->update([
-								'advance_ax_export_sync' => 1,
-							]);
+							// Trip::where('id', $employeeTrip->id)->update([
+							// 	'advance_ax_export_sync' => 1,
+							// ]);
 						}
 					} catch (\Exception $e) {
 						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
@@ -3346,7 +3354,7 @@ class ExportReportController extends Controller {
 			->where('advance_received', '>', 0)
 			->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
 			->where('oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
-			->groupBy('trips.id')
+			->groupBy('id')
 			->get()
 			->toArray();
 
@@ -3360,9 +3368,9 @@ class ExportReportController extends Controller {
 				}
 			})
 			->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
+			->where('eyec.total_amount', '>', 0)
 			->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
 			->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
-			->where('eyec.balance_amount', '>', 0)
 			->groupBy('trips.id')
 			->get()
 			->toArray();
@@ -3375,7 +3383,7 @@ class ExportReportController extends Controller {
 
 				//ADVANCE AMOUNT SYNC
 				if ($trip_detail['category'] == 'Advance amount') {
-					$r = $trip->generatePrePaymentArOracleAxapta();
+					$r = $trip->generatePrePaymentApOracleAxapta();
 					if (!$r['success']) {
 						dump($r);
 					} else {
@@ -3386,7 +3394,7 @@ class ExportReportController extends Controller {
 
 				//TRIP CLAIM SYNC
 				if ($trip_detail['category'] == 'Trip claim') {
-					$r = $trip->generateInvoiceArOracleAxapta();
+					$r = $trip->generateInvoiceApOracleAxapta();
 					if (!$r['success']) {
 						dump($r);
 					} else {

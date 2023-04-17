@@ -4562,34 +4562,27 @@ request is not desired, then those may be rejected.';
 		}
 	}
 
-	public function generatePrePaymentArOracleAxapta() {
-		//CUSTOMER
+	public function generatePrePaymentApOracleAxapta() {
+		//VENDOR
 		$res = [];
 		$res['success'] = false;
 		$res['errors'] = [];
 
 		$companyId = $this->company_id;
 		$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
-		$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
-		$transactionClass = '';
-		$transactionBatchName = 'Travelex';
-		$transactionTypeName = 'Pre Payment Invoice';
+
 		$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
+		$invoiceSource = 'Pre Payment Invoice';
 		if (!empty($transactionDetail)) {
-			$transactionClass = $transactionDetail->class ? $transactionDetail->class : $transactionClass;
-			$transactionBatchName = $transactionDetail->batch ? $transactionDetail->batch : $transactionBatchName;
-			$transactionTypeName = $transactionDetail->type ? $transactionDetail->type : $transactionTypeName;
+			$invoiceSource = $transactionDetail->type ? $transactionDetail->type : $invoiceSource;
 		}
 
 		$businessUnitName = $companyBusinessUnit;
-		$transactionNumber = $this->number;
+		$invoiceNumber = $this->number;
 		$invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
-
 		$employeeData = $this->employee;
-		$customerCode = $employeeData ? $employeeData->code : null;
-		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
-		$customerSiteNumber = $outletCode;
-		$shipToCustomerAccount = $customerCode;
+		$supplierNumber = $employeeData ? $employeeData->code : null;
+		$invoiceType = 'Standard';
 		$description = '';
 		if (!empty($employeeData->code)) {
 			$description .= $employeeData->code;
@@ -4600,29 +4593,20 @@ request is not desired, then those may be rejected.';
 		if (!empty($this->purpose)) {
 			$description .= ' - ' . ($this->purpose->name);
 		}
-		$unitPrice = $this->advance_received;
+
 		$amount = $this->advance_received;
-		$quantity = 1;
-		$accountingClass = 'REV';
+		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		$accountingClass = 'Payable';
+		$company = $this->company ? $this->company->oracle_code : '';
+
 		$sbu = $employeeData->Sbu;
-		$lob = $costCentre = null;
+		$lob = $department = null;
 		if ($sbu) {
 			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
-			$costCentre = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
+			$department = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
 		}
-
-		// $itemCode = Config::where('id', 133921)->first()->name;
-		// $serviceItem = ServiceItem::where('company_id', $this->company_id)
-		//     ->where('code', $itemCode)
-		//     ->first();
-		// $naturalAccount = null;
-		// if($serviceItem){
-		//     if(isset($serviceItem->coaCode)){
-		//         $naturalAccount = $serviceItem->coaCode->oracle_code;
-		//     }
-		// }
-		$naturalAccount = null;
 		$location = $outletCode;
+		$naturalAccount = Config::where('id', 3860)->first()->name;
 
 		$bpas_portal = Portal::select([
 			'db_host_name',
@@ -4643,12 +4627,12 @@ request is not desired, then those may be rejected.';
 		DB::purge('dynamic');
 		DB::reconnect('dynamic');
 
-		$arInvoiceExports = DB::table('oracle_ar_invoice_exports')->where([
-			'transaction_number' => $transactionNumber,
+		$apInvoiceExports = DB::table('oracle_ap_invoice_exports')->where([
+			'invoice_number' => $invoiceNumber,
 			'business_unit' => $companyBusinessUnit,
-			'transaction_type_name' => $transactionTypeName,
+			'invoice_source' => $invoiceSource,
 		])->get();
-		if (count($arInvoiceExports) > 0) {
+		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
 			return $res;
 		}
@@ -4659,28 +4643,24 @@ request is not desired, then those may be rejected.';
 			$amountDiff = number_format((round($amount) - $amount), 2);
 		}
 
-		DB::table('oracle_ar_invoice_exports')->insert([
+		DB::table('oracle_ap_invoice_exports')->insert([
 			'company_id' => $companyId,
 			'business_unit' => $businessUnitName,
-			'transaction_class' => $transactionClass,
-			'transaction_batch_source_name' => $transactionBatchName,
-			'transaction_type_name' => $transactionTypeName,
-			'transaction_number' => $transactionNumber,
-			'transaction_date' => $invoiceDate,
-			'customer_account_number' => $customerCode,
-			'bill_to_customer_site_number' => $customerSiteNumber,
-			'credit_outlet' => $outletCode,
-			'quantity' => $quantity,
+			'invoice_source' => $invoiceSource,
+			'invoice_number' => $invoiceNumber,
+			'invoice_date' => $invoiceDate,
+			'supplier_number' => $supplierNumber,
+			'invoice_type' => $invoiceType,
+			'description' => $description,
+			'amount' => $amount,
+			'outlet' => $outletCode,
+			'round_off_amount' => $amountDiff,
 			'accounting_class' => $accountingClass,
-			'company' => $companyCode,
+			'company' => $company,
 			'lob' => $lob,
 			'location' => $location,
-			'cost_centre' => $costCentre,
+			'department' => $department,
 			'natural_account' => $naturalAccount,
-			'description' => $description,
-			'unit_price' => $unitPrice,
-			'amount' => $amount,
-			'round_off_amount' => $amountDiff,
 			'created_at' => Carbon::now(),
 		]);
 
@@ -4689,33 +4669,423 @@ request is not desired, then those may be rejected.';
 		return $res;
 	}
 
-	public function generateInvoiceArOracleAxapta() {
+	// public function generateInvoiceArOracleAxapta() {
+	// 	$res = [];
+	// 	$res['success'] = false;
+	// 	$res['errors'] = [];
+
+	// 	$companyId = $this->company_id;
+	// 	$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+	// 	$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
+	// 	$transactionClass = '';
+	// 	$transactionBatchName = 'Travelex';
+	// 	$transactionTypeName = 'Invoice';
+	// 	$transactionDetail = $this->company ? $this->company->invoiceTransaction() : null;
+	// 	if (!empty($transactionDetail)) {
+	// 		$transactionClass = $transactionDetail->class ? $transactionDetail->class : $transactionClass;
+	// 		$transactionBatchName = $transactionDetail->batch ? $transactionDetail->batch : $transactionBatchName;
+	// 		$transactionTypeName = $transactionDetail->type ? $transactionDetail->type : $transactionTypeName;
+	// 	}
+
+	// 	$prePaymentTransactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
+	// 	$prePaymentClass = '';
+	// 	$prePaymentBatch = 'Travelex';
+	// 	$prePaymentType = 'Pre Payment Invoice';
+	// 	if (!empty($prePaymentTransactionDetail)) {
+	// 		$prePaymentClass = $prePaymentTransactionDetail->class ? $prePaymentTransactionDetail->class : $prePaymentClass;
+	// 		$prePaymentBatch = $prePaymentTransactionDetail->batch ? $prePaymentTransactionDetail->batch : $prePaymentBatch;
+	// 		$prePaymentType = $prePaymentTransactionDetail->type ? $prePaymentTransactionDetail->type : $prePaymentType;
+	// 	}
+
+	// 	$businessUnitName = $companyBusinessUnit;
+
+	// 	$employeeData = $this->employee;
+	// 	$customerCode = $employeeData ? $employeeData->code : null;
+	// 	$supplierNumber = $employeeData ? $employeeData->code : null;
+	// 	$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+	// 	$customerSiteNumber = $outletCode;
+	// 	$shipToCustomerAccount = $customerCode;
+	// 	$description = '';
+	// 	if (!empty($employeeData->code)) {
+	// 		$description .= $employeeData->code;
+	// 	}
+	// 	if (!empty($employeeData->user->name)) {
+	// 		$description .= ' - ' . ($employeeData->user->name);
+	// 	}
+	// 	if (!empty($this->purpose)) {
+	// 		$description .= ' - ' . ($this->purpose->name);
+	// 	}
+
+	// 	$employeeClaim = EmployeeClaim::select([
+	// 		'id',
+	// 		'number',
+	// 		'total_amount',
+	// 		'boarding_total',
+	// 		'local_travel_total',
+	// 		'amount_to_pay',
+	// 		'balance_amount',
+	// 		'created_at',
+	// 	])
+	// 		->where('trip_id', $this->id)
+	// 		->first();
+
+	// 	$invoiceAmount = null;
+	// 	$transactionNumber = null;
+	// 	$invoiceDate = null;
+	// 	$invoiceNumber = null;
+	// 	if ($employeeClaim) {
+	// 		$invoiceAmount = round($employeeClaim->total_amount);
+	// 		$transactionNumber = $employeeClaim->number;
+	// 		$invoiceDate = $employeeClaim->created_at ? date("Y-m-d", strtotime($employeeClaim->created_at)) : null;
+	// 		$invoiceNumber = $employeeClaim->number;
+	// 	}
+
+	// 	$employeeTrip = $this;
+	// 	$employeeTransportAmount = 0.00;
+	// 	$employeeTransportOtherCharges = 0.00;
+	// 	$selfVisitTotalRoundOff = 0;
+	// 	$employeeTransportTaxableValue = 0.00;
+
+	// 	$employeeLodgingTaxableValue = 0.00;
+	// 	$employeeBoardingTaxableValue = 0.00;
+	// 	$employeeLocalTravelTaxableValue = 0.00;
+	// 	$employeeTotalTaxableValue = 0.00;
+
+	// 	if ($employeeTrip->selfVisits->isNotEmpty()) {
+	// 		foreach ($employeeTrip->selfVisits as $selfVisit) {
+	// 			if ($selfVisit->booking) {
+	// 				$employeeTransportAmount += floatval($selfVisit->booking->amount);
+	// 				$employeeTransportOtherCharges += floatval($selfVisit->booking->other_charges);
+	// 				$selfVisitTotalRoundOff += floatval($selfVisit->booking->round_off);
+	// 			}
+	// 		}
+	// 	}
+	// 	$employeeTransportTaxableValue = floatval($employeeTransportAmount + $employeeTransportOtherCharges);
+
+	// 	//LODGING
+	// 	if ($employeeTrip->lodgings->isNotEmpty()) {
+	// 		$employeeLodgingTaxableValue = floatval($employeeTrip->lodgings()->sum('amount'));
+	// 	}
+
+	// 	//BOARDING
+	// 	if ($employeeTrip->boardings->isNotEmpty()) {
+	// 		$employeeBoardingTaxableValue = floatval($employeeClaim->boarding_total);
+	// 	}
+
+	// 	//LOCAL TRAVELS
+	// 	if ($employeeTrip->localTravels->isNotEmpty()) {
+	// 		$employeeLocalTravelTaxableValue = floatval($employeeClaim->local_travel_total);
+	// 	}
+
+	// 	$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue + $selfVisitTotalRoundOff);
+
+	// 	$unitPrice = $employeeTotalTaxableValue;
+	// 	$amount = $employeeTotalTaxableValue;
+	// 	$quantity = 1;
+	// 	$accountingClass = 'REV';
+	// 	$sbu = $employeeData->Sbu;
+	// 	$lob = $costCentre = $department = null;
+	// 	if ($sbu) {
+	// 		$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
+	// 		$costCentre = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
+	// 		$department = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
+	// 	}
+
+	// 	$naturalAccount = Config::where('id', 3861)->first()->name;
+	// 	$location = $outletCode;
+
+	// 	$invoiceType = 'Standard';
+	// 	$company = $this->company ? $this->company->oracle_code : '';
+
+	// 	$bpas_portal = Portal::select([
+	// 		'db_host_name',
+	// 		'db_port_number',
+	// 		'db_name',
+	// 		'db_user_name',
+	// 		'db_password',
+	// 	])
+	// 		->where('id', 1)
+	// 		->first();
+	// 	DB::setDefaultConnection('dynamic');
+	// 	$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $bpas_portal->db_host_name);
+	// 	$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $bpas_portal->db_port_number);
+	// 	$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
+	// 	$db_name = dataBaseConfig::set('database.connections.dynamic.database', $bpas_portal->db_name);
+	// 	$db_username = dataBaseConfig::set('database.connections.dynamic.username', $bpas_portal->db_user_name);
+	// 	$db_username = dataBaseConfig::set('database.connections.dynamic.password', $bpas_portal->db_password);
+	// 	DB::purge('dynamic');
+	// 	DB::reconnect('dynamic');
+
+	// 	$arInvoiceExports = DB::table('oracle_ar_invoice_exports')->where([
+	// 		'transaction_number' => $transactionNumber,
+	// 		'business_unit' => $companyBusinessUnit,
+	// 		'transaction_type_name' => $transactionTypeName,
+	// 	])->get();
+	// 	if (count($arInvoiceExports) > 0) {
+	// 		$res['errors'] = ['Already exported to oracle table'];
+	// 		return $res;
+	// 	}
+
+	// 	//LODGING TAXES
+	// 	$cgstAmount = 0;
+	// 	$sgstAmount = 0;
+	// 	$igstAmount = 0;
+	// 	$cgstSgstPercentage = 0;
+	// 	$igstPercentage = 0;
+
+	// 	if ($employeeTrip->lodgings->isNotEmpty()) {
+	// 		foreach ($employeeTrip->lodgings as $lodging) {
+	// 			if ($lodging->stay_type_id == 3340) {
+	// 				//HAS MULTIPLE TAX INVOICE
+	// 				if ($lodging->has_multiple_tax_invoice == "Yes") {
+	// 					//LODGE
+	// 					if ($lodging->lodgingTaxInvoice && (($lodging->lodgingTaxInvoice->cgst != '0.00' && $lodging->lodgingTaxInvoice->sgst != '0.00') || ($lodging->lodgingTaxInvoice->igst != '0.00'))) {
+	// 						if ($lodging->lodgingTaxInvoice->cgst > 0 && $lodging->lodgingTaxInvoice->sgst > 0) {
+	// 							$cgstAmount += floatval($lodging->lodgingTaxInvoice->cgst);
+	// 							$sgstAmount += floatval($lodging->lodgingTaxInvoice->sgst);
+	// 							$cgstSgstPercentage += floatval($lodging->lodgingTaxInvoice->tax_percentage);
+	// 						} else {
+	// 							$igstAmount += floatval($lodging->lodgingTaxInvoice->igst);
+	// 							$igstPercentage += floatval($lodging->lodgingTaxInvoice->tax_percentage);
+	// 						}
+	// 					}
+
+	// 					//DRY WASH
+	// 					if ($lodging->drywashTaxInvoice && (($lodging->drywashTaxInvoice->cgst != '0.00' && $lodging->drywashTaxInvoice->sgst != '0.00') || ($lodging->drywashTaxInvoice->igst != '0.00'))) {
+
+	// 						if ($lodging->drywashTaxInvoice->cgst > 0 && $lodging->drywashTaxInvoice->sgst > 0) {
+	// 							$cgstAmount += floatval($lodging->drywashTaxInvoice->cgst);
+	// 							$sgstAmount += floatval($lodging->drywashTaxInvoice->sgst);
+	// 							$cgstSgstPercentage += floatval($lodging->drywashTaxInvoice->tax_percentage);
+	// 						} else {
+	// 							$igstAmount += floatval($lodging->drywashTaxInvoice->igst);
+	// 							$igstPercentage += floatval($lodging->drywashTaxInvoice->tax_percentage);
+	// 						}
+	// 					}
+
+	// 					//BOARDING
+	// 					if ($lodging->boardingTaxInvoice && (($lodging->boardingTaxInvoice->cgst != '0.00' && $lodging->boardingTaxInvoice->sgst != '0.00') || ($lodging->boardingTaxInvoice->igst != '0.00'))) {
+	// 						if ($lodging->boardingTaxInvoice->cgst > 0 && $lodging->boardingTaxInvoice->sgst > 0) {
+	// 							$cgstAmount += floatval($lodging->boardingTaxInvoice->cgst);
+	// 							$sgstAmount += floatval($lodging->boardingTaxInvoice->sgst);
+	// 							$cgstSgstPercentage += floatval($lodging->boardingTaxInvoice->tax_percentage);
+	// 						} else {
+	// 							$igstAmount += floatval($lodging->boardingTaxInvoice->igst);
+	// 							$igstPercentage += floatval($lodging->boardingTaxInvoice->tax_percentage);
+	// 						}
+	// 					}
+
+	// 					//OTHERS
+	// 					if ($lodging->othersTaxInvoice && (($lodging->othersTaxInvoice->cgst != '0.00' && $lodging->othersTaxInvoice->sgst != '0.00') || ($lodging->othersTaxInvoice->igst != '0.00'))) {
+	// 						if ($lodging->othersTaxInvoice->cgst > 0 && $lodging->othersTaxInvoice->sgst > 0) {
+	// 							$cgstAmount += floatval($lodging->othersTaxInvoice->cgst);
+	// 							$sgstAmount += floatval($lodging->othersTaxInvoice->sgst);
+	// 							$cgstSgstPercentage += floatval($lodging->othersTaxInvoice->tax_percentage);
+	// 						} else {
+	// 							$igstAmount += floatval($lodging->othersTaxInvoice->igst);
+	// 							$igstPercentage += floatval($lodging->othersTaxInvoice->tax_percentage);
+	// 						}
+	// 					}
+
+	// 				} else {
+	// 					//SINGLE
+	// 					if ($lodging && (($lodging->cgst != '0.00' && $lodging->sgst != '0.00') || ($lodging->igst != '0.00'))) {
+	// 						if ($lodging->cgst > 0 && $lodging->sgst > 0) {
+	// 							$cgstAmount += floatval($lodging->cgst);
+	// 							$sgstAmount += floatval($lodging->sgst);
+	// 							$cgstSgstPercentage += floatval($lodging->tax_percentage);
+	// 						} else {
+	// 							$igstAmount += floatval($lodging->igst);
+	// 							$igstPercentage += floatval($lodging->tax_percentage);
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+
+	// 	//GST TAX CLASSIFICATION
+	// 	$taxClassification = '';
+	// 	if ($cgstAmount > 0 && $sgstAmount > 0) {
+	// 		$taxClassification .= 'CGST + SGST + ' . (round($cgstSgstPercentage));
+	// 	}
+	// 	if ($igstAmount > 0) {
+	// 		$taxClassification .= ' IGST + ' . (round($igstPercentage));
+	// 	}
+
+	// 	//ROUND OFF
+	// 	$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
+	// 	$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
+	// 	$employeeLodgingRoundoff += floatval($roundOffAmt);
+
+	// 	DB::table('oracle_ar_invoice_exports')->insert([
+	// 		'company_id' => $companyId,
+	// 		'business_unit' => $businessUnitName,
+	// 		'transaction_class' => $transactionClass,
+	// 		'transaction_batch_source_name' => $transactionBatchName,
+	// 		'transaction_type_name' => $transactionTypeName,
+	// 		'transaction_number' => $transactionNumber,
+	// 		'invoice_amount' => $invoiceAmount,
+	// 		'transaction_date' => $invoiceDate,
+	// 		'customer_account_number' => $customerCode,
+	// 		'bill_to_customer_site_number' => $customerSiteNumber,
+	// 		'credit_outlet' => $outletCode,
+	// 		'description' => $description,
+	// 		'quantity' => $quantity,
+	// 		'unit_price' => $unitPrice,
+	// 		'amount' => $amount,
+	// 		'tax_classification' => $taxClassification,
+	// 		'cgst' => $cgstAmount,
+	// 		'sgst' => $sgstAmount,
+	// 		'igst' => $igstAmount,
+	// 		'round_off_amount' => $employeeLodgingRoundoff,
+	// 		'accounting_class' => $accountingClass,
+	// 		'company' => $companyCode,
+	// 		'lob' => $lob,
+	// 		'location' => $location,
+	// 		'cost_centre' => $costCentre,
+	// 		'natural_account' => $naturalAccount,
+	// 		'created_at' => Carbon::now(),
+	// 	]);
+
+	// 	//IF ADVANCE RECEIVED
+	// 	// dd("fdfdf");
+	// 	if ($employeeTrip->advance_received > 0) {
+	// 		//COMPANY TO EMPLOYEE
+	// 		if ($employeeClaim->amount_to_pay == 1) {
+	// 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+	// 				//ROUND OFF
+	// 				$amountDiff = 0;
+	// 				if (!empty($employeeClaim->balance_amount)) {
+	// 					$amountDiff = number_format((round($employeeClaim->balance_amount) - $employeeClaim->balance_amount), 2);
+	// 				}
+	// 				DB::table('oracle_ap_invoice_exports')->insert([
+	// 					'company_id' => $companyId,
+	// 					'business_unit' => $businessUnitName,
+	// 					'invoice_source' => $prePaymentType,
+	// 					'invoice_number' => $invoiceNumber,
+	// 					'invoice_date' => $invoiceDate,
+	// 					'supplier_number' => $supplierNumber,
+	// 					'invoice_type' => $invoiceType,
+	// 					'description' => $description,
+	// 					'amount' => $employeeClaim->balance_amount,
+	// 					'outlet' => $outletCode,
+	// 					'round_off_amount' => $amountDiff,
+	// 					'accounting_class' => 'Payable',
+	// 					'company' => $company,
+	// 					'lob' => $lob,
+	// 					'location' => $location,
+	// 					'department' => $department,
+	// 					'natural_account' => $naturalAccount,
+	// 					'created_at' => Carbon::now(),
+	// 				]);
+	// 			}
+	// 		}
+
+	// 		//EMPLOYEE TO COMPANY
+	// 		if ($employeeClaim->amount_to_pay == 2) {
+	// 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+	// 				//ROUND OFF
+	// 				$amountDiff = 0;
+	// 				if (!empty($employeeClaim->balance_amount)) {
+	// 					$amountDiff = number_format((round($employeeClaim->balance_amount) - $employeeClaim->balance_amount), 2);
+	// 				}
+
+	// 				DB::table('oracle_ar_invoice_exports')->insert([
+	// 					'company_id' => $companyId,
+	// 					'business_unit' => $businessUnitName,
+	// 					'transaction_class' => $prePaymentClass,
+	// 					'transaction_batch_source_name' => $prePaymentBatch,
+	// 					'transaction_type_name' => $prePaymentType,
+	// 					'transaction_number' => $transactionNumber,
+	// 					// 'invoice_amount' => $invoiceAmount,
+	// 					'transaction_date' => $invoiceDate,
+	// 					'customer_account_number' => $customerCode,
+	// 					'bill_to_customer_site_number' => $customerSiteNumber,
+	// 					'credit_outlet' => $outletCode,
+	// 					'description' => $description,
+	// 					'quantity' => $quantity,
+	// 					'unit_price' => $employeeClaim->balance_amount,
+	// 					'amount' => $employeeClaim->balance_amount,
+	// 					// 'tax_classification' => $taxClassification,
+	// 					// 'cgst' => $cgstAmount,
+	// 					// 'sgst' => $sgstAmount,
+	// 					// 'igst' => $igstAmount,
+	// 					'round_off_amount' => $amountDiff,
+	// 					'accounting_class' => 'REV',
+	// 					'company' => $companyCode,
+	// 					'lob' => $lob,
+	// 					'location' => $location,
+	// 					'cost_centre' => $costCentre,
+	// 					'natural_account' => $naturalAccount,
+	// 					'created_at' => Carbon::now(),
+	// 				]);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	$res['success'] = true;
+	// 	DB::setDefaultConnection('mysql');
+	// 	return $res;
+	// }
+
+	public function generateInvoiceApOracleAxapta() {
 		$res = [];
 		$res['success'] = false;
 		$res['errors'] = [];
 
-		$companyId = $this->company_id;
-		$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+		$employeeTrip = $this;
+		$companyId = $employeeTrip->company_id;
+		$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
 		$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
-		$transactionClass = '';
-		$transactionBatchName = 'Travelex';
-		$transactionTypeName = 'Invoice';
-		$transactionDetail = $this->company ? $this->company->invoiceTransaction() : null;
+
+		$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
+		$invoiceSource = 'Invoice';
 		if (!empty($transactionDetail)) {
-			$transactionClass = $transactionDetail->class ? $transactionDetail->class : $transactionClass;
-			$transactionBatchName = $transactionDetail->batch ? $transactionDetail->batch : $transactionBatchName;
-			$transactionTypeName = $transactionDetail->type ? $transactionDetail->type : $transactionTypeName;
+			$invoiceSource = $transactionDetail->type ? $transactionDetail->type : $invoiceSource;
+		}
+
+		$prePaymentTransactionDetail = $employeeTrip->company ? $employeeTrip->company->prePaymentInvoiceTransaction() : null;
+		$prePaymentClass = '';
+		$prePaymentBatch = 'Travelex';
+		$prePaymentType = 'Pre Payment Invoice';
+		if (!empty($prePaymentTransactionDetail)) {
+			$prePaymentClass = $prePaymentTransactionDetail->class ? $prePaymentTransactionDetail->class : $prePaymentClass;
+			$prePaymentBatch = $prePaymentTransactionDetail->batch ? $prePaymentTransactionDetail->batch : $prePaymentBatch;
+			$prePaymentType = $prePaymentTransactionDetail->type ? $prePaymentTransactionDetail->type : $prePaymentType;
+		}
+
+		$employeeClaim = EmployeeClaim::select([
+			'id',
+			'number',
+			'total_amount',
+			'boarding_total',
+			'local_travel_total',
+			'amount_to_pay',
+			'balance_amount',
+			'created_at',
+		])
+			->where('trip_id', $employeeTrip->id)
+			->first();
+
+		$invoiceAmount = null;
+		$invoiceDate = null;
+		$invoiceNumber = null;
+		$tripNumber = null;
+		$tripDate = null;
+		if ($employeeClaim) {
+			$invoiceAmount = round($employeeClaim->total_amount);
+			$invoiceDate = $employeeClaim->created_at ? date("Y-m-d", strtotime($employeeClaim->created_at)) : null;
+			$invoiceNumber = $employeeClaim->number;
+			$tripNumber = $employeeTrip->number;
+			$tripDate = $employeeTrip->created_at ? date("Y-m-d", strtotime($employeeTrip->created_at)) : null;
 		}
 
 		$businessUnitName = $companyBusinessUnit;
-		$transactionNumber = $this->number;
-		$invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
-
-		$employeeData = $this->employee;
+		$employeeData = $employeeTrip->employee;
 		$customerCode = $employeeData ? $employeeData->code : null;
-		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
-		$customerSiteNumber = $outletCode;
-		$shipToCustomerAccount = $customerCode;
+		$supplierNumber = $employeeData ? $employeeData->code : null;
+		$invoiceType = 'Standard';
 		$description = '';
 		if (!empty($employeeData->code)) {
 			$description .= $employeeData->code;
@@ -4723,29 +5093,15 @@ request is not desired, then those may be rejected.';
 		if (!empty($employeeData->user->name)) {
 			$description .= ' - ' . ($employeeData->user->name);
 		}
-		if (!empty($this->purpose)) {
-			$description .= ' - ' . ($this->purpose->name);
+		if (!empty($employeeTrip->purpose->name)) {
+			$description .= ' - ' . ($employeeTrip->purpose->name);
 		}
 
-		$employeeClaim = EmployeeClaim::select([
-			'id',
-			'total_amount',
-			'boarding_total',
-			'local_travel_total',
-		])
-			->where('trip_id', $this->id)
-			->first();
-
-		$invoiceAmount = null;
-		if ($employeeClaim) {
-			$invoiceAmount = round($employeeClaim->total_amount);
-		}
-
-		$employeeTrip = $this;
 		$employeeTransportAmount = 0.00;
 		$employeeTransportOtherCharges = 0.00;
-		$employeeTransportTaxableValue = 0.00;
 		$selfVisitTotalRoundOff = 0;
+		$employeeTransportTaxableValue = 0.00;
+
 		$employeeLodgingTaxableValue = 0.00;
 		$employeeBoardingTaxableValue = 0.00;
 		$employeeLocalTravelTaxableValue = 0.00;
@@ -4754,8 +5110,8 @@ request is not desired, then those may be rejected.';
 		if ($employeeTrip->selfVisits->isNotEmpty()) {
 			foreach ($employeeTrip->selfVisits as $selfVisit) {
 				if ($selfVisit->booking) {
-					$employeeTransportAmount += $selfVisit->booking->amount;
-					$employeeTransportOtherCharges += $selfVisit->booking->other_charges;
+					$employeeTransportAmount += floatval($selfVisit->booking->amount);
+					$employeeTransportOtherCharges += floatval($selfVisit->booking->other_charges);
 					$selfVisitTotalRoundOff += floatval($selfVisit->booking->round_off);
 				}
 			}
@@ -4777,21 +5133,20 @@ request is not desired, then those may be rejected.';
 			$employeeLocalTravelTaxableValue = floatval($employeeClaim->local_travel_total);
 		}
 
-		$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue + $selfVisitTotalRoundOff);
+		$amount = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue + $selfVisitTotalRoundOff);
+		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		$customerSiteNumber = $outletCode;
+		$accountingClass = 'Payable';
+		$company = $employeeTrip->company ? $employeeTrip->company->oracle_code : '';
 
-		$unitPrice = $employeeTotalTaxableValue;
-		$amount = $employeeTotalTaxableValue;
-		$quantity = 1;
-		$accountingClass = 'REV';
 		$sbu = $employeeData->Sbu;
-		$lob = $costCentre = null;
+		$lob = $department = null;
 		if ($sbu) {
 			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
-			$costCentre = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
+			$department = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
 		}
-
-		$naturalAccount = null;
 		$location = $outletCode;
+		$naturalAccount = Config::where('id', 3861)->first()->name;
 
 		$bpas_portal = Portal::select([
 			'db_host_name',
@@ -4812,12 +5167,12 @@ request is not desired, then those may be rejected.';
 		DB::purge('dynamic');
 		DB::reconnect('dynamic');
 
-		$arInvoiceExports = DB::table('oracle_ar_invoice_exports')->where([
-			'transaction_number' => $transactionNumber,
-			'business_unit' => $companyBusinessUnit,
-			'transaction_type_name' => $transactionTypeName,
+		$apInvoiceExports = DB::table('oracle_ap_invoice_exports')->where([
+			'invoice_number' => $invoiceNumber,
+			'business_unit' => $businessUnitName,
+			'invoice_source' => $invoiceSource,
 		])->get();
-		if (count($arInvoiceExports) > 0) {
+		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
 			return $res;
 		}
@@ -4826,6 +5181,9 @@ request is not desired, then those may be rejected.';
 		$cgstAmount = 0;
 		$sgstAmount = 0;
 		$igstAmount = 0;
+		$cgstSgstPercentage = 0;
+		$igstPercentage = 0;
+
 		if ($employeeTrip->lodgings->isNotEmpty()) {
 			foreach ($employeeTrip->lodgings as $lodging) {
 				if ($lodging->stay_type_id == 3340) {
@@ -4833,82 +5191,191 @@ request is not desired, then those may be rejected.';
 					if ($lodging->has_multiple_tax_invoice == "Yes") {
 						//LODGE
 						if ($lodging->lodgingTaxInvoice && (($lodging->lodgingTaxInvoice->cgst != '0.00' && $lodging->lodgingTaxInvoice->sgst != '0.00') || ($lodging->lodgingTaxInvoice->igst != '0.00'))) {
-							$cgstAmount += $lodging->lodgingTaxInvoice->cgst;
-							$sgstAmount += $lodging->lodgingTaxInvoice->sgst;
-							$igstAmount += $lodging->lodgingTaxInvoice->igst;
+							if ($lodging->lodgingTaxInvoice->cgst > 0 && $lodging->lodgingTaxInvoice->sgst > 0) {
+								$cgstAmount += floatval($lodging->lodgingTaxInvoice->cgst);
+								$sgstAmount += floatval($lodging->lodgingTaxInvoice->sgst);
+								$cgstSgstPercentage += floatval($lodging->lodgingTaxInvoice->tax_percentage);
+							} else {
+								$igstAmount += floatval($lodging->lodgingTaxInvoice->igst);
+								$igstPercentage += floatval($lodging->lodgingTaxInvoice->tax_percentage);
+							}
 						}
 
 						//DRY WASH
 						if ($lodging->drywashTaxInvoice && (($lodging->drywashTaxInvoice->cgst != '0.00' && $lodging->drywashTaxInvoice->sgst != '0.00') || ($lodging->drywashTaxInvoice->igst != '0.00'))) {
-							$cgstAmount += $lodging->drywashTaxInvoice->cgst;
-							$sgstAmount += $lodging->drywashTaxInvoice->sgst;
-							$igstAmount += $lodging->drywashTaxInvoice->igst;
+
+							if ($lodging->drywashTaxInvoice->cgst > 0 && $lodging->drywashTaxInvoice->sgst > 0) {
+								$cgstAmount += floatval($lodging->drywashTaxInvoice->cgst);
+								$sgstAmount += floatval($lodging->drywashTaxInvoice->sgst);
+								$cgstSgstPercentage += floatval($lodging->drywashTaxInvoice->tax_percentage);
+							} else {
+								$igstAmount += floatval($lodging->drywashTaxInvoice->igst);
+								$igstPercentage += floatval($lodging->drywashTaxInvoice->tax_percentage);
+							}
 						}
 
 						//BOARDING
 						if ($lodging->boardingTaxInvoice && (($lodging->boardingTaxInvoice->cgst != '0.00' && $lodging->boardingTaxInvoice->sgst != '0.00') || ($lodging->boardingTaxInvoice->igst != '0.00'))) {
-							$cgstAmount += $lodging->boardingTaxInvoice->cgst;
-							$sgstAmount += $lodging->boardingTaxInvoice->sgst;
-							$igstAmount += $lodging->boardingTaxInvoice->igst;
+							if ($lodging->boardingTaxInvoice->cgst > 0 && $lodging->boardingTaxInvoice->sgst > 0) {
+								$cgstAmount += floatval($lodging->boardingTaxInvoice->cgst);
+								$sgstAmount += floatval($lodging->boardingTaxInvoice->sgst);
+								$cgstSgstPercentage += floatval($lodging->boardingTaxInvoice->tax_percentage);
+							} else {
+								$igstAmount += floatval($lodging->boardingTaxInvoice->igst);
+								$igstPercentage += floatval($lodging->boardingTaxInvoice->tax_percentage);
+							}
 						}
 
 						//OTHERS
 						if ($lodging->othersTaxInvoice && (($lodging->othersTaxInvoice->cgst != '0.00' && $lodging->othersTaxInvoice->sgst != '0.00') || ($lodging->othersTaxInvoice->igst != '0.00'))) {
-							$cgstAmount += $lodging->othersTaxInvoice->cgst;
-							$sgstAmount += $lodging->othersTaxInvoice->sgst;
-							$igstAmount += $lodging->othersTaxInvoice->igst;
+							if ($lodging->othersTaxInvoice->cgst > 0 && $lodging->othersTaxInvoice->sgst > 0) {
+								$cgstAmount += floatval($lodging->othersTaxInvoice->cgst);
+								$sgstAmount += floatval($lodging->othersTaxInvoice->sgst);
+								$cgstSgstPercentage += floatval($lodging->othersTaxInvoice->tax_percentage);
+							} else {
+								$igstAmount += floatval($lodging->othersTaxInvoice->igst);
+								$igstPercentage += floatval($lodging->othersTaxInvoice->tax_percentage);
+							}
 						}
 
 					} else {
 						//SINGLE
 						if ($lodging && (($lodging->cgst != '0.00' && $lodging->sgst != '0.00') || ($lodging->igst != '0.00'))) {
-							$cgstAmount += $lodging->cgst;
-							$sgstAmount += $lodging->sgst;
-							$igstAmount += $lodging->igst;
+							if ($lodging->cgst > 0 && $lodging->sgst > 0) {
+								$cgstAmount += floatval($lodging->cgst);
+								$sgstAmount += floatval($lodging->sgst);
+								$cgstSgstPercentage += floatval($lodging->tax_percentage);
+							} else {
+								$igstAmount += floatval($lodging->igst);
+								$igstPercentage += floatval($lodging->tax_percentage);
+							}
 						}
 					}
 				}
 			}
 		}
 
-		// if($cgstAmount > 0 && $sgstAmount > 0){
-		// 	$export_record['cgst'] = $cgstDetail->amount;
-		// }elseif($igstAmount > 0){
-		// }
+		//GST TAX CLASSIFICATION
+		$taxClassification = '';
+		if ($cgstAmount > 0 && $sgstAmount > 0) {
+			$taxClassification .= 'CGST + SGST + ' . (round($cgstSgstPercentage));
+		}
+		if ($igstAmount > 0) {
+			$taxClassification .= 'IGST + ' . (round($igstPercentage));
+		}
+
+		$taxAmount = $cgstAmount + $sgstAmount + $igstAmount;
 
 		//ROUND OFF
 		$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
 		$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
 		$employeeLodgingRoundoff += floatval($roundOffAmt);
 
-		DB::table('oracle_ar_invoice_exports')->insert([
+		DB::table('oracle_ap_invoice_exports')->insert([
 			'company_id' => $companyId,
 			'business_unit' => $businessUnitName,
-			'transaction_class' => $transactionClass,
-			'transaction_batch_source_name' => $transactionBatchName,
-			'transaction_type_name' => $transactionTypeName,
-			'transaction_number' => $transactionNumber,
+			'invoice_source' => $invoiceSource,
+			'invoice_number' => $invoiceNumber,
 			'invoice_amount' => $invoiceAmount,
-			'transaction_date' => $invoiceDate,
-			'customer_account_number' => $customerCode,
-			'bill_to_customer_site_number' => $customerSiteNumber,
-			'credit_outlet' => $outletCode,
-			'quantity' => $quantity,
-			'accounting_class' => $accountingClass,
-			'company' => $companyCode,
-			'lob' => $lob,
-			'location' => $location,
-			'cost_centre' => $costCentre,
-			'natural_account' => $naturalAccount,
+			'invoice_date' => $invoiceDate,
+			'supplier_number' => $supplierNumber,
+			'invoice_type' => $invoiceType,
 			'description' => $description,
-			'unit_price' => $unitPrice,
 			'amount' => $amount,
+			'tax_classification' => $taxClassification,
 			'cgst' => $cgstAmount,
 			'sgst' => $sgstAmount,
 			'igst' => $igstAmount,
+			'outlet' => $outletCode,
 			'round_off_amount' => $employeeLodgingRoundoff,
+			'tax_amount' => $taxAmount,
+			'accounting_class' => $accountingClass,
+			'company' => $company,
+			'lob' => $lob,
+			'location' => $location,
+			'department' => $department,
+			'natural_account' => $naturalAccount,
 			'created_at' => Carbon::now(),
 		]);
+
+		//IF ADVANCE RECEIVED
+		if ($employeeTrip->advance_received > 0) {
+			//COMPANY TO EMPLOYEE
+			if ($employeeClaim->amount_to_pay == 1) {
+				if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+					//ROUND OFF
+					$amountDiff = 0;
+					if (!empty($employeeClaim->balance_amount)) {
+						$amountDiff = number_format((round($employeeClaim->balance_amount) - $employeeClaim->balance_amount), 2);
+					}
+					DB::table('oracle_ap_invoice_exports')->insert([
+						'company_id' => $companyId,
+						'business_unit' => $businessUnitName,
+						'invoice_source' => $prePaymentType,
+						'invoice_number' => $invoiceNumber,
+						// 'pre_payment_invoice_number' => $tripNumber,
+						'invoice_date' => $invoiceDate,
+						// 'pre_payment_invoice_date' => $tripDate,
+						'supplier_number' => $supplierNumber,
+						'invoice_type' => $invoiceType,
+						'description' => $description,
+						'amount' => $employeeClaim->balance_amount,
+						'outlet' => $outletCode,
+						'round_off_amount' => $amountDiff,
+						'accounting_class' => 'Payable',
+						'company' => $company,
+						'lob' => $lob,
+						'location' => $location,
+						'department' => $department,
+						'natural_account' => $naturalAccount,
+						'created_at' => Carbon::now(),
+					]);
+				}
+			}
+
+			//EMPLOYEE TO COMPANY
+			if ($employeeClaim->amount_to_pay == 2) {
+				if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+					//ROUND OFF
+					$amountDiff = 0;
+					if (!empty($employeeClaim->balance_amount)) {
+						$amountDiff = number_format((round($employeeClaim->balance_amount) - $employeeClaim->balance_amount), 2);
+					}
+
+					DB::table('oracle_ar_invoice_exports')->insert([
+						'company_id' => $companyId,
+						'business_unit' => $businessUnitName,
+						'transaction_class' => $prePaymentClass,
+						'transaction_batch_source_name' => $prePaymentBatch,
+						'transaction_type_name' => $prePaymentType,
+						'transaction_number' => $invoiceNumber,
+						// 'pre_payment_invoice_number' => $tripNumber,
+						// 'invoice_amount' => $invoiceAmount,
+						'transaction_date' => $invoiceDate,
+						// 'pre_payment_invoice_date' => $tripDate,
+						'customer_account_number' => $customerCode,
+						'bill_to_customer_site_number' => $customerSiteNumber,
+						'credit_outlet' => $outletCode,
+						'description' => $description,
+						'quantity' => 1,
+						'unit_price' => $employeeClaim->balance_amount,
+						'amount' => $employeeClaim->balance_amount,
+						// 'tax_classification' => $taxClassification,
+						// 'cgst' => $cgstAmount,
+						// 'sgst' => $sgstAmount,
+						// 'igst' => $igstAmount,
+						'round_off_amount' => $amountDiff,
+						'accounting_class' => 'REV',
+						'company' => $companyCode,
+						'lob' => $lob,
+						'location' => $location,
+						'cost_centre' => $costCentre,
+						'natural_account' => $naturalAccount,
+						'created_at' => Carbon::now(),
+					]);
+				}
+			}
+		}
 
 		$res['success'] = true;
 		DB::setDefaultConnection('mysql');
