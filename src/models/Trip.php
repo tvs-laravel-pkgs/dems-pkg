@@ -5313,9 +5313,9 @@ request is not desired, then those may be rejected.';
 						'business_unit' => $businessUnitName,
 						'invoice_source' => $prePaymentType,
 						'invoice_number' => $invoiceNumber,
-						// 'pre_payment_invoice_number' => $tripNumber,
 						'invoice_date' => $invoiceDate,
-						// 'pre_payment_invoice_date' => $tripDate,
+						'pre_payment_invoice_number' => $tripNumber,
+						'pre_payment_invoice_date' => $tripDate,
 						'supplier_number' => $supplierNumber,
 						'invoice_type' => $invoiceType,
 						'description' => $description,
@@ -5334,47 +5334,47 @@ request is not desired, then those may be rejected.';
 			}
 
 			//EMPLOYEE TO COMPANY
-			if ($employeeClaim->amount_to_pay == 2) {
-				if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
-					//ROUND OFF
-					$amountDiff = 0;
-					if (!empty($employeeClaim->balance_amount)) {
-						$amountDiff = number_format((round($employeeClaim->balance_amount) - $employeeClaim->balance_amount), 2);
-					}
+			// if ($employeeClaim->amount_to_pay == 2) {
+			// 	if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+			// 		//ROUND OFF
+			// 		$amountDiff = 0;
+			// 		if (!empty($employeeClaim->balance_amount)) {
+			// 			$amountDiff = number_format((round($employeeClaim->balance_amount) - $employeeClaim->balance_amount), 2);
+			// 		}
 
-					DB::table('oracle_ar_invoice_exports')->insert([
-						'company_id' => $companyId,
-						'business_unit' => $businessUnitName,
-						'transaction_class' => $prePaymentClass,
-						'transaction_batch_source_name' => $prePaymentBatch,
-						'transaction_type_name' => $prePaymentType,
-						'transaction_number' => $invoiceNumber,
-						// 'pre_payment_invoice_number' => $tripNumber,
-						// 'invoice_amount' => $invoiceAmount,
-						'transaction_date' => $invoiceDate,
-						// 'pre_payment_invoice_date' => $tripDate,
-						'customer_account_number' => $customerCode,
-						'bill_to_customer_site_number' => $customerSiteNumber,
-						'credit_outlet' => $outletCode,
-						'description' => $description,
-						'quantity' => 1,
-						'unit_price' => $employeeClaim->balance_amount,
-						'amount' => $employeeClaim->balance_amount,
-						// 'tax_classification' => $taxClassification,
-						// 'cgst' => $cgstAmount,
-						// 'sgst' => $sgstAmount,
-						// 'igst' => $igstAmount,
-						'round_off_amount' => $amountDiff,
-						'accounting_class' => 'REV',
-						'company' => $companyCode,
-						'lob' => $lob,
-						'location' => $location,
-						'cost_centre' => $costCentre,
-						'natural_account' => $naturalAccount,
-						'created_at' => Carbon::now(),
-					]);
-				}
-			}
+			// 		DB::table('oracle_ar_invoice_exports')->insert([
+			// 			'company_id' => $companyId,
+			// 			'business_unit' => $businessUnitName,
+			// 			'transaction_class' => $prePaymentClass,
+			// 			'transaction_batch_source_name' => $prePaymentBatch,
+			// 			'transaction_type_name' => $prePaymentType,
+			// 			'transaction_number' => $invoiceNumber,
+			// 			// 'pre_payment_invoice_number' => $tripNumber,
+			// 			// 'invoice_amount' => $invoiceAmount,
+			// 			'transaction_date' => $invoiceDate,
+			// 			// 'pre_payment_invoice_date' => $tripDate,
+			// 			'customer_account_number' => $customerCode,
+			// 			'bill_to_customer_site_number' => $customerSiteNumber,
+			// 			'credit_outlet' => $outletCode,
+			// 			'description' => $description,
+			// 			'quantity' => 1,
+			// 			'unit_price' => $employeeClaim->balance_amount,
+			// 			'amount' => $employeeClaim->balance_amount,
+			// 			// 'tax_classification' => $taxClassification,
+			// 			// 'cgst' => $cgstAmount,
+			// 			// 'sgst' => $sgstAmount,
+			// 			// 'igst' => $igstAmount,
+			// 			'round_off_amount' => $amountDiff,
+			// 			'accounting_class' => 'REV',
+			// 			'company' => $companyCode,
+			// 			'lob' => $lob,
+			// 			'location' => $location,
+			// 			'cost_centre' => $costCentre,
+			// 			'natural_account' => $naturalAccount,
+			// 			'created_at' => Carbon::now(),
+			// 		]);
+			// 	}
+			// }
 		}
 
 		$res['success'] = true;
