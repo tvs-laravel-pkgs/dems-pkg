@@ -4581,7 +4581,7 @@ request is not desired, then those may be rejected.';
 		$invoiceNumber = $this->number;
 		$invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
 		$employeeData = $this->employee;
-		$supplierNumber = $employeeData ? $employeeData->code : null;
+		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		$invoiceType = 'Standard';
 		$description = '';
 		if (!empty($employeeData->code)) {
@@ -5084,7 +5084,7 @@ request is not desired, then those may be rejected.';
 		$businessUnitName = $companyBusinessUnit;
 		$employeeData = $employeeTrip->employee;
 		$customerCode = $employeeData ? $employeeData->code : null;
-		$supplierNumber = $employeeData ? $employeeData->code : null;
+		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		$invoiceType = 'Standard';
 		$description = '';
 		if (!empty($employeeData->code)) {
