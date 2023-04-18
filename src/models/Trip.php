@@ -25,12 +25,12 @@ use Session;
 use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
-use Uitoux\EYatra\LodgingTaxInvoice;
-use Uitoux\EYatra\LodgingShareDetail;
-use Uitoux\EYatra\NState;
-use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\EmployeeClaim;
+use Uitoux\EYatra\LodgingShareDetail;
+use Uitoux\EYatra\LodgingTaxInvoice;
+use Uitoux\EYatra\NState;
 use Uitoux\EYatra\OperatingStates;
+use Uitoux\EYatra\Sbu;
 use Validator;
 
 class Trip extends Model {
@@ -166,12 +166,12 @@ class Trip extends Model {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')
 			->where('attachment_type_id', 3200)
 			->whereIn('attachment_of_id', [3750, 3751, 3752, 3753, 3754, 3755, 3756]);
-			// ->where('attachment_of_id', '!=', 3185);
+		// ->where('attachment_of_id', '!=', 3185);
 	}
 	public function pendingTripAttachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')
 			->where('attachment_type_id', 3200)
-			// ->where('attachment_of_id', '!=', 3185)
+		// ->where('attachment_of_id', '!=', 3185)
 			->whereIn('attachment_of_id', [3750, 3751, 3752, 3753, 3754, 3755, 3756])
 			->where('view_status', 0);
 	}
@@ -199,7 +199,7 @@ class Trip extends Model {
 	}
 
 	public static function saveTrip($request) {
-		 //dd($request->all());
+		//dd($request->all());
 		try {
 			//validation
 			$validator = Validator::make($request->all(), [
@@ -220,7 +220,7 @@ class Trip extends Model {
 
 			//EMPLOYEE MOBILE NUMBER AND EMAIL VALIDATION
 			$authUser = Auth::user();
-			if($authUser){
+			if ($authUser) {
 				$employeeData = [];
 				$employeeData['mobile_number'] = $authUser->mobile_number;
 				$employeeData['email_id'] = $authUser->email;
@@ -231,24 +231,24 @@ class Trip extends Model {
 					'email_id.email' => 'The employee email id must be a valid email address',
 				];
 				$employeeValidator = Validator::make($employeeData, [
-	                'mobile_number' => [
-	                    'required',
-    					'digits:10',
-	                ],
-	                'email_id' => [
-	                    'required',
-	                    'email',
-	                ],
-	            ], $employeeErrorMessages);
-	            if ($employeeValidator->fails()) {
-	                return response()->json([
-	                    'success' => false,
-	                    'error' => 'Validation Error',
-	                    'errors' => $employeeValidator->errors()->all(),
-	                ]);
-	            }
+					'mobile_number' => [
+						'required',
+						'digits:10',
+					],
+					'email_id' => [
+						'required',
+						'email',
+					],
+				], $employeeErrorMessages);
+				if ($employeeValidator->fails()) {
+					return response()->json([
+						'success' => false,
+						'error' => 'Validation Error',
+						'errors' => $employeeValidator->errors()->all(),
+					]);
+				}
 			}
-			
+
 			DB::beginTransaction();
 			if (!$request->id) {
 				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
@@ -489,7 +489,7 @@ class Trip extends Model {
 			'managerApprovedTripLog.user',
 		])
 			->find($trip_id);
-		 //dd($trip);
+		//dd($trip);
 		if (!$trip) {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
@@ -504,11 +504,12 @@ class Trip extends Model {
 		//               ->orderBy('trips.id','desc')->first();
 		$tripStartDate = date("Y-m-d", strtotime($trip->start_date));
 		$pending_trip = Trip::where('trips.employee_id', Auth::user()->entity_id)
-		              ->where('trips.id','!=', $trip->id)
-		              ->where('trips.start_date','<=', $tripStartDate)
-		              ->whereIn('trips.status_id',[3021,3028])
-		              ->first();
-		$pending_trip_status =!!$pending_trip;
+			->where('trips.id', '!=', $trip->id)
+			->where('trips.start_date', '<=', $tripStartDate)
+			->where('trips.id', '<', $trip->id)
+			->whereIn('trips.status_id', [3021, 3028])
+			->first();
+		$pending_trip_status = !!$pending_trip;
 		$sbu_name = Sbu::where('id', $trip->employee->sbu_id)->pluck('name')->first();
 		$trip->sbu_name = $sbu_name;
 		if ((!Entrust::can('view-all-trips') && $trip->employee_id != Auth::user()->entity_id) && $employee->reporting_to_id != Auth::user()->entity_id) {
@@ -543,11 +544,11 @@ class Trip extends Model {
 		// }
 
 		$data['claim_status'] = 0;
-		if (($current_date >= $trip_start_date) && ($current_date <= $trip_end_date)){
-		    $data['claim_status'] = 1;
+		if (($current_date >= $trip_start_date) && ($current_date <= $trip_end_date)) {
+			$data['claim_status'] = 1;
 		}
 
-		if($current_date > $trip_end_date){
+		if ($current_date > $trip_end_date) {
 			if ($current_date <= $claim_last_date) {
 				$data['claim_status'] = 1;
 			}
@@ -567,8 +568,8 @@ class Trip extends Model {
 
 		$data['trip_reject'] = $trip_reject;
 		$data['approval_status'] = Trip::validateAttachment($trip_id);
-        $data['pending_trip_status'] = $pending_trip_status;
-        $data['pending_trip'] = $pending_trip;
+		$data['pending_trip_status'] = $pending_trip_status;
+		$data['pending_trip'] = $pending_trip;
 		$data['success'] = true;
 		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
 		return response()->json($data);
@@ -595,7 +596,7 @@ class Trip extends Model {
 
 			$trip = Trip::find($trip_id);
 
-			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021,3022,3032]))) {
+			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032]))) {
 				$data['success'] = false;
 				$data['error'] = 'Not possible to update the Trip details';
 				return response()->json($data);
@@ -609,13 +610,13 @@ class Trip extends Model {
 				$key_val = ($key - 1 < 0) ? 0 : $key - 1;
 				$trip->visits[$key]->to_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')
 					->select(
-						'ncities.id', 
+						'ncities.id',
 						DB::raw('IF(ncities.id=4100,ncities.name,CONCAT(ncities.name," - ",nstates.name)) as name')
 						// DB::raw('CONCAT(ncities.name,"-",nstates.name) as name')
 					)->where('ncities.id', $trip->visits[$key]->to_city_id)->first();
 				$trip->visits[$key]->from_city_details = DB::table('ncities')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')
 					->select(
-						'ncities.id', 
+						'ncities.id',
 						DB::raw('IF(ncities.id=4100,ncities.name,CONCAT(ncities.name," - ",nstates.name)) as name')
 						// DB::raw('CONCAT(ncities.name,"-",nstates.name) as name')
 					)->where('ncities.id', $trip->visits[$key_val]->from_city_id)->first();
@@ -1365,7 +1366,7 @@ class Trip extends Model {
 		//dd($trip->lodgings);
 
 		$ey_employee_data = EmployeeClaim::where('trip_id', $trip_id)->first();
-		if (!empty($ey_employee_data) && (!Entrust::can('claim-edit') || (!in_array($trip->status_id, [3023,3024,3033])))) {
+		if (!empty($ey_employee_data) && (!Entrust::can('claim-edit') || (!in_array($trip->status_id, [3023, 3024, 3033])))) {
 			$data['success'] = false;
 			$data['error'] = 'Not possible to update the Claim details';
 			return response()->json($data);
@@ -1396,7 +1397,7 @@ class Trip extends Model {
 				// $range_key++;
 				// $travel_dates_list[$range_key]['id'] = $range_val;
 				// $travel_dates_list[$range_key]['name'] = $range_val;
-				if(strtotime($range_val) <= strtotime(date('d-m-Y'))){
+				if (strtotime($range_val) <= strtotime(date('d-m-Y'))) {
 					$range_key++;
 					$travel_dates_list[$range_key]['id'] = $range_val;
 					$travel_dates_list[$range_key]['name'] = $range_val;
@@ -1573,21 +1574,23 @@ class Trip extends Model {
 		// $local_travel_mode_list = collect(Entity::uiClaimLocaTravelModeList()->prepend(['id' => '', 'name' => 'Select Local Travel Mode']));
 		$local_travel_mode_list = collect($local_travels_expense_types->prepend(['id' => '', 'name' => 'Select Local Travel / Expense Type']));
 		$showOfficeGuestHouse = true;
-		if (!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['W00','W01','W02','W03','W04','W05','W06','W07','S00','S01','S02','S03','S04','S05','S06','S07'])) {
+		if (!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['W00', 'W01', 'W02', 'W03', 'W04', 'W05', 'W06', 'W07', 'S00', 'S01', 'S02', 'S03', 'S04', 'S05', 'S06', 'S07'])) {
 			$showOfficeGuestHouse = false;
 		}
 		// $stay_type_list = collect(Config::getLodgeStayTypeList()->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$stay_type_list = collect(
-				Config::where('config_type_id', 521)
+			Config::where('config_type_id', 521)
 				->select('id', 'name')
 				->where(function ($q) use ($showOfficeGuestHouse) {
-					if (!$showOfficeGuestHouse) 
+					if (!$showOfficeGuestHouse) {
 						$q->whereNotIn('id', [3342]);
+					}
+
 				})
 				->get()
-			->prepend(['id' => '', 'name' => 'Select Stay Type']));
+				->prepend(['id' => '', 'name' => 'Select Stay Type']));
 		$boarding_type_list = collect(Config::getBoardingTypeList()->prepend(['id' => '', 'name' => 'Select Type']));
-		$sharing_type_list = collect(Config::whereIn('id', [3811,3812])->select('id', 'name')->get());
+		$sharing_type_list = collect(Config::whereIn('id', [3811, 3812])->select('id', 'name')->get());
 		$data['extras'] = [
 			'purpose_list' => $purpose_list,
 			'travel_mode_list' => $travel_mode_list,
@@ -1606,7 +1609,7 @@ class Trip extends Model {
 			->pluck('nstates.gstin_state_code')->first();
 		$user_company_id = Auth::user()->company_id;
 		$gstin_enable = Company::where('id', $user_company_id)->pluck('gstin_enable')->first();
-		$grade_travel=Entity::select('entities.id', 'entities.name')
+		$grade_travel = Entity::select('entities.id', 'entities.name')
 			->join('grade_travel_mode', 'grade_travel_mode.travel_mode_id', 'entities.id')
 			->join('employees', 'employees.grade_id', 'grade_travel_mode.grade_id')
 			->where('entities.entity_type_id', 502)
@@ -1618,7 +1621,7 @@ class Trip extends Model {
 		$data['gstin_enable'] = $gstin_enable;
 
 		//LODGE SHARE DETAILS
-		if(count($trip->lodgings) > 0){
+		if (count($trip->lodgings) > 0) {
 			foreach ($trip->lodgings as $lodge_data) {
 				$lodge_share_data = [];
 				foreach ($lodge_data->shareDetails as $share_key => $share_data) {
@@ -1641,7 +1644,7 @@ class Trip extends Model {
 						->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 						->join('users', 'users.entity_id', 'employees.id')
 						->where('users.user_type_id', 3121) //EMPLOYEE
-						->where('lodging_share_details.id',$share_data->id)
+						->where('lodging_share_details.id', $share_data->id)
 						->first();
 
 					$lodge_share_data[$share_key]->eligible_amount = 0.00;
@@ -1650,10 +1653,10 @@ class Trip extends Model {
 						->pluck('category_id')
 						->first();
 					// $lodge_share_data[$share_key]['normal'] = [
-					// 	'eligible_amount' => 0,  
+					// 	'eligible_amount' => 0,
 					// ];
 
-					if($lodge_city_category_id){
+					if ($lodge_city_category_id) {
 						$lodge_expense_config = DB::table('grade_expense_type')
 							->where('grade_id', $lodge_share_data[$share_key]->grade_id)
 							->where('expense_type_id', 3001) //LODGING EXPENSES
@@ -1661,7 +1664,7 @@ class Trip extends Model {
 							->first();
 						if (!empty($lodge_expense_config)) {
 							// $lodge_share_data[$share_key]['normal'] = [
-							// 	'eligible_amount' => $lodge_expense_config->eligible_amount,  
+							// 	'eligible_amount' => $lodge_expense_config->eligible_amount,
 							// ];
 							$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 						}
@@ -1844,7 +1847,6 @@ class Trip extends Model {
 
 				$local_travel_tax = number_format(array_sum(array_column($tax_details, 'local_travel_tax')), 2, '.', '');
 
-
 				$lodgingTotal = $trip->employee->tripEmployeeClaim->lodging_total + $lodging_tax;
 				$boardingTotal = $trip->employee->tripEmployeeClaim->boarding_total + $boarding_tax;
 				$localTravelTotal = $trip->employee->tripEmployeeClaim->local_travel_total + $local_travel_tax;
@@ -1940,7 +1942,7 @@ class Trip extends Model {
 		$to_date = $current_year_arr['to_fy'];
 		$from_date = $current_year_arr['from_fy'];
 		$emp_amount_financial_year_from = date('Y', strtotime($from_date));
-        $emp_amount_financial_year_to = date('Y', strtotime($to_date));
+		$emp_amount_financial_year_to = date('Y', strtotime($to_date));
 		$emp_fy_amounts = EmployeeClaim::select(
 			'ey_employee_claims.total_amount',
 			'ey_employee_claims.transport_total',
@@ -1965,25 +1967,25 @@ class Trip extends Model {
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
-		$visit = Visit::select('id')->where('trip_id', $trip->id)->where('booking_method_id',3040)->get()->toArray();
+		$visit = Visit::select('id')->where('trip_id', $trip->id)->where('booking_method_id', 3040)->get()->toArray();
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$board = Boarding::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$other = LocalTravel::where('trip_id', $trip->id)->pluck('trip_id')->count();
-		$tax_details = Trip::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off','boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')
-		      ->leftjoin('lodgings', 'lodgings.trip_id', 'trips.id')
-		      ->leftjoin('boardings', 'boardings.trip_id', 'trips.id')
-		      ->leftjoin('local_travels', 'local_travels.trip_id', 'trips.id')
-		      ->where('trips.id', $trip->id)
-		      //->where('trips.employee_id', $trip->employee->id)
-		      ->get()->toArray();
-		      //dd($tax_details);
-        $transport_tax_details = Trip::select('visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst')
-		      ->join('visits', 'visits.trip_id', 'trips.id')
-		      ->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
-		      ->where('visits.booking_method_id',3040)
-		      ->where('trips.id', $trip->id)
-		      //->where('trips.employee_id', $trip->employee->id)
-		      ->get()->toArray();
+		$tax_details = Trip::select('lodgings.amount as lodging_basic', 'lodgings.cgst as lodging_cgst', 'lodgings.sgst as lodging_sgst', 'lodgings.igst as lodging_igst', 'lodgings.round_off as lodging_round_off', 'boardings.amount as boarding_basic', 'boardings.cgst as boarding_cgst', 'boardings.sgst as boarding_sgst', 'boardings.igst as boarding_igst', 'local_travels.amount as local_basic', 'local_travels.cgst as local_cgst', 'local_travels.sgst as local_sgst', 'local_travels.igst as local_igst')
+			->leftjoin('lodgings', 'lodgings.trip_id', 'trips.id')
+			->leftjoin('boardings', 'boardings.trip_id', 'trips.id')
+			->leftjoin('local_travels', 'local_travels.trip_id', 'trips.id')
+			->where('trips.id', $trip->id)
+		//->where('trips.employee_id', $trip->employee->id)
+			->get()->toArray();
+		//dd($tax_details);
+		$transport_tax_details = Trip::select('visit_bookings.cgst as transport_cgst', 'visit_bookings.sgst as transport_sgst', 'visit_bookings.amount as transport_basic', 'visit_bookings.igst as transport_igst')
+			->join('visits', 'visits.trip_id', 'trips.id')
+			->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+			->where('visits.booking_method_id', 3040)
+			->where('trips.id', $trip->id)
+		//->where('trips.employee_id', $trip->employee->id)
+			->get()->toArray();
 
 		if (count($visit) > 1) {
 			$transport_basic = number_format(array_sum(array_column($transport_tax_details, 'transport_basic')), 2, '.', ',');
@@ -2077,11 +2079,11 @@ class Trip extends Model {
 		$trip->boarding_amount = $boarding_amount;
 		$trip->local_travel_amount = $local_travel_amount;
 		$trip->emp_amount_financial_year_from = $emp_amount_financial_year_from;
-        $trip->emp_amount_financial_year_to = $emp_amount_financial_year_to;
+		$trip->emp_amount_financial_year_to = $emp_amount_financial_year_to;
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
 		$data['state_code'] = $state_code;
-        
+
 		if ($trip->employee->tripEmployeeClaim) {
 			if (($trip->employee->tripEmployeeClaim->is_justify_my_trip == 1) || ($trip->employee->tripEmployeeClaim->remarks != '')) {
 				$data['trip_justify'] = 1;
@@ -2095,7 +2097,7 @@ class Trip extends Model {
 	}
 
 	public static function saveEYatraTripClaim($request) {
-		 // dd($request->all());
+		// dd($request->all());
 		//validation
 		try {
 			// $validator = Validator::make($request->all(), [
@@ -2112,8 +2114,8 @@ class Trip extends Model {
 			$two_wheeler_total_km = 0;
 			$four_wheeler_total_km = 0;
 
-			if(isset($request->is_attachment_trip) && $request->is_attachment_trip){
-				if(floatval($request->claim_total_amount) <= 0){
+			if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
+				if (floatval($request->claim_total_amount) <= 0) {
 					return response()->json([
 						'success' => false,
 						'errors' => ['Trip claim amount should be greater than 0'],
@@ -2129,7 +2131,7 @@ class Trip extends Model {
 				$four_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 16)->count();
 
 				$tripData = Trip::find($request->trip_id);
-				if(!empty($tripData->employee->grade_id)){
+				if (!empty($tripData->employee->grade_id)) {
 					$employeeGradeInfo = DB::table('grade_advanced_eligibility')->select([
 						'id',
 						'two_wheeler_limit',
@@ -2139,7 +2141,7 @@ class Trip extends Model {
 						->first();
 
 					$twoWheelerPerDayKmLimit = $employeeGradeInfo ? $employeeGradeInfo->two_wheeler_limit : null;
-				}else{
+				} else {
 					$twoWheelerPerDayKmLimit = null;
 				}
 
@@ -2170,8 +2172,8 @@ class Trip extends Model {
 				}
 
 				foreach ($request->visits as $visit_info) {
-					if(isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16)){
-						if($visit_info['travel_mode_id'] == 15){
+					if (isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16)) {
+						if ($visit_info['travel_mode_id'] == 15) {
 							//TWO WHEELER
 							// $mode_two_wheeler = true;
 							// $two_wheeler_total_km += ($visit_info['km_end'] - $visit_info['km_start']);
@@ -2180,22 +2182,22 @@ class Trip extends Model {
 							$visitDateDiff = strtotime($visit_info['arrival_date']) - strtotime($visit_info['departure_date']);
 							$visitNoOfDays = ($visitDateDiff / (60 * 60 * 24)) + 1;
 							$perDayVisitKm = ($visitKm / $visitNoOfDays);
-							if(empty($twoWheelerPerDayKmLimit)){
+							if (empty($twoWheelerPerDayKmLimit)) {
 								return response()->json([
 									'success' => false,
-									'errors' => ['Two wheeler KM limit is not updated kindly contact Admin']
+									'errors' => ['Two wheeler KM limit is not updated kindly contact Admin'],
 								]);
 							}
-							
-							if(round($perDayVisitKm) > round($twoWheelerPerDayKmLimit)){
+
+							if (round($perDayVisitKm) > round($twoWheelerPerDayKmLimit)) {
 								return response()->json([
 									'success' => false,
-									'errors' => ['Two wheeler total KM should be less than or equal to Two wheeler total KM limit : '. $twoWheelerPerDayKmLimit]
+									'errors' => ['Two wheeler total KM should be less than or equal to Two wheeler total KM limit : ' . $twoWheelerPerDayKmLimit],
 								]);
 							}
 						}
 
-						if($visit_info['travel_mode_id'] == 16){
+						if ($visit_info['travel_mode_id'] == 16) {
 							//FOUR WHEELER
 							$mode_four_wheeler = true;
 							$four_wheeler_total_km += ($visit_info['km_end'] - $visit_info['km_start']);
@@ -2216,7 +2218,7 @@ class Trip extends Model {
 			}
 
 			//TWO WHEELER AND FOUR WHEELER TOTAL KM VALIDATION
-			if(($mode_two_wheeler == true || $mode_four_wheeler == true) && !empty($trip->employee->grade_id)){
+			if (($mode_two_wheeler == true || $mode_four_wheeler == true) && !empty($trip->employee->grade_id)) {
 				$employee_grade_data = DB::table('grade_advanced_eligibility')->select([
 					'id',
 					'two_wheeler_limit',
@@ -2243,25 +2245,25 @@ class Trip extends Model {
 				// 	}
 				// }
 
-				if($mode_four_wheeler == true){
-					if(empty($four_wheeler_km_limit)){
+				if ($mode_four_wheeler == true) {
+					if (empty($four_wheeler_km_limit)) {
 						return response()->json([
 							'success' => false,
-							'errors' => ['Four wheeler KM limit is not updated kindly contact Admin']
+							'errors' => ['Four wheeler KM limit is not updated kindly contact Admin'],
 						]);
 					}
 
-					if(round($four_wheeler_total_km) > round($four_wheeler_km_limit)){
+					if (round($four_wheeler_total_km) > round($four_wheeler_km_limit)) {
 						return response()->json([
 							'success' => false,
-							'errors' => ['Four wheeler total KM should be less than or equal to Four wheeler total KM limit : '. $four_wheeler_km_limit]
+							'errors' => ['Four wheeler total KM should be less than or equal to Four wheeler total KM limit : ' . $four_wheeler_km_limit],
 						]);
 					}
 				}
 			}
 
 			$is_grade_leader = false;
-			if(!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1','L2','L3','L4','L5','L6','L7','L8','L9'])){
+			if (!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9'])) {
 				$is_grade_leader = true;
 			}
 
@@ -2299,7 +2301,7 @@ class Trip extends Model {
 					->toArray();
 				if (!in_array(3750, $attachement_types)) {
 					// All Type
-					$visit_count = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15,16,17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
+					$visit_count = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type
 						$validations['fare_detail_doc'] = 'required';
@@ -2324,11 +2326,11 @@ class Trip extends Model {
 						$validations['other_doc'] = 'required';
 					}
 					//$self_booking = Visit::where('trip_id', $trip->id)->where('self_booking_approval', 1)->count();
-					$self_booking = Visit::join('visit_bookings','visit_bookings.visit_id','visits.id')
-						->whereNotIn('visit_bookings.travel_mode_id', [15,16,17])
+					$self_booking = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+						->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])
 						->where('visits.trip_id', $trip->id)
 						->where('visits.self_booking_approval', 1)
-						->where('visits.trip_mode_id', 3793)	// 3793 -> Overnight
+						->where('visits.trip_mode_id', 3793) // 3793 -> Overnight
 						->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
@@ -2336,7 +2338,7 @@ class Trip extends Model {
 					}
 					// Toll fee doc required
 					$tollFeeLocalTravelCount = LocalTravel::where('trip_id', $request->trip_id)
-						->where('mode_id', 63)	// 63 -> Toll Fee
+						->where('mode_id', 63) // 63 -> Toll Fee
 						->count();
 					if ($tollFeeLocalTravelCount > 0 && !in_array(3754, $attachement_types)) {
 						// Toll Fee Document
@@ -2385,7 +2387,7 @@ class Trip extends Model {
 					// 	return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
 					// }
 
-					if($is_grade_leader == false){
+					if ($is_grade_leader == false) {
 						if ($boardingAmount > $boardingEligibleAmount) {
 							return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
 						}
@@ -2516,15 +2518,15 @@ class Trip extends Model {
 							$visit_booking->sgst = $visit_data['sgst'];
 							$visit_booking->igst = $visit_data['igst'];
 							$visit_booking->tax_percentage = $visit_data['tax_percentage'];
-							$visit_booking->invoice_number=$visit_data['invoice_number'];
-							$visit_booking->invoice_amount=$visit_data['invoice_amount'];
-							$visit_booking->invoice_date=$visit_data['invoice_date'] ? date('Y-m-d', strtotime($visit_data['invoice_date'])) : null;
-							if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
-							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
-						}else{
-							$visit_booking->round_off=$visit_data['round_off'];
-						}
-						    $visit_booking->other_charges=$visit_data['other_charges'];
+							$visit_booking->invoice_number = $visit_data['invoice_number'];
+							$visit_booking->invoice_amount = $visit_data['invoice_amount'];
+							$visit_booking->invoice_date = $visit_data['invoice_date'] ? date('Y-m-d', strtotime($visit_data['invoice_date'])) : null;
+							if (!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)) {
+								return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
+							} else {
+								$visit_booking->round_off = $visit_data['round_off'];
+							}
+							$visit_booking->other_charges = $visit_data['other_charges'];
 							$visit_booking->km_start = (isset($visit_data['km_start']) && !empty($visit_data['km_start'])) ? $visit_data['km_start'] : null;
 							$visit_booking->km_end = (isset($visit_data['km_end']) && !empty($visit_data['km_end'])) ? $visit_data['km_end'] : null;
 							$visit_booking->toll_fee = (isset($visit_data['toll_fee']) && !empty($visit_data['toll_fee'])) ? $visit_data['toll_fee'] : null;
@@ -2683,7 +2685,7 @@ class Trip extends Model {
 
 			//SAVING LODGINGS
 			if ($request->is_lodging) {
-				 //dd($request->all());
+				//dd($request->all());
 				//REMOVE LODGING AND THIER ATTACHMENTS
 				if (!empty($request->lodgings_removal_id)) {
 					$lodgings_removal_id = json_decode($request->lodgings_removal_id, true);
@@ -2709,22 +2711,22 @@ class Trip extends Model {
 
 					$lodging_unique_share_with_claims = [];
 					$lodging_share_with_claims = [];
-					foreach($request->lodgings as $lodge_info) {
-						if($lodge_info['sharing_type_id'] == 3811){
+					foreach ($request->lodgings as $lodge_info) {
+						if ($lodge_info['sharing_type_id'] == 3811) {
 							//SHARING WITH CLAIM
-							if(isset($lodge_info['gstin']) && isset($lodge_info['reference_number']) && isset($lodge_info['invoice_date'])){
-							    $logding_row = $lodge_info['gstin'] . "|" . $lodge_info['reference_number'] . "|" . $lodge_info['invoice_date'];
-							    isset($lodging_unique_share_with_claims[$logding_row]) or $lodging_unique_share_with_claims[$logding_row] = $lodge_info;
+							if (isset($lodge_info['gstin']) && isset($lodge_info['reference_number']) && isset($lodge_info['invoice_date'])) {
+								$logding_row = $lodge_info['gstin'] . "|" . $lodge_info['reference_number'] . "|" . $lodge_info['invoice_date'];
+								isset($lodging_unique_share_with_claims[$logding_row]) or $lodging_unique_share_with_claims[$logding_row] = $lodge_info;
 							}
 							$lodging_share_with_claims[] = $lodge_info;
 						}
 					}
 
 					// if(count($lodging_unique_share_with_claims) > 0  && count($request->lodgings) != count(array_values($lodging_unique_share_with_claims))){
-					if((count($lodging_share_with_claims) > 0 && count($lodging_unique_share_with_claims) > 0)  && (count($lodging_share_with_claims) != count(array_values($lodging_unique_share_with_claims)))){
+					if ((count($lodging_share_with_claims) > 0 && count($lodging_unique_share_with_claims) > 0) && (count($lodging_share_with_claims) != count(array_values($lodging_unique_share_with_claims)))) {
 						return response()->json([
 							'success' => false,
-							'errors' => ['Cannot enter the same GSTIN, Invoice number, Invoice Date for sharing claim']
+							'errors' => ['Cannot enter the same GSTIN, Invoice number, Invoice Date for sharing claim'],
 						]);
 					}
 
@@ -2742,12 +2744,12 @@ class Trip extends Model {
 						//dd($lodging_data['lodge_name']);
 						// if ($lodging_data['amount'] > 0 && $lodging_data['stay_type_id'] == 3340) {
 						// if ($lodging_data['amount'] > 1000 && $lodging_data['stay_type_id'] == 3340) {
-						if($lodging_data['stayed_days'] && $lodging_data['stayed_days'] > 0){
+						if ($lodging_data['stayed_days'] && $lodging_data['stayed_days'] > 0) {
 							$lodge_per_day_amt = $lodging_data['amount'] / $lodging_data['stayed_days'];
-						}else{
+						} else {
 							$lodge_per_day_amt = $lodging_data['amount'];
 						}
-						
+
 						if ($lodge_per_day_amt > 1000 && $lodging_data['stay_type_id'] == 3340) {
 							if (empty($lodging_data['lodge_name'])) {
 								$response = app('App\Http\Controllers\AngularController')->verifyGSTIN($lodging_data['gstin'], $lodging_data['lodge_name'], true);
@@ -2771,16 +2773,16 @@ class Trip extends Model {
 							$lodging->gstin_address = null;
 						}
 						// if($lodging_data['stay_type_id'] == 3340 || $lodging_data['stay_type_id'] == 3341){
-						if($lodging_data['stay_type_id'] == 3340){
-							if($lodging_data['amount'] == 0){
+						if ($lodging_data['stay_type_id'] == 3340) {
+							if ($lodging_data['amount'] == 0) {
 								return response()->json(['success' => false, 'errors' => ['Please Enter Before Tax Amount']]);
 							}
 						}
-						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
+						if (!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)) {
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 						}
 						$lodging->fill($lodging_data);
-						if($lodging_data['stay_type_id'] == 3342){
+						if ($lodging_data['stay_type_id'] == 3342) {
 							$lodging->amount = 0.00;
 						}
 						$lodging->trip_id = $request->trip_id;
@@ -2937,38 +2939,38 @@ class Trip extends Model {
 						}
 
 						//LODGE SHARE SAVE
-						if($lodging_data['sharing_type_id'] == 3811){
+						if ($lodging_data['sharing_type_id'] == 3811) {
 							//SHARING WITH CLAIM
 
-							if(isset($lodging_data['gstin']) && isset($lodging_data['reference_number']) && isset($lodging_data['invoice_date'])){
+							if (isset($lodging_data['gstin']) && isset($lodging_data['reference_number']) && isset($lodging_data['invoice_date'])) {
 								$claim_share_exist_check = Lodging::select([
 									'lodgings.id',
 									'ey_employee_claims.number',
 								])
-									->join('trips','trips.id','lodgings.trip_id')
-									->join('ey_employee_claims','ey_employee_claims.trip_id','trips.id')
-									->where('lodgings.trip_id','!=', $request->trip_id)
+									->join('trips', 'trips.id', 'lodgings.trip_id')
+									->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+									->where('lodgings.trip_id', '!=', $request->trip_id)
 									->where('lodgings.gstin', $lodging_data['gstin'])
 									->where('lodgings.reference_number', $lodging_data['reference_number'])
 									->where('lodgings.invoice_date', date('Y-m-d', strtotime($lodging_data['invoice_date'])))
-									->whereNotIn('trips.status_id', [3032,3038,3022]) //CANCEL , AUTO CANCEL, MANAGER REJECTED
-									->whereNotIn('ey_employee_claims.status_id', [3032,3039,3024]) //CANCEL, AUTO CANCEL, CLAIM REJECTED
+									->whereNotIn('trips.status_id', [3032, 3038, 3022]) //CANCEL , AUTO CANCEL, MANAGER REJECTED
+									->whereNotIn('ey_employee_claims.status_id', [3032, 3039, 3024]) //CANCEL, AUTO CANCEL, CLAIM REJECTED
 									->where('lodgings.sharing_type_id', 3811) //SHARING WITH CLAIM
 									->first();
 
-								if(!empty($claim_share_exist_check)){
+								if (!empty($claim_share_exist_check)) {
 									return response()->json([
 										'success' => false,
-										'errors' => ['Claim already shared for this details. Claim number : '.$claim_share_exist_check->number]
+										'errors' => ['Claim already shared for this details. Claim number : ' . $claim_share_exist_check->number],
 									]);
 								}
 							}
 
 							$lodge_share_details = json_decode($lodging_data['sharing_employees'], true);
-							if(empty($lodge_share_details) || count($lodge_share_details) == 0){
+							if (empty($lodge_share_details) || count($lodge_share_details) == 0) {
 								return response()->json([
 									'success' => false,
-									'errors' => ['Lodge sharing employee details is required']
+									'errors' => ['Lodge sharing employee details is required'],
 								]);
 							}
 							foreach ($lodge_share_details as $share_detail) {
@@ -3023,7 +3025,7 @@ class Trip extends Model {
 						}
 						$loding_attachment_exist = true;
 					}
-           
+
 					//SAVE EMPLOYEE CLAIMS
 					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $trip->id]);
 					$employee_claim->lodging_total = $lodging_total_amount;
@@ -3091,7 +3093,7 @@ class Trip extends Model {
 				])->find($request->trip_id);
 
 				//LODGE SHARE DETAILS
-				if(count($saved_lodgings->lodgings) > 0){
+				if (count($saved_lodgings->lodgings) > 0) {
 					foreach ($saved_lodgings->lodgings as $lodge_data) {
 						$lodge_share_data = [];
 						foreach ($lodge_data->shareDetails as $share_key => $share_data) {
@@ -3114,7 +3116,7 @@ class Trip extends Model {
 								->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 								->join('users', 'users.entity_id', 'employees.id')
 								->where('users.user_type_id', 3121) //EMPLOYEE
-								->where('lodging_share_details.id',$share_data->id)
+								->where('lodging_share_details.id', $share_data->id)
 								->first();
 							$lodge_share_data[$share_key]->eligible_amount = 0.00;
 
@@ -3122,10 +3124,10 @@ class Trip extends Model {
 								->pluck('category_id')
 								->first();
 							// $lodge_share_data[$share_key]['normal'] = [
-							// 	'eligible_amount' => 0,  
+							// 	'eligible_amount' => 0,
 							// ];
 
-							if($lodge_city_category_id){
+							if ($lodge_city_category_id) {
 								$lodge_expense_config = DB::table('grade_expense_type')
 									->where('grade_id', $lodge_share_data[$share_key]->grade_id)
 									->where('expense_type_id', 3001) //LODGING EXPENSES
@@ -3133,7 +3135,7 @@ class Trip extends Model {
 									->first();
 								if (!empty($lodge_expense_config)) {
 									// $lodge_share_data[$share_key]['normal'] = [
-									// 	'eligible_amount' => $lodge_expense_config->eligible_amount,  
+									// 	'eligible_amount' => $lodge_expense_config->eligible_amount,
 									// ];
 									$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 								}
@@ -3219,7 +3221,7 @@ class Trip extends Model {
 
 						$boarding_total = 0;
 						if ($boarding) {
-							$boarding_total = $boarding->amount + $boarding->cgst+$boarding->sgst+$boarding->igst;
+							$boarding_total = $boarding->amount + $boarding->cgst + $boarding->sgst + $boarding->igst;
 							$boarding_total_amount += $boarding_total;
 						}
 
@@ -3450,7 +3452,7 @@ class Trip extends Model {
 
 						$local_amount_total = 0;
 						if ($local_travel) {
-							$local_amount_total = $local_travel->amount + $local_travel->cgst + $local_travel->sgst+$local_travel->igst;
+							$local_amount_total = $local_travel->amount + $local_travel->cgst + $local_travel->sgst + $local_travel->igst;
 							$local_total_amount += $local_amount_total;
 						}
 
@@ -3607,7 +3609,7 @@ class Trip extends Model {
 					$employee_claim->is_deviation = 1;
 				}
 				// if($grade_advance_eligibility->deviation_eligiblity == 1){
-				if($grade_advance_eligibility->deviation_eligiblity == 1 && $is_grade_leader == false){
+				if ($grade_advance_eligibility->deviation_eligiblity == 1 && $is_grade_leader == false) {
 					if ($employee_claim->deviation_reason == NULL) {
 						$employee_claim->is_deviation = 0; //NO DEVIATION DEFAULT
 					} else {
@@ -3790,10 +3792,10 @@ class Trip extends Model {
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-				// ->whereDate('trips.created_at', $date)
-				// // ->whereDate('trips.end_date', $date)
-				// ->where('trips.status_id', '=', 3021)
-				->where(function($q) use ($date, $title) {
+			// ->whereDate('trips.created_at', $date)
+			// // ->whereDate('trips.end_date', $date)
+			// ->where('trips.status_id', '=', 3021)
+				->where(function ($q) use ($date, $title) {
 					$q->where('trips.status_id', '=', 3021);
 					if ($title == 'Cancelled') {
 						$q->whereDate('trips.created_at', '<=', $date);
@@ -3818,12 +3820,12 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				// ->where('trips.end_date', $date)
-				// ->whereNull('ey_employee_claims.number')
-				// ->where('trips.status_id', '=', 3028)
-				->where(function($q) use ($date, $title) {
+			// ->where('trips.end_date', $date)
+			// ->whereNull('ey_employee_claims.number')
+			// ->where('trips.status_id', '=', 3028)
+				->where(function ($q) use ($date, $title) {
 					$q->where('trips.status_id', '=', 3028)
-					->whereNull('ey_employee_claims.number');
+						->whereNull('ey_employee_claims.number');
 					if ($title == 'Cancelled') {
 						$q->whereDate('trips.end_date', '<=', $date);
 					} else {
@@ -3847,11 +3849,11 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				// // ->whereDate('ey_employee_claims.created_at', $date)
-				// ->whereDate('trips.end_date', $date)
-				// ->where('trips.status_id', '=', 3023) //Claim Requested
-				->where(function($q) use ($date, $title) {
-					$q->where('trips.status_id', '=', 3023);		//Claim Requested
+			// // ->whereDate('ey_employee_claims.created_at', $date)
+			// ->whereDate('trips.end_date', $date)
+			// ->where('trips.status_id', '=', 3023) //Claim Requested
+				->where(function ($q) use ($date, $title) {
+					$q->where('trips.status_id', '=', 3023); //Claim Requested
 					if ($title == 'Cancelled') {
 						$q->whereDate('trips.end_date', '<=', $date);
 					} else {
@@ -3876,11 +3878,11 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-				// ->whereDate('ey_employee_claims.created_at', $date)
-				// ->whereDate('trips.end_date', $date)
-				// ->where('trips.status_id', '=', 3029) //Senior Manager Approval Pending
-				->where(function($q) use ($date, $title) {
-					$q->where('trips.status_id', '=', 3029);		//Senior Manager Approval Pending
+			// ->whereDate('ey_employee_claims.created_at', $date)
+			// ->whereDate('trips.end_date', $date)
+			// ->where('trips.status_id', '=', 3029) //Senior Manager Approval Pending
+				->where(function ($q) use ($date, $title) {
+					$q->where('trips.status_id', '=', 3029); //Senior Manager Approval Pending
 					if ($title == 'Cancelled') {
 						$q->whereDate('trips.end_date', '<=', $date);
 					} else {
@@ -3902,44 +3904,44 @@ request is not desired, then those may be rejected.';
 					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
-					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name','users.mobile_number')
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name', 'users.mobile_number')
 						->join('users', 'users.entity_id', 'employees.reporting_to_id')
 						->where('users.user_type_id', 3121)
 						->where('employees.id', $pending_trip->employee_id)
 						->get()->toArray();
-						//dd($to_email[0]['mobile_number']);
-						foreach($to_email as $key =>$value){
-							$mobile_number = $value['mobile_number'];
-							$employee_id = $value['id'];
-						}
-						//dd($mobile_number);
-					if ($title == 'Remainder'){
+					//dd($to_email[0]['mobile_number']);
+					foreach ($to_email as $key => $value) {
+						$mobile_number = $value['mobile_number'];
+						$employee_id = $value['id'];
+					}
+					//dd($mobile_number);
+					if ($title == 'Remainder') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3021)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_REMINDER'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 2, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_REMINDER'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
-					if ($title == 'Warning'){
+					if ($title == 'Warning') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3021)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_WARNING'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 8, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_WARNING'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 8, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
 					if ($title == 'Cancelled') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3021)->update(['status_id' => 3038, 'reason' => 'Your Trip not approved,So system Cancelled Automatically', 'updated_at' => Carbon::now()]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 10, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 10, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
@@ -3953,33 +3955,33 @@ request is not desired, then those may be cancelled.';
 					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
-					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name','users.mobile_number')
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name', 'users.mobile_number')
 						->join('users', 'users.entity_id', 'employees.id')
 						->where('users.user_type_id', 3121)
 						->where('employees.id', $pending_trip->employee_id)
 						->get()->toArray();
-						foreach($to_email as $key =>$value){
-							$mobile_number = $value['mobile_number'];
-							$employee_id= $value['id'];
-						}
-					if ($title == 'Remainder'){
+					foreach ($to_email as $key => $value) {
+						$mobile_number = $value['mobile_number'];
+						$employee_id = $value['id'];
+					}
+					if ($title == 'Remainder') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3028)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
-		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
-		 				$message = str_replace('ZZZ', 2, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
+						$message = str_replace('YYYY', $pending_trip->end_date, $message);
+						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
-					if ($title == 'Warning'){
+					if ($title == 'Warning') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3028)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
-		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
-		 				$message = str_replace('ZZZ', 12, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
+						$message = str_replace('YYYY', $pending_trip->end_date, $message);
+						$message = str_replace('ZZZ', 12, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
@@ -3987,9 +3989,9 @@ request is not desired, then those may be cancelled.';
 					if ($title == 'Cancelled') {
 						// $status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3038, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically', 'updated_at' => Carbon::now()]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
-		 				$message = str_replace('YYYY',$pending_trip->end_date,$message);
-		 				$message = str_replace('ZZZ', 15, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
+						$message = str_replace('YYYY', $pending_trip->end_date, $message);
+						$message = str_replace('ZZZ', 15, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
@@ -4003,42 +4005,42 @@ request is not desired, then those may be rejected.';
 					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
-					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name','users.mobile_number')
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name', 'users.mobile_number')
 						->join('users', 'users.entity_id', 'employees.reporting_to_id')
 						->where('users.user_type_id', 3121)
 						->where('employees.id', $pending_trip->employee_id)
 						->get()->toArray();
-						foreach($to_email as $key =>$value){
-							$mobile_number = $value['mobile_number'];
-							$employee_id = $value['id'];
-						}
-					if ($title == 'Remainder'){
+					foreach ($to_email as $key => $value) {
+						$mobile_number = $value['mobile_number'];
+						$employee_id = $value['id'];
+					}
+					if ($title == 'Remainder') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3023)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 2, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
-					if ($title == 'Warning'){
+					if ($title == 'Warning') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3023)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 8, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 8, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
 					if ($title == 'Cancelled') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3023)->update(['status_id' => 3039, 'reason' => 'Your claim is not Approved,So system Rejected Automatically', 'updated_at' => Carbon::now()]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 10, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 10, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
@@ -4052,44 +4054,44 @@ request is not desired, then those may be rejected.';
 					$arr['detail'] = $detail;
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
-					$to_email = $arr['to_email'] = EmployeeClaim::join('employees as e', 'e.id', 'ey_employee_claims.employee_id','users.mobile_number')
+					$to_email = $arr['to_email'] = EmployeeClaim::join('employees as e', 'e.id', 'ey_employee_claims.employee_id', 'users.mobile_number')
 						->join('employees as trip_manager_employee', 'trip_manager_employee.id', 'e.reporting_to_id')
 						->join('employees as se_manager_employee', 'se_manager_employee.id', 'trip_manager_employee.reporting_to_id')
 						->join('users', 'users.entity_id', 'se_manager_employee.id')
 						->where('users.user_type_id', 3121)
 						->select('e.id', 'users.email as email', 'users.name as name', 'users.mobile_number')
 						->get()->toArray();
-						foreach($to_email as $key =>$value){
-							$mobile_number = $value['mobile_number'];
-							$employee_id = $value['id'];
-						}
-					if ($title == 'Remainder'){
+					foreach ($to_email as $key => $value) {
+						$mobile_number = $value['mobile_number'];
+						$employee_id = $value['id'];
+					}
+					if ($title == 'Remainder') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3029)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX',$pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 2, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
-					if ($title == 'Warning'){
+					if ($title == 'Warning') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)
 							->where('status_id', 3029)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 5, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 5, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
 					}
 					if ($title == 'Cancelled') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3029)->update(['status_id' => 3039, 'reason' => 'Your claim is not Approved by senior Manager,So system Rejected Automatically', 'updated_at' => Carbon::now()]);
-		 				$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
-		 				$message = str_replace('YYYY',$pending_trip->created_at,$message);
-		 				$message = str_replace('ZZZ', 10, $message);
+						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
+						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('ZZZ', 10, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
 						}
@@ -4101,8 +4103,10 @@ request is not desired, then those may be rejected.';
 				$arr['status'] = $status;
 				foreach ($to_email as $key => $value) {
 					$arr['name'] = $value['name'];
-					if ($value['email'] && $value['email'] != '-')
+					if ($value['email'] && $value['email'] != '-') {
 						$email_to = $value['email'];
+					}
+
 				}
 				$view_name = 'mail.report_mail';
 				if ($sendSmsAndMail && count($email_to) > 0) {
@@ -4149,96 +4153,96 @@ request is not desired, then those may be rejected.';
 		return $pending_attachment_lists;
 	}
 	// For Attachment by Karthick T on 07-04-2022
-public static function saveVerifierClaim($request){
-	//dd($request->booked_by);
-	try {
-		DB::beginTransaction();
-		if (!empty($request->visits)) {
-			foreach ($request->visits as $visit_data) {
-				if (!empty($visit_data['id'] && $visit_data['booked_by'] == 'Self')) {
+	public static function saveVerifierClaim($request) {
+		//dd($request->booked_by);
+		try {
+			DB::beginTransaction();
+			if (!empty($request->visits)) {
+				foreach ($request->visits as $visit_data) {
+					if (!empty($visit_data['id'] && $visit_data['booked_by'] == 'Self')) {
 						$visit = Visit::find($visit_data['id']);
 						$visit_booking = VisitBooking::firstOrNew(['visit_id' => $visit_data['id']]);
-							$visit_booking->visit_id = $visit_data['id'];
-							$visit_booking->amount = $visit_data['amount'];
-							$visit_booking->gstin = $visit_data['gstin'];
-							$visit_booking->tax_percentage = $visit_data['tax_percentage'];
-							//$visit_booking->tax = $visit_data['tax'];
-							$visit_booking->cgst = $visit_data['cgst'];
-							$visit_booking->sgst = $visit_data['sgst'];
-							$visit_booking->igst = $visit_data['igst'];
-							$visit_booking->igst = $visit_data['gstin_name'];
-							$visit_booking->igst = $visit_data['gstin_state_code'];
-							$visit_booking->igst = $visit_data['gstin_address'];
+						$visit_booking->visit_id = $visit_data['id'];
+						$visit_booking->amount = $visit_data['amount'];
+						$visit_booking->gstin = $visit_data['gstin'];
+						$visit_booking->tax_percentage = $visit_data['tax_percentage'];
+						//$visit_booking->tax = $visit_data['tax'];
+						$visit_booking->cgst = $visit_data['cgst'];
+						$visit_booking->sgst = $visit_data['sgst'];
+						$visit_booking->igst = $visit_data['igst'];
+						$visit_booking->igst = $visit_data['gstin_name'];
+						$visit_booking->igst = $visit_data['gstin_state_code'];
+						$visit_booking->igst = $visit_data['gstin_address'];
 
-						if(!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)){
-								return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
-						}else{
-	                          $visit_booking->round_off = $visit_data['round_off'];
+						if (!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)) {
+							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
+						} else {
+							$visit_booking->round_off = $visit_data['round_off'];
 						}
 						$visit_booking->other_charges = $visit_data['other_charges'];
 						$visit_booking->save();
 						$transport_total = 0;
-						$transport_total_amount=0;
-							if ($visit_booking) {
-								$transport_total = (float)$visit_booking->amount + (float)$visit_booking->cgst + (float)$visit_booking->sgst + (float)$visit_booking->igst + (float)$visit_booking->toll_fee + (float)$visit_booking->round_off + (float)$visit_booking->other_charges;
-								 $transport_total_amount += $transport_total;
-							}
+						$transport_total_amount = 0;
+						if ($visit_booking) {
+							$transport_total = (float) $visit_booking->amount + (float) $visit_booking->cgst + (float) $visit_booking->sgst + (float) $visit_booking->igst + (float) $visit_booking->toll_fee + (float) $visit_booking->round_off + (float) $visit_booking->other_charges;
+							$transport_total_amount += $transport_total;
+						}
 						$visit_booking->total = $transport_total_amount ? $transport_total_amount : 0;
 						$visit_booking->save();
 						$visit->save();
 						$total_transport_amount = Visit::select(
-		                    	DB::raw('SUM(COALESCE(visit_bookings.total ,0)) as total'))
-					           ->join('visit_bookings','visit_bookings.visit_id','visits.id')
-					           ->where('visits.booking_method_id',3040)
-					           ->where('visits.trip_id',$request->trip_id)
-					           ->get()->first();
+							DB::raw('SUM(COALESCE(visit_bookings.total ,0)) as total'))
+							->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+							->where('visits.booking_method_id', 3040)
+							->where('visits.trip_id', $request->trip_id)
+							->get()->first();
 						//SAVE EMPLOYEE CLAIMS
-					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
-					$employee_claim->trip_id = $request->trip_id;
-					$employee_claim->transport_total = $total_transport_amount->total;
-					//$employee_claim->employee_id = Auth::user()->entity_id;
-					$employee_claim->created_by = Auth::user()->id;
-					$employee_claim->total_amount = 0;
-					$employee_claim->save();
-					$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
-					$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
-					$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
-					$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
-					$total_amount =  $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+						$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
+						$employee_claim->trip_id = $request->trip_id;
+						$employee_claim->transport_total = $total_transport_amount->total;
+						//$employee_claim->employee_id = Auth::user()->entity_id;
+						$employee_claim->created_by = Auth::user()->id;
+						$employee_claim->total_amount = 0;
+						$employee_claim->save();
+						$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+						$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+						$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+						$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+						$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
 
-					$employee_claim->total_trip_days = $request->trip_total_days;
-					$employee_claim->total_amount = $total_amount;
-					$employee_claim->save();
-	                 $trip=Trip::where('id',$request->trip_id)->select('advance_received')->get()->first();
-					//To Find Amount to Pay Financier or Employee
-					if ($trip->advance_received) {
-						if ($trip->advance_received > $total_amount) {
-							$balance_amount = $trip->advance_received - $total_amount;
-							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-							$employee_claim->amount_to_pay = 2;
+						$employee_claim->total_trip_days = $request->trip_total_days;
+						$employee_claim->total_amount = $total_amount;
+						$employee_claim->save();
+						$trip = Trip::where('id', $request->trip_id)->select('advance_received')->get()->first();
+						//To Find Amount to Pay Financier or Employee
+						if ($trip->advance_received) {
+							if ($trip->advance_received > $total_amount) {
+								$balance_amount = $trip->advance_received - $total_amount;
+								$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+								$employee_claim->amount_to_pay = 2;
+							} else {
+								$balance_amount = $total_amount - $trip->advance_received;
+								$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+								$employee_claim->amount_to_pay = 1;
+							}
 						} else {
-							$balance_amount = $total_amount - $trip->advance_received;
-							$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+							$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
 							$employee_claim->amount_to_pay = 1;
 						}
-					} else {
-						$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
-						$employee_claim->amount_to_pay = 1;
-					}
 
-					// dump($trip->advance_received);
-					// dump($request->claim_total_amount);
+						// dump($trip->advance_received);
+						// dump($request->claim_total_amount);
 
-					$employee_claim->save();
-					DB::commit();
+						$employee_claim->save();
+						DB::commit();
 						return response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'visit' => $visit]);
+					}
 				}
 			}
-		}
-		if (!empty($request->lodgings)) {
-			//dd($request->all());
-		    foreach ($request->lodgings as $lodgeKey => $lodging_data) {
-                    if (!empty($lodging_data['id'])) {
+			if (!empty($request->lodgings)) {
+				//dd($request->all());
+				foreach ($request->lodgings as $lodgeKey => $lodging_data) {
+					if (!empty($lodging_data['id'])) {
 						if (isset($lodging_data['id'])) {
 							$lodging = Lodging::where('id', $lodging_data['id'])->first();
 							if (!$lodging) {
@@ -4247,36 +4251,36 @@ public static function saveVerifierClaim($request){
 						} else {
 							$lodging = new Lodging;
 						}
-							$lodging->id = $lodging_data['id'];
-							$lodging->amount = $lodging_data['amount'];
-							$lodging->gstin = $lodging_data['gstin'];
-							$lodging->tax_percentage = $lodging_data['tax_percentage'];
-							$lodging->cgst = $lodging_data['cgst'];
-							$lodging->sgst = $lodging_data['sgst'];
-							$lodging->igst = $lodging_data['igst'];
-							$lodging->gstin_state_code = $lodging_data['gstin_state_code'];
-							$lodging->gstin_address = $lodging_data['gstin_address'];
-						if(!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)){
+						$lodging->id = $lodging_data['id'];
+						$lodging->amount = $lodging_data['amount'];
+						$lodging->gstin = $lodging_data['gstin'];
+						$lodging->tax_percentage = $lodging_data['tax_percentage'];
+						$lodging->cgst = $lodging_data['cgst'];
+						$lodging->sgst = $lodging_data['sgst'];
+						$lodging->igst = $lodging_data['igst'];
+						$lodging->gstin_state_code = $lodging_data['gstin_state_code'];
+						$lodging->gstin_address = $lodging_data['gstin_address'];
+						if (!empty($lodging_data['round_off']) && ($lodging_data['round_off'] > 1 || $lodging_data['round_off'] < -1)) {
 							return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
-						}else{
-						$lodging->round_off = $lodging_data['round_off'] ? $lodging_data['round_off']: 0;
-					    }
-					$lodging->lodge_name = $lodging_data['lodge_name'];
-					$lodging->save();
-					$lodging_total = 0;
-					$lodging_total_amount=0;
+						} else {
+							$lodging->round_off = $lodging_data['round_off'] ? $lodging_data['round_off'] : 0;
+						}
+						$lodging->lodge_name = $lodging_data['lodge_name'];
+						$lodging->save();
+						$lodging_total = 0;
+						$lodging_total_amount = 0;
 						if ($lodging) {
 							$lodging_total = $lodging->amount + $lodging->cgst + $lodging->sgst + $lodging->igst + $lodging->round_off;
-							$lodging_total_amount += $lodging_total ? $lodging_total : 0 ;
+							$lodging_total_amount += $lodging_total ? $lodging_total : 0;
 						}
-					$lodging->total=$lodging_total_amount ? $lodging_total_amount : 0;
-					$lodging->save();
-					//LODGE TAX INVOICE SAVE
+						$lodging->total = $lodging_total_amount ? $lodging_total_amount : 0;
+						$lodging->save();
+						//LODGE TAX INVOICE SAVE
 
 						$lodging->taxInvoices()->forceDelete();
 
 						//ONLY FOR LODGE STAY TYPE
-					if ($lodging_data['stay_type_id'] == '3340' && $lodging_data['has_multiple_tax_invoice'] == 'Yes') {
+						if ($lodging_data['stay_type_id'] == '3340' && $lodging_data['has_multiple_tax_invoice'] == 'Yes') {
 							if (empty($lodging_data['tax_invoice_amount'])) {
 								return response()->json([
 									'success' => false,
@@ -4299,7 +4303,7 @@ public static function saveVerifierClaim($request){
 							$lodging->tax_invoice_amount = !empty($lodging_data['tax_invoice_amount']) ? $lodging_data['tax_invoice_amount'] : NULL;
 							$lodging->save();
 
-					   //SAVE LODGE TAX INVOICE
+							//SAVE LODGE TAX INVOICE
 							$lodgeTaxInvoice = LodgingTaxInvoice::firstOrNew([
 								'lodging_id' => $lodging->id,
 								'type_id' => 3771,
@@ -4392,76 +4396,76 @@ public static function saveVerifierClaim($request){
 							$roundoffTaxInvoice->igst = !empty($lodging_data['roundoffTaxInvoice']['igst']) ? $lodging_data['roundoffTaxInvoice']['igst'] : 0;
 							$roundoffTaxInvoice->total = !empty($lodging_data['roundoffTaxInvoice']['total']) ? $lodging_data['roundoffTaxInvoice']['total'] : 0;
 							$roundoffTaxInvoice->save();
-					}
+						}
 						//SAVE EMPLOYEE CLAIMS
-					$total_lodge_amount = Lodging::select(
-	                    	DB::raw('SUM(COALESCE(total,0)) as total'))->where('trip_id',$request->trip_id)->get()->first();
-                            //SAVE EMPLOYEE CLAIMS
-					$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
-					$employee_claim->lodging_total = $total_lodge_amount->total;
-					//$employee_claim->employee_id = Auth::user()->entity_id;
-					$employee_claim->created_by = Auth::user()->id;
+						$total_lodge_amount = Lodging::select(
+							DB::raw('SUM(COALESCE(total,0)) as total'))->where('trip_id', $request->trip_id)->get()->first();
+						//SAVE EMPLOYEE CLAIMS
+						$employee_claim = EmployeeClaim::firstOrNew(['trip_id' => $request->trip_id]);
+						$employee_claim->lodging_total = $total_lodge_amount->total;
+						//$employee_claim->employee_id = Auth::user()->entity_id;
+						$employee_claim->created_by = Auth::user()->id;
 
-					$employee_claim->save();
+						$employee_claim->save();
 
-				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
-				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
-				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
-				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
-				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
-				// $employee_claim->total_trip_days = $request->trip_total_days;
-				$employee_claim->total_amount = $total_amount;
-                $employee_claim->save();
-				//To Find Amount to Pay Financier or Employee
-				$trip=Trip::where('id',$request->trip_id)->select('advance_received')->get()->first();
-				if ($trip->advance_received) {
-					if ($trip->advance_received > $total_amount) {
-						$balance_amount = $trip->advance_received - $total_amount;
-						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-						$employee_claim->amount_to_pay = 2;
-					} else {
-						$balance_amount = $total_amount - $trip->advance_received;
-						$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
-						$employee_claim->amount_to_pay = 1;
+						$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+						$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+						$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+						$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+						$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+						// $employee_claim->total_trip_days = $request->trip_total_days;
+						$employee_claim->total_amount = $total_amount;
+						$employee_claim->save();
+						//To Find Amount to Pay Financier or Employee
+						$trip = Trip::where('id', $request->trip_id)->select('advance_received')->get()->first();
+						if ($trip->advance_received) {
+							if ($trip->advance_received > $total_amount) {
+								$balance_amount = $trip->advance_received - $total_amount;
+								$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+								$employee_claim->amount_to_pay = 2;
+							} else {
+								$balance_amount = $total_amount - $trip->advance_received;
+								$employee_claim->balance_amount = $balance_amount ? $balance_amount : 0;
+								$employee_claim->amount_to_pay = 1;
+							}
+						} else {
+							$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
+							$employee_claim->amount_to_pay = 1;
+						}
+
+						$employee_claim->save();
+						//GET SAVED LODGINGS
+						$saved_lodgings = Trip::with([
+							'lodgings',
+							'lodgings.lodgingTaxInvoice',
+							'lodgings.drywashTaxInvoice',
+							'lodgings.boardingTaxInvoice',
+							'lodgings.othersTaxInvoice',
+							'lodgings.roundoffTaxInvoice',
+							'lodging_attachments',
+							'lodgings.city',
+							'lodgings.stateType',
+							'lodgings.attachments',
+							'lodgings.sharingType',
+							'lodgings.shareDetails',
+							'lodgings.shareDetails.employee',
+							'lodgings.shareDetails.employee.user',
+							'lodgings.shareDetails.employee.outlet',
+							'lodgings.shareDetails.employee.grade',
+							'lodgings.shareDetails.employee.designation',
+							'lodgings.shareDetails.employee.Sbu',
+						])->find($request->trip_id);
+						DB::commit();
+
+						return response()->json(['success' => true, 'saved_lodgings' => $saved_lodgings]);
 					}
-				} else {
-					$employee_claim->balance_amount = $total_amount ? $total_amount : 0;
-					$employee_claim->amount_to_pay = 1;
 				}
-
-				$employee_claim->save();
-				//GET SAVED LODGINGS
-				$saved_lodgings = Trip::with([
-					'lodgings',
-					'lodgings.lodgingTaxInvoice',
-					'lodgings.drywashTaxInvoice',
-					'lodgings.boardingTaxInvoice',
-					'lodgings.othersTaxInvoice',
-					'lodgings.roundoffTaxInvoice',
-					'lodging_attachments',
-					'lodgings.city',
-					'lodgings.stateType',
-					'lodgings.attachments',
-					'lodgings.sharingType',
-					'lodgings.shareDetails',
-					'lodgings.shareDetails.employee',
-					'lodgings.shareDetails.employee.user',
-					'lodgings.shareDetails.employee.outlet',
-					'lodgings.shareDetails.employee.grade',
-					'lodgings.shareDetails.employee.designation',
-					'lodgings.shareDetails.employee.Sbu',
-				])->find($request->trip_id);
-				DB::commit();
-				
-					return response()->json(['success' => true,'saved_lodgings'=>$saved_lodgings]);
-					}
 			}
-		}
-	}catch (\Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage().$e->getLine()]]);
+			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage() . $e->getLine()]]);
 		}
-}
+	}
 
 	public static function searchLodgeSharingEmployee($request) {
 		$key = $request->key;
@@ -4484,7 +4488,7 @@ public static function saveVerifierClaim($request){
 	}
 
 	public static function getLodgeSharingEmployee($request) {
-		try{
+		try {
 			$validator = Validator::make($request->all(), [
 				'employee_id' => [
 					'required',
@@ -4518,17 +4522,17 @@ public static function saveVerifierClaim($request){
 				->leftjoin('designations', 'designations.id', 'employees.designation_id')
 				->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 				->join('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)//EMPLOYEE
-				->where('employees.id',$request->employee_id)
+				->where('users.user_type_id', 3121) //EMPLOYEE
+				->where('employees.id', $request->employee_id)
 				->first();
 			$data['employee']->eligible_amount = 0.00;
 			$city_category_id = NCity::where('id', $request->city_id)
 				->pluck('category_id')
 				->first();
 			// $data['employee']['normal'] = [
-			// 	'eligible_amount' => 0,  
+			// 	'eligible_amount' => 0,
 			// ];
-			if($city_category_id){
+			if ($city_category_id) {
 				$lodge_expense_type = DB::table('grade_expense_type')
 					->where('grade_id', $data['employee']->grade_id)
 					->where('expense_type_id', 3001) //LODGE EXPENSE
@@ -4536,16 +4540,16 @@ public static function saveVerifierClaim($request){
 					->first();
 				if ($lodge_expense_type) {
 					// $data['employee']['normal'] = [
-					// 	'eligible_amount' => $lodge_expense_type->eligible_amount,  
+					// 	'eligible_amount' => $lodge_expense_type->eligible_amount,
 					// ];
 					$data['employee']->eligible_amount = $lodge_expense_type->eligible_amount;
 				}
 			}
 
 			return response()->json([
-                'success' => true,
-                'data' => $data,
-            ]);
+				'success' => true,
+				'data' => $data,
+			]);
 		} catch (\Exception $e) {
 			return response()->json([
 				'success' => false,
@@ -4555,6 +4559,5 @@ public static function saveVerifierClaim($request){
 			]);
 		}
 	}
-	
 
 }
