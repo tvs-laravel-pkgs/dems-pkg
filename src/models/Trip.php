@@ -5187,6 +5187,22 @@ request is not desired, then those may be rejected.';
 		$cgstSgstPercentage = 0;
 		$igstPercentage = 0;
 
+		//FAIR TAXES
+		if ($employeeTrip->selfVisits->isNotEmpty()) {
+			foreach ($employeeTrip->selfVisits as $selfVisitData) {
+				if ($selfVisitData->booking && !empty($selfVisitData->booking->gstin)) {
+					if ($selfVisitData->booking->cgst > 0 && $selfVisitData->booking->sgst > 0) {
+						$cgstAmount += floatval($selfVisitData->booking->cgst);
+						$sgstAmount += floatval($selfVisitData->booking->sgst);
+						$cgstSgstPercentage += floatval($selfVisitData->booking->tax_percentage);
+					} else {
+						$igstAmount += floatval($selfVisitData->booking->igst);
+						$igstPercentage += floatval($selfVisitData->booking->tax_percentage);
+					}
+				}
+			}
+		}
+
 		if ($employeeTrip->lodgings->isNotEmpty()) {
 			foreach ($employeeTrip->lodgings as $lodging) {
 				if ($lodging->stay_type_id == 3340) {
@@ -5303,7 +5319,7 @@ request is not desired, then those may be rejected.';
 		]);
 
 		//IF ADVANCE RECEIVED
-		if ($employeeTrip->advance_received > 0) {
+		if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
 			//COMPANY TO EMPLOYEE
 			if ($employeeClaim->amount_to_pay == 1) {
 				if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
@@ -5312,6 +5328,7 @@ request is not desired, then those may be rejected.';
 					if (!empty($employeeClaim->balance_amount)) {
 						$amountDiff = number_format((round($employeeClaim->balance_amount) - $employeeClaim->balance_amount), 2);
 					}
+
 					DB::table('oracle_ap_invoice_exports')->insert([
 						'company_id' => $companyId,
 						'business_unit' => $businessUnitName,
@@ -5320,6 +5337,7 @@ request is not desired, then those may be rejected.';
 						'invoice_date' => $invoiceDate,
 						'pre_payment_invoice_number' => $tripNumber,
 						'pre_payment_invoice_date' => $tripDate,
+						'pre_payment_amount' => $employeeTrip->advance_received,
 						'supplier_number' => $supplierNumber,
 						'supplier_site_name' => $supplierSiteName,
 						'invoice_type' => $invoiceType,
