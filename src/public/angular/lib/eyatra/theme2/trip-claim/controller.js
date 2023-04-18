@@ -2018,7 +2018,8 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
                 $(self.trip.lodgings).each(function(key, lodge) {
                     console.log(lodge.stay_type_id);
-                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                    // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                    if (lodge.stay_type_id == 3340) { // 3340 -> LODGE STAY
                         if (lodge.city_id) {
                             var guestHouseStatus = 0
                             $(self.extras.city_list).each(function(cityKey, city) {
@@ -2106,7 +2107,8 @@ app.component('eyatraTripClaimForm', {
                                 }
 
                                 if ($.inArray(3756, tripAttachmentTypeIds) == -1) {
-                                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                                    // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                                    if (lodge.stay_type_id == 3340) { // 3340 -> LODGE STAY
                                         if (lodge.city_id) {
                                             var guestHouseStatus = 0;
                                             $(self.extras.city_list).each(function(city_key, city) {
