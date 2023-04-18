@@ -3376,6 +3376,12 @@ class ExportReportController extends Controller {
 			->toArray();
 
 		$trip_details = array_merge($advance_amount_trips, $claimed_trips);
+		array_multisort(
+			array_column($trip_details, 'id'),
+			SORT_ASC,
+			$trip_details
+		);
+
 		foreach ($trip_details as $trip_detail) {
 			try {
 				DB::beginTransaction();

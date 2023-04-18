@@ -5277,10 +5277,10 @@ request is not desired, then those may be rejected.';
 		//GST TAX CLASSIFICATION
 		$taxClassification = '';
 		if ($cgstAmount > 0 && $sgstAmount > 0) {
-			$taxClassification .= 'CGST + SGST + ' . (round($cgstSgstPercentage));
+			$taxClassification .= 'CGST+SGST REC ' . (round($cgstSgstPercentage));
 		}
 		if ($igstAmount > 0) {
-			$taxClassification .= 'IGST + ' . (round($igstPercentage));
+			$taxClassification .= 'IGST REC ' . (round($igstPercentage));
 		}
 
 		$taxAmount = $cgstAmount + $sgstAmount + $igstAmount;
