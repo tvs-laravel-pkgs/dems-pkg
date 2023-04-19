@@ -1936,6 +1936,7 @@ app.component('eyatraTripClaimForm', {
             console.log({ grade_travel_ids })
             is_grade_travel_mode = false;
             let bookedBySelf = false
+            let visitInvoiceTotalAmount = 0;
             $(self.trip.visits).each(function(key, visit) {
                 console.log(visit.travel_mode_id);
                 console.log(jQuery.inArray(visit.travel_mode_id, grade_travel_ids) == -1);
@@ -1944,9 +1945,15 @@ app.component('eyatraTripClaimForm', {
                     is_grade_travel_mode = true;
                     is_deviation = true;
                 }
+
+                if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount)){
+                    visitInvoiceTotalAmount += parseFloat(visit.self_booking.invoice_amount);
+                }
+
                 if(visit.booking_method_id == 3040)
                     bookedBySelf = true
             });
+            
             console.log({ is_grade_travel_mode })
             if (is_grade_travel_mode == true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
@@ -1965,7 +1972,8 @@ app.component('eyatraTripClaimForm', {
                     // is_deviation = true;
                     // attachmentError = 'Fare detail document not uploaded'
                     // self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
-                    if(self.is_grade_leader == false && !!bookedBySelf){
+                    // if(self.is_grade_leader == false && !!bookedBySelf){
+                    if(self.is_grade_leader == false && !!bookedBySelf && visitInvoiceTotalAmount > 0){
                         is_deviation = true;
                         attachmentError = 'Fare detail document not uploaded'
                         self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
@@ -1989,7 +1997,8 @@ app.component('eyatraTripClaimForm', {
                     if (jQuery.inArray(3750, tripAttachmentTypeIds) == -1) {
                         // Fare detail document validation
                         // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
-                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf) {
+                        // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf) {
+                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf && visitInvoiceTotalAmount > 0) {
                             is_deviation = true;
                             attachmentError = 'Fare detail document not uploaded'
                             self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
@@ -2018,7 +2027,8 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
                 $(self.trip.lodgings).each(function(key, lodge) {
                     console.log(lodge.stay_type_id);
-                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                    // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                    if (lodge.stay_type_id == 3340) { // 3340 -> LODGE STAY
                         if (lodge.city_id) {
                             var guestHouseStatus = 0
                             $(self.extras.city_list).each(function(cityKey, city) {
@@ -2059,7 +2069,10 @@ app.component('eyatraTripClaimForm', {
                     if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272){
                         //proof upload yes and booking method self and travel mode not equal to two Wheeler, four wheeler, office vehicle
                         if ((self.trip.trip_attachments).length == 0) {
-                            leader_proof_error.push('Fare detail document not uploaded');
+                            // leader_proof_error.push('Fare detail document not uploaded');
+                            if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount) && parseFloat(visit.self_booking.invoice_amount) > 0){
+                                leader_proof_error.push('Fare detail document not uploaded');
+                            }
                         }else {
                             var tripAttachmentTypeIds = [];
                             $(self.trip.trip_attachments).each(function(key, tripAttachment) {
@@ -2071,7 +2084,10 @@ app.component('eyatraTripClaimForm', {
                             // 3755 : self doc
                             if ($.inArray(3750, tripAttachmentTypeIds) == -1) {
                                 if ($.inArray(3751, tripAttachmentTypeIds) == -1) {
-                                    leader_proof_error.push('Fare detail document not uploaded');
+                                    // leader_proof_error.push('Fare detail document not uploaded');
+                                    if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount) && parseFloat(visit.self_booking.invoice_amount) > 0){
+                                        leader_proof_error.push('Fare detail document not uploaded');
+                                    }
                                 }
  
                                 if ($.inArray(3755, tripAttachmentTypeIds) == -1) {
@@ -2106,7 +2122,8 @@ app.component('eyatraTripClaimForm', {
                                 }
 
                                 if ($.inArray(3756, tripAttachmentTypeIds) == -1) {
-                                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                                    // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                                    if (lodge.stay_type_id == 3340) { // 3340 -> LODGE STAY
                                         if (lodge.city_id) {
                                             var guestHouseStatus = 0;
                                             $(self.extras.city_list).each(function(city_key, city) {
