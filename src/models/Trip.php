@@ -5557,22 +5557,21 @@ request is not desired, then those may be rejected.';
 		if ($employeeTrip->lodgings->isNotEmpty()) {
 			foreach ($employeeTrip->lodgings as $lodging) {
 				//LODGE STAY
-				if ($lodging->stay_type_id == 3340) {
-					if (($lodging->cgst != '0.00' && $lodging->sgst != '0.00') || ($lodging->igst != '0.00')) {
-						if ($lodging->cgst > 0 && $lodging->sgst > 0) {
-							$lodgingCgstSgstTaxableAmount += floatval($lodging->amount);
-							$lodgingCgstAmount += floatval($lodging->cgst);
-							$lodgingSgstAmount += floatval($lodging->sgst);
-							$lodgingCgstSgstPercentage += floatval($lodging->tax_percentage);
-						} else {
-							$lodgingIgstTaxableAmount += floatval($lodging->amount);
-							$lodgingIgstAmount += floatval($lodging->igst);
-							$lodgingIgstPercentage += floatval($lodging->tax_percentage);
-						}
+				if (($lodging->cgst != '0.00' && $lodging->sgst != '0.00') || ($lodging->igst != '0.00')) {
+					if ($lodging->cgst > 0 && $lodging->sgst > 0) {
+						$lodgingCgstSgstTaxableAmount += floatval($lodging->amount);
+						$lodgingCgstAmount += floatval($lodging->cgst);
+						$lodgingSgstAmount += floatval($lodging->sgst);
+						$lodgingCgstSgstPercentage += floatval($lodging->tax_percentage);
+					} else {
+						$lodgingIgstTaxableAmount += floatval($lodging->amount);
+						$lodgingIgstAmount += floatval($lodging->igst);
+						$lodgingIgstPercentage += floatval($lodging->tax_percentage);
 					}
 				} else {
 					$lodgingWithoutGstValue += floatval($lodging->amount);
 				}
+
 			}
 		}
 
