@@ -1872,7 +1872,11 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
-			->where('departments.business_id', '=', $r->business_ids)
+			->where(function ($q) use ($r) {
+				if($r->business_ids != -1){
+					$q->where('departments.business_id', $r->business_ids);
+				}
+			})
 			->groupBy('lodgings.id')
 			->get();
 		// dd(count($gst_details));
