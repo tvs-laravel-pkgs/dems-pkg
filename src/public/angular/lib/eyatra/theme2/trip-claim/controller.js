@@ -3108,7 +3108,8 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_invoice_amount = self.grandTotalTaxInvoice.total;
             if (self.roundoffTaxInvoice.total > 1 || self.roundoffTaxInvoice.total < -1) {
                 custom_noty('error', "Round Off Amount is with in +1 or -1");
-                self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].has_multiple_tax_invoice = "No";
+                // self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].has_multiple_tax_invoice = "No";
+                return;
             }
 
             self.lodgingTaxInvoiceModalIndex = '';
