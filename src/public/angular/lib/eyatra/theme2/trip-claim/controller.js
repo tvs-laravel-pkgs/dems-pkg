@@ -436,9 +436,11 @@ app.component('eyatraTripClaimForm', {
                 self.boardingCal();
                 self.localTravelCal();
 
-                $.each(self.trip.lodgings,(lodging_index, lodging_info) => {
-                   $scope.gstinCheck(lodging_index); 
-                });
+                if(self.trip.lodgings && (self.trip.lodgings).length > 0){
+                    $.each(self.trip.lodgings,(lodging_index, lodging_info) => {
+                       $scope.gstinCheck(lodging_index); 
+                    });
+                }
 
                 // fileUpload();
                 $(".datepicker").datepicker({
@@ -3858,9 +3860,11 @@ app.component('eyatraTripClaimForm', {
                                 self.lodgings_attachment_removal_ids = [];
                                 $('#lodgings_attach_removal_ids').val('');
                                 self.enable_switch_tab = true;
-                                $.each(self.trip.lodgings, (lodging_index, lodging_info) => {
-                                   $scope.gstinCheck(lodging_index); 
-                                });
+                                if((self.trip.lodgings).length > 0){
+                                    $.each(self.trip.lodgings,(lodging_index, lodging_info) => {
+                                       $scope.gstinCheck(lodging_index); 
+                                    });
+                                }
                                 $scope.$apply()
                                 // $('.tab_li').removeClass('active');
                                 // $('.tab_boarding').addClass('active');
