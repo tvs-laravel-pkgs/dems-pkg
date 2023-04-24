@@ -808,28 +808,54 @@ app.component('eyatraTripClaimForm', {
         }
 
         $scope.gstHelper = function(index) {
-            var cgst = $('#' + index + '-visitCgst').val();
-            var sgst = $('#' + index + '-visitSgst').val();
-            var igst = $('#' + index + '-visitIgst').val();
+            // var cgst = $('#' + index + '-visitCgst').val();
+            // var sgst = $('#' + index + '-visitSgst').val();
+            // var igst = $('#' + index + '-visitIgst').val();
 
-            if (cgst == '' && sgst == '') {
-                // $('#' + index + '-visitIgst').attr('readonly', false);
-                $('#' + index + '-visitIgst').attr('placeholder', 'Eg:133.50');
-            } else {
-                // $('#' + index + '-visitIgst').attr('readonly', true);
-                $('#' + index + '-visitIgst').attr('placeholder', 'N/A');
-            }
+            // if (cgst == '' && sgst == '') {
+            //     $('#' + index + '-visitIgst').attr('readonly', false);
+            //     $('#' + index + '-visitIgst').attr('placeholder', 'Eg:133.50');
+            // } else {
+            //     $('#' + index + '-visitIgst').attr('readonly', true);
+            //     $('#' + index + '-visitIgst').attr('placeholder', 'N/A');
+            // }
 
-            if (igst == '') {
-                // $('#' + index + '-visitCgst').attr('readonly', false);
-                // $('#' + index + '-visitSgst').attr('readonly', false);
-                $('#' + index + '-visitCgst').attr('placeholder', 'Eg:113.50');
-                $('#' + index + '-visitSgst').attr('placeholder', 'Eg:123.50');
-            } else {
-                // $('#' + index + '-visitCgst').attr('readonly', true);
-                // $('#' + index + '-visitSgst').attr('readonly', true);
-                $('#' + index + '-visitCgst').attr('placeholder', 'N/A');
-                $('#' + index + '-visitSgst').attr('placeholder', 'N/A');
+            // if (igst == '') {
+            //     $('#' + index + '-visitCgst').attr('readonly', false);
+            //     $('#' + index + '-visitSgst').attr('readonly', false);
+            //     $('#' + index + '-visitCgst').attr('placeholder', 'Eg:113.50');
+            //     $('#' + index + '-visitSgst').attr('placeholder', 'Eg:123.50');
+            // } else {
+            //     $('#' + index + '-visitCgst').attr('readonly', true);
+            //     $('#' + index + '-visitSgst').attr('readonly', true);
+            //     $('#' + index + '-visitCgst').attr('placeholder', 'N/A');
+            //     $('#' + index + '-visitSgst').attr('placeholder', 'N/A');
+            // }
+
+            if(self.trip.visits[index].self_booking && self.trip.visits[index].self_booking.gstin){
+                var cgst = $('#' + index + '-visitCgst').val();
+                var sgst = $('#' + index + '-visitSgst').val();
+                var igst = $('#' + index + '-visitIgst').val();
+
+                if (cgst == '' && sgst == '') {
+                    $('#' + index + '-visitIgst').attr('readonly', false);
+                    $('#' + index + '-visitIgst').attr('placeholder', 'Eg:133.50');
+                } else {
+                    $('#' + index + '-visitIgst').attr('readonly', true);
+                    $('#' + index + '-visitIgst').attr('placeholder', 'N/A');
+                }
+
+                if (igst == '') {
+                    $('#' + index + '-visitCgst').attr('readonly', false);
+                    $('#' + index + '-visitSgst').attr('readonly', false);
+                    $('#' + index + '-visitCgst').attr('placeholder', 'Eg:113.50');
+                    $('#' + index + '-visitSgst').attr('placeholder', 'Eg:123.50');
+                } else {
+                    $('#' + index + '-visitCgst').attr('readonly', true);
+                    $('#' + index + '-visitSgst').attr('readonly', true);
+                    $('#' + index + '-visitCgst').attr('placeholder', 'N/A');
+                    $('#' + index + '-visitSgst').attr('placeholder', 'N/A');
+                }
             }
         }
         $scope.gstBoardingHelper = function(index) {
