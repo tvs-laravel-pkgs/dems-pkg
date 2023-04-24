@@ -8,6 +8,7 @@ use App\AxaptaExport;
 use App\BatchWiseReport;
 use App\Config;
 use App\CronLog;
+use App\HondaAxaptaExport;
 use App\Http\Controllers\Controller;
 use App\MailConfiguration;
 use App\ReportDetail;
@@ -19,16 +20,15 @@ use Illuminate\Support\Facades\URL;
 use Mail;
 use Redirect;
 use Session;
+use Uitoux\EYatra\ApprovalLog;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\EmployeeClaim;
+use Uitoux\EYatra\LocalTrip;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Region;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
-use Uitoux\EYatra\LocalTrip;
-use Uitoux\EYatra\ApprovalLog;
-use App\HondaAxaptaExport;
 
 class ExportReportController extends Controller {
 	// Report list filter
@@ -212,8 +212,8 @@ class ExportReportController extends Controller {
 				}
 				$cronLog->remarks = "Agent visits found";
 				$time_stamp = date('Y_m_d');
-             $datas = DB::table('axapta_exports')->where('entity_type_id',3790)->whereDate('created_at',$time_stamp)->get()->toArray();
-				$excel_header =[
+				$datas = DB::table('axapta_exports')->where('entity_type_id', 3790)->whereDate('created_at', $time_stamp)->get()->toArray();
+				$excel_header = [
 					'EntityId',
 					'CurrencyCode',
 					'JournalName',
@@ -244,60 +244,60 @@ class ExportReportController extends Controller {
 					'Due',
 					'PaymReference',
 				];
-				foreach($datas as $data_key => $data){
-				$excel_details =[
-					$data->entity_id,
-					$data->CurrencyCode,
-					$data->JournalName,
-					$data->JournalNum,
-					$data->LineNum,
-					$data->Voucher,
-					$data->ApproverPersonnelNumber,
-					$data->Approved,
-					$data->TransDate,
-					$data->AccountType,
-					$data->LedgerDimension,
-					$data->DefaultDimension,
-					$data->Txt,
-					$data->AmountCurDebit,
-					$data->AmountCurCredit,
-					$data->OffsetAccountType,
-					$data->OffsetLedgerDimension,
-					'',
-					$data->PaymMode,
-					$data->TaxGroup,
-					$data->TaxItemGroup,
-					$data->Invoice,
-					$data->SalesTaxFormTypes_IN_FormType,
-					$data->TDSGroup_IN,
-					$data->DocumentNum,
-					$data->DocumentDate,
-					$data->LogisticsLocation_LocationId,
-					$data->Due,
-					$data->PaymReference,
-                ];
-              	$export_data[] = $excel_details;
-              }
-		    	$outputfile = 'AgentAxaptaExport_' . $time_stamp;
-				$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
-					$excel->sheet('AgentAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
+				foreach ($datas as $data_key => $data) {
+					$excel_details = [
+						$data->entity_id,
+						$data->CurrencyCode,
+						$data->JournalName,
+						$data->JournalNum,
+						$data->LineNum,
+						$data->Voucher,
+						$data->ApproverPersonnelNumber,
+						$data->Approved,
+						$data->TransDate,
+						$data->AccountType,
+						$data->LedgerDimension,
+						$data->DefaultDimension,
+						$data->Txt,
+						$data->AmountCurDebit,
+						$data->AmountCurCredit,
+						$data->OffsetAccountType,
+						$data->OffsetLedgerDimension,
+						'',
+						$data->PaymMode,
+						$data->TaxGroup,
+						$data->TaxItemGroup,
+						$data->Invoice,
+						$data->SalesTaxFormTypes_IN_FormType,
+						$data->TDSGroup_IN,
+						$data->DocumentNum,
+						$data->DocumentDate,
+						$data->LogisticsLocation_LocationId,
+						$data->Due,
+						$data->PaymReference,
+					];
+					$export_data[] = $excel_details;
+				}
+				$outputfile = 'AgentAxaptaExport_' . $time_stamp;
+				$file = Excel::create($outputfile, function ($excel) use ($excel_header, $export_data) {
+					$excel->sheet('AgentAxaptaExport_', function ($sheet) use ($excel_header, $export_data) {
 						$sheet->fromArray($export_data, NULL, 'A1');
 						$sheet->row(1, $excel_header);
 						$sheet->row(1, function ($row) {
-						$row->setBackground('#07c63a');
+							$row->setBackground('#07c63a');
 						});
 					});
 				})->store('xlsx', storage_path('app/public/agent_axapta_report/'));
-			$report_details = new ReportDetail;
-			$report_details->company_id = $data->company_id;
-			$report_details->type_id = 3790;
-			$report_details->name = $file->filename;
-			$report_details->path = 'storage/app/public/agent_axapta_report/' . $outputfile . '.xlsx';
-			$report_details->batch = NULL;
-			$report_details->no_of_credits = NULL;
-			$report_details->bank_date = $data->TransDate;
-			$report_details->credit_total_amount = NULL;
-			$report_details->save();
+				$report_details = new ReportDetail;
+				$report_details->company_id = $data->company_id;
+				$report_details->type_id = 3790;
+				$report_details->name = $file->filename;
+				$report_details->path = 'storage/app/public/agent_axapta_report/' . $outputfile . '.xlsx';
+				$report_details->batch = NULL;
+				$report_details->no_of_credits = NULL;
+				$report_details->bank_date = $data->TransDate;
+				$report_details->credit_total_amount = NULL;
+				$report_details->save();
 			} else {
 				$cronLog->remarks = "No agent visits found";
 			}
@@ -323,7 +323,7 @@ class ExportReportController extends Controller {
 		$purpose = $trip->purpose ? $trip->purpose->name : '';
 		$transactionDate = date('Y-m-d', strtotime($trip->created_at));
 		$txt = '';
-        $documentNumber = $agentTripVisit->invoiceNumber;
+		$documentNumber = $agentTripVisit->invoiceNumber;
 		//TOTAL AMOUNT ENTRY
 		if ($type == 1) {
 
@@ -444,7 +444,7 @@ class ExportReportController extends Controller {
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//BANK DEBIT ENTRY
-			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXCHQ", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, $agentTripVisit->totalAmount, 0.00, $agentTripVisit->invoiceNumber . "-1", $documentNumber,$agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
+			$this->saveAxaptaExport($trip->company_id, 3790, $agentTripVisit->visitId, "TLXCHQ", "V", $transactionDate, $accountType, $agentTripVisit->agentCode, "COMMON-MDS", $txt, $agentTripVisit->totalAmount, 0.00, $agentTripVisit->invoiceNumber . "-1", $documentNumber, $agentTripVisit->invoiceDate, $agentTripVisit->axaptaLocationId);
 
 		} elseif ($type == 5) {
 			//BANK CREDIT ENTRY
@@ -515,7 +515,7 @@ class ExportReportController extends Controller {
 				'ey_employee_claims.balance_amount',
 				'trips.advance_ax_export_sync',
 			])
-				// ->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			// ->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('sbus', 'sbus.id', 'employees.sbu_id')
@@ -528,17 +528,17 @@ class ExportReportController extends Controller {
 				})
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'trips.purpose_id')
-				//->where('ey_employee_claims.status_id', 3026) //PAID
-				->whereIn('departments.business_id',$business_ids)
+			//->where('ey_employee_claims.status_id', 3026) //PAID
+				->whereIn('departments.business_id', $business_ids)
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
-				// ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
-				->where(function($q) {
-					$q->where(function($nonAdvanceQ) {
+			// ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
+				->where(function ($q) {
+					$q->where(function ($nonAdvanceQ) {
 						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
-							// ->whereIn('trips.advance_received', [0, null])
-							->where('ey_employee_claims.total_amount','>',0)
+						// ->whereIn('trips.advance_received', [0, null])
+							->where('ey_employee_claims.total_amount', '>', 0)
 							->where('ey_employee_claims.status_id', 3026); // PAID
-					})->orWhere(function($advanceQ) {
+					})->orWhere(function ($advanceQ) {
 						$advanceQ->whereDate('trips.updated_at', '<', date('Y-m-d'))
 							->where('trips.advance_received', '>', 0)
 							->where('trips.status_id', 3028) // Manager Approved
@@ -576,17 +576,17 @@ class ExportReportController extends Controller {
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'local_trips.purpose_id')
 				->where('local_trips.status_id', 3026)
-				->whereIn('departments.business_id',$business_ids)
+				->whereIn('departments.business_id', $business_ids)
 				->where('local_trips.self_ax_export_synched', 0) //NOT SYNCHED
-				// ->whereNotNull('local_trips.claim_amount')
-				->where('local_trips.claim_amount', '>' ,0)
+			// ->whereNotNull('local_trips.claim_amount')
+				->where('local_trips.claim_amount', '>', 0)
 				->whereDate('local_trips.updated_at', '<', date('Y-m-d'))
 				->groupBy('local_trips.id')
 				->get();
 
 			$tot_consolidated_amount = 0;
 			$exceptionErrors = [];
-			$export_data=[];
+			$export_data = [];
 			if ($employeeTrips->isNotEmpty() || $employeeLocalTrips->isNotEmpty()) {
 				foreach ($employeeLocalTrips as $employeeLocalTrip) {
 					// DB::beginTransaction();
@@ -611,55 +611,54 @@ class ExportReportController extends Controller {
 					// DB::beginTransaction();
 					try {
 
-						if($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028){
+						if ($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028) {
 							//PAID || MANAGER APPROVED
-							if($employeeTrip->advance_ax_export_sync == 0 && $employeeTrip->advance_received && $employeeTrip->advance_received != '0.00'){
+							if ($employeeTrip->advance_ax_export_sync == 0 && $employeeTrip->advance_received && $employeeTrip->advance_received != '0.00') {
 								//ADVANCE TRIP AMOUNT
 								$res = $this->employeeAxaptaExportProcess(6, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$tot_consolidated_amount += $res;
 							}
-						}else{
+						} else {
 							continue;
 						}
 
-						if($employeeTrip->ey_employee_claim_status_id == 3026){
+						if ($employeeTrip->ey_employee_claim_status_id == 3026) {
 							//TOTAL AMOUNT ENTRY
 							$this->employeeAxaptaExportProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-							
+
 							//TAXABLE VALUE AND GST SPLITUP ENTRIES
 							$this->employeeAxaptaExportProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 
 							//ROUND OFF
 							$this->employeeAxaptaExportProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-							
+
 							//BANK DEBIT ENTRY
 							$res = $this->employeeAxaptaExportProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 							$tot_consolidated_amount += $res;
-							
+
 							//BANK CREDIT ENTRY
 							$this->employeeAxaptaExportProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 						}
 
 						//TRIP ADVANCE COMPANY TO EMPLOYEE BALANCE PAYMENT
-						if($employeeTrip->amount_to_pay == 1){
-							if($employeeTrip->balance_amount && $employeeTrip->balance_amount != '0.00'){
-							// if($employeeTrip->totalAmount && $employeeTrip->totalAmount != '0.00'){
+						if ($employeeTrip->amount_to_pay == 1) {
+							if ($employeeTrip->balance_amount && $employeeTrip->balance_amount != '0.00') {
+								// if($employeeTrip->totalAmount && $employeeTrip->totalAmount != '0.00'){
 								$res = $this->employeeAxaptaExportProcess(7, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$tot_consolidated_amount += $res;
 							}
 						}
 
-						if($employeeTrip->ey_employee_claim_status_id == 3026){
+						if ($employeeTrip->ey_employee_claim_status_id == 3026) {
 							//AX SYNCHED
 							Trip::where('id', $employeeTrip->id)->update([
 								'self_ax_export_synched' => 1,
 							]);
-						}else{
+						} else {
 							Trip::where('id', $employeeTrip->id)->update([
 								'advance_ax_export_sync' => 1,
 							]);
 						}
-
 
 						// DB::commit();
 						continue;
@@ -677,15 +676,15 @@ class ExportReportController extends Controller {
 				$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
 				$consolidated_cre_acc_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
-				if($tot_consolidated_amount && $tot_consolidated_amount != '0.00'){
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type,'1215-TVM-F&A', 'F&A-TVM', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY"). "-1","0001",date('Y_m_d'),'');
-					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type,'TMD-012', 'F&A-TVM', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY"). "-1", "0001",date('Y_m_d'),'');
+				if ($tot_consolidated_amount && $tot_consolidated_amount != '0.00') {
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "V", date('Y-m-d'), $consolidated_deb_acc_type, '1215-TVM-F&A', 'F&A-TVM', $consolidated_txt, $tot_consolidated_amount, 0.00, date("dmY") . "-1", "0001", date('Y_m_d'), '');
+					$this->saveAxaptaExport(4, 3791, date("dmY"), "TLXCHQ", "D", date('Y-m-d'), $consolidated_cre_acc_type, 'TMD-012', 'F&A-TVM', $consolidated_txt, 0.00, $tot_consolidated_amount, date("dmY") . "-1", "0001", date('Y_m_d'), '');
 				}
 
 				$cronLog->remarks = "Employee trips found";
 				$time_stamp = date('Y_m_d');
-				$datas = DB::table('axapta_exports')->where('entity_type_id',3791)->whereDate('created_at',$time_stamp)->get()->toArray();
-					$excel_header =[
+				$datas = DB::table('axapta_exports')->where('entity_type_id', 3791)->whereDate('created_at', $time_stamp)->get()->toArray();
+				$excel_header = [
 					'EntityId',
 					'CurrencyCode',
 					'JournalName',
@@ -715,67 +714,67 @@ class ExportReportController extends Controller {
 					'LogisticsLocation_LocationId',
 					'Due',
 					'PaymReference',
+				];
+				foreach ($datas as $data_key => $data) {
+					$excel_details = [
+						$data->entity_id,
+						$data->CurrencyCode,
+						$data->JournalName,
+						$data->JournalNum,
+						$data->LineNum,
+						$data->Voucher,
+						$data->ApproverPersonnelNumber,
+						$data->Approved,
+						$data->TransDate,
+						$data->AccountType,
+						$data->LedgerDimension,
+						$data->DefaultDimension,
+						$data->Txt,
+						$data->AmountCurDebit,
+						$data->AmountCurCredit,
+						$data->OffsetAccountType,
+						$data->OffsetLedgerDimension,
+						'',
+						$data->PaymMode,
+						$data->TaxGroup,
+						$data->TaxItemGroup,
+						$data->Invoice,
+						$data->SalesTaxFormTypes_IN_FormType,
+						$data->TDSGroup_IN,
+						$data->DocumentNum,
+						$data->DocumentDate,
+						$data->LogisticsLocation_LocationId,
+						$data->Due,
+						$data->PaymReference,
 					];
-				foreach($datas as $data_key => $data){
-					$excel_details =[
-					$data->entity_id,
-					$data->CurrencyCode,
-					$data->JournalName,
-					$data->JournalNum,
-					$data->LineNum,
-					$data->Voucher,
-					$data->ApproverPersonnelNumber,
-					$data->Approved,
-					$data->TransDate,
-					$data->AccountType,
-					$data->LedgerDimension,
-					$data->DefaultDimension,
-					$data->Txt,
-					$data->AmountCurDebit,
-					$data->AmountCurCredit,
-					$data->OffsetAccountType,
-					$data->OffsetLedgerDimension,
-					'',
-					$data->PaymMode,
-					$data->TaxGroup,
-					$data->TaxItemGroup,
-					$data->Invoice,
-					$data->SalesTaxFormTypes_IN_FormType,
-					$data->TDSGroup_IN,
-					$data->DocumentNum,
-					$data->DocumentDate,
-					$data->LogisticsLocation_LocationId,
-					$data->Due,
-					$data->PaymReference,
-                	];
-              		$export_data[] = $excel_details;
-              	}
-		    	// $outputfile = 'EmployeeAxaptaExport_' . $time_stamp;
-		    	$outputfile = 'DLOB_EmployeeAxaptaExport_' . $time_stamp;
-				$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
-						$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
+					$export_data[] = $excel_details;
+				}
+				// $outputfile = 'EmployeeAxaptaExport_' . $time_stamp;
+				$outputfile = 'DLOB_EmployeeAxaptaExport_' . $time_stamp;
+				$file = Excel::create($outputfile, function ($excel) use ($excel_header, $export_data) {
+					$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header, $export_data) {
 						$sheet->fromArray($export_data, NULL, 'A1');
 						$sheet->row(1, $excel_header);
 						$sheet->row(1, function ($row) {
-						$row->setBackground('#07c63a');
+							$row->setBackground('#07c63a');
 						});
 					});
 				})->store('xlsx', storage_path('app/public/employee_axapta_report/'));
 				//SAVE TRAVELEX REPORTS
-			$report_details = new ReportDetail;
-			$report_details->company_id = $data->company_id;
-			$report_details->type_id = 3791;
-			$report_details->name = $file->filename;
-			$report_details->path = 'storage/app/public/employee_axapta_report/' . $outputfile . '.xlsx';
-			$report_details->batch = NULL;
-			$report_details->no_of_credits = NULL;
-			$report_details->bank_date = $data->TransDate;
-			$report_details->credit_total_amount = null;
-			$report_details->save();
+				$report_details = new ReportDetail;
+				$report_details->company_id = $data->company_id;
+				$report_details->type_id = 3791;
+				$report_details->name = $file->filename;
+				$report_details->path = 'storage/app/public/employee_axapta_report/' . $outputfile . '.xlsx';
+				$report_details->batch = NULL;
+				$report_details->no_of_credits = NULL;
+				$report_details->bank_date = $data->TransDate;
+				$report_details->credit_total_amount = null;
+				$report_details->save();
 			} else {
 				$cronLog->remarks = "No employee trips found";
 			}
-            
+
 			$cronLog->status = "Completed";
 			if (!empty($exceptionErrors)) {
 				$cronLog->errors = json_encode($exceptionErrors);
@@ -811,7 +810,7 @@ class ExportReportController extends Controller {
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			// $this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, round($employeeTrip->totalAmount, 2), "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, round($employeeTrip->totalAmount), "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, 0.00, round($employeeTrip->totalAmount), "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 2) {
 			//TAXABLE VALUE AND GST SPLITUP ENTRIES
@@ -866,7 +865,7 @@ class ExportReportController extends Controller {
 			$employeeTotalTaxableValue = floatval($employeeTransportTaxableValue + $employeeLodgingTaxableValue + $employeeBoardingTaxableValue + $employeeLocalTravelTaxableValue + $selfVisitTotalRoundOff);
 
 			//TICKET TAXABLE AMOUNT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeTotalTaxableValue, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//GST SPLITUPS
 			if ($employeeTrip->employee && $employeeTrip->employee->outlet && $employeeTrip->employee->outlet->address && $employeeTrip->employee->outlet->address->city && $employeeTrip->employee->outlet->address->city->state) {
@@ -884,8 +883,8 @@ class ExportReportController extends Controller {
 				//LODGING GST SPLITUPS
 				if ($employeeTrip->lodgings->isNotEmpty()) {
 					foreach ($employeeTrip->lodgings as $key => $lodging) {
-						if($lodging->stay_type_id == 3340){
-						//HAS MULTIPLE TAX INVOICE
+						if ($lodging->stay_type_id == 3340) {
+							//HAS MULTIPLE TAX INVOICE
 							if ($lodging->has_multiple_tax_invoice == "Yes") {
 								//LODGE
 								// if ($lodging->lodgingTaxInvoice) {
@@ -922,7 +921,7 @@ class ExportReportController extends Controller {
 									$this->axaptaExportDlobGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, "Lodging ", $transactionDate, $accountType, $lodging->tax_percentage, $lodging->cgst, $lodging->sgst, $lodging->igst);
 								}
 							}
-					    }
+						}
 					}
 				}
 
@@ -940,7 +939,7 @@ class ExportReportController extends Controller {
 			$ledgerDimension = "3198-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
-			$employeeLodgingRoundoff += floatval($roundOffAmt); 
+			$employeeLodgingRoundoff += floatval($roundOffAmt);
 
 			// $selfVisitTotalRoundOff = 0;
 			// if ($employeeTrip->selfVisits->isNotEmpty()) {
@@ -953,11 +952,11 @@ class ExportReportController extends Controller {
 			// $employeeLodgingRoundoff += floatval($selfVisitTotalRoundOff);
 
 			//ROUND OFF ENTRY
-			if($employeeLodgingRoundoff != 0){
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
-		}
+			if ($employeeLodgingRoundoff != 0) {
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, $employeeLodgingRoundoff, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			}
 
-		}elseif ($type == 10 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
+		} elseif ($type == 10 && $employeeTrip->advance_received == 0 && $employeeTrip->advance_ax_export_sync == 0) {
 			//BANK DEBIT ENTRY
 
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
@@ -967,7 +966,7 @@ class ExportReportController extends Controller {
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
 
 			//BANK DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, "CC-".$employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $accountType, "Emp_" . $employeeCode, $defaultDimension, $txt, $employeeTrip->totalAmount, 0.00, "CC-" . $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			$consolidated_amount = $employeeTrip->totalAmount;
 			return $consolidated_amount;
@@ -980,12 +979,12 @@ class ExportReportController extends Controller {
 			//$axaptaAccountType = $axaptaAccountTypes->where('name', 'Bank')->first();
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Ledger')->first();
 			$accountType = $axaptaAccountType ? $axaptaAccountType->name : '';
-            $ledgerDimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
+			$ledgerDimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 			/*$axaptaBankDetail = $axaptaBankDetails->where('name', 'HDFC Bank')->first();
 			$ledgerDimension = $axaptaBankDetail ? $axaptaBankDetail->code : '';*/
 
 			//BANK CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, "CC-".$employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $accountType, $ledgerDimension, $defaultDimension, $txt, 0.00, $employeeTrip->totalAmount, "CC-" . $employeeTrip->invoiceNumber . "-1", $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 		} elseif ($type == 6) {
 			//TRIP ADVANCE DEBIT AND CREDIT ENTRY
@@ -993,7 +992,7 @@ class ExportReportController extends Controller {
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
-			
+
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$deb_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
@@ -1003,20 +1002,20 @@ class ExportReportController extends Controller {
 			$deb_ledger_dimension = "Emp_" . $employeeCode;
 			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
-			$trip_approved_log = ApprovalLog::where('type_id',3581)
-				->where('entity_id',$employeeTrip->id)
-				->where('approval_type_id',3600)
+			$trip_approved_log = ApprovalLog::where('type_id', 3581)
+				->where('entity_id', $employeeTrip->id)
+				->where('approval_type_id', 3600)
 				->first();
-			if($trip_approved_log){
+			if ($trip_approved_log) {
 				$trip_approved_date = date('Y-m-d', strtotime($trip_approved_log->approved_at));
-			}else{
+			} else {
 				$trip_approved_date = null;
 			}
 
 			//DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $trip_approved_date, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $advance_amount, 0.00, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $trip_approved_date, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $advance_amount, 0.00, "AC-" . $employeeTrip->invoiceNumber, $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $trip_approved_date, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $advance_amount, "AC-".$employeeTrip->invoiceNumber, $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $trip_approved_date, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $advance_amount, "AC-" . $employeeTrip->invoiceNumber, $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $advance_amount;
 			return $consolidated_amount;
 		} elseif ($type == 7) {
@@ -1025,7 +1024,7 @@ class ExportReportController extends Controller {
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
-			
+
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$deb_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
@@ -1036,10 +1035,10 @@ class ExportReportController extends Controller {
 			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 
 			//DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $balance_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $balance_amount, 0.00, "CC-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $balance_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $balance_amount, "CC-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			$consolidated_amount = $balance_amount;
 			return $consolidated_amount;
 		} elseif ($type == 8) {
@@ -1048,7 +1047,7 @@ class ExportReportController extends Controller {
 			if (!empty($employeeCode) && !empty($employeeName) && !empty($purpose)) {
 				$txt = $employeeCode . " - " . $employeeName . " - " . $purpose;
 			}
-			
+
 			$axaptaAccountType = $axaptaAccountTypes->where('name', 'Vendor')->first();
 			$deb_account_type = $axaptaAccountType ? $axaptaAccountType->name : '';
 
@@ -1058,17 +1057,16 @@ class ExportReportController extends Controller {
 			$deb_ledger_dimension = "Emp_" . $employeeCode;
 			$cre_ledger_dimension = "1215-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
 			$ecre_ledger_dimension = "4572-" . $employeeTrip->outletCode . "-" . $employeeTrip->sbu;
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $cre_account_type, $ecre_ledger_dimension, $defaultDimension, $txt,$claim_amount, 0.00 , "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $cre_account_type, $ecre_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			//DEBIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "V", $transactionDate, $deb_account_type, $deb_ledger_dimension, $defaultDimension, $txt, $claim_amount, 0.00, "CC-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			//CREDIT ENTRY
-			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CC-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXCHQ", "D", $transactionDate, $cre_account_type, $cre_ledger_dimension, $defaultDimension, $txt, 0.00, $claim_amount, "CC-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
-			
 			$consolidated_amount = $claim_amount;
 			return $consolidated_amount;
 		}
@@ -1097,10 +1095,10 @@ class ExportReportController extends Controller {
 				}
 
 				//CGST ENTRY
-				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, $gstDefaultDimension, $cgstEntryTxt, $taxCgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, $gstDefaultDimension, $cgstEntryTxt, $taxCgst, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 				//SGST ENTRY
-				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, $gstDefaultDimension, $sgstEntryTxt, $taxSgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, $gstDefaultDimension, $sgstEntryTxt, $taxSgst, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 			} else {
 				//INTER STATE (IGST)
@@ -1112,7 +1110,7 @@ class ExportReportController extends Controller {
 					$igstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - IGST - " . $igstPercentage . "%";
 				}
 
-				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $igstEntryTxt, $taxIgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $igstEntryTxt, $taxIgst, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			}
 		}
 	}
@@ -1123,7 +1121,7 @@ class ExportReportController extends Controller {
 		$gstDefaultDimension = $employeeTrip->sbu . "-" . $employeeTrip->outletCode;
 
 		if (!empty($enteredGstinState)) {
-			if($taxCgst > 0 && $taxSgst > 0){
+			if ($taxCgst > 0 && $taxSgst > 0) {
 				$cgstPercentage = $sgstPercentage = ($taxPercentage) / 2;
 				$cgstEntryTxt = '';
 				$sgstEntryTxt = '';
@@ -1138,11 +1136,11 @@ class ExportReportController extends Controller {
 				}
 
 				//CGST ENTRY
-				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, $gstDefaultDimension, $cgstEntryTxt, $taxCgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $cgstLedgerDimension, $gstDefaultDimension, $cgstEntryTxt, $taxCgst, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 
 				//SGST ENTRY
-				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, $gstDefaultDimension, $sgstEntryTxt, $taxSgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
-			}elseif($taxIgst > 0){
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $sgstLedgerDimension, $gstDefaultDimension, $sgstEntryTxt, $taxSgst, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+			} elseif ($taxIgst > 0) {
 				//INTER STATE (IGST)
 				$igstPercentage = $taxPercentage;
 				$igstEntryTxt = '';
@@ -1152,7 +1150,7 @@ class ExportReportController extends Controller {
 					$igstEntryTxt = $gstType . " - " . $employeeTrip->employeeCode . " - " . $employeeTrip->employeeName . " - " . $employeeTrip->purpose . " - IGST - " . $igstPercentage . "%";
 				}
 
-				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $igstEntryTxt, $taxIgst, 0.00, "CE-".$employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
+				$this->saveAxaptaExport($employeeTrip->company_id, 3791, $employeeTrip->id, "TLXECR", "D", $transactionDate, $accountType, $igstLedgerDimension, $gstDefaultDimension, $igstEntryTxt, $taxIgst, 0.00, "CE-" . $employeeTrip->invoiceNumber, $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->axaptaLocationId);
 			}
 		}
 	}
@@ -1201,7 +1199,7 @@ class ExportReportController extends Controller {
 				$business_ids = json_decode($r->business_ids);
 			}
 		}*/
-		$business_ids = [1,2,3];
+		$business_ids = [1, 2, 3];
 		$time_stamp = date('Y_m_d_h_i_s');
 		foreach ($business_ids as $business_id) {
 			$outstations = Trip::select(
@@ -1223,7 +1221,7 @@ class ExportReportController extends Controller {
 				DB::raw("'Outstation Claim' as category")
 			)
 				->join('users as u', 'u.entity_id', 'trips.employee_id')
-				->join('bank_details as bd', 'bd.entity_id', 'trips.employee_id')
+				->leftjoin('bank_details as bd', 'bd.entity_id', 'trips.employee_id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
 				->leftjoin('outlets as ol', 'ol.id', 'trips.outlet_id')
@@ -1236,8 +1234,8 @@ class ExportReportController extends Controller {
 				->where('eyec.amount_to_pay', 1)
 				->where('eyec.batch', 0)
 				->where('eyec.balance_amount', '>', 0)
-				// ->where('eyec.total_amount', '>', 0)
-				// ->where('trips.batch', 0)
+			// ->where('eyec.total_amount', '>', 0)
+			// ->where('trips.batch', 0)
 				->where('departments.business_id', '=', $business_id)
 				->whereDate('eyec.updated_at', '<', date('Y-m-d'))
 				->groupBy('trips.id')
@@ -1259,7 +1257,7 @@ class ExportReportController extends Controller {
 				DB::raw("'Advance Payment' as category")
 			)
 				->join('users as u', 'u.entity_id', 'employees.id')
-				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
+				->leftjoin('bank_details as bd', 'bd.entity_id', 'employees.id')
 				->join('trips as t', 't.employee_id', 'employees.id')
 				->leftjoin('ey_employee_claims as eyec', 'eyec.employee_id', 'employees.id')
 				->leftjoin('outlets as ol', 'ol.id', 't.outlet_id')
@@ -1267,8 +1265,8 @@ class ExportReportController extends Controller {
 				->leftjoin('sbus as eyec_s', 'eyec_s.id', 'eyec.sbu_id')
 				->join('departments', 'departments.id', 'employees.department_id')
 				->join('businesses', 'businesses.id', 'departments.business_id')
-				// ->where('t.status_id', 3028)
-				->whereIn('t.status_id', [3028,3026])
+			// ->where('t.status_id', 3028)
+				->whereIn('t.status_id', [3028, 3026])
 				->where('t.advance_received', '>', 0)
 				->where('t.batch', 0)
 				->whereDate('t.updated_at', '<', date('Y-m-d'))
@@ -1292,7 +1290,7 @@ class ExportReportController extends Controller {
 				DB::raw("'Local Trip Claim' as category")
 			)
 				->join('users as u', 'u.entity_id', 'employees.id')
-				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
+				->leftjoin('bank_details as bd', 'bd.entity_id', 'employees.id')
 				->join('local_trips as lt', 'lt.employee_id', 'employees.id')
 				->leftjoin('outlets as ol', 'ol.id', 'lt.outlet_id')
 				->leftjoin('sbus as s', 's.id', 'employees.sbu_id')
@@ -1329,7 +1327,7 @@ class ExportReportController extends Controller {
 			// 	'Bank Date',
 			// ];
 
-			if(in_array($business_id, [2,3])){
+			if (in_array($business_id, [2, 3])) {
 				//HONDA AND OESL
 				$local_trips_header = [
 					'Parent',
@@ -1363,7 +1361,7 @@ class ExportReportController extends Controller {
 					'',
 					'',
 				];
-			}else{
+			} else {
 				$local_trips_header = [
 					'SNo',
 					'Account Number',
@@ -1450,13 +1448,13 @@ class ExportReportController extends Controller {
 					// 	$time_stamp,
 					// ];
 
-					if(in_array($business_id, [2,3])){
+					if (in_array($business_id, [2, 3])) {
 						//HONDA AND OESL
 						$payment_type = '';
-						if(!empty($local['ifsc_code']) && $local['ifsc_code'] != '-'){
-							if(substr($local['ifsc_code'], 0, 3) == "SBI" || substr($local['ifsc_code'], 0, 3) === "sbi"){
+						if (!empty($local['ifsc_code']) && $local['ifsc_code'] != '-') {
+							if (substr($local['ifsc_code'], 0, 3) == "SBI" || substr($local['ifsc_code'], 0, 3) === "sbi") {
 								$payment_type = 'DCR';
-							}else{
+							} else {
 								$payment_type = 'NEFT';
 							}
 						}
@@ -1491,7 +1489,7 @@ class ExportReportController extends Controller {
 							'',
 							$local['Amount'],
 						];
-					}else{
+					} else {
 						$local_trip = [
 							$l_no++,
 							'EMP_' . $local['Account_Number'],
@@ -1510,55 +1508,55 @@ class ExportReportController extends Controller {
 					}
 
 					/*$travelex_local = [
-						$s_no++,
-						'AC-' . $local['invoice'],
-						$local['documentnum'],
-						$local['documentdate'],
-						'AL-' . $local['ledgerdiamension'],
-						$transdate,
-						$account_type,
-						$amountcurcredit,
-						$offsetaccounttype,
-						$local['Amount'],
-						'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
-						$voucher = 'v',
-						$posted = '0',
-						$dataareaid = 'tvs',
-						$journaltype = '0',
-						$journalname = 'TLXCHQ',
-						$soprostatus = '2',
-						'EMP_' . $local['Account_Number'],
-						$company = 'tvs',
-						$local['sbuname'] . '-' . $local['ledgerdiamension'],
-						$offsetledgerdiamension = '0',
-						$personnelnumber = 'INTG01',
-						$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
-					];
-					$travelex_detail = [
-						$s_no++,
-						'AC-' . $local['invoice'],
-						$local['documentnum'],
-						$local['documentdate'],
-						'AL-' . $local['ledgerdiamension'],
-						$transdate,
-						$account_type_two,
-						$local['Amount'],
-						$offsetaccounttype_two,
-						$amountcurdebit_two,
-						'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
-						$voucher = 'v',
-						$posted = '0',
-						$dataareaid = 'tvs',
-						$journaltype = '0',
-						$journalname = 'TLXCHQ',
-						$soprostatus = '2',
-						'1215-' . $local['ledgerdiamension'] . '-' . $local['sbuname'],
-						$company = 'tvs',
-						$local['sbuname'] . '-' . $local['ledgerdiamension'],
-						$offsetledgerdiamension = '0',
-						$personnelnumber = 'INTG01',
-						$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
-					];*/
+							$s_no++,
+							'AC-' . $local['invoice'],
+							$local['documentnum'],
+							$local['documentdate'],
+							'AL-' . $local['ledgerdiamension'],
+							$transdate,
+							$account_type,
+							$amountcurcredit,
+							$offsetaccounttype,
+							$local['Amount'],
+							'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
+							$voucher = 'v',
+							$posted = '0',
+							$dataareaid = 'tvs',
+							$journaltype = '0',
+							$journalname = 'TLXCHQ',
+							$soprostatus = '2',
+							'EMP_' . $local['Account_Number'],
+							$company = 'tvs',
+							$local['sbuname'] . '-' . $local['ledgerdiamension'],
+							$offsetledgerdiamension = '0',
+							$personnelnumber = 'INTG01',
+							$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
+						];
+						$travelex_detail = [
+							$s_no++,
+							'AC-' . $local['invoice'],
+							$local['documentnum'],
+							$local['documentdate'],
+							'AL-' . $local['ledgerdiamension'],
+							$transdate,
+							$account_type_two,
+							$local['Amount'],
+							$offsetaccounttype_two,
+							$amountcurdebit_two,
+							'(' . $local['Account_Number'] . '-' . $local['Name'] . ')' . '-' . $local['Purpose'],
+							$voucher = 'v',
+							$posted = '0',
+							$dataareaid = 'tvs',
+							$journaltype = '0',
+							$journalname = 'TLXCHQ',
+							$soprostatus = '2',
+							'1215-' . $local['ledgerdiamension'] . '-' . $local['sbuname'],
+							$company = 'tvs',
+							$local['sbuname'] . '-' . $local['ledgerdiamension'],
+							$offsetledgerdiamension = '0',
+							$personnelnumber = 'INTG01',
+							$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
+					*/
 					$local_trips[] = $local_trip;
 					/*$travelex_details[] = $travelex_local;
 					$travelex_details[] = $travelex_detail;*/
@@ -1577,7 +1575,7 @@ class ExportReportController extends Controller {
 				// 	'',
 				// 	'',
 				// ];
-				if(in_array($business_id, [2,3])){
+				if (in_array($business_id, [2, 3])) {
 					//HONDA AND OESL
 					// $local_trips[] = [
 					// 	'',
@@ -1594,7 +1592,7 @@ class ExportReportController extends Controller {
 					// 	'',
 					// 	'',
 					// ];
-				}else{
+				} else {
 					$local_trips[] = [
 						$l_no++,
 						'',
@@ -1611,69 +1609,69 @@ class ExportReportController extends Controller {
 					];
 				}
 
-			/*} else {
-				Session()->flash('error', 'No Data Found');
-				// return Redirect::to('/#!/report/list');
-			}*/
+				/*} else {
+					Session()->flash('error', 'No Data Found');
+					// return Redirect::to('/#!/report/list');
+				*/
 
-			/*$consolidation_local = [
-				$s_no++,
-				'CC-' . $local['invoice'],
-				'0001',
-				$local['documentdate'],
-				'AL-' . $local['ledgerdiamension'],
-				$transdate,
-				'6',
-				$total_amount,
-				'2',
-				'0.00',
-				'consolidation',
-				$voucher = 'v',
-				$posted = '0',
-				$dataareaid = 'tvs',
-				$journaltype = '0',
-				$journalname = 'TLXCHQ',
-				$soprostatus = '2',
-				'TVS-044',
-				$company = 'tvs',
-				'F&A-TVM',
-				$offsetledgerdiamension = '0',
-				$personnelnumber = 'INTG01',
-				$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
-			];
-			$consolidation_detail = [
-				$s_no++,
-				'CC-' . $local['invoice'],
-				'0001',
-				$local['documentdate'],
-				'AL-' . $local['ledgerdiamension'],
-				$transdate,
-				'0',
-				'0.00',
-				'0',
-				$total_amount,
-				'consolidation',
-				$voucher = 'v',
-				$posted = '0',
-				$dataareaid = 'tvs',
-				$journaltype = '0',
-				$journalname = 'TLXCHQ',
-				$soprostatus = '2',
-				'1215-TVM-F&A',
-				$company = 'tvs',
-				'F&A-TVM',
-				$offsetledgerdiamension = '0',
-				$personnelnumber = 'INTG01',
-				$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
-			];
-			$travelex_details[] = $consolidation_local;
-			$travelex_details[] = $consolidation_detail;*/
-			// ob_end_clean();
-			// ob_start();
-			$business_name = Business::where('id', '=', $business_id)->pluck('name')->first();
-			//dd($business_name);
-			//$outputfile = $business_name . '_travelex_report_' . $time_stamp;
-			/*$file = Excel::create($outputfile, function ($excel) use ($travelex_header, $travelex_details) {
+				/*$consolidation_local = [
+						$s_no++,
+						'CC-' . $local['invoice'],
+						'0001',
+						$local['documentdate'],
+						'AL-' . $local['ledgerdiamension'],
+						$transdate,
+						'6',
+						$total_amount,
+						'2',
+						'0.00',
+						'consolidation',
+						$voucher = 'v',
+						$posted = '0',
+						$dataareaid = 'tvs',
+						$journaltype = '0',
+						$journalname = 'TLXCHQ',
+						$soprostatus = '2',
+						'TVS-044',
+						$company = 'tvs',
+						'F&A-TVM',
+						$offsetledgerdiamension = '0',
+						$personnelnumber = 'INTG01',
+						$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
+					];
+					$consolidation_detail = [
+						$s_no++,
+						'CC-' . $local['invoice'],
+						'0001',
+						$local['documentdate'],
+						'AL-' . $local['ledgerdiamension'],
+						$transdate,
+						'0',
+						'0.00',
+						'0',
+						$total_amount,
+						'consolidation',
+						$voucher = 'v',
+						$posted = '0',
+						$dataareaid = 'tvs',
+						$journaltype = '0',
+						$journalname = 'TLXCHQ',
+						$soprostatus = '2',
+						'1215-TVM-F&A',
+						$company = 'tvs',
+						'F&A-TVM',
+						$offsetledgerdiamension = '0',
+						$personnelnumber = 'INTG01',
+						$logisticlocation = 'T V Sundram Iyengar & Sons P Ltd(CEN)',
+					];
+					$travelex_details[] = $consolidation_local;
+				*/
+				// ob_end_clean();
+				// ob_start();
+				$business_name = Business::where('id', '=', $business_id)->pluck('name')->first();
+				//dd($business_name);
+				//$outputfile = $business_name . '_travelex_report_' . $time_stamp;
+				/*$file = Excel::create($outputfile, function ($excel) use ($travelex_header, $travelex_details) {
 				$excel->sheet('travelex_', function ($sheet) use ($travelex_header, $travelex_details) {
 					$sheet->fromArray($travelex_details, NULL, 'A1');
 					$sheet->row(1, $travelex_header);
@@ -1682,9 +1680,9 @@ class ExportReportController extends Controller {
 					});
 				});
 			})->store('xlsx', storage_path('app/public/travelex_report/'));*/
-			//dd($file);
-			//SAVE TRAVELEX REPORTS
-			/*$report_details = new ReportDetail;
+				//dd($file);
+				//SAVE TRAVELEX REPORTS
+				/*$report_details = new ReportDetail;
 			$report_details->company_id = $local['company_id'];
 			$report_details->type_id = 3722;
 			$report_details->name = $file->filename;
@@ -1699,68 +1697,68 @@ class ExportReportController extends Controller {
 			$batch_wise_reports->name = $report_details->batch;
 			$batch_wise_reports->date = $time_stamp;
 			$batch_wise_reports->save();*/
-			$outputfile_bank = $business_name . '_bank_statement_' . $time_stamp;
-			//$outputfile_bank = 'bank_statement_' . $time_stamp;
-			$file_one = Excel::create($outputfile_bank, function ($excel) use ($local_trips_header, $local_trips) {
-				$excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header, $local_trips) {
-					$sheet->fromArray($local_trips, NULL, 'A1');
-					$sheet->row(1, $local_trips_header);
-					$sheet->row(1, function ($row) {
-						$row->setBackground('#07c63a');
+				$outputfile_bank = $business_name . '_bank_statement_' . $time_stamp;
+				//$outputfile_bank = 'bank_statement_' . $time_stamp;
+				$file_one = Excel::create($outputfile_bank, function ($excel) use ($local_trips_header, $local_trips) {
+					$excel->sheet('Bank Statement', function ($sheet) use ($local_trips_header, $local_trips) {
+						$sheet->fromArray($local_trips, NULL, 'A1');
+						$sheet->row(1, $local_trips_header);
+						$sheet->row(1, function ($row) {
+							$row->setBackground('#07c63a');
+						});
 					});
-				});
-			})->save('xlsx', storage_path('app/public/bank_statement_report/'));
-			//dd($file_one);
+				})->save('xlsx', storage_path('app/public/bank_statement_report/'));
+				//dd($file_one);
 
-			//SAVE BANK STATEMENT REPORTS
-			$report_details = new ReportDetail;
-			$report_details->company_id = $local['company_id'];
-			$report_details->type_id = 3721;
-			$report_details->name = $file_one->filename;
-			$report_details->path = 'storage/app/public/bank_statement_report/' . $outputfile_bank . '.xlsx';
-			$report_details->batch = $batch;
-			$report_details->no_of_credits = $l_no;
-			$report_details->bank_date = $time_stamp;
-			$report_details->credit_total_amount = $total_amount;
-			$report_details->save();
-			$batch_wise_reports = new BatchWiseReport;
-			$batch_wise_reports->report_detail_id = $report_details->id;
-			$batch_wise_reports->name = $report_details->batch;
-			$batch_wise_reports->date = $time_stamp;
-			$batch_wise_reports->save();
+				//SAVE BANK STATEMENT REPORTS
+				$report_details = new ReportDetail;
+				$report_details->company_id = $local['company_id'];
+				$report_details->type_id = 3721;
+				$report_details->name = $file_one->filename;
+				$report_details->path = 'storage/app/public/bank_statement_report/' . $outputfile_bank . '.xlsx';
+				$report_details->batch = $batch;
+				$report_details->no_of_credits = $l_no;
+				$report_details->bank_date = $time_stamp;
+				$report_details->credit_total_amount = $total_amount;
+				$report_details->save();
+				$batch_wise_reports = new BatchWiseReport;
+				$batch_wise_reports->report_detail_id = $report_details->id;
+				$batch_wise_reports->name = $report_details->batch;
+				$batch_wise_reports->date = $time_stamp;
+				$batch_wise_reports->save();
 
-			foreach ($locals as $local) {
-				// $batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3028')->where('batch', '0')->update(['batch' => 1]);
+				foreach ($locals as $local) {
+					// $batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3028')->where('batch', '0')->update(['batch' => 1]);
 
-				// $batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
-				// $batch_update = DB::table('ey_employee_claims')->where('trip_id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
+					// $batch_update = DB::table('trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
+					// $batch_update = DB::table('ey_employee_claims')->where('trip_id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
 
-				// $batch_update = DB::table('local_trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
-				
-				if($local['category'] == 'Local Trip Claim'){
-					$batch_update = DB::table('local_trips')
-						->where('id', $local['invoice'])
-						->where('status_id', '=', '3026')
-						->where('batch', '0')
-						->update(['batch' => 1]);
-				}elseif($local['category'] == 'Outstation Claim' || $local['category'] == 'Advance Payment'){
-					$batch_update = DB::table('trips')
-						->where('id', $local['invoice'])
-						->where('status_id', '=', '3028')
-						->where('batch', '0')
-						->update(['batch' => 1]);
-					$batch_update = DB::table('trips')
-						->where('id', $local['invoice'])
-						->where('status_id', '=', '3026')
-						->where('batch', '0')
-						->update(['batch' => 1]);
-					$batch_update = DB::table('ey_employee_claims')
-						->where('trip_id', $local['invoice'])
-						->where('status_id', '=', '3026')
-						->where('batch', '0')
-						->update(['batch' => 1]);
+					// $batch_update = DB::table('local_trips')->where('id', $local['invoice'])->where('status_id', '=', '3026')->where('batch', '0')->update(['batch' => 1]);
+
+					if ($local['category'] == 'Local Trip Claim') {
+						$batch_update = DB::table('local_trips')
+							->where('id', $local['invoice'])
+							->where('status_id', '=', '3026')
+							->where('batch', '0')
+							->update(['batch' => 1]);
+					} elseif ($local['category'] == 'Outstation Claim' || $local['category'] == 'Advance Payment') {
+						$batch_update = DB::table('trips')
+							->where('id', $local['invoice'])
+							->where('status_id', '=', '3028')
+							->where('batch', '0')
+							->update(['batch' => 1]);
+						$batch_update = DB::table('trips')
+							->where('id', $local['invoice'])
+							->where('status_id', '=', '3026')
+							->where('batch', '0')
+							->update(['batch' => 1]);
+						$batch_update = DB::table('ey_employee_claims')
+							->where('trip_id', $local['invoice'])
+							->where('status_id', '=', '3026')
+							->where('batch', '0')
+							->update(['batch' => 1]);
+					}
 				}
-			}
 			} else {
 				Session()->flash('error', 'No Data Found');
 				// return Redirect::to('/#!/report/list');
@@ -1813,7 +1811,7 @@ class ExportReportController extends Controller {
 			'LODGING INVOICE NUMBER',
 			'LODGING INVOICE DATE',
 			'SUPPLIER NAME',
-  			'INVOICE AMOUNT',
+			'INVOICE AMOUNT',
 			'TAX PERCENTAGE',
 			'CGST AMOUNT',
 			'SGST AMOUNT',
@@ -1873,7 +1871,7 @@ class ExportReportController extends Controller {
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
 			->where(function ($q) use ($r) {
-				if($r->business_ids != -1){
+				if ($r->business_ids != -1) {
 					$q->where('departments.business_id', $r->business_ids);
 				}
 			})
@@ -1926,7 +1924,7 @@ class ExportReportController extends Controller {
 			$excel->setActiveSheetIndex(0);
 		})->download('xlsx');
 	}
-   //GST REPORT NEW ONE
+	//GST REPORT NEW ONE
 	public function employeeGstrReport(Request $r) {
 		ob_end_clean();
 		$date = explode(' to ', $r->period);
@@ -2013,7 +2011,7 @@ class ExportReportController extends Controller {
 			->leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->leftJoin('visits', 'visits.trip_id', 'trips.id')
 			->leftJoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
-			->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
+			->leftJoin('entities', 'entities.id', 'visit_bookings.travel_mode_id')
 			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
 			->leftJoin('ey_addresses as a', function ($join) {
 				$join->on('a.entity_id', '=', 'outlets.id')
@@ -2021,10 +2019,10 @@ class ExportReportController extends Controller {
 			})
 			->leftJoin('ncities as city', 'city.id', 'a.city_id')
 			->leftJoin('nstates as s', 's.id', 'city.state_id')
-			->leftjoin('operating_states','operating_states.nstate_id','s.id')
+			->leftjoin('operating_states', 'operating_states.nstate_id', 's.id')
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
-			->where('entities.entity_type_id',502)
+			->where('entities.entity_type_id', 502)
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
@@ -2061,8 +2059,8 @@ class ExportReportController extends Controller {
 			})
 			->leftJoin('trips', 'trips.id', 'ey_employee_claims.trip_id')
 			->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
-			->leftJoin('lodging_tax_invoices','lodging_tax_invoices.lodging_id','lodgings.id')
-			->leftJoin('configs','configs.id','lodging_tax_invoices.type_id')
+			->leftJoin('lodging_tax_invoices', 'lodging_tax_invoices.lodging_id', 'lodgings.id')
+			->leftJoin('configs', 'configs.id', 'lodging_tax_invoices.type_id')
 			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
 			->leftJoin('ey_addresses as a', function ($join) {
 				$join->on('a.entity_id', '=', 'outlets.id')
@@ -2070,10 +2068,10 @@ class ExportReportController extends Controller {
 			})
 			->leftJoin('ncities as city', 'city.id', 'a.city_id')
 			->leftJoin('nstates as s', 's.id', 'city.state_id')
-			->leftjoin('operating_states','operating_states.nstate_id','s.id')
+			->leftjoin('operating_states', 'operating_states.nstate_id', 's.id')
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
-			//->where('configs.config_type_id',546)
+		//->where('configs.config_type_id',546)
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('lodgings.gstin')
@@ -2082,8 +2080,8 @@ class ExportReportController extends Controller {
 			->whereIn('departments.business_id', $business_ids)
 			->groupBy('lodgings.id')
 			->get()->toArray();
-			//dd($gst_lodgings);
-		$gst_datas = array_merge($gst_transports,$gst_lodgings);
+		//dd($gst_lodgings);
+		$gst_datas = array_merge($gst_transports, $gst_lodgings);
 		if (count($gst_datas) == 0) {
 			Session()->flash('error', 'No Data Found');
 			//return redirect()->to('/#!/gst/report');
@@ -2138,70 +2136,70 @@ class ExportReportController extends Controller {
 			];
 			$export_details[] = $transport_data;
 		}
-		foreach($gst_lodgings as $gst_lodging_key => $gst_lodging){
-			$multiple_taxs=LodgingTaxInvoice::select(
-			DB::raw('COALESCE(configs.name, "") as multiple_description'),
-			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.without_tax_amount, 0)),2,"en_IN") as multiple_amount'),
-			DB::raw('COALESCE(lodging_tax_invoices.tax_percentage, "") as multilple_tax_percentage'),
-			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.cgst, 0)),2,"en_IN") as multilple_cgst'),
-			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.sgst, 0)),2,"en_IN") as multilple_sgst'),
-			DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.igst, 0)),2,"en_IN") as multilple_igst'))
-			->leftJoin('lodgings','lodgings.id','lodging_tax_invoices.lodging_id')
-			->leftJoin('configs','configs.id','lodging_tax_invoices.type_id')
-			->where('lodging_tax_invoices.lodging_id',$gst_lodging['id'])
-			->where('lodging_tax_invoices.type_id','!=',3775)
-			->get()->toArray();
-			if($gst_lodging['has_multiple_tax_invoice'] == 0){
-	        $lodging_data = [
-				$gst_lodging['business_gstin'],
-				$gst_lodging['business_unit'],
-				$gst_lodging['tax_period'],
-				'Invoice',
-				'STD',
-				$gst_lodging['doc_number'],
-				$gst_lodging['doc_date'],
-				' ',
-				$gst_lodging['supplier_gstin'],
-				$gst_lodging['supplier_name'],
-				$gst_lodging['supplier_address'],
-				$gst_lodging['supplier_state'],
-				$gst_lodging['supplier_state'],
-				' ',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				$gst_lodging['round_off'],
-				'',
-				'',
-				'',
-				'',
-				'',
-				'',
-				'S',
-				'Lodging',
-				'996311',
-				'',
-				'OTH',
-				'1',
-				$gst_lodging['item_taxable_amount'],
-				'TAX',
-				$gst_lodging['tax_percentage'],
-				$gst_lodging['igst'],
-				$gst_lodging['cgst'],
-				$gst_lodging['sgst'],
-				'0',
-				'0',
-			];
-			$export_details[] = $lodging_data;
-		}
-			if($gst_lodging['has_multiple_tax_invoice'] == 1){
-				foreach($multiple_taxs as $multiple_tax_key => $multiple_tax){
+		foreach ($gst_lodgings as $gst_lodging_key => $gst_lodging) {
+			$multiple_taxs = LodgingTaxInvoice::select(
+				DB::raw('COALESCE(configs.name, "") as multiple_description'),
+				DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.without_tax_amount, 0)),2,"en_IN") as multiple_amount'),
+				DB::raw('COALESCE(lodging_tax_invoices.tax_percentage, "") as multilple_tax_percentage'),
+				DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.cgst, 0)),2,"en_IN") as multilple_cgst'),
+				DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.sgst, 0)),2,"en_IN") as multilple_sgst'),
+				DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.igst, 0)),2,"en_IN") as multilple_igst'))
+				->leftJoin('lodgings', 'lodgings.id', 'lodging_tax_invoices.lodging_id')
+				->leftJoin('configs', 'configs.id', 'lodging_tax_invoices.type_id')
+				->where('lodging_tax_invoices.lodging_id', $gst_lodging['id'])
+				->where('lodging_tax_invoices.type_id', '!=', 3775)
+				->get()->toArray();
+			if ($gst_lodging['has_multiple_tax_invoice'] == 0) {
+				$lodging_data = [
+					$gst_lodging['business_gstin'],
+					$gst_lodging['business_unit'],
+					$gst_lodging['tax_period'],
+					'Invoice',
+					'STD',
+					$gst_lodging['doc_number'],
+					$gst_lodging['doc_date'],
+					' ',
+					$gst_lodging['supplier_gstin'],
+					$gst_lodging['supplier_name'],
+					$gst_lodging['supplier_address'],
+					$gst_lodging['supplier_state'],
+					$gst_lodging['supplier_state'],
+					' ',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					$gst_lodging['round_off'],
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'S',
+					'Lodging',
+					'996311',
+					'',
+					'OTH',
+					'1',
+					$gst_lodging['item_taxable_amount'],
+					'TAX',
+					$gst_lodging['tax_percentage'],
+					$gst_lodging['igst'],
+					$gst_lodging['cgst'],
+					$gst_lodging['sgst'],
+					'0',
+					'0',
+				];
+				$export_details[] = $lodging_data;
+			}
+			if ($gst_lodging['has_multiple_tax_invoice'] == 1) {
+				foreach ($multiple_taxs as $multiple_tax_key => $multiple_tax) {
 					$multiple_lodging_data = [
-					    $gst_lodging['business_gstin'],
+						$gst_lodging['business_gstin'],
 						$gst_lodging['business_unit'],
 						$gst_lodging['tax_period'],
 						'Invoice',
@@ -2244,10 +2242,10 @@ class ExportReportController extends Controller {
 						'0',
 						'0',
 					];
-			   		$export_details[] = $multiple_lodging_data;
-		    	}
-	        }
-			
+					$export_details[] = $multiple_lodging_data;
+				}
+			}
+
 		}
 		$title = 'GSTR2_REPORT_' . Carbon::now();
 		$sheet_name = 'GSTR2 REPORT';
@@ -2262,11 +2260,11 @@ class ExportReportController extends Controller {
 			$excel->setActiveSheetIndex(0);
 		})->download('xlsx');
 	}
-	
-    //Agent report
-    public function agentReport(Request $r) {
-        ini_set('max_execution_time', 0);
-        $date = explode(' to ', $r->period);
+
+	//Agent report
+	public function agentReport(Request $r) {
+		ini_set('max_execution_time', 0);
+		$date = explode(' to ', $r->period);
 		$from_date = date('Y-m-d', strtotime($date[0]));
 		$to_date = date('Y-m-d', strtotime($date[1]));
 		$business_ids = $r->businesses;
@@ -2277,180 +2275,180 @@ class ExportReportController extends Controller {
 				$business_ids = json_decode($r->businesses);
 			}
 		}
-        $excel_headers = [
-            'Sl.No',
-            'Name',
-            'ECode',
-            'Sbu',
-            'State',
-            'Date of Request',
-            'Date of Booking',
-            'Date Of Travel',
-            'From',
-            'To',
-            'Mode',
-            'Reference Number',
-            'Ticket Base Amount',
-            'Cgst',
-            'Sgst',
-            'Igst',
-            'Other Charges',
-            'Total Ticket Amount',
-            'Booking Charge',
-            'Agent Tax',
-            'Total Amount',
-            'Original Refernce Number',
-            'Original Ticket Amount',
-            'Cancel Charges',
-            'Original Booking Date',
-            'Cr.Amount',
-            'Ref',
-        ];
-        $booking_details = Trip::select(
-        		DB::raw('COALESCE(visits.id, "") as id'),
-        		DB::raw('COALESCE(visit_bookings.id, "") as visit_booking_id'),
-                DB::raw('COALESCE(users.name, "") as emp_name'),
-                DB::raw('COALESCE(employees.code, "") as emp_code'),
-                DB::raw('COALESCE(sbus.name, "") as sbu'),
-                DB::raw('COALESCE(nstates.name, "") as state'),
-                DB::raw('COALESCE(DATE_FORMAT(trips.created_at,"%d-%m-%Y"), "") as date_of_request'),
-                DB::raw('COALESCE(DATE_FORMAT(visit_bookings.created_at,"%d-%m-%Y"), "") as date_of_booking'),
-                DB::raw('COALESCE(DATE_FORMAT(visits.departure_date,"%d-%m-%Y"), "") as date_of_travel'),
-                'ncities.name as from',
-                'ncty.name as to',
-                DB::raw('COALESCE(entities.name, "") as mode'),
-                DB::raw('COALESCE(visit_bookings.reference_number, "") as reference_number'),
-                DB::raw('COALESCE(visit_bookings.amount, "") as ticket_base_amount'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.cgst, 0)),2,"en_IN") as cgst'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.sgst, 0)),2,"en_IN") as sgst'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as total_ticket_amount'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.agent_service_charges, 0)),2,"en_IN") as booking_charge'),
-                DB::raw('SUM(COALESCE(visit_bookings.agent_cgst, 0) + COALESCE(visit_bookings.agent_sgst, 0) + COALESCE(visit_bookings.agent_igst, 0)) as agent_tax'),
-                DB::raw('SUM(COALESCE(visit_bookings.total, 0) + COALESCE(visit_bookings.agent_total, 0)) as total_amount'),
-                DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
-                DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'),
-                DB::raw('COALESCE(visit_bookings.type_id, "") as type')
-            )
-            ->leftJoin('employees', 'employees.id', 'trips.employee_id')
-            ->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
-            ->leftJoin('users', function($user_q) {
-                $user_q->on('employees.id', 'users.entity_id')
-                   ->where('users.user_type_id', 3121);
-            })
-            ->leftJoin('visits','visits.trip_id','trips.id')
-            ->leftJoin('visit_bookings', 'visit_bookings.visit_id','visits.id')
-            ->leftJoin('entities','entities.id','visit_bookings.travel_mode_id')
+		$excel_headers = [
+			'Sl.No',
+			'Name',
+			'ECode',
+			'Sbu',
+			'State',
+			'Date of Request',
+			'Date of Booking',
+			'Date Of Travel',
+			'From',
+			'To',
+			'Mode',
+			'Reference Number',
+			'Ticket Base Amount',
+			'Cgst',
+			'Sgst',
+			'Igst',
+			'Other Charges',
+			'Total Ticket Amount',
+			'Booking Charge',
+			'Agent Tax',
+			'Total Amount',
+			'Original Refernce Number',
+			'Original Ticket Amount',
+			'Cancel Charges',
+			'Original Booking Date',
+			'Cr.Amount',
+			'Ref',
+		];
+		$booking_details = Trip::select(
+			DB::raw('COALESCE(visits.id, "") as id'),
+			DB::raw('COALESCE(visit_bookings.id, "") as visit_booking_id'),
+			DB::raw('COALESCE(users.name, "") as emp_name'),
+			DB::raw('COALESCE(employees.code, "") as emp_code'),
+			DB::raw('COALESCE(sbus.name, "") as sbu'),
+			DB::raw('COALESCE(nstates.name, "") as state'),
+			DB::raw('COALESCE(DATE_FORMAT(trips.created_at,"%d-%m-%Y"), "") as date_of_request'),
+			DB::raw('COALESCE(DATE_FORMAT(visit_bookings.created_at,"%d-%m-%Y"), "") as date_of_booking'),
+			DB::raw('COALESCE(DATE_FORMAT(visits.departure_date,"%d-%m-%Y"), "") as date_of_travel'),
+			'ncities.name as from',
+			'ncty.name as to',
+			DB::raw('COALESCE(entities.name, "") as mode'),
+			DB::raw('COALESCE(visit_bookings.reference_number, "") as reference_number'),
+			DB::raw('COALESCE(visit_bookings.amount, "") as ticket_base_amount'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.cgst, 0)),2,"en_IN") as cgst'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.sgst, 0)),2,"en_IN") as sgst'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.total, 0)),2,"en_IN") as total_ticket_amount'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.agent_service_charges, 0)),2,"en_IN") as booking_charge'),
+			DB::raw('SUM(COALESCE(visit_bookings.agent_cgst, 0) + COALESCE(visit_bookings.agent_sgst, 0) + COALESCE(visit_bookings.agent_igst, 0)) as agent_tax'),
+			DB::raw('SUM(COALESCE(visit_bookings.total, 0) + COALESCE(visit_bookings.agent_total, 0)) as total_amount'),
+			DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
+			DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'),
+			DB::raw('COALESCE(visit_bookings.type_id, "") as type')
+		)
+			->leftJoin('employees', 'employees.id', 'trips.employee_id')
+			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftJoin('users', function ($user_q) {
+				$user_q->on('employees.id', 'users.entity_id')
+					->where('users.user_type_id', 3121);
+			})
+			->leftJoin('visits', 'visits.trip_id', 'trips.id')
+			->leftJoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
+			->leftJoin('entities', 'entities.id', 'visit_bookings.travel_mode_id')
 			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
-            ->leftJoin('ncities', 'ncities.id', 'visits.from_city_id')
-            ->leftJoin('ncities as ncty', 'ncty.id', 'visits.to_city_id')
-            ->leftJoin('nstates', 'nstates.id', 'ncities.state_id')
-            ->leftjoin('departments','departments.id','employees.department_id')
-            ->leftjoin('businesses','businesses.id','departments.business_id')
-            ->where('visits.booking_method_id',3042)
-            ->whereIn('visit_bookings.type_id', [3100,3101])
-            ->whereDate('visit_bookings.created_at', '>=', $from_date)
+			->leftJoin('ncities', 'ncities.id', 'visits.from_city_id')
+			->leftJoin('ncities as ncty', 'ncty.id', 'visits.to_city_id')
+			->leftJoin('nstates', 'nstates.id', 'ncities.state_id')
+			->leftjoin('departments', 'departments.id', 'employees.department_id')
+			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
+			->where('visits.booking_method_id', 3042)
+			->whereIn('visit_bookings.type_id', [3100, 3101])
+			->whereDate('visit_bookings.created_at', '>=', $from_date)
 			->whereDate('visit_bookings.created_at', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
-            ->groupBy('visit_bookings.id')->get()->toArray();
-        
-        if (count($booking_details) == 0) {
-            Session()->flash('error', 'No Data Found');
-            //return redirect()->to('/#!/gst/report');
-        }
-        $export_details = [];
-        $s_no = 1;
-        foreach ($booking_details as $booking_detail_key => $booking_detail) {
-        	$cancel_datas = VisitBooking::select(
-        		DB::raw('COALESCE(visit_bookings.id, "") as visit_booking_id'),
-        		DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
-                DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'))
-        	  ->leftJoin('visits','visits.id','visit_bookings.visit_id')
-        	  ->where('visits.id',$booking_detail['id'])->where('visit_bookings.type_id',3101)->get()->toArray();
-        	  if(count($cancel_datas)>0){
-        	foreach($cancel_datas as $cancel_data_key => $cancel_data){
-        		$export_data = [
-        			$s_no++,
-	                $booking_detail['emp_name'],
-	                $booking_detail['emp_code'],
-	                $booking_detail['sbu'],
-	                $booking_detail['state'],
-	                $booking_detail['date_of_request'],
-	                $booking_detail['date_of_booking'],
-	                $booking_detail['date_of_travel'],
-	                $booking_detail['from'],
-	                $booking_detail['to'],
-	                $booking_detail['mode'],
-	                $booking_detail['reference_number'],
-	                $booking_detail['ticket_base_amount'],
-	                $booking_detail['cgst'],
-	                $booking_detail['sgst'],
-	                $booking_detail['igst'],
-	                $booking_detail['other_charges'],
-	                $booking_detail['total_ticket_amount'],
-	                $booking_detail['booking_charge'],
-	                $booking_detail['agent_tax'],
-	                $booking_detail['total_amount'],
-        		$booking_detail['reference_number'],
-	                $booking_detail['total_ticket_amount'],
-	                '0.00',
-	                $booking_detail['date_of_booking'],
-	                $cancel_data['cr_amount'],
-	                $cancel_data['ref'],
-	            ];
-	            $export_details[]=$export_data;
-        }
-    }else{
-    	$export_data = [
-        			$s_no++,
-	                $booking_detail['emp_name'],
-	                $booking_detail['emp_code'],
-	                $booking_detail['sbu'],
-	                $booking_detail['state'],
-	                $booking_detail['date_of_request'],
-	                $booking_detail['date_of_booking'],
-	                $booking_detail['date_of_travel'],
-	                $booking_detail['from'],
-	                $booking_detail['to'],
-	                $booking_detail['mode'],
-	                $booking_detail['reference_number'],
-	                $booking_detail['ticket_base_amount'],
-	                $booking_detail['cgst'],
-	                $booking_detail['sgst'],
-	                $booking_detail['igst'],
-	                $booking_detail['other_charges'],
-	                $booking_detail['total_ticket_amount'],
-	                $booking_detail['booking_charge'],
-	                $booking_detail['agent_tax'],
-	                $booking_detail['total_amount'],
-        		   '',
-        		   '',
-        		   '',
-        		   '',
-        		   '',
-        		   '',
-	            ];
-	            $export_details[]=$export_data;
+			->groupBy('visit_bookings.id')->get()->toArray();
 
-    }
-            //$export_details[]=$export_data;
-       	}
-        $title = 'Agent_Report_' . Carbon::now();
-        $sheet_name = 'Agent Report';
-        Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
-            $excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
-                $sheet->fromArray($export_details, NULL, 'A1');
-                $sheet->row(1, $excel_headers);
-                $sheet->row(1, function ($row) {
-                    $row->setBackground('#c4c4c4');
-                });
-            });
-            $excel->setActiveSheetIndex(0);
-        })->download('xlsx');
-    }
-    // Send mail
-    public function sendMail() {
+		if (count($booking_details) == 0) {
+			Session()->flash('error', 'No Data Found');
+			//return redirect()->to('/#!/gst/report');
+		}
+		$export_details = [];
+		$s_no = 1;
+		foreach ($booking_details as $booking_detail_key => $booking_detail) {
+			$cancel_datas = VisitBooking::select(
+				DB::raw('COALESCE(visit_bookings.id, "") as visit_booking_id'),
+				DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
+				DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'))
+				->leftJoin('visits', 'visits.id', 'visit_bookings.visit_id')
+				->where('visits.id', $booking_detail['id'])->where('visit_bookings.type_id', 3101)->get()->toArray();
+			if (count($cancel_datas) > 0) {
+				foreach ($cancel_datas as $cancel_data_key => $cancel_data) {
+					$export_data = [
+						$s_no++,
+						$booking_detail['emp_name'],
+						$booking_detail['emp_code'],
+						$booking_detail['sbu'],
+						$booking_detail['state'],
+						$booking_detail['date_of_request'],
+						$booking_detail['date_of_booking'],
+						$booking_detail['date_of_travel'],
+						$booking_detail['from'],
+						$booking_detail['to'],
+						$booking_detail['mode'],
+						$booking_detail['reference_number'],
+						$booking_detail['ticket_base_amount'],
+						$booking_detail['cgst'],
+						$booking_detail['sgst'],
+						$booking_detail['igst'],
+						$booking_detail['other_charges'],
+						$booking_detail['total_ticket_amount'],
+						$booking_detail['booking_charge'],
+						$booking_detail['agent_tax'],
+						$booking_detail['total_amount'],
+						$booking_detail['reference_number'],
+						$booking_detail['total_ticket_amount'],
+						'0.00',
+						$booking_detail['date_of_booking'],
+						$cancel_data['cr_amount'],
+						$cancel_data['ref'],
+					];
+					$export_details[] = $export_data;
+				}
+			} else {
+				$export_data = [
+					$s_no++,
+					$booking_detail['emp_name'],
+					$booking_detail['emp_code'],
+					$booking_detail['sbu'],
+					$booking_detail['state'],
+					$booking_detail['date_of_request'],
+					$booking_detail['date_of_booking'],
+					$booking_detail['date_of_travel'],
+					$booking_detail['from'],
+					$booking_detail['to'],
+					$booking_detail['mode'],
+					$booking_detail['reference_number'],
+					$booking_detail['ticket_base_amount'],
+					$booking_detail['cgst'],
+					$booking_detail['sgst'],
+					$booking_detail['igst'],
+					$booking_detail['other_charges'],
+					$booking_detail['total_ticket_amount'],
+					$booking_detail['booking_charge'],
+					$booking_detail['agent_tax'],
+					$booking_detail['total_amount'],
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+				];
+				$export_details[] = $export_data;
+
+			}
+			//$export_details[]=$export_data;
+		}
+		$title = 'Agent_Report_' . Carbon::now();
+		$sheet_name = 'Agent Report';
+		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
+			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+				$sheet->fromArray($export_details, NULL, 'A1');
+				$sheet->row(1, $excel_headers);
+				$sheet->row(1, function ($row) {
+					$row->setBackground('#c4c4c4');
+				});
+			});
+			$excel->setActiveSheetIndex(0);
+		})->download('xlsx');
+	}
+	// Send mail
+	public function sendMail() {
 		try {
 			$current_date = date('Y-m-d');
 			$mail_config_id = 3731;
@@ -2464,7 +2462,7 @@ class ExportReportController extends Controller {
 				$to_email = explode(',', $mail_config_detail->to_email);
 				$cc_email = explode(',', $mail_config_detail->cc_email);
 
-				$mail_attachements = ReportDetail::whereIn('type_id', [3721, 3722,3790,3791])
+				$mail_attachements = ReportDetail::whereIn('type_id', [3721, 3722, 3790, 3791])
 					->whereDate('created_at', $current_date)
 					->where('company_id', $mail_config_detail->company_id)
 					->pluck('path')
@@ -2528,7 +2526,7 @@ class ExportReportController extends Controller {
 				'code',
 			])->get();
 
-			$business_ids = [2,3];
+			$business_ids = [2, 3];
 			$employeeTrips = Trip::select([
 				'trips.id',
 				'trips.company_id',
@@ -2551,7 +2549,7 @@ class ExportReportController extends Controller {
 				'ey_employee_claims.balance_amount',
 				'trips.advance_ax_export_sync',
 				'businesses.ax_company_code',
-				'departments.business_id'
+				'departments.business_id',
 			])
 				->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 				->join('employees', 'employees.id', 'trips.employee_id')
@@ -2565,14 +2563,14 @@ class ExportReportController extends Controller {
 				})
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities', 'entities.id', 'trips.purpose_id')
-				->whereIn('departments.business_id',$business_ids)
+				->whereIn('departments.business_id', $business_ids)
 				->where('trips.self_ax_export_synched', 0) //NOT SYNCHED
-				->where(function($q) {
-					$q->where(function($nonAdvanceQ) {
+				->where(function ($q) {
+					$q->where(function ($nonAdvanceQ) {
 						$nonAdvanceQ->whereDate('ey_employee_claims.updated_at', '<', date('Y-m-d'))
-							->where('ey_employee_claims.total_amount','>',0)
+							->where('ey_employee_claims.total_amount', '>', 0)
 							->where('ey_employee_claims.status_id', 3026); //COMPLETED
-					})->orWhere(function($advanceQ) {
+					})->orWhere(function ($advanceQ) {
 						$advanceQ->whereDate('trips.updated_at', '<', date('Y-m-d'))
 							->where('trips.advance_received', '>', 0)
 							->where('trips.status_id', 3028) //MANAGER APPROVED
@@ -2580,7 +2578,7 @@ class ExportReportController extends Controller {
 					});
 				})
 				->groupBy('trips.id')
-				->orderBy('trips.id','ASC')
+				->orderBy('trips.id', 'ASC')
 				->get();
 
 			$exceptionErrors = [];
@@ -2588,44 +2586,44 @@ class ExportReportController extends Controller {
 			if ($employeeTrips->isNotEmpty()) {
 				foreach ($employeeTrips as $employeeTrip) {
 					try {
-						if($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028){
+						if ($employeeTrip->ey_employee_claim_status_id == 3026 || $employeeTrip->trip_status_id == 3028) {
 							//COMPLETED OR MANAGER APPROVED
-							if($employeeTrip->advance_ax_export_sync == 0 && $employeeTrip->advance_received > 0){
+							if ($employeeTrip->advance_ax_export_sync == 0 && $employeeTrip->advance_received > 0) {
 								//TRAVEL ADVANCE
 								// $this->hondaOeslEmployeeAxaptaProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-								if($employeeTrip->business_id == 2){
+								if ($employeeTrip->business_id == 2) {
 									//OESL
 									$this->hondaOeslEmployeeAxaptaProcess(1, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-								}elseif($employeeTrip->business_id == 3){
+								} elseif ($employeeTrip->business_id == 3) {
 									//HONDA
 									$this->hondaOeslEmployeeAxaptaProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								}
 							}
-						}else{
+						} else {
 							continue;
 						}
 
-						if($employeeTrip->ey_employee_claim_status_id == 3026){
+						if ($employeeTrip->ey_employee_claim_status_id == 3026) {
 							//TRAVEL EXPENSES
 							// $this->hondaOeslEmployeeAxaptaProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-							if($employeeTrip->business_id == 2){
+							if ($employeeTrip->business_id == 2) {
 								//OESL
 								$this->hondaOeslEmployeeAxaptaProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$this->hondaOeslEmployeeAxaptaProcess(9, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-							}elseif($employeeTrip->business_id == 3){
+							} elseif ($employeeTrip->business_id == 3) {
 								//HONDA
 								$this->hondaOeslEmployeeAxaptaProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 							}
 						}
 
 						//TRAVEL ADVANCE BALANCE AMOUNT PAID BY COMPANY TO EMPLOYEE
-						if($employeeTrip->amount_to_pay == 1){
-							if($employeeTrip->balance_amount > 0){
+						if ($employeeTrip->amount_to_pay == 1) {
+							if ($employeeTrip->balance_amount > 0) {
 								// $this->hondaOeslEmployeeAxaptaProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-								if($employeeTrip->business_id == 2){
+								if ($employeeTrip->business_id == 2) {
 									//OESL
 									$this->hondaOeslEmployeeAxaptaProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-								}elseif($employeeTrip->business_id == 3){
+								} elseif ($employeeTrip->business_id == 3) {
 									//HONDA
 									$this->hondaOeslEmployeeAxaptaProcess(6, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								}
@@ -2633,24 +2631,24 @@ class ExportReportController extends Controller {
 						}
 
 						//TRAVEL ADVANCE BALANCE AMOUNT PAID BY EMPLOYEE TO COMPANY
-						if($employeeTrip->amount_to_pay == 2){
-							if($employeeTrip->balance_amount > 0){
-								if($employeeTrip->business_id == 3){
+						if ($employeeTrip->amount_to_pay == 2) {
+							if ($employeeTrip->balance_amount > 0) {
+								if ($employeeTrip->business_id == 3) {
 									//HONDA
 									$this->hondaOeslEmployeeAxaptaProcess(7, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
-								}elseif($employeeTrip->business_id == 2){
+								} elseif ($employeeTrip->business_id == 2) {
 									//OESL
 									$this->hondaOeslEmployeeAxaptaProcess(8, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								}
 							}
 						}
 
-						if($employeeTrip->ey_employee_claim_status_id == 3026){
+						if ($employeeTrip->ey_employee_claim_status_id == 3026) {
 							//COMPLETED
 							Trip::where('id', $employeeTrip->id)->update([
 								'self_ax_export_synched' => 1,
 							]);
-						}else{
+						} else {
 							Trip::where('id', $employeeTrip->id)->update([
 								'advance_ax_export_sync' => 1,
 							]);
@@ -2714,8 +2712,8 @@ class ExportReportController extends Controller {
 						'Paymref',
 					];
 
-					if($datas && count($datas) > 0){
-						foreach($datas as $data){
+					if ($datas && count($datas) > 0) {
+						foreach ($datas as $data) {
 							$excel_details = [
 								$data->brcd,
 								$data->doc_type,
@@ -2757,17 +2755,17 @@ class ExportReportController extends Controller {
 								$data->qty,
 								$data->gstin,
 								$data->paymemt_ref,
-		                	];
-		              		$export_data[] = $excel_details;
-		              	}
+							];
+							$export_data[] = $excel_details;
+						}
 
-				    	$outputfile = $business_name.'_EmployeeAxaptaExport_' . $time_stamp;
-						$file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
-							$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
+						$outputfile = $business_name . '_EmployeeAxaptaExport_' . $time_stamp;
+						$file = Excel::create($outputfile, function ($excel) use ($excel_header, $export_data) {
+							$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header, $export_data) {
 								$sheet->fromArray($export_data, NULL, 'A1');
 								$sheet->row(1, $excel_header);
 								$sheet->row(1, function ($row) {
-								$row->setBackground('#07c63a');
+									$row->setBackground('#07c63a');
 								});
 							});
 						})->store('xlsx', storage_path('app/public/honda_oesl_employee_axapta_report/'));
@@ -2779,7 +2777,7 @@ class ExportReportController extends Controller {
 						$report_details->name = $file->filename;
 						$report_details->path = 'storage/app/public/honda_oesl_employee_axapta_report/' . $outputfile . '.xlsx';
 						$report_details->save();
-		            }
+					}
 				}
 
 				// $time_stamp = date('Y_m_d');
@@ -2870,11 +2868,11 @@ class ExportReportController extends Controller {
 				// 		$data->qty,
 				// 		$data->gstin,
 				// 		$data->paymemt_ref,
-                // 	];
-              	// 	$export_data[] = $excel_details;
-              	// }
+				// 	];
+				// 	$export_data[] = $excel_details;
+				// }
 
-		    	// $outputfile = 'EmployeeAxaptaExport_' . $time_stamp;
+				// $outputfile = 'EmployeeAxaptaExport_' . $time_stamp;
 				// $file = Excel::create($outputfile, function ($excel) use ($excel_header,$export_data) {
 				// 	$excel->sheet('EmployeeAxaptaExport_', function ($sheet) use ($excel_header,$export_data) {
 				// 		$sheet->fromArray($export_data, NULL, 'A1');
@@ -2896,7 +2894,7 @@ class ExportReportController extends Controller {
 			} else {
 				$cronLog->remarks = "No employee trips found";
 			}
-            
+
 			$cronLog->status = "Completed";
 			if (!empty($exceptionErrors)) {
 				$cronLog->errors = json_encode($exceptionErrors);
@@ -2915,7 +2913,7 @@ class ExportReportController extends Controller {
 		$employeeCode = $employeeTrip->employeeCode;
 		$employeeName = $employeeTrip->employeeName;
 
-		if($type == 1) {
+		if ($type == 1) {
 			//TRAVEL ADVANCE
 			// $toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
 			// 	->where('visits.trip_id', $employeeTrip->id)
@@ -2924,12 +2922,12 @@ class ExportReportController extends Controller {
 
 			//DEBIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '5100652016', 2, $employeeCode.' : '.$employeeName.' : '.$toCity.' - Advance', $employeeTrip->advance_received, 0.00, 'C', $employeeTrip->outletCode, '',  $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '5100652016', 2, $employeeCode.':'.$employeeName.'-Adv', $employeeTrip->advance_received, 0.00, 'C', $employeeTrip->outletCode, '',  $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '5100652016', 2, $employeeCode . ':' . $employeeName . '-Adv', $employeeTrip->advance_received, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
 
 			//CREDIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode.' : '.$employeeName.' : '.$toCity .' - Advance', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode.':'.$employeeName.'-Adv', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
-		}else if($type == 2) {
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode . ':' . $employeeName . '-Adv', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+		} else if ($type == 2) {
 			//TRAVEL EXPENSES
 			// $toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
 			// 	->where('visits.trip_id', $employeeTrip->id)
@@ -2943,10 +2941,10 @@ class ExportReportController extends Controller {
 				foreach ($employeeTrip->lodgings as $lodging) {
 					// $lodgingCity = !empty($lodging->city->name) ? $lodging->city->name : '';
 
-					if($lodging->amount > 0){
+					if ($lodging->amount > 0) {
 						// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.' : '.$employeeName.' : '.$lodgingCity.' : Room Rent : '.$lodging->gstin, $lodging->amount, '0.00', 'C', $employeeTrip->outletCode, '901_22',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
-						$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':RoomRent:', $lodging->amount, '0.00', 'C', $employeeTrip->outletCode, '901_22',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+						$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':RoomRent:', $lodging->amount, '0.00', 'C', $employeeTrip->outletCode, '901_22', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 						$travelExpenseTotalValue += $lodging->amount;
 					}
 
@@ -2954,46 +2952,46 @@ class ExportReportController extends Controller {
 					if ($employeeTrip->employee && $employeeTrip->employee->outlet && $employeeTrip->employee->outlet->address && $employeeTrip->employee->outlet->address->city && $employeeTrip->employee->outlet->address->city->state) {
 						$employeeGstCode = !empty($employeeTrip->employee->outlet->address->city->state->gstin_state_code) ? $employeeTrip->employee->outlet->address->city->state->gstin_state_code : '';
 
-						if($lodging->stay_type_id == 3340){
+						if ($lodging->stay_type_id == 3340) {
 							//LODGE STAY
 							if ($lodging->has_multiple_tax_invoice == "Yes") {
 								//HAS MULTIPLE TAX INVOICE
 								if ($lodging->lodgingTaxInvoice && (($lodging->lodgingTaxInvoice->cgst > 0 && $lodging->lodgingTaxInvoice->sgst > 0) || ($lodging->lodgingTaxInvoice->igst > 0))) {
-									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst, $employeeCode.':'.$employeeName.':Lod');
+									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':Lod');
 									$lodgingGstValue += $res;
 								}
 
 								//DRY WASH
 								if ($lodging->drywashTaxInvoice && (($lodging->drywashTaxInvoice->cgst > 0 && $lodging->drywashTaxInvoice->sgst > 0) || ($lodging->drywashTaxInvoice->igst > 0))) {
-									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst, $employeeCode.':'.$employeeName.':DryWh');
+									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':DryWh');
 									$lodgingGstValue += $res;
 								}
 
 								//BOARDING
 								if ($lodging->boardingTaxInvoice && (($lodging->boardingTaxInvoice->cgst > 0 && $lodging->boardingTaxInvoice->sgst > 0) || ($lodging->boardingTaxInvoice->igst > 0))) {
-									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst, $employeeCode.':'.$employeeName.':Board');
+									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':Board');
 									$lodgingGstValue += $res;
 								}
 
 								//OTHERS
 								if ($lodging->othersTaxInvoice && (($lodging->othersTaxInvoice->cgst > 0 && $lodging->othersTaxInvoice->sgst > 0) || ($lodging->othersTaxInvoice->igst > 0))) {
-									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst, $employeeCode.':'.$employeeName.':Oth');
+									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':Oth');
 									$lodgingGstValue += $res;
 								}
 							} else {
 								//SINGLE
 								if (($lodging->cgst > 0 && $lodging->sgst > 0) || ($lodging->igst > 0)) {
-									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->cgst, $lodging->sgst, $lodging->igst,$employeeCode.':'.$employeeName.':Lod');
+									$res = $this->hondaOeslAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->cgst, $lodging->sgst, $lodging->igst, $employeeCode . ':' . $employeeName . ':Lod');
 									$lodgingGstValue += $res;
 								}
 							}
-					    }
+						}
 					}
 				}
 			}
 
 			//LODGING GST TOTAL
-			if($lodgingGstValue && $lodgingGstValue > 0){
+			if ($lodgingGstValue && $lodgingGstValue > 0) {
 				// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':GSTClaim', '0.00', $lodgingGstValue, 'C', '', '', '', null , $employeeTrip->ax_company_code);
 				$travelExpenseTotalValue += $lodgingGstValue;
 			}
@@ -3009,8 +3007,8 @@ class ExportReportController extends Controller {
 			// }
 
 			if ($employeeTrip->boardings->isNotEmpty()) {
-				if($tripClaim->boarding_total > 0){
-					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':Batta', $tripClaim->boarding_total, '0.00', 'C', $employeeTrip->outletCode, '901_02',$employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				if ($tripClaim->boarding_total > 0) {
+					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':Batta', $tripClaim->boarding_total, '0.00', 'C', $employeeTrip->outletCode, '901_02', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 					$travelExpenseTotalValue += $tripClaim->boarding_total;
 				}
 			}
@@ -3036,8 +3034,8 @@ class ExportReportController extends Controller {
 					}
 				}
 
-				if($selfVisitTotalValue > 0){
-					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':Ticket', $selfVisitTotalValue, '0.00', 'C', $employeeTrip->outletCode, '901_07',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				if ($selfVisitTotalValue > 0) {
+					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':Ticket', $selfVisitTotalValue, '0.00', 'C', $employeeTrip->outletCode, '901_07', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 					$travelExpenseTotalValue += $selfVisitTotalValue;
 				}
 			}
@@ -3052,16 +3050,16 @@ class ExportReportController extends Controller {
 			// }
 
 			if ($employeeTrip->localTravels->isNotEmpty()) {
-				if($tripClaim->local_travel_total > 0){
-					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':'.'LocalConvey', $tripClaim->local_travel_total, '0.00', 'C', $employeeTrip->outletCode, '901_12',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				if ($tripClaim->local_travel_total > 0) {
+					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':' . 'LocalConvey', $tripClaim->local_travel_total, '0.00', 'C', $employeeTrip->outletCode, '901_12', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 					$travelExpenseTotalValue += $tripClaim->local_travel_total;
 				}
 			}
 
-			if($travelExpenseTotalValue && $travelExpenseTotalValue > 0){
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode.':TravelExpTo:'.$employeeName, '0.00', $travelExpenseTotalValue, 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			if ($travelExpenseTotalValue && $travelExpenseTotalValue > 0) {
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode . ':TravelExpTo:' . $employeeName, '0.00', $travelExpenseTotalValue, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			}
-		}elseif($type == 3){
+		} elseif ($type == 3) {
 			//PAYMENT JOURNAL
 			// $toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
 			// 	->where('visits.trip_id', $employeeTrip->id)
@@ -3070,17 +3068,17 @@ class ExportReportController extends Controller {
 
 			//DEBIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode.':'.$employeeName.':'.$toCity.'-Payment', $employeeTrip->balance_amount, 0.00, 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode.':'.$employeeName.'-Payment', $employeeTrip->balance_amount, 0.00, 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode . ':' . $employeeName . '-Payment', $employeeTrip->balance_amount, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
 			//CREDIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_CC_501', 6, $employeeCode.':'.$employeeName.':'.$toCity.'-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_CC_501', 6, $employeeCode.':'.$employeeName.'-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-		}else if($type == 4) {
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_CC_501', 6, $employeeCode . ':' . $employeeName . '-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+		} else if ($type == 4) {
 			//HONDA ADVANCE DEBIT AND CREDIT ENTRY
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '1480652137', 2, $employeeCode.':'.$employeeName.'-Adv', $employeeTrip->advance_received, 0.00, 'F', '', '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '1480652137', 2, $employeeCode . ':' . $employeeName . '-Adv', $employeeTrip->advance_received, 0.00, 'F', '', '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
 
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode.':'.$employeeName.'-Adv', 0.00, $employeeTrip->advance_received, 'F', '', '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
-		}else if($type == 5) {
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode . ':' . $employeeName . '-Adv', 0.00, $employeeTrip->advance_received, 'F', '', '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+		} else if ($type == 5) {
 			//HONDA TRAVEL EXPENSES ENTRY
 			$tripClaim = EmployeeClaim::where('trip_id', $employeeTrip->id)->first();
 			$lodgingTotalValue = 0;
@@ -3088,15 +3086,15 @@ class ExportReportController extends Controller {
 			if ($employeeTrip->lodgings->isNotEmpty()) {
 				foreach ($employeeTrip->lodgings as $lodging) {
 					$lodgingValue = 0;
-					if($lodging->amount > 0){
-						if(!empty($lodging->gstin)){
+					if ($lodging->amount > 0) {
+						if (!empty($lodging->gstin)) {
 							//GST BILL
-							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':'.$lodging->gstin, $lodging->amount, '0.00', 'F', '', '901_22',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':' . $lodging->gstin, $lodging->amount, '0.00', 'F', '', '901_22', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 							$lodgingTotalValue += $lodging->amount;
 							$lodgingValue += $lodging->amount;
-						}else{
+						} else {
 							//NON GST BILL
-							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName, $lodging->amount, 0.00, 'F', '', '901_22',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName, $lodging->amount, 0.00, 'F', '', '901_22', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 							$lodgingTotalValue += $lodging->amount;
 							$lodgingValue += $lodging->amount;
 						}
@@ -3106,62 +3104,62 @@ class ExportReportController extends Controller {
 					if ($employeeTrip->employee && $employeeTrip->employee->outlet && $employeeTrip->employee->outlet->address && $employeeTrip->employee->outlet->address->city && $employeeTrip->employee->outlet->address->city->state) {
 						$employeeGstCode = !empty($employeeTrip->employee->outlet->address->city->state->gstin_state_code) ? $employeeTrip->employee->outlet->address->city->state->gstin_state_code : '';
 
-						if($lodging->stay_type_id == 3340){
+						if ($lodging->stay_type_id == 3340) {
 							//LODGE STAY
 							if ($lodging->has_multiple_tax_invoice == "Yes") {
 								//HAS MULTIPLE TAX INVOICE
 								if ($lodging->lodgingTaxInvoice && (($lodging->lodgingTaxInvoice->cgst > 0 && $lodging->lodgingTaxInvoice->sgst > 0) || ($lodging->lodgingTaxInvoice->igst > 0))) {
-									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst, $employeeCode.':'.$employeeName.':Lod', $lodging->lodgingTaxInvoice->tax_percentage);
+									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->lodgingTaxInvoice->cgst, $lodging->lodgingTaxInvoice->sgst, $lodging->lodgingTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':Lod', $lodging->lodgingTaxInvoice->tax_percentage);
 									$lodgingTotalValue += $lodging->amount;
 									$lodgingValue += $res;
 								}
 
 								//DRY WASH
 								if ($lodging->drywashTaxInvoice && (($lodging->drywashTaxInvoice->cgst > 0 && $lodging->drywashTaxInvoice->sgst > 0) || ($lodging->drywashTaxInvoice->igst > 0))) {
-									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst, $employeeCode.':'.$employeeName.':DryWh', $lodging->drywashTaxInvoice->tax_percentage);
+									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->drywashTaxInvoice->cgst, $lodging->drywashTaxInvoice->sgst, $lodging->drywashTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':DryWh', $lodging->drywashTaxInvoice->tax_percentage);
 									$lodgingTotalValue += $lodging->amount;
 									$lodgingValue += $res;
 								}
 
 								//BOARDING
 								if ($lodging->boardingTaxInvoice && (($lodging->boardingTaxInvoice->cgst > 0 && $lodging->boardingTaxInvoice->sgst > 0) || ($lodging->boardingTaxInvoice->igst > 0))) {
-									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst, $employeeCode.':'.$employeeName.':Board', $lodging->boardingTaxInvoice->tax_percentage);
+									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->boardingTaxInvoice->cgst, $lodging->boardingTaxInvoice->sgst, $lodging->boardingTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':Board', $lodging->boardingTaxInvoice->tax_percentage);
 									$lodgingValue += $res;
 								}
 
 								//OTHERS
 								if ($lodging->othersTaxInvoice && (($lodging->othersTaxInvoice->cgst > 0 && $lodging->othersTaxInvoice->sgst > 0) || ($lodging->othersTaxInvoice->igst > 0))) {
-									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst, $employeeCode.':'.$employeeName.':Oth', $lodging->othersTaxInvoice->tax_percentage);
+									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->othersTaxInvoice->cgst, $lodging->othersTaxInvoice->sgst, $lodging->othersTaxInvoice->igst, $employeeCode . ':' . $employeeName . ':Oth', $lodging->othersTaxInvoice->tax_percentage);
 									$lodgingTotalValue += $lodging->amount;
 									$lodgingValue += $res;
 								}
 							} else {
 								//SINGLE
 								if (($lodging->cgst > 0 && $lodging->sgst > 0) || ($lodging->igst > 0)) {
-									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->cgst, $lodging->sgst, $lodging->igst,$employeeCode.':'.$employeeName.':Lod', $lodging->tax_percentage);
+									$res = $this->hondaAxaptaExportGstSplitupEntries($employeeTrip, $employeeGstCode, $lodging->gstin, $lodging->cgst, $lodging->sgst, $lodging->igst, $employeeCode . ':' . $employeeName . ':Lod', $lodging->tax_percentage);
 									$lodgingTotalValue += $lodging->amount;
 									$lodgingValue += $res;
 								}
 							}
-					    }
+						}
 					}
 
 					//LODGING TOTAL
-					if($lodgingValue && $lodgingValue > 0){
-						if(!empty($lodging->gstin)){
+					if ($lodgingValue && $lodgingValue > 0) {
+						if (!empty($lodging->gstin)) {
 							//GST BILL
-							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode.':'.$employeeName.':TravelExp', 0.00, $lodgingValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code, '', substr($lodging->gstin,0,2));
-						}else{
+							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode . ':' . $employeeName . ':TravelExp', 0.00, $lodgingValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code, '', substr($lodging->gstin, 0, 2));
+						} else {
 							//NON GST BILL
-							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode.':'.$employeeName.':TravelExp', 0.00, $lodgingValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+							$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode . ':' . $employeeName . ':TravelExp', 0.00, $lodgingValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 						}
 					}
 				}
 			}
 
 			if ($employeeTrip->boardings->isNotEmpty()) {
-				if($tripClaim->boarding_total > 0){
-					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':Batta', $tripClaim->boarding_total, '0.00', 'F', '', '901_02',$employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				if ($tripClaim->boarding_total > 0) {
+					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':Batta', $tripClaim->boarding_total, '0.00', 'F', '', '901_02', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 					$travelExpenseTotalValue += $tripClaim->boarding_total;
 				}
 			}
@@ -3175,57 +3173,57 @@ class ExportReportController extends Controller {
 					}
 				}
 
-				if($selfVisitTotalValue > 0){
-					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':Ticket', $selfVisitTotalValue, '0.00', 'F', '', '901_07',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				if ($selfVisitTotalValue > 0) {
+					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':Ticket', $selfVisitTotalValue, '0.00', 'F', '', '901_07', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 					$travelExpenseTotalValue += $selfVisitTotalValue;
 				}
 			}
 
 			if ($employeeTrip->localTravels->isNotEmpty()) {
-				if($tripClaim->local_travel_total > 0){
-					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.':'.'LocalConvey', $tripClaim->local_travel_total, '0.00', 'F', '', '901_12',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				if ($tripClaim->local_travel_total > 0) {
+					$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . ':' . 'LocalConvey', $tripClaim->local_travel_total, '0.00', 'F', '', '901_12', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 					$travelExpenseTotalValue += $tripClaim->local_travel_total;
 				}
 			}
 
-			if($travelExpenseTotalValue && $travelExpenseTotalValue > 0){
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode.':TravelExpTo:'.$employeeName, '0.00', $travelExpenseTotalValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			if ($travelExpenseTotalValue && $travelExpenseTotalValue > 0) {
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '196', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode . ':TravelExpTo:' . $employeeName, '0.00', $travelExpenseTotalValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			}
 
 			$travelExpensePaymentTotalValue = $lodgingTotalValue + $travelExpenseTotalValue;
-			if($travelExpensePaymentTotalValue && $travelExpensePaymentTotalValue > 0){
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode.':TravelExpTo:'.$employeeName, $travelExpensePaymentTotalValue,'0.00', 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			if ($travelExpensePaymentTotalValue && $travelExpensePaymentTotalValue > 0) {
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode . ':TravelExpTo:' . $employeeName, $travelExpensePaymentTotalValue, '0.00', 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode.':TravelExpTo:'.$employeeName, '0.00', $travelExpensePaymentTotalValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode . ':TravelExpTo:' . $employeeName, '0.00', $travelExpensePaymentTotalValue, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
 			}
-		}else if($type == 6){
+		} else if ($type == 6) {
 			//HONDA ADVANCE BALANCE AMOUNT PAID BY COMPANY TO EMPLOYEE
 			//DEBIT ENTRY
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode.':'.$employeeName.'-TravelExp', $employeeTrip->balance_amount, 0.00, 'F', '', '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode . ':' . $employeeName . '-TravelExp', $employeeTrip->balance_amount, 0.00, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
 			//CREDIT ENTRY
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode.':'.$employeeName.'-TravelExp', 0.00, $employeeTrip->balance_amount, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-		}else if($type == 7){
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode . ':' . $employeeName . '-TravelExp', 0.00, $employeeTrip->balance_amount, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+		} else if ($type == 7) {
 			//HONDA ADVANCE BALANCE AMOUNT PAID BY EMPLOYEE TO COMPANY
 			//DEBIT ENTRY
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '191', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode.':'.$employeeName.'-TravelExp', 0.00, $employeeTrip->balance_amount , 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '191', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '1480652137', 2, $employeeCode . ':' . $employeeName . '-TravelExp', 0.00, $employeeTrip->balance_amount, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			//CREDIT ENTRY
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '191', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode.':'.$employeeName.'-TravelExp', $employeeTrip->balance_amount, 0.00, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-		}else if($type == 8){
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '191', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TMH_SBI_CAG_CHN', 6, $employeeCode . ':' . $employeeName . '-TravelExp', $employeeTrip->balance_amount, 0.00, 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+		} else if ($type == 8) {
 			//OESL ADVANCE BALANCE AMOUNT PAID BY EMPLOYEE TO COMPANY
 			//DEBIT
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.'-TravelExp', $employeeTrip->balance_amount, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . '-TravelExp', $employeeTrip->balance_amount, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			//CREDIT
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode.':'.$employeeName.'-TravelExp', 0.00, $employeeTrip->balance_amount , 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-		}elseif ($type == 9) {
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode . ':' . $employeeName . '-TravelExp', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+		} elseif ($type == 9) {
 			//OESL ROUND OFF ENTRY
 			$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
 			$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
 			$employeeLodgingRoundoff += floatval($roundOffAmt);
 
-			if($employeeLodgingRoundoff != 0){
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode.':'.$employeeName.'-Roff', $employeeLodgingRoundoff, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			if ($employeeLodgingRoundoff != 0) {
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . '-Roff', $employeeLodgingRoundoff, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			}
 		}
 	}
@@ -3250,17 +3248,17 @@ class ExportReportController extends Controller {
 		// }
 
 		if (!empty($enteredGstinState)) {
-			if($taxCgst > 0 && $taxSgst > 0){
+			if ($taxCgst > 0 && $taxSgst > 0) {
 				//INTRA STATE (CGST AND SGST)
 				//SGST
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146030', 0, $taxInvoiceType.'-SGST', $taxSgst, '0.00', 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146030', 0, $taxInvoiceType . '-SGST', $taxSgst, '0.00', 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 
 				//CGST
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType.'-CGST', $taxCgst, '0.00', 'C', $employeeTrip->outletCode, '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType . '-CGST', $taxCgst, '0.00', 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 				return $taxCgst + $taxSgst;
-			}elseif($taxIgst > 0){
+			} elseif ($taxIgst > 0) {
 				//INTER STATE (IGST)
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', 'C', '', '',  '', '', $employeeTrip->ax_company_code);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType . '-IGST', $taxIgst, '0.00', 'C', '', '', '', '', $employeeTrip->ax_company_code);
 				return $taxIgst;
 			}
 		}
@@ -3288,26 +3286,26 @@ class ExportReportController extends Controller {
 		// 	}
 		// }
 
-		if(!empty($enteredGstinState)){
-			if($taxCgst > 0 && $taxSgst > 0){
+		if (!empty($enteredGstinState)) {
+			if ($taxCgst > 0 && $taxSgst > 0) {
 				//INTRA STATE
 				//SGST
 				$intraTaxPercentage = $taxPercentage / 2;
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146030', 0, $taxInvoiceType.'-SGST', $taxSgst, '0.00', 'F', '', '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code,'','',$intraTaxPercentage);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146030', 0, $taxInvoiceType . '-SGST', $taxSgst, '0.00', 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code, '', '', $intraTaxPercentage);
 
 				//CGST
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType.'-CGST', $taxCgst, '0.00', 'F', '', '',  $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code, '', '' , $intraTaxPercentage);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146031', 0, $taxInvoiceType . '-CGST', $taxCgst, '0.00', 'F', '', '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code, '', '', $intraTaxPercentage);
 				return $taxCgst + $taxSgst;
-			}elseif($taxIgst > 0){
+			} elseif ($taxIgst > 0) {
 				//INTER STATE (IGST)
 				$interTaxPercentage = $taxPercentage;
-				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType.'-IGST', $taxIgst, '0.00', 'F', '', '',  '', '', $employeeTrip->ax_company_code,'','',$interTaxPercentage);
+				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '139', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '146033', 0, $taxInvoiceType . '-IGST', $taxIgst, '0.00', 'F', '', '', '', '', $employeeTrip->ax_company_code, '', '', $interTaxPercentage);
 				return $taxIgst;
 			}
 		}
 	}
 
-	public function saveHondaOeslAxaptaExport($companyId, $businessId, $entityTypeId, $entityId ,$brcd, $docType, $docNo, $docDt, $account, $accType, $tranTxt, $dbtAmt, $crdAmt, $dept, $costCenter, $purpose, $supInvNo, $supInvDate, $company, $hsnCode = null, $shipState = null, $vatPer = null) {
+	public function saveHondaOeslAxaptaExport($companyId, $businessId, $entityTypeId, $entityId, $brcd, $docType, $docNo, $docDt, $account, $accType, $tranTxt, $dbtAmt, $crdAmt, $dept, $costCenter, $purpose, $supInvNo, $supInvDate, $company, $hsnCode = null, $shipState = null, $vatPer = null) {
 		$data = array(
 			'company_id' => $companyId,
 			'business_id' => $businessId,
