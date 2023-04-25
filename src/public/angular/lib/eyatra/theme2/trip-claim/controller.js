@@ -1889,7 +1889,8 @@ app.component('eyatraTripClaimForm', {
             $(self.trip.visits).each(function(key, visit) {
                 // if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17) {
                 // if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272) {
-                if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272 && visit.travel_mode_id != 270 && visit.travel_mode_id != 271) {
+                // if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272 && visit.travel_mode_id != 270 && visit.travel_mode_id != 271) {
+                if (visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272 && visit.travel_mode_id != 270 && visit.travel_mode_id != 271) {
                     $scope.travel_mode_check = true;
                 }
             });

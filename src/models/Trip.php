@@ -2114,14 +2114,14 @@ class Trip extends Model {
 			$two_wheeler_total_km = 0;
 			$four_wheeler_total_km = 0;
 
-			if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
-				if (floatval($request->claim_total_amount) <= 0) {
-					return response()->json([
-						'success' => false,
-						'errors' => ['Trip claim amount should be greater than 0'],
-					]);
-				}
-			}
+			// if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
+			// 	if (floatval($request->claim_total_amount) <= 0) {
+			// 		return response()->json([
+			// 			'success' => false,
+			// 			'errors' => ['Trip claim amount should be greater than 0'],
+			// 		]);
+			// 	}
+			// }
 
 			// dd($request->all());
 			//starting ending Km validation
