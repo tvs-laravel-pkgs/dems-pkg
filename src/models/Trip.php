@@ -1784,6 +1784,7 @@ class Trip extends Model {
 			'lodgings.drywashTaxInvoice',
 			'lodgings.boardingTaxInvoice',
 			'lodgings.othersTaxInvoice',
+			'lodgings.discountTaxInvoice',
 			'lodgings.roundoffTaxInvoice',
 			'lodgings.city',
 			'lodgings.stateType',
