@@ -1337,6 +1337,7 @@ class Trip extends Model {
 				'lodgings.drywashTaxInvoice',
 				'lodgings.boardingTaxInvoice',
 				'lodgings.othersTaxInvoice',
+				'lodgings.discountTaxInvoice',
 				'lodgings.roundoffTaxInvoice',
 				'lodgings.stateType',
 				'lodgings.city',
@@ -2919,6 +2920,24 @@ class Trip extends Model {
 							$othersTaxInvoice->total = !empty($lodging_data['othersTaxInvoice']['total']) ? $lodging_data['othersTaxInvoice']['total'] : 0;
 							$othersTaxInvoice->save();
 
+							//SAVE DISCOUNT TAX INVOICE
+							$discountTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3776,
+							]);
+							if (!$discountTaxInvoice->exists) {
+								$discountTaxInvoice->created_at = Carbon::now();
+							} else {
+								$discountTaxInvoice->updated_at = Carbon::now();
+							}
+							$discountTaxInvoice->without_tax_amount = !empty($lodging_data['discountTaxInvoice']['without_tax_amount']) ? $lodging_data['discountTaxInvoice']['without_tax_amount'] : 0;
+							$discountTaxInvoice->tax_percentage = !empty($lodging_data['discountTaxInvoice']['tax_percentage']) ? $lodging_data['discountTaxInvoice']['tax_percentage'] : 0;
+							$discountTaxInvoice->cgst = !empty($lodging_data['discountTaxInvoice']['cgst']) ? $lodging_data['discountTaxInvoice']['cgst'] : 0;
+							$discountTaxInvoice->sgst = !empty($lodging_data['discountTaxInvoice']['sgst']) ? $lodging_data['discountTaxInvoice']['sgst'] : 0;
+							$discountTaxInvoice->igst = !empty($lodging_data['discountTaxInvoice']['igst']) ? $lodging_data['discountTaxInvoice']['igst'] : 0;
+							$discountTaxInvoice->total = !empty($lodging_data['discountTaxInvoice']['total']) ? $lodging_data['discountTaxInvoice']['total'] : 0;
+							$discountTaxInvoice->save();
+
 							//SAVE ROUNDOFF TAX INVOICE
 							$roundoffTaxInvoice = LodgingTaxInvoice::firstOrNew([
 								'lodging_id' => $lodging->id,
@@ -3084,6 +3103,7 @@ class Trip extends Model {
 					'lodgings.drywashTaxInvoice',
 					'lodgings.boardingTaxInvoice',
 					'lodgings.othersTaxInvoice',
+					'lodgings.discountTaxInvoice',
 					'lodgings.roundoffTaxInvoice',
 					'lodging_attachments',
 					'lodgings.city',

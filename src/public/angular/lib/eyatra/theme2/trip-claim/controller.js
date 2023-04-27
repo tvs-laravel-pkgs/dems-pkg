@@ -275,6 +275,7 @@ app.component('eyatraTripClaimForm', {
             self.drywashTaxInvoice = {};
             self.boardingTaxInvoice = {};
             self.othersTaxInvoice = {};
+            self.discountTaxInvoice = {};
             self.roundoffTaxInvoice = {};
             self.grandTotalTaxInvoice = {};
 
@@ -2871,6 +2872,14 @@ app.component('eyatraTripClaimForm', {
                     self.othersTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceOthersIgst").val();
                     self.othersTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceOthersTotal").val();
 
+                    //DISCOUNT
+                    self.discountTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceDiscountWithoutTaxAmount").val();
+                    self.discountTaxInvoice.tax_percentage = $("#" + lodgingIndex + "-taxInvoiceDiscountTaxPercentage").val();
+                    self.discountTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceDiscountCgst").val();
+                    self.discountTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceDiscountSgst").val();
+                    self.discountTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceDiscountIgst").val();
+                    self.discountTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceDiscountTotal").val();
+
                     //ROUNDOFF
                     self.roundoffTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceRoundoffWithoutTaxAmount").val();
                     self.roundoffTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceRoundoffCgst").val();
@@ -2897,6 +2906,7 @@ app.component('eyatraTripClaimForm', {
                     self.drywashTaxInvoice = {};
                     self.boardingTaxInvoice = {};
                     self.othersTaxInvoice = {};
+                    self.discountTaxInvoice = {};
                     self.roundoffTaxInvoice = {};
                     self.grandTotalTaxInvoice = {};
                     $('#lodging_has_multiple_tax_invoice_active_' + lodgingIndex).attr('disabled', true);
@@ -2909,6 +2919,7 @@ app.component('eyatraTripClaimForm', {
                 self.drywashTaxInvoice = {};
                 self.boardingTaxInvoice = {};
                 self.othersTaxInvoice = {};
+                self.discountTaxInvoice = {};
                 self.roundoffTaxInvoice = {};
                 self.grandTotalTaxInvoice = {};
             }
@@ -2939,6 +2950,12 @@ app.component('eyatraTripClaimForm', {
             let othersSgst = 0;
             let othersIgst = 0;
             let othersTotal = 0;
+            let discountWithoutTaxAmount = parseFloat(self.discountTaxInvoice.without_tax_amount) || 0;
+            let discountCgst = 0;
+            let discountSgst = 0;
+            let discountIgst = 0;
+            let discountTotal = 0;
+
             let roundoffTotal = 0;
             let base = 0;
             let cgst = 0;
@@ -3054,11 +3071,19 @@ app.component('eyatraTripClaimForm', {
                 // othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
                 othersTotal = Math.round(othersWithoutTaxAmount * 100)/ 100 + Math.round(othersCgst * 100)/ 100 + Math.round(othersSgst * 100)/ 100 + Math.round(othersIgst * 100)/ 100;
             }
-            base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
+
+            //DISCOUNT CALCULATION
+            if (discountWithoutTaxAmount && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex] && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin']) {
+                discountTotal = Math.round(discountWithoutTaxAmount * 100) / 100;
+            }
+
+            // base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
+            base = (lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount) - discountWithoutTaxAmount;
             cgst = lodgeCgst + drywashCgst + boardingCgst + othersCgst;
             sgst = lodgeSgst + drywashSgst + boardingSgst + othersSgst;
             igst = lodgeIgst + drywashIgst + boardingIgst + othersIgst;
-            grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal; //+ roundoffTotal;
+            // grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal; //+ roundoffTotal;
+            grandTotal = (lodgeTotal + drywashTotal + boardingTotal + othersTotal) - discountTotal; //+ roundoffTotal;
             roundoffTotal = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['invoice_amount'] - grandTotal;
             console.log(self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['invoice_amount'], grandTotal);
 
@@ -3078,6 +3103,11 @@ app.component('eyatraTripClaimForm', {
             self.othersTaxInvoice.sgst = parseFloat(othersSgst).toFixed(2);
             self.othersTaxInvoice.igst = parseFloat(othersIgst).toFixed(2);
             self.othersTaxInvoice.total = parseFloat(othersTotal).toFixed(2);
+            self.discountTaxInvoice.cgst = parseFloat(discountCgst).toFixed(2);
+            self.discountTaxInvoice.sgst = parseFloat(discountSgst).toFixed(2);
+            self.discountTaxInvoice.igst = parseFloat(discountIgst).toFixed(2);
+            self.discountTaxInvoice.total = parseFloat(discountTotal).toFixed(2);
+
             self.grandTotalTaxInvoice.without_tax_amount = parseFloat(base).toFixed(2);
             self.grandTotalTaxInvoice.cgst = parseFloat(cgst).toFixed(2);
             self.grandTotalTaxInvoice.sgst = parseFloat(sgst).toFixed(2);
@@ -3126,6 +3156,14 @@ app.component('eyatraTripClaimForm', {
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersIgst").val(self.othersTaxInvoice.igst);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersTotal").val(self.othersTaxInvoice.total);
 
+            //DISCOUNT
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountTypeId").val(3776);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountWithoutTaxAmount").val(self.discountTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountCgst").val(self.discountTaxInvoice.cgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountSgst").val(self.discountTaxInvoice.sgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountIgst").val(self.discountTaxInvoice.igst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountTotal").val(self.discountTaxInvoice.total);
+
             //ROUNDOFF
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffTypeId").val(3775);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffWithoutTaxAmount").val(self.roundoffTaxInvoice.without_tax_amount);
@@ -3151,6 +3189,7 @@ app.component('eyatraTripClaimForm', {
             self.drywashTaxInvoice = {};
             self.boardingTaxInvoice = {};
             self.othersTaxInvoice = {};
+            self.discountTaxInvoice = {};
             self.roundoffTaxInvoice = {};
             self.grandTotalTaxInvoice = {};
             $('#lodgingTaxInvoiceFormModal').modal('hide');

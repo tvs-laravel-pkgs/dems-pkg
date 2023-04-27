@@ -1167,6 +1167,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Roundoff',
 				'config_type_id' => 546,
 			],
+			3776 => [
+				'name' => 'Discount',
+				'config_type_id' => 546,
+			],
 
 			// Axapta Export Types
 			3790 => [
