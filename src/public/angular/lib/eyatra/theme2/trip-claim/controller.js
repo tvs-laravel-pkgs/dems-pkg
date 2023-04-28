@@ -3112,7 +3112,8 @@ app.component('eyatraTripClaimForm', {
             self.grandTotalTaxInvoice.cgst = parseFloat(cgst).toFixed(2);
             self.grandTotalTaxInvoice.sgst = parseFloat(sgst).toFixed(2);
             self.grandTotalTaxInvoice.igst = parseFloat(igst).toFixed(2);
-            self.grandTotalTaxInvoice.total = parseFloat(grandTotal).toFixed(2);
+            // self.grandTotalTaxInvoice.total = parseFloat(grandTotal).toFixed(2);
+            self.grandTotalTaxInvoice.total = (parseFloat(grandTotal) + parseFloat(roundoffTotal)).toFixed(2);
             self.roundoffTaxInvoice.total = parseFloat(roundoffTotal).toFixed(2);
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['amount'] = self.grandTotalTaxInvoice.without_tax_amount;
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['cgst'] = self.grandTotalTaxInvoice.cgst;
