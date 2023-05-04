@@ -7,6 +7,7 @@ namespace Uitoux\EYatra;
 use App\Attachment;
 use App\Company;
 use App\FinancialYear;
+use App\Oracle\OtherTypeTransactionDetail;
 use App\Portal;
 use App\SerialNumberGroup;
 use App\User;
@@ -4661,10 +4662,10 @@ request is not desired, then those may be rejected.';
 		}
 
 		//ROUND OFF
-		$amountDiff = 0;
-		if (!empty($amount)) {
-			$amountDiff = number_format((round($amount) - $amount), 2);
-		}
+		// $amountDiff = 0;
+		// if (!empty($amount)) {
+		// $amountDiff = number_format((round($amount) - $amount), 2);
+		// }
 
 		DB::table('oracle_ap_invoice_exports')->insert([
 			'company_id' => $companyId,
@@ -4676,9 +4677,9 @@ request is not desired, then those may be rejected.';
 			'supplier_site_name' => $supplierSiteName,
 			'invoice_type' => $invoiceType,
 			'description' => $description,
-			'amount' => $amount,
+			'amount' => round($amount),
 			'outlet' => $outletCode,
-			'round_off_amount' => $amountDiff,
+			// 'round_off_amount' => $amountDiff,
 			'accounting_class' => $accountingClass,
 			'company' => $company,
 			'lob' => $lob,
@@ -5536,6 +5537,7 @@ request is not desired, then those may be rejected.';
 		$naturalAccount = Config::where('id', 3861)->first()->name;
 		$supplierSiteName = $outletCode;
 
+		$roundOffTransaction = OtherTypeTransactionDetail::apRoundOffTransaction();
 		$bpas_portal = Portal::select([
 			'db_host_name',
 			'db_port_number',
@@ -5605,7 +5607,8 @@ request is not desired, then those may be rejected.';
 		$employeeLodgingRoundoff += floatval($roundOffAmt);
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
-		$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+		// $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+		$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
 
 		//LODGING-GST ENTRY
 		if ($lodgingCgstSgstTaxableAmount && $lodgingCgstSgstTaxableAmount > 0) {
@@ -5620,6 +5623,20 @@ request is not desired, then those may be rejected.';
 			$taxAmount = $lodgingIgstAmount;
 
 			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $lodgingIgstTaxableAmount, $taxClassification, null, null, $lodgingIgstAmount, null, null, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+		}
+
+		//ROUND OFF ENTRY
+		if ($employeeLodgingRoundoff && $employeeLodgingRoundoff != '0.00') {
+			$roundOffDescription = null;
+			$roundOffAccountingClass = null;
+			$roundOffNaturalAccount = null;
+			if ($roundOffTransaction) {
+				$roundOffDescription = $roundOffTransaction->name;
+				$roundOffAccountingClass = $roundOffTransaction->accounting_class;
+				$roundOffNaturalAccount = $roundOffTransaction->natural_account;
+			}
+
+			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount);
 		}
 
 		$res['success'] = true;
