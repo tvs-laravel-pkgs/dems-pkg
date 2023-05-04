@@ -67,6 +67,8 @@ class EYatraConfigSeeder extends Seeder {
 			551 => 'Company Business Unit',
 			552 => 'Trip Advance - Pre Payment Invoice Natural Account',
 			553 => 'Claim - Invoice Natural Account',
+			554 => 'Oracle Other Transaction Invoice Types',
+			555 => 'Oracle Other Transaction Types',
 		];
 
 		$configs = [
@@ -1237,6 +1239,24 @@ class EYatraConfigSeeder extends Seeder {
 			3861 => [
 				'name' => '413401',
 				'config_type_id' => 553,
+			],
+
+			3881 => [
+				'name' => 'AR Invoice',
+				'config_type_id' => 554,
+			],
+			3882 => [
+				'name' => 'AP Invoice',
+				'config_type_id' => 554,
+			],
+
+			3891 => [
+				'name' => 'Frieght Charges',
+				'config_type_id' => 555,
+			],
+			3892 => [
+				'name' => 'Roundoff',
+				'config_type_id' => 555,
 			],
 		];
 
