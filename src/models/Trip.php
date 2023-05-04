@@ -508,6 +508,7 @@ class Trip extends Model {
 		$pending_trip = Trip::where('trips.employee_id', Auth::user()->entity_id)
 			->where('trips.id', '!=', $trip->id)
 			->where('trips.start_date', '<=', $tripStartDate)
+			->where('trips.id', '<', $trip->id)
 			->whereIn('trips.status_id', [3021, 3028])
 			->first();
 		$pending_trip_status = !!$pending_trip;
@@ -1338,6 +1339,7 @@ class Trip extends Model {
 				'lodgings.drywashTaxInvoice',
 				'lodgings.boardingTaxInvoice',
 				'lodgings.othersTaxInvoice',
+				'lodgings.discountTaxInvoice',
 				'lodgings.roundoffTaxInvoice',
 				'lodgings.stateType',
 				'lodgings.city',
@@ -1784,6 +1786,7 @@ class Trip extends Model {
 			'lodgings.drywashTaxInvoice',
 			'lodgings.boardingTaxInvoice',
 			'lodgings.othersTaxInvoice',
+			'lodgings.discountTaxInvoice',
 			'lodgings.roundoffTaxInvoice',
 			'lodgings.city',
 			'lodgings.stateType',
@@ -2115,14 +2118,14 @@ class Trip extends Model {
 			$two_wheeler_total_km = 0;
 			$four_wheeler_total_km = 0;
 
-			if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
-				if (floatval($request->claim_total_amount) <= 0) {
-					return response()->json([
-						'success' => false,
-						'errors' => ['Trip claim amount should be greater than 0'],
-					]);
-				}
-			}
+			// if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
+			// 	if (floatval($request->claim_total_amount) <= 0) {
+			// 		return response()->json([
+			// 			'success' => false,
+			// 			'errors' => ['Trip claim amount should be greater than 0'],
+			// 		]);
+			// 	}
+			// }
 
 			// dd($request->all());
 			//starting ending Km validation
@@ -2920,6 +2923,24 @@ class Trip extends Model {
 							$othersTaxInvoice->total = !empty($lodging_data['othersTaxInvoice']['total']) ? $lodging_data['othersTaxInvoice']['total'] : 0;
 							$othersTaxInvoice->save();
 
+							//SAVE DISCOUNT TAX INVOICE
+							$discountTaxInvoice = LodgingTaxInvoice::firstOrNew([
+								'lodging_id' => $lodging->id,
+								'type_id' => 3776,
+							]);
+							if (!$discountTaxInvoice->exists) {
+								$discountTaxInvoice->created_at = Carbon::now();
+							} else {
+								$discountTaxInvoice->updated_at = Carbon::now();
+							}
+							$discountTaxInvoice->without_tax_amount = !empty($lodging_data['discountTaxInvoice']['without_tax_amount']) ? $lodging_data['discountTaxInvoice']['without_tax_amount'] : 0;
+							$discountTaxInvoice->tax_percentage = !empty($lodging_data['discountTaxInvoice']['tax_percentage']) ? $lodging_data['discountTaxInvoice']['tax_percentage'] : 0;
+							$discountTaxInvoice->cgst = !empty($lodging_data['discountTaxInvoice']['cgst']) ? $lodging_data['discountTaxInvoice']['cgst'] : 0;
+							$discountTaxInvoice->sgst = !empty($lodging_data['discountTaxInvoice']['sgst']) ? $lodging_data['discountTaxInvoice']['sgst'] : 0;
+							$discountTaxInvoice->igst = !empty($lodging_data['discountTaxInvoice']['igst']) ? $lodging_data['discountTaxInvoice']['igst'] : 0;
+							$discountTaxInvoice->total = !empty($lodging_data['discountTaxInvoice']['total']) ? $lodging_data['discountTaxInvoice']['total'] : 0;
+							$discountTaxInvoice->save();
+
 							//SAVE ROUNDOFF TAX INVOICE
 							$roundoffTaxInvoice = LodgingTaxInvoice::firstOrNew([
 								'lodging_id' => $lodging->id,
@@ -3085,6 +3106,7 @@ class Trip extends Model {
 					'lodgings.drywashTaxInvoice',
 					'lodgings.boardingTaxInvoice',
 					'lodgings.othersTaxInvoice',
+					'lodgings.discountTaxInvoice',
 					'lodgings.roundoffTaxInvoice',
 					'lodging_attachments',
 					'lodgings.city',

@@ -659,9 +659,11 @@ class ExportReportController extends Controller {
 								'self_ax_export_synched' => 1,
 							]);
 						} else {
+
 							// Trip::where('id', $employeeTrip->id)->update([
 							// 	'advance_ax_export_sync' => 1,
 							// ]);
+
 						}
 
 						// DB::commit();
@@ -1225,7 +1227,7 @@ class ExportReportController extends Controller {
 				DB::raw("'Outstation Claim' as category")
 			)
 				->join('users as u', 'u.entity_id', 'trips.employee_id')
-				->join('bank_details as bd', 'bd.entity_id', 'trips.employee_id')
+				->leftjoin('bank_details as bd', 'bd.entity_id', 'trips.employee_id')
 				->join('employees', 'employees.id', 'trips.employee_id')
 				->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
 				->leftjoin('outlets as ol', 'ol.id', 'trips.outlet_id')
@@ -1261,7 +1263,7 @@ class ExportReportController extends Controller {
 				DB::raw("'Advance Payment' as category")
 			)
 				->join('users as u', 'u.entity_id', 'employees.id')
-				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
+				->leftjoin('bank_details as bd', 'bd.entity_id', 'employees.id')
 				->join('trips as t', 't.employee_id', 'employees.id')
 				->leftjoin('ey_employee_claims as eyec', 'eyec.employee_id', 'employees.id')
 				->leftjoin('outlets as ol', 'ol.id', 't.outlet_id')
@@ -1294,7 +1296,7 @@ class ExportReportController extends Controller {
 				DB::raw("'Local Trip Claim' as category")
 			)
 				->join('users as u', 'u.entity_id', 'employees.id')
-				->join('bank_details as bd', 'bd.entity_id', 'employees.id')
+				->leftjoin('bank_details as bd', 'bd.entity_id', 'employees.id')
 				->join('local_trips as lt', 'lt.employee_id', 'employees.id')
 				->leftjoin('outlets as ol', 'ol.id', 'lt.outlet_id')
 				->leftjoin('sbus as s', 's.id', 'employees.sbu_id')
@@ -1874,7 +1876,11 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('ey_employee_claims.created_at', '>=', $from_date)
 			->whereDate('ey_employee_claims.created_at', '<=', $to_date)
-			->where('departments.business_id', '=', $r->business_ids)
+			->where(function ($q) use ($r) {
+				if ($r->business_ids != -1) {
+					$q->where('departments.business_id', $r->business_ids);
+				}
+			})
 			->groupBy('lodgings.id')
 			->get();
 		// dd(count($gst_details));
@@ -2653,9 +2659,11 @@ class ExportReportController extends Controller {
 								'self_ax_export_synched' => 1,
 							]);
 						} else {
+
 							// Trip::where('id', $employeeTrip->id)->update([
 							// 	'advance_ax_export_sync' => 1,
 							// ]);
+
 						}
 					} catch (\Exception $e) {
 						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();

@@ -252,28 +252,54 @@ app.component('eyatraTripBookingUpdatesForm', {
             },
         });
         $scope.gstHelper = function() {
-            var cgst = $('#cgst').val();
-            var sgst = $('#sgst').val();
-            var igst = $('#igst').val();
+            // var cgst = $('#cgst').val();
+            // var sgst = $('#sgst').val();
+            // var igst = $('#igst').val();
 
-            if (cgst == '' && sgst == '') {
-                $('#igst').attr('readonly', false);
-                $('#igst').attr('placeholder', 'Eg:133.50');
-            } else {
-                $('#igst').attr('readonly', true);
-                $('#igst').attr('placeholder', 'N/A');
-            }
+            // if (cgst == '' && sgst == '') {
+            //     $('#igst').attr('readonly', false);
+            //     $('#igst').attr('placeholder', 'Eg:133.50');
+            // } else {
+            //     $('#igst').attr('readonly', true);
+            //     $('#igst').attr('placeholder', 'N/A');
+            // }
 
-            if (igst == '') {
-                $('#cgst').attr('readonly', false);
-                $('#sgst').attr('readonly', false);
-                $('#cgst').attr('placeholder', 'Eg:113.50');
-                $('#sgst').attr('placeholder', 'Eg:123.50');
-            } else {
-                $('#cgst').attr('readonly', true);
-                $('#sgst').attr('readonly', true);
-                $('#cgst').attr('placeholder', 'N/A');
-                $('#sgst').attr('placeholder', 'N/A');
+            // if (igst == '') {
+            //     $('#cgst').attr('readonly', false);
+            //     $('#sgst').attr('readonly', false);
+            //     $('#cgst').attr('placeholder', 'Eg:113.50');
+            //     $('#sgst').attr('placeholder', 'Eg:123.50');
+            // } else {
+            //     $('#cgst').attr('readonly', true);
+            //     $('#sgst').attr('readonly', true);
+            //     $('#cgst').attr('placeholder', 'N/A');
+            //     $('#sgst').attr('placeholder', 'N/A');
+            // }
+
+            if(self.visit && self.visit.gstin){
+                var cgst = $('#cgst').val();
+                var sgst = $('#sgst').val();
+                var igst = $('#igst').val();
+
+                if (cgst == '' && sgst == '') {
+                    $('#igst').attr('readonly', false);
+                    $('#igst').attr('placeholder', 'Eg:133.50');
+                } else {
+                    $('#igst').attr('readonly', true);
+                    $('#igst').attr('placeholder', 'N/A');
+                }
+
+                if (igst == '') {
+                    $('#cgst').attr('readonly', false);
+                    $('#sgst').attr('readonly', false);
+                    $('#cgst').attr('placeholder', 'Eg:113.50');
+                    $('#sgst').attr('placeholder', 'Eg:123.50');
+                } else {
+                    $('#cgst').attr('readonly', true);
+                    $('#sgst').attr('readonly', true);
+                    $('#cgst').attr('placeholder', 'N/A');
+                    $('#sgst').attr('placeholder', 'N/A');
+                }
             }
         }
     }

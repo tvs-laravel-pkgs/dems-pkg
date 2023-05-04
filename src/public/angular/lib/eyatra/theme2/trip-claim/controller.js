@@ -275,6 +275,7 @@ app.component('eyatraTripClaimForm', {
             self.drywashTaxInvoice = {};
             self.boardingTaxInvoice = {};
             self.othersTaxInvoice = {};
+            self.discountTaxInvoice = {};
             self.roundoffTaxInvoice = {};
             self.grandTotalTaxInvoice = {};
 
@@ -435,6 +436,13 @@ app.component('eyatraTripClaimForm', {
                 self.lodgingCal();
                 self.boardingCal();
                 self.localTravelCal();
+
+                if(self.trip.lodgings && (self.trip.lodgings).length > 0){
+                    $.each(self.trip.lodgings,(lodging_index, lodging_info) => {
+                       $scope.gstinCheck(lodging_index); 
+                    });
+                }
+
                 // fileUpload();
                 $(".datepicker").datepicker({
                     todayHighlight: true,
@@ -808,28 +816,54 @@ app.component('eyatraTripClaimForm', {
         }
 
         $scope.gstHelper = function(index) {
-            var cgst = $('#' + index + '-visitCgst').val();
-            var sgst = $('#' + index + '-visitSgst').val();
-            var igst = $('#' + index + '-visitIgst').val();
+            // var cgst = $('#' + index + '-visitCgst').val();
+            // var sgst = $('#' + index + '-visitSgst').val();
+            // var igst = $('#' + index + '-visitIgst').val();
 
-            if (cgst == '' && sgst == '') {
-                $('#' + index + '-visitIgst').attr('readonly', false);
-                $('#' + index + '-visitIgst').attr('placeholder', 'Eg:133.50');
-            } else {
-                $('#' + index + '-visitIgst').attr('readonly', true);
-                $('#' + index + '-visitIgst').attr('placeholder', 'N/A');
-            }
+            // if (cgst == '' && sgst == '') {
+            //     $('#' + index + '-visitIgst').attr('readonly', false);
+            //     $('#' + index + '-visitIgst').attr('placeholder', 'Eg:133.50');
+            // } else {
+            //     $('#' + index + '-visitIgst').attr('readonly', true);
+            //     $('#' + index + '-visitIgst').attr('placeholder', 'N/A');
+            // }
 
-            if (igst == '') {
-                $('#' + index + '-visitCgst').attr('readonly', false);
-                $('#' + index + '-visitSgst').attr('readonly', false);
-                $('#' + index + '-visitCgst').attr('placeholder', 'Eg:113.50');
-                $('#' + index + '-visitSgst').attr('placeholder', 'Eg:123.50');
-            } else {
-                $('#' + index + '-visitCgst').attr('readonly', true);
-                $('#' + index + '-visitSgst').attr('readonly', true);
-                $('#' + index + '-visitCgst').attr('placeholder', 'N/A');
-                $('#' + index + '-visitSgst').attr('placeholder', 'N/A');
+            // if (igst == '') {
+            //     $('#' + index + '-visitCgst').attr('readonly', false);
+            //     $('#' + index + '-visitSgst').attr('readonly', false);
+            //     $('#' + index + '-visitCgst').attr('placeholder', 'Eg:113.50');
+            //     $('#' + index + '-visitSgst').attr('placeholder', 'Eg:123.50');
+            // } else {
+            //     $('#' + index + '-visitCgst').attr('readonly', true);
+            //     $('#' + index + '-visitSgst').attr('readonly', true);
+            //     $('#' + index + '-visitCgst').attr('placeholder', 'N/A');
+            //     $('#' + index + '-visitSgst').attr('placeholder', 'N/A');
+            // }
+
+            if(self.trip.visits[index].self_booking && self.trip.visits[index].self_booking.gstin){
+                var cgst = $('#' + index + '-visitCgst').val();
+                var sgst = $('#' + index + '-visitSgst').val();
+                var igst = $('#' + index + '-visitIgst').val();
+
+                if (cgst == '' && sgst == '') {
+                    $('#' + index + '-visitIgst').attr('readonly', false);
+                    $('#' + index + '-visitIgst').attr('placeholder', 'Eg:133.50');
+                } else {
+                    $('#' + index + '-visitIgst').attr('readonly', true);
+                    $('#' + index + '-visitIgst').attr('placeholder', 'N/A');
+                }
+
+                if (igst == '') {
+                    $('#' + index + '-visitCgst').attr('readonly', false);
+                    $('#' + index + '-visitSgst').attr('readonly', false);
+                    $('#' + index + '-visitCgst').attr('placeholder', 'Eg:113.50');
+                    $('#' + index + '-visitSgst').attr('placeholder', 'Eg:123.50');
+                } else {
+                    $('#' + index + '-visitCgst').attr('readonly', true);
+                    $('#' + index + '-visitSgst').attr('readonly', true);
+                    $('#' + index + '-visitCgst').attr('placeholder', 'N/A');
+                    $('#' + index + '-visitSgst').attr('placeholder', 'N/A');
+                }
             }
         }
         $scope.gstBoardingHelper = function(index) {
@@ -838,21 +872,21 @@ app.component('eyatraTripClaimForm', {
             var igst = $('#' + index + '-boardingIgst').val();
 
             if (cgst == '' && sgst == '') {
-                $('#' + index + '-boardingIgst').attr('readonly', false);
+                // $('#' + index + '-boardingIgst').attr('readonly', false);
                 $('#' + index + '-boardingIgst').attr('placeholder', 'Eg:133.50');
             } else {
-                $('#' + index + '-boardingIgst').attr('readonly', true);
+                // $('#' + index + '-boardingIgst').attr('readonly', true);
                 $('#' + index + '-boardingIgst').attr('placeholder', 'N/A');
             }
 
             if (igst == '') {
-                $('#' + index + '-boardingCgst').attr('readonly', false);
-                $('#' + index + '-boardingSgst').attr('readonly', false);
+                // $('#' + index + '-boardingCgst').attr('readonly', false);
+                // $('#' + index + '-boardingSgst').attr('readonly', false);
                 $('#' + index + '-boardingCgst').attr('placeholder', 'Eg:113.50');
                 $('#' + index + '-boardingSgst').attr('placeholder', 'Eg:123.50');
             } else {
-                $('#' + index + '-boardingCgst').attr('readonly', true);
-                $('#' + index + '-boardingSgst').attr('readonly', true);
+                // $('#' + index + '-boardingCgst').attr('readonly', true);
+                // $('#' + index + '-boardingSgst').attr('readonly', true);
                 $('#' + index + '-boardingCgst').attr('placeholder', 'N/A');
                 $('#' + index + '-boardingSgst').attr('placeholder', 'N/A');
             }
@@ -863,21 +897,21 @@ app.component('eyatraTripClaimForm', {
             var igst = $('#' + index + '-localTravelIgst').val();
 
             if (cgst == '' && sgst == '') {
-                $('#' + index + '-localTravelIgst').attr('readonly', false);
+                // $('#' + index + '-localTravelIgst').attr('readonly', false);
                 $('#' + index + '-localTravelIgst').attr('placeholder', 'Eg:133.50');
             } else {
-                $('#' + index + '-localTravelIgst').attr('readonly', true);
+                // $('#' + index + '-localTravelIgst').attr('readonly', true);
                 $('#' + index + '-localTravelIgst').attr('placeholder', 'N/A');
             }
 
             if (igst == '') {
-                $('#' + index + '-localTravelCgst').attr('readonly', false);
-                $('#' + index + '-localTravelSgst').attr('readonly', false);
+                // $('#' + index + '-localTravelCgst').attr('readonly', false);
+                // $('#' + index + '-localTravelSgst').attr('readonly', false);
                 $('#' + index + '-localTravelCgst').attr('placeholder', 'Eg:113.50');
                 $('#' + index + '-localTravelSgst').attr('placeholder', 'Eg:123.50');
             } else {
-                $('#' + index + '-localTravelCgst').attr('readonly', true);
-                $('#' + index + '-localTravelSgst').attr('readonly', true);
+                // $('#' + index + '-localTravelCgst').attr('readonly', true);
+                // $('#' + index + '-localTravelSgst').attr('readonly', true);
                 $('#' + index + '-localTravelCgst').attr('placeholder', 'N/A');
                 $('#' + index + '-localTravelSgst').attr('placeholder', 'N/A');
             }
@@ -1856,7 +1890,8 @@ app.component('eyatraTripClaimForm', {
             $(self.trip.visits).each(function(key, visit) {
                 // if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17) {
                 // if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272) {
-                if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272 && visit.travel_mode_id != 270 && visit.travel_mode_id != 271) {
+                // if (visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272 && visit.travel_mode_id != 270 && visit.travel_mode_id != 271) {
+                if (visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272 && visit.travel_mode_id != 270 && visit.travel_mode_id != 271) {
                     $scope.travel_mode_check = true;
                 }
             });
@@ -1936,6 +1971,7 @@ app.component('eyatraTripClaimForm', {
             console.log({ grade_travel_ids })
             is_grade_travel_mode = false;
             let bookedBySelf = false
+            let visitInvoiceTotalAmount = 0;
             $(self.trip.visits).each(function(key, visit) {
                 console.log(visit.travel_mode_id);
                 console.log(jQuery.inArray(visit.travel_mode_id, grade_travel_ids) == -1);
@@ -1944,9 +1980,15 @@ app.component('eyatraTripClaimForm', {
                     is_grade_travel_mode = true;
                     is_deviation = true;
                 }
+
+                if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount)){
+                    visitInvoiceTotalAmount += parseFloat(visit.self_booking.invoice_amount);
+                }
+
                 if(visit.booking_method_id == 3040)
                     bookedBySelf = true
             });
+            
             console.log({ is_grade_travel_mode })
             if (is_grade_travel_mode == true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
@@ -1965,7 +2007,8 @@ app.component('eyatraTripClaimForm', {
                     // is_deviation = true;
                     // attachmentError = 'Fare detail document not uploaded'
                     // self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
-                    if(self.is_grade_leader == false && !!bookedBySelf){
+                    // if(self.is_grade_leader == false && !!bookedBySelf){
+                    if(self.is_grade_leader == false && !!bookedBySelf && visitInvoiceTotalAmount > 0){
                         is_deviation = true;
                         attachmentError = 'Fare detail document not uploaded'
                         self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
@@ -1989,7 +2032,8 @@ app.component('eyatraTripClaimForm', {
                     if (jQuery.inArray(3750, tripAttachmentTypeIds) == -1) {
                         // Fare detail document validation
                         // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
-                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf) {
+                        // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf) {
+                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf && visitInvoiceTotalAmount > 0) {
                             is_deviation = true;
                             attachmentError = 'Fare detail document not uploaded'
                             self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
@@ -2018,7 +2062,8 @@ app.component('eyatraTripClaimForm', {
             if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
                 $(self.trip.lodgings).each(function(key, lodge) {
                     console.log(lodge.stay_type_id);
-                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                    // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                    if (lodge.stay_type_id == 3340) { // 3340 -> LODGE STAY
                         if (lodge.city_id) {
                             var guestHouseStatus = 0
                             $(self.extras.city_list).each(function(cityKey, city) {
@@ -2059,7 +2104,10 @@ app.component('eyatraTripClaimForm', {
                     if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272){
                         //proof upload yes and booking method self and travel mode not equal to two Wheeler, four wheeler, office vehicle
                         if ((self.trip.trip_attachments).length == 0) {
-                            leader_proof_error.push('Fare detail document not uploaded');
+                            // leader_proof_error.push('Fare detail document not uploaded');
+                            if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount) && parseFloat(visit.self_booking.invoice_amount) > 0){
+                                leader_proof_error.push('Fare detail document not uploaded');
+                            }
                         }else {
                             var tripAttachmentTypeIds = [];
                             $(self.trip.trip_attachments).each(function(key, tripAttachment) {
@@ -2071,7 +2119,10 @@ app.component('eyatraTripClaimForm', {
                             // 3755 : self doc
                             if ($.inArray(3750, tripAttachmentTypeIds) == -1) {
                                 if ($.inArray(3751, tripAttachmentTypeIds) == -1) {
-                                    leader_proof_error.push('Fare detail document not uploaded');
+                                    // leader_proof_error.push('Fare detail document not uploaded');
+                                    if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount) && parseFloat(visit.self_booking.invoice_amount) > 0){
+                                        leader_proof_error.push('Fare detail document not uploaded');
+                                    }
                                 }
  
                                 if ($.inArray(3755, tripAttachmentTypeIds) == -1) {
@@ -2106,7 +2157,8 @@ app.component('eyatraTripClaimForm', {
                                 }
 
                                 if ($.inArray(3756, tripAttachmentTypeIds) == -1) {
-                                    if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                                    // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
+                                    if (lodge.stay_type_id == 3340) { // 3340 -> LODGE STAY
                                         if (lodge.city_id) {
                                             var guestHouseStatus = 0;
                                             $(self.extras.city_list).each(function(city_key, city) {
@@ -2820,6 +2872,14 @@ app.component('eyatraTripClaimForm', {
                     self.othersTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceOthersIgst").val();
                     self.othersTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceOthersTotal").val();
 
+                    //DISCOUNT
+                    self.discountTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceDiscountWithoutTaxAmount").val();
+                    self.discountTaxInvoice.tax_percentage = $("#" + lodgingIndex + "-taxInvoiceDiscountTaxPercentage").val();
+                    self.discountTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceDiscountCgst").val();
+                    self.discountTaxInvoice.sgst = $("#" + lodgingIndex + "-taxInvoiceDiscountSgst").val();
+                    self.discountTaxInvoice.igst = $("#" + lodgingIndex + "-taxInvoiceDiscountIgst").val();
+                    self.discountTaxInvoice.total = $("#" + lodgingIndex + "-taxInvoiceDiscountTotal").val();
+
                     //ROUNDOFF
                     self.roundoffTaxInvoice.without_tax_amount = $("#" + lodgingIndex + "-taxInvoiceRoundoffWithoutTaxAmount").val();
                     self.roundoffTaxInvoice.cgst = $("#" + lodgingIndex + "-taxInvoiceRoundoffCgst").val();
@@ -2846,6 +2906,7 @@ app.component('eyatraTripClaimForm', {
                     self.drywashTaxInvoice = {};
                     self.boardingTaxInvoice = {};
                     self.othersTaxInvoice = {};
+                    self.discountTaxInvoice = {};
                     self.roundoffTaxInvoice = {};
                     self.grandTotalTaxInvoice = {};
                     $('#lodging_has_multiple_tax_invoice_active_' + lodgingIndex).attr('disabled', true);
@@ -2858,6 +2919,7 @@ app.component('eyatraTripClaimForm', {
                 self.drywashTaxInvoice = {};
                 self.boardingTaxInvoice = {};
                 self.othersTaxInvoice = {};
+                self.discountTaxInvoice = {};
                 self.roundoffTaxInvoice = {};
                 self.grandTotalTaxInvoice = {};
             }
@@ -2888,6 +2950,12 @@ app.component('eyatraTripClaimForm', {
             let othersSgst = 0;
             let othersIgst = 0;
             let othersTotal = 0;
+            let discountWithoutTaxAmount = parseFloat(self.discountTaxInvoice.without_tax_amount) || 0;
+            let discountCgst = 0;
+            let discountSgst = 0;
+            let discountIgst = 0;
+            let discountTotal = 0;
+
             let roundoffTotal = 0;
             let base = 0;
             let cgst = 0;
@@ -3003,11 +3071,19 @@ app.component('eyatraTripClaimForm', {
                 // othersTotal = othersWithoutTaxAmount + othersCgst + othersSgst + othersIgst;
                 othersTotal = Math.round(othersWithoutTaxAmount * 100)/ 100 + Math.round(othersCgst * 100)/ 100 + Math.round(othersSgst * 100)/ 100 + Math.round(othersIgst * 100)/ 100;
             }
-            base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
+
+            //DISCOUNT CALCULATION
+            if (discountWithoutTaxAmount && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex] && self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin']) {
+                discountTotal = Math.round(discountWithoutTaxAmount * 100) / 100;
+            }
+
+            // base = lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount;
+            base = (lodgeWithoutTaxAmount + drywashWithoutTaxAmount + boardingWithoutTaxAmount + othersWithoutTaxAmount) - discountWithoutTaxAmount;
             cgst = lodgeCgst + drywashCgst + boardingCgst + othersCgst;
             sgst = lodgeSgst + drywashSgst + boardingSgst + othersSgst;
             igst = lodgeIgst + drywashIgst + boardingIgst + othersIgst;
-            grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal; //+ roundoffTotal;
+            // grandTotal = lodgeTotal + drywashTotal + boardingTotal + othersTotal; //+ roundoffTotal;
+            grandTotal = (lodgeTotal + drywashTotal + boardingTotal + othersTotal) - discountTotal; //+ roundoffTotal;
             roundoffTotal = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['invoice_amount'] - grandTotal;
             console.log(self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['invoice_amount'], grandTotal);
 
@@ -3027,11 +3103,18 @@ app.component('eyatraTripClaimForm', {
             self.othersTaxInvoice.sgst = parseFloat(othersSgst).toFixed(2);
             self.othersTaxInvoice.igst = parseFloat(othersIgst).toFixed(2);
             self.othersTaxInvoice.total = parseFloat(othersTotal).toFixed(2);
+            self.discountTaxInvoice.cgst = parseFloat(discountCgst).toFixed(2);
+            self.discountTaxInvoice.sgst = parseFloat(discountSgst).toFixed(2);
+            self.discountTaxInvoice.igst = parseFloat(discountIgst).toFixed(2);
+            self.discountTaxInvoice.total = parseFloat(discountTotal).toFixed(2);
+
             self.grandTotalTaxInvoice.without_tax_amount = parseFloat(base).toFixed(2);
             self.grandTotalTaxInvoice.cgst = parseFloat(cgst).toFixed(2);
             self.grandTotalTaxInvoice.sgst = parseFloat(sgst).toFixed(2);
             self.grandTotalTaxInvoice.igst = parseFloat(igst).toFixed(2);
-            self.grandTotalTaxInvoice.total = parseFloat(grandTotal).toFixed(2);
+            // self.grandTotalTaxInvoice.total = parseFloat(grandTotal).toFixed(2);
+            // self.grandTotalTaxInvoice.total = (parseFloat(grandTotal) + parseFloat(roundoffTotal)).toFixed(2);
+            self.grandTotalTaxInvoice.total = Math.round(parseFloat(grandTotal) + parseFloat(roundoffTotal)).toFixed(2);
             self.roundoffTaxInvoice.total = parseFloat(roundoffTotal).toFixed(2);
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['amount'] = self.grandTotalTaxInvoice.without_tax_amount;
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['cgst'] = self.grandTotalTaxInvoice.cgst;
@@ -3075,6 +3158,14 @@ app.component('eyatraTripClaimForm', {
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersIgst").val(self.othersTaxInvoice.igst);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceOthersTotal").val(self.othersTaxInvoice.total);
 
+            //DISCOUNT
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountTypeId").val(3776);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountWithoutTaxAmount").val(self.discountTaxInvoice.without_tax_amount);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountCgst").val(self.discountTaxInvoice.cgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountSgst").val(self.discountTaxInvoice.sgst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountIgst").val(self.discountTaxInvoice.igst);
+            $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceDiscountTotal").val(self.discountTaxInvoice.total);
+
             //ROUNDOFF
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffTypeId").val(3775);
             $("#" + self.lodgingTaxInvoiceModalIndex + "-taxInvoiceRoundoffWithoutTaxAmount").val(self.roundoffTaxInvoice.without_tax_amount);
@@ -3091,6 +3182,8 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].tax_invoice_amount = self.grandTotalTaxInvoice.total;
             if (self.roundoffTaxInvoice.total > 1 || self.roundoffTaxInvoice.total < -1) {
                 custom_noty('error', "Round Off Amount is with in +1 or -1");
+                // self.trip.lodgings[self.lodgingTaxInvoiceModalIndex].has_multiple_tax_invoice = "No";
+                return;
             }
 
             self.lodgingTaxInvoiceModalIndex = '';
@@ -3098,6 +3191,7 @@ app.component('eyatraTripClaimForm', {
             self.drywashTaxInvoice = {};
             self.boardingTaxInvoice = {};
             self.othersTaxInvoice = {};
+            self.discountTaxInvoice = {};
             self.roundoffTaxInvoice = {};
             self.grandTotalTaxInvoice = {};
             $('#lodgingTaxInvoiceFormModal').modal('hide');
@@ -3808,6 +3902,11 @@ app.component('eyatraTripClaimForm', {
                                 self.lodgings_attachment_removal_ids = [];
                                 $('#lodgings_attach_removal_ids').val('');
                                 self.enable_switch_tab = true;
+                                if((self.trip.lodgings).length > 0){
+                                    $.each(self.trip.lodgings,(lodging_index, lodging_info) => {
+                                       $scope.gstinCheck(lodging_index); 
+                                    });
+                                }
                                 $scope.$apply()
                                 // $('.tab_li').removeClass('active');
                                 // $('.tab_boarding').addClass('active');

@@ -123,6 +123,10 @@ class Lodging extends Model {
 		return $this->hasOne('Uitoux\EYatra\LodgingTaxInvoice', 'lodging_id')->where('type_id', 3774);
 	}
 
+	public function discountTaxInvoice() {
+		return $this->hasOne('Uitoux\EYatra\LodgingTaxInvoice', 'lodging_id')->where('type_id', 3776);
+	}
+
 	public function roundoffTaxInvoice() {
 		return $this->hasOne('Uitoux\EYatra\LodgingTaxInvoice', 'lodging_id')->where('type_id', 3775);
 	}
