@@ -4162,7 +4162,8 @@ request is not desired, then those may be rejected.';
 	public static function getAttachmentList($trip_id) {
 		$exist_attachment_ids = Attachment::where('attachment_type_id', 3200)
 			->where('entity_id', $trip_id)
-			->where('attachment_of_id', '!=', 3754)
+		// ->where('attachment_of_id', '!=', 3754)
+			->whereNotIn('attachment_of_id', [3754, 3752])
 			->pluck('attachment_of_id')->toArray();
 		$pending_attachment_lists = Collect(
 			Config::select('id', 'name')
