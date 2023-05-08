@@ -135,7 +135,16 @@ class TripBookingRequestController extends Controller {
 				} elseif ($visit->status_id == '3022') {
 					return "Trip Rejected";
 				} else {
-					return "-";
+					// return "-";
+					$visitCancelledCount = Visit::where('trip_id', $visit->trip_id)
+						->where('booking_method_id', 3042) //AGENT
+						->where('status_id', 3062) //VISIT CANCELLED
+						->count();
+					if ($visitCancelledCount > 0) {
+						return "Visit Cancelled";
+					} else {
+						return "-";
+					}
 				}
 			})
 			->addColumn('action', function ($visit) {
