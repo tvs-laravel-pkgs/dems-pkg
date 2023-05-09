@@ -1876,6 +1876,8 @@ class ExportReportController extends Controller {
 					$q->where('departments.business_id', $r->business_ids);
 				}
 			})
+			->whereNotNull('lodgings.gstin')
+			->where('lodgings.gstin', '!=', '')
 			->groupBy('lodgings.id')
 			->get();
 		// dd(count($gst_details));
