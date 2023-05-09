@@ -1124,6 +1124,14 @@ class Trip extends Model {
 		$activity_log = ActivityLog::saveLog($activity);
 		$visit = Visit::where('trip_id', $trip_id)->update(['status_id' => 3221]);
 		$visit = Visit::where('trip_id', $trip_id)->where('booking_method_id', '=', 3040)->update(['booking_status_id' => 3062]);
+
+		//TRIP CANCEL NOTIFICATION TO AGENT
+		$agentBookVisitIds = Visit::where('trip_id', $trip->id)
+			->where('booking_method_id', 3042) //AGENT
+			->pluck('id');
+		if (!empty($agentBookVisitIds)) {
+			sendEmailNotification($trip, $notification_type = 'Trip Cancel', $trip_type = "Outstation Trip", $agentBookVisitIds);
+		}
 		return response()->json(['success' => true]);
 	}
 
@@ -1194,6 +1202,12 @@ class Trip extends Model {
 				$activity['activity'] = "cancel";
 
 				$activity_log = ActivityLog::saveLog($activity);
+
+				//VISIT CANCEL NOTIFICATION TO AGENT
+				if ($visit && $visit->booking_method_id == 3042) {
+					$tripData = Trip::find($visit->trip_id);
+					sendEmailNotification($tripData, $notification_type = 'Visit Cancel', $trip_type = "Outstation Trip", [$visit->id]);
+				}
 				return response()->json(['success' => true, 'message' => 'Visit Cancelled successfully!']);
 			} else {
 				//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
