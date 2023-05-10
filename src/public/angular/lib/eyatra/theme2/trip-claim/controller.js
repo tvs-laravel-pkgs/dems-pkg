@@ -1885,6 +1885,13 @@ app.component('eyatraTripClaimForm', {
             //     is_grade_leader = true;
             // }
 
+            var tripAttachmentTypeIds = [];
+            if(self.trip && self.trip.trip_attachments){
+                $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                    tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id
+                });
+            }
+
             var deviationTypes = [];
             $scope.travel_mode_check = false;
             $(self.trip.visits).each(function(key, visit) {
@@ -2019,10 +2026,10 @@ app.component('eyatraTripClaimForm', {
                     //     self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
                     // }
                 } else {
-                    var tripAttachmentTypeIds = []
-                    $(self.trip.trip_attachments).each(function(key, tripAttachment) {
-                        tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id
-                    })
+                    // var tripAttachmentTypeIds = []
+                    // $(self.trip.trip_attachments).each(function(key, tripAttachment) {
+                    //     tripAttachmentTypeIds[tripAttachmentTypeIds.length] = tripAttachment.attachment_of_id
+                    // })
                     /*  
                         3750 -> ALL Document type
                         3751 -> Fare detail document type
