@@ -1234,7 +1234,7 @@ class EYatraConfigSeeder extends Seeder {
 
 			//ORACLE NATURAL ACCOUNT
 			3860 => [
-				'name' => '413401',
+				'name' => '152668',
 				'config_type_id' => 552,
 			],
 			3861 => [
