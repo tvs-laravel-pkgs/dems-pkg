@@ -5627,7 +5627,7 @@ request is not desired, then those may be rejected.';
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
 		// $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
-		$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
 
 		//LODGING-GST ENTRY
 		if ($lodgingCgstSgstTaxableAmount && $lodgingCgstSgstTaxableAmount > 0) {
@@ -5660,11 +5660,21 @@ request is not desired, then those may be rejected.';
 
 		//IF ADVANCE RECEIVED
 		if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
-			//EMPLOYEE TO COMPANY
-			if ($employeeClaim->amount_to_pay == 2) {
-				if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+				//EMPLOYEE TO COMPANY
+				if ($employeeClaim->amount_to_pay == 2) {
 					$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount);
 				}
+
+				//PRE PAYMENT DETAILS SAVE
+				$prePaymentDetails = DB::table('oracle_pre_payment_invoice_details')->where([
+					'ap_invoice_id' => $apInvoiceId,
+				])->get();
+				if (count($prePaymentDetails) > 0) {
+					$res['errors'] = ['Pre payment invoice already exported to oracle table'];
+					return $res;
+				}
+				$this->savePrePaymentInvoice($apInvoiceId, $businessUnitName, $supplierNumber, $invoiceNumber, $prePaymentNumber, $prePaymentAmount);
 			}
 		}
 
@@ -5674,7 +5684,7 @@ request is not desired, then those may be rejected.';
 	}
 
 	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentInvoiceDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outlet, $amount, $taxClassification, $cgst, $sgst, $igst, $roundOffAmount, $hsnCode, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount) {
-		DB::table('oracle_ap_invoice_exports')->insert([
+		return $apInvoiceId = DB::table('oracle_ap_invoice_exports')->insertGetId([
 			'company_id' => $companyId,
 			'business_unit' => $businessUnit,
 			'invoice_source' => $invoiceSource,
@@ -5704,6 +5714,18 @@ request is not desired, then those may be rejected.';
 			'location' => $location,
 			'department' => $department,
 			'natural_account' => $naturalAccount,
+			'created_at' => Carbon::now(),
+		]);
+	}
+
+	public function savePrePaymentInvoice($apInvoiceId, $businessUnit, $supplierNumber, $standardInvoiceNumber, $prePaymentInvoiceNumber, $prePaymentAmount) {
+		DB::table('oracle_pre_payment_invoice_details')->insert([
+			'ap_invoice_id' => $apInvoiceId,
+			'business_unit' => $businessUnit,
+			'supplier_number' => $supplierNumber,
+			'standard_invoice_number' => $standardInvoiceNumber,
+			'pre_payment_invoice_number' => $prePaymentInvoiceNumber,
+			'pre_payment_amount' => $prePaymentAmount,
 			'created_at' => Carbon::now(),
 		]);
 	}
