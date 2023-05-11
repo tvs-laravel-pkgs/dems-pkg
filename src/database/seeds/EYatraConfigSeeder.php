@@ -70,6 +70,7 @@ class EYatraConfigSeeder extends Seeder {
 			554 => 'Oracle Other Transaction Invoice Types',
 			555 => 'Oracle Other Transaction Types',
 			556 => 'Lodging HSN Code',
+			557 => 'Advance Balance - Employee To Company Natural Account',
 		];
 
 		$configs = [
@@ -1263,6 +1264,11 @@ class EYatraConfigSeeder extends Seeder {
 			3901 => [
 				'name' => '996311',
 				'config_type_id' => 556,
+			],
+
+			3921 => [
+				'name' => '152674',
+				'config_type_id' => 557,
 			],
 		];
 
