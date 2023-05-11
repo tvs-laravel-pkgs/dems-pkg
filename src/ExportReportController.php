@@ -1779,7 +1779,7 @@ class ExportReportController extends Controller {
 	}
 	// Gst report
 	public function gst(Request $r) {
-		//dd($r->business_ids);
+		// dd($r->business_ids);
 		ob_end_clean();
 		$date = explode(' to ', $r->period);
 		$from_date = date('Y-m-d', strtotime($date[0]));
@@ -1824,6 +1824,7 @@ class ExportReportController extends Controller {
 			'IGST AMOUNT',
 			// 'ADDRESS',
 			'DATE',
+			'HSN CODE',
 		];
 		$gst_details = EmployeeClaim::select(
 			DB::raw('COALESCE(employees.code, "") as emp_code'),
@@ -1881,6 +1882,8 @@ class ExportReportController extends Controller {
 					$q->where('departments.business_id', $r->business_ids);
 				}
 			})
+			->whereNotNull('lodgings.gstin')
+			->where('lodgings.gstin', '!=', '')
 			->groupBy('lodgings.id')
 			->get();
 		// dd(count($gst_details));
@@ -1890,6 +1893,7 @@ class ExportReportController extends Controller {
 		}
 		$export_details = [];
 		$s_no = 1;
+		$lodgingHsnCode = Config::where('id', 3901)->first()->name;
 		foreach ($gst_details as $gst_detail_key => $gst_detail) {
 			$export_data = [
 				$s_no++,
@@ -1913,6 +1917,7 @@ class ExportReportController extends Controller {
 				$gst_detail->sgst,
 				$gst_detail->igst,
 				$gst_detail->date,
+				$lodgingHsnCode,
 			];
 
 			$export_details[] = $export_data;

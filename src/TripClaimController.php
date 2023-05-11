@@ -4,15 +4,15 @@ namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
+use Entrust;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Uitoux\EYatra\LodgingShareDetail;
 use Uitoux\EYatra\NCity;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
-use Uitoux\EYatra\LodgingShareDetail;
-use Yajra\Datatables\Datatables;
-use Illuminate\Support\Facades\Storage;
 use Validator;
-use Entrust;
+use Yajra\Datatables\Datatables;
 
 class TripClaimController extends Controller {
 	public function listEYatraTripClaimList(Request $r) {
@@ -295,45 +295,47 @@ class TripClaimController extends Controller {
 		try {
 			// validation
 			$error_messages = [
-                'id.required' => 'Trip request is required',
-                'id.integer' => 'Trip request is not correct format',
-                'id.exists' => 'Trip request is not found',
-                'document_type_id.required' => 'Document type is required',
-                'document_type_id.integer' => 'Document type is not correct format',
-                'document_type_id.exists' => 'Document type is not found',
-                'atttachment.required' => 'Document is required',
-            ];
-            $validations = [
-                'id' => 'required|integer|exists:trips,id',
-                'document_type_id' => 'required|integer|exists:configs,id',
-                'atttachment' => 'required',
-            ];
-            $validator = Validator::make($r->all(), $validations , $error_messages);
-						
+				'id.required' => 'Trip request is required',
+				'id.integer' => 'Trip request is not correct format',
+				'id.exists' => 'Trip request is not found',
+				'document_type_id.required' => 'Document type is required',
+				'document_type_id.integer' => 'Document type is not correct format',
+				'document_type_id.exists' => 'Document type is not found',
+				'atttachment.required' => 'Document is required',
+			];
+			$validations = [
+				'id' => 'required|integer|exists:trips,id',
+				'document_type_id' => 'required|integer|exists:configs,id',
+				'atttachment' => 'required',
+			];
+			$validator = Validator::make($r->all(), $validations, $error_messages);
+
 			if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
+				return response()->json([
+					'success' => false,
 					'message' => 'Validation Errors',
-                    'errors' => $validator->errors()->all(),
-                ]);
+					'errors' => $validator->errors()->all(),
+				]);
 			}
 
 			DB::beginTransaction();
-			
+
 			$trip = Trip::find($r->id);
 			$item_images = storage_path('app/public/trip/claim/' . $trip->id . '/');
 			Storage::makeDirectory($item_images, 0777);
 			if (!empty($r->atttachment)) {
 				$image = $r->atttachment;
-				
+
 				$file_name = $image->getClientOriginalName();
 				$attachment_id = Attachment::orderBy('id', 'DESC')->pluck('id')->first() + 1;
-                $file_name = 'trip_' . str_replace('.', '_' . $attachment_id . '.', $file_name);
-                $file_name = str_replace(' ', '_', $file_name);
+				$file_name = 'trip_' . str_replace('.', '_' . $attachment_id . '.', $file_name);
+				$file_name = str_replace(' ', '_', $file_name);
 
 				$image->move(storage_path('app/public/trip/claim/' . $trip->id . '/'), $file_name);
 				$attachement_transport = null;
-				if ($r->document_type_id == 3754) {		// 3754 -> Others
+				// if ($r->document_type_id == 3754) {		// 3754 -> Others
+				if ($r->document_type_id == 3754 || $r->document_type_id == 3752) {
+					//OTHERS OR LODGING
 					$attachement_transport = new Attachment;
 				} else {
 					$attachement_transport = Attachment::firstOrNew([
@@ -363,7 +365,7 @@ class TripClaimController extends Controller {
 				'success' => true,
 				'message' => 'Document uploaded successfully!',
 				'attachment_type_lists' => $attachment_type_lists,
-				'trip_attachments' => $trip_attachments
+				'trip_attachments' => $trip_attachments,
 			]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -375,25 +377,25 @@ class TripClaimController extends Controller {
 		try {
 			// validation
 			$error_messages = [
-                'attachment_id.required' => 'Attachment is required',
-                'attachment_id.integer' => 'Attachment is not correct format',
-                'attachment_id.exists' => 'Attachment is not found',
-            ];
-            $validations = [
-                'attachment_id' => 'required|integer|exists:attachments,id',
-            ];
-            $validator = Validator::make($r->all(), $validations , $error_messages);
-						
+				'attachment_id.required' => 'Attachment is required',
+				'attachment_id.integer' => 'Attachment is not correct format',
+				'attachment_id.exists' => 'Attachment is not found',
+			];
+			$validations = [
+				'attachment_id' => 'required|integer|exists:attachments,id',
+			];
+			$validator = Validator::make($r->all(), $validations, $error_messages);
+
 			if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
+				return response()->json([
+					'success' => false,
 					'message' => 'Validation Errors',
-                    'errors' => $validator->errors()->all(),
-                ]);
+					'errors' => $validator->errors()->all(),
+				]);
 			}
 
 			DB::beginTransaction();
-			
+
 			$attachment = Attachment::where('id', $r->attachment_id)->first();
 			$trip_id = null;
 			if ($attachment) {
@@ -403,7 +405,6 @@ class TripClaimController extends Controller {
 				Storage::disk('local')->delete($destination . '/' . $attachment->name);
 				$attachment->forceDelete();
 			}
-
 
 			DB::commit();
 			$attachment_type_lists = Trip::getAttachmentList($trip_id);
@@ -417,7 +418,7 @@ class TripClaimController extends Controller {
 				'success' => true,
 				'message' => 'Document deleted successfully!',
 				'attachment_type_lists' => $attachment_type_lists,
-				'trip_attachments' => $trip_attachments
+				'trip_attachments' => $trip_attachments,
 			]);
 		} catch (Exception $e) {
 			DB::rollBack();
@@ -440,10 +441,10 @@ class TripClaimController extends Controller {
 				'users.name as employee_name',
 				'lodgings.invoice_date',
 			])
-				->join('lodgings','lodgings.id','lodging_share_details.lodging_id')
-				->join('trips','trips.id','lodgings.trip_id')
-				->join('ey_employee_claims','ey_employee_claims.trip_id','trips.id')
-				->join('employees','employees.id','ey_employee_claims.employee_id')
+				->join('lodgings', 'lodgings.id', 'lodging_share_details.lodging_id')
+				->join('trips', 'trips.id', 'lodgings.trip_id')
+				->join('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->join('employees', 'employees.id', 'ey_employee_claims.employee_id')
 				->join('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121) //EMPLOYEE
 				->where('lodging_share_details.is_shared_claim_ok', 0) //NO
@@ -452,7 +453,7 @@ class TripClaimController extends Controller {
 			$user = Auth::user();
 			return response()->json([
 				'success' => true,
-				'data' => compact('lodge_sharing_details','user'),
+				'data' => compact('lodge_sharing_details', 'user'),
 			]);
 		} catch (\Exception $e) {
 			return response()->json([
@@ -464,42 +465,42 @@ class TripClaimController extends Controller {
 		}
 	}
 
-	public function sharedClaimUpdate(Request $request){
+	public function sharedClaimUpdate(Request $request) {
 		// dd($request->all());
-        try {
-            $validator = Validator::make($request->all(), [
-                'id' => [
-                    'required',
-                    'exists:lodging_share_details,id',
-                ],
-            ]);
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
+		try {
+			$validator = Validator::make($request->all(), [
+				'id' => [
+					'required',
+					'exists:lodging_share_details,id',
+				],
+			]);
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
 					'message' => 'Validation Errors',
-                    'errors' => $validator->errors()->all(),
-                ]);
+					'errors' => $validator->errors()->all(),
+				]);
 			}
-        	DB::beginTransaction();
-       
-            $lodge_share_detail = LodgingShareDetail::find($request->id);
-            $lodge_share_detail->is_shared_claim_ok = 1; //YES
-            $lodge_share_detail->save();
-            $message = 'Details updated successfully!';
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => $message
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
+			DB::beginTransaction();
+
+			$lodge_share_detail = LodgingShareDetail::find($request->id);
+			$lodge_share_detail->is_shared_claim_ok = 1; //YES
+			$lodge_share_detail->save();
+			$message = 'Details updated successfully!';
+			DB::commit();
+			return response()->json([
+				'success' => true,
+				'message' => $message,
+			]);
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
 				'success' => false,
 				'errors' => [
 					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
 				],
 			]);
-        }
-    }
+		}
+	}
 
 }
