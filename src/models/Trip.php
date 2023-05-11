@@ -4605,7 +4605,8 @@ request is not desired, then those may be rejected.';
 		$invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
 		$employeeData = $this->employee;
 		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
-		$invoiceType = 'Standard';
+		// $invoiceType = 'Standard';
+		$invoiceType = 'Prepayment';
 		$description = '';
 		if (!empty($employeeData->code)) {
 			$description .= $employeeData->code;
