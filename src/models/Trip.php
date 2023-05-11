@@ -4635,7 +4635,8 @@ request is not desired, then those may be rejected.';
 
 		$amount = $this->advance_received;
 		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
-		$accountingClass = 'Payable';
+		// $accountingClass = 'Payable';
+		$accountingClass = 'Purchase/Expense';
 		$company = $this->company ? $this->company->oracle_code : '';
 
 		$sbu = $employeeData->Sbu;
@@ -5540,7 +5541,8 @@ request is not desired, then those may be rejected.';
 
 		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
 		$customerSiteNumber = $outletCode;
-		$accountingClass = 'Payable';
+		// $accountingClass = 'Payable';
+		$accountingClass = 'Purchase/Expense';
 		$company = $employeeTrip->company ? $employeeTrip->company->oracle_code : '';
 
 		$sbu = $employeeData->Sbu;
@@ -5551,6 +5553,7 @@ request is not desired, then those may be rejected.';
 		}
 		$location = $outletCode;
 		$naturalAccount = Config::where('id', 3861)->first()->name;
+		$empToCompanyNaturalAccount = Config::where('id', 3921)->first()->name;
 		$supplierSiteName = $outletCode;
 
 		$roundOffTransaction = OtherTypeTransactionDetail::apRoundOffTransaction();
@@ -5655,6 +5658,16 @@ request is not desired, then those may be rejected.';
 			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount);
 		}
 
+		//IF ADVANCE RECEIVED
+		if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
+			//EMPLOYEE TO COMPANY
+			if ($employeeClaim->amount_to_pay == 2) {
+				if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+					$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount);
+				}
+			}
+		}
+
 		$res['success'] = true;
 		DB::setDefaultConnection('mysql');
 		return $res;
@@ -5674,14 +5687,15 @@ request is not desired, then those may be rejected.';
 			'supplier_number' => $supplierNumber,
 			'supplier_site_name' => $supplierSiteName,
 			'invoice_type' => $invoiceType,
-			'description' => $description,
+			// 'description' => $description,
+			'invoice_description' => $description,
 			'outlet' => $outlet,
 			'amount' => $amount,
 			'tax_classification' => $taxClassification,
 			'cgst' => $cgst,
 			'sgst' => $sgst,
 			'igst' => $igst,
-			'round_off_amount' => $roundOffAmount,
+			// 'round_off_amount' => $roundOffAmount,
 			'hsn_code' => $hsnCode,
 			'tax_amount' => $taxAmount,
 			'accounting_class' => $accountingClass,
