@@ -66,7 +66,7 @@ class EYatraConfigSeeder extends Seeder {
 			550 => 'Oracle Transaction Type',
 			551 => 'Company Business Unit',
 			552 => 'Trip Advance - Pre Payment Invoice Natural Account',
-			553 => 'Claim - Invoice Natural Account',
+			553 => 'Claim - Invoice Expenses Natural Account',
 			554 => 'Oracle Other Transaction Invoice Types',
 			555 => 'Oracle Other Transaction Types',
 			556 => 'Lodging HSN Code',
@@ -1238,7 +1238,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 552,
 			],
 			3861 => [
-				'name' => '413401',
+				'name' => '570222',
 				'config_type_id' => 553,
 			],
 
