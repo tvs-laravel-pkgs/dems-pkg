@@ -5462,7 +5462,7 @@ request is not desired, then those may be rejected.';
 		$employeeTrip = $this;
 		$companyId = $employeeTrip->company_id;
 		$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
-		$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
+		// $companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
 
 		$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 		$invoiceSource = 'Invoice';
@@ -5487,7 +5487,7 @@ request is not desired, then those may be rejected.';
 		$invoiceDate = null;
 		$invoiceNumber = null;
 		$prePaymentNumber = null;
-		$prePaymentDate = null;
+		// $prePaymentDate = null;
 		$prePaymentAmount = null;
 		if ($employeeClaim) {
 			$invoiceAmount = round($employeeClaim->total_amount);
@@ -5614,7 +5614,6 @@ request is not desired, then those may be rejected.';
 				} else {
 					$lodgingWithoutGstValue += floatval($lodging->amount);
 				}
-
 			}
 		}
 
@@ -5627,7 +5626,7 @@ request is not desired, then those may be rejected.';
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
 		// $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
-		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
 
 		//LODGING-GST ENTRY
 		if ($lodgingCgstSgstTaxableAmount && $lodgingCgstSgstTaxableAmount > 0) {
