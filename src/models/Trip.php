@@ -5665,16 +5665,26 @@ request is not desired, then those may be rejected.';
 					$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount);
 				}
 
-				//PRE PAYMENT DETAILS SAVE
-				$prePaymentDetails = DB::table('oracle_pre_payment_invoice_details')->where([
-					'ap_invoice_id' => $apInvoiceId,
-				])->get();
-				if (count($prePaymentDetails) > 0) {
-					$res['errors'] = ['Pre payment invoice already exported to oracle table'];
-					return $res;
-				}
-				$this->savePrePaymentInvoice($apInvoiceId, $businessUnitName, $supplierNumber, $invoiceNumber, $prePaymentNumber, $prePaymentAmount);
+				// //PRE PAYMENT DETAILS SAVE
+				// $prePaymentDetails = DB::table('oracle_pre_payment_invoice_details')->where([
+				// 	'ap_invoice_id' => $apInvoiceId,
+				// ])->get();
+				// if (count($prePaymentDetails) > 0) {
+				// 	$res['errors'] = ['Pre payment invoice already exported to oracle table'];
+				// 	return $res;
+				// }
+				// $this->savePrePaymentInvoice($apInvoiceId, $businessUnitName, $supplierNumber, $invoiceNumber, $prePaymentNumber, $prePaymentAmount);
 			}
+
+			//PRE PAYMENT DETAILS SAVE
+			$prePaymentDetails = DB::table('oracle_pre_payment_invoice_details')->where([
+				'ap_invoice_id' => $apInvoiceId,
+			])->get();
+			if (count($prePaymentDetails) > 0) {
+				$res['errors'] = ['Pre payment invoice already exported to oracle table'];
+				return $res;
+			}
+			$this->savePrePaymentInvoice($apInvoiceId, $businessUnitName, $supplierNumber, $invoiceNumber, $prePaymentNumber, $prePaymentAmount);
 		}
 
 		$res['success'] = true;
