@@ -718,6 +718,13 @@ app.component('eyatraTripForm', {
                         self.trip.visits[index].booking_method_name = "Self";
                     }
                 }
+
+                //APPROVAL MAIL FROM TRAVEL DESK ENABLE
+                if(self.trip.visits[index].booking_method_name == 'Self' && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.trip_mode_id == 3793){
+                    self.trip.visits[index].self_booking_approval = "1";
+                }else{
+                    self.trip.visits[index].self_booking_approval = "0";
+                }
             }
         }
 
