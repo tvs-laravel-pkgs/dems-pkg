@@ -288,7 +288,7 @@ app.component('eyatraTripForm', {
                 // Booking Preference Conditions
                 $.each(self.trip.visits, function(key, value) {
                     setTimeout(function() {
-                        $scope.onChangeTravelMode(value.travel_mode_id, key);
+                        // $scope.onChangeTravelMode(value.travel_mode_id, key);
                         $scope.onChangeBookingPreference(value.booking_method_name, key);
                     }, 800);
                 });
@@ -698,6 +698,26 @@ app.component('eyatraTripForm', {
                 self.trip.visits[key].self_booking_approval = "1";
                 $('#active_' + key).prop('checked', true);
                 // $('#inactive_' + key).attr('disabled', true);
+            }
+        }
+
+        $scope.bookingPreferenceHandler = (index) => {
+            let visit = self.trip.visits[index];
+            if (self.trip && visit) {
+                if(visit.travel_mode_id == 12 || visit.travel_mode_id == 13 || visit.travel_mode_id == 14 || visit.travel_mode_id == 150 || visit.travel_mode_id == 151 || visit.travel_mode_id == 152 || visit.travel_mode_id == 153 || visit.travel_mode_id == 225 || visit.travel_mode_id == 226 || visit.travel_mode_id == 228){
+                    if(visit.trip_mode_id == 3792){
+                        //SHORT DISTANCE
+                        self.trip.visits[index].booking_method_name = "Self";
+                    }else if(visit.trip_mode_id == 3793){
+                        //OVER NIGHT
+                        self.trip.visits[index].booking_method_name = "Agent";
+                    }
+                }else if(visit.travel_mode_id == 15 || visit.travel_mode_id == 16 || visit.travel_mode_id == 17 || visit.travel_mode_id == 270 || visit.travel_mode_id == 271 || visit.travel_mode_id == 272){
+                    if(visit.trip_mode_id == 3792 || visit.trip_mode_id == 3793){
+                        // SHORT DISTANCE OR OVER NIGHT
+                        self.trip.visits[index].booking_method_name = "Self";
+                    }
+                }
             }
         }
 
