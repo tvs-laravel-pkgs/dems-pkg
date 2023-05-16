@@ -5980,14 +5980,14 @@ request is not desired, then those may be rejected.';
 			}
 
 			//PRE PAYMENT DETAILS SAVE
-			$prePaymentDetails = DB::table('oracle_pre_payment_invoice_details')->where([
-				'ap_invoice_id' => $apInvoiceId,
-			])->get();
-			if (count($prePaymentDetails) > 0) {
-				$res['errors'] = ['Pre payment invoice already exported to oracle table'];
-				return $res;
-			}
-			$this->savePrePaymentInvoice($apInvoiceId, $businessUnitName, $supplierNumber, $invoiceNumber, $prePaymentNumber, $prePaymentAmount);
+			// $prePaymentDetails = DB::table('oracle_pre_payment_invoice_details')->where([
+			// 	'ap_invoice_id' => $apInvoiceId,
+			// ])->get();
+			// if (count($prePaymentDetails) > 0) {
+			// 	$res['errors'] = ['Pre payment invoice already exported to oracle table'];
+			// 	return $res;
+			// }
+			// $this->savePrePaymentInvoice($apInvoiceId, $businessUnitName, $supplierNumber, $invoiceNumber, $prePaymentNumber, $prePaymentAmount);
 		}
 
 		$res['success'] = true;
@@ -6003,9 +6003,9 @@ request is not desired, then those may be rejected.';
 			'invoice_number' => $invoiceNumber,
 			'invoice_amount' => $invoiceAmount,
 			'invoice_date' => $invoiceDate,
-			// 'pre_payment_invoice_number' => $prePaymentInvoiceNumber,
+			'pre_payment_invoice_number' => $prePaymentInvoiceNumber,
 			// 'pre_payment_invoice_date' => $prePaymentInvoiceDate,
-			// 'pre_payment_amount' => $prePaymentAmount,
+			'pre_payment_amount' => $prePaymentAmount,
 			'supplier_number' => $supplierNumber,
 			'supplier_site_name' => $supplierSiteName,
 			'invoice_type' => $invoiceType,
