@@ -1945,7 +1945,18 @@ app.component('eyatraTripClaimForm', {
                 });
             }
 
+            console.log({ deviationTypes })
+            self.deviationTypeName = deviationTypes.toString()
+            if (self.trip.visits)
+                if ($scope.travel_mode_check) {
+                    if (self.deviationTypeName)
+                        self.deviationTypeName += ' amount is greater than their eligible amount';
+                    is_grade_travel_mode = false;
+                }
+
             //LODGING AMOUNT DEVIATION CHECK
+            let lodgingDeviation = [];
+            let isLodgingDeviated = false;
             $('.is_lodging_deviation_amount').each(function() {
                 let lodgeBeforeTaxAmount = $(this).val();
                 if(lodgeBeforeTaxAmount && self.is_grade_leader == false){
@@ -1965,22 +1976,23 @@ app.component('eyatraTripClaimForm', {
                     if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
                         is_deviation = true;
                         let isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
-                        if ($.inArray(isDeviationType, deviationTypes) == -1){
-                            deviationTypes[deviationTypes.length] = isDeviationType;
+                        if ($.inArray(isDeviationType, lodgingDeviation) == -1){
+                            lodgingDeviation[lodgingDeviation.length] = isDeviationType;
+                            isLodgingDeviated = true;
                         }
                     }
                 }
             });
 
 
-            console.log({ deviationTypes })
-            self.deviationTypeName = deviationTypes.toString()
-            if (self.trip.visits)
-                if ($scope.travel_mode_check) {
-                    if (self.deviationTypeName)
-                        self.deviationTypeName += ' amount is greater than their eligible amount';
-                    is_grade_travel_mode = false;
+            let lodgingDeviations = lodgingDeviation.toString();
+            if (isLodgingDeviated == true && lodgingDeviations){
+                if(self.deviationTypeName){
+                    self.deviationTypeName += (', ' + lodgingDeviations + ' amount is greater than their eligible amount');
+                }else{
+                    self.deviationTypeName += (lodgingDeviations + ' amount is greater than their eligible amount');
                 }
+            }
 
             /*$(self.trip.visits).each(function(key, visit) {
                 $(self.grade_travel).each(function(key, travel) {
