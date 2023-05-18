@@ -1944,6 +1944,35 @@ app.component('eyatraTripClaimForm', {
 
                 });
             }
+
+            //LODGING AMOUNT DEVIATION CHECK
+            $('.is_lodging_deviation_amount').each(function() {
+                let lodgeBeforeTaxAmount = $(this).val();
+                if(lodgeBeforeTaxAmount && self.is_grade_leader == false){
+                    let lodgeEligibleAmount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
+                    if (!$.isNumeric(lodgeBeforeTaxAmount)) {
+                        lodgeBeforeTaxAmount = 0;
+                    } else {
+                        lodgeBeforeTaxAmount = parseInt(lodgeBeforeTaxAmount);
+                    }
+
+                    if (!$.isNumeric(lodgeEligibleAmount)) {
+                        lodgeEligibleAmount = 0;
+                    } else {
+                        lodgeEligibleAmount = parseInt(lodgeEligibleAmount);
+                    }
+
+                    if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
+                        is_deviation = true;
+                        let isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+                        if ($.inArray(isDeviationType, deviationTypes) == -1){
+                            deviationTypes[deviationTypes.length] = isDeviationType;
+                        }
+                    }
+                }
+            });
+
+
             console.log({ deviationTypes })
             self.deviationTypeName = deviationTypes.toString()
             if (self.trip.visits)
@@ -1970,6 +1999,9 @@ app.component('eyatraTripClaimForm', {
             if (is_grade_travel_mode = true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }*/
+
+
+
             var grade_travel_ids = []
             $(self.grade_travel).each(function(key, travel) {
                 if (jQuery.inArray(travel.id, grade_travel_ids) == -1) // Not in array
