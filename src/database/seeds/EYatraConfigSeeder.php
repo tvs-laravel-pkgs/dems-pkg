@@ -71,6 +71,7 @@ class EYatraConfigSeeder extends Seeder {
 			555 => 'Oracle Other Transaction Types',
 			556 => 'Lodging HSN Code',
 			557 => 'Advance Balance - Employee To Company Natural Account',
+			558 => 'HRMS To Travelex Employee Sync Types',
 		];
 
 		$configs = [
@@ -1278,6 +1279,15 @@ class EYatraConfigSeeder extends Seeder {
 			3942 => [
 				'name' => 'HRMS To Travelex Employee Detail Change Mail',
 				'config_type_id' => 539,
+			],
+
+			3961 => [
+				'name' => 'Employee Addition',
+				'config_type_id' => 558,
+			],
+			3962 => [
+				'name' => 'Employee Updation',
+				'config_type_id' => 558,
 			],
 		];
 
