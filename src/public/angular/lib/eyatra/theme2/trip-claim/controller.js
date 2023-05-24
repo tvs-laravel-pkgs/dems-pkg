@@ -1868,7 +1868,7 @@ app.component('eyatraTripClaimForm', {
         self.deviationTypeName = '';
         $scope.isDeviation = function() {
             var is_deviation = false;
-
+            let is_grade_travel_mode = false;
             //LODGING
             var check_lodge_attachment = false;
             if((self.trip.lodgings).length > 0){
@@ -2040,7 +2040,7 @@ app.component('eyatraTripClaimForm', {
                     bookedBySelf = true
             });
             
-            console.log({ is_grade_travel_mode })
+            // console.log({ is_grade_travel_mode })
             if (is_grade_travel_mode == true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }
