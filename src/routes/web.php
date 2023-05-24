@@ -96,7 +96,7 @@ Route::group(['middleware' => ['api']], function () {
 		//PROFILE IMAGE SAVE
 		Route::post('/profile/save/image', 'Uitoux\EYatra\Api\ProfileController@saveImage')->name('profileSaveImage');
 		Route::get('/profile/Getvehicle-detail', 'Uitoux\EYatra\Api\ProfileController@getVehicleData')->name('getVehicleData');
-	    Route::post('/profile/save/vehicle-detail', 'Uitoux\EYatra\Api\ProfileController@saveVehicleDetails')->name('saveVehicleDetails');
+		Route::post('/profile/save/vehicle-detail', 'Uitoux\EYatra\Api\ProfileController@saveVehicleDetails')->name('saveVehicleDetails');
 
 		//NOTIFICATION
 		Route::post('notification/get-list', 'Uitoux\EYatra\Api\DashboardController@getNotification');
@@ -264,6 +264,10 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/import/type/get', 'Uitoux\EYatra\EmployeeController@getImportFormData')->name('getImportFormData');
 
 		//END
+		//HRMS TO TRAVELEX EMPLOYEE SYNC
+		Route::get('hrms-employee-sync/log-list', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeSyncLogList')->name('getHrmsEmployeeSyncLogList');
+		Route::get('hrms-employee-sync/log-filter-data', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeSyncLogFilterData')->name('getHrmsEmployeeSyncLogFilterData');
+		Route::post('/hrms-employee-addition/sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeAdditionSync')->name('hrmsEmployeeAdditionSync');
 
 		//EXPENSE VOUCHER ADVANCE
 		Route::get('eyatra/expense/voucher-advance/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@listExpenseVoucherRequest')->name('listExpenseVoucherRequest');

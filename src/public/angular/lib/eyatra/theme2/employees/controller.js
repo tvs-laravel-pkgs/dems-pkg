@@ -1045,6 +1045,99 @@ app.component('importJobs', {
     }
 });
 
+app.component('hrmsEmployeeSyncLogList', {
+    templateUrl: hrms_employee_sync_log_list_template_url,
+    controller: function(HelperService, $rootScope, $scope, $http, $routeParams) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.type_id = $routeParams.type_id;
+
+        $http.get(
+            laravel_routes['getHrmsEmployeeSyncLogFilterData']
+        ).then(function(response) {
+            console.log(response);
+            self.user_company = response.data.user_company; 
+        });
+
+        var dataTable = $('#employee_sync_log_list_table').DataTable({
+            stateSave: true,
+            "dom": dom_structure_separate,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search",
+                "lengthMenu": "Rows Per Page _MENU_",
+                "paginate": {
+                    "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                    "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                },
+            },
+            pageLength: 10,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            ordering: false,
+            ajax: {
+                url: laravel_routes['getHrmsEmployeeSyncLogList'],
+                type: "GET",
+                dataType: "json",
+                data: function(d) {
+                    d.type_id = self.type_id;
+                }
+            },
+            columns: [
+                { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                { data: 'from_date_time',  searchable: false },
+                { data: 'to_date_time',  searchable: false },
+            ],
+            rowCallback: function(row, data) {
+                $(row).addClass('highlight-row');
+            }
+        });
+
+        $('#eyatra_designation_table_filter').find('input').addClass("on_focus");
+        $('.on_focus').focus();
+        $('.dataTables_length select').select2();
+        $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Addition</p><h3 class="title">HRMS To Travelex Employee Addition</h3>');
+        $('.add_new_button').html(
+                '<button type="button" class="btn btn-secondary employee-addition-sync">' +
+                'Sync' +
+                '</button>'
+        );
+
+        $('.employee-addition-sync').on("click", function() {
+            $('.employee-addition-sync').button('loading');
+            $.ajax({
+                method: "POST",
+                url: laravel_routes['hrmsEmployeeAdditionSync'],
+                data: {
+                    company_id: self.user_company.id,
+                    company_code: self.user_company.code
+                },
+            })
+            .done(function(res) {
+                console.log(res.success);
+                $('.employee-addition-sync').button('reset');
+                if (!res.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    custom_noty('error', errors);
+                } else {
+                    custom_noty('success', res.message);
+                    dataTable.draw();
+                }
+            })
+            .fail(function(xhr) {
+                $('.employee-addition-sync').button('reset');
+                custom_noty('error', 'Something went wrong at server');
+            });
+        });
+
+        $rootScope.loading = false;
+    }
+});
+
 
 //End
 //------------------------------------------------------------------------------------------------------------------

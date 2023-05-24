@@ -865,7 +865,13 @@ app.config(['$routeProvider', function($routeProvider) {
     when('/shared-claim/detail', {
         template: '<shared-claim-detail></shared-claim-detail>',
         title: 'Shared Claim Detail',
-    });
+    })
 
+
+    //HRMS TO TRAVELEX EMPLOYEE SYNC
+    .when('/hrms-employee-sync/log-list/:type_id', {
+        template: '<hrms-employee-sync-log-list></hrms-employee-sync-log-list>',
+        title: 'HRMS Employee Sync Log List',
+    });
 
 }]);
