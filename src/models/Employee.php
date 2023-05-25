@@ -411,7 +411,7 @@ class Employee extends Model {
 							if ($outlet->exists) {
 								$outlet->updated_at = Carbon::now();
 							} else {
-								$outlet->created_by = 1; //ADMIN
+								$outlet->created_by = Auth::id();
 								$outlet->created_at = Carbon::now();
 							}
 							$outlet->name = $hrmsEmployee->outlet_name;
@@ -437,7 +437,7 @@ class Employee extends Model {
 							if ($grade->exists) {
 								$grade->updated_at = Carbon::now();
 							} else {
-								$grade->created_by = 1; //ADMIN
+								$grade->created_by = Auth::id();
 								$grade->created_at = Carbon::now();
 							}
 							$grade->save();
@@ -457,7 +457,7 @@ class Employee extends Model {
 									if ($designation->exists) {
 										$designation->updated_at = Carbon::now();
 									} else {
-										$designation->created_by = 1; //ADMIN
+										$designation->created_by = Auth::id();
 										$designation->created_at = Carbon::now();
 									}
 									$designation->save();
@@ -483,7 +483,7 @@ class Employee extends Model {
 							if ($lob->exists) {
 								$lob->updated_at = Carbon::now();
 							} else {
-								$lob->created_by = 1; //ADMIN
+								$lob->created_by = Auth::id();
 								$lob->created_at = Carbon::now();
 							}
 							$lob->save();
@@ -496,7 +496,7 @@ class Employee extends Model {
 								if ($sbu->exists) {
 									$sbu->updated_at = Carbon::now();
 								} else {
-									$sbu->created_by = 1; //ADMIN
+									$sbu->created_by = Auth::id();
 									$sbu->created_at = Carbon::now();
 								}
 								$sbu->save();
@@ -527,13 +527,16 @@ class Employee extends Model {
 										if ($department->exists) {
 											$department->updated_at = Carbon::now();
 										} else {
-											$department->created_by = 1; //ADMIN
+											$department->created_by = Auth::id();
 											$department->created_at = Carbon::now();
 											$department->short_name = $hrmsEmployee->function_name;
 										}
 										$department->save();
 									}
 								}
+							} else {
+								$skip = true;
+								$recordErrors[] = 'The employee sbu is required';
 							}
 						}
 					}
@@ -571,7 +574,7 @@ class Employee extends Model {
 								if ($reportingToOutlet->exists) {
 									$reportingToOutlet->updated_at = Carbon::now();
 								} else {
-									$reportingToOutlet->created_by = 1; //ADMIN
+									$reportingToOutlet->created_by = Auth::id();
 									$reportingToOutlet->created_at = Carbon::now();
 								}
 								$reportingToOutlet->name = $hrmsEmployee->reporting_to_outlet_name;
@@ -597,7 +600,7 @@ class Employee extends Model {
 								if ($reportingToGrade->exists) {
 									$reportingToGrade->updated_at = Carbon::now();
 								} else {
-									$reportingToGrade->created_by_id = 1; //ADMIN
+									$reportingToGrade->created_by_id = Auth::id();
 									$reportingToGrade->created_at = Carbon::now();
 								}
 								$reportingToGrade->save();
@@ -620,7 +623,7 @@ class Employee extends Model {
 							if ($reportingToEmployee->exists) {
 								$reportingToEmployee->updated_at = Carbon::now();
 							} else {
-								$reportingToEmployee->created_by = 1; //ADMIN
+								$reportingToEmployee->created_by = Auth::id();
 								$reportingToEmployee->created_at = Carbon::now();
 							}
 							$reportingToEmployee->save();
@@ -636,7 +639,7 @@ class Employee extends Model {
 									$reportingToUser->password = $hrmsEmployee->reporting_to_dob;
 								}
 							} else {
-								$reportingToUser->created_by = 1; //ADMIN
+								$reportingToUser->created_by = Auth::id();
 								$reportingToUser->created_at = Carbon::now();
 								if ($hrmsEmployee->reporting_to_dob) {
 									$reportingToUser->password = $hrmsEmployee->reporting_to_dob;
@@ -663,7 +666,7 @@ class Employee extends Model {
 						if ($employee->exists) {
 							$employee->updated_at = Carbon::now();
 						} else {
-							$employee->created_by = 1; //ADMIN
+							$employee->created_by = Auth::id();
 							$employee->created_at = Carbon::now();
 						}
 						$employee->outlet_id = $outlet->id;
@@ -708,7 +711,7 @@ class Employee extends Model {
 								$user->password = $hrmsEmployee->dob;
 							}
 						} else {
-							$user->created_by = 1; //ADMIN
+							$user->created_by = Auth::id();
 							$user->created_at = Carbon::now();
 							if ($hrmsEmployee->dob) {
 								$user->password = $hrmsEmployee->dob;
@@ -781,7 +784,7 @@ class Employee extends Model {
 					'Employee Name',
 					'Error',
 				];
-				$errorFileName = 'employee_sync_error_report_' . $timeStamp;
+				$errorFileName = 'employee_addition_sync_error_report_' . $timeStamp;
 				//NEED TO ENABLE
 				// $file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $employeeErrorReport) {
 				// 	$excel->sheet('Errors', function ($sheet) use ($excelHeader, $employeeErrorReport) {
@@ -908,30 +911,32 @@ class Employee extends Model {
 
 		$transferRequests = DB::table('transfer_requests')->select([
 			'transfer_requests.id',
-			'transfer_requests.updated_at',
 			'employees.id as employee_id',
-			'outlets.id as outlet_id',
-			'grades.id as grade_id',
-			'designations.id as designation_id',
+			'transfer_requests.outlet_id',
+			'transfer_requests.grade_id',
+			'transfer_requests.designation_id',
+			'transfer_requests.function_id',
+			'transfer_requests.updated_at',
 		])
 			->join('employees', 'employees.id', 'transfer_requests.employee_id')
-			->leftjoin('outlets', 'outlets.id', 'transfer_requests.outlet_id')
-			->leftjoin('grades', 'grades.id', 'transfer_requests.grade_id')
-			->leftjoin('designations', 'designations.id', 'transfer_requests.designation_id')
 			->where('employees.company_id', $hrmsCompanyId)
 			->where('transfer_requests.status_id', 4) //APPROVED
 			->whereBetween('transfer_requests.updated_at', [$fromDateTime, $toDateTime])
 			->get();
 
 		if (count($transferRequests) == 0) {
+			$formattedFromDateTime = date('d/m/Y h:i A', strtotime($fromDateTime));
+			$formattedToDateTime = date('d/m/Y h:i A', strtotime($toDateTime));
+
 			return response()->json([
 				'success' => false,
 				'error' => 'Validation Error',
-				'errors' => ['Employee transfer requests not found for this period : ' . $fromDateTime . ' to ' . $toDateTime],
+				'errors' => ['Employee transfer requests not found for this period : ' . $formattedFromDateTime . ' to ' . $formattedToDateTime],
 			]);
 		}
 		$employeeTransferRequests = collect($transferRequests)->groupBy('employee_id');
 
+		//GETTING EMPLOYEE OUTLET,GRADE,DESIGNATION,FUNCTION CHANGE DETAILS
 		$employeeUpdateDetails = [];
 		foreach ($employeeTransferRequests as $employeeId => $employeeTransferRequest) {
 			$employeeTransferRequest = collect($employeeTransferRequest)->sortByDesc('updated_at');
@@ -953,15 +958,16 @@ class Employee extends Model {
 				$designationId = array_shift($designationIds);
 			}
 
+			$functionIds = array_filter($employeeTransferRequest->pluck('function_id')->toArray());
+			$functionId = null;
+			if (count($functionIds) > 0) {
+				$functionId = array_shift($functionIds);
+			}
+
 			//IF NO TRANSFER WAS FOUND
 			if (!$outletId && !$gradeId && !$designationId) {
 				continue;
 			}
-
-			$hrmsEmployee = null;
-			$hrmsOutlet = null;
-			$hrmsGrade = null;
-			$hrmsDesignation = null;
 
 			$hrmsEmployee = DB::table('employees')->select([
 				'employees.id',
@@ -969,8 +975,14 @@ class Employee extends Model {
 				'employees.name as employee_name',
 				'employees.lob_id',
 				'employee_companies.adre_code as employee_company_adre_code',
+				'lob_companies.adre_code as lob_company_adre_code',
+				'lobs.code as lob_code',
+				'sbus.code as sbu_code',
 			])
 				->join('companies as employee_companies', 'employee_companies.id', 'employees.company_id')
+				->leftjoin('lobs', 'lobs.id', 'employees.lob_id')
+				->leftjoin('companies as lob_companies', 'lob_companies.id', 'lobs.company_id')
+				->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 				->where('employees.id', $employeeId)
 				->first();
 
@@ -1007,11 +1019,21 @@ class Employee extends Model {
 				->where('designations.id', $designationId)
 				->first();
 
+			$hrmsFunction = DB::table('funcs')->select([
+				'funcs.id',
+				'funcs.name as function_name',
+				'function_companies.adre_code as function_company_adre_code',
+			])
+				->join('companies as function_companies', 'function_companies.id', 'funcs.company_id')
+				->where('funcs.id', $functionId)
+				->first();
+
 			$employeeUpdateDetails[] = [
 				'employee' => $hrmsEmployee,
 				'outlet' => $hrmsOutlet,
 				'grade' => $hrmsGrade,
 				'designation' => $hrmsDesignation,
+				'function' => $hrmsFunction,
 			];
 		}
 
@@ -1019,6 +1041,7 @@ class Employee extends Model {
 		if (count($employeeUpdateDetails) > 0) {
 			$employeeSyncedData = [];
 			$syncErrors = [];
+			$employeeUpdateCount = 0;
 			foreach ($employeeUpdateDetails as $employeeUpdateDetail) {
 				DB::beginTransaction();
 				try {
@@ -1048,7 +1071,7 @@ class Employee extends Model {
 					}
 
 					//EMPLOYEE OUTLET
-					if ($employeeUpdateDetail['outlet']) {
+					if (!empty($employeeUpdateDetail['outlet'])) {
 						$outletCompanyId = Company::where('code', $employeeUpdateDetail['outlet']->outlet_company_adre_code)->first()->id;
 						if (!$outletCompanyId) {
 							$skip = true;
@@ -1061,7 +1084,7 @@ class Employee extends Model {
 							if ($outlet->exists) {
 								$outlet->updated_at = Carbon::now();
 							} else {
-								$outlet->created_by = 1; //ADMIN
+								$outlet->created_by = Auth::id();
 								$outlet->created_at = Carbon::now();
 							}
 							$outlet->name = $employeeUpdateDetail['outlet']->outlet_name;
@@ -1070,7 +1093,7 @@ class Employee extends Model {
 					}
 
 					//EMPLOYEE GRADE
-					if ($employeeUpdateDetail['grade']) {
+					if (!empty($employeeUpdateDetail['grade'])) {
 						$gradeCompanyId = Company::where('code', $employeeUpdateDetail['grade']->grade_company_adre_code)->first()->id;
 						if (!$gradeCompanyId) {
 							$skip = true;
@@ -1084,13 +1107,13 @@ class Employee extends Model {
 							if ($grade->exists) {
 								$grade->updated_at = Carbon::now();
 							} else {
-								$grade->created_by = 1; //ADMIN
+								$grade->created_by = Auth::id();
 								$grade->created_at = Carbon::now();
 							}
 							$grade->save();
 
 							//EMPLOYEE DESIGNATION
-							if ($employeeUpdateDetail['designation']) {
+							if (!empty($employeeUpdateDetail['designation'])) {
 								$designationCompanyId = Company::where('code', $employeeUpdateDetail['designation']->designation_company_adre_code)->first()->id;
 								if (!$designationCompanyId) {
 									$skip = true;
@@ -1104,11 +1127,83 @@ class Employee extends Model {
 									if ($designation->exists) {
 										$designation->updated_at = Carbon::now();
 									} else {
-										$designation->created_by = 1; //ADMIN
+										$designation->created_by = Auth::id();
 										$designation->created_at = Carbon::now();
 									}
 									$designation->save();
 								}
+							}
+						}
+					}
+
+					//EMLOYEE LOB & SBU
+					if (!empty($employeeUpdateDetail['employee']->lob_code)) {
+						$lobCompanyId = Company::where('code', $employeeUpdateDetail['employee']->lob_company_adre_code)->first()->id;
+						if (!$lobCompanyId) {
+							$skip = true;
+							$recordErrors[] = 'The employee lob company not found in travelex';
+						} else {
+							$lob = Lob::firstOrNew([
+								'company_id' => $lobCompanyId,
+								'name' => $employeeUpdateDetail['employee']->lob_code,
+							]);
+							if ($lob->exists) {
+								$lob->updated_at = Carbon::now();
+							} else {
+								$lob->created_by = Auth::id();
+								$lob->created_at = Carbon::now();
+							}
+							$lob->save();
+
+							if (!empty($employeeUpdateDetail['employee']->sbu_code)) {
+								$sbu = Sbu::firstOrNew([
+									'lob_id' => $lob->id,
+									'name' => $employeeUpdateDetail['employee']->sbu_code,
+								]);
+								if ($sbu->exists) {
+									$sbu->updated_at = Carbon::now();
+								} else {
+									$sbu->created_by = Auth::id();
+									$sbu->created_at = Carbon::now();
+								}
+								$sbu->save();
+
+								//EMPLOYEE DEPARTMENT
+								$businessId = null;
+								if ($employeeUpdateDetail['employee']->lob_code == 'DLOB') {
+									if (strpos($employeeUpdateDetail['employee']->sbu_code, 'honda') !== false) {
+										$businessId = 3; //HONDA
+									} else {
+										$businessId = 1; //DLOB
+									}
+								} else if ($employeeUpdateDetail['employee']->lob_code == 'OESL') {
+									$businessId = 2; //OESL
+								}
+
+								if ($businessId && !empty($employeeUpdateDetail['function']->function_name)) {
+									$funcCompanyId = Company::where('code', $employeeUpdateDetail['function']->function_company_adre_code)->first()->id;
+									if (!$funcCompanyId) {
+										$skip = true;
+										$recordErrors[] = 'The employee function company not found in travelex';
+									} else {
+										$department = Department::withTrashed()->firstOrNew([
+											'company_id' => $funcCompanyId,
+											'business_id' => $businessId,
+											'name' => $employeeUpdateDetail['function']->function_name,
+										]);
+										if ($department->exists) {
+											$department->updated_at = Carbon::now();
+										} else {
+											$department->created_by = Auth::id();
+											$department->created_at = Carbon::now();
+											$department->short_name = $employeeUpdateDetail['function']->function_name;
+										}
+										$department->save();
+									}
+								}
+							} else {
+								$skip = true;
+								$recordErrors[] = 'The employee sbu is required';
 							}
 						}
 					}
@@ -1129,6 +1224,9 @@ class Employee extends Model {
 							if (isset($designation)) {
 								$employee->designation_id = $designation->id;
 							}
+							if (isset($department)) {
+								$employee->department_id = $department->id;
+							}
 							$employee->save();
 
 							if (isset($outlet)) {
@@ -1139,6 +1237,14 @@ class Employee extends Model {
 							}
 							if (isset($designation)) {
 								$employeeSyncedData[] = self::hrmsToDemsEmployeeData($employee, 'Designation Change');
+							}
+							if (isset($department)) {
+								$employeeSyncedData[] = self::hrmsToDemsEmployeeData($employee, 'Function Change');
+							}
+
+							//UPDATE COUNT
+							if (isset($outlet) || isset($grade) || isset($designation) || isset($department)) {
+								$employeeUpdateCount++;
 							}
 						}
 					}
@@ -1184,7 +1290,7 @@ class Employee extends Model {
 				// })->store('xlsx', storage_path('app/public/hrms_to_dems/'));
 			}
 
-			//EMPLOYEE ADDITION MAIL
+			//EMPLOYEE UPDATION MAIL
 			if (count($employeeSyncedData) > 0) {
 				$mailConfig = MailConfiguration::select(
 					'to_email',
@@ -1204,6 +1310,7 @@ class Employee extends Model {
 				$arr['subject'] = 'Employee Update';
 				$arr['content'] = 'The below employee changes has been made in travelex system FYI.';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
+				$arr['type'] = 2;
 				$arr['employee_details'] = $employeeSyncedData;
 				$mail_instance = new TravelexConfigMail($arr);
 				$mail = Mail::send($mail_instance);
@@ -1214,6 +1321,7 @@ class Employee extends Model {
 			$employeeSyncLog->type_id = 3962; //EMPLOYEE UPDATION
 			$employeeSyncLog->from_date_time = $fromDateTime;
 			$employeeSyncLog->to_date_time = $toDateTime;
+			$employeeSyncLog->update_count = $employeeUpdateCount;
 			if ($errorFileName) {
 				$employeeSyncLog->error_file = 'storage/app/public/hrms_to_dems/' . $errorFileName . '.xlsx';
 			}
@@ -1222,6 +1330,246 @@ class Employee extends Model {
 			return response()->json([
 				'success' => true,
 				'message' => ['Employees updation synced successfully'],
+			]);
+		}
+	}
+
+	public static function hrmsEmployeeDeletionSync($request) {
+		// dd($request->all());
+		$hrmsPortalConfig = config('custom.HRMS_PORTAL_CONFIG');
+		if ($hrmsPortalConfig == true) {
+			$hrmsPortal = DB::table('portals')->select([
+				'db_host_name',
+				'db_port_number',
+				'db_name',
+				'db_user_name',
+				'db_password',
+			])
+				->where('id', 2) //HRMS
+				->first();
+
+			$dbHostName = $hrmsPortal->db_host_name;
+			$dbPortNumber = $hrmsPortal->db_port_number;
+			$dbPortDriver = 'mysql';
+			$dbName = $hrmsPortal->db_name;
+			$dbUserName = $hrmsPortal->db_user_name;
+			$dbPassword = $hrmsPortal->db_password;
+		} else {
+			$dbHostName = config('custom.HRMS_DB_HOST');
+			$dbPortNumber = config('custom.HRMS_DB_PORT_NUMBER');
+			$dbPortDriver = 'mysql';
+			$dbName = config('custom.HRMS_DB_NAME');
+			$dbUserName = config('custom.HRMS_DB_USER_NAME');
+			$dbPassword = config('custom.HRMS_DB_PASSWORD');
+		}
+
+		$employeeDeletionExistLog = HrmsToTravelxEmployeeSyncLog::select([
+			'id',
+			'from_date_time',
+			'to_date_time',
+		])
+			->where('company_id', $request->company_id)
+			->where('type_id', 3963) //EMPLOYEE DELETION
+			->orderBy('id', 'DESC')
+			->first();
+		if ($employeeDeletionExistLog) {
+			$fromDateTime = $employeeDeletionExistLog->to_date_time;
+			$toDateTime = date("Y-m-d H:i:s");
+		} else {
+			$fromDateTime = date('Y-m-d') . ' 00:00:00';
+			$toDateTime = date("Y-m-d H:i:s");
+		}
+
+		DB::setDefaultConnection('dynamic');
+		dataBaseConfig::set('database.connections.dynamic.host', $dbHostName);
+		dataBaseConfig::set('database.connections.dynamic.port', $dbPortNumber);
+		dataBaseConfig::set('database.connections.dynamic.driver', $dbPortDriver);
+		dataBaseConfig::set('database.connections.dynamic.database', $dbName);
+		dataBaseConfig::set('database.connections.dynamic.username', $dbUserName);
+		dataBaseConfig::set('database.connections.dynamic.password', $dbPassword);
+		DB::purge('dynamic');
+		DB::reconnect('dynamic');
+		$hrmsCompanyId = DB::table('companies')
+			->where('adre_code', $request->company_code)
+			->first()
+			->id;
+		if (!$hrmsCompanyId) {
+			return response()->json([
+				'success' => false,
+				'error' => 'Validation Error',
+				'errors' => ['The logined user company not found in HRMS'],
+			]);
+		}
+
+		$hrmsDeletionEmployees = DB::table('employees')->select([
+			'employees.id',
+			'employees.code as employee_code',
+			'employees.name as employee_name',
+			'employees.lob_id',
+			'companies.adre_code as employee_company_adre_code',
+			'employees.deleted_at',
+		])
+			->join('companies', 'companies.id', 'employees.company_id')
+			->where('employees.company_id', $hrmsCompanyId)
+			->whereNotNull('employees.deleted_at')
+			->whereBetween('employees.deleted_at', [$fromDateTime, $toDateTime])
+			->get();
+
+		if (count($hrmsDeletionEmployees) == 0) {
+			$formattedFromDateTime = date('d/m/Y h:i A', strtotime($fromDateTime));
+			$formattedToDateTime = date('d/m/Y h:i A', strtotime($toDateTime));
+
+			return response()->json([
+				'success' => false,
+				'error' => 'Validation Error',
+				'errors' => ['Employee deletion details not found for this period : ' . $formattedFromDateTime . ' to ' . $formattedToDateTime],
+			]);
+		}
+
+		DB::setDefaultConnection('mysql');
+		if (count($hrmsDeletionEmployees) > 0) {
+			$employeeSyncedData = [];
+			$employeeErrorReport = [];
+			foreach ($hrmsDeletionEmployees as $hrmsDeletionEmployee) {
+				DB::beginTransaction();
+				try {
+					$skip = false;
+					$recordErrors = [];
+
+					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
+					if (!in_array($hrmsDeletionEmployee->lob_id, [4, 15])) {
+						continue;
+					}
+
+					//EMPLOYEE COMPANY
+					if (!$hrmsDeletionEmployee->employee_company_adre_code) {
+						$skip = true;
+						$recordErrors[] = 'The employee company is required';
+					} else {
+						$companyId = Company::where('code', $hrmsDeletionEmployee->employee_company_adre_code)->first()->id;
+						if (!$companyId) {
+							$skip = true;
+							$recordErrors[] = 'The employee company not found in travelex';
+						} else {
+							$employeeExistId = Employee::withTrashed()
+								->where('company_id', $companyId)
+								->where('code', $hrmsDeletionEmployee->employee_code)
+								->pluck('id')
+								->first();
+							if (!$employeeExistId) {
+								$skip = true;
+								$recordErrors[] = 'The employee detail not found in travelex';
+							}
+						}
+					}
+
+					if (!$skip) {
+						$employee = Employee::withTrashed()
+							->where('company_id', $companyId)
+							->where('code', $hrmsDeletionEmployee->employee_code)
+							->first();
+						if ($employee) {
+							$employee->deleted_at = Carbon::now();
+							$employee->deleted_by = Auth::id();
+							$employee->save();
+
+							$user = User::withTrashed()
+								->where('entity_id', $employee->id)
+								->where('user_type_id', 3121) //EMPLOYEE
+								->first();
+							if ($user) {
+								$user->deleted_at = Carbon::now();
+								$user->deleted_by = Auth::id();
+								$user->save();
+							}
+							$employeeSyncedData[] = self::hrmsToDemsEmployeeData($employee, 'Deletion');
+						}
+					}
+
+					// EMPLOYEE ERROR DETAILS
+					if (count($recordErrors) > 0) {
+						$employeeErrorReport[] = [
+							$hrmsDeletionEmployee->employee_code,
+							$hrmsDeletionEmployee->employee_name,
+							implode(',', $recordErrors),
+						];
+					}
+					DB::commit();
+				} catch (\Exception $e) {
+					DB::rollBack();
+					$employeeErrorReport[] = [
+						$hrmsDeletionEmployee->employee_code,
+						$hrmsDeletionEmployee->employee_name,
+						$e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile(),
+					];
+					continue;
+				}
+			}
+
+			$errorFileName = null;
+			// dump($employeeErrorReport);
+			if (count($employeeErrorReport) > 0) {
+				$timeStamp = date('Y_m_d_h_i_s');
+				$excelHeader = [
+					'Employee Code',
+					'Employee Name',
+					'Error',
+				];
+				$errorFileName = 'employee_deletion_sync_error_report_' . $timeStamp;
+				//NEED TO ENABLE
+				// $file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $employeeErrorReport) {
+				// 	$excel->sheet('Errors', function ($sheet) use ($excelHeader, $employeeErrorReport) {
+				// 		$sheet->fromArray($employeeErrorReport, NULL, 'A1');
+				// 		$sheet->row(1, $excelHeader);
+				// 		$sheet->row(1, function ($row) {
+				// 			$row->setBackground('#07c63a');
+				// 		});
+				// 	});
+				// })->store('xlsx', storage_path('app/public/hrms_to_dems/'));
+			}
+
+			//EMPLOYEE DELETION MAIL
+			if (count($employeeSyncedData) > 0) {
+				$mailConfig = MailConfiguration::select(
+					'to_email',
+					'cc_email'
+				)
+					->where('company_id', $request->company_id)
+					->where('config_id', 3943) //HRMS To Travelex Employee Deletion Mail
+					->first();
+
+				$to = explode(',', $mailConfig->to_email);
+				$cc = explode(',', $mailConfig->cc_email);
+
+				$arr = [];
+				$arr['from_mail'] = env('MAIL_FROM_ADDRESS', 'travelex@tvs.in');
+				$arr['from_name'] = 'DEMS-Admin';
+				$arr['to_email'] = $to;
+				$arr['cc_email'] = $cc;
+				$arr['subject'] = 'Employee Deletion';
+				$arr['content'] = 'The below employees travelex login access has been disabled please deactivate the same set of employees in Axapta vendor master.';
+				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
+				$arr['type'] = 2;
+				$arr['employee_details'] = $employeeSyncedData;
+				$mail_instance = new TravelexConfigMail($arr);
+				$mail = Mail::send($mail_instance);
+			}
+
+			$employeeSyncLog = new HrmsToTravelxEmployeeSyncLog();
+			$employeeSyncLog->company_id = $request->company_id;
+			$employeeSyncLog->type_id = 3963; //EMPLOYEE ADDITION
+			$employeeSyncLog->from_date_time = $fromDateTime;
+			$employeeSyncLog->to_date_time = $toDateTime;
+			$employeeSyncLog->delete_count = count($employeeSyncedData);
+			$employeeSyncLog->created_by_id = Auth::id();
+			if ($errorFileName) {
+				$employeeSyncLog->error_file = 'storage/app/public/hrms_to_dems/' . $errorFileName . '.xlsx';
+			}
+			$employeeSyncLog->save();
+
+			return response()->json([
+				'success' => true,
+				'message' => ['Employee deletion synced successfully'],
 			]);
 		}
 	}

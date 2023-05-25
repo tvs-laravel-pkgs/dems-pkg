@@ -868,6 +868,7 @@ class EmployeeController extends Controller {
 			DB::raw('DATE_FORMAT(to_date_time,"%d/%m/%Y %h:%i %p") as to_date_time'),
 			'new_count',
 			'update_count',
+			'delete_count',
 			'error_file',
 		])
 			->where('company_id', Auth::user()->company_id)
@@ -890,6 +891,10 @@ class EmployeeController extends Controller {
 
 	public function hrmsEmployeeUpdationSync(Request $request) {
 		return Employee::hrmsEmployeeUpdationSync($request);
+	}
+
+	public function hrmsEmployeeDeletionSync(Request $request) {
+		return Employee::hrmsEmployeeDeletionSync($request);
 	}
 
 }
