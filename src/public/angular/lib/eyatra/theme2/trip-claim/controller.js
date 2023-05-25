@@ -3623,7 +3623,8 @@ app.component('eyatraTripClaimForm', {
                 lodging.total = parseFloat(currentTotal).toFixed(2);
                 totalLodgingAmount += currentTotal;
             });
-            $('.lodging_expenses').text('₹ ' + totalLodgingAmount.toFixed(2));
+            // $('.lodging_expenses').text('₹ ' + totalLodgingAmount.toFixed(2));
+            $('.lodging_expenses').text('₹ ' + Math.round(totalLodgingAmount).toFixed(2));
             $('.total_lodging_amount').val(totalLodgingAmount.toFixed(2));
             caimTotalAmount();
         }
