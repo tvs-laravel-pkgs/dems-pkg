@@ -864,10 +864,13 @@ class EmployeeController extends Controller {
 	public function hrmsEmployeeSyncLogList(Request $request) {
 		$employeeSyncLogList = HrmsToTravelxEmployeeSyncLog::select([
 			'id',
-			DB::raw('DATE_FORMAT(from_date_time,"%d-%m-%Y %h:%i %p") as from_date_time'),
-			DB::raw('DATE_FORMAT(to_date_time,"%d-%m-%Y %h:%i %p") as to_date_time'),
+			DB::raw('DATE_FORMAT(from_date_time,"%d/%m/%Y %h:%i %p") as from_date_time'),
+			DB::raw('DATE_FORMAT(to_date_time,"%d/%m/%Y %h:%i %p") as to_date_time'),
+			'new_count',
+			'update_count',
 			'error_file',
 		])
+			->where('company_id', Auth::user()->company_id)
 			->where('type_id', $request->type_id)
 			->orderBy('id', 'desc')
 			->get();
@@ -879,11 +882,14 @@ class EmployeeController extends Controller {
 				}
 			})
 			->make(true);
-
 	}
 
 	public function hrmsEmployeeAdditionSync(Request $request) {
 		return Employee::hrmsEmployeeAdditionSync($request);
+	}
+
+	public function hrmsEmployeeUpdationSync(Request $request) {
+		return Employee::hrmsEmployeeUpdationSync($request);
 	}
 
 }
