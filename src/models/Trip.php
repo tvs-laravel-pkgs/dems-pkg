@@ -2861,7 +2861,8 @@ class Trip extends Model {
 									],
 								]);
 							}
-							if (floatval($lodging_data['invoice_amount']) != floatval($lodging_data['total'])) {
+							// if (floatval($lodging_data['invoice_amount']) != floatval($lodging_data['total'])) {
+							if (round($lodging_data['invoice_amount']) != round($lodging_data['total'])) {
 								return response()->json([
 									'success' => false,
 									'errors' => [
