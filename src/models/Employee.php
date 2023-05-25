@@ -10,6 +10,7 @@ use Auth;
 use Carbon\Carbon;
 use Config as databaseConfig;
 use DB;
+use Excel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Mail;
