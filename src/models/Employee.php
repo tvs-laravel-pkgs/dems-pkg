@@ -796,17 +796,17 @@ class Employee extends Model {
 					'Employee Name',
 					'Error',
 				];
-				$errorFileName = 'employee_addition_sync_error_report_' . $timeStamp;
+				$errorFileName = 'emp_addition_error_' . $timeStamp;
 				//NEED TO ENABLE
-				// $file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $employeeErrorReport) {
-				// 	$excel->sheet('Errors', function ($sheet) use ($excelHeader, $employeeErrorReport) {
-				// 		$sheet->fromArray($employeeErrorReport, NULL, 'A1');
-				// 		$sheet->row(1, $excelHeader);
-				// 		$sheet->row(1, function ($row) {
-				// 			$row->setBackground('#07c63a');
-				// 		});
-				// 	});
-				// })->store('xlsx', storage_path('app/public/hrms_to_dems/'));
+				$file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $employeeErrorReport) {
+					$excel->sheet('Errors', function ($sheet) use ($excelHeader, $employeeErrorReport) {
+						$sheet->fromArray($employeeErrorReport, NULL, 'A1');
+						$sheet->row(1, $excelHeader);
+						$sheet->row(1, function ($row) {
+							$row->setBackground('#07c63a');
+						});
+					});
+				})->store('xlsx', storage_path('app/public/hrms_to_dems/'));
 			}
 
 			//EMPLOYEE ADDITION MAIL
@@ -1295,17 +1295,17 @@ class Employee extends Model {
 					'Employee Name',
 					'Error',
 				];
-				$errorFileName = 'employee_updation_sync_error_report_' . $timeStamp;
+				$errorFileName = 'emp_updation_error_' . $timeStamp;
 				//NEED TO ENABLE
-				// $file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $syncErrors) {
-				// 	$excel->sheet('Errors', function ($sheet) use ($excelHeader, $syncErrors) {
-				// 		$sheet->fromArray($syncErrors, NULL, 'A1');
-				// 		$sheet->row(1, $excelHeader);
-				// 		$sheet->row(1, function ($row) {
-				// 			$row->setBackground('#07c63a');
-				// 		});
-				// 	});
-				// })->store('xlsx', storage_path('app/public/hrms_to_dems/'));
+				$file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $syncErrors) {
+					$excel->sheet('Errors', function ($sheet) use ($excelHeader, $syncErrors) {
+						$sheet->fromArray($syncErrors, NULL, 'A1');
+						$sheet->row(1, $excelHeader);
+						$sheet->row(1, function ($row) {
+							$row->setBackground('#07c63a');
+						});
+					});
+				})->store('xlsx', storage_path('app/public/hrms_to_dems/'));
 			}
 
 			//EMPLOYEE UPDATION MAIL
@@ -1534,17 +1534,17 @@ class Employee extends Model {
 					'Employee Name',
 					'Error',
 				];
-				$errorFileName = 'employee_deletion_sync_error_report_' . $timeStamp;
+				$errorFileName = 'emp_deletion_error_' . $timeStamp;
 				//NEED TO ENABLE
-				// $file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $employeeErrorReport) {
-				// 	$excel->sheet('Errors', function ($sheet) use ($excelHeader, $employeeErrorReport) {
-				// 		$sheet->fromArray($employeeErrorReport, NULL, 'A1');
-				// 		$sheet->row(1, $excelHeader);
-				// 		$sheet->row(1, function ($row) {
-				// 			$row->setBackground('#07c63a');
-				// 		});
-				// 	});
-				// })->store('xlsx', storage_path('app/public/hrms_to_dems/'));
+				$file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $employeeErrorReport) {
+					$excel->sheet('Errors', function ($sheet) use ($excelHeader, $employeeErrorReport) {
+						$sheet->fromArray($employeeErrorReport, NULL, 'A1');
+						$sheet->row(1, $excelHeader);
+						$sheet->row(1, function ($row) {
+							$row->setBackground('#07c63a');
+						});
+					});
+				})->store('xlsx', storage_path('app/public/hrms_to_dems/'));
 			}
 
 			//EMPLOYEE DELETION MAIL
