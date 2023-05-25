@@ -409,6 +409,7 @@ class Employee extends Model {
 								'code' => $hrmsEmployee->outlet_code,
 							]);
 							if ($outlet->exists) {
+								$outlet->updated_by = Auth::id();
 								$outlet->updated_at = Carbon::now();
 							} else {
 								$outlet->created_by = Auth::id();
@@ -435,6 +436,7 @@ class Employee extends Model {
 								'name' => $hrmsEmployee->grade_code,
 							]);
 							if ($grade->exists) {
+								$grade->updated_by = Auth::id();
 								$grade->updated_at = Carbon::now();
 							} else {
 								$grade->created_by = Auth::id();
@@ -455,6 +457,7 @@ class Employee extends Model {
 										'grade_id' => $grade->id,
 									]);
 									if ($designation->exists) {
+										$designation->updated_by = Auth::id();
 										$designation->updated_at = Carbon::now();
 									} else {
 										$designation->created_by = Auth::id();
@@ -481,6 +484,7 @@ class Employee extends Model {
 								'name' => $hrmsEmployee->lob_code,
 							]);
 							if ($lob->exists) {
+								$lob->updated_by = Auth::id();
 								$lob->updated_at = Carbon::now();
 							} else {
 								$lob->created_by = Auth::id();
@@ -494,6 +498,7 @@ class Employee extends Model {
 									'name' => $hrmsEmployee->sbu_code,
 								]);
 								if ($sbu->exists) {
+									$sbu->updated_by = Auth::id();
 									$sbu->updated_at = Carbon::now();
 								} else {
 									$sbu->created_by = Auth::id();
@@ -525,6 +530,7 @@ class Employee extends Model {
 											'name' => $hrmsEmployee->function_name,
 										]);
 										if ($department->exists) {
+											$department->updated_by = Auth::id();
 											$department->updated_at = Carbon::now();
 										} else {
 											$department->created_by = Auth::id();
@@ -572,6 +578,7 @@ class Employee extends Model {
 									'code' => $hrmsEmployee->reporting_to_outlet_code,
 								]);
 								if ($reportingToOutlet->exists) {
+									$reportingToOutlet->updated_by = Auth::id();
 									$reportingToOutlet->updated_at = Carbon::now();
 								} else {
 									$reportingToOutlet->created_by = Auth::id();
@@ -598,6 +605,7 @@ class Employee extends Model {
 									'name' => $hrmsEmployee->reporting_to_grade_code,
 								]);
 								if ($reportingToGrade->exists) {
+									$reportingToGrade->updated_by = Auth::id();
 									$reportingToGrade->updated_at = Carbon::now();
 								} else {
 									$reportingToGrade->created_by_id = Auth::id();
@@ -621,6 +629,7 @@ class Employee extends Model {
 							$reportingToEmployee->outlet_id = $reportingToOutlet->id;
 							$reportingToEmployee->grade_id = $reportingToGrade->id;
 							if ($reportingToEmployee->exists) {
+								$reportingToEmployee->updated_by = Auth::id();
 								$reportingToEmployee->updated_at = Carbon::now();
 							} else {
 								$reportingToEmployee->created_by = Auth::id();
@@ -634,6 +643,7 @@ class Employee extends Model {
 								'user_type_id' => 3121, //EMPLOYEE
 							]);
 							if ($reportingToUser->exists) {
+								$reportingToUser->updated_by = Auth::id();
 								$reportingToUser->updated_at = Carbon::now();
 								if ($hrmsEmployee->reporting_to_dob) {
 									$reportingToUser->password = $hrmsEmployee->reporting_to_dob;
@@ -664,6 +674,7 @@ class Employee extends Model {
 							'code' => $hrmsEmployee->employee_code,
 						]);
 						if ($employee->exists) {
+							$employee->updated_by = Auth::id();
 							$employee->updated_at = Carbon::now();
 						} else {
 							$employee->created_by = Auth::id();
@@ -706,6 +717,7 @@ class Employee extends Model {
 							'user_type_id' => 3121, //EMPLOYEE
 						]);
 						if ($user->exists) {
+							$user->updated_by = Auth::id();
 							$user->updated_at = Carbon::now();
 							if ($hrmsEmployee->dob) {
 								$user->password = $hrmsEmployee->dob;
@@ -1082,6 +1094,7 @@ class Employee extends Model {
 								'code' => $employeeUpdateDetail['outlet']->outlet_code,
 							]);
 							if ($outlet->exists) {
+								$outlet->updated_by = Auth::id();
 								$outlet->updated_at = Carbon::now();
 							} else {
 								$outlet->created_by = Auth::id();
@@ -1105,6 +1118,7 @@ class Employee extends Model {
 								'name' => $employeeUpdateDetail['grade']->grade_code,
 							]);
 							if ($grade->exists) {
+								$grade->updated_by = Auth::id();
 								$grade->updated_at = Carbon::now();
 							} else {
 								$grade->created_by = Auth::id();
@@ -1125,6 +1139,7 @@ class Employee extends Model {
 										'grade_id' => $grade->id,
 									]);
 									if ($designation->exists) {
+										$designation->updated_by = Auth::id();
 										$designation->updated_at = Carbon::now();
 									} else {
 										$designation->created_by = Auth::id();
@@ -1148,6 +1163,7 @@ class Employee extends Model {
 								'name' => $employeeUpdateDetail['employee']->lob_code,
 							]);
 							if ($lob->exists) {
+								$lob->updated_by = Auth::id();
 								$lob->updated_at = Carbon::now();
 							} else {
 								$lob->created_by = Auth::id();
@@ -1161,6 +1177,7 @@ class Employee extends Model {
 									'name' => $employeeUpdateDetail['employee']->sbu_code,
 								]);
 								if ($sbu->exists) {
+									$sbu->updated_by = Auth::id();
 									$sbu->updated_at = Carbon::now();
 								} else {
 									$sbu->created_by = Auth::id();
@@ -1192,6 +1209,7 @@ class Employee extends Model {
 											'name' => $employeeUpdateDetail['function']->function_name,
 										]);
 										if ($department->exists) {
+											$department->updated_by = Auth::id();
 											$department->updated_at = Carbon::now();
 										} else {
 											$department->created_by = Auth::id();
@@ -1322,6 +1340,7 @@ class Employee extends Model {
 			$employeeSyncLog->from_date_time = $fromDateTime;
 			$employeeSyncLog->to_date_time = $toDateTime;
 			$employeeSyncLog->update_count = $employeeUpdateCount;
+			$employeeSyncLog->created_by_id = Auth::id();
 			if ($errorFileName) {
 				$employeeSyncLog->error_file = 'storage/app/public/hrms_to_dems/' . $errorFileName . '.xlsx';
 			}
