@@ -1868,7 +1868,7 @@ app.component('eyatraTripClaimForm', {
         self.deviationTypeName = '';
         $scope.isDeviation = function() {
             var is_deviation = false;
-
+            let is_grade_travel_mode = false;
             //LODGING
             var check_lodge_attachment = false;
             if((self.trip.lodgings).length > 0){
@@ -2040,7 +2040,7 @@ app.component('eyatraTripClaimForm', {
                     bookedBySelf = true
             });
             
-            console.log({ is_grade_travel_mode })
+            // console.log({ is_grade_travel_mode })
             if (is_grade_travel_mode == true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }
@@ -3019,9 +3019,17 @@ app.component('eyatraTripClaimForm', {
                 const lodgeGstin = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin'];
                 let lodgeCgstPerc = lodgeSgstPerc = lodgeIgstPerc = 0;
                 const lodgeGstCode = lodgeGstin.substr(0, 2);
+                const stayedDays = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['stayed_days'];
+                let lodgePerDayAmt = 0;
+                if(stayedDays && stayedDays > 0){
+                    lodgePerDayAmt = (lodgeWithoutTaxAmount / stayedDays);
+                }else{
+                    lodgePerDayAmt = lodgeWithoutTaxAmount;
+                }
 
                 let lodgePercentage = 12;
-                if (lodgeWithoutTaxAmount >= 7500) {
+                // if (lodgeWithoutTaxAmount >= 7500) {
+                if (lodgePerDayAmt > 7500) {
                     lodgePercentage = 18;
                 }
 
@@ -3306,7 +3314,8 @@ app.component('eyatraTripClaimForm', {
                 }
 
                 // if (amount >= 7500)
-                if (lodge_per_day_amt >= 7500)
+                // if (lodge_per_day_amt >= 7500)
+                if (lodge_per_day_amt > 7500)
                     percentage = 18;
                 if (gst_state_code == self.state_code) {
                     cgst_percentage = sgst_percentage = percentage / 2;
