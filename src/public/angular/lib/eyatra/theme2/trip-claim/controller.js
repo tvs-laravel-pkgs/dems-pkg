@@ -1868,7 +1868,7 @@ app.component('eyatraTripClaimForm', {
         self.deviationTypeName = '';
         $scope.isDeviation = function() {
             var is_deviation = false;
-
+            let is_grade_travel_mode = false;
             //LODGING
             var check_lodge_attachment = false;
             if((self.trip.lodgings).length > 0){
@@ -1944,6 +1944,7 @@ app.component('eyatraTripClaimForm', {
 
                 });
             }
+
             console.log({ deviationTypes })
             self.deviationTypeName = deviationTypes.toString()
             if (self.trip.visits)
@@ -1952,6 +1953,46 @@ app.component('eyatraTripClaimForm', {
                         self.deviationTypeName += ' amount is greater than their eligible amount';
                     is_grade_travel_mode = false;
                 }
+
+            //LODGING AMOUNT DEVIATION CHECK
+            let lodgingDeviation = [];
+            let isLodgingDeviated = false;
+            $('.is_lodging_deviation_amount').each(function() {
+                let lodgeBeforeTaxAmount = $(this).val();
+                if(lodgeBeforeTaxAmount && self.is_grade_leader == false){
+                    let lodgeEligibleAmount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
+                    if (!$.isNumeric(lodgeBeforeTaxAmount)) {
+                        lodgeBeforeTaxAmount = 0;
+                    } else {
+                        lodgeBeforeTaxAmount = parseInt(lodgeBeforeTaxAmount);
+                    }
+
+                    if (!$.isNumeric(lodgeEligibleAmount)) {
+                        lodgeEligibleAmount = 0;
+                    } else {
+                        lodgeEligibleAmount = parseInt(lodgeEligibleAmount);
+                    }
+
+                    if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
+                        is_deviation = true;
+                        let isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
+                        if ($.inArray(isDeviationType, lodgingDeviation) == -1){
+                            lodgingDeviation[lodgingDeviation.length] = isDeviationType;
+                            isLodgingDeviated = true;
+                        }
+                    }
+                }
+            });
+
+
+            let lodgingDeviations = lodgingDeviation.toString();
+            if (isLodgingDeviated == true && lodgingDeviations){
+                if(self.deviationTypeName){
+                    self.deviationTypeName += (', ' + lodgingDeviations + ' amount is greater than their eligible amount');
+                }else{
+                    self.deviationTypeName += (lodgingDeviations + ' amount is greater than their eligible amount');
+                }
+            }
 
             /*$(self.trip.visits).each(function(key, visit) {
                 $(self.grade_travel).each(function(key, travel) {
@@ -1970,6 +2011,9 @@ app.component('eyatraTripClaimForm', {
             if (is_grade_travel_mode = true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }*/
+
+
+
             var grade_travel_ids = []
             $(self.grade_travel).each(function(key, travel) {
                 if (jQuery.inArray(travel.id, grade_travel_ids) == -1) // Not in array
@@ -1996,7 +2040,7 @@ app.component('eyatraTripClaimForm', {
                     bookedBySelf = true
             });
             
-            console.log({ is_grade_travel_mode })
+            // console.log({ is_grade_travel_mode })
             if (is_grade_travel_mode == true) {
                 self.deviationTypeName += ' Travelmode is not eligible for this Grade';
             }
@@ -2975,9 +3019,17 @@ app.component('eyatraTripClaimForm', {
                 const lodgeGstin = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['gstin'];
                 let lodgeCgstPerc = lodgeSgstPerc = lodgeIgstPerc = 0;
                 const lodgeGstCode = lodgeGstin.substr(0, 2);
+                const stayedDays = self.trip.lodgings[self.lodgingTaxInvoiceModalIndex]['stayed_days'];
+                let lodgePerDayAmt = 0;
+                if(stayedDays && stayedDays > 0){
+                    lodgePerDayAmt = (lodgeWithoutTaxAmount / stayedDays);
+                }else{
+                    lodgePerDayAmt = lodgeWithoutTaxAmount;
+                }
 
                 let lodgePercentage = 12;
-                if (lodgeWithoutTaxAmount >= 7500) {
+                // if (lodgeWithoutTaxAmount >= 7500) {
+                if (lodgePerDayAmt > 7500) {
                     lodgePercentage = 18;
                 }
 
@@ -3262,7 +3314,8 @@ app.component('eyatraTripClaimForm', {
                 }
 
                 // if (amount >= 7500)
-                if (lodge_per_day_amt >= 7500)
+                // if (lodge_per_day_amt >= 7500)
+                if (lodge_per_day_amt > 7500)
                     percentage = 18;
                 if (gst_state_code == self.state_code) {
                     cgst_percentage = sgst_percentage = percentage / 2;
