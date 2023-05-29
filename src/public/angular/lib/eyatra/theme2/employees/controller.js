@@ -1052,6 +1052,14 @@ app.component('hrmsEmployeeSyncLogList', {
         self.hasPermission = HelperService.hasPermission;
         self.type_id = $routeParams.type_id;
 
+        if(self.type_id == 3961){
+            //EMPLOYEE ADDITION
+            if(!self.hasPermission('hrms-to-travelex-employee-addition')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }
+
         $http.get(
             laravel_routes['getHrmsEmployeeSyncLogFilterData']
         ).then(function(response) {
