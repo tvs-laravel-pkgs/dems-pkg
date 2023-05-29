@@ -59,7 +59,7 @@ class Employee extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Sbu');
 	}
 	public function Department() {
-		return $this->belongsTo('Uitoux\EYatra\Department');
+		return $this->belongsTo('Uitoux\EYatra\Department')->withTrashed();
 	}
 
 	public function trips() {
@@ -280,6 +280,7 @@ class Employee extends Model {
 
 		$hrmsEmployees = DB::table('employees')->select([
 			'employees.id',
+			'employees.company_id',
 			'employees.code as employee_code',
 			'employees.name as employee_name',
 			'employees.doj',
@@ -288,6 +289,7 @@ class Employee extends Model {
 			'employees.email',
 			'companies.adre_code',
 			'outlet_companies.adre_code as outlet_company_adre_code',
+			'outlets.id as outlet_id',
 			'outlets.code as outlet_code',
 			'outlets.name as outlet_name',
 			'grade_companies.adre_code as grade_company_adre_code',
@@ -348,6 +350,34 @@ class Employee extends Model {
 				'error' => 'Validation Error',
 				'errors' => ['New employee details not found for this period : ' . $formattedFromDateTime . ' to ' . $formattedToDateTime],
 			]);
+		}
+
+		if (count($hrmsEmployees) > 0) {
+			foreach ($hrmsEmployees as $hrmsEmployeeData) {
+				$outletHrEmail = null;
+				$outletHrRoleId = DB::table('roles')
+					->where('company_id', $hrmsEmployeeData->company_id)
+					->where('name', 'Outlet HR')
+					->first()->id;
+				if ($outletHrRoleId) {
+					$outletHrEmployeeIds = DB::table('user_has_roles')
+						->join('employees', 'employees.user_id', 'user_has_roles.user_id')
+						->where('user_has_roles.role_id', $outletHrRoleId)
+						->pluck('employees.id');
+					if ($outletHrEmployeeIds) {
+						$outletHrEmail = DB::table('employee_outlets')->select([
+							'employee_outlets.id',
+							'employees.code',
+							'employees.email',
+						])
+							->join('employees', 'employees.id', 'employee_outlets.employee_id')
+							->whereIn('employee_outlets.employee_id', $outletHrEmployeeIds)
+							->where('employee_outlets.outlet_id', $hrmsEmployeeData->outlet_id)
+							->first()->email;
+					}
+				}
+				$hrmsEmployeeData->outlet_hr_email = $outletHrEmail;
+			}
 		}
 
 		DB::setDefaultConnection('mysql');
@@ -746,11 +776,15 @@ class Employee extends Model {
 						$employeeSyncedData[] = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 
 						//EMPLOYEE ADDITION MAIL TO EMPLOYEE, CC REPORTING MANAGE AND OUTLET HR
-						if ($employeeAdditionData) {
+						if ($employeeAdditionData && $user->email) {
 							$toEmail = [$user->email];
 							$ccEmail = [];
+
 							if (isset($reportingToUser->email)) {
-								$ccEmail = [$reportingToUser->email];
+								$ccEmail[] = $reportingToUser->email;
+							}
+							if (isset($hrmsEmployee->outlet_hr_email)) {
+								$ccEmail[] = $hrmsEmployee->outlet_hr_email;
 							}
 
 							$arr = [];
@@ -1603,6 +1637,7 @@ class Employee extends Model {
 			'outlet' => $employee->outlet->code,
 			'lob' => isset($employee->Sbu->lob) ? $employee->Sbu->lob->name : '',
 			'sbu' => $employee->Sbu ? $employee->Sbu->name : '',
+			'function' => $employee->Department ? $employee->Department->name : '',
 			'repoting_to_code' => $employee->reportingTo ? $employee->reportingTo->code : '',
 			'repoting_to_name' => isset($employee->reportingTo->user) ? $employee->reportingTo->user->name : '',
 			'category' => $category,
