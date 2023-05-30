@@ -199,7 +199,7 @@ class Trip extends Model {
 	}
 
 	public static function saveTrip($request) {
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			//validation
 			$validator = Validator::make($request->all(), [
@@ -412,7 +412,10 @@ class Trip extends Model {
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
 					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
 					if ($visit->booking_method_id == 3040) {
-						$visit->self_booking_approval = 1;
+						// $visit->self_booking_approval = 1;
+						if (isset($visit_data['self_booking_approval'])) {
+							$visit->self_booking_approval = $visit_data['self_booking_approval'];
+						}
 					} else {
 						$visit->self_booking_approval = 0;
 					}
