@@ -1094,6 +1094,15 @@ app.component('hrmsEmployeeSyncLogList', {
                     { data: 'delete_count',  searchable: false },
                 ];
             }
+            else if(self.type_id == 3964){
+                //EMPLOYEE REPORTING TO UPDATION
+                cols = [
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                    { data: 'from_date_time',  searchable: false },
+                    { data: 'to_date_time',  searchable: false },
+                    { data: 'update_count',  searchable: false },
+                ];
+            }
 
             var dataTable = $('#employee_sync_log_list_table').DataTable({
                 stateSave: true,
@@ -1140,6 +1149,10 @@ app.component('hrmsEmployeeSyncLogList', {
             }else if(self.type_id == 3963){
                 $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Deletion</p><h3 class="title">HRMS To Travelex Employee Deletion</h3>');
                 $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-deletion-sync">' +
+                'Sync' +'</button>');
+            }else if(self.type_id == 3964){
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Reporting To Updation</p><h3 class="title">HRMS To Travelex Employee Reporting To Updation</h3>');
+                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-reporting-to-update-sync">' +
                 'Sync' +'</button>');
             }
 
@@ -1226,6 +1239,35 @@ app.component('hrmsEmployeeSyncLogList', {
                 })
                 .fail(function(xhr) {
                     $('.employee-deletion-sync').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+            });
+
+            $('.employee-reporting-to-update-sync').on("click", function() {
+                $('.employee-reporting-to-update-sync').button('loading');
+                $.ajax({
+                    method: "POST",
+                    url: laravel_routes['hrmsEmployeeReportingToUpdateSync'],
+                    data: {
+                        company_id: self.user_company.id,
+                        company_code: self.user_company.code
+                    },
+                })
+                .done(function(res) {
+                    $('.employee-reporting-to-update-sync').button('reset');
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', res.message);
+                        dataTable.draw();
+                    }
+                })
+                .fail(function(xhr) {
+                    $('.employee-reporting-to-update-sync').button('reset');
                     custom_noty('error', 'Something went wrong at server');
                 });
             });

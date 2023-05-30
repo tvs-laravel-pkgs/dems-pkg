@@ -595,108 +595,137 @@ class Employee extends Model {
 						if (!$reportingToCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The reporting to employee company not found in travelex';
+						} else {
+							$reportingToEmployeeExistId = Employee::withTrashed()
+								->where('company_id', $reportingToCompanyId)
+								->where('code', $hrmsEmployee->reporting_to_employee_code)
+								->pluck('id')
+								->first();
+							if (!$reportingToEmployeeExistId) {
+								$skip = true;
+								$recordErrors[] = 'The reporting to employee detail not available in travelex';
+							}
 						}
 
 						//EMPLOYEE REPORTING TO OUTLET
-						if ($hrmsEmployee->reporting_to_outlet_code) {
-							$reportingToOutletCompanyId = Company::where('code', $hrmsEmployee->reporting_to_outlet_company_adre_code)->first()->id;
-							if (!$reportingToOutletCompanyId) {
-								$skip = true;
-								$recordErrors[] = 'The reporting to outlet company not found in travelex';
-							} else {
-								$reportingToOutlet = Outlet::withTrashed()->firstOrNew([
-									'company_id' => $reportingToOutletCompanyId,
-									'code' => $hrmsEmployee->reporting_to_outlet_code,
-								]);
-								if ($reportingToOutlet->exists) {
-									$reportingToOutlet->updated_by = Auth::id();
-									$reportingToOutlet->updated_at = Carbon::now();
-								} else {
-									$reportingToOutlet->created_by = Auth::id();
-									$reportingToOutlet->created_at = Carbon::now();
-								}
-								$reportingToOutlet->name = $hrmsEmployee->reporting_to_outlet_name;
-								$reportingToOutlet->save();
-							}
-						} else {
-							$skip = true;
-							$recordErrors[] = 'The reporting to outlet code is required';
-						}
+						// if ($hrmsEmployee->reporting_to_outlet_code) {
+						// 	$reportingToOutletCompanyId = Company::where('code', $hrmsEmployee->reporting_to_outlet_company_adre_code)->first()->id;
+						// 	if (!$reportingToOutletCompanyId) {
+						// 		$skip = true;
+						// 		$recordErrors[] = 'The reporting to outlet company not found in travelex';
+						// 	} else {
+						// 		$reportingToOutlet = Outlet::withTrashed()->firstOrNew([
+						// 			'company_id' => $reportingToOutletCompanyId,
+						// 			'code' => $hrmsEmployee->reporting_to_outlet_code,
+						// 		]);
+						// 		if ($reportingToOutlet->exists) {
+						// 			$reportingToOutlet->updated_by = Auth::id();
+						// 			$reportingToOutlet->updated_at = Carbon::now();
+						// 		} else {
+						// 			$reportingToOutlet->created_by = Auth::id();
+						// 			$reportingToOutlet->created_at = Carbon::now();
+						// 		}
+						// 		$reportingToOutlet->name = $hrmsEmployee->reporting_to_outlet_name;
+						// 		$reportingToOutlet->save();
+						// 	}
+						// } else {
+						// 	$skip = true;
+						// 	$recordErrors[] = 'The reporting to outlet code is required';
+						// }
 
 						//EMPLOYEE REPORTING TO GRADE
-						if ($hrmsEmployee->reporting_to_grade_code) {
-							$reportingToGradeCompanyId = Company::where('code', $hrmsEmployee->reporting_to_grade_company_adre_code)->first()->id;
-							if (!$reportingToGradeCompanyId) {
-								$skip = true;
-								$recordErrors[] = 'The reporting to grade company not found in travelex';
-							} else {
-								$reportingToGrade = Entity::withTrashed()->firstOrNew([
-									'company_id' => $reportingToGradeCompanyId,
-									'entity_type_id' => 500, //GRADE
-									'name' => $hrmsEmployee->reporting_to_grade_code,
-								]);
-								if ($reportingToGrade->exists) {
-									$reportingToGrade->updated_by = Auth::id();
-									$reportingToGrade->updated_at = Carbon::now();
-								} else {
-									$reportingToGrade->created_by_id = Auth::id();
-									$reportingToGrade->created_at = Carbon::now();
-								}
-								$reportingToGrade->save();
-							}
-						} else {
-							$skip = true;
-							$recordErrors[] = 'The reporting to grade is required';
-						}
+						// if ($hrmsEmployee->reporting_to_grade_code) {
+						// 	$reportingToGradeCompanyId = Company::where('code', $hrmsEmployee->reporting_to_grade_company_adre_code)->first()->id;
+						// 	if (!$reportingToGradeCompanyId) {
+						// 		$skip = true;
+						// 		$recordErrors[] = 'The reporting to grade company not found in travelex';
+						// 	} else {
+						// 		$reportingToGrade = Entity::withTrashed()->firstOrNew([
+						// 			'company_id' => $reportingToGradeCompanyId,
+						// 			'entity_type_id' => 500, //GRADE
+						// 			'name' => $hrmsEmployee->reporting_to_grade_code,
+						// 		]);
+						// 		if ($reportingToGrade->exists) {
+						// 			$reportingToGrade->updated_by = Auth::id();
+						// 			$reportingToGrade->updated_at = Carbon::now();
+						// 		} else {
+						// 			$reportingToGrade->created_by_id = Auth::id();
+						// 			$reportingToGrade->created_at = Carbon::now();
+						// 		}
+						// 		$reportingToGrade->save();
+						// 	}
+						// } else {
+						// 	$skip = true;
+						// 	$recordErrors[] = 'The reporting to grade is required';
+						// }
 					}
 
 					if (!$skip) {
 						//REPORTING TO SAVE
 						if ($hrmsEmployee->reporting_to_employee_code) {
-							$reportingToEmployee = Employee::withTrashed()->firstOrNew([
-								'company_id' => $reportingToCompanyId,
-								'code' => $hrmsEmployee->reporting_to_employee_code,
-							]);
-							$reportingToEmployee->outlet_id = $reportingToOutlet->id;
-							$reportingToEmployee->grade_id = $reportingToGrade->id;
-							if ($reportingToEmployee->exists) {
-								$reportingToEmployee->updated_by = Auth::id();
-								$reportingToEmployee->updated_at = Carbon::now();
-							} else {
-								$reportingToEmployee->created_by = Auth::id();
-								$reportingToEmployee->created_at = Carbon::now();
-							}
-							$reportingToEmployee->save();
+							// $reportingToEmployee = Employee::withTrashed()->firstOrNew([
+							// 	'company_id' => $reportingToCompanyId,
+							// 	'code' => $hrmsEmployee->reporting_to_employee_code,
+							// ]);
+							// $reportingToEmployee->outlet_id = $reportingToOutlet->id;
+							// $reportingToEmployee->grade_id = $reportingToGrade->id;
+							// if ($reportingToEmployee->exists) {
+							// 	$reportingToEmployee->updated_by = Auth::id();
+							// 	$reportingToEmployee->updated_at = Carbon::now();
+							// } else {
+							// 	$reportingToEmployee->created_by = Auth::id();
+							// 	$reportingToEmployee->created_at = Carbon::now();
+							// }
+							// $reportingToEmployee->save();
 
 							//REPORTING TO USER SAVE
-							$reportingToUser = User::withTrashed()->firstOrNew([
-								'entity_id' => $reportingToEmployee->id,
-								'user_type_id' => 3121, //EMPLOYEE
-							]);
-							if ($reportingToUser->exists) {
-								$reportingToUser->updated_by = Auth::id();
-								$reportingToUser->updated_at = Carbon::now();
-								if ($hrmsEmployee->reporting_to_dob) {
-									$reportingToUser->password = $hrmsEmployee->reporting_to_dob;
-								}
-							} else {
-								$reportingToUser->created_by = Auth::id();
-								$reportingToUser->created_at = Carbon::now();
-								if ($hrmsEmployee->reporting_to_dob) {
-									$reportingToUser->password = $hrmsEmployee->reporting_to_dob;
-								} else {
-									$reportingToUser->password = $reportingToEmployee->code;
+							// $reportingToUser = User::withTrashed()->firstOrNew([
+							// 	'entity_id' => $reportingToEmployee->id,
+							// 	'user_type_id' => 3121, //EMPLOYEE
+							// ]);
+							// if ($reportingToUser->exists) {
+							// 	$reportingToUser->updated_by = Auth::id();
+							// 	$reportingToUser->updated_at = Carbon::now();
+							// 	if ($hrmsEmployee->reporting_to_dob) {
+							// 		$reportingToUser->password = $hrmsEmployee->reporting_to_dob;
+							// 	}
+							// } else {
+							// 	$reportingToUser->created_by = Auth::id();
+							// 	$reportingToUser->created_at = Carbon::now();
+							// 	if ($hrmsEmployee->reporting_to_dob) {
+							// 		$reportingToUser->password = $hrmsEmployee->reporting_to_dob;
+							// 	} else {
+							// 		$reportingToUser->password = $reportingToEmployee->code;
+							// 	}
+							// }
+							// $reportingToUser->company_id = $reportingToEmployee->company_id;
+							// $reportingToUser->entity_type = 0;
+							// $reportingToUser->username = $reportingToEmployee->code;
+							// $reportingToUser->name = $hrmsEmployee->reporting_to_employee_name;
+							// $reportingToUser->mobile_number = $hrmsEmployee->reporting_to_mobile_number;
+							// if ($hrmsEmployee->reporting_to_email) {
+							// 	$reportingToUser->email = $hrmsEmployee->reporting_to_email;
+							// }
+							// $reportingToUser->save();
+
+							$reportingToEmployee = Employee::withTrashed()
+								->where('id', $reportingToEmployeeExistId)
+								->first();
+							if ($reportingToEmployee) {
+								$reportingToUser = User::withTrashed()
+									->where('entity_id', $reportingToEmployee->id)
+									->where('user_type_id', 3121) //EMPLOYEE
+									->first();
+								if ($reportingToUser) {
+									if ($hrmsEmployee->reporting_to_employee_name) {
+										$reportingToUser->name = $hrmsEmployee->reporting_to_employee_name;
+									}
+									if ($hrmsEmployee->reporting_to_email) {
+										$reportingToUser->email = $hrmsEmployee->reporting_to_email;
+									}
+									$reportingToUser->save();
 								}
 							}
-							$reportingToUser->company_id = $reportingToEmployee->company_id;
-							$reportingToUser->entity_type = 0;
-							$reportingToUser->username = $reportingToEmployee->code;
-							$reportingToUser->name = $hrmsEmployee->reporting_to_employee_name;
-							$reportingToUser->mobile_number = $hrmsEmployee->reporting_to_mobile_number;
-							if ($hrmsEmployee->reporting_to_email) {
-								$reportingToUser->email = $hrmsEmployee->reporting_to_email;
-							}
-							$reportingToUser->save();
 						}
 
 						//EMPLOYEE SAVE
@@ -1012,7 +1041,7 @@ class Employee extends Model {
 			}
 
 			//IF NO TRANSFER WAS FOUND
-			if (!$outletId && !$gradeId && !$designationId) {
+			if (!$outletId && !$gradeId && !$designationId && !$functionId) {
 				continue;
 			}
 
@@ -1624,6 +1653,265 @@ class Employee extends Model {
 			return response()->json([
 				'success' => true,
 				'message' => ['Employee deletion synced successfully'],
+			]);
+		}
+	}
+
+	public static function hrmsEmployeeReportingToSync($request) {
+		$hrmsPortalConfig = config('custom.HRMS_PORTAL_CONFIG');
+		if ($hrmsPortalConfig == true) {
+			$hrmsPortal = DB::table('portals')->select([
+				'db_host_name',
+				'db_port_number',
+				'db_name',
+				'db_user_name',
+				'db_password',
+			])
+				->where('id', 2) //HRMS
+				->first();
+
+			$dbHostName = $hrmsPortal->db_host_name;
+			$dbPortNumber = $hrmsPortal->db_port_number;
+			$dbPortDriver = 'mysql';
+			$dbName = $hrmsPortal->db_name;
+			$dbUserName = $hrmsPortal->db_user_name;
+			$dbPassword = $hrmsPortal->db_password;
+		} else {
+			$dbHostName = config('custom.HRMS_DB_HOST');
+			$dbPortNumber = config('custom.HRMS_DB_PORT_NUMBER');
+			$dbPortDriver = 'mysql';
+			$dbName = config('custom.HRMS_DB_NAME');
+			$dbUserName = config('custom.HRMS_DB_USER_NAME');
+			$dbPassword = config('custom.HRMS_DB_PASSWORD');
+		}
+
+		$employeeUpdationExistLog = HrmsToTravelxEmployeeSyncLog::select([
+			'id',
+			'from_date_time',
+			'to_date_time',
+		])
+			->where('company_id', $request->company_id)
+			->where('type_id', 3964) //EMPLOYEE REPORTING UPDATION
+			->orderBy('id', 'DESC')
+			->first();
+		if ($employeeUpdationExistLog) {
+			$fromDateTime = $employeeUpdationExistLog->to_date_time;
+			$toDateTime = date("Y-m-d H:i:s");
+		} else {
+			$fromDateTime = date('Y-m-d') . ' 00:00:00';
+			$toDateTime = date("Y-m-d H:i:s");
+		}
+
+		DB::setDefaultConnection('dynamic');
+		dataBaseConfig::set('database.connections.dynamic.host', $dbHostName);
+		dataBaseConfig::set('database.connections.dynamic.port', $dbPortNumber);
+		dataBaseConfig::set('database.connections.dynamic.driver', $dbPortDriver);
+		dataBaseConfig::set('database.connections.dynamic.database', $dbName);
+		dataBaseConfig::set('database.connections.dynamic.username', $dbUserName);
+		dataBaseConfig::set('database.connections.dynamic.password', $dbPassword);
+		DB::purge('dynamic');
+		DB::reconnect('dynamic');
+
+		$hrmsCompanyId = DB::table('companies')
+			->where('adre_code', $request->company_code)
+			->first()->id;
+		if (!$hrmsCompanyId) {
+			return response()->json([
+				'success' => false,
+				'error' => 'Validation Error',
+				'errors' => ['The logined user company not found in HRMS'],
+			]);
+		}
+
+		$employeeReportingDetails = DB::table('employees')->select([
+			'employees.id',
+			'employees.code as employee_code',
+			'employees.name as employee_name',
+			'employees.lob_id',
+			'companies.adre_code',
+			'reporting_to_companies.adre_code as reporting_to_company_adre_code',
+			'reporting_to_employees.code as reporting_to_employee_code',
+			'reporting_to_employees.name as reporting_to_employee_name',
+		])
+			->join('companies', 'companies.id', 'employees.company_id')
+			->join('employees as reporting_to_employees', 'reporting_to_employees.id', 'employees.reporting_to_id')
+			->leftjoin('companies as reporting_to_companies', 'reporting_to_companies.id', 'reporting_to_employees.company_id')
+			->where('employees.company_id', $hrmsCompanyId)
+			->whereBetween('employees.updated_at', [$fromDateTime, $toDateTime])
+			->get();
+
+		if (count($employeeReportingDetails) == 0) {
+			$formattedFromDateTime = date('d/m/Y h:i A', strtotime($fromDateTime));
+			$formattedToDateTime = date('d/m/Y h:i A', strtotime($toDateTime));
+
+			return response()->json([
+				'success' => false,
+				'error' => 'Validation Error',
+				'errors' => ['Employee reporting to updates not found for this period : ' . $formattedFromDateTime . ' to ' . $formattedToDateTime],
+			]);
+		}
+
+		DB::setDefaultConnection('mysql');
+		if (count($employeeReportingDetails) > 0) {
+			$employeeSyncedData = [];
+			$employeeErrorReport = [];
+			foreach (collect($employeeReportingDetails) as $employeeReportingDetail) {
+				DB::beginTransaction();
+				try {
+					$skip = false;
+					$recordErrors = [];
+
+					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
+					if (!in_array($employeeReportingDetail->lob_id, [4, 15])) {
+						continue;
+					}
+
+					//EMPLOYEE COMPANY
+					if (!$employeeReportingDetail->adre_code) {
+						$skip = true;
+						$recordErrors[] = 'The employee company is required';
+					} else {
+						$companyId = Company::where('code', $employeeReportingDetail->adre_code)->first()->id;
+						if (!$companyId) {
+							$skip = true;
+							$recordErrors[] = 'The employee company not found in travelex';
+						} else {
+							$employeeExistId = Employee::withTrashed()
+								->where('company_id', $companyId)
+								->where('code', $employeeReportingDetail->employee_code)
+								->pluck('id')
+								->first();
+							if (!$employeeExistId) {
+								$skip = true;
+								$recordErrors[] = 'The employee detail not available in travelex';
+							}
+						}
+					}
+
+					//EMPLOYEE REPORTING TO DETAILS
+					$reportingToCompanyId = Company::where('code', $employeeReportingDetail->reporting_to_company_adre_code)->first()->id;
+					if (!$reportingToCompanyId) {
+						$skip = true;
+						$recordErrors[] = 'The reporting to employee company not found in travelex';
+					} else {
+						$reportingEmployeeExistId = Employee::withTrashed()
+							->where('company_id', $reportingToCompanyId)
+							->where('code', $employeeReportingDetail->reporting_to_employee_code)
+							->pluck('id')
+							->first();
+						if (!$reportingEmployeeExistId) {
+							$skip = true;
+							$recordErrors[] = 'The reporting employee not available in travelex';
+						}
+					}
+					if (!$skip) {
+						//REPORTING TO NAME UPDATE
+						$reportingToUser = User::withTrashed()
+							->where('entity_id', $reportingEmployeeExistId)
+							->where('user_type_id', 3121) //EMPLOYEE
+							->first();
+						if ($reportingToUser && $employeeReportingDetail->reporting_to_employee_name) {
+							$reportingToUser->name = $employeeReportingDetail->reporting_to_employee_name;
+							$reportingToUser->save();
+						}
+
+						//EMPLOYEE REPORTING TO UPDATE
+						$employee = Employee::withTrashed()->where('id', $employeeExistId)->first();
+						if ($employee) {
+							$employeeExistReportingToId = $employee->reporting_to_id;
+							$employee->reporting_to_id = $reportingEmployeeExistId;
+							$employee->updated_by = Auth::id();
+							$employee->updated_at = Carbon::now();
+							$employee->save();
+							//CHECK REPORTING MANAGER IS CHANGED
+							if ($employeeExistReportingToId != $reportingEmployeeExistId) {
+								$employeeSyncedData[] = self::hrmsToDemsEmployeeData($employee, 'Reporting To Change');
+							}
+						}
+					}
+
+					// EMPLOYEE ERROR DETAILS
+					if (count($recordErrors) > 0) {
+						$employeeErrorReport[] = [
+							$employeeReportingDetail->employee_code,
+							$employeeReportingDetail->employee_name,
+							implode(',', $recordErrors),
+						];
+					}
+					DB::commit();
+				} catch (\Exception $e) {
+					DB::rollBack();
+					$employeeErrorReport[] = [
+						$employeeReportingDetail->employee_code,
+						$employeeReportingDetail->employee_name,
+						$e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile(),
+					];
+					continue;
+				}
+			}
+
+			$errorFileName = null;
+			if (count($employeeErrorReport) > 0) {
+				$timeStamp = date('Y_m_d_h_i_s');
+				$excelHeader = [
+					'Employee Code',
+					'Employee Name',
+					'Error',
+				];
+				$errorFileName = 'emp_reporting_to_error_' . $timeStamp;
+				//NEED TO ENABLE
+				$file = Excel::create($errorFileName, function ($excel) use ($excelHeader, $employeeErrorReport) {
+					$excel->sheet('Errors', function ($sheet) use ($excelHeader, $employeeErrorReport) {
+						$sheet->fromArray($employeeErrorReport, NULL, 'A1');
+						$sheet->row(1, $excelHeader);
+						$sheet->row(1, function ($row) {
+							$row->setBackground('#07c63a');
+						});
+					});
+				})->store('xlsx', storage_path('app/public/hrms_to_dems/'));
+			}
+
+			//EMPLOYEE UPDATION MAIL
+			if (count($employeeSyncedData) > 0) {
+				$mailConfig = MailConfiguration::select(
+					'to_email',
+					'cc_email'
+				)
+					->where('company_id', $request->company_id)
+					->where('config_id', 3944) //HRMS To Travelex Employee Reporting To Change Mail
+					->first();
+
+				$to = explode(',', $mailConfig->to_email);
+				$cc = explode(',', $mailConfig->cc_email);
+
+				$arr['from_mail'] = env('MAIL_FROM_ADDRESS', 'travelex@tvs.in');
+				$arr['from_name'] = 'DEMS-Admin';
+				$arr['to_email'] = $to;
+				$arr['cc_email'] = $cc;
+				$arr['subject'] = 'Employee Update';
+				$arr['content'] = 'The below employee changes has been made in travelex system FYI.';
+				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
+				$arr['type'] = 2;
+				$arr['employee_details'] = $employeeSyncedData;
+				$mail_instance = new TravelexConfigMail($arr);
+				$mail = Mail::send($mail_instance);
+			}
+
+			$employeeSyncLog = new HrmsToTravelxEmployeeSyncLog();
+			$employeeSyncLog->company_id = $request->company_id;
+			$employeeSyncLog->type_id = 3964; //EMPLOYEE REPORTING TO CHANGE
+			$employeeSyncLog->from_date_time = $fromDateTime;
+			$employeeSyncLog->to_date_time = $toDateTime;
+			$employeeSyncLog->update_count = count($employeeSyncedData);
+			$employeeSyncLog->created_by_id = Auth::id();
+			if ($errorFileName) {
+				$employeeSyncLog->error_file = 'storage/app/public/hrms_to_dems/' . $errorFileName . '.xlsx';
+			}
+			$employeeSyncLog->save();
+
+			return response()->json([
+				'success' => true,
+				'message' => ['Employee details synced successfully'],
 			]);
 		}
 	}
