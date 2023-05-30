@@ -17,6 +17,24 @@ class TravelexPermissionSeeder extends Seeder {
 				'name' => 'hrms-to-travelex-employee-addition',
 				'display_name' => 'HRMS To Travelex Employee Addition',
 			],
+			5526 => [
+				'display_order' => 6,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-updation',
+				'display_name' => 'HRMS To Travelex Employee Updation',
+			],
+			5527 => [
+				'display_order' => 7,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-deletion',
+				'display_name' => 'HRMS To Travelex Employee Deletion',
+			],
+			5528 => [
+				'display_order' => 8,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-reporting-to-updation',
+				'display_name' => 'HRMS To Travelex Employee Reporting To Updation',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

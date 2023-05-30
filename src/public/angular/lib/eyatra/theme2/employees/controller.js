@@ -1058,6 +1058,24 @@ app.component('hrmsEmployeeSyncLogList', {
                 window.location = "#!/permission-denied";
                 return false;
             }
+        }else if(self.type_id == 3962){
+            //EMPLOYEE UPDATION
+            if(!self.hasPermission('hrms-to-travelex-employee-updation')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }else if(self.type_id == 3963){
+            //EMPLOYEE DELETION
+            if(!self.hasPermission('hrms-to-travelex-employee-deletion')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }else if(self.type_id == 3964){
+            //EMPLOYEE REPORTING TO UPDATION
+            if(!self.hasPermission('hrms-to-travelex-employee-reporting-to-updation')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
         }
 
         $http.get(
