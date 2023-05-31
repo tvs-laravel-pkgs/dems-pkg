@@ -216,6 +216,7 @@ app.component('eyatraTripForm', {
             self.claimable_travel_mode_list = response.data.extras.claimable_travel_mode_list;
             self.trip_advance_amount_edit = response.data.trip_advance_amount_edit;
             self.trip_advance_amount_employee_edit = response.data.trip_advance_amount_employee_edit;
+            self.is_self_booking_approval_must = response.data.is_self_booking_approval_must;
 
             if (response.data.action == "Edit") {
 
@@ -287,6 +288,10 @@ app.component('eyatraTripForm', {
                 // });
                 // Booking Preference Conditions
                 $.each(self.trip.visits, function(key, value) {
+                    if(value.self_booking_approval  == 1 && self.is_self_booking_approval_must == 'No'){
+                        value.self_booking_approval  = 0;
+                    }
+
                     setTimeout(function() {
                         $scope.onChangeTravelMode(value.travel_mode_id, key);
                         $scope.onChangeBookingPreference(value.booking_method_name, key);
@@ -676,7 +681,8 @@ app.component('eyatraTripForm', {
 
         $scope.onChangeBookingPreference = (value, index) => {
             if (value == "Self") {
-                self.trip.visits[index].self_booking_approval = "1";
+                // self.trip.visits[index].self_booking_approval = "1";
+                self.trip.visits[index].self_booking_approval = (self.is_self_booking_approval_must == "Yes" ? '1' : '0');
             }
         }
         console.log("success")
@@ -695,7 +701,8 @@ app.component('eyatraTripForm', {
                 // $('#inactive_' + key).attr('disabled', false);
             } else {
                 self.trip.visits[key].booking_method_name = "Self";
-                self.trip.visits[key].self_booking_approval = "1";
+                // self.trip.visits[key].self_booking_approval = "1";
+                self.trip.visits[key].self_booking_approval = (self.is_self_booking_approval_must == "Yes"  ? '1' : '0');
                 $('#active_' + key).prop('checked', true);
                 // $('#inactive_' + key).attr('disabled', true);
             }
