@@ -72,6 +72,8 @@ class EYatraConfigSeeder extends Seeder {
 			556 => 'Lodging HSN Code',
 			557 => 'Advance Balance - Employee To Company Natural Account',
 			558 => 'HRMS To Travelex Employee Sync Types',
+			559 => 'Enable Agent Booking Preference In Trip',
+			560 => 'Trip Self Booking Approval Must',
 		];
 
 		$configs = [
@@ -1304,6 +1306,15 @@ class EYatraConfigSeeder extends Seeder {
 			3964 => [
 				'name' => 'Employee Reporting To Updation',
 				'config_type_id' => 558,
+			],
+
+			3971 => [
+				'name' => 'No',
+				'config_type_id' => 559,
+			],
+			3972 => [
+				'name' => 'No',
+				'config_type_id' => 560,
 			],
 		];
 

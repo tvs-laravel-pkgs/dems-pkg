@@ -248,6 +248,7 @@ class Trip extends Model {
 					]);
 				}
 			}
+			$enable_agent_booking_preference = Config::where('id', 3971)->first()->name;
 
 			DB::beginTransaction();
 			if (!$request->id) {
@@ -331,6 +332,12 @@ class Trip extends Model {
 
 				foreach ($request->visits as $key => $visit_data) {
 					//dump($visit_data);
+
+					if (isset($visit_data['booking_method_name']) && $visit_data['booking_method_name'] == 'Agent' && $enable_agent_booking_preference == 'No') {
+						return response()->json([
+							'success' => false,
+							'errors' => "Agent booking preference option is temporarily unavailable. Kindly proceed the Self booking option."]);
+					}
 
 					//if no agent found display visit count
 					// dd(Auth::user()->entity->outlet->address);
@@ -698,6 +705,7 @@ class Trip extends Model {
 
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-60 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
+		$data['is_self_booking_approval_must'] = Config::where('id', 3972)->first()->name;
 
 		return response()->json($data);
 	}
