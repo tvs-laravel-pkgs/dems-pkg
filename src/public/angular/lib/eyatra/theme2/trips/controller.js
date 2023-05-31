@@ -290,7 +290,7 @@ app.component('eyatraTripForm', {
                 $.each(self.trip.visits, function(key, value) {
                     if(value.self_booking_approval  == 1 && self.is_self_booking_approval_must == 'No'){
                         value.self_booking_approval  = 0;
-                        $('#active_' + key).prop('checked', true);
+                        $('#inactive_' + key).prop('checked', true);
                     }
 
                     setTimeout(function() {
@@ -683,7 +683,14 @@ app.component('eyatraTripForm', {
         $scope.onChangeBookingPreference = (value, index) => {
             if (value == "Self") {
                 // self.trip.visits[index].self_booking_approval = "1";
-                self.trip.visits[index].self_booking_approval = (self.is_self_booking_approval_must == "Yes" ? '1' : '0');
+                // self.trip.visits[index].self_booking_approval = (self.is_self_booking_approval_must == "Yes" ? '1' : '0');
+                if(self.is_self_booking_approval_must == "Yes"){
+                    self.trip.visits[index].self_booking_approval = "1";
+                    $('#active_' + index).prop('checked', true);
+                }else{
+                    self.trip.visits[index].self_booking_approval = "0";
+                    $('#inactive_' + index).prop('checked', true);
+                }
             }
         }
         console.log("success")
@@ -703,9 +710,16 @@ app.component('eyatraTripForm', {
             } else {
                 self.trip.visits[key].booking_method_name = "Self";
                 // self.trip.visits[key].self_booking_approval = "1";
-                self.trip.visits[key].self_booking_approval = (self.is_self_booking_approval_must == "Yes"  ? '1' : '0');
-                $('#active_' + key).prop('checked', true);
+                // self.trip.visits[key].self_booking_approval = (self.is_self_booking_approval_must == "Yes"  ? '1' : '0');
+                // $('#active_' + key).prop('checked', true);
                 // $('#inactive_' + key).attr('disabled', true);
+                if(self.is_self_booking_approval_must == "Yes"){
+                    self.trip.visits[key].self_booking_approval = "1";
+                    $('#active_' + key).prop('checked', true);
+                }else{
+                    self.trip.visits[key].self_booking_approval = "0";
+                    $('#inactive_' + key).prop('checked', true);
+                }
             }
         }
 
