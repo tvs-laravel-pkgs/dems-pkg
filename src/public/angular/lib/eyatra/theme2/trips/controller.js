@@ -293,7 +293,7 @@ app.component('eyatraTripForm', {
                     }
 
                     setTimeout(function() {
-                        $scope.onChangeTravelMode(value.travel_mode_id, key);
+                        // $scope.onChangeTravelMode(value.travel_mode_id, key);
                         $scope.onChangeBookingPreference(value.booking_method_name, key);
                     }, 800);
                 });
