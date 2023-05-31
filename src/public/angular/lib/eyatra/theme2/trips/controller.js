@@ -290,6 +290,7 @@ app.component('eyatraTripForm', {
                 $.each(self.trip.visits, function(key, value) {
                     if(value.self_booking_approval  == 1 && self.is_self_booking_approval_must == 'No'){
                         value.self_booking_approval  = 0;
+                        $('#active_' + key).prop('checked', true);
                     }
 
                     setTimeout(function() {
