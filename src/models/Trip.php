@@ -249,6 +249,8 @@ class Trip extends Model {
 				}
 			}
 
+			$enableAgentBookingPreference = Config::where('id', 3971)->first()->name;
+
 			DB::beginTransaction();
 			if (!$request->id) {
 				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
@@ -331,6 +333,10 @@ class Trip extends Model {
 
 				foreach ($request->visits as $key => $visit_data) {
 					//dump($visit_data);
+
+					if ($enableAgentBookingPreference == 'No') {
+						$visit_data['booking_method_name'] = 'Self';
+					}
 
 					//if no agent found display visit count
 					// dd(Auth::user()->entity->outlet->address);
