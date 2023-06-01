@@ -1113,6 +1113,17 @@ class Employee extends Model {
 			];
 		}
 
+		if (count($employeeUpdateDetails) == 0) {
+			$formattedFromDateTime = date('d/m/Y h:i A', strtotime($fromDateTime));
+			$formattedToDateTime = date('d/m/Y h:i A', strtotime($toDateTime));
+
+			return response()->json([
+				'success' => false,
+				'error' => 'Validation Error',
+				'errors' => ['Employee transfer requests not found for this period : ' . $formattedFromDateTime . ' to ' . $formattedToDateTime],
+			]);
+		}
+
 		DB::setDefaultConnection('mysql');
 		if (count($employeeUpdateDetails) > 0) {
 			$employeeSyncedData = [];
