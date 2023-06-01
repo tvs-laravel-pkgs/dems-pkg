@@ -1290,6 +1290,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'HRMS To Travelex Employee Reporting To Change Mail',
 				'config_type_id' => 539,
 			],
+			3945 => [
+				'name' => 'HRMS To Travelex Employee Manual Addition Mail',
+				'config_type_id' => 539,
+			],
 
 			3961 => [
 				'name' => 'Employee Addition',
