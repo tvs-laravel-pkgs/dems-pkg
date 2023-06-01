@@ -1301,6 +1301,11 @@ app.component('hrmsEmployeeManualAddition', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.employee = null;
+        if(!self.hasPermission('hrms-to-travelex-employee-manual-addition')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
+
         $http.get(
             laravel_routes['getHrmsEmployeeSyncLogFilterData']
         ).then(function(response) {
