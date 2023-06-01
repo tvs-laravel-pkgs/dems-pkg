@@ -1295,6 +1295,62 @@ app.component('hrmsEmployeeSyncLogList', {
     }
 });
 
+app.component('hrmsEmployeeManualAddition', {
+    templateUrl: hrms_employee_manual_addition_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.employee = null;
+        $http.get(
+            laravel_routes['getHrmsEmployeeSyncLogFilterData']
+        ).then(function(response) {
+            self.user_company = response.data.user_company; 
+        });
+
+        $scope.manualAdditionSubmit = function () {
+            var split_form_id = '#hrms-employee-manual-addition-form';
+            var v = jQuery(split_form_id).validate({
+                ignore: '',
+                rules: {
+                    'employee_code': {
+                        required: true,
+                    },
+                },
+                submitHandler: function (form) {
+                    let formData = new FormData($(split_form_id)[0]);
+                    $('#submit').button('loading');
+                    $.ajax({
+                        url: laravel_routes['hrmsEmployeeManualAddition'],
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                        .done(function (response) {
+                            $('#submit').button('reset');
+                            if (!response.success) {
+                                var errors = '';
+                                for (var i in response.errors) {
+                                    errors += '<li>' + response.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                self.employee_code = null;
+                                self.employee = response.employee;
+                                custom_noty('success', response.message);
+                            }
+                            $scope.$apply();
+                        })
+                        .fail(function (xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
+            });
+        }
+    }
+});
+
 
 //End
 //------------------------------------------------------------------------------------------------------------------

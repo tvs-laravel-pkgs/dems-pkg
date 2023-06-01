@@ -901,4 +901,8 @@ class EmployeeController extends Controller {
 		return Employee::hrmsEmployeeReportingToSync($request);
 	}
 
+	public function hrmsEmployeeManualAddition(Request $request) {
+		return Employee::hrmsEmployeeManualAddition($request);
+	}
+
 }

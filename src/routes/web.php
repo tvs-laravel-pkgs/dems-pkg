@@ -271,6 +271,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('/hrms-employee-updation/sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeUpdationSync')->name('hrmsEmployeeUpdationSync');
 		Route::post('/hrms-employee-deletion/sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeDeletionSync')->name('hrmsEmployeeDeletionSync');
 		Route::post('/hrms-employee/reporting-to-sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeReportingToSync')->name('hrmsEmployeeReportingToUpdateSync');
+		Route::post('/hrms-employee/manual-addition', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeManualAddition')->name('hrmsEmployeeManualAddition');
 
 		//EXPENSE VOUCHER ADVANCE
 		Route::get('eyatra/expense/voucher-advance/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@listExpenseVoucherRequest')->name('listExpenseVoucherRequest');
