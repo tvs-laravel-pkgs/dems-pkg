@@ -268,8 +268,8 @@ class Employee extends Model {
 		DB::reconnect('dynamic');
 		$hrmsCompanyId = DB::table('companies')
 			->where('adre_code', $request->company_code)
-			->first()
-			->id;
+			->pluck('id')
+			->first();
 		if (!$hrmsCompanyId) {
 			return response()->json([
 				'success' => false,
@@ -358,7 +358,8 @@ class Employee extends Model {
 				$outletHrRoleId = DB::table('roles')
 					->where('company_id', $hrmsEmployeeData->company_id)
 					->where('name', 'Outlet HR')
-					->first()->id;
+					->pluck('id')
+					->first();
 				if ($outletHrRoleId) {
 					$outletHrEmployeeIds = DB::table('user_has_roles')
 						->join('employees', 'employees.user_id', 'user_has_roles.user_id')
@@ -373,7 +374,8 @@ class Employee extends Model {
 							->join('employees', 'employees.id', 'employee_outlets.employee_id')
 							->whereIn('employee_outlets.employee_id', $outletHrEmployeeIds)
 							->where('employee_outlets.outlet_id', $hrmsEmployeeData->outlet_id)
-							->first()->email;
+							->pluck('email')
+							->first();
 					}
 				}
 				$hrmsEmployeeData->outlet_hr_email = $outletHrEmail;
@@ -400,7 +402,7 @@ class Employee extends Model {
 						$skip = true;
 						$recordErrors[] = 'The employee company is required';
 					} else {
-						$companyId = Company::where('code', $hrmsEmployee->adre_code)->first()->id;
+						$companyId = Company::where('code', $hrmsEmployee->adre_code)->pluck('id')->first();
 						if (!$companyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee company not found in travelex';
@@ -430,7 +432,7 @@ class Employee extends Model {
 
 					//EMPLOYEE OUTLET
 					if ($hrmsEmployee->outlet_code) {
-						$outletCompanyId = Company::where('code', $hrmsEmployee->outlet_company_adre_code)->first()->id;
+						$outletCompanyId = Company::where('code', $hrmsEmployee->outlet_company_adre_code)->pluck('id')->first();
 						if (!$outletCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee outlet company not found in travelex';
@@ -456,7 +458,7 @@ class Employee extends Model {
 
 					//EMPLOYEE GRADE
 					if ($hrmsEmployee->grade_code) {
-						$gradeCompanyId = Company::where('code', $hrmsEmployee->grade_company_adre_code)->first()->id;
+						$gradeCompanyId = Company::where('code', $hrmsEmployee->grade_company_adre_code)->pluck('id')->first();
 						if (!$gradeCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee grade company not found in travelex';
@@ -477,7 +479,7 @@ class Employee extends Model {
 
 							//EMPLOYEE DESIGNATION
 							if ($hrmsEmployee->designation_code) {
-								$designationCompanyId = Company::where('code', $hrmsEmployee->designation_company_adre_code)->first()->id;
+								$designationCompanyId = Company::where('code', $hrmsEmployee->designation_company_adre_code)->pluck('id')->first();
 								if (!$designationCompanyId) {
 									$skip = true;
 									$recordErrors[] = 'The employee designation company not found in travelex';
@@ -505,7 +507,7 @@ class Employee extends Model {
 
 					//EMLOYEE LOB & SBU
 					if ($hrmsEmployee->lob_code) {
-						$lobCompanyId = Company::where('code', $hrmsEmployee->lob_company_adre_code)->first()->id;
+						$lobCompanyId = Company::where('code', $hrmsEmployee->lob_company_adre_code)->pluck('id')->first();
 						if (!$lobCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee lob company not found in travelex';
@@ -550,7 +552,7 @@ class Employee extends Model {
 								}
 
 								if ($businessId && $hrmsEmployee->function_name) {
-									$funcCompanyId = Company::where('code', $hrmsEmployee->func_company_adre_code)->first()->id;
+									$funcCompanyId = Company::where('code', $hrmsEmployee->func_company_adre_code)->pluck('id')->first();
 									if (!$funcCompanyId) {
 										$skip = true;
 										$recordErrors[] = 'The employee function company not found in travelex';
@@ -591,7 +593,7 @@ class Employee extends Model {
 						// 	}
 						// }
 
-						$reportingToCompanyId = Company::where('code', $hrmsEmployee->reporting_to_company_adre_code)->first()->id;
+						$reportingToCompanyId = Company::where('code', $hrmsEmployee->reporting_to_company_adre_code)->pluck('id')->first();
 						if (!$reportingToCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The reporting to employee company not found in travelex';
@@ -976,7 +978,8 @@ class Employee extends Model {
 
 		$hrmsCompanyId = DB::table('companies')
 			->where('adre_code', $request->company_code)
-			->first()->id;
+			->pluck('id')
+			->first();
 		if (!$hrmsCompanyId) {
 			return response()->json([
 				'success' => false,
@@ -1140,7 +1143,7 @@ class Employee extends Model {
 						$skip = true;
 						$recordErrors[] = 'The employee company is required';
 					} else {
-						$companyId = Company::where('code', $employeeUpdateDetail['employee']->employee_company_adre_code)->first()->id;
+						$companyId = Company::where('code', $employeeUpdateDetail['employee']->employee_company_adre_code)->pluck('id')->first();
 						if (!$companyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee company not found in travelex';
@@ -1159,7 +1162,7 @@ class Employee extends Model {
 
 					//EMPLOYEE OUTLET
 					if (!empty($employeeUpdateDetail['outlet'])) {
-						$outletCompanyId = Company::where('code', $employeeUpdateDetail['outlet']->outlet_company_adre_code)->first()->id;
+						$outletCompanyId = Company::where('code', $employeeUpdateDetail['outlet']->outlet_company_adre_code)->pluck('id')->first();
 						if (!$outletCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee outlet company not found in travelex';
@@ -1182,7 +1185,7 @@ class Employee extends Model {
 
 					//EMPLOYEE GRADE
 					if (!empty($employeeUpdateDetail['grade'])) {
-						$gradeCompanyId = Company::where('code', $employeeUpdateDetail['grade']->grade_company_adre_code)->first()->id;
+						$gradeCompanyId = Company::where('code', $employeeUpdateDetail['grade']->grade_company_adre_code)->pluck('id')->first();
 						if (!$gradeCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee grade company not found in travelex';
@@ -1203,7 +1206,7 @@ class Employee extends Model {
 
 							//EMPLOYEE DESIGNATION
 							if (!empty($employeeUpdateDetail['designation'])) {
-								$designationCompanyId = Company::where('code', $employeeUpdateDetail['designation']->designation_company_adre_code)->first()->id;
+								$designationCompanyId = Company::where('code', $employeeUpdateDetail['designation']->designation_company_adre_code)->pluck('id')->first();
 								if (!$designationCompanyId) {
 									$skip = true;
 									$recordErrors[] = 'The employee designation company not found in travelex';
@@ -1228,7 +1231,7 @@ class Employee extends Model {
 
 					//EMLOYEE LOB & SBU
 					if (!empty($employeeUpdateDetail['employee']->lob_code)) {
-						$lobCompanyId = Company::where('code', $employeeUpdateDetail['employee']->lob_company_adre_code)->first()->id;
+						$lobCompanyId = Company::where('code', $employeeUpdateDetail['employee']->lob_company_adre_code)->pluck('id')->first();
 						if (!$lobCompanyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee lob company not found in travelex';
@@ -1273,7 +1276,7 @@ class Employee extends Model {
 								}
 
 								if ($businessId && !empty($employeeUpdateDetail['function']->function_name)) {
-									$funcCompanyId = Company::where('code', $employeeUpdateDetail['function']->function_company_adre_code)->first()->id;
+									$funcCompanyId = Company::where('code', $employeeUpdateDetail['function']->function_company_adre_code)->pluck('id')->first();
 									if (!$funcCompanyId) {
 										$skip = true;
 										$recordErrors[] = 'The employee function company not found in travelex';
@@ -1485,8 +1488,8 @@ class Employee extends Model {
 		DB::reconnect('dynamic');
 		$hrmsCompanyId = DB::table('companies')
 			->where('adre_code', $request->company_code)
-			->first()
-			->id;
+			->pluck('id')
+			->first();
 		if (!$hrmsCompanyId) {
 			return response()->json([
 				'success' => false,
@@ -1540,7 +1543,7 @@ class Employee extends Model {
 						$skip = true;
 						$recordErrors[] = 'The employee company is required';
 					} else {
-						$companyId = Company::where('code', $hrmsDeletionEmployee->employee_company_adre_code)->first()->id;
+						$companyId = Company::where('code', $hrmsDeletionEmployee->employee_company_adre_code)->pluck('id')->first();
 						if (!$companyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee company not found in travelex';
@@ -1725,7 +1728,8 @@ class Employee extends Model {
 
 		$hrmsCompanyId = DB::table('companies')
 			->where('adre_code', $request->company_code)
-			->first()->id;
+			->pluck('id')
+			->first();
 		if (!$hrmsCompanyId) {
 			return response()->json([
 				'success' => false,
@@ -1782,7 +1786,7 @@ class Employee extends Model {
 						$skip = true;
 						$recordErrors[] = 'The employee company is required';
 					} else {
-						$companyId = Company::where('code', $employeeReportingDetail->adre_code)->first()->id;
+						$companyId = Company::where('code', $employeeReportingDetail->adre_code)->pluck('id')->first();
 						if (!$companyId) {
 							$skip = true;
 							$recordErrors[] = 'The employee company not found in travelex';
@@ -1800,7 +1804,7 @@ class Employee extends Model {
 					}
 
 					//EMPLOYEE REPORTING TO DETAILS
-					$reportingToCompanyId = Company::where('code', $employeeReportingDetail->reporting_to_company_adre_code)->first()->id;
+					$reportingToCompanyId = Company::where('code', $employeeReportingDetail->reporting_to_company_adre_code)->pluck('id')->first();
 					if (!$reportingToCompanyId) {
 						$skip = true;
 						$recordErrors[] = 'The reporting to employee company not found in travelex';
@@ -1984,8 +1988,10 @@ class Employee extends Model {
 		DB::reconnect('dynamic');
 		$hrmsCompanyId = DB::table('companies')
 			->where('adre_code', $request->company_code)
-			->first()
-			->id;
+			->pluck('id')
+			->first();
+		// ->id;
+
 		if (!$hrmsCompanyId) {
 			return response()->json([
 				'success' => false,
@@ -2069,7 +2075,9 @@ class Employee extends Model {
 		$outletHrRoleId = DB::table('roles')
 			->where('company_id', $hrmsEmployee->company_id)
 			->where('name', 'Outlet HR')
-			->first()->id;
+			->pluck('id')
+			->first();
+		// ->id;
 		if ($outletHrRoleId) {
 			$outletHrEmployeeIds = DB::table('user_has_roles')
 				->join('employees', 'employees.user_id', 'user_has_roles.user_id')
@@ -2084,7 +2092,9 @@ class Employee extends Model {
 					->join('employees', 'employees.id', 'employee_outlets.employee_id')
 					->whereIn('employee_outlets.employee_id', $outletHrEmployeeIds)
 					->where('employee_outlets.outlet_id', $hrmsEmployee->outlet_id)
-					->first()->email;
+					->pluck('email')
+					->first();
+				// ->email;
 			}
 		}
 		$hrmsEmployee->outlet_hr_email = $outletHrEmail;
@@ -2111,7 +2121,7 @@ class Employee extends Model {
 					'errors' => ['The employee company is required'],
 				]);
 			} else {
-				$companyId = Company::where('code', $hrmsEmployee->adre_code)->first()->id;
+				$companyId = Company::where('code', $hrmsEmployee->adre_code)->pluck('id')->first();
 				if (!$companyId) {
 					return response()->json([
 						'success' => false,
@@ -2153,7 +2163,7 @@ class Employee extends Model {
 
 			//EMPLOYEE OUTLET
 			if ($hrmsEmployee->outlet_code) {
-				$outletCompanyId = Company::where('code', $hrmsEmployee->outlet_company_adre_code)->first()->id;
+				$outletCompanyId = Company::where('code', $hrmsEmployee->outlet_company_adre_code)->pluck('id')->first();
 				if (!$outletCompanyId) {
 					return response()->json([
 						'success' => false,
@@ -2185,7 +2195,7 @@ class Employee extends Model {
 
 			//EMPLOYEE GRADE
 			if ($hrmsEmployee->grade_code) {
-				$gradeCompanyId = Company::where('code', $hrmsEmployee->grade_company_adre_code)->first()->id;
+				$gradeCompanyId = Company::where('code', $hrmsEmployee->grade_company_adre_code)->pluck('id')->first();
 				if (!$gradeCompanyId) {
 					return response()->json([
 						'success' => false,
@@ -2209,7 +2219,7 @@ class Employee extends Model {
 
 					//EMPLOYEE DESIGNATION
 					if ($hrmsEmployee->designation_code) {
-						$designationCompanyId = Company::where('code', $hrmsEmployee->designation_company_adre_code)->first()->id;
+						$designationCompanyId = Company::where('code', $hrmsEmployee->designation_company_adre_code)->pluck('id')->first();
 						if (!$designationCompanyId) {
 							return response()->json([
 								'success' => false,
@@ -2243,7 +2253,7 @@ class Employee extends Model {
 
 			//EMLOYEE LOB & SBU
 			if ($hrmsEmployee->lob_code) {
-				$lobCompanyId = Company::where('code', $hrmsEmployee->lob_company_adre_code)->first()->id;
+				$lobCompanyId = Company::where('code', $hrmsEmployee->lob_company_adre_code)->pluck('id')->first();
 				if (!$lobCompanyId) {
 					return response()->json([
 						'success' => false,
@@ -2291,7 +2301,7 @@ class Employee extends Model {
 						}
 
 						if ($businessId && $hrmsEmployee->function_name) {
-							$funcCompanyId = Company::where('code', $hrmsEmployee->func_company_adre_code)->first()->id;
+							$funcCompanyId = Company::where('code', $hrmsEmployee->func_company_adre_code)->pluck('id')->first();
 							if (!$funcCompanyId) {
 								return response()->json([
 									'success' => false,
@@ -2327,7 +2337,7 @@ class Employee extends Model {
 
 			//EMPLOYEE REPORTING TO DETAILS
 			if ($hrmsEmployee->reporting_to_employee_code) {
-				$reportingToCompanyId = Company::where('code', $hrmsEmployee->reporting_to_company_adre_code)->first()->id;
+				$reportingToCompanyId = Company::where('code', $hrmsEmployee->reporting_to_company_adre_code)->pluck('id')->first();
 				if (!$reportingToCompanyId) {
 					return response()->json([
 						'success' => false,
