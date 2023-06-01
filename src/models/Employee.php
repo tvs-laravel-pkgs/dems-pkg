@@ -581,15 +581,15 @@ class Employee extends Model {
 					//EMPLOYEE REPORTING TO DETAILS
 					if ($hrmsEmployee->reporting_to_employee_code) {
 						//EMPLOYEE REPORTING TO MOBILE NUMBER
-						if (!$hrmsEmployee->reporting_to_mobile_number) {
-							$skip = true;
-							$recordErrors[] = 'The reporting to employee mobile number is requried';
-						} else {
-							if (!preg_match('/^[0-9]{10}+$/', $hrmsEmployee->reporting_to_mobile_number)) {
-								$skip = true;
-								$recordErrors[] = 'The reporting to employee mobile number is invalid';
-							}
-						}
+						// if (!$hrmsEmployee->reporting_to_mobile_number) {
+						// 	$skip = true;
+						// 	$recordErrors[] = 'The reporting to employee mobile number is requried';
+						// } else {
+						// 	if (!preg_match('/^[0-9]{10}+$/', $hrmsEmployee->reporting_to_mobile_number)) {
+						// 		$skip = true;
+						// 		$recordErrors[] = 'The reporting to employee mobile number is invalid';
+						// 	}
+						// }
 
 						$reportingToCompanyId = Company::where('code', $hrmsEmployee->reporting_to_company_adre_code)->first()->id;
 						if (!$reportingToCompanyId) {
