@@ -2183,8 +2183,10 @@ class Trip extends Model {
 						->first();
 
 					$twoWheelerPerDayKmLimit = $employeeGradeInfo ? $employeeGradeInfo->two_wheeler_limit : null;
+					$fourWheelerPerDaykmLimit = $employeeGradeInfo ? $employeeGradeInfo->four_wheeler_limit : null;
 				} else {
 					$twoWheelerPerDayKmLimit = null;
+					$fourWheelerPerDaykmLimit = null;
 				}
 
 				if ($visit_id >= 2 && $two_wheeler_count >= 2) {
@@ -2241,8 +2243,25 @@ class Trip extends Model {
 
 						if ($visit_info['travel_mode_id'] == 16) {
 							//FOUR WHEELER
-							$mode_four_wheeler = true;
-							$four_wheeler_total_km += ($visit_info['km_end'] - $visit_info['km_start']);
+							// $mode_four_wheeler = true;
+							// $four_wheeler_total_km += ($visit_info['km_end'] - $visit_info['km_start']);
+							$visitKm = ($visit_info['km_end'] - $visit_info['km_start']);
+							$visitDateDiff = strtotime($visit_info['arrival_date']) - strtotime($visit_info['departure_date']);
+							$visitNoOfDays = ($visitDateDiff / (60 * 60 * 24)) + 1;
+							$perDayVisitKm = ($visitKm / $visitNoOfDays);
+							if (empty($fourWheelerPerDayKmLimit)) {
+								return response()->json([
+									'success' => false,
+									'errors' => ['Four wheeler KM limit is not updated kindly contact Admin'],
+								]);
+							}
+
+							if (round($perDayVisitKm) > round($fourWheelerPerDayKmLimit)) {
+								return response()->json([
+									'success' => false,
+									'errors' => ['Four wheeler total KM should be less than or equal to Four wheeler total KM limit : ' . $fourWheelerPerDayKmLimit],
+								]);
+							}
 						}
 					}
 				}
@@ -2260,49 +2279,49 @@ class Trip extends Model {
 			}
 
 			//TWO WHEELER AND FOUR WHEELER TOTAL KM VALIDATION
-			if (($mode_two_wheeler == true || $mode_four_wheeler == true) && !empty($trip->employee->grade_id)) {
-				$employee_grade_data = DB::table('grade_advanced_eligibility')->select([
-					'id',
-					'two_wheeler_limit',
-					'four_wheeler_limit',
-				])
-					->where('grade_id', $trip->employee->grade_id)
-					->first();
+			// if (($mode_two_wheeler == true || $mode_four_wheeler == true) && !empty($trip->employee->grade_id)) {
+			// 	$employee_grade_data = DB::table('grade_advanced_eligibility')->select([
+			// 		'id',
+			// 		'two_wheeler_limit',
+			// 		'four_wheeler_limit',
+			// 	])
+			// 		->where('grade_id', $trip->employee->grade_id)
+			// 		->first();
 
-				// $two_wheeler_km_limit = $employee_grade_data ? $employee_grade_data->two_wheeler_limit : 0;
-				$four_wheeler_km_limit = $employee_grade_data ? $employee_grade_data->four_wheeler_limit : 0;
+			// 	// $two_wheeler_km_limit = $employee_grade_data ? $employee_grade_data->two_wheeler_limit : 0;
+			// 	$four_wheeler_km_limit = $employee_grade_data ? $employee_grade_data->four_wheeler_limit : 0;
 
-				// if($mode_two_wheeler == true){
-				// 	if(empty($two_wheeler_km_limit)){
-				// 		return response()->json([
-				// 			'success' => false,
-				// 			'errors' => ['Two wheeler KM limit is not updated kindly contact Admin']
-				// 		]);
-				// 	}
-				// 	if(round($two_wheeler_total_km) > round($two_wheeler_km_limit)){
-				// 		return response()->json([
-				// 			'success' => false,
-				// 			'errors' => ['Two wheeler total KM should be less than or equal to Two wheeler total KM limit : '. $two_wheeler_km_limit]
-				// 		]);
-				// 	}
-				// }
+			// 	// if($mode_two_wheeler == true){
+			// 	// 	if(empty($two_wheeler_km_limit)){
+			// 	// 		return response()->json([
+			// 	// 			'success' => false,
+			// 	// 			'errors' => ['Two wheeler KM limit is not updated kindly contact Admin']
+			// 	// 		]);
+			// 	// 	}
+			// 	// 	if(round($two_wheeler_total_km) > round($two_wheeler_km_limit)){
+			// 	// 		return response()->json([
+			// 	// 			'success' => false,
+			// 	// 			'errors' => ['Two wheeler total KM should be less than or equal to Two wheeler total KM limit : '. $two_wheeler_km_limit]
+			// 	// 		]);
+			// 	// 	}
+			// 	// }
 
-				if ($mode_four_wheeler == true) {
-					if (empty($four_wheeler_km_limit)) {
-						return response()->json([
-							'success' => false,
-							'errors' => ['Four wheeler KM limit is not updated kindly contact Admin'],
-						]);
-					}
+			// 	if ($mode_four_wheeler == true) {
+			// 		if (empty($four_wheeler_km_limit)) {
+			// 			return response()->json([
+			// 				'success' => false,
+			// 				'errors' => ['Four wheeler KM limit is not updated kindly contact Admin'],
+			// 			]);
+			// 		}
 
-					if (round($four_wheeler_total_km) > round($four_wheeler_km_limit)) {
-						return response()->json([
-							'success' => false,
-							'errors' => ['Four wheeler total KM should be less than or equal to Four wheeler total KM limit : ' . $four_wheeler_km_limit],
-						]);
-					}
-				}
-			}
+			// 		if (round($four_wheeler_total_km) > round($four_wheeler_km_limit)) {
+			// 			return response()->json([
+			// 				'success' => false,
+			// 				'errors' => ['Four wheeler total KM should be less than or equal to Four wheeler total KM limit : ' . $four_wheeler_km_limit],
+			// 			]);
+			// 		}
+			// 	}
+			// }
 
 			$is_grade_leader = false;
 			if (!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9'])) {
