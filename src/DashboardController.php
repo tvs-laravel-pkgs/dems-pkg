@@ -6,12 +6,12 @@ use Auth;
 use Entrust;
 use Illuminate\Http\Request;
 use Session;
+use Uitoux\EYatra\Business;
 use Uitoux\EYatra\EmployeeClaim;
 use Uitoux\EYatra\LocalTrip;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\Trip;
-use Uitoux\EYatra\Business;
 
 class DashboardController extends Controller {
 	public function getDEMSDashboardData(Request $request) {
@@ -59,6 +59,14 @@ class DashboardController extends Controller {
 			$business_id = '';
 		}
 
+		if ($request->selected_date_range) {
+			session(['date_range_session' => $request->selected_date_range]);
+			$selected_date_range = $request->selected_date_range;
+		} else {
+			session(['date_range_session' => '']);
+			$selected_date_range = '';
+		}
+
 		$this->data['current_fyc'] = $fyc_year_session;
 		$this->data['fyc_year_session'] = $fyc_year_session;
 		$this->data['fyc_month_session'] = $fyc_month_session;
@@ -98,7 +106,7 @@ class DashboardController extends Controller {
 
 		// }
 
-		$result = $this->trip_details($start_date, $end_date, $outlet_id, $business_id);
+		$result = $this->trip_details($start_date, $end_date, $outlet_id, $business_id, $selected_date_range);
 
 		$this->data['total_outstation_trips'] = $total_outstation_trips = $result['total_outstation_trips']->count();
 		$this->data['outstation_total_trip_claim'] = $outstation_total_trip_claim = $result['outstation_total_trip_claim']->count();
@@ -125,94 +133,94 @@ class DashboardController extends Controller {
 		if ($total_outstation_trips > 0) {
 			if ($outstation_total_trip_claim > 0) {
 				$this->data['outstation_total_trip_claim_percen'] = number_format((float) (($outstation_total_trip_claim / $total_outstation_trips) * 100), 2, '.', '') . "%";
-				$this->data['total_claimed_outstation_trip_amount'] = ($result['outstation_total_trip_claim']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['outstation_total_trip_claim']->sum('trips.claim_amount'), 2) : '--';
+				$this->data['total_claimed_outstation_trip_amount'] = ($result['outstation_total_trip_claim']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['outstation_total_trip_claim']->sum('trips.claim_amount'), 2) : '--';
 			} else {
 				$this->data['outstation_total_trip_claim_percen'] = number_format((float) $outstation_total_trip_claim, 2, '.', '') . "%";
-				$this->data['total_claimed_outstation_trip_amount'] = ($result['outstation_total_trip_claim']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['outstation_total_trip_claim']->sum('trips.claim_amount'), 2) : '--';
+				$this->data['total_claimed_outstation_trip_amount'] = ($result['outstation_total_trip_claim']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['outstation_total_trip_claim']->sum('trips.claim_amount'), 2) : '--';
 			}
 			$this->data['outstation_trip_claim_pending_percen'] = number_format((float) (($outstation_trip_claim_pending / $total_outstation_trips) * 100), 2, '.', '') . "%";
 
 			$this->data['outstation_trip_payment_requested_per'] = number_format((float) (($outstation_total_payment_requested / $total_outstation_trips) * 100), 2, '.', '') . "%";
-			$this->data['outstation_trip_payment_requested_amount'] = ($result['outstation_total_payment_requested']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['outstation_total_payment_requested']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['outstation_trip_payment_requested_amount'] = ($result['outstation_total_payment_requested']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['outstation_total_payment_requested']->sum('trips.claim_amount'), 2) : '--';
 			$this->data['outstation_trip_ready_for_claim_per'] = number_format((float) (($total_outstation_ready_for_claim / $total_outstation_trips) * 100), 2, '.', '') . "%";
-			$this->data['outstation_trip_ready_for_claim_amount'] = ($result['total_outstation_ready_for_claim']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_ready_for_claim']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['outstation_trip_ready_for_claim_amount'] = ($result['total_outstation_ready_for_claim']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_ready_for_claim']->sum('trips.claim_amount'), 2) : '--';
 			$this->data['outstation_upcoming_trip_per'] = number_format((float) (($total_outstation_upcoming_trips / $total_outstation_trips) * 100), 2, '.', '') . "%";
-			$this->data['outstation_upcoming_trip_amount'] = ($result['total_outstation_upcoming_trips']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_upcoming_trips']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['outstation_upcoming_trip_amount'] = ($result['total_outstation_upcoming_trips']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_upcoming_trips']->sum('trips.claim_amount'), 2) : '--';
 			$this->data['outstation_advance_trip_per'] = number_format((float) (($total_outstation_advance_trips / $total_outstation_trips) * 100), 2, '.', '') . "%";
-			$this->data['outstation_advance_trip_amount'] = ($result['total_outstation_advance_trips']->sum('trips.advance_received')) > 0 ? '₹ '. number_format($result['total_outstation_advance_trips']->sum('trips.advance_received'), 2) : '--';
+			$this->data['outstation_advance_trip_amount'] = ($result['total_outstation_advance_trips']->sum('trips.advance_received')) > 0 ? '₹ ' . number_format($result['total_outstation_advance_trips']->sum('trips.advance_received'), 2) : '--';
 
 			$this->data['total_outstation_trip_percen'] = number_format((float) 100, 2, '.', '') . "%";
-			$this->data['total_outstation_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['total_outstation_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
 
 		} else {
 			$this->data['outstation_total_trip_claim_percen'] = number_format((float) $total_outstation_trips, 2, '.', '') . "%";
-			$this->data['total_claimed_outstation_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['total_claimed_outstation_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
 			$this->data['outstation_trip_claim_pending_percen'] = number_format((float) $total_outstation_trips, 2, '.', '') . "%";
 			$this->data['outstation_trip_payment_requested_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['outstation_trip_payment_requested_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2): '--';
+			$this->data['outstation_trip_payment_requested_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
 			$this->data['outstation_trip_ready_for_claim_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['outstation_trip_ready_for_claim_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['outstation_trip_ready_for_claim_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
 			$this->data['outstation_upcoming_trip_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['outstation_upcoming_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['outstation_upcoming_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
 
 			$this->data['total_outstation_trip_percen'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['total_outstation_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
+			$this->data['total_outstation_trip_amount'] = ($result['total_outstation_trips']->sum('trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_outstation_trips']->sum('trips.claim_amount'), 2) : '--';
 		}
 
 		//LOCAL TRIP
 		if ($total_local_trips > 0) {
 			if ($total_local_trip_claim > 0) {
 				$this->data['claimed_local_trips_per'] = number_format((float) (($total_local_trip_claim / $total_local_trips) * 100), 2, '.', '') . "%";
-				$this->data['claimed_local_trips_amount'] = ($result['total_local_trip_claim']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trip_claim']->sum('local_trips.claim_amount'), 2) : '--';
+				$this->data['claimed_local_trips_amount'] = ($result['total_local_trip_claim']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trip_claim']->sum('local_trips.claim_amount'), 2) : '--';
 			} else {
 				$this->data['claimed_local_trips_per'] = number_format((float) $total_local_trip_claim, 2, '.', '') . "%";
-				$this->data['claimed_local_trips_amount'] = ($result['total_local_trip_claim']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trip_claim']->sum('local_trips.claim_amount'), 2) : '--';
+				$this->data['claimed_local_trips_amount'] = ($result['total_local_trip_claim']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trip_claim']->sum('local_trips.claim_amount'), 2) : '--';
 			}
 
 			$this->data['claim_requested_local_trips_per'] = number_format((float) (($total_local_trip_claim_requested / $total_local_trips) * 100), 2, '.', '') . "%";
-			$this->data['claim_requested_local_trips_amount'] = ($result['total_local_trip_claim_requested']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trip_claim_requested']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['claim_requested_local_trips_amount'] = ($result['total_local_trip_claim_requested']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trip_claim_requested']->sum('local_trips.claim_amount'), 2) : '--';
 			$this->data['ready_for_claimed_local_trips_per'] = number_format((float) (($total_local_trip_ready_for_claim / $total_local_trips) * 100), 2, '.', '') . "%";
-			$this->data['ready_for_claimed_local_trips_amount'] = ($result['total_local_trip_ready_for_claim']->sum('local_trips.claim_amount')) > 0 ? '₹ '.number_format((float) $result['total_local_trip_ready_for_claim']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['ready_for_claimed_local_trips_amount'] = ($result['total_local_trip_ready_for_claim']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format((float) $result['total_local_trip_ready_for_claim']->sum('local_trips.claim_amount'), 2) : '--';
 			$this->data['upcoming_local_trips_per'] = number_format((float) (($total_upcoming_local_trips / $total_local_trips) * 100), 2, '.', '') . "%";
-			$this->data['upcoming_local_trips_amount'] = ($result['total_upcoming_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format((float) $result['total_upcoming_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['upcoming_local_trips_amount'] = ($result['total_upcoming_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format((float) $result['total_upcoming_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
 
 			$this->data['total_local_trip_per'] = number_format((float) 100, 2, '.', '') . "%";
-			$this->data['total_local_trip_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['total_local_trip_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
 
 		} else {
 			$this->data['claimed_local_trips_per'] = number_format((float) $total_local_trips, 2, '.', '') . "%";
-			$this->data['claimed_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['claimed_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
 			$this->data['claim_requested_local_trips_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['claim_requested_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['claim_requested_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
 			$this->data['ready_for_claimed_local_trips_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['ready_for_claimed_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['ready_for_claimed_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
 			$this->data['upcoming_local_trips_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['upcoming_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['upcoming_local_trips_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
 			$this->data['total_local_trip_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['total_local_trip_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ '. number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
+			$this->data['total_local_trip_amount'] = ($result['total_local_trips']->sum('local_trips.claim_amount')) > 0 ? '₹ ' . number_format($result['total_local_trips']->sum('local_trips.claim_amount'), 2) : '--';
 		}
 
 		//PETTY CASH
 		if ($total_petty_cash > 0) {
 			if ($total_petty_cash_claim > 0) {
 				$this->data['claimed_petty_cash_per'] = number_format((float) (($total_petty_cash_claim / $total_petty_cash) * 100), 2, '.', '') . "%";
-				$this->data['claimed_petty_cash_per'] = ($result['total_petty_cash_claim']->sum('petty_cash.total')) > 0 ? '₹ '. number_format((float) $result['total_petty_cash_claim']->sum('petty_cash.total'), 2) : '--';
+				$this->data['claimed_petty_cash_per'] = ($result['total_petty_cash_claim']->sum('petty_cash.total')) > 0 ? '₹ ' . number_format((float) $result['total_petty_cash_claim']->sum('petty_cash.total'), 2) : '--';
 			} else {
 				$this->data['claimed_petty_cash_per'] = number_format((float) $total_petty_cash_claim, 2, '.', '') . "%";
-				$this->data['claimed_petty_cash_amount'] = ($result['total_petty_cash_claim']->sum('petty_cash.total')) > 0 ? '₹ '. number_format((float) $result['total_petty_cash_claim']->sum('petty_cash.total'), 2) : '--';
+				$this->data['claimed_petty_cash_amount'] = ($result['total_petty_cash_claim']->sum('petty_cash.total')) > 0 ? '₹ ' . number_format((float) $result['total_petty_cash_claim']->sum('petty_cash.total'), 2) : '--';
 			}
 			$this->data['not_claimed_petty_cash_per'] = number_format((float) (($total_petty_cash_claim_pending / $total_petty_cash) * 100), 2, '.', '') . "%";
-			$this->data['not_claimed_petty_cash_amount'] = ($total_petty_cash_claim_pending_amount > 0) ? "₹ ". number_format((float) $total_petty_cash_claim_pending_amount, 2) : '--';
+			$this->data['not_claimed_petty_cash_amount'] = ($total_petty_cash_claim_pending_amount > 0) ? "₹ " . number_format((float) $total_petty_cash_claim_pending_amount, 2) : '--';
 			$this->data['total_petty_cash_per'] = number_format((float) 100, 2, '.', '') . "%";
-			$this->data['total_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0? "₹ ".number_format((float) $result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
+			$this->data['total_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0 ? "₹ " . number_format((float) $result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
 
 		} else {
 			$this->data['claimed_petty_cash_per'] = number_format((float) $total_petty_cash, 2, '.', '') . "%";
-			$this->data['claimed_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0 ? "₹ ".number_format($result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
+			$this->data['claimed_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0 ? "₹ " . number_format($result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
 			$this->data['not_claimed_petty_cash_per'] = number_format((float) $total_petty_cash, 2, '.', '') . "%";
-			$this->data['not_claimed_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0 ? "₹ ".number_format($result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
+			$this->data['not_claimed_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0 ? "₹ " . number_format($result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
 			$this->data['total_petty_cash_per'] = number_format((float) 0, 2, '.', '') . "%";
-			$this->data['total_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0 ? "₹ ".number_format($result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
+			$this->data['total_petty_cash_amount'] = ($result['total_petty_cash']->sum('petty_cash.total')) > 0 ? "₹ " . number_format($result['total_petty_cash']->sum('petty_cash.total'), 2) : '--';
 		}
 
 		$split_year = explode('-', $fyc_year_session);
@@ -241,7 +249,7 @@ class DashboardController extends Controller {
 			$start_date = $month_value;
 			$end_date = date('Y-m-t', strtotime($start_date));
 
-			$result = $this->trip_details($start_date, $end_date, $outlet_id, $business_id);
+			$result = $this->trip_details($start_date, $end_date, $outlet_id, $business_id, $selected_date_range);
 
 			$outstation_total_trip_claim = $result['outstation_total_trip_claim']->sum('ey_employee_claims.total_amount');
 			$local_total_trip_claim = $result['total_local_trip_claim']->sum('local_trips.claim_amount');
@@ -259,7 +267,7 @@ class DashboardController extends Controller {
 		return response()->json($this->data);
 	}
 
-	public function trip_details($start_date, $end_date, $outlet_id, $business_id) {
+	public function trip_details($start_date, $end_date, $outlet_id, $business_id, $date_range) {
 
 		$current_date = date('Y-m-d');
 
@@ -269,7 +277,7 @@ class DashboardController extends Controller {
 		//TOTAL OUTSTATION TRIP PAID
 		$total_outstation_trip_claim = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->leftjoin('employees', 'employees.id', 'trips.employee_id')->where('ey_employee_claims.status_id', 3026)->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP PAYMENT REQUESTED
-		$total_outstation_claim_requested = Trip::leftjoin('employees', 'employees.id', 'trips.employee_id')->whereIN('trips.status_id', [3023, 3024, 3025, 3029, 3030, 3033,3034, 3036])->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
+		$total_outstation_claim_requested = Trip::leftjoin('employees', 'employees.id', 'trips.employee_id')->whereIN('trips.status_id', [3023, 3024, 3025, 3029, 3030, 3033, 3034, 3036])->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP READY FOR CLAIM
 		$total_outstation_ready_for_claim = Trip::leftjoin('employees', 'employees.id', 'trips.employee_id')->where('trips.status_id', '=', '3028')->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->where('trips.end_date', '<=', $current_date);
 		//TOTAL UPCOMING OUTSTATION TRIPS
@@ -330,6 +338,49 @@ class DashboardController extends Controller {
 
 		}
 
+		if (!empty($date_range)) {
+			$dates = explode(' to ', $date_range);
+			$from_date = date('Y-m-d', strtotime($dates[0]));
+			$to_date = date('Y-m-d', strtotime($dates[1]));
+
+			$total_outstation_trips = $total_outstation_trips
+				->where('trips.start_date', '>=', $from_date)
+				->where('trips.end_date', '<=', $to_date);
+			$total_outstation_trip_claim = $total_outstation_trip_claim
+				->where('trips.start_date', '>=', $from_date)
+				->where('trips.end_date', '<=', $to_date);
+			$total_outstation_claim_requested = $total_outstation_claim_requested
+				->where('trips.start_date', '>=', $from_date)
+				->where('trips.end_date', '<=', $to_date);
+			$total_outstation_ready_for_claim = $total_outstation_ready_for_claim
+				->where('trips.start_date', '>=', $from_date)
+				->where('trips.end_date', '<=', $to_date);
+			$total_upcoming_outstation_trips = $total_upcoming_outstation_trips
+				->where('trips.start_date', '>=', $from_date)
+				->where('trips.end_date', '<=', $to_date);
+			$total_advance_outstation_trips = $total_advance_outstation_trips
+				->where('trips.start_date', '>=', $from_date)
+				->where('trips.end_date', '<=', $to_date);
+
+			$total_local_trips = $total_local_trips
+				->where('local_trips.start_date', '>=', $from_date)
+				->where('local_trips.end_date', '<=', $to_date);
+			$total_local_trip_claim = $total_local_trip_claim
+				->where('local_trips.start_date', '>=', $from_date)
+				->where('local_trips.end_date', '<=', $to_date);
+			$total_local_trip_claim_requested = $total_local_trip_claim_requested
+				->where('local_trips.start_date', '>=', $from_date)
+				->where('local_trips.end_date', '<=', $to_date);
+			$total_local_trip_ready_for_claim = $total_local_trip_ready_for_claim
+				->where('local_trips.start_date', '>=', $from_date)
+				->where('local_trips.end_date', '<=', $to_date);
+			$total_upcoming_local_trips = $total_upcoming_local_trips
+				->where('local_trips.start_date', '>=', $from_date)
+				->where('local_trips.end_date', '<=', $to_date);
+			// $total_petty_cash = $total_petty_cash->where('employees.outlet_id', $business_id);
+			// $total_petty_cash_claim = $total_petty_cash_claim->where('employees.outlet_id', $business_id);
+		}
+
 		if (!Entrust::can('eyatra-masters')) {
 			$total_outstation_trips = $total_outstation_trips->where('employees.id', Auth::user()->entity_id);
 			$total_outstation_trip_claim = $total_outstation_trip_claim->where('employees.id', Auth::user()->entity_id);
@@ -379,7 +430,7 @@ class DashboardController extends Controller {
 		//TOTAL OUTSTATION TRIP PAID
 		$total_outstation_trip_claim = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')->where('ey_employee_claims.status_id', 3026)->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP PAYMENT REQUESTED
-		$total_outstation_claim_requested = Trip::whereIN('trips.status_id', [3023, 3024, 3025, 3029, 3030, 3033,3034, 3036])->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
+		$total_outstation_claim_requested = Trip::whereIN('trips.status_id', [3023, 3024, 3025, 3029, 3030, 3033, 3034, 3036])->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date);
 		//TOTAL OUTSTATION TRIP READY FOR CLAIM
 		$total_outstation_ready_for_claim = Trip::where('trips.status_id', '=', '3028')->where('trips.start_date', '>=', $start_date)->where('trips.end_date', '<=', $end_date)->where('trips.end_date', '<=', $current_date);
 		//TOTAL UPCOMING OUTSTATION TRIPS
