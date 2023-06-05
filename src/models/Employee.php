@@ -196,7 +196,7 @@ class Employee extends Model {
 
 	}
 	public function setDateOfJoiningAttribute($value) {
-		return $this->attributes['date_of_joining'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
+		return $this->attributes['date_of_joining'] = $value?date('Y-m-d', strtotime($value)): date('Y-m-d');
 	}
 
 	public function getDateOfJoiningAttribute($value) {
@@ -204,7 +204,7 @@ class Employee extends Model {
 	}
 
 	public function setDateOfBirthAttribute($value) {
-		return $this->attributes['date_of_birth'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
+		return $this->attributes['date_of_birth'] = $value?date('Y-m-d', strtotime($value)): date('Y-m-d');
 	}
 
 	public function getDateOfBirthAttribute($value) {
@@ -660,6 +660,9 @@ class Employee extends Model {
 						// 	$skip = true;
 						// 	$recordErrors[] = 'The reporting to grade is required';
 						// }
+					} else {
+						$skip = true;
+						$recordErrors[] = 'The reporting to employee detail is required';
 					}
 
 					if (!$skip) {
@@ -2358,6 +2361,12 @@ class Employee extends Model {
 						]);
 					}
 				}
+			} else {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => ['The reporting to employee detail is required'],
+				]);
 			}
 
 			//REPORTING TO EMPLOYEE SAVE
