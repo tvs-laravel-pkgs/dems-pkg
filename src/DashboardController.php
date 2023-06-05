@@ -59,13 +59,13 @@ class DashboardController extends Controller {
 			$business_id = '';
 		}
 
-		if ($request->selected_date_range) {
-			session(['date_range_session' => $request->selected_date_range]);
-			$selected_date_range = $request->selected_date_range;
-		} else {
-			session(['date_range_session' => '']);
-			$selected_date_range = '';
-		}
+		// if ($request->selected_date_range) {
+		// 	session(['date_range_session' => $request->selected_date_range]);
+		// 	$selected_date_range = $request->selected_date_range;
+		// } else {
+		// 	session(['date_range_session' => '']);
+		// 	$selected_date_range = '';
+		// }
 
 		$this->data['current_fyc'] = $fyc_year_session;
 		$this->data['fyc_year_session'] = $fyc_year_session;
@@ -105,6 +105,23 @@ class DashboardController extends Controller {
 		$end_date = $selected_year[1] . '-03-31';
 
 		// }
+
+		if (!empty($request->selected_date_range)) {
+			$selected_date_range = $request->selected_date_range;
+			$selected_dates = explode(' to ', $selected_date_range);
+			$selected_from_date = date('Y-m-d', strtotime($selected_dates[0]));
+			$selected_to_date = date('Y-m-d', strtotime($selected_dates[1]));
+			if ($selected_from_date >= $start_date && $selected_to_date <= $end_date) {
+			} else {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => ['Kindly select the date range in between the financial years.'],
+				]);
+			}
+		} else {
+			$selected_date_range = '';
+		}
 
 		$result = $this->trip_details($start_date, $end_date, $outlet_id, $business_id, $selected_date_range);
 
