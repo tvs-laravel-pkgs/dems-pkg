@@ -64,10 +64,10 @@ class Trip extends Model {
 	}
 
 	public function setStartDateAttribute($date) {
-		return $this->attributes['start_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
+		return $this->attributes['start_date'] = empty($date)?date('Y-m-d'): date('Y-m-d', strtotime($date));
 	}
 	public function setEndDateAttribute($date) {
-		return $this->attributes['end_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
+		return $this->attributes['end_date'] = empty($date)?date('Y-m-d'): date('Y-m-d', strtotime($date));
 
 	}
 	public function getCreatedAtAttribute($value) {
@@ -252,7 +252,7 @@ class Trip extends Model {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id)?Auth::user()->entity->outlet_id: null;
 				if (!$outlet_id) {
 					return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
 				}
@@ -417,7 +417,7 @@ class Trip extends Model {
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
-					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
+					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self'?NULL: $visit_data['prefered_departure_time']?date('H:i:s', strtotime($visit_data['prefered_departure_time'])): NULL;
 					if ($visit->booking_method_id == 3040) {
 						// $visit->self_booking_approval = 1;
 						if (isset($visit_data['self_booking_approval'])) {
@@ -1489,7 +1489,7 @@ class Trip extends Model {
 			->where('users.user_type_id', 3121)->first();
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
-		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
+		$data['travel_cities'] = !empty($travel_cities)?trim(implode(', ', $travel_cities)): '--';
 		// $start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		// $end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
 		// $days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
@@ -1518,7 +1518,7 @@ class Trip extends Model {
 		$trip->days = $no_of_days ? $no_of_days : 0;
 
 		//DONT REVERT - ABDUL
-		$trip->cities = $data['cities'] = count($travel_cities) > 0 ? trim(implode(', ', $travel_cities)) : '--';
+		$trip->cities = $data['cities'] = count($travel_cities) > 0?trim(implode(', ', $travel_cities)): '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 		// }
 		if (!empty($to_cities)) {
@@ -1966,7 +1966,7 @@ class Trip extends Model {
 		// $total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
 		// $data['total_amount'] = number_format($total_amount, 2, '.', '');
 
-		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
+		$data['travel_cities'] = !empty($travel_cities)?trim(implode(', ', $travel_cities)): '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 
 		$data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
@@ -2183,10 +2183,10 @@ class Trip extends Model {
 						->first();
 
 					$twoWheelerPerDayKmLimit = $employeeGradeInfo ? $employeeGradeInfo->two_wheeler_limit : null;
-					$fourWheelerPerDaykmLimit = $employeeGradeInfo ? $employeeGradeInfo->four_wheeler_limit : null;
+					$fourWheelerPerDayKmLimit = $employeeGradeInfo ? $employeeGradeInfo->four_wheeler_limit : null;
 				} else {
 					$twoWheelerPerDayKmLimit = null;
-					$fourWheelerPerDaykmLimit = null;
+					$fourWheelerPerDayKmLimit = null;
 				}
 
 				if ($visit_id >= 2 && $two_wheeler_count >= 2) {
@@ -2464,7 +2464,7 @@ class Trip extends Model {
 			if (!$employee_claim->number) {
 				$outlet_id = $trip->outlet_id;
 				if (!$outlet_id) {
-					$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+					$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id)?Auth::user()->entity->outlet_id: null;
 					if (!$outlet_id) {
 						return response()->json(['success' => false, 'errors' => ['Outlet not found!']]);
 					}
@@ -2581,7 +2581,7 @@ class Trip extends Model {
 							$visit_booking->tax_percentage = $visit_data['tax_percentage'];
 							$visit_booking->invoice_number = $visit_data['invoice_number'];
 							$visit_booking->invoice_amount = $visit_data['invoice_amount'];
-							$visit_booking->invoice_date = $visit_data['invoice_date'] ? date('Y-m-d', strtotime($visit_data['invoice_date'])) : null;
+							$visit_booking->invoice_date = $visit_data['invoice_date']?date('Y-m-d', strtotime($visit_data['invoice_date'])): null;
 							if (!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)) {
 								return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 							} else {
@@ -3767,7 +3767,7 @@ class Trip extends Model {
 						$employee_claim->amount_to_pay = 1;
 					}
 				} else {
-					$employee_claim->balance_amount = round($total_amount) ? round($total_amount) : 0;
+					$employee_claim->balance_amount = round($total_amount)?round($total_amount): 0;
 					$employee_claim->amount_to_pay = 1;
 				}
 
@@ -3852,7 +3852,7 @@ class Trip extends Model {
 			$pending_count += count($trip_attachment->pending_google_attachments);
 			$pending_count += count($trip_attachment->pendingTripAttachments);
 		}
-		$approval_status = ($pending_count == 0) ? false : true;
+		$approval_status = ($pending_count == 0)?false: true;
 		return $approval_status;
 	}
 	// Checking attachment status by Karthick T on 20-01-2022
