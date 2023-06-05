@@ -2848,7 +2848,8 @@ app.component('eyatraTripClaimForm', {
                 custom_noty('error', "Ending KM is required");
                 return;
             }
-            if (self.fareDetailsKmModalValues.kmStart > self.fareDetailsKmModalValues.kmEnd) {
+            // if (self.fareDetailsKmModalValues.kmStart > self.fareDetailsKmModalValues.kmEnd) {
+            if (Math.round(self.fareDetailsKmModalValues.kmStart) > Math.round(self.fareDetailsKmModalValues.kmEnd)) {
                 custom_noty('error', "Enter value grater than starting KM");
                 return;
             }
