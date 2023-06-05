@@ -1759,6 +1759,7 @@ class Employee extends Model {
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereBetween('employees.updated_at', [$fromDateTime, $toDateTime])
 			->whereIn('employees.lob_id', [4, 15]) //DLOB, OESL
+			->whereNotNull('employees.reporting_to_id')
 			->get();
 
 		if (count($employeeReportingDetails) == 0) {
