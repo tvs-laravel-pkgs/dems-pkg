@@ -339,6 +339,7 @@ class Employee extends Model {
 			->leftjoin('companies as reporting_to_grade_companies', 'reporting_to_grade_companies.id', 'reporting_to_grades.company_id')
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereBetween('employees.created_at', [$fromDateTime, $toDateTime])
+			->whereIn('employees.lob_id', [4, 15]) //DLOB, OESL
 			->get();
 
 		if (count($hrmsEmployees) == 0) {
@@ -393,9 +394,9 @@ class Employee extends Model {
 					$recordErrors = [];
 
 					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
-					if (!in_array($hrmsEmployee->lob_id, [4, 15])) {
-						continue;
-					}
+					// if (!in_array($hrmsEmployee->lob_id, [4, 15])) {
+					// 	continue;
+					// }
 
 					//EMPLOYEE COMPANY
 					if (!$hrmsEmployee->adre_code) {
@@ -1513,6 +1514,7 @@ class Employee extends Model {
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereNotNull('employees.deleted_at')
 			->whereBetween('employees.deleted_at', [$fromDateTime, $toDateTime])
+			->whereIn('employees.lob_id', [4, 15]) //DLOB, OESL
 			->get();
 
 		if (count($hrmsDeletionEmployees) == 0) {
@@ -1537,9 +1539,9 @@ class Employee extends Model {
 					$recordErrors = [];
 
 					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
-					if (!in_array($hrmsDeletionEmployee->lob_id, [4, 15])) {
-						continue;
-					}
+					// if (!in_array($hrmsDeletionEmployee->lob_id, [4, 15])) {
+					// 	continue;
+					// }
 
 					//EMPLOYEE COMPANY
 					if (!$hrmsDeletionEmployee->employee_company_adre_code) {
@@ -1756,6 +1758,7 @@ class Employee extends Model {
 			->leftjoin('companies as reporting_to_companies', 'reporting_to_companies.id', 'reporting_to_employees.company_id')
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereBetween('employees.updated_at', [$fromDateTime, $toDateTime])
+			->whereIn('employees.lob_id', [4, 15]) //DLOB, OESL
 			->get();
 
 		if (count($employeeReportingDetails) == 0) {
@@ -1780,9 +1783,9 @@ class Employee extends Model {
 					$recordErrors = [];
 
 					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
-					if (!in_array($employeeReportingDetail->lob_id, [4, 15])) {
-						continue;
-					}
+					// if (!in_array($employeeReportingDetail->lob_id, [4, 15])) {
+					// 	continue;
+					// }
 
 					//EMPLOYEE COMPANY
 					if (!$employeeReportingDetail->adre_code) {
