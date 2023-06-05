@@ -2286,6 +2286,7 @@ class ExportReportController extends Controller {
 			'ECode',
 			'Sbu',
 			'State',
+			'Trip Number',
 			'Date of Request',
 			'Date of Booking',
 			'Date Of Travel',
@@ -2334,7 +2335,8 @@ class ExportReportController extends Controller {
 			DB::raw('SUM(COALESCE(visit_bookings.total, 0) + COALESCE(visit_bookings.agent_total, 0)) as total_amount'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
 			DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'),
-			DB::raw('COALESCE(visit_bookings.type_id, "") as type')
+			DB::raw('COALESCE(visit_bookings.type_id, "") as type'),
+			'trips.number as trip_number'
 		)
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -2379,6 +2381,7 @@ class ExportReportController extends Controller {
 						$booking_detail['emp_code'],
 						$booking_detail['sbu'],
 						$booking_detail['state'],
+						$booking_detail['trip_number'],
 						$booking_detail['date_of_request'],
 						$booking_detail['date_of_booking'],
 						$booking_detail['date_of_travel'],
@@ -2411,6 +2414,7 @@ class ExportReportController extends Controller {
 					$booking_detail['emp_code'],
 					$booking_detail['sbu'],
 					$booking_detail['state'],
+					$booking_detail['trip_number'],
 					$booking_detail['date_of_request'],
 					$booking_detail['date_of_booking'],
 					$booking_detail['date_of_travel'],
