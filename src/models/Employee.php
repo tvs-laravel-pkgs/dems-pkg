@@ -196,7 +196,7 @@ class Employee extends Model {
 
 	}
 	public function setDateOfJoiningAttribute($value) {
-		return $this->attributes['date_of_joining'] = $value?date('Y-m-d', strtotime($value)): date('Y-m-d');
+		return $this->attributes['date_of_joining'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
 	}
 
 	public function getDateOfJoiningAttribute($value) {
@@ -204,7 +204,7 @@ class Employee extends Model {
 	}
 
 	public function setDateOfBirthAttribute($value) {
-		return $this->attributes['date_of_birth'] = $value?date('Y-m-d', strtotime($value)): date('Y-m-d');
+		return $this->attributes['date_of_birth'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
 	}
 
 	public function getDateOfBirthAttribute($value) {
@@ -898,7 +898,7 @@ class Employee extends Model {
 				$arr['to_email'] = $to;
 				$arr['cc_email'] = $cc;
 				$arr['subject'] = 'Employee Addition';
-				$arr['content'] = 'The below employee please create in Axapta vendor master immediatly';
+				$arr['content'] = 'The below employee please create in Axapta vendor master immediately';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
 				$arr['type'] = 2;
 				$arr['employee_details'] = $employeeSyncedData;
@@ -2514,7 +2514,7 @@ class Employee extends Model {
 				$arr['to_email'] = $to;
 				$arr['cc_email'] = $cc;
 				$arr['subject'] = 'Employee Addition';
-				$arr['content'] = 'The below employee please create in Axapta vendor master immediatly';
+				$arr['content'] = 'The below employee please create in Axapta vendor master immediately';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
 				$arr['type'] = 1;
 				$arr['employee'] = $employeeAdditionData;
