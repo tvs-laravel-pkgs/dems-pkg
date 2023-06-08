@@ -3428,7 +3428,7 @@ class ExportReportController extends Controller {
 
 
 		if (count($trip_details) == 0) {
-			Session()->flash('error', 'No Data Found');
+			return redirect()->back()->with(['error' => 'No Records Found!']);
 		}
 
 		$export_details = [];

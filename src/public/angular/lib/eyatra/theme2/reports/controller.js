@@ -359,7 +359,7 @@ app.component('eyatraTripReport', {
                 error.insertAfter(element);
             },
             invalidHandler: function(event, validator) {
-                custom_noty('error', 'You have errors,Please check all tabs');
+                custom_noty('error', 'You have errors, Please check');
             },
         });
     }
