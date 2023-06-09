@@ -3373,7 +3373,7 @@ class ExportReportController extends Controller {
 			'Purpose',
 			'Trip Start Date',
 			'Trip End Date',
-			'Trip Created At',
+			'Trip Created Date',
 			'Advance Received',
 			'Claimed Date',
 			'Trip Claim Number',
