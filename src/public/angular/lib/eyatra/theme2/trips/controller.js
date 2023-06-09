@@ -365,7 +365,19 @@ app.component('eyatraTripForm', {
                 var d2 = new Date();
                 var d1 = start_date.split("-");
                 var start_date_trip = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
-                if (start_date_trip >= d2) {
+
+                let start_day = String(start_date_trip.getDate()).padStart(2, '0');
+                let start_month = String(start_date_trip.getMonth() + 1).padStart(2, '0');
+                let start_year = start_date_trip.getFullYear();
+                let trip_start_date = start_year + '-' + start_month + '-' + start_day;
+
+                let current_day = String(d2.getDate()).padStart(2, '0');
+                let current_month = String(d2.getMonth() + 1).padStart(2, '0');
+                let current_year = d2.getFullYear();
+                let current_date = current_year + '-' + current_month + '-' + current_day;
+
+                // if (start_date_trip >= d2) {
+                if (trip_start_date >= current_date) {
                     $("#advance").show().prop('disabled', false);
                     // $("#advance_amount").prop('readonly', false);
                     if (self.advance_eligibility == 0) {
