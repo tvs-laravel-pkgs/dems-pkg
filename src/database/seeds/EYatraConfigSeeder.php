@@ -71,6 +71,9 @@ class EYatraConfigSeeder extends Seeder {
 			555 => 'Oracle Other Transaction Types',
 			556 => 'Lodging HSN Code',
 			557 => 'Advance Balance - Employee To Company Natural Account',
+			558 => 'HRMS To Travelex Employee Sync Types',
+			559 => 'Enable Agent Booking Preference In Trip',
+			560 => 'Trip Self Booking Approval Must',
 		];
 
 		$configs = [
@@ -1269,6 +1272,53 @@ class EYatraConfigSeeder extends Seeder {
 			3921 => [
 				'name' => '152674',
 				'config_type_id' => 557,
+			],
+
+			3941 => [
+				'name' => 'HRMS To Travelex Employee Addition Mail',
+				'config_type_id' => 539,
+			],
+			3942 => [
+				'name' => 'HRMS To Travelex Employee Detail Change Mail',
+				'config_type_id' => 539,
+			],
+			3943 => [
+				'name' => 'HRMS To Travelex Employee Deletion Mail',
+				'config_type_id' => 539,
+			],
+			3944 => [
+				'name' => 'HRMS To Travelex Employee Reporting To Change Mail',
+				'config_type_id' => 539,
+			],
+			3945 => [
+				'name' => 'HRMS To Travelex Employee Manual Addition Mail',
+				'config_type_id' => 539,
+			],
+
+			3961 => [
+				'name' => 'Employee Addition',
+				'config_type_id' => 558,
+			],
+			3962 => [
+				'name' => 'Employee Updation',
+				'config_type_id' => 558,
+			],
+			3963 => [
+				'name' => 'Employee Deletion',
+				'config_type_id' => 558,
+			],
+			3964 => [
+				'name' => 'Employee Reporting To Updation',
+				'config_type_id' => 558,
+			],
+
+			3971 => [
+				'name' => 'No',
+				'config_type_id' => 559,
+			],
+			3972 => [
+				'name' => 'No',
+				'config_type_id' => 560,
 			],
 		];
 
