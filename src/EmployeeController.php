@@ -1,6 +1,7 @@
 <?php
 
 namespace Uitoux\EYatra;
+use App\HrmsToTravelxEmployeeSyncLog;
 use App\Http\Controllers\Controller;
 use App\Role;
 use App\User;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\URL;
 use Uitoux\EYatra\BankDetail;
 use Uitoux\EYatra\Business;
 use Uitoux\EYatra\ChequeDetail;
+use Uitoux\EYatra\Company;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Department;
 use Uitoux\EYatra\Designation;
@@ -321,24 +323,24 @@ class EmployeeController extends Controller {
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
-		
-			if(!is_numeric($request->business_id)){
-              return response()->json(['success' => false, 'errors' => ['Business Not Exist']]);
+
+			if (!is_numeric($request->business_id)) {
+				return response()->json(['success' => false, 'errors' => ['Business Not Exist']]);
 			}
-			if(!is_numeric($request->lob_id)){
-              return response()->json(['success' => false, 'errors' => ['Lob Not Exist']]);
+			if (!is_numeric($request->lob_id)) {
+				return response()->json(['success' => false, 'errors' => ['Lob Not Exist']]);
 			}
-			if(!is_numeric($request->outlet_id)){
-              return response()->json(['success' => false, 'errors' => ['Outlet Not Exist']]);
+			if (!is_numeric($request->outlet_id)) {
+				return response()->json(['success' => false, 'errors' => ['Outlet Not Exist']]);
 			}
-			if(!is_numeric($request->grade_id)){
-              return response()->json(['success' => false, 'errors' => ['Grade Not Exist']]);
+			if (!is_numeric($request->grade_id)) {
+				return response()->json(['success' => false, 'errors' => ['Grade Not Exist']]);
 			}
-			if(!is_numeric($request->designation_id)){
-              return response()->json(['success' => false, 'errors' => ['Designation Not Exist']]);
+			if (!is_numeric($request->designation_id)) {
+				return response()->json(['success' => false, 'errors' => ['Designation Not Exist']]);
 			}
-			if(!is_numeric($request->reporting_to_id)){
-              return response()->json(['success' => false, 'errors' => ['Reporting Manager Not Exist']]);
+			if (!is_numeric($request->reporting_to_id)) {
+				return response()->json(['success' => false, 'errors' => ['Reporting Manager Not Exist']]);
 			}
 			//ROLE VALIDATION
 			$roles_valid = json_decode($request->roles);
@@ -718,42 +720,42 @@ class EmployeeController extends Controller {
 
 	public function getEmployeeFromApi(Request $r) {
 		//dd($r->all());
-      if (!empty($r->code)) {
-		$employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
-		//dd($employee);
-		if (empty($employee)) {
-			return response()->json(['success' => false, 'errors' => ['Employee Details not found in AX']]);
-		}
-		$business = Business::where('name',$employee['business_id'])->pluck('id')->first();
-		$employee['business_id']=$business;
-		// dd($employee);
-		$department = Department::where('name',$employee['department_id'])->where('id',$business)->pluck('id')->first();
-		 $employee['department_id']=$department;
-		 $lob = Lob::where('name',$employee['lob_id'])->pluck('id')->first();
-		 $employee['lob_id']=$lob;
-		 $sbu = Sbu::where('name',$employee['business_id'])->where('id',$lob)->pluck('id')->first();
-		 $employee['business_id']=$sbu;
-         $outlet = Outlet::where('name',$employee['outlet_id'])->pluck('id')->first();
-         $employee['outlet_id']=$outlet;
-		 $grade = Entity::where('name',$employee['grade_id'])->pluck('id')->first();
-		 $employee['grade_id']=$grade;
-		 //dd($grade);
-		 $designation = Designation::where('name',$employee['designation_id'])->where('id',$grade)->pluck('id')->first();
-		 $employee['grade_id']=$designation;
-		 $reporting = User::where('username',$employee['reporting_to'])->pluck('id')->first();
-		 $employee['grade_id']=$reporting;
-         } else {
+		if (!empty($r->code)) {
+			$employee = $this->getSoap->GetCMSEmployeeDetails($r->code);
+			//dd($employee);
+			if (empty($employee)) {
+				return response()->json(['success' => false, 'errors' => ['Employee Details not found in AX']]);
+			}
+			$business = Business::where('name', $employee['business_id'])->pluck('id')->first();
+			$employee['business_id'] = $business;
+			// dd($employee);
+			$department = Department::where('name', $employee['department_id'])->where('id', $business)->pluck('id')->first();
+			$employee['department_id'] = $department;
+			$lob = Lob::where('name', $employee['lob_id'])->pluck('id')->first();
+			$employee['lob_id'] = $lob;
+			$sbu = Sbu::where('name', $employee['business_id'])->where('id', $lob)->pluck('id')->first();
+			$employee['business_id'] = $sbu;
+			$outlet = Outlet::where('name', $employee['outlet_id'])->pluck('id')->first();
+			$employee['outlet_id'] = $outlet;
+			$grade = Entity::where('name', $employee['grade_id'])->pluck('id')->first();
+			$employee['grade_id'] = $grade;
+			//dd($grade);
+			$designation = Designation::where('name', $employee['designation_id'])->where('id', $grade)->pluck('id')->first();
+			$employee['grade_id'] = $designation;
+			$reporting = User::where('username', $employee['reporting_to'])->pluck('id')->first();
+			$employee['grade_id'] = $reporting;
+		} else {
 			return response()->json(['success' => false, 'errors' => ['Employee code is empty']]);
 		}
 		return response()->json(['success' => true, 'employee' => $employee]);
 	}
 
-	public function getSendSms(Request $r){
-        if(!empty($r->sms_mobile_number)){
-        	$message = str_replace('XXXXXX', 2, config('custom.SMS_TEMPLATES.SMS_SENT'));
-        	$mobile_number=$r->sms_mobile_number;
-        	$sms=sendNotificationTxtMsg(2,$message,$mobile_number);
-        }else {
+	public function getSendSms(Request $r) {
+		if (!empty($r->sms_mobile_number)) {
+			$message = str_replace('XXXXXX', 2, config('custom.SMS_TEMPLATES.SMS_SENT'));
+			$mobile_number = $r->sms_mobile_number;
+			$sms = sendNotificationTxtMsg(2, $message, $mobile_number);
+		} else {
 			return response()->json(['success' => false, 'errors' => ['Mobile Number is Empty']]);
 		}
 		return response()->json(['success' => true, 'message' => $sms]);
@@ -764,12 +766,12 @@ class EmployeeController extends Controller {
 		$employeeDetails = [];
 		if ($r->id) {
 			$employeeDetails = Employee::select(
-					'employees.id',
-					'employees.code',
-					'users.name',
-					'users.email',
-					'users.mobile_number'
-				)->join('users', 'users.entity_id', 'employees.id')
+				'employees.id',
+				'employees.code',
+				'users.name',
+				'users.email',
+				'users.mobile_number'
+			)->join('users', 'users.entity_id', 'employees.id')
 				->where('users.user_type_id', 3121)
 				->where('users.company_id', Auth::user()->company_id)
 				->where('employees.reporting_to_id', $r->id)
@@ -799,18 +801,24 @@ class EmployeeController extends Controller {
 				],
 			], $error_messages);
 
-			if ($validator->fails())
+			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
 
-			if ($r->from_reporting_manager_id == $r->to_reporting_manager_id)
+			if ($r->from_reporting_manager_id == $r->to_reporting_manager_id) {
 				throw new \Exception('From manager and to manager both are same');
-			if (empty($r->employee_ids) || count($r->employee_ids) == 0)
+			}
+
+			if (empty($r->employee_ids) || count($r->employee_ids) == 0) {
 				throw new \Exception('Kindly select employees');
+			}
 
 			foreach ($r->employee_ids as $key => $employee_id) {
 				$employee = Employee::find($employee_id);
-				if (!$employee)
+				if (!$employee) {
 					throw new \Exception('Selected employee not found');
+				}
+
 			}
 
 			DB::beginTransaction();
@@ -841,6 +849,60 @@ class EmployeeController extends Controller {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Throwable Error' => $e->getMessage()]]);
 		}
+	}
+
+	public function hrmsEmployeeSyncLogFilterData() {
+		$this->data['user_company'] = Company::select([
+			'id',
+			'code',
+		])
+			->where('id', Auth::user()->company_id)
+			->first();
+		return response()->json($this->data);
+	}
+
+	public function hrmsEmployeeSyncLogList(Request $request) {
+		$employeeSyncLogList = HrmsToTravelxEmployeeSyncLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(from_date_time,"%d/%m/%Y %h:%i %p") as from_date_time'),
+			DB::raw('DATE_FORMAT(to_date_time,"%d/%m/%Y %h:%i %p") as to_date_time'),
+			'new_count',
+			'update_count',
+			'delete_count',
+			'error_file',
+		])
+			->where('company_id', Auth::user()->company_id)
+			->where('type_id', $request->type_id)
+			->orderBy('id', 'desc')
+			->get();
+
+		return Datatables::of($employeeSyncLogList)
+			->addColumn('action', function ($employeeSyncLogList) {
+				if ($employeeSyncLogList->error_file) {
+					return '<a class="btn btn-sm btn-red" href="' . URL::to($employeeSyncLogList->error_file) . '">Download Error Report</a>';
+				}
+			})
+			->make(true);
+	}
+
+	public function hrmsEmployeeAdditionSync(Request $request) {
+		return Employee::hrmsEmployeeAdditionSync($request);
+	}
+
+	public function hrmsEmployeeUpdationSync(Request $request) {
+		return Employee::hrmsEmployeeUpdationSync($request);
+	}
+
+	public function hrmsEmployeeDeletionSync(Request $request) {
+		return Employee::hrmsEmployeeDeletionSync($request);
+	}
+
+	public function hrmsEmployeeReportingToSync(Request $request) {
+		return Employee::hrmsEmployeeReportingToSync($request);
+	}
+
+	public function hrmsEmployeeManualAddition(Request $request) {
+		return Employee::hrmsEmployeeManualAddition($request);
 	}
 
 }
