@@ -3449,15 +3449,15 @@ class ExportReportController extends Controller {
 					$trip_detail['trip_start_date'],
 					$trip_detail['trip_end_date'],
 					$trip_detail['trip_created_at'],
-					floatval($trip_detail['advance_received']),
+					number_format(floatval($trip_detail['advance_received']), 2, '.', ''),
 					$trip_detail['claimed_date'],
 					$trip_detail['claim_number'],
-					floatval($trip_detail['transport_total']),
-					floatval($trip_detail['lodging_total']),
-					floatval($trip_detail['boarding_total']),
-					floatval($trip_detail['local_travel_total']),
+					number_format(floatval($trip_detail['transport_total']) 2, '.', ''),
+					number_format(floatval($trip_detail['lodging_total']) 2, '.', ''),
+					number_format(floatval($trip_detail['boarding_total']) 2, '.', ''),
+					number_format(floatval($trip_detail['local_travel_total']) 2, '.', ''),
 					// $trip_detail['beta_amount'],
-					floatval($trip_detail['total_amount']),
+					number_format(floatval($trip_detail['total_amount']) 2, '.', ''),
 				];
 				$export_details[] = $export_data;
 		}
