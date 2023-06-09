@@ -3367,6 +3367,7 @@ class ExportReportController extends Controller {
 			'Employee Code',
 			'Employee Name',
 			'Outlet Code',
+			'Outlet Name',
 			'Trip Number',
 			'Description',
 			'Purpose',
@@ -3376,11 +3377,11 @@ class ExportReportController extends Controller {
 			'Advance Received',
 			'Claimed Date',
 			'Trip Claim Number',
-			'Transport Total',
-			'Lodging Total',
-			'Boarding Total',
-			'Local Travel Total',
-			'Beta Amount',
+			'Transport',
+			'Lodging',
+			'Boarding',
+			'Local Travel',
+			// 'Beta Amount',
 			'Total Amount',
 		];
 
@@ -3390,6 +3391,7 @@ class ExportReportController extends Controller {
 			'employees.code as employee_code',
 			'users.name as employee_name',
 			'outlets.code as outlet_code',
+			'outlets.name as outlet_name',
 			'trips.number as trip_number',
 			'trips.description',
 			'entities.name as purpose',
@@ -3403,7 +3405,7 @@ class ExportReportController extends Controller {
 			'ey_employee_claims.lodging_total',
 			'ey_employee_claims.boarding_total',
 			'ey_employee_claims.local_travel_total',
-			'ey_employee_claims.beta_amount',
+			// 'ey_employee_claims.beta_amount',
 			'ey_employee_claims.total_amount',			
 		])
 			->leftjoin('employees', 'employees.id', 'trips.employee_id')
@@ -3440,6 +3442,7 @@ class ExportReportController extends Controller {
 					$trip_detail['employee_code'],
 					$trip_detail['employee_name'],
 					$trip_detail['outlet_code'],
+					$trip_detail['outlet_name'],
 					$trip_detail['trip_number'],
 					$trip_detail['description'],
 					$trip_detail['purpose'],
@@ -3453,7 +3456,7 @@ class ExportReportController extends Controller {
 					$trip_detail['lodging_total'],
 					$trip_detail['boarding_total'],
 					$trip_detail['local_travel_total'],
-					$trip_detail['beta_amount'],
+					// $trip_detail['beta_amount'],
 					$trip_detail['total_amount'],
 				];
 				$export_details[] = $export_data;
