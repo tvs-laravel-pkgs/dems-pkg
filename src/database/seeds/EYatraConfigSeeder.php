@@ -74,6 +74,7 @@ class EYatraConfigSeeder extends Seeder {
 			558 => 'HRMS To Travelex Employee Sync Types',
 			559 => 'Enable Agent Booking Preference In Trip',
 			560 => 'Trip Self Booking Approval Must',
+			561 => 'HRMS To Travelex New Employee Default Role',
 		];
 
 		$configs = [
@@ -1319,6 +1320,11 @@ class EYatraConfigSeeder extends Seeder {
 			3972 => [
 				'name' => 'No',
 				'config_type_id' => 560,
+			],
+
+			3975 => [
+				'name' => 'Employee',
+				'config_type_id' => 561,
 			],
 		];
 
