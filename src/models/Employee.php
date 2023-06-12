@@ -6,6 +6,7 @@ use App\HrmsToTravelxEmployeeSyncLog;
 use App\MailConfiguration;
 use App\Mail\TravelexConfigMail;
 use App\User;
+use App\Role;
 use Auth;
 use Carbon\Carbon;
 use Config as databaseConfig;
@@ -20,6 +21,7 @@ use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Sbu;
+use Uitoux\EYatra\Config;
 
 class Employee extends Model {
 	use SoftDeletes;
@@ -387,6 +389,8 @@ class Employee extends Model {
 		if (count($hrmsEmployees) > 0) {
 			$employeeSyncedData = [];
 			$employeeErrorReport = [];
+
+			$employeeDefaultRole = Config::where('id', 3975)->first()->name;
 			foreach ($hrmsEmployees as $hrmsEmployee) {
 				DB::beginTransaction();
 				try {
@@ -806,6 +810,24 @@ class Employee extends Model {
 							$user->email = $hrmsEmployee->email;
 						}
 						$user->save();
+
+						//USER ROLE MAP
+						$employeeRoleId = Role::where('name' , $employeeDefaultRole)
+							->where('company_id', $employee->company_id)
+							->pluck('id')
+							->first();
+						if($employeeRoleId){
+							$userRoleExist = DB::table('role_user')
+								->where('user_id', $user->id)
+								->where('role_id', $employeeRoleId)
+								->first();
+							if(!$userRoleExist){
+								DB::table('role_user')->insert([
+									'user_id' => $user->id,
+									'role_id' => $employeeRoleId,
+								]);
+							}
+						}
 
 						$employeeAdditionData = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 						$employeeSyncedData[] = self::hrmsToDemsEmployeeData($employee, 'New Addition');
@@ -2109,6 +2131,7 @@ class Employee extends Model {
 		DB::setDefaultConnection('mysql');
 
 		$employeeSyncedData = [];
+		$employeeDefaultRole = Config::where('id', 3975)->first()->name;
 		DB::beginTransaction();
 		try {
 			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
@@ -2467,6 +2490,24 @@ class Employee extends Model {
 				$user->email = $hrmsEmployee->email;
 			}
 			$user->save();
+
+			//USER ROLE MAP
+			$employeeRoleId = Role::where('name' , $employeeDefaultRole)
+				->where('company_id', $employee->company_id)
+				->pluck('id')
+				->first();
+			if($employeeRoleId){
+				$userRoleExist = DB::table('role_user')
+					->where('user_id', $user->id)
+					->where('role_id', $employeeRoleId)
+					->first();
+				if(!$userRoleExist){
+					DB::table('role_user')->insert([
+						'user_id' => $user->id,
+						'role_id' => $employeeRoleId,
+					]);
+				}
+			}
 
 			$employeeAdditionData = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 
