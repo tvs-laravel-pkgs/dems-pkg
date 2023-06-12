@@ -876,6 +876,10 @@ app.config(['$routeProvider', function($routeProvider) {
     .when('/hrms/employee-manual-addition', {
         template: '<hrms-employee-manual-addition></hrms-employee-manual-addition>',
         title: 'HRMS Employee Manual Addition',
-    });
+    })
 
+    .when('/trip/report', {
+        template: '<eyatra-trip-report></eyatra-trip-report>',
+        title: 'Trip Report',
+    });
 }]);
