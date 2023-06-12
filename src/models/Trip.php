@@ -329,13 +329,20 @@ class Trip extends Model {
 
 				//Check Visits booking status pending or booked.If Pending means remove
 				$visit = Visit::where('trip_id', $trip->id)->where('booking_status_id', 3060)->forceDelete();
-
+				$booking_methods = ['Self','Agent'];
 				foreach ($request->visits as $key => $visit_data) {
 					//dump($visit_data);
 					if (empty($visit_data['booking_method_name'])) {
 						return response()->json([
 							'success' => false,
 							'errors' => "Booking method preference is required.",
+						]);
+					}
+
+					if(!in_array($visit_data['booking_method_name'], $booking_methods)){
+						return response()->json([
+							'success' => false,
+							'errors' => "Invalid booking method preference.",
 						]);
 					}
 
