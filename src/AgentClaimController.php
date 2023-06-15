@@ -404,6 +404,8 @@ class AgentClaimController extends Controller {
 				foreach ($visit_books as $visit_book) {
 					$visit_book->status_id = 3222; //CLAIM REQUESTED
 					$visit_book->agent_claim_id = $agentClaim->id;
+					$visit_book->invoice_number = $request->invoice_number;
+					$visit_book->invoice_date = $invoice_date;
 					$visit_book->save();
 
 					//VISIT BOOKING STATUS UPDATE
