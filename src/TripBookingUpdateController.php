@@ -303,7 +303,10 @@ class TripBookingUpdateController extends Controller {
 						$visit_bookings->gstin = NULL;
 					}
 					$visit_bookings->fill($value);
-					$visit_bookings->invoice_date = date('Y-m-d', strtotime($value['invoice_date']));
+					// $visit_bookings->invoice_date = date('Y-m-d', strtotime($value['invoice_date']));
+					if(!empty($value['invoice_date'])){
+						$visit_bookings->invoice_date = date('Y-m-d', strtotime($value['invoice_date']));
+					}
 					//$visit_bookings->invoice_number = $value['invoice_number'];
 					// $visit_bookings->booking_type_id = $value['booking_mode_id'];
 					//$visit_bookings->booking_category_id = $value['booking_category_id'];

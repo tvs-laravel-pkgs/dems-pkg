@@ -61,6 +61,7 @@ class TripBookingRequestController extends Controller {
 			->leftJoin('users', 'users.entity_id', 'e.id')
 			->where('users.user_type_id', 3121)
 			->where('createdBy.company_id', Auth::user()->company_id)
+			->where('v.booking_method_id' , 3042) //AGENT
 			->where(function ($query) use ($r, $employee) {
 				if (!empty($employee)) {
 					$query->where('e.id', $employee);
@@ -114,26 +115,76 @@ class TripBookingRequestController extends Controller {
 		}
 
 		return Datatables::of($visits)
+			// ->addColumn('booking_status', function ($visit) {
+			// 	$bookings = Visit::where('trip_id', $visit->trip_id)
+			// 		->where('booking_status_id', 3060)
+			// 		->count();
+			// 	$ticketBooked = Visit::where('trip_id', $visit->trip_id)
+			// 		->where('booking_status_id', 3065)
+			// 		->count();
+			// 	// if ($bookings) {
+			// 	// 	return "Pending";
+			// 	// } else {
+			// 	// 	return "Booked";
+			// 	// }
+			// 	// dd($bookings);
+			// 	return $bookings ? "Pending" : ($ticketBooked ? "Ticket Uploaded" : "Booked");
+			// })
 			->addColumn('booking_status', function ($visit) {
-				$bookings = Visit::where('trip_id', $visit->trip_id)
+				$totalVisitCount = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_method_id', 3042) //AGENT
+					->count();
+
+				$bookedCount = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_method_id', 3042) //AGENT
+					->where('booking_status_id', 3061)
+					->count();
+
+				$cancelledCount = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_method_id', 3042) //AGENT
+					->where('booking_status_id', 3062)
+					->count();
+
+				$pendingCount = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_method_id', 3042) //AGENT
 					->where('booking_status_id', 3060)
 					->count();
-				$ticketBooked = Visit::where('trip_id', $visit->trip_id)
+
+				$ticketUploadedCount = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_method_id', 3042) //AGENT
 					->where('booking_status_id', 3065)
 					->count();
-				// if ($bookings) {
-				// 	return "Pending";
-				// } else {
-				// 	return "Booked";
-				// }
-				// dd($bookings);
-				return $bookings ? "Pending" : ($ticketBooked ? "Ticket Uploaded" : "Booked");
+
+				$invoicedCount = Visit::where('trip_id', $visit->trip_id)
+					->where('booking_method_id', 3042) //AGENT
+					->where('booking_status_id', 3066)
+					->count();
+
+				if($bookedCount == $totalVisitCount){
+					$over_all_booking_status = "Booked";
+				}else if($cancelledCount == $totalVisitCount){
+					$over_all_booking_status = "Cancelled";
+				}else if($pendingCount == $totalVisitCount){
+					$over_all_booking_status = "Pending";
+				}else if($ticketUploadedCount == $totalVisitCount){
+					$over_all_booking_status = "Ticket Uploaded";
+				}else if($invoicedCount == $totalVisitCount){
+					$over_all_booking_status = "Invoiced";
+				}else{
+					$over_all_booking_status = "Partially Booked / Mixed";
+				}
+				return $over_all_booking_status;
 			})
+
 			->addColumn('trip_status', function ($visit) {
 				if ($visit->status_id == '3032') {
-					return "Trip Cancelled";
+					// return "Trip Cancelled";
+					return '<span style="color:red">Trip Cancelled</span>';
 				} elseif ($visit->status_id == '3022') {
 					return "Trip Rejected";
+				} elseif ($visit->status_id == '3038') {
+					// return "Trip Auto Cancelled";
+					return '<span style="color:red">Trip Auto Cancelled</span>';
 				} else {
 					// return "-";
 					$visitCancelledCount = Visit::where('trip_id', $visit->trip_id)

@@ -13,6 +13,7 @@ use Uitoux\EYatra\Agent;
 use Uitoux\EYatra\AgentClaim;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\VisitBooking;
+use Uitoux\EYatra\Visit;
 use Validator;
 use Yajra\Datatables\Datatables;
 
@@ -392,9 +393,24 @@ class AgentClaimController extends Controller {
 			// dd($request->booking_list);
 			//UPDATE VISIT BOOKING BY AGENT
 			if (!$request->id) {
-				$visit_book = VisitBooking::join('visits', 'visits.id', 'visit_bookings.visit_id')
+				// $visit_book = VisitBooking::join('visits', 'visits.id', 'visit_bookings.visit_id')
+				// 	->whereIn('visits.trip_id', $request->booking_list)
+				// 	->update(['visit_bookings.status_id' => 3222, 'visit_bookings.agent_claim_id' => $agentClaim->id]);
+
+				$visit_books = VisitBooking::select('visit_bookings.*')
+					->join('visits', 'visits.id', 'visit_bookings.visit_id')
 					->whereIn('visits.trip_id', $request->booking_list)
-					->update(['visit_bookings.status_id' => 3222, 'visit_bookings.agent_claim_id' => $agentClaim->id]);
+					->get();
+				foreach ($visit_books as $visit_book) {
+					$visit_book->status_id = 3222; //CLAIM REQUESTED
+					$visit_book->agent_claim_id = $agentClaim->id;
+					$visit_book->save();
+
+					//VISIT BOOKING STATUS UPDATE
+					Visit::where('id', $visit_book->visit_id)->update([
+						'booking_status_id' => 3066,// INVOICED
+					]);
+				}
 			}
 			// $booking_list_array = implode(',', $request->booking_list);
 			// $visit_book = VisitBooking::whereIn('id', $request->booking_list)->update(['status_id' => 3222, 'agent_claim_id' => $agentClaim->id]);

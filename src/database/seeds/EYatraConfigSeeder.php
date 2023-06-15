@@ -222,6 +222,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Ticket Uploaded',
 				'config_type_id' => 503,
 			],
+			3066 => [
+				'name' => 'Invoiced',
+				'config_type_id' => 503,
+			],
 
 			//MANAGER VERIFICATION STATUSES
 			3080 => [

@@ -267,15 +267,23 @@ app.component('eyatraAgentClaimForm', {
             if (event.target.checked == true) {
                 $.each($('.booking_list:checked'), function() {
                     count++;
-                    amount += parseFloat($(this).attr('data-amount'));
-                    ticket_amount += parseFloat($(this).attr('data-ticketamount'));
+                    // amount += parseFloat($(this).attr('data-amount'));
+                    let data_amount = $(this).attr('data-amount');
+                    amount += (data_amount ? parseFloat(data_amount) : 0);
+                    // ticket_amount += parseFloat($(this).attr('data-ticketamount'));
+                    let data_ticket_amount = $(this).attr('data-ticketamount');
+                    ticket_amount += (data_ticket_amount ? parseFloat(data_ticket_amount) : 0);
                     console.log(amount, ticket_amount);
                 });
             } else {
                 $.each($('.booking_list:checked'), function() {
                     count++;
-                    amount += parseFloat($(this).attr('data-amount'));
-                    ticket_amount += parseFloat($(this).attr('data-ticketamount'));
+                    // amount += parseFloat($(this).attr('data-amount'));
+                    let data_amount = $(this).attr('data-amount');
+                    amount += (data_amount ? parseFloat(data_amount) : 0);
+                    // ticket_amount += parseFloat($(this).attr('data-ticketamount'));
+                    let data_ticket_amount = $(this).attr('data-ticketamount');
+                    ticket_amount += (data_ticket_amount ? parseFloat(data_ticket_amount) : 0);
                 });
                 self.total_amount = 0;
             }
