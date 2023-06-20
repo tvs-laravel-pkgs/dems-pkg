@@ -2824,7 +2824,7 @@ class Trip extends Model {
 						$lodge_checkout_time = $lodging_data['checkout_time'];
 						$lodging_check_in_date_time = date('Y-m-d H:i:s', strtotime("$lodge_check_in_date $lodge_check_in_time"));
 						$lodging_checkout_date_time = date('Y-m-d H:i:s', strtotime("$lodge_checkout_date $lodge_checkout_time"));
-						if($lodging_checkout_date_time < $lodging_check_in_date_time){
+						if($lodging_checkout_date_time <= $lodging_check_in_date_time){
 							return response()->json([
 								'success' => false,
 								'errors' => ['Lodging check out date time should be greater than the check in date time'],
