@@ -1459,13 +1459,22 @@ class ExportReportController extends Controller {
 							}
 						}
 
+						if($business_id == 2){
+							//OESL
+							$debit_account_no = '41854182732';
+						}else if($business_id == 3){
+							//HONDA
+							$debit_account_no = '40711975675';
+						}
+
 						$local_trip = [
 							'P',
 							$l_no++,
 							$local['Account_Number'],
 							'295723',
 							'MOBILITY',
-							'40711975675',
+							// '40711975675',
+							$debit_account_no,
 							$payment_type,
 							'',
 							date('d-m-Y', strtotime($local['Created_Date_and_Time'])),
@@ -2935,7 +2944,7 @@ class ExportReportController extends Controller {
 
 			//CREDIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode.' : '.$employeeName.' : '.$toCity .' - Advance', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode . ':' . $employeeName . '-Adv', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_OD_501', 6, $employeeCode . ':' . $employeeName . '-Adv', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
 		} else if ($type == 2) {
 			//TRAVEL EXPENSES
 			// $toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
@@ -3081,7 +3090,7 @@ class ExportReportController extends Controller {
 
 			//CREDIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_CC_501', 6, $employeeCode.':'.$employeeName.':'.$toCity.'-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_CC_501', 6, $employeeCode . ':' . $employeeName . '-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_OD_501', 6, $employeeCode . ':' . $employeeName . '-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 		} else if ($type == 4) {
 			//HONDA ADVANCE DEBIT AND CREDIT ENTRY
 			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '1480652137', 2, $employeeCode . ':' . $employeeName . '-Adv', $employeeTrip->advance_received, 0.00, 'F', '', '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
