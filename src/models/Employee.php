@@ -548,13 +548,13 @@ class Employee extends Model {
 								$businessId = null;
 								// if ($hrmsEmployee->lob_code == 'DLOB') {
 								if ($hrmsEmployee->lob_code == 'DLOB') {
-									if (strpos($hrmsEmployee->sbu_code, 'honda') !== false) {
+									if (strpos(strtolower($hrmsEmployee->sbu_code), 'honda') !== false) {
 										$businessId = 3; //HONDA
 									} else {
 										$businessId = 1; //DLOB
 									}
 								} else if ($hrmsEmployee->lob_code == 'DSBU') {
-									if (strpos($hrmsEmployee->sbu_code, 'dist') !== false) {
+									if (strpos(strtolower($hrmsEmployee->sbu_code), 'dist') !== false) {
 										$businessId = 1; //DLOB
 									}
 								}else if ($hrmsEmployee->lob_code == 'OESL') {
@@ -1298,13 +1298,13 @@ class Employee extends Model {
 								$businessId = null;
 								// if ($employeeUpdateDetail['employee']->lob_code == 'DLOB') {
 								if ($employeeUpdateDetail['employee']->lob_code == 'DLOB') {
-									if (strpos($employeeUpdateDetail['employee']->sbu_code, 'honda') !== false) {
+									if (strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'honda') !== false) {
 										$businessId = 3; //HONDA
 									} else {
 										$businessId = 1; //DLOB
 									}
 								}else if ($employeeUpdateDetail['employee']->lob_code == 'DSBU') {
-									if (strpos($employeeUpdateDetail['employee']->sbu_code, 'dist') !== false) {
+									if (strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'dist') !== false) {
 										$businessId = 1; //DLOB
 									}
 								} else if ($employeeUpdateDetail['employee']->lob_code == 'OESL') {
@@ -2331,13 +2331,13 @@ class Employee extends Model {
 						//EMPLOYEE DEPARTMENT
 						$businessId = null;
 						if ($hrmsEmployee->lob_code == 'DLOB') {
-							if (strpos($hrmsEmployee->sbu_code, 'honda') !== false) {
+							if (strpos(strtolower($hrmsEmployee->sbu_code), 'honda') !== false) {
 								$businessId = 3; //HONDA
 							} else {
 								$businessId = 1; //DLOB
 							}
 						} else if ($hrmsEmployee->lob_code == 'DSBU') {
-							if (strpos($hrmsEmployee->sbu_code, 'dist') !== false) {
+							if (strpos(strtolower($hrmsEmployee->sbu_code), 'dist') !== false) {
 								$businessId = 1; //DLOB
 							}
 						} else if ($hrmsEmployee->lob_code == 'OESL') {
