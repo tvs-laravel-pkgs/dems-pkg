@@ -2360,7 +2360,10 @@ class Trip extends Model {
 				// if (count($errors) > 0) return response()->json(['success' => false, 'errors' => $errors]);
 				// // Throwing an error if details added with 0 value
 
+				$is_fare_doc_required_for_agent_booking_visit = Config::where('id', 3982)->first()->name;
+
 				$error_messages = [
+					'agent_book_visit_fare_detail_doc.required' => 'Agent option selected for ticket booking please attach the ticket selecting the "fare detail" option as attachment.',
 					'fare_detail_doc.required' => 'Fare detail document is required',
 					'lodging_doc.required' => 'Lodging document is required',
 					'boarding_doc.required' => 'Boarding document is required',
@@ -2375,6 +2378,20 @@ class Trip extends Model {
 					->toArray();
 				if (!in_array(3750, $attachement_types)) {
 					// All Type
+
+					if($is_fare_doc_required_for_agent_booking_visit == 'Yes'){
+						//CHECK FARE DOCUMENT FOR AGENT VISIT
+						$agent_booking_visit_count = Visit::where('visits.trip_id', $trip->id)
+							->where('visits.attachment_status', 1)
+							->where('visits.booking_method_id', 3042) //AGENT
+							->count();
+						if ($agent_booking_visit_count > 0 && !in_array(3751, $attachement_types)) {
+							// Fare Detail Type
+							$validations['agent_book_visit_fare_detail_doc'] = 'required';
+						}
+					}
+
+
 					$visit_count = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type

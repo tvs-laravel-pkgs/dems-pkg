@@ -300,6 +300,11 @@ app.component('eyatraTripClaimForm', {
                         //SELF AND LEADER GRADE
                        visit.attachment_status = 'Yes'; 
                     }
+
+                    if(visit.booking_method_id == 3042){
+                        //AGENT
+                       visit.attachment_status = 'Yes'; 
+                    }
                 });
                 $scope.custom_city_show = custom_city_show
                 if (custom_city_show) {
