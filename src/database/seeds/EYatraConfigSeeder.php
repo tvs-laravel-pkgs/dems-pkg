@@ -77,6 +77,7 @@ class EYatraConfigSeeder extends Seeder {
 			561 => 'HRMS To Travelex New Employee Default Role',
 			562 => 'Enable Ticket Booking Request Email To Agent',
 			563 => 'Is Fare Doc Required In Claims For Agent Booking Visit',
+			564 => 'On Claim Agent Booking Visit Proof Upload Value',
 		];
 
 		$configs = [
@@ -1336,6 +1337,10 @@ class EYatraConfigSeeder extends Seeder {
 			3982 => [
 				'name' => 'Yes',
 				'config_type_id' => 563,
+			],
+			3983 => [
+				'name' => 'Yes',
+				'config_type_id' => 564,
 			],
 		];
 
