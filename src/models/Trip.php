@@ -1165,10 +1165,12 @@ class Trip extends Model {
 		$visit = Visit::where('trip_id', $trip_id)->where('booking_method_id', '=', 3040)->update(['booking_status_id' => 3062]);
 
 		//TRIP CANCEL NOTIFICATION TO AGENT
+		$trip_cancel_agent_notify_required = Config::where('id', 3984)->first()->name;
 		$agentBookVisitIds = Visit::where('trip_id', $trip->id)
 			->where('booking_method_id', 3042) //AGENT
 			->pluck('id');
-		if (!empty($agentBookVisitIds)) {
+		// if (!empty($agentBookVisitIds)) {
+		if (!empty($agentBookVisitIds) && $trip_cancel_agent_notify_required == "Yes") {
 			sendEmailNotification($trip, $notification_type = 'Trip Cancel', $trip_type = "Outstation Trip", $agentBookVisitIds);
 		}
 		return response()->json(['success' => true]);
@@ -1243,7 +1245,9 @@ class Trip extends Model {
 				$activity_log = ActivityLog::saveLog($activity);
 
 				//VISIT CANCEL NOTIFICATION TO AGENT
-				if ($visit && $visit->booking_method_id == 3042) {
+				$visit_cancel_agent_notify_required = Config::where('id', 3985)->first()->name;
+				// if ($visit && $visit->booking_method_id == 3042) {
+				if ($visit && $visit->booking_method_id == 3042 && $visit_cancel_agent_notify_required == 'Yes') {
 					$tripData = Trip::find($visit->trip_id);
 					sendEmailNotification($tripData, $notification_type = 'Visit Cancel', $trip_type = "Outstation Trip", [$visit->id]);
 				}
