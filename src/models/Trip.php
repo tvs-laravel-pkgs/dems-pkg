@@ -2184,6 +2184,7 @@ class Trip extends Model {
 				$visit_id = Visit::select('id')->where('trip_id', $request->trip_id)->count();
 				$two_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 15)->count();
 				$four_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 16)->count();
+				$agent_booking_visit_proof_upload_value = Config::where('id', 3983)->first()->name;
 
 				$tripData = Trip::find($request->trip_id);
 				if (!empty($tripData->employee->grade_id)) {
@@ -2229,6 +2230,14 @@ class Trip extends Model {
 				}
 
 				foreach ($request->visits as $visit_info) {
+					//IF AGENT BOOKING VISIT MEANS PROFF UPLOAD SHOULD BE YES
+					if($agent_booking_visit_proof_upload_value == 'Yes' && $visit_info['booked_by'] == 'Agent' && $visit_info['attachment_status'] == 'No'){
+						return response()->json([
+							'success' => false,
+							'errors' => ['Proof upload should be "Yes" for Agent booking visit']
+						]);
+					}
+
 					if (isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16)) {
 						if ($visit_info['travel_mode_id'] == 15) {
 							//TWO WHEELER

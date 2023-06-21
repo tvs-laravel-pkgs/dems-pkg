@@ -301,7 +301,7 @@ app.component('eyatraTripClaimForm', {
                        visit.attachment_status = 'Yes'; 
                     }
 
-                    if(visit.booking_method_id == 3042){
+                    if(self.trip && !self.trip.cliam && visit.booking_method_id == 3042){
                         //AGENT
                        visit.attachment_status = 'Yes'; 
                     }
