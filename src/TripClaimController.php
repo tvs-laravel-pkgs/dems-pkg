@@ -306,7 +306,8 @@ class TripClaimController extends Controller {
 			$validations = [
 				'id' => 'required|integer|exists:trips,id',
 				'document_type_id' => 'required|integer|exists:configs,id',
-				'atttachment' => 'required',
+				// 'atttachment' => 'required',
+				'atttachment' => 'required|mimes:jpeg,jpg,pdf,png',
 			];
 			$validator = Validator::make($r->all(), $validations, $error_messages);
 
@@ -334,7 +335,8 @@ class TripClaimController extends Controller {
 				$image->move(storage_path('app/public/trip/claim/' . $trip->id . '/'), $file_name);
 				$attachement_transport = null;
 				// if ($r->document_type_id == 3754) {		// 3754 -> Others
-				if ($r->document_type_id == 3754 || $r->document_type_id == 3752) {
+				// if ($r->document_type_id == 3754 || $r->document_type_id == 3752) {
+				if ($r->document_type_id == 3754 || $r->document_type_id == 3752 || $r->document_type_id == 3751) {
 					//OTHERS OR LODGING
 					$attachement_transport = new Attachment;
 				} else {
@@ -367,7 +369,7 @@ class TripClaimController extends Controller {
 				'attachment_type_lists' => $attachment_type_lists,
 				'trip_attachments' => $trip_attachments,
 			]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}

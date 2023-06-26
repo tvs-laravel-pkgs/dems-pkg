@@ -2234,11 +2234,19 @@ class Trip extends Model {
 				}
 
 				foreach ($request->visits as $visit_info) {
-					//IF AGENT BOOKING VISIT MEANS PROFF UPLOAD SHOULD BE YES
-					if($agent_booking_visit_proof_upload_value == 'Yes' && $visit_info['booked_by'] == 'Agent' && $visit_info['attachment_status'] == 'No'){
+					// //IF AGENT BOOKING VISIT MEANS PROFF UPLOAD SHOULD BE YES
+					// if($agent_booking_visit_proof_upload_value == 'Yes' && $visit_info['booked_by'] == 'Agent' && $visit_info['attachment_status'] == 'No'){
+					// 	return response()->json([
+					// 		'success' => false,
+					// 		'errors' => ['Proof upload should be "Yes" for Agent booking visit']
+					// 	]);
+					// }
+
+					//PROFF UPLOAD SHOULD BE YES VALIDATION
+					if($agent_booking_visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No'){
 						return response()->json([
 							'success' => false,
-							'errors' => ['Proof upload should be "Yes" for Agent booking visit']
+							'errors' => ['Proof upload should be "Yes" for fare detail']
 						]);
 					}
 
@@ -2376,7 +2384,8 @@ class Trip extends Model {
 				$is_fare_doc_required_for_agent_booking_visit = Config::where('id', 3982)->first()->name;
 
 				$error_messages = [
-					'agent_book_visit_fare_detail_doc.required' => 'Agent option selected for ticket booking please attach the ticket selecting the "fare detail" option as attachment.',
+					// 'agent_book_visit_fare_detail_doc.required' => 'Agent option selected for ticket booking please attach the ticket selecting the "fare detail" option as attachment.',
+					'fare_detail_document_validate.required' => 'Please attach the ticket selecting the "fare detail" option as attachment for all the fare detail.',
 					'fare_detail_doc.required' => 'Fare detail document is required',
 					'lodging_doc.required' => 'Lodging document is required',
 					'boarding_doc.required' => 'Boarding document is required',
@@ -2392,15 +2401,36 @@ class Trip extends Model {
 				if (!in_array(3750, $attachement_types)) {
 					// All Type
 
+					// if($is_fare_doc_required_for_agent_booking_visit == 'Yes'){
+					// 	//CHECK FARE DOCUMENT FOR AGENT VISIT
+					// 	$agent_booking_visit_count = Visit::where('visits.trip_id', $trip->id)
+					// 		->where('visits.attachment_status', 1)
+					// 		->where('visits.booking_method_id', 3042) //AGENT
+					// 		->count();
+					// 	if ($agent_booking_visit_count > 0 && !in_array(3751, $attachement_types)) {
+					// 		// Fare Detail Type
+					// 		$validations['agent_book_visit_fare_detail_doc'] = 'required';
+					// 	}
+					// }
+
+					//FARE DETAILS DOCUMENT VALIDATION
 					if($is_fare_doc_required_for_agent_booking_visit == 'Yes'){
-						//CHECK FARE DOCUMENT FOR AGENT VISIT
-						$agent_booking_visit_count = Visit::where('visits.trip_id', $trip->id)
+						$fare_detail_count = Visit::where('visits.trip_id', $trip->id)
+							->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
 							->where('visits.attachment_status', 1)
-							->where('visits.booking_method_id', 3042) //AGENT
 							->count();
-						if ($agent_booking_visit_count > 0 && !in_array(3751, $attachement_types)) {
-							// Fare Detail Type
-							$validations['agent_book_visit_fare_detail_doc'] = 'required';
+						if ($fare_detail_count > 0) {
+							if(!in_array(3751, $attachement_types)){
+								$validations['fare_detail_document_validate'] = 'required';
+							}else{
+								$fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
+									->where('entity_id', $trip->id)
+									->where('attachment_of_id', 3751) //FARE DETAIL
+									->count();
+								if($fare_detail_document_count < $fare_detail_count){
+									$validations['fare_detail_document_validate'] = 'required';
+								}
+							}
 						}
 					}
 
@@ -3770,6 +3800,18 @@ class Trip extends Model {
 				$item_images = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
 				Storage::makeDirectory($item_images, 0777);
 				if ($request->hasfile('google_attachments')) {
+					$validator = Validator::make($request->all(), [
+                        'google_attachments.*' => [
+                            'mimes:jpeg,jpg,pdf,png',
+                        ],
+                    ]);
+                    if ($validator->fails()) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'Validation Error',
+                            'errors' => ['The attachement must be a jpeg, jpg, pdf, or png file.'],
+                        ]);
+                    }
 
 					foreach ($request->file('google_attachments') as $key => $attachement) {
 						$value = rand(1, 100);
@@ -4280,7 +4322,8 @@ request is not desired, then those may be rejected.';
 		$exist_attachment_ids = Attachment::where('attachment_type_id', 3200)
 			->where('entity_id', $trip_id)
 		// ->where('attachment_of_id', '!=', 3754)
-			->whereNotIn('attachment_of_id', [3754, 3752])
+			// ->whereNotIn('attachment_of_id', [3754, 3752])
+			->whereNotIn('attachment_of_id', [3754, 3752, 3751])
 			->pluck('attachment_of_id')->toArray();
 		$pending_attachment_lists = Collect(
 			Config::select('id', 'name')
