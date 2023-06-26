@@ -80,6 +80,7 @@ class EYatraConfigSeeder extends Seeder {
 			564 => 'On Claim Agent Booking Visit Proof Upload Value',
 			565 => 'On Trip Cancel Agent Notification Is Required',
 			566 => 'On Visit Cancel Agent Notification Is Required',
+			567 => 'Enable Ticket Cancell SMS To Agent',
 		];
 
 		$configs = [
@@ -1351,6 +1352,10 @@ class EYatraConfigSeeder extends Seeder {
 			3985 => [
 				'name' => 'No',
 				'config_type_id' => 566,
+			],
+			3986 => [
+				'name' => 'No',
+				'config_type_id' => 567,
 			],
 		];
 
