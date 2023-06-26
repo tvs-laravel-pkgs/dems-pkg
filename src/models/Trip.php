@@ -2188,7 +2188,7 @@ class Trip extends Model {
 				$visit_id = Visit::select('id')->where('trip_id', $request->trip_id)->count();
 				$two_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 15)->count();
 				$four_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 16)->count();
-				$agent_booking_visit_proof_upload_value = Config::where('id', 3983)->first()->name;
+				$visit_proof_upload_value = Config::where('id', 3983)->first()->name;
 
 				$tripData = Trip::find($request->trip_id);
 				if (!empty($tripData->employee->grade_id)) {
@@ -2243,7 +2243,7 @@ class Trip extends Model {
 					// }
 
 					//PROFF UPLOAD SHOULD BE YES VALIDATION
-					if($agent_booking_visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No'){
+					if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No'){
 						return response()->json([
 							'success' => false,
 							'errors' => ['Proof upload should be "Yes" for fare detail']
@@ -2381,7 +2381,7 @@ class Trip extends Model {
 				// if (count($errors) > 0) return response()->json(['success' => false, 'errors' => $errors]);
 				// // Throwing an error if details added with 0 value
 
-				$is_fare_doc_required_for_agent_booking_visit = Config::where('id', 3982)->first()->name;
+				$is_fare_doc_required_for_visit = Config::where('id', 3982)->first()->name;
 
 				$error_messages = [
 					// 'agent_book_visit_fare_detail_doc.required' => 'Agent option selected for ticket booking please attach the ticket selecting the "fare detail" option as attachment.',
@@ -2414,7 +2414,7 @@ class Trip extends Model {
 					// }
 
 					//FARE DETAILS DOCUMENT VALIDATION
-					if($is_fare_doc_required_for_agent_booking_visit == 'Yes'){
+					if($is_fare_doc_required_for_visit == 'Yes'){
 						$fare_detail_count = Visit::where('visits.trip_id', $trip->id)
 							->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
 							->where('visits.attachment_status', 1)
