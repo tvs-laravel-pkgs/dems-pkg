@@ -2848,6 +2848,20 @@ class Trip extends Model {
 						//dd($lodging_data['lodge_name']);
 						// if ($lodging_data['amount'] > 0 && $lodging_data['stay_type_id'] == 3340) {
 						// if ($lodging_data['amount'] > 1000 && $lodging_data['stay_type_id'] == 3340) {
+						$lodge_check_in_date = $lodging_data['check_in_date'];
+						$lodge_check_in_time = $lodging_data['check_in_time'];
+						$lodge_checkout_date = $lodging_data['checkout_date'];
+						$lodge_checkout_time = $lodging_data['checkout_time'];
+						$lodging_check_in_date_time = date('Y-m-d H:i:s', strtotime("$lodge_check_in_date $lodge_check_in_time"));
+						$lodging_checkout_date_time = date('Y-m-d H:i:s', strtotime("$lodge_checkout_date $lodge_checkout_time"));
+						if($lodging_checkout_date_time <= $lodging_check_in_date_time){
+							return response()->json([
+								'success' => false,
+								'errors' => ['Lodging check out date time should be greater than the check in date time'],
+							]);
+						}
+
+
 						if ($lodging_data['stayed_days'] && $lodging_data['stayed_days'] > 0) {
 							$lodge_per_day_amt = $lodging_data['amount'] / $lodging_data['stayed_days'];
 						} else {
