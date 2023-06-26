@@ -3900,13 +3900,15 @@ class Trip extends Model {
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+				->join('employees', 'employees.id', 'trips.employee_id')
 			// ->whereDate('trips.created_at', $date)
 			// // ->whereDate('trips.end_date', $date)
 			// ->where('trips.status_id', '=', 3021)
 				->where(function ($q) use ($date, $title) {
 					$q->where('trips.status_id', '=', 3021);
 					if ($title == 'Cancelled') {
-						$q->whereDate('trips.created_at', '<=', $date);
+						$q->whereDate('trips.created_at', '<=', $date)
+						$q->where('employees.is_auto_cancel_required', 1);
 					} else {
 						$q->whereDate('trips.created_at', $date);
 					}
@@ -3928,6 +3930,7 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->join('employees', 'employees.id', 'trips.employee_id')
 			// ->where('trips.end_date', $date)
 			// ->whereNull('ey_employee_claims.number')
 			// ->where('trips.status_id', '=', 3028)
@@ -3935,7 +3938,8 @@ class Trip extends Model {
 					$q->where('trips.status_id', '=', 3028)
 						->whereNull('ey_employee_claims.number');
 					if ($title == 'Cancelled') {
-						$q->whereDate('trips.end_date', '<=', $date);
+						$q->whereDate('trips.end_date', '<=', $date)
+						$q->where('employees.is_auto_cancel_required', 1);
 					} else {
 						$q->whereDate('trips.end_date', $date);
 					}
@@ -3957,13 +3961,15 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->join('employees', 'employees.id', 'trips.employee_id')
 			// // ->whereDate('ey_employee_claims.created_at', $date)
 			// ->whereDate('trips.end_date', $date)
 			// ->where('trips.status_id', '=', 3023) //Claim Requested
 				->where(function ($q) use ($date, $title) {
 					$q->where('trips.status_id', '=', 3023); //Claim Requested
 					if ($title == 'Cancelled') {
-						$q->whereDate('trips.end_date', '<=', $date);
+						$q->whereDate('trips.end_date', '<=', $date)
+						$q->where('employees.is_auto_cancel_required', 1);
 					} else {
 						$q->whereDate('trips.end_date', $date);
 					}
@@ -3986,13 +3992,15 @@ class Trip extends Model {
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+				->join('employees', 'employees.id', 'trips.employee_id')
 			// ->whereDate('ey_employee_claims.created_at', $date)
 			// ->whereDate('trips.end_date', $date)
 			// ->where('trips.status_id', '=', 3029) //Senior Manager Approval Pending
 				->where(function ($q) use ($date, $title) {
 					$q->where('trips.status_id', '=', 3029); //Senior Manager Approval Pending
 					if ($title == 'Cancelled') {
-						$q->whereDate('trips.end_date', '<=', $date);
+						$q->whereDate('trips.end_date', '<=', $date)
+						$q->where('employees.is_auto_cancel_required', 1);
 					} else {
 						$q->whereDate('trips.end_date', $date);
 					}
