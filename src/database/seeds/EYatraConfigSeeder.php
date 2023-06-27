@@ -1123,7 +1123,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 541,
 			],
 			3751 => [
-				'name' => 'Fare Detail',
+				'name' => 'Fare Detail(Agent Ticket)',
 				'config_type_id' => 541,
 			],
 			3752 => [
