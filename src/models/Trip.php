@@ -2381,11 +2381,12 @@ class Trip extends Model {
 				// if (count($errors) > 0) return response()->json(['success' => false, 'errors' => $errors]);
 				// // Throwing an error if details added with 0 value
 
-				$is_fare_doc_required_for_visit = Config::where('id', 3982)->first()->name;
+				// $is_fare_doc_required_for_visit = Config::where('id', 3982)->first()->name;
 
 				$error_messages = [
 					// 'agent_book_visit_fare_detail_doc.required' => 'Agent option selected for ticket booking please attach the ticket selecting the "fare detail" option as attachment.',
-					'fare_detail_document_validate.required' => 'Please attach the ticket selecting the "fare detail" option as attachment for all the fare detail.',
+					'fare_detail_document_validate.required' => 'Please attach the ticket selecting the "Fare Detail(Agent Ticket)" option for all agent booking fare detail.',
+					'self_booking_document_validate.required' => 'Please attach the ticket selecting the "Self Booking Attachments" option for all the self booking fare detail.',
 					'fare_detail_doc.required' => 'Fare detail document is required',
 					'lodging_doc.required' => 'Lodging document is required',
 					'boarding_doc.required' => 'Boarding document is required',
@@ -2414,31 +2415,68 @@ class Trip extends Model {
 					// }
 
 					//FARE DETAILS DOCUMENT VALIDATION
-					if($is_fare_doc_required_for_visit == 'Yes'){
-						$fare_detail_count = Visit::where('visits.trip_id', $trip->id)
-							->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
-							->where('visits.attachment_status', 1)
-							->count();
-						if ($fare_detail_count > 0) {
-							if(!in_array(3751, $attachement_types)){
-								$validations['fare_detail_document_validate'] = 'required';
-							}else{
-								$fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
-									->where('entity_id', $trip->id)
-									->where('attachment_of_id', 3751) //FARE DETAIL
-									->count();
-								if($fare_detail_document_count < $fare_detail_count){
-									$validations['fare_detail_document_validate'] = 'required';
-								}
+					// if($is_fare_doc_required_for_visit == 'Yes'){
+					// 	$fare_detail_count = Visit::where('visits.trip_id', $trip->id)
+					// 		->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
+					// 		->where('visits.attachment_status', 1)
+					// 		->count();
+					// 	if ($fare_detail_count > 0) {
+					// 		if(!in_array(3751, $attachement_types)){
+					// 			$validations['fare_detail_document_validate'] = 'required';
+					// 		}else{
+					// 			$fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
+					// 				->where('entity_id', $trip->id)
+					// 				->where('attachment_of_id', 3751) //FARE DETAIL
+					// 				->count();
+					// 			if($fare_detail_document_count < $fare_detail_count){
+					// 				$validations['fare_detail_document_validate'] = 'required';
+					// 			}
+					// 		}
+					// 	}
+					// }
+
+					$self_fare_detail_count = Visit::where('visits.trip_id', $trip->id)
+						->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
+						->where('visits.booking_method_id', 3040) //SELF
+						->where('visits.attachment_status', 1)
+						->count();
+					if ($self_fare_detail_count > 0) {
+						if(!in_array(3755, $attachement_types)){
+							$validations['self_booking_document_validate'] = 'required';
+						}else{
+							$self_fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
+								->where('entity_id', $trip->id)
+								->where('attachment_of_id', 3755) //SELF BOOKING ATTACHMENT
+								->count();
+							if($self_fare_detail_document_count < $self_fare_detail_count){
+								$validations['self_booking_document_validate'] = 'required';
 							}
 						}
 					}
 
+					$agent_fare_detail_count = Visit::where('visits.trip_id', $trip->id)
+						->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
+						->where('visits.booking_method_id', 3042) //AGENT
+						->where('visits.attachment_status', 1)
+						->count();
+					if ($agent_fare_detail_count > 0) {
+						if(!in_array(3751, $attachement_types)){
+							$validations['fare_detail_document_validate'] = 'required';
+						}else{
+							$agent_fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
+								->where('entity_id', $trip->id)
+								->where('attachment_of_id', 3751) //FARE DETAIL
+								->count();
+							if($agent_fare_detail_document_count < $agent_fare_detail_count){
+								$validations['fare_detail_document_validate'] = 'required';
+							}
+						}
+					}
 
 					$visit_count = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type
-						$validations['fare_detail_doc'] = 'required';
+						// $validations['fare_detail_doc'] = 'required';
 					}
 
 					// $lodging_count = Lodging::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
@@ -2468,7 +2506,7 @@ class Trip extends Model {
 						->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
-						$validations['self_booking_doc'] = 'required';
+						// $validations['self_booking_doc'] = 'required';
 					}
 					// Toll fee doc required
 					$tollFeeLocalTravelCount = LocalTravel::where('trip_id', $request->trip_id)
@@ -3761,7 +3799,7 @@ class Trip extends Model {
 					}
 					// if ($transport_count > 0 && $transport_attachment_count == 0) {
 					if ($transport_count > 0 && $transport_attachment_count == 0 && $is_grade_leader == false) {
-						$employee_claim->is_deviation = 1;
+						// $employee_claim->is_deviation = 1;
 					}
 				}
 
@@ -4323,7 +4361,8 @@ request is not desired, then those may be rejected.';
 			->where('entity_id', $trip_id)
 		// ->where('attachment_of_id', '!=', 3754)
 			// ->whereNotIn('attachment_of_id', [3754, 3752])
-			->whereNotIn('attachment_of_id', [3754, 3752, 3751])
+			// ->whereNotIn('attachment_of_id', [3754, 3752, 3751])
+			->whereNotIn('attachment_of_id', [3754, 3752, 3751, 3755])
 			->pluck('attachment_of_id')->toArray();
 		$pending_attachment_lists = Collect(
 			Config::select('id', 'name')

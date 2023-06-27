@@ -336,7 +336,8 @@ class TripClaimController extends Controller {
 				$attachement_transport = null;
 				// if ($r->document_type_id == 3754) {		// 3754 -> Others
 				// if ($r->document_type_id == 3754 || $r->document_type_id == 3752) {
-				if ($r->document_type_id == 3754 || $r->document_type_id == 3752 || $r->document_type_id == 3751) {
+				// if ($r->document_type_id == 3754 || $r->document_type_id == 3752 || $r->document_type_id == 3751) {
+				if ($r->document_type_id == 3754 || $r->document_type_id == 3752 || $r->document_type_id == 3751 || $r->document_type_id == 3755) {
 					//OTHERS OR LODGING
 					$attachement_transport = new Attachment;
 				} else {
