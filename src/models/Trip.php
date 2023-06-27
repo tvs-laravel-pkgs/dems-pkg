@@ -2393,6 +2393,7 @@ class Trip extends Model {
 					'other_doc.required' => 'Others document is required',
 					'self_booking_doc.required' => 'Self Booking Approval Email is required',
 					'toll_fee_doc.required' => 'Toll fee document is required',
+					'guest_house_approval_document.required' => 'Guest house approval document is required',
 				];
 				$validations = [];
 				$attachement_types = Attachment::where('attachment_type_id', 3200)
@@ -2472,6 +2473,16 @@ class Trip extends Model {
 							}
 						}
 					}
+
+					$lodging_guest_house_cities = Lodging::join('ncities','ncities.id','lodgings.city_id')
+						->where('lodgings.trip_id', $trip->id)
+						->where('lodgings.attachment_status', 1)
+						->where('lodgings.stay_type_id', 3340) //LODGE STAY
+						->where('ncities.guest_house_status',1)
+						->pluck('ncities.city_id');
+					if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+						$validations['guest_house_approval_document'] = 'required';
+            		}
 
 					$visit_count = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
