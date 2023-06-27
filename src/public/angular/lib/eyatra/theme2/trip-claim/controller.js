@@ -3825,6 +3825,7 @@ app.component('eyatraTripClaimForm', {
         });
         $(document).on('click', '#modal_attachment_submit', function() {
             trip_attachment_save = 1;
+            $("#modal_attachment_submit").prop("disabled", true);
             $('#claim_attachment_expense_form').submit();
         });
 
