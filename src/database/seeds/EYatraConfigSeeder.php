@@ -1319,6 +1319,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Employee Reporting To Updation',
 				'config_type_id' => 558,
 			],
+			3965 => [
+				'name' => 'Employee Manual Addition',
+				'config_type_id' => 558,
+			],
 
 			3971 => [
 				'name' => 'No',
