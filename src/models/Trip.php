@@ -2244,11 +2244,30 @@ class Trip extends Model {
 
 					//PROFF UPLOAD SHOULD BE YES VALIDATION
 					// if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No'){
-					if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($visit_info['travel_mode_id'], [15,16,17,270,271,272])){
-						return response()->json([
-							'success' => false,
-							'errors' => ['Proof upload should be "Yes" for fare detail']
-						]);
+					// if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($visit_info['travel_mode_id'], [15,16,17,270,271,272])){
+					// 	return response()->json([
+					// 		'success' => false,
+					// 		'errors' => ['Proof upload should be "Yes" for fare detail']
+					// 	]);
+					// }
+
+					if($visit_info['booked_by'] == 'Agent'){
+						//AGENT
+						$agent_visit_travel_mode_id = Visit::where('id', $visit_info['id'])->pluck('travel_mode_id')->first();
+						if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($agent_visit_travel_mode_id, [15,16,17,270,271,272])){
+							return response()->json([
+								'success' => false,
+								'errors' => ['Proof upload should be "Yes" for fare detail']
+							]);
+						}
+					}else{
+						//SELF
+						if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($visit_info['travel_mode_id'], [15,16,17,270,271,272])){
+							return response()->json([
+								'success' => false,
+								'errors' => ['Proof upload should be "Yes" for fare detail']
+							]);
+						}
 					}
 
 					if (isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16)) {
