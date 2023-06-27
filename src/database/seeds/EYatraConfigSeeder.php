@@ -81,6 +81,7 @@ class EYatraConfigSeeder extends Seeder {
 			565 => 'On Trip Cancel Agent Notification Is Required',
 			566 => 'On Visit Cancel Agent Notification Is Required',
 			567 => 'Enable Ticket Cancell SMS To Agent',
+			568 => 'HRMS To Travelex Employee Sync Categories',
 		];
 
 		$configs = [
@@ -1318,6 +1319,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Employee Reporting To Updation',
 				'config_type_id' => 558,
 			],
+			3965 => [
+				'name' => 'Employee Manual Addition',
+				'config_type_id' => 558,
+			],
 
 			3971 => [
 				'name' => 'No',
@@ -1356,6 +1361,15 @@ class EYatraConfigSeeder extends Seeder {
 			3986 => [
 				'name' => 'No',
 				'config_type_id' => 567,
+			],
+
+			3990 => [
+				'name' => 'New Addition',
+				'config_type_id' => 568,
+			],
+			3991 => [
+				'name' => 'Deletion',
+				'config_type_id' => 568,
 			],
 		];
 
