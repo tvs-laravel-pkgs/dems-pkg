@@ -2243,7 +2243,8 @@ class Trip extends Model {
 					// }
 
 					//PROFF UPLOAD SHOULD BE YES VALIDATION
-					if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No'){
+					// if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No'){
+					if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($visit_info['travel_mode_id'], [15,16,17,270,271,272])){
 						return response()->json([
 							'success' => false,
 							'errors' => ['Proof upload should be "Yes" for fare detail']
@@ -2479,7 +2480,7 @@ class Trip extends Model {
 						->where('lodgings.attachment_status', 1)
 						->where('lodgings.stay_type_id', 3340) //LODGE STAY
 						->where('ncities.guest_house_status',1)
-						->pluck('ncities.city_id');
+						->pluck('ncities.id');
 					if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
 						$validations['guest_house_approval_document'] = 'required';
             		}

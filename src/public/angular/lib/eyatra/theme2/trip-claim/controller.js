@@ -300,13 +300,18 @@ app.component('eyatraTripClaimForm', {
                         custom_city_show = true;
                     }
 
-                    if(visit.booking_method_id == 3040 && self.is_grade_leader == true){
-                        //SELF AND LEADER GRADE
-                       visit.attachment_status = 'Yes'; 
-                    }
+                    // if(visit.booking_method_id == 3040 && self.is_grade_leader == true){
+                    //     //SELF AND LEADER GRADE
+                    //    visit.attachment_status = 'Yes'; 
+                    // }
 
                     if(self.trip && !self.trip.cliam && visit.booking_method_id == 3042){
                         //AGENT
+                       visit.attachment_status = 'Yes'; 
+                    }
+
+                    if(self.trip && !self.trip.cliam && visit.booking_method_id == 3040){
+                        //SELF
                        visit.attachment_status = 'Yes'; 
                     }
                 });
