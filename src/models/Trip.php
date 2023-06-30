@@ -68,10 +68,10 @@ class Trip extends Model {
 	}
 
 	public function setStartDateAttribute($date) {
-		return $this->attributes['start_date'] = empty($date)?date('Y-m-d'): date('Y-m-d', strtotime($date));
+		return $this->attributes['start_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
 	}
 	public function setEndDateAttribute($date) {
-		return $this->attributes['end_date'] = empty($date)?date('Y-m-d'): date('Y-m-d', strtotime($date));
+		return $this->attributes['end_date'] = empty($date) ? date('Y-m-d') : date('Y-m-d', strtotime($date));
 
 	}
 	public function getCreatedAtAttribute($value) {
@@ -256,7 +256,7 @@ class Trip extends Model {
 
 			DB::beginTransaction();
 			if (!$request->id) {
-				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id)?Auth::user()->entity->outlet_id: null;
+				$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
 				if (!$outlet_id) {
 					return response()->json(['success' => false, 'errors' => 'Outlet not found!']);
 				}
@@ -333,9 +333,22 @@ class Trip extends Model {
 
 				//Check Visits booking status pending or booked.If Pending means remove
 				$visit = Visit::where('trip_id', $trip->id)->where('booking_status_id', 3060)->forceDelete();
-
+				$booking_methods = ['Self','Agent'];
 				foreach ($request->visits as $key => $visit_data) {
 					//dump($visit_data);
+					if (empty($visit_data['booking_method_name'])) {
+						return response()->json([
+							'success' => false,
+							'errors' => "Booking method preference is required.",
+						]);
+					}
+
+					if(!in_array($visit_data['booking_method_name'], $booking_methods)){
+						return response()->json([
+							'success' => false,
+							'errors' => "Invalid booking method preference.",
+						]);
+					}
 
 					if (isset($visit_data['booking_method_name']) && $visit_data['booking_method_name'] == 'Agent' && $enable_agent_booking_preference == 'No') {
 						return response()->json([
@@ -421,7 +434,7 @@ class Trip extends Model {
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
-					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self'?NULL: $visit_data['prefered_departure_time']?date('H:i:s', strtotime($visit_data['prefered_departure_time'])): NULL;
+					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
 					if ($visit->booking_method_id == 3040) {
 						// $visit->self_booking_approval = 1;
 						if (isset($visit_data['self_booking_approval'])) {
@@ -1156,10 +1169,12 @@ class Trip extends Model {
 		$visit = Visit::where('trip_id', $trip_id)->where('booking_method_id', '=', 3040)->update(['booking_status_id' => 3062]);
 
 		//TRIP CANCEL NOTIFICATION TO AGENT
+		$trip_cancel_agent_notify_required = Config::where('id', 3984)->first()->name;
 		$agentBookVisitIds = Visit::where('trip_id', $trip->id)
 			->where('booking_method_id', 3042) //AGENT
 			->pluck('id');
-		if (!empty($agentBookVisitIds)) {
+		// if (!empty($agentBookVisitIds)) {
+		if (!empty($agentBookVisitIds) && $trip_cancel_agent_notify_required == "Yes") {
 			sendEmailNotification($trip, $notification_type = 'Trip Cancel', $trip_type = "Outstation Trip", $agentBookVisitIds);
 		}
 		return response()->json(['success' => true]);
@@ -1234,7 +1249,9 @@ class Trip extends Model {
 				$activity_log = ActivityLog::saveLog($activity);
 
 				//VISIT CANCEL NOTIFICATION TO AGENT
-				if ($visit && $visit->booking_method_id == 3042) {
+				$visit_cancel_agent_notify_required = Config::where('id', 3985)->first()->name;
+				// if ($visit && $visit->booking_method_id == 3042) {
+				if ($visit && $visit->booking_method_id == 3042 && $visit_cancel_agent_notify_required == 'Yes') {
 					$tripData = Trip::find($visit->trip_id);
 					sendEmailNotification($tripData, $notification_type = 'Visit Cancel', $trip_type = "Outstation Trip", [$visit->id]);
 				}
@@ -1493,7 +1510,7 @@ class Trip extends Model {
 			->where('users.user_type_id', 3121)->first();
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
-		$data['travel_cities'] = !empty($travel_cities)?trim(implode(', ', $travel_cities)): '--';
+		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 		// $start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		// $end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
 		// $days = $trip->visits()->select(DB::raw('DATEDIFF(MAX(visits.departure_date),MIN(visits.departure_date))+1 as days'))->first();
@@ -1522,7 +1539,7 @@ class Trip extends Model {
 		$trip->days = $no_of_days ? $no_of_days : 0;
 
 		//DONT REVERT - ABDUL
-		$trip->cities = $data['cities'] = count($travel_cities) > 0?trim(implode(', ', $travel_cities)): '--';
+		$trip->cities = $data['cities'] = count($travel_cities) > 0 ? trim(implode(', ', $travel_cities)) : '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 		// }
 		if (!empty($to_cities)) {
@@ -1970,7 +1987,7 @@ class Trip extends Model {
 		// $total_amount = $transport_total_amount + $transport_total_tax + $lodging_total_amount + $lodging_total_tax + $boardings_total_amount + $boardings_total_tax + $local_travels_total_amount + $local_travels_total_tax;
 		// $data['total_amount'] = number_format($total_amount, 2, '.', '');
 
-		$data['travel_cities'] = !empty($travel_cities)?trim(implode(', ', $travel_cities)): '--';
+		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
 
 		$data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
@@ -2175,6 +2192,7 @@ class Trip extends Model {
 				$visit_id = Visit::select('id')->where('trip_id', $request->trip_id)->count();
 				$two_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 15)->count();
 				$four_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 16)->count();
+				$visit_proof_upload_value = Config::where('id', 3983)->first()->name;
 
 				$tripData = Trip::find($request->trip_id);
 				if (!empty($tripData->employee->grade_id)) {
@@ -2220,6 +2238,42 @@ class Trip extends Model {
 				}
 
 				foreach ($request->visits as $visit_info) {
+					// //IF AGENT BOOKING VISIT MEANS PROFF UPLOAD SHOULD BE YES
+					// if($agent_booking_visit_proof_upload_value == 'Yes' && $visit_info['booked_by'] == 'Agent' && $visit_info['attachment_status'] == 'No'){
+					// 	return response()->json([
+					// 		'success' => false,
+					// 		'errors' => ['Proof upload should be "Yes" for Agent booking visit']
+					// 	]);
+					// }
+
+					//PROFF UPLOAD SHOULD BE YES VALIDATION
+					// if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No'){
+					// if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($visit_info['travel_mode_id'], [15,16,17,270,271,272])){
+					// 	return response()->json([
+					// 		'success' => false,
+					// 		'errors' => ['Proof upload should be "Yes" for fare detail']
+					// 	]);
+					// }
+
+					if($visit_info['booked_by'] == 'Agent'){
+						//AGENT
+						$agent_visit_travel_mode_id = Visit::where('id', $visit_info['id'])->pluck('travel_mode_id')->first();
+						if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($agent_visit_travel_mode_id, [15,16,17,270,271,272])){
+							return response()->json([
+								'success' => false,
+								'errors' => ['Proof upload should be "Yes" for fare detail']
+							]);
+						}
+					}else{
+						//SELF
+						if($visit_proof_upload_value == 'Yes' && $visit_info['attachment_status'] == 'No' && !in_array($visit_info['travel_mode_id'], [15,16,17,270,271,272])){
+							return response()->json([
+								'success' => false,
+								'errors' => ['Proof upload should be "Yes" for fare detail']
+							]);
+						}
+					}
+
 					if (isset($visit_info['travel_mode_id']) && ($visit_info['travel_mode_id'] == 15 || $visit_info['travel_mode_id'] == 16)) {
 						if ($visit_info['travel_mode_id'] == 15) {
 							//TWO WHEELER
@@ -2351,13 +2405,19 @@ class Trip extends Model {
 				// if (count($errors) > 0) return response()->json(['success' => false, 'errors' => $errors]);
 				// // Throwing an error if details added with 0 value
 
+				// $is_fare_doc_required_for_visit = Config::where('id', 3982)->first()->name;
+
 				$error_messages = [
+					// 'agent_book_visit_fare_detail_doc.required' => 'Agent option selected for ticket booking please attach the ticket selecting the "fare detail" option as attachment.',
+					'fare_detail_document_validate.required' => 'Please attach the ticket selecting the "Fare Detail(Agent Ticket)" option for all agent booking fare detail.',
+					'self_booking_document_validate.required' => 'Please attach the ticket selecting the "Self Booking Attachments" option for all the self booking fare detail.',
 					'fare_detail_doc.required' => 'Fare detail document is required',
 					'lodging_doc.required' => 'Lodging document is required',
 					'boarding_doc.required' => 'Boarding document is required',
 					'other_doc.required' => 'Others document is required',
 					'self_booking_doc.required' => 'Self Booking Approval Email is required',
 					'toll_fee_doc.required' => 'Toll fee document is required',
+					'guest_house_approval_document.required' => 'Guest house approval document is required',
 				];
 				$validations = [];
 				$attachement_types = Attachment::where('attachment_type_id', 3200)
@@ -2366,10 +2426,92 @@ class Trip extends Model {
 					->toArray();
 				if (!in_array(3750, $attachement_types)) {
 					// All Type
+
+					// if($is_fare_doc_required_for_agent_booking_visit == 'Yes'){
+					// 	//CHECK FARE DOCUMENT FOR AGENT VISIT
+					// 	$agent_booking_visit_count = Visit::where('visits.trip_id', $trip->id)
+					// 		->where('visits.attachment_status', 1)
+					// 		->where('visits.booking_method_id', 3042) //AGENT
+					// 		->count();
+					// 	if ($agent_booking_visit_count > 0 && !in_array(3751, $attachement_types)) {
+					// 		// Fare Detail Type
+					// 		$validations['agent_book_visit_fare_detail_doc'] = 'required';
+					// 	}
+					// }
+
+					//FARE DETAILS DOCUMENT VALIDATION
+					// if($is_fare_doc_required_for_visit == 'Yes'){
+					// 	$fare_detail_count = Visit::where('visits.trip_id', $trip->id)
+					// 		->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
+					// 		->where('visits.attachment_status', 1)
+					// 		->count();
+					// 	if ($fare_detail_count > 0) {
+					// 		if(!in_array(3751, $attachement_types)){
+					// 			$validations['fare_detail_document_validate'] = 'required';
+					// 		}else{
+					// 			$fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
+					// 				->where('entity_id', $trip->id)
+					// 				->where('attachment_of_id', 3751) //FARE DETAIL
+					// 				->count();
+					// 			if($fare_detail_document_count < $fare_detail_count){
+					// 				$validations['fare_detail_document_validate'] = 'required';
+					// 			}
+					// 		}
+					// 	}
+					// }
+
+					$self_fare_detail_count = Visit::where('visits.trip_id', $trip->id)
+						->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
+						->where('visits.booking_method_id', 3040) //SELF
+						->where('visits.attachment_status', 1)
+						->count();
+					if ($self_fare_detail_count > 0) {
+						if(!in_array(3755, $attachement_types)){
+							$validations['self_booking_document_validate'] = 'required';
+						}else{
+							$self_fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
+								->where('entity_id', $trip->id)
+								->where('attachment_of_id', 3755) //SELF BOOKING ATTACHMENT
+								->count();
+							if($self_fare_detail_document_count < $self_fare_detail_count){
+								$validations['self_booking_document_validate'] = 'required';
+							}
+						}
+					}
+
+					$agent_fare_detail_count = Visit::where('visits.trip_id', $trip->id)
+						->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
+						->where('visits.booking_method_id', 3042) //AGENT
+						->where('visits.attachment_status', 1)
+						->count();
+					if ($agent_fare_detail_count > 0) {
+						if(!in_array(3751, $attachement_types)){
+							$validations['fare_detail_document_validate'] = 'required';
+						}else{
+							$agent_fare_detail_document_count = Attachment::where('attachment_type_id', 3200)
+								->where('entity_id', $trip->id)
+								->where('attachment_of_id', 3751) //FARE DETAIL
+								->count();
+							if($agent_fare_detail_document_count < $agent_fare_detail_count){
+								$validations['fare_detail_document_validate'] = 'required';
+							}
+						}
+					}
+
+					$lodging_guest_house_cities = Lodging::join('ncities','ncities.id','lodgings.city_id')
+						->where('lodgings.trip_id', $trip->id)
+						->where('lodgings.attachment_status', 1)
+						->where('lodgings.stay_type_id', 3340) //LODGE STAY
+						->where('ncities.guest_house_status',1)
+						->pluck('ncities.id');
+					if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+						$validations['guest_house_approval_document'] = 'required';
+            		}
+
 					$visit_count = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type
-						$validations['fare_detail_doc'] = 'required';
+						// $validations['fare_detail_doc'] = 'required';
 					}
 
 					// $lodging_count = Lodging::where('trip_id', $trip->id)->where('attachment_status', 1)->count();
@@ -2399,7 +2541,7 @@ class Trip extends Model {
 						->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
-						$validations['self_booking_doc'] = 'required';
+						// $validations['self_booking_doc'] = 'required';
 					}
 					// Toll fee doc required
 					$tollFeeLocalTravelCount = LocalTravel::where('trip_id', $request->trip_id)
@@ -2468,7 +2610,7 @@ class Trip extends Model {
 			if (!$employee_claim->number) {
 				$outlet_id = $trip->outlet_id;
 				if (!$outlet_id) {
-					$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id)?Auth::user()->entity->outlet_id: null;
+					$outlet_id = (isset(Auth::user()->entity->outlet_id) && Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
 					if (!$outlet_id) {
 						return response()->json(['success' => false, 'errors' => ['Outlet not found!']]);
 					}
@@ -2585,7 +2727,7 @@ class Trip extends Model {
 							$visit_booking->tax_percentage = $visit_data['tax_percentage'];
 							$visit_booking->invoice_number = $visit_data['invoice_number'];
 							$visit_booking->invoice_amount = $visit_data['invoice_amount'];
-							$visit_booking->invoice_date = $visit_data['invoice_date']?date('Y-m-d', strtotime($visit_data['invoice_date'])): null;
+							$visit_booking->invoice_date = $visit_data['invoice_date'] ? date('Y-m-d', strtotime($visit_data['invoice_date'])) : null;
 							if (!empty($visit_data['round_off']) && ($visit_data['round_off'] > 1 || $visit_data['round_off'] < -1)) {
 								return response()->json(['success' => false, 'errors' => ['Round off amount limit is +1 Or -1']]);
 							} else {
@@ -2809,6 +2951,20 @@ class Trip extends Model {
 						//dd($lodging_data['lodge_name']);
 						// if ($lodging_data['amount'] > 0 && $lodging_data['stay_type_id'] == 3340) {
 						// if ($lodging_data['amount'] > 1000 && $lodging_data['stay_type_id'] == 3340) {
+						$lodge_check_in_date = $lodging_data['check_in_date'];
+						$lodge_check_in_time = $lodging_data['check_in_time'];
+						$lodge_checkout_date = $lodging_data['checkout_date'];
+						$lodge_checkout_time = $lodging_data['checkout_time'];
+						$lodging_check_in_date_time = date('Y-m-d H:i:s', strtotime("$lodge_check_in_date $lodge_check_in_time"));
+						$lodging_checkout_date_time = date('Y-m-d H:i:s', strtotime("$lodge_checkout_date $lodge_checkout_time"));
+						if($lodging_checkout_date_time <= $lodging_check_in_date_time){
+							return response()->json([
+								'success' => false,
+								'errors' => ['Lodging check out date time should be greater than the check in date time'],
+							]);
+						}
+
+
 						if ($lodging_data['stayed_days'] && $lodging_data['stayed_days'] > 0) {
 							$lodge_per_day_amt = $lodging_data['amount'] / $lodging_data['stayed_days'];
 						} else {
@@ -3678,7 +3834,7 @@ class Trip extends Model {
 					}
 					// if ($transport_count > 0 && $transport_attachment_count == 0) {
 					if ($transport_count > 0 && $transport_attachment_count == 0 && $is_grade_leader == false) {
-						$employee_claim->is_deviation = 1;
+						// $employee_claim->is_deviation = 1;
 					}
 				}
 
@@ -3717,6 +3873,18 @@ class Trip extends Model {
 				$item_images = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
 				Storage::makeDirectory($item_images, 0777);
 				if ($request->hasfile('google_attachments')) {
+					$validator = Validator::make($request->all(), [
+                        'google_attachments.*' => [
+                            'mimes:jpeg,jpg,pdf,png',
+                        ],
+                    ]);
+                    if ($validator->fails()) {
+                        return response()->json([
+                            'success' => false,
+                            'error' => 'Validation Error',
+                            'errors' => ['The attachement must be a jpeg, jpg, pdf, or png file.'],
+                        ]);
+                    }
 
 					foreach ($request->file('google_attachments') as $key => $attachement) {
 						$value = rand(1, 100);
@@ -3771,7 +3939,7 @@ class Trip extends Model {
 						$employee_claim->amount_to_pay = 1;
 					}
 				} else {
-					$employee_claim->balance_amount = round($total_amount)?round($total_amount): 0;
+					$employee_claim->balance_amount = round($total_amount) ? round($total_amount) : 0;
 					$employee_claim->amount_to_pay = 1;
 				}
 
@@ -3856,7 +4024,7 @@ class Trip extends Model {
 			$pending_count += count($trip_attachment->pending_google_attachments);
 			$pending_count += count($trip_attachment->pendingTripAttachments);
 		}
-		$approval_status = ($pending_count == 0)?false: true;
+		$approval_status = ($pending_count == 0) ? false : true;
 		return $approval_status;
 	}
 	// Checking attachment status by Karthick T on 20-01-2022
@@ -4227,7 +4395,9 @@ request is not desired, then those may be rejected.';
 		$exist_attachment_ids = Attachment::where('attachment_type_id', 3200)
 			->where('entity_id', $trip_id)
 		// ->where('attachment_of_id', '!=', 3754)
-			->whereNotIn('attachment_of_id', [3754, 3752])
+			// ->whereNotIn('attachment_of_id', [3754, 3752])
+			// ->whereNotIn('attachment_of_id', [3754, 3752, 3751])
+			->whereNotIn('attachment_of_id', [3754, 3752, 3751, 3755])
 			->pluck('attachment_of_id')->toArray();
 		$pending_attachment_lists = Collect(
 			Config::select('id', 'name')

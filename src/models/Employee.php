@@ -6,6 +6,7 @@ use App\HrmsToTravelxEmployeeSyncLog;
 use App\MailConfiguration;
 use App\Mail\TravelexConfigMail;
 use App\User;
+use App\Role;
 use Auth;
 use Carbon\Carbon;
 use Config as databaseConfig;
@@ -20,6 +21,7 @@ use Uitoux\EYatra\Designation;
 use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Sbu;
+use Uitoux\EYatra\Config;
 
 class Employee extends Model {
 	use SoftDeletes;
@@ -339,7 +341,7 @@ class Employee extends Model {
 			->leftjoin('companies as reporting_to_grade_companies', 'reporting_to_grade_companies.id', 'reporting_to_grades.company_id')
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereBetween('employees.created_at', [$fromDateTime, $toDateTime])
-			->whereIn('employees.lob_id', [4, 15]) //DLOB, OESL
+			->whereIn('employees.lob_id', [4, 15, 12]) //DLOB, OESL, DSBU
 			->get();
 
 		if (count($hrmsEmployees) == 0) {
@@ -387,6 +389,8 @@ class Employee extends Model {
 		if (count($hrmsEmployees) > 0) {
 			$employeeSyncedData = [];
 			$employeeErrorReport = [];
+
+			$employeeDefaultRole = Config::where('id', 3975)->first()->name;
 			foreach ($hrmsEmployees as $hrmsEmployee) {
 				DB::beginTransaction();
 				try {
@@ -542,13 +546,18 @@ class Employee extends Model {
 
 								//EMPLOYEE DEPARTMENT
 								$businessId = null;
+								// if ($hrmsEmployee->lob_code == 'DLOB') {
 								if ($hrmsEmployee->lob_code == 'DLOB') {
-									if (strpos($hrmsEmployee->sbu_code, 'honda') !== false) {
+									if (strpos(strtolower($hrmsEmployee->sbu_code), 'honda') !== false) {
 										$businessId = 3; //HONDA
 									} else {
 										$businessId = 1; //DLOB
 									}
-								} else if ($hrmsEmployee->lob_code == 'OESL') {
+								} else if ($hrmsEmployee->lob_code == 'DSBU') {
+									if (strpos(strtolower($hrmsEmployee->sbu_code), 'dist') !== false) {
+										$businessId = 1; //DLOB
+									}
+								}else if ($hrmsEmployee->lob_code == 'OESL') {
 									$businessId = 2; //OESL
 								}
 
@@ -806,6 +815,24 @@ class Employee extends Model {
 							$user->email = $hrmsEmployee->email;
 						}
 						$user->save();
+
+						//USER ROLE MAP
+						$employeeRoleId = Role::where('name' , $employeeDefaultRole)
+							->where('company_id', $employee->company_id)
+							->pluck('id')
+							->first();
+						if($employeeRoleId){
+							$userRoleExist = DB::table('role_user')
+								->where('user_id', $user->id)
+								->where('role_id', $employeeRoleId)
+								->first();
+							if(!$userRoleExist){
+								DB::table('role_user')->insert([
+									'user_id' => $user->id,
+									'role_id' => $employeeRoleId,
+								]);
+							}
+						}
 
 						$employeeAdditionData = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 						$employeeSyncedData[] = self::hrmsToDemsEmployeeData($employee, 'New Addition');
@@ -1069,8 +1096,8 @@ class Employee extends Model {
 				->where('employees.id', $employeeId)
 				->first();
 
-			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
-			if (!in_array($hrmsEmployee->lob_id, [4, 15])) {
+			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL, DSBU
+			if (!in_array($hrmsEmployee->lob_id, [4, 15, 12])) {
 				continue;
 			}
 
@@ -1269,10 +1296,15 @@ class Employee extends Model {
 
 								//EMPLOYEE DEPARTMENT
 								$businessId = null;
+								// if ($employeeUpdateDetail['employee']->lob_code == 'DLOB') {
 								if ($employeeUpdateDetail['employee']->lob_code == 'DLOB') {
-									if (strpos($employeeUpdateDetail['employee']->sbu_code, 'honda') !== false) {
+									if (strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'honda') !== false) {
 										$businessId = 3; //HONDA
 									} else {
+										$businessId = 1; //DLOB
+									}
+								}else if ($employeeUpdateDetail['employee']->lob_code == 'DSBU') {
+									if (strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'dist') !== false) {
 										$businessId = 1; //DLOB
 									}
 								} else if ($employeeUpdateDetail['employee']->lob_code == 'OESL') {
@@ -1514,7 +1546,7 @@ class Employee extends Model {
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereNotNull('employees.deleted_at')
 			->whereBetween('employees.deleted_at', [$fromDateTime, $toDateTime])
-			->whereIn('employees.lob_id', [4, 15]) //DLOB, OESL
+			->whereIn('employees.lob_id', [4, 15, 12]) //DLOB, OESL, DSBU
 			->get();
 
 		if (count($hrmsDeletionEmployees) == 0) {
@@ -1758,7 +1790,7 @@ class Employee extends Model {
 			->leftjoin('companies as reporting_to_companies', 'reporting_to_companies.id', 'reporting_to_employees.company_id')
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereBetween('employees.updated_at', [$fromDateTime, $toDateTime])
-			->whereIn('employees.lob_id', [4, 15]) //DLOB, OESL
+			->whereIn('employees.lob_id', [4, 15, 12]) //DLOB, OESL, DSBU
 			->whereNotNull('employees.reporting_to_id')
 			->get();
 
@@ -2109,14 +2141,15 @@ class Employee extends Model {
 		DB::setDefaultConnection('mysql');
 
 		$employeeSyncedData = [];
+		$employeeDefaultRole = Config::where('id', 3975)->first()->name;
 		DB::beginTransaction();
 		try {
-			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
-			if (!in_array($hrmsEmployee->lob_id, [4, 15])) {
+			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL, DSBU
+			if (!in_array($hrmsEmployee->lob_id, [4, 15, 12])) {
 				return response()->json([
 					'success' => false,
 					'error' => 'Validation Error',
-					'errors' => ['Employee LOB should be DLOB, OESL'],
+					'errors' => ['Employee LOB should be DLOB, OESL, DSBU'],
 				]);
 			}
 
@@ -2298,9 +2331,13 @@ class Employee extends Model {
 						//EMPLOYEE DEPARTMENT
 						$businessId = null;
 						if ($hrmsEmployee->lob_code == 'DLOB') {
-							if (strpos($hrmsEmployee->sbu_code, 'honda') !== false) {
+							if (strpos(strtolower($hrmsEmployee->sbu_code), 'honda') !== false) {
 								$businessId = 3; //HONDA
 							} else {
+								$businessId = 1; //DLOB
+							}
+						} else if ($hrmsEmployee->lob_code == 'DSBU') {
+							if (strpos(strtolower($hrmsEmployee->sbu_code), 'dist') !== false) {
 								$businessId = 1; //DLOB
 							}
 						} else if ($hrmsEmployee->lob_code == 'OESL') {
@@ -2467,6 +2504,24 @@ class Employee extends Model {
 				$user->email = $hrmsEmployee->email;
 			}
 			$user->save();
+
+			//USER ROLE MAP
+			$employeeRoleId = Role::where('name' , $employeeDefaultRole)
+				->where('company_id', $employee->company_id)
+				->pluck('id')
+				->first();
+			if($employeeRoleId){
+				$userRoleExist = DB::table('role_user')
+					->where('user_id', $user->id)
+					->where('role_id', $employeeRoleId)
+					->first();
+				if(!$userRoleExist){
+					DB::table('role_user')->insert([
+						'user_id' => $user->id,
+						'role_id' => $employeeRoleId,
+					]);
+				}
+			}
 
 			$employeeAdditionData = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 
