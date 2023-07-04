@@ -174,6 +174,12 @@ app.component('eyatraTripVerificationForm', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
+        self.page_type = typeof($location.search().type) === 'undefined' ? '' : $location.search().type;
+        if(self.page_type == 1){
+            self.list_page_url = '/trip/approvals';
+        }else{
+            self.list_page_url = '/trip/verifications';
+        }
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -189,7 +195,8 @@ app.component('eyatraTripVerificationForm', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/trip/verifications')
+                // $location.path('/trip/verifications')
+                $location.path(self.list_page_url)
                 $scope.$apply()
                 return;
             }
@@ -307,7 +314,8 @@ app.component('eyatraTripVerificationForm', {
                                 }, 1000);
                                 $('#alert-modal-approve').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/trip/verifications')
+                                    // $location.path('/trip/verifications')
+                                    $location.path(self.list_page_url)
                                     $scope.$apply()
                                 }, 500);
 
@@ -362,7 +370,9 @@ app.component('eyatraTripVerificationForm', {
                                 }, 1000);
                                 $('#alert-modal-reject').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/trip/verifications')
+                                    // $location.path('/trip/verifications')
+                                    $location.path(self.list_page_url)
+                                    
                                     $scope.$apply()
                                 }, 500);
 
