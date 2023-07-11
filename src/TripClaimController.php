@@ -98,7 +98,8 @@ class TripClaimController extends Controller {
 
 				// if ($trip->status_id == 3023 || $trip->status_id == 3024 || $trip->status_id == 3033) {
 				if (Entrust::can('claim-edit') && ($trip->status_id == 3024 || $trip->status_id == 3033)) {
-					$action .= ' <a href="#!/trip/claim/edit/' . $trip->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+					// $action .= ' <a href="#!/trip/claim/edit/' . $trip->id . '"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
+					$action .= ' <a href="#!/trip/claim/edit/' . $trip->id . '/2"><img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '"></a> ';
 				}
 
 				$action .= ' <a href="#!/trip/claim/view/' . $trip->id . '"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
@@ -504,6 +505,21 @@ class TripClaimController extends Controller {
 				],
 			]);
 		}
+	}
+
+	public function eyatraTripClaimGetData($trip_id) {
+		$data = [];
+		$data['trip'] = Trip::with(['cliam'])->find($trip_id);
+		if (!$data['trip']) {
+			return response()->json([
+				'success' => false,
+				'errors' => ["Trip details not found"],
+			]);
+		}
+		return response()->json([
+			'success' => true,
+			'data' => $data,
+		]);
 	}
 
 }

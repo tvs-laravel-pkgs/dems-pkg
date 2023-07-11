@@ -208,7 +208,7 @@ app.component('eyatraTripClaimForm', {
         self.eyatra_trip_claim_boarding_attachment_url = eyatra_trip_claim_boarding_attachment_url;
         self.eyatra_trip_claim_local_travel_attachment_url = eyatra_trip_claim_local_travel_attachment_url;
         self.enable_switch_tab = true;
-
+        self.form_type_id = typeof($routeParams.form_type_id) == 'undefined' ? null : $routeParams.form_type_id;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -262,6 +262,7 @@ app.component('eyatraTripClaimForm', {
             self.state_code = response.data.state_code;
             self.operating_states = response.data.operating_states;
             self.sbu_lists = response.data.sbu_lists;
+            self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
             self.attachment_type_lists = response.data.attachment_type_lists;
             self.attachment_type_lists = response.data.attachment_type_lists.filter(function (el) {
               return el.id != 3750; //ALL
@@ -3825,7 +3826,7 @@ app.component('eyatraTripClaimForm', {
         });
         $(document).on('click', '#modal_attachment_submit', function() {
             trip_attachment_save = 1;
-            $("#modal_attachment_submit").prop("disabled", true);
+            // $("#modal_attachment_submit").prop("disabled", true);
             $('#claim_attachment_expense_form').submit();
         });
 
@@ -4213,6 +4214,55 @@ app.component('eyatraTripClaimForm', {
                         });
                 }
             },
+        });
+
+        $(document).on('click', '.claim_submit_button', function() {
+            if(self.trip.advance_received > 0){
+                $.ajax({
+                    url: get_trip_claim_data_url + '/' + self.trip.id,
+                    method: "GET",
+                })
+                .done(function(res) {
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        let trip_detail = res.data.trip;
+                        let balance_amount = parseFloat(trip_detail.cliam.balance_amount);
+                        if(trip_detail.cliam.amount_to_pay == 2){
+                            $('#trip-claim-modal-justify-one').modal('show');
+                            if(self.form_type_id == 2){
+                                //EDIT PAGE
+                                if(!self.advance_balance_return_payment_mode_id){
+                                    self.advance_balance_return_payment_mode_id = trip_detail.cliam.employee_return_payment_mode_id;
+                                }
+                            }else{
+                                if(!self.advance_balance_return_payment_mode_id){
+                                    if(balance_amount < 1000){
+                                        self.advance_balance_return_payment_mode_id = 4010; //CASH
+                                    }else{
+                                        self.advance_balance_return_payment_mode_id = 4011; //Bank Transfer
+                                    }
+                                }
+                            }
+                            self.show_employee_return_payment_mode_section = true;
+                            $scope.$apply();
+                        }else{
+                            $('#trip-claim-modal-justify-one').modal('show');
+                            self.show_employee_return_payment_mode_section = false;
+                        }
+                    }
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+            }else{
+                $('#trip-claim-modal-justify-one').modal('show');
+                self.show_employee_return_payment_mode_section = false;
+            }
         });
     }
 });

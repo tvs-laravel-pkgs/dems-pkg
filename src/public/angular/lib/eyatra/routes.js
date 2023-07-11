@@ -410,7 +410,7 @@ app.config(['$routeProvider', function($routeProvider) {
         template: '<eyatra-trip-claim-form></eyatra-trip-claim-form>',
         title: 'Trip Claim Form',
     }).
-    when('/trip/claim/edit/:trip_id', {
+    when('/trip/claim/edit/:trip_id/:form_type_id?', {
         template: '<eyatra-trip-claim-form></eyatra-trip-claim-form>',
         title: 'Edit Trip Claim',
     }).

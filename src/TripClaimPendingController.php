@@ -92,7 +92,7 @@ class TripClaimPendingController extends Controller {
 				if ($trip->status_id == 3023) {
 
 					return '
-				<a href="#!/trip/claim/edit/' . $trip->id . '">
+				<a href="#!/trip/claim/edit/' . $trip->id . '/2">
 					<img src="' . $img1 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '">
 				</a>
 				<a href="#!/trip/claim/view/' . $trip->id . '">
