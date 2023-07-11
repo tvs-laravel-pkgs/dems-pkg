@@ -4241,10 +4241,14 @@ app.component('eyatraTripClaimForm', {
                                 }
                             }else{
                                 if(!self.advance_balance_return_payment_mode_id){
-                                    if(balance_amount < 1000){
-                                        self.advance_balance_return_payment_mode_id = 4010; //CASH
+                                    if(trip_detail.cliam.employee_return_payment_mode_id){
+                                        self.advance_balance_return_payment_mode_id = trip_detail.cliam.employee_return_payment_mode_id;
                                     }else{
-                                        self.advance_balance_return_payment_mode_id = 4011; //Bank Transfer
+                                        if(balance_amount < 1000){
+                                            self.advance_balance_return_payment_mode_id = 4010; //CASH
+                                        }else{
+                                            self.advance_balance_return_payment_mode_id = 4011; //Bank Transfer
+                                        }   
                                     }
                                 }
                             }
