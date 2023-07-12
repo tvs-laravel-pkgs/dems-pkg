@@ -1775,7 +1775,7 @@ class Trip extends Model {
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3034, 3030, 3026, 3025, 3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);
-
+		$data['employee_return_payment_mode_list'] = collect(Config::select('name', 'id')->where('config_type_id', 569)->whereNotIn('id',[4012])->orderBy('id', 'asc')->get());
 		$data['success'] = true;
 		//dd($data);
 		return response()->json($data);

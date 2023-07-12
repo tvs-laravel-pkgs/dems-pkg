@@ -41,7 +41,9 @@ class TripClaimController extends Controller {
 				'purpose.name as purpose',
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
-				'status.name as status'
+				'status.name as status',
+				'claims.employee_return_payment_mode_id',
+				'claims.is_employee_return_payment_detail_updated'
 			)
 			->where('e.company_id', Auth::user()->company_id)
 
@@ -103,6 +105,10 @@ class TripClaimController extends Controller {
 				}
 
 				$action .= ' <a href="#!/trip/claim/view/' . $trip->id . '"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
+
+				if(($trip->employee_return_payment_mode_id == 4010 || $trip->employee_return_payment_mode_id == 4011) && $trip->status_id == 3026 && $trip->is_employee_return_payment_detail_updated == 0){
+					$action .= '<button class="btn btn-primary btn-sm" onclick="angular.element(this).scope().employeeReturnPaymentUpdateHandler(' . $trip->id . ')" title="Update Employee Return Payment Detail">Update</button>';
+				}
 				return $action;
 			})
 			->make(true);
@@ -509,7 +515,7 @@ class TripClaimController extends Controller {
 
 	public function eyatraTripClaimGetData($trip_id) {
 		$data = [];
-		$data['trip'] = Trip::with(['cliam'])->find($trip_id);
+		$data['trip'] = Trip::with(['cliam','cliam.employeeReturnPaymentMode'])->find($trip_id);
 		if (!$data['trip']) {
 			return response()->json([
 				'success' => false,
@@ -521,5 +527,63 @@ class TripClaimController extends Controller {
 			'data' => $data,
 		]);
 	}
+
+	public function employeeReturnPaymentDetailSave(Request $request){
+        // dd($request->all());
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make($request->all(), [
+                'claim_id' => [
+                    'required',
+                    'exists:ey_employee_claims,id',
+                ],
+                'employee_return_payment_mode_id' => [
+                    'required',
+                    'exists:configs,id',
+                ],
+                'employee_return_payment_bank_id' => [
+                    'nullable',
+                    'exists:configs,id',
+                ],
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Validation Error',
+                    'errors' => $validator->errors()->all(),
+                ]);
+            }
+
+            DB::table('ey_employee_claims')->where('id', $request->claim_id)->update([
+            	'employee_return_payment_mode_id' => $request->employee_return_payment_mode_id,
+            	'is_employee_return_payment_detail_updated' => 1,
+            	'updated_by' => Auth::user()->id,
+            ]);
+            
+            if($request->employee_return_payment_mode_id != 4010){
+            	//NOT CASH
+            	DB::table('ey_employee_claims')->where('id', $request->claim_id)->update([
+	            	'employee_return_payment_reference_no' => $request->employee_return_payment_reference_no,
+	            	'employee_return_payment_date' => date('Y-m-d', strtotime((str_replace('/', '-', $request->employee_return_payment_date)))),
+	            	'employee_return_payment_bank_id' => $request->employee_return_payment_bank_id,
+	            ]);
+            }
+
+            $message = 'Details updated successfully!';
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+        }
+    }
 
 }

@@ -10,6 +10,7 @@ app.component('eyatraTripClaimList', {
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
+            self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
             $rootScope.loading = false;
         });
 
@@ -166,6 +167,68 @@ app.component('eyatraTripClaimList', {
                 }
             });
         }
+
+        $scope.employeeReturnPaymentUpdateHandler = function(trip_id) {
+            $.ajax({
+                url: get_trip_claim_data_url + '/' + trip_id,
+                method: "GET",
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    custom_noty('error', errors);
+                } else {
+                    self.claim_detail = res.data.trip.cliam;
+                    $("#employee-return-payment-detail-modal").modal('show');
+                }
+                $scope.$apply();
+            })
+            .fail(function(xhr) {
+                console.log(xhr);
+            });
+        }
+
+        $(document).on('click', '#employee-return-payment-detail-save-btn', function() {
+            var form_id = '#employee-return-payment-detail-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+                submitHandler: function(form) {
+                    let formData = new FormData($(form_id)[0]);
+                    $('#employee-return-payment-detail-save-btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['tripClaimEmployeeReturnPaymentDetailSave'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            $('#employee-return-payment-detail-save-btn').button('reset');
+                            if (!res.success) {
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                custom_noty('success', res.message);
+                                $('#employee-return-payment-detail-modal').modal('hide');
+                                setTimeout(function() {
+                                    dataTable.draw();
+                                }, 500);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#employee-return-payment-detail-save-btn').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+
         $rootScope.loading = false;
 
     }
@@ -4217,6 +4280,8 @@ app.component('eyatraTripClaimForm', {
         });
 
         $(document).on('click', '.claim_submit_button', function() {
+            console.log("self.trip.advance_received")
+            console.log(self.trip.advance_received)
             if(self.trip.advance_received > 0){
                 $.ajax({
                     url: get_trip_claim_data_url + '/' + self.trip.id,
@@ -4235,11 +4300,13 @@ app.component('eyatraTripClaimForm', {
                         if(trip_detail.cliam.amount_to_pay == 2){
                             $('#trip-claim-modal-justify-one').modal('show');
                             if(self.form_type_id == 2){
+                                console.log("edit page")
                                 //EDIT PAGE
                                 if(!self.advance_balance_return_payment_mode_id){
                                     self.advance_balance_return_payment_mode_id = trip_detail.cliam.employee_return_payment_mode_id;
                                 }
                             }else{
+                                console.log("add page")
                                 if(!self.advance_balance_return_payment_mode_id){
                                     if(trip_detail.cliam.employee_return_payment_mode_id){
                                         self.advance_balance_return_payment_mode_id = trip_detail.cliam.employee_return_payment_mode_id;

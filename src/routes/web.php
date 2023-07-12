@@ -414,6 +414,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::post('eyatra/trip/claim/attachment/update', 'Uitoux\EYatra\TripClaimVerificationOneController@updateAttachmentStatus')->name('updateAttachmentStatus');
 		Route::post('eyatra/trip/claim/lodging/days', 'Uitoux\EYatra\TripClaimController@calculateLodgingDays')->name('calculateLodgingDays');
 		Route::get('eyatra/trip/claim/get-data/{trip_id}', 'Uitoux\EYatra\TripClaimController@eyatraTripClaimGetData')->name('eyatraTripClaimGetData');
+		Route::post('trip-claim/employee-return-payment/detail-save', 'Uitoux\EYatra\TripClaimController@employeeReturnPaymentDetailSave')->name('tripClaimEmployeeReturnPaymentDetailSave');
 
 		//TRIP APPROVALS
 		Route::get('eyatra/trip/approval/get-list', 'Uitoux\EYatra\TripApprovalController@getList')->name('getEyatraTripApprovalList');
