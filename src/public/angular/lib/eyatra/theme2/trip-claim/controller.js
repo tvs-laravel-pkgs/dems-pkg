@@ -11,6 +11,7 @@ app.component('eyatraTripClaimList', {
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
             self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
+            self.employee_return_payment_bank_list = response.data.employee_return_payment_bank_list;
             $rootScope.loading = false;
         });
 
