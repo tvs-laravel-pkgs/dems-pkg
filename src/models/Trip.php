@@ -1879,6 +1879,8 @@ class Trip extends Model {
 			// 'local_travel_attachments',
 			'cliam.sbu',
 			'cliam.sbu.lob',
+			'cliam.employeeReturnPaymentMode',
+			'cliam.employeeReturnPaymentBank',
 			'tripAttachments',
 			'tripAttachments.attachmentName',
 

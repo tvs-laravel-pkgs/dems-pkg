@@ -219,7 +219,7 @@ app.component('eyatraTripClaimList', {
                                 $('#employee-return-payment-detail-modal').modal('hide');
                                 setTimeout(function() {
                                     dataTable.draw();
-                                }, 500);
+                                }, 700);
                             }
                         })
                         .fail(function(xhr) {
@@ -4280,7 +4280,7 @@ app.component('eyatraTripClaimForm', {
             },
         });
 
-        $(document).on('click', '.claim_submit_button', function() {
+        $scope.claimSubmitHandler = function(){
             console.log("self.trip.advance_received")
             console.log(self.trip.advance_received)
             if(self.trip.advance_received > 0){
@@ -4335,7 +4335,7 @@ app.component('eyatraTripClaimForm', {
                 $('#trip-claim-modal-justify-one').modal('show');
                 self.show_employee_return_payment_mode_section = false;
             }
-        });
+        }
     }
 });
 //------------------------------------------------------------------------------------------------------------------------

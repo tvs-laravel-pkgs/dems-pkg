@@ -106,7 +106,8 @@ class TripClaimController extends Controller {
 
 				$action .= ' <a href="#!/trip/claim/view/' . $trip->id . '"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
 
-				if(($trip->employee_return_payment_mode_id == 4010 || $trip->employee_return_payment_mode_id == 4011) && $trip->status_id == 3026 && $trip->is_employee_return_payment_detail_updated == 0){
+				// if(($trip->employee_return_payment_mode_id == 4010 || $trip->employee_return_payment_mode_id == 4011) && $trip->status_id == 3026 && $trip->is_employee_return_payment_detail_updated == 0){
+				if(($trip->employee_return_payment_mode_id == 4010 || $trip->employee_return_payment_mode_id == 4011) && $trip->status_id == 3026){
 					$action .= '<button class="btn btn-primary btn-sm" onclick="angular.element(this).scope().employeeReturnPaymentUpdateHandler(' . $trip->id . ')" title="Update Employee Return Payment Detail">Update</button>';
 				}
 				return $action;
@@ -515,7 +516,11 @@ class TripClaimController extends Controller {
 
 	public function eyatraTripClaimGetData($trip_id) {
 		$data = [];
-		$data['trip'] = Trip::with(['cliam','cliam.employeeReturnPaymentMode'])->find($trip_id);
+		$data['trip'] = Trip::with([
+			'cliam',
+			'cliam.employeeReturnPaymentMode',
+			'cliam.employeeReturnPaymentBank'
+		])->find($trip_id);
 		if (!$data['trip']) {
 			return response()->json([
 				'success' => false,
