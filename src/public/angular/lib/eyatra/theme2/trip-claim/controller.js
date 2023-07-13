@@ -3901,6 +3901,19 @@ app.component('eyatraTripClaimForm', {
             // }, 1000);
         });
         $(document).on('click', '#modal_attachment_submit', function() {
+            if(!$("#is_justify_my_trip").is(":checked")){
+                custom_noty('error', "Kindly justify the trip");
+                return;
+            }
+            if(!$("#debit_to_business_unit").val()){
+                custom_noty('error', "Kindly select the debit to business unit");
+                return;
+            }
+            if(self.show_employee_return_payment_mode_section == true && !self.advance_balance_return_payment_mode_id){
+                custom_noty('error', "Kindly select the employee return payment mode");
+                return;
+            }
+
             trip_attachment_save = 1;
             // $("#modal_attachment_submit").prop("disabled", true);
             $('#claim_attachment_expense_form').submit();
@@ -4337,6 +4350,10 @@ app.component('eyatraTripClaimForm', {
                             $('#trip-claim-modal-justify-one').modal('show');
                             self.show_employee_return_payment_mode_section = false;
                         }
+
+                        setTimeout(function() {
+                            $scope.$apply();
+                        }, 400);
                     }
                 })
                 .fail(function(xhr) {
@@ -4345,8 +4362,10 @@ app.component('eyatraTripClaimForm', {
             }else{
                 $('#trip-claim-modal-justify-one').modal('show');
                 self.show_employee_return_payment_mode_section = false;
+                setTimeout(function() {
+                    $scope.$apply();
+                }, 400);
             }
-            $scope.$apply();
         }
     }
 });
