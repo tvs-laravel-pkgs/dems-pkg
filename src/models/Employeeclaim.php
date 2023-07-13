@@ -21,4 +21,12 @@ class EmployeeClaim extends Model {
 	public function sbu() {
 		return $this->belongsTo('Uitoux\EYatra\Sbu', 'sbu_id');
 	}
+
+	public function employeeReturnPaymentMode() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'employee_return_payment_mode_id');
+	}
+
+	public function employeeReturnPaymentBank() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'employee_return_payment_bank_id');
+	}
 }

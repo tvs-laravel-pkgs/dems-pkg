@@ -1741,6 +1741,7 @@ class Trip extends Model {
 		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
 			->where('operating_states.company_id', Auth::user()->company_id)
 			->pluck('nstates.gstin_state_code');
+		$data['employee_return_payment_mode_list'] = collect(Config::select('name', 'id')->where('config_type_id', 569)->orderBy('id', 'asc')->get());
 
 		return response()->json($data);
 	}
@@ -1774,7 +1775,8 @@ class Trip extends Model {
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3034, 3030, 3026, 3025, 3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);
-
+		$data['employee_return_payment_mode_list'] = collect(Config::select('name', 'id')->where('config_type_id', 569)->whereNotIn('id',[4012])->orderBy('id', 'asc')->get());
+		$data['employee_return_payment_bank_list'] = collect(Config::select('name', 'id')->where('config_type_id', 570)->orderBy('id', 'asc')->get());
 		$data['success'] = true;
 		//dd($data);
 		return response()->json($data);
@@ -1877,6 +1879,8 @@ class Trip extends Model {
 			// 'local_travel_attachments',
 			'cliam.sbu',
 			'cliam.sbu.lob',
+			'cliam.employeeReturnPaymentMode',
+			'cliam.employeeReturnPaymentBank',
 			'tripAttachments',
 			'tripAttachments.attachmentName',
 
@@ -3939,6 +3943,9 @@ class Trip extends Model {
 					$employee_claim->amount_to_pay = 1;
 				}
 
+				if(isset($request->employee_return_payment_mode_id)){
+					$employee_claim->employee_return_payment_mode_id = $request->employee_return_payment_mode_id;
+				}
 				$employee_claim->save();
 
 				$employee = Employee::where('id', $trip->employee_id)->first();

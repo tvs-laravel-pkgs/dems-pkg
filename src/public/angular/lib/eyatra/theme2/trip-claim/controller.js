@@ -10,6 +10,13 @@ app.component('eyatraTripClaimList', {
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
+            self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
+            self.employee_return_payment_bank_list = response.data.employee_return_payment_bank_list;
+
+            $(".employee_return_payment_date_picker").datepicker({
+                startDate: '-2d',
+                autoclose: true,
+            });
             $rootScope.loading = false;
         });
 
@@ -166,6 +173,75 @@ app.component('eyatraTripClaimList', {
                 }
             });
         }
+
+        $scope.employeeReturnPaymentUpdateHandler = function(trip_id) {
+            $.ajax({
+                url: get_trip_claim_data_url + '/' + trip_id,
+                method: "GET",
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    custom_noty('error', errors);
+                } else {
+                    self.claim_detail = res.data.trip.cliam;
+                    $("#employee-return-payment-detail-modal").modal('show');
+                }
+                $scope.$apply();
+            })
+            .fail(function(xhr) {
+                console.log(xhr);
+            });
+        }
+
+        $(document).on('click', '#employee-return-payment-detail-save-btn', function() {
+            var form_id = '#employee-return-payment-detail-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+                errorPlacement: function(error, element) {
+                    if (element.hasClass("employee_return_payment_date")) {
+                        error.appendTo($('.employee_return_payment_date_error'));
+                    }else{
+                        error.insertAfter(element.parent())
+                    }
+                },
+                submitHandler: function(form) {
+                    let formData = new FormData($(form_id)[0]);
+                    $('#employee-return-payment-detail-save-btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['tripClaimEmployeeReturnPaymentDetailSave'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            $('#employee-return-payment-detail-save-btn').button('reset');
+                            if (!res.success) {
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                custom_noty('success', res.message);
+                                $('#employee-return-payment-detail-modal').modal('hide');
+                                setTimeout(function() {
+                                    dataTable.draw();
+                                }, 700);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#employee-return-payment-detail-save-btn').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+
         $rootScope.loading = false;
 
     }
@@ -208,7 +284,7 @@ app.component('eyatraTripClaimForm', {
         self.eyatra_trip_claim_boarding_attachment_url = eyatra_trip_claim_boarding_attachment_url;
         self.eyatra_trip_claim_local_travel_attachment_url = eyatra_trip_claim_local_travel_attachment_url;
         self.enable_switch_tab = true;
-
+        self.form_type_id = typeof($routeParams.form_type_id) == 'undefined' ? null : $routeParams.form_type_id;
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -262,6 +338,7 @@ app.component('eyatraTripClaimForm', {
             self.state_code = response.data.state_code;
             self.operating_states = response.data.operating_states;
             self.sbu_lists = response.data.sbu_lists;
+            self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
             self.attachment_type_lists = response.data.attachment_type_lists;
             self.attachment_type_lists = response.data.attachment_type_lists.filter(function (el) {
               return el.id != 3750; //ALL
@@ -3824,8 +3901,21 @@ app.component('eyatraTripClaimForm', {
             // }, 1000);
         });
         $(document).on('click', '#modal_attachment_submit', function() {
+            if(!$("#is_justify_my_trip").is(":checked")){
+                custom_noty('error', "Kindly justify the trip");
+                return;
+            }
+            if(!$("#debit_to_business_unit").val()){
+                custom_noty('error', "Kindly select the debit to business unit");
+                return;
+            }
+            if(self.show_employee_return_payment_mode_section == true && !self.advance_balance_return_payment_mode_id){
+                custom_noty('error', "Kindly select the employee return payment mode");
+                return;
+            }
+
             trip_attachment_save = 1;
-            $("#modal_attachment_submit").prop("disabled", true);
+            // $("#modal_attachment_submit").prop("disabled", true);
             $('#claim_attachment_expense_form').submit();
         });
 
@@ -4214,6 +4304,69 @@ app.component('eyatraTripClaimForm', {
                 }
             },
         });
+
+        $scope.claimSubmitHandler = function(){
+            console.log("self.trip.advance_received")
+            console.log(self.trip.advance_received)
+            if(self.trip.advance_received > 0){
+                $.ajax({
+                    url: get_trip_claim_data_url + '/' + self.trip.id,
+                    method: "GET",
+                })
+                .done(function(res) {
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        let trip_detail = res.data.trip;
+                        let balance_amount = parseFloat(trip_detail.cliam.balance_amount);
+                        if(trip_detail.cliam.amount_to_pay == 2){
+                            $('#trip-claim-modal-justify-one').modal('show');
+                            if(self.form_type_id == 2){
+                                console.log("edit page")
+                                //EDIT PAGE
+                                if(!self.advance_balance_return_payment_mode_id){
+                                    self.advance_balance_return_payment_mode_id = trip_detail.cliam.employee_return_payment_mode_id;
+                                }
+                            }else{
+                                console.log("add page")
+                                if(!self.advance_balance_return_payment_mode_id){
+                                    if(trip_detail.cliam.employee_return_payment_mode_id){
+                                        self.advance_balance_return_payment_mode_id = trip_detail.cliam.employee_return_payment_mode_id;
+                                    }else{
+                                        if(balance_amount < 1000){
+                                            self.advance_balance_return_payment_mode_id = 4010; //CASH
+                                        }else{
+                                            self.advance_balance_return_payment_mode_id = 4011; //Bank Transfer
+                                        }   
+                                    }
+                                }
+                            }
+                            self.show_employee_return_payment_mode_section = true;
+                        }else{
+                            $('#trip-claim-modal-justify-one').modal('show');
+                            self.show_employee_return_payment_mode_section = false;
+                        }
+
+                        setTimeout(function() {
+                            $scope.$apply();
+                        }, 400);
+                    }
+                })
+                .fail(function(xhr) {
+                    console.log(xhr);
+                });
+            }else{
+                $('#trip-claim-modal-justify-one').modal('show');
+                self.show_employee_return_payment_mode_section = false;
+                setTimeout(function() {
+                    $scope.$apply();
+                }, 400);
+            }
+        }
     }
 });
 //------------------------------------------------------------------------------------------------------------------------
