@@ -12,6 +12,11 @@ app.component('eyatraTripClaimList', {
             self.trip_status_list = response.data.trip_status_list;
             self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
             self.employee_return_payment_bank_list = response.data.employee_return_payment_bank_list;
+
+            $(".employee_return_payment_date_picker").datepicker({
+                startDate: '-2d',
+                autoclose: true,
+            });
             $rootScope.loading = false;
         });
 
@@ -196,6 +201,13 @@ app.component('eyatraTripClaimList', {
             var form_id = '#employee-return-payment-detail-form';
             var v = jQuery(form_id).validate({
                 ignore: '',
+                errorPlacement: function(error, element) {
+                    if (element.hasClass("employee_return_payment_date")) {
+                        error.appendTo($('.employee_return_payment_date_error'));
+                    }else{
+                        error.insertAfter(element.parent())
+                    }
+                },
                 submitHandler: function(form) {
                     let formData = new FormData($(form_id)[0]);
                     $('#employee-return-payment-detail-save-btn').button('loading');
@@ -4321,7 +4333,6 @@ app.component('eyatraTripClaimForm', {
                                 }
                             }
                             self.show_employee_return_payment_mode_section = true;
-                            $scope.$apply();
                         }else{
                             $('#trip-claim-modal-justify-one').modal('show');
                             self.show_employee_return_payment_mode_section = false;
@@ -4335,6 +4346,7 @@ app.component('eyatraTripClaimForm', {
                 $('#trip-claim-modal-justify-one').modal('show');
                 self.show_employee_return_payment_mode_section = false;
             }
+            $scope.$apply();
         }
     }
 });

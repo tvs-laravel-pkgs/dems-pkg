@@ -1741,7 +1741,7 @@ class Trip extends Model {
 		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
 			->where('operating_states.company_id', Auth::user()->company_id)
 			->pluck('nstates.gstin_state_code');
-		$data['employee_return_payment_mode_list'] = collect(Config::select('name', 'id')->where('config_type_id', 569)->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Employee Return Payment Mode']);
+		$data['employee_return_payment_mode_list'] = collect(Config::select('name', 'id')->where('config_type_id', 569)->orderBy('id', 'asc')->get());
 
 		return response()->json($data);
 	}

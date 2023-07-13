@@ -95,6 +95,7 @@ class TripClaimController extends Controller {
 				$img2_active = asset('public/img/content/yatra/table/view-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
+				$payment_detail_icon = asset('public/img/content/yatra/table/payment-detail.svg');
 
 				$action = '';
 
@@ -106,9 +107,8 @@ class TripClaimController extends Controller {
 
 				$action .= ' <a href="#!/trip/claim/view/' . $trip->id . '"><img src="' . $img2 . '" alt="Edit" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '"></a> ';
 
-				// if(($trip->employee_return_payment_mode_id == 4010 || $trip->employee_return_payment_mode_id == 4011) && $trip->status_id == 3026 && $trip->is_employee_return_payment_detail_updated == 0){
-				if(($trip->employee_return_payment_mode_id == 4010 || $trip->employee_return_payment_mode_id == 4011) && $trip->status_id == 3026){
-					$action .= '<button class="btn btn-primary btn-sm" onclick="angular.element(this).scope().employeeReturnPaymentUpdateHandler(' . $trip->id . ')" title="Update Employee Return Payment Detail">Update</button>';
+				if(Entrust::can("trip-claim-employee-return-payment-detail") && ($trip->employee_return_payment_mode_id == 4010 || $trip->employee_return_payment_mode_id == 4011) && $trip->status_id == 3026){
+					$action .= ' <a type="button" onclick="angular.element(this).scope().employeeReturnPaymentUpdateHandler(' . $trip->id . ')"><img src="' . $payment_detail_icon . '" title="Employee Return Payment Detail" alt="Employee Return Payment Detail" class="img-responsive" onmouseover=this.src="' . $payment_detail_icon . '" onmouseout=this.src="' . $payment_detail_icon . '"></a> ';
 				}
 				return $action;
 			})
@@ -560,7 +560,6 @@ class TripClaimController extends Controller {
             }
 
             DB::table('ey_employee_claims')->where('id', $request->claim_id)->update([
-            	'employee_return_payment_mode_id' => $request->employee_return_payment_mode_id,
             	'is_employee_return_payment_detail_updated' => 1,
             	'updated_by' => Auth::user()->id,
             ]);
