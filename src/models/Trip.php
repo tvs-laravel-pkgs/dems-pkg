@@ -581,7 +581,7 @@ class Trip extends Model {
 		// 	}
 		// }
 
-		$data['claim_status'] = 0;
+		$data['claim_status'] = 1;
 		if (($current_date >= $trip_start_date) && ($current_date <= $trip_end_date)) {
 			$data['claim_status'] = 1;
 		}
@@ -1455,11 +1455,11 @@ class Trip extends Model {
 				// $range_key++;
 				// $travel_dates_list[$range_key]['id'] = $range_val;
 				// $travel_dates_list[$range_key]['name'] = $range_val;
-				if (strtotime($range_val) <= strtotime(date('d-m-Y'))) {
+				// if (strtotime($range_val) <= strtotime(date('d-m-Y'))) {
 					$range_key++;
 					$travel_dates_list[$range_key]['id'] = $range_val;
 					$travel_dates_list[$range_key]['name'] = $range_val;
-				}
+				// }
 			}
 		}
 		// Calculating Lodging days by Karthick T on 21-01-2022
