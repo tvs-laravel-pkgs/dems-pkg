@@ -527,7 +527,7 @@ class TripClaimController extends Controller {
 				'errors' => ["Trip details not found"],
 			]);
 		}
-		$data['employee_return_payment_start_date'] = $data['trip']->start_date;
+		$data['employee_return_payment_start_date'] = $data['trip']->end_date;
 
 		return response()->json([
 			'success' => true,
