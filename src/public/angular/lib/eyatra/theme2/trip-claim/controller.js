@@ -13,10 +13,10 @@ app.component('eyatraTripClaimList', {
             self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
             self.employee_return_payment_bank_list = response.data.employee_return_payment_bank_list;
 
-            $(".employee_return_payment_date_picker").datepicker({
-                startDate: '-2d',
-                autoclose: true,
-            });
+            // $(".employee_return_payment_date_picker").datepicker({
+            //     startDate: '-2d',
+            //     autoclose: true,
+            // });
             $rootScope.loading = false;
         });
 
@@ -187,8 +187,15 @@ app.component('eyatraTripClaimList', {
                     }
                     custom_noty('error', errors);
                 } else {
+                    let employee_return_payment_start_date = res.data.employee_return_payment_start_date;
                     self.claim_detail = res.data.trip.cliam;
+                    
                     $("#employee-return-payment-detail-modal").modal('show');
+                    $(".employee_return_payment_date_picker").datepicker("destroy");
+                    $(".employee_return_payment_date_picker").datepicker({
+                        startDate: employee_return_payment_start_date,
+                        autoclose: true,
+                    });
                 }
                 $scope.$apply();
             })
