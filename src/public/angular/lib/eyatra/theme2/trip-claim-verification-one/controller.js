@@ -132,6 +132,12 @@ app.component('eyatraTripClaimVerificationOneView', {
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url_new = eyatra_trip_claim_verification_one_local_travel_attachment_url_new;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
+        self.page_type = typeof($location.search().type) === 'undefined' ? '' : $location.search().type;
+        if(self.page_type == 1){
+            self.list_page_url = '/trip/approvals';
+        }else{
+            self.list_page_url = '/trip/claim/verification1/list';
+        }
         $http.get(
             $form_data_url
         ).then(function(response) {
@@ -147,7 +153,8 @@ app.component('eyatraTripClaimVerificationOneView', {
                 setTimeout(function() {
                     $noty.close();
                 }, 1000);
-                $location.path('/trip/claim/verification1/list')
+                // $location.path('/trip/claim/verification1/list')
+                $location.path(self.list_page_url)
                 $scope.$apply()
                 return;
             }
@@ -326,7 +333,8 @@ app.component('eyatraTripClaimVerificationOneView', {
                                 }, 1000);
                                 $('#trip-claim-modal-approve-one').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/trip/claim/verification1/list')
+                                    // $location.path('/trip/claim/verification1/list')
+                                    $location.path(self.list_page_url)
                                     $scope.$apply()
                                 }, 500);
                             }
@@ -379,7 +387,8 @@ app.component('eyatraTripClaimVerificationOneView', {
                                 }, 1000);
                                 $('#trip-claim-modal-reject-one').modal('hide');
                                 setTimeout(function() {
-                                    $location.path('/trip/claim/verification1/list')
+                                    // $location.path('/trip/claim/verification1/list')
+                                    $location.path(self.list_page_url)
                                     $scope.$apply()
                                 }, 500);
                             }

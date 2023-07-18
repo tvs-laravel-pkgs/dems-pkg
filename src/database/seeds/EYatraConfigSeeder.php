@@ -82,6 +82,8 @@ class EYatraConfigSeeder extends Seeder {
 			566 => 'On Visit Cancel Agent Notification Is Required',
 			567 => 'Enable Ticket Cancell SMS To Agent',
 			568 => 'HRMS To Travelex Employee Sync Categories',
+			569 => 'Employee Return Payment Modes',
+			570 => 'Employee Return Payment Banks',
 		];
 
 		$configs = [
@@ -1325,7 +1327,7 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3971 => [
-				'name' => 'No',
+				'name' => 'Yes',
 				'config_type_id' => 559,
 			],
 			3972 => [
@@ -1370,6 +1372,28 @@ class EYatraConfigSeeder extends Seeder {
 			3991 => [
 				'name' => 'Deletion',
 				'config_type_id' => 568,
+			],
+
+			4010 => [
+				'name' => 'Cash',
+				'config_type_id' => 569,
+			],
+			4011 => [
+				'name' => 'Bank Transfer',
+				'config_type_id' => 569,
+			],
+			4012 => [
+				'name' => 'Debit from my salary',
+				'config_type_id' => 569,
+			],
+
+			4021 => [
+				'name' => 'Test Bank1',
+				'config_type_id' => 570,
+			],
+			4022 => [
+				'name' => 'Test Bank2',
+				'config_type_id' => 570,
 			],
 		];
 

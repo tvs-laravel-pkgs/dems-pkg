@@ -143,26 +143,26 @@ class TripApprovalController extends Controller {
 				if (Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && !Entrust::can('eyatra-indv-employee-claims-verification2')) {
 					//OUTSTATION TRIP VERIFICATIONS
 					if($trip->status_id =='3021'){
-					$action = '<a href="#!/trip/verification/form/' . $trip->id . '">
+					$action = '<a href="#!/trip/verification/form/' . $trip->id . '?type=1">
 									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 								</a>';
 					}else if($trip->status_id == '3023'){
-						$action = '<a href="#!/trip/claim/verification1/view/' . $trip->id . '">
+						$action = '<a href="#!/trip/claim/verification1/view/' . $trip->id . '?type=1">
 									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 								</a>';
 					}
 				}else if(Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && Entrust::can('eyatra-indv-employee-claims-verification2')) {
 					//OUTSTATION TRIP CLIAM VERIFICATION TWO
 					if($trip->status_id== '3021'){
-					$action = '<a href="#!/trip/verification/form/' . $trip->id . '">
+					$action = '<a href="#!/trip/verification/form/' . $trip->id . '?type=1">
 									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 								</a>';
 					}else if($trip->status_id== '3023'){
-						$action = '<a href="#!/trip/claim/verification1/view/' . $trip->id . '">
+						$action = '<a href="#!/trip/claim/verification1/view/' . $trip->id . '?type=1">
 									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 								</a>';
 					}else if($trip->status_id== '3029')
-					$action = '<a href="#!/trip/claim/verification2/view/' . $trip->id . '">
+					$action = '<a href="#!/trip/claim/verification2/view/' . $trip->id . '?type=1">
 									<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 								</a>';
 				}
