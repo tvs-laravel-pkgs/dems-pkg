@@ -11,12 +11,13 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		'employee_id',
 		'date',
 		'advance_amount',
-		'expense_amount',
+		// 'expense_amount',
 		'status_id',
 	];
 	public function employee() {
-		return $this->belongsTo('Uitoux\EYatra\Employee');
+		return $this->belongsTo('Uitoux\EYatra\Employee')->withTrashed();
 	}
+	
 	public function setDateAttribute($value) {
 		return $this->attributes['date'] = $value ? date('Y-m-d', strtotime($value)) : date('Y-m-d');
 	}

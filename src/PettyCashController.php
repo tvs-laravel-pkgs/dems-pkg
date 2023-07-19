@@ -490,6 +490,12 @@ class PettyCashController extends Controller {
 					}
 					//ADD OTHER EXPENSE TO TABLE
 					foreach ($request->petty_cash_other as $petty_cash_data_other) {
+						if($petty_cash_data_other['invoice'] == 1 && empty($petty_cash_data_other['attachments'])){
+							return response()->json([
+								'success' => false,
+								'errors' => ['Kindly upload the proof attachement']
+							]);
+						}
 						$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
 						$petty_cash_other->fill($petty_cash_data_other);
 						$petty_cash_other->invoice=$petty_cash_data_other['invoice'];
@@ -497,17 +503,17 @@ class PettyCashController extends Controller {
 						$petty_cash_other->invoice_date=date("Y-m-d", strtotime($petty_cash_data_other['invoice_date']));
 						$petty_cash_other->invoice_amount=$petty_cash_data_other['invoice_amount'];
 						$petty_cash_other->invoice_number=$petty_cash_data_other['invoice_number'];
-						$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($petty_cash_data_other['gstin'],"",false);
-			        //dd($response);
-			        if(!$response['success']){
-				    return response()->json([
-                        'success' => false,
-                        'errors' => [
-                          $response['error']
-                        ],
-                    ]);
-			        } 
-                        $petty_cash_other->gstin=$response['gstin'];
+					// 	$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($petty_cash_data_other['gstin'],"",false);
+			        // //dd($response);
+			        // if(!$response['success']){
+				    // return response()->json([
+                    //     'success' => false,
+                    //     'errors' => [
+                    //       $response['error']
+                    //     ],
+                    // ]);
+			        // } 
+                    //     $petty_cash_other->gstin=$response['gstin'];
                     }
 						//dd($petty_cash_data_other);
 						$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];

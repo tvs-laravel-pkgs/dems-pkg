@@ -36,6 +36,9 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
+                { data: 'request_type', searchable: false },
+                { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
+                { data: 'advance_pcv_number', name: 'expense_voucher_advance_requests.number', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'oname', name: 'outlets.name', searchable: true },
@@ -109,7 +112,8 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             if (self.expense_voucher_view.status_id == '3462') {
                 self.type_id = 1;
                 $scope.showApproveLayout = true;
-            } else if (self.expense_voucher_view.status_id == '3468') {
+            // } else if (self.expense_voucher_view.status_id == '3468') {
+            } else if (self.expense_voucher_view.advance_pcv_claim_status_id == '3468') {
 
                 if (parseInt(self.expense_voucher_view.expense_amount) <= parseInt(self.expense_voucher_view.advance_amount)) {
                     $scope.showApproveLayout = false;

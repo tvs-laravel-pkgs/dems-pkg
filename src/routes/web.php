@@ -280,6 +280,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/expense/voucher-advance/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherView')->name('expenseVoucherView');
 		Route::get('eyatra/expense/voucher-advance/delete/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherDelete')->name('expenseVoucherDelete');
 		Route::get('eyatra/expense/voucher-advance/filter-data', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@ExpenseVoucherAdvanceFilterData')->name('ExpenseVoucherAdvanceFilterData');
+		Route::get('eyatra/expense-voucher-advance/get-data/{id}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherGetData')->name('expenseVoucherAdvanceGetData');
+		Route::post('expense-voucher-advance/employee-return-payment-save', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@employeeReturnPaymentSave')->name('expenseVoucherAdvanceEmployeeReturnPaymentSave');
 
 		//EXPENSE VOUCHER ADVANCE VERIFICATION MANAGER
 		Route::get('eyatra/expense/voucher-advance/verification/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@listExpenseVoucherverificationRequest')->name('listExpenseVoucherverificationRequest');

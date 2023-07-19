@@ -386,25 +386,44 @@ app.component('eyatraPettyCashForm', {
         }
 
         //OTHER EXPENSE AMOUNT CALCULATE
+        // self.otherConveyanceCal = function() {
+        //     var total_petty_cash_other_amount = 0;
+        //     $('.otherConveyance_amount').each(function() {
+        //         var other_amount = parseInt($(this).closest('tr').find('.otherConveyance_amount_check_validation').val() || 0);
+        //         var other_tax = parseInt($(this).closest('tr').find('.otherConveyance_tax_check_validation').val() || 0);
+        //         if (!$.isNumeric(other_amount)) {
+        //             other_amount = 0;
+        //         }
+        //         if (!$.isNumeric(other_tax)) {
+        //             other_tax = 0;
+        //         }
+        //         current_total = other_amount + other_tax;
+        //         total_petty_cash_other_amount += current_total;
+        //     });
+        //     $('.other_expenses').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
+        //     $('.total_petty_cash_other_amount').val(total_petty_cash_other_amount.toFixed(2));
+        //     $('.claim_total_amount').val(total_petty_cash_other_amount.toFixed(2));
+        //     $('.claim_total_amount').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
+        //     // caimTotalAmount();
+        // }
+
         self.otherConveyanceCal = function() {
-            var total_petty_cash_other_amount = 0;
-            $('.otherConveyance_amount').each(function() {
-                var other_amount = parseInt($(this).closest('tr').find('.otherConveyance_amount_check_validation').val() || 0);
-                var other_tax = parseInt($(this).closest('tr').find('.otherConveyance_tax_check_validation').val() || 0);
-                if (!$.isNumeric(other_amount)) {
-                    other_amount = 0;
+            let total_petty_cash_other_amount = 0;
+            $(self.petty_cash_others).each(function(key, value) {
+                let invoice_amount = parseFloat(value.invoice_amount || 0);
+                let amount = parseFloat(value.amount || 0);
+                if(value.invoice == 1){
+                    //INVOICE
+                   total_petty_cash_other_amount += invoice_amount;
+                }else{
+                   total_petty_cash_other_amount += amount;
                 }
-                if (!$.isNumeric(other_tax)) {
-                    other_tax = 0;
-                }
-                current_total = other_amount + other_tax;
-                total_petty_cash_other_amount += current_total;
             });
+
             $('.other_expenses').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
             $('.total_petty_cash_other_amount').val(total_petty_cash_other_amount.toFixed(2));
             $('.claim_total_amount').val(total_petty_cash_other_amount.toFixed(2));
             $('.claim_total_amount').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
-            // caimTotalAmount();
         }
 
         //TOTAL AMOUNT CALCULATE
