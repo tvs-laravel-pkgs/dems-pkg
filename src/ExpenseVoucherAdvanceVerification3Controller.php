@@ -80,35 +80,37 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 	}
 
 	public function expenseVoucherVerification3View($id) {
-		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
-			'employees.code',
-			'users.name',
-			'expense_voucher_advance_requests.employee_id',
-			'expense_voucher_advance_requests.date',
-			'expense_voucher_advance_requests.id',
-			'expense_voucher_advance_requests.number as advance_pcv_number',
-			'expense_voucher_advance_requests.advance_amount',
-			// 'expense_voucher_advance_requests.expense_amount',
-			'expense_voucher_advance_request_claims.expense_amount',
-			// 'expense_voucher_advance_requests.balance_amount',
-			'expense_voucher_advance_request_claims.balance_amount',
-			'expense_voucher_advance_requests.description',
-			'expense_voucher_advance_requests.expense_description',
-			'configs.name as status',
-			'employees.payment_mode_id',
-			'expense_voucher_advance_requests.status_id',
-			'expense_voucher_advance_request_claims.status_id as advance_pcv_claim_status_id',
-			'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
-			'advance_pcv_claim_statuses.name as advance_pcv_claim_status'
-		)
-			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
-			->leftjoin('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
-			->leftJoin('configs as advance_pcv_claim_statuses', 'advance_pcv_claim_statuses.id', 'expense_voucher_advance_request_claims.status_id')
-			->where('users.user_type_id', 3121)
-			->where('expense_voucher_advance_requests.id', $id)
-			->first();
+		// $this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
+		// 	'employees.code',
+		// 	'users.name',
+		// 	'expense_voucher_advance_requests.employee_id',
+		// 	'expense_voucher_advance_requests.date',
+		// 	'expense_voucher_advance_requests.id',
+		// 	'expense_voucher_advance_requests.number as advance_pcv_number',
+		// 	'expense_voucher_advance_requests.advance_amount',
+		// 	// 'expense_voucher_advance_requests.expense_amount',
+		// 	'expense_voucher_advance_request_claims.expense_amount',
+		// 	// 'expense_voucher_advance_requests.balance_amount',
+		// 	'expense_voucher_advance_request_claims.balance_amount',
+		// 	'expense_voucher_advance_requests.description',
+		// 	'expense_voucher_advance_requests.expense_description',
+		// 	'configs.name as status',
+		// 	'employees.payment_mode_id',
+		// 	'expense_voucher_advance_requests.status_id',
+		// 	'expense_voucher_advance_request_claims.status_id as advance_pcv_claim_status_id',
+		// 	'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
+		// 	'advance_pcv_claim_statuses.name as advance_pcv_claim_status'
+		// )
+		// 	->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
+		// 	->leftJoin('users', 'users.entity_id', 'employees.id')
+		// 	->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
+		// 	->leftjoin('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
+		// 	->leftJoin('configs as advance_pcv_claim_statuses', 'advance_pcv_claim_statuses.id', 'expense_voucher_advance_request_claims.status_id')
+		// 	->where('users.user_type_id', 3121)
+		// 	->where('expense_voucher_advance_requests.id', $id)
+		// 	->first();
+
+		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::getExpenseVoucherAdvanceRequestData($id);
 		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id')->get();
 		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
 

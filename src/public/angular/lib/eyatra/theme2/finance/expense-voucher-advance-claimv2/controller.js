@@ -95,6 +95,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
             self.payment_mode_list = response.data.payment_mode_list;
             self.wallet_mode_list = response.data.wallet_mode_list;
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
+            self.cashier_payment_date = response.data.cashier_payment_date;
             console.log(self.expense_voucher_view);
             $scope.showApproveLayout = false;
             $scope.showApproveModal = false;
@@ -160,6 +161,32 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
             endDate: '+0d',
         });
 
+        self.searchCoaCodes = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            laravel_routes['expenseVoucherAdvanceSearchOracleCoaCodes'], {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            resolve(response.data);
+                        });
+                });
+            } else {
+                return [];
+            }
+        }
+
+        $scope.approveModalHandler = function(){
+            if(!self.coa_code1_detail){
+                custom_noty('error', 'Kindly select the coa code');
+                return;
+            }
+            $("#alert-modal-approve").modal('show');
+        }
+
         var form_id = '#approve';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -176,7 +203,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
                     required: true,
                 },
                 'reference_number': {
-                    required: true,
+                    // required: true,
                     maxlength: 100,
                     minlength: 3,
                 },

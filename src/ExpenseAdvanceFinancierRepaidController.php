@@ -152,24 +152,26 @@ class ExpenseAdvanceFinancierRepaidController extends Controller {
 	}
 
 	public function ExpenseVoucherAdvanceFinancierRepaidView($id) {
-		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
-			'employees.code',
-			'users.name',
-			'expense_voucher_advance_requests.id',
-			'expense_voucher_advance_requests.date',
-			'expense_voucher_advance_requests.advance_amount',
-			'expense_voucher_advance_requests.expense_amount',
-			'expense_voucher_advance_requests.balance_amount',
-			'expense_voucher_advance_requests.description',
-			'expense_voucher_advance_requests.expense_description',
-			'configs.name as status'
-		)
-			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
-			->where('users.user_type_id', 3121)
-			->where('expense_voucher_advance_requests.id', $id)
-			->first();
+		// $this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
+		// 	'employees.code',
+		// 	'users.name',
+		// 	'expense_voucher_advance_requests.id',
+		// 	'expense_voucher_advance_requests.date',
+		// 	'expense_voucher_advance_requests.advance_amount',
+		// 	'expense_voucher_advance_requests.expense_amount',
+		// 	'expense_voucher_advance_requests.balance_amount',
+		// 	'expense_voucher_advance_requests.description',
+		// 	'expense_voucher_advance_requests.expense_description',
+		// 	'configs.name as status'
+		// )
+		// 	->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
+		// 	->leftJoin('users', 'users.entity_id', 'employees.id')
+		// 	->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
+		// 	->where('users.user_type_id', 3121)
+		// 	->where('expense_voucher_advance_requests.id', $id)
+		// 	->first();
+
+		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::getExpenseVoucherAdvanceRequestData($id);
 
 		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id')->get();
 		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;

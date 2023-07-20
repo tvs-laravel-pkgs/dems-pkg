@@ -10,6 +10,7 @@ use Storage;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequestClaim;
+use Uitoux\EYatra\CoaCode;
 use Validator;
 use App\FinancialYear;
 use App\SerialNumberGroup;
@@ -95,7 +96,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 					$action .= '<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
 				 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a>';
 
-					if(($expense_voucher_requests->employee_return_payment_mode_id == 4010 || $expense_voucher_requests->employee_return_payment_mode_id == 4011) && ($expense_voucher_requests->advance_pcv_claim_status_id == 3473 || $expense_voucher_requests->advance_pcv_claim_status_id == 3470)){
+					if(($expense_voucher_requests->employee_return_payment_mode_id == 4010 || $expense_voucher_requests->employee_return_payment_mode_id == 4011) && ($expense_voucher_requests->advance_pcv_claim_status_id == 3470)){
 						$action .= '<a type="button" onclick="angular.element(this).scope().employeeReturnPaymentUpdateHandler(' . $expense_voucher_requests->id . ')"><img src="' . $payment_detail_icon . '" title="Employee Return Payment Detail" alt="Employee Return Payment Detail" class="img-responsive" onmouseover=this.src="' . $payment_detail_icon . '" onmouseout=this.src="' . $payment_detail_icon . '"></a> ';
 					}
 					return $action;
@@ -156,6 +157,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 		$this->data['status_list'] = $status_list = collect(Config::ExpenseVoucherAdvanceStatus())->prepend(['id' => '', 'name' => 'Select Status']);
 		$this->data['employee_list'] = collect(Employee::getEmployeeListBasedCompany())->prepend(['id' => '', 'name' => 'Select Employee']);
 		$this->data['outlet_list'] = collect(Outlet::getOutletList())->prepend(['id' => '', 'name' => 'Select Outlet']);
+		$this->data['employee_return_payment_bank_list'] = Config::where('config_type_id', 570)->select('name','id')->get();
 
 		return response()->json($this->data);
 	}
@@ -165,31 +167,32 @@ class ExpenseVoucherAdvanceController extends Controller {
 	}
 
 	public function expenseVoucherView($id) {
-		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
-			'employees.code',
-			'users.name',
-			'expense_voucher_advance_requests.id',
-			'expense_voucher_advance_requests.number as advance_pcv_number',
-			'expense_voucher_advance_requests.date',
-			'expense_voucher_advance_requests.advance_amount',
-			// 'expense_voucher_advance_requests.expense_amount',
-			'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
-			'expense_voucher_advance_request_claims.expense_amount',
-			// 'expense_voucher_advance_requests.balance_amount',
-			'expense_voucher_advance_request_claims.balance_amount',
-			'advance_pcv_claim_statuses.name as advance_pcv_claim_status',
-			'expense_voucher_advance_requests.description',
-			'expense_voucher_advance_requests.expense_description',
-			'configs.name as status'
-		)
-			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
-			->leftJoin('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
-			->leftJoin('configs as advance_pcv_claim_statuses', 'advance_pcv_claim_statuses.id', 'expense_voucher_advance_request_claims.status_id')
-			->where('users.user_type_id', 3121)
-			->where('expense_voucher_advance_requests.id', $id)
-			->first();
+		// $this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
+		// 	'employees.code',
+		// 	'users.name',
+		// 	'expense_voucher_advance_requests.id',
+		// 	'expense_voucher_advance_requests.number as advance_pcv_number',
+		// 	'expense_voucher_advance_requests.date',
+		// 	'expense_voucher_advance_requests.advance_amount',
+		// 	// 'expense_voucher_advance_requests.expense_amount',
+		// 	'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
+		// 	'expense_voucher_advance_request_claims.expense_amount',
+		// 	// 'expense_voucher_advance_requests.balance_amount',
+		// 	'expense_voucher_advance_request_claims.balance_amount',
+		// 	'advance_pcv_claim_statuses.name as advance_pcv_claim_status',
+		// 	'expense_voucher_advance_requests.description',
+		// 	'expense_voucher_advance_requests.expense_description',
+		// 	'configs.name as status'
+		// )
+		// 	->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
+		// 	->leftJoin('users', 'users.entity_id', 'employees.id')
+		// 	->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
+		// 	->leftJoin('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
+		// 	->leftJoin('configs as advance_pcv_claim_statuses', 'advance_pcv_claim_statuses.id', 'expense_voucher_advance_request_claims.status_id')
+		// 	->where('users.user_type_id', 3121)
+		// 	->where('expense_voucher_advance_requests.id', $id)
+		// 	->first();
+		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::getExpenseVoucherAdvanceRequestData($id);
 
 		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id')->get();
 		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
@@ -506,10 +509,16 @@ class ExpenseVoucherAdvanceController extends Controller {
 	                    'errors' => $validator->errors()->all(),
 	                ]);
 	            }
+
+	            $advance_pcv_natural_account_code = Config::where('id', 4031)->first()->name;
+	            $coa_code_id = CoaCode::where('oracle_code', $advance_pcv_natural_account_code)
+	            	->pluck('id')
+	            	->first();
 				$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 				$expense_voucher_advance->company_id = Auth::user()->company_id;
 				$expense_voucher_advance->number = $generate_number['number'];
 				$expense_voucher_advance->created_by = Auth::user()->id;
+				$expense_voucher_advance->coa_code_id = $coa_code_id;
 				$expense_voucher_advance->status_id = 3460;//Waiting for Manager Approval
 			}
 
@@ -620,8 +629,13 @@ class ExpenseVoucherAdvanceController extends Controller {
             	$expense_voucher_advance_request_claim->employee_return_payment_bank_id = $request->employee_return_payment_bank_id;
             }
 
+            if(isset($request->employee_return_payment_receipt_no)){
+            	$expense_voucher_advance_request_claim->employee_return_payment_receipt_no = $request->employee_return_payment_receipt_no;
+            }
+            if(isset($request->employee_return_payment_receipt_date)){
+            	$expense_voucher_advance_request_claim->employee_return_payment_receipt_date = date('Y-m-d', strtotime((str_replace('/', '-', $request->employee_return_payment_receipt_date))));
+            }
             $expense_voucher_advance_request_claim->is_employee_return_payment_detail_updated = 1;
-            $expense_voucher_advance_request_claim->status_id = 3470; //PAID
             $expense_voucher_advance_request_claim->save();
 
             $message = 'Details updated successfully!';
@@ -640,4 +654,8 @@ class ExpenseVoucherAdvanceController extends Controller {
 			]);
         }
     }
+
+    public function searchOracleCoaCodes(Request $request) {
+    	return CoaCode::searchOracleCoaCodes($request);
+	}
 }

@@ -89,6 +89,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
             expense_voucher_advance_filter_url
         ).then(function(response) {
             self.status_list = response.data.status_list;
+            self.employee_return_payment_bank_list = response.data.employee_return_payment_bank_list;
         });
         // var dataTable = $('#expense_advance_list').DataTable();
 
@@ -192,8 +193,8 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                 } else {
                     self.expense_voucher_advance_request_claim = res.data.expense_voucher_advance_request_claim;
                     $("#employee-return-payment-detail-modal").modal('show');
-                    $(".employee_return_payment_date_picker").datepicker("destroy");
-                    $(".employee_return_payment_date_picker").datepicker({
+                    $(".employee_return_date_picker").datepicker("destroy");
+                    $(".employee_return_date_picker").datepicker({
                         startDate: res.data.expense_voucher_advance.date,
                         autoclose: true,
                     });

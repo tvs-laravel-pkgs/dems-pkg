@@ -75,36 +75,39 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 	}
 
 	public function expenseVoucherVerification2View($id) {
-		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
-			'employees.code',
-			'employees.id as employee_id',
-			'users.name',
-			'expense_voucher_advance_requests.employee_id',
-			'expense_voucher_advance_requests.date',
-			'expense_voucher_advance_requests.id',
-			'expense_voucher_advance_requests.number as advance_pcv_number',
-			'expense_voucher_advance_requests.advance_amount',
-			// 'expense_voucher_advance_requests.expense_amount',
-			'expense_voucher_advance_request_claims.expense_amount',
-			// 'expense_voucher_advance_requests.balance_amount',
-			'expense_voucher_advance_request_claims.balance_amount',
-			'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
-			'expense_voucher_advance_requests.description',
-			'expense_voucher_advance_requests.expense_description',
-			'configs.name as status',
-			'employees.payment_mode_id',
-			'expense_voucher_advance_requests.status_id',
-			'expense_voucher_advance_request_claims.status_id as advance_pcv_claim_status_id',
-			'advance_pcv_claim_statuses.name as advance_pcv_claim_status'
-		)
-			->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
-			->leftJoin('users', 'users.entity_id', 'employees.id')
-			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
-			->leftJoin('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
-			->leftJoin('configs as advance_pcv_claim_statuses', 'advance_pcv_claim_statuses.id', 'expense_voucher_advance_request_claims.status_id')
-			->where('users.user_type_id', 3121)
-			->where('expense_voucher_advance_requests.id', $id)
-			->first();
+		// $this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::select(
+		// 	'employees.code',
+		// 	'employees.id as employee_id',
+		// 	'users.name',
+		// 	'expense_voucher_advance_requests.employee_id',
+		// 	'expense_voucher_advance_requests.date',
+		// 	'expense_voucher_advance_requests.id',
+		// 	'expense_voucher_advance_requests.number as advance_pcv_number',
+		// 	'expense_voucher_advance_requests.advance_amount',
+		// 	// 'expense_voucher_advance_requests.expense_amount',
+		// 	'expense_voucher_advance_request_claims.expense_amount',
+		// 	// 'expense_voucher_advance_requests.balance_amount',
+		// 	'expense_voucher_advance_request_claims.balance_amount',
+		// 	'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
+		// 	'expense_voucher_advance_requests.description',
+		// 	'expense_voucher_advance_requests.expense_description',
+		// 	'configs.name as status',
+		// 	'employees.payment_mode_id',
+		// 	'expense_voucher_advance_requests.status_id',
+		// 	'expense_voucher_advance_request_claims.status_id as advance_pcv_claim_status_id',
+		// 	'advance_pcv_claim_statuses.name as advance_pcv_claim_status'
+		// )
+		// 	->leftJoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
+		// 	->leftJoin('users', 'users.entity_id', 'employees.id')
+		// 	->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
+		// 	->leftJoin('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
+		// 	->leftJoin('configs as advance_pcv_claim_statuses', 'advance_pcv_claim_statuses.id', 'expense_voucher_advance_request_claims.status_id')
+		// 	->where('users.user_type_id', 3121)
+		// 	->where('expense_voucher_advance_requests.id', $id)
+		// 	->first();
+
+		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::getExpenseVoucherAdvanceRequestData($id);
+
 		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id')->get();
 		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
 
@@ -116,6 +119,10 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 		$this->data['payment_mode_list'] = $payment_mode_list;
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Mode']);
 		$this->data['wallet_mode_list'] = $wallet_mode_list;
+
+		$is_cashier_payment_date_should_be_current_date = Config::where('id', 4032)->first()->name;
+		$this->data['cashier_payment_date'] = $is_cashier_payment_date_should_be_current_date == "Yes" ? date('d-m-Y') : null;
+
 		return response()->json($this->data);
 	}
 
@@ -291,7 +298,9 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 				if ($request->expense_amount) {
 					if ($advance_petty_cash->advance_amount > $advance_pcv_claim->expense_amount) {
 						// $advance_petty_cash->status_id = 3472;
-						$advance_pcv_claim->status_id = 3472; //Payment Pending from Employee
+						// $advance_pcv_claim->status_id = 3472; //Payment Pending from Employee
+						$advance_petty_cash->status_id = 3470; //Paid
+						$advance_pcv_claim->status_id = 3470; //Paid
 					} elseif ($advance_petty_cash->advance_amount < $advance_pcv_claim->expense_amount) {
 						$advance_petty_cash->status_id = 3470; //Paid
 						$advance_pcv_claim->status_id = 3470; //Paid
@@ -300,6 +309,10 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 						$advance_pcv_claim->status_id = 3470; //Paid
 					}
 
+					$advance_pcv_claim->coa_code1_id = $request->coa_code1_id;
+					if(isset($request->coa_code2_id)){
+						$advance_pcv_claim->coa_code2_id = $request->coa_code2_id;
+					}
 					$advance_pcv_claim->remarks = NULL;
 					$advance_pcv_claim->rejection_id = NULL;
 					$advance_pcv_claim->updated_by_id = Auth::user()->id;
@@ -322,7 +335,8 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 
 						$validator = Validator::make($request->all(), [
 							'reference_number' => [
-								'required:true',
+								// 'required:true',
+								'nullable',
 								'unique:payments,reference_number',
 
 							],

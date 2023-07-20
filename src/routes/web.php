@@ -282,11 +282,13 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/expense/voucher-advance/filter-data', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@ExpenseVoucherAdvanceFilterData')->name('ExpenseVoucherAdvanceFilterData');
 		Route::get('eyatra/expense-voucher-advance/get-data/{id}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherGetData')->name('expenseVoucherAdvanceGetData');
 		Route::post('expense-voucher-advance/employee-return-payment-save', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@employeeReturnPaymentSave')->name('expenseVoucherAdvanceEmployeeReturnPaymentSave');
+		Route::post('expense-voucher-advance/search-oracle-coa-codes', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@searchOracleCoaCodes')->name('expenseVoucherAdvanceSearchOracleCoaCodes');
 
 		//EXPENSE VOUCHER ADVANCE VERIFICATION MANAGER
 		Route::get('eyatra/expense/voucher-advance/verification/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@listExpenseVoucherverificationRequest')->name('listExpenseVoucherverificationRequest');
 		Route::post('eyatra/expense/voucher-advance/verification/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationSave')->name('expenseVoucherVerificationSave');
 		Route::get('eyatra/expense/voucher-advance/verification/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationView')->name('expenseVoucherVerificationView');
+		Route::post('expense-voucher-advance/proof-upload/view-status-update', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@proofUploadViewStatusUpdate')->name('expenseVoucherAdvanceProofUploadViewStatusUpdate');
 
 		//EXPENSE VOUCHER ADVANCE VERIFICATION CASHIER
 		Route::get('eyatra/expense/voucher-advance/verification2/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@listExpenseVoucherverification2Request')->name('listExpenseVoucherverification2Request');
