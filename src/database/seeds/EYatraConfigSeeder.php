@@ -84,6 +84,7 @@ class EYatraConfigSeeder extends Seeder {
 			568 => 'HRMS To Travelex Employee Sync Categories',
 			569 => 'Employee Return Payment Modes',
 			570 => 'Employee Return Payment Banks',
+			571 => 'Advance PCV - Natural Account Code',
 		];
 
 		$configs = [
@@ -1394,6 +1395,11 @@ class EYatraConfigSeeder extends Seeder {
 			4022 => [
 				'name' => 'Test Bank2',
 				'config_type_id' => 570,
+			],
+
+			4031 => [
+				'name' => '114255',
+				'config_type_id' => 571,
 			],
 		];
 
