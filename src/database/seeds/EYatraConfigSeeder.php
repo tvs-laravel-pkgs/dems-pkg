@@ -85,6 +85,7 @@ class EYatraConfigSeeder extends Seeder {
 			569 => 'Employee Return Payment Modes',
 			570 => 'Employee Return Payment Banks',
 			571 => 'Advance PCV - Natural Account Code',
+			572 => 'Advance PCV - Is Cashier Payment Date Should Be Current Date',
 		];
 
 		$configs = [
@@ -1400,6 +1401,10 @@ class EYatraConfigSeeder extends Seeder {
 			4031 => [
 				'name' => '114255',
 				'config_type_id' => 571,
+			],
+			4032 => [
+				'name' => 'Yes',
+				'config_type_id' => 572,
 			],
 		];
 
