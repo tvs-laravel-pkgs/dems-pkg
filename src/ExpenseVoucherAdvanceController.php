@@ -339,6 +339,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'employee_id' => [
 					'required',
+					'exists:employees,id',
 				],
 				'date' => [
 					'required',
@@ -377,6 +378,13 @@ class ExpenseVoucherAdvanceController extends Controller {
 
 			if ($request->id) {
 				$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
+				if(!$expense_voucher_advance){
+					return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => ['Expense voucher advance data not Found'],
+	                ]);
+				}
 				if ($request->expense_amount) {
 					//EXPENSE ADVANCE RFEQUEST CLAIM
 					$expense_voucher_advance_request_claim = ExpenseVoucherAdvanceRequestClaim::firstOrNew(['expense_voucher_advance_request_id' => $expense_voucher_advance->id]);

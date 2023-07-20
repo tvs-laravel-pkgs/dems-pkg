@@ -293,9 +293,37 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
+				$error_messages = [
+					'approve.required' => 'Expense voucher advance request ID is required',
+					'approve.exists' => 'Expense voucher advance request data not found',
+				];
+				$validations = [
+					'approve' => [
+						'required',
+						'exists:expense_voucher_advance_requests,id',
+					],
+				];
+				$validator = Validator::make($request->all(), $validations, $error_messages);
+				if ($validator->fails()) {
+					return response()->json([
+						'success' => false,
+						'error' => 'Validation Error',
+						'errors' => $validator->errors()->all(),
+					]);
+				}
+
 				$advance_petty_cash = ExpenseVoucherAdvanceRequest::where('id', $request->approve)->first();
 				$advance_pcv_claim = ExpenseVoucherAdvanceRequestClaim::where('expense_voucher_advance_request_id', $request->approve)->first();
+
 				if ($request->expense_amount) {
+					if(!$advance_pcv_claim){
+						return response()->json([
+		                    'success' => false,
+		                    'error' => 'Validation Error',
+		                    'errors' => ['Expense voucher advance claim data not Found'],
+		                ]);
+					}
+
 					if ($advance_petty_cash->advance_amount > $advance_pcv_claim->expense_amount) {
 						// $advance_petty_cash->status_id = 3472;
 						// $advance_pcv_claim->status_id = 3472; //Payment Pending from Employee
@@ -449,16 +477,41 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 				}
 
 			} else {
+				$error_messages = [
+					'reject.required' => 'Expense voucher advance request ID is required',
+					'reject.exists' => 'Expense voucher advance request data not found',
+				];
+				$validations = [
+					'reject' => [
+						'required',
+						'exists:expense_voucher_advance_requests,id',
+					],
+				];
+				$validator = Validator::make($request->all(), $validations, $error_messages);
+				if ($validator->fails()) {
+					return response()->json([
+						'success' => false,
+						'error' => 'Validation Error',
+						'errors' => $validator->errors()->all(),
+					]);
+				}
+
 				if ($request->expense_amount) {
 					// $expence_voucher_cashier_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3471, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 					$expense_voucher_advance_request_claim = ExpenseVoucherAdvanceRequestClaim::where('expense_voucher_advance_request_id', $request->reject)->first();
-					if($expense_voucher_advance_request_claim){
-						$expense_voucher_advance_request_claim->status_id = 3471;//Expense Claim Rejected
-						$expense_voucher_advance_request_claim->remarks = $request->remarks;
-						$expense_voucher_advance_request_claim->rejection_id = $request->rejection_id;
-						$expense_voucher_advance_request_claim->updated_by_id = Auth::user()->id;
-						$expense_voucher_advance_request_claim->save();
+					if(!$expense_voucher_advance_request_claim){
+						return response()->json([
+		                    'success' => false,
+		                    'error' => 'Validation Error',
+		                    'errors' => ['Expense voucher advance claim data not Found'],
+		                ]);
 					}
+
+					$expense_voucher_advance_request_claim->status_id = 3471;//Expense Claim Rejected
+					$expense_voucher_advance_request_claim->remarks = $request->remarks;
+					$expense_voucher_advance_request_claim->rejection_id = $request->rejection_id;
+					$expense_voucher_advance_request_claim->updated_by_id = Auth::user()->id;
+					$expense_voucher_advance_request_claim->save();
 				} else {
 					$expence_voucher_cashier_reject = ExpenseVoucherAdvanceRequest::where('id', $request->reject)->update(['status_id' => 3465, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 				}
@@ -467,9 +520,12 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 			return response()->json(['success' => true]);
 			$request->session()->flash('success', 'Expense Voucher Advance Manager Verification successfully!');
 			return response()->json(['success' => true]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json([
+				'success' => false,
+				'errors' => ['Error : ' . $e->getMessage() . '. Line : ' . $e->getLine() . '. File : ' . $e->getFile()],
+			]);
 		}
 	}
 }
