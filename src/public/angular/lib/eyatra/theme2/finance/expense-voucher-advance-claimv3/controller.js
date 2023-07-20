@@ -37,8 +37,9 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
                 { data: 'request_type', searchable: false },
-                { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
-                { data: 'advance_pcv_number', name: 'expense_voucher_advance_requests.number', searchable: true },
+                { data: 'request_number', searchable: false },
+                // { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
+                // { data: 'advance_pcv_number', name: 'expense_voucher_advance_requests.number', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'oname', name: 'outlets.name', searchable: true },

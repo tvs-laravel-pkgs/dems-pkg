@@ -25,6 +25,7 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 			'expense_voucher_advance_requests.status_id as status_id',
 			// 'configs.name as status'
 			DB::raw('IF(advance_pcv_claim_statuses.name IS NULL,configs.name,advance_pcv_claim_statuses.name) as status'),
+			DB::raw('IF(expense_voucher_advance_request_claims.number IS NULL,expense_voucher_advance_requests.number ,expense_voucher_advance_request_claims.number) as request_number'),
 			'expense_voucher_advance_requests.number as advance_pcv_number',
 			'expense_voucher_advance_request_claims.number as advance_pcv_claim_number'
 		)
@@ -70,9 +71,9 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 				</a>';
 			})
 			->addColumn('request_type', function ($expense_voucher_requests) {
-				$request_type = "Advance PCV";
+				$request_type = "PCV";
 				if($expense_voucher_requests->advance_pcv_claim_number){
-					$request_type = "Advance PCV Claim";
+					$request_type = "PCV Claim";
 				}
 				return $request_type;
 			})
