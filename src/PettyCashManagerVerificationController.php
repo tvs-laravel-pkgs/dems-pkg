@@ -88,6 +88,7 @@ class PettyCashManagerVerificationController extends Controller {
 
 	public function pettycashManagerVerificationView($type_id, $pettycash_id) {
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
+		$this->data['pcv_proof_view_pending_count'] = 0;
 		if ($type_id == 1) {
 			$this->data['petty_cash'] = $petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type', 'configs.name as status', 'petty_cash.employee_id', 'petty_cash.total')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
@@ -166,9 +167,15 @@ class PettyCashManagerVerificationController extends Controller {
 				->where('users.company_id', Auth::user()->company_id)
 				->first();
 			foreach ($petty_cash_other as $key => $value) {
-				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id','view_status')->get();
 				$value->attachments = $petty_cash_attachment;
 			}
+
+			$this->data['pcv_proof_view_pending_count'] = Attachment::where('attachment_of_id', 3441)
+				->where('attachment_type_id', 3200)
+				->where('view_status', 0)
+				->where('entity_id', $petty_cash_other[0]->id)
+				->count();
 		}
 		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
 		return response()->json($this->data);
@@ -252,6 +259,55 @@ class PettyCashManagerVerificationController extends Controller {
 				'errors' => [
 					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
 				],
+			]);
+		}
+	}
+
+	public function proofUploadViewStatusSave(Request $request) {
+		try {
+			$error_messages = [
+				'petty_cash_detail_id.required' => 'Petty cash detail ID is required',
+				'petty_cash_detail_id.integer' => 'Petty cash detail ID is invalid',
+				'petty_cash_detail_id.exists' => 'Petty cash detail is not found',
+				'attachment_id.required' => 'Attachment ID is required',
+				'attachment_id.integer' => 'Attachment ID is invalid',
+				'attachment_id.exists' => 'Attachment data is not found',
+			];
+			$validations = [
+				'petty_cash_detail_id' => 'required|integer|exists:petty_cash_employee_details,id',
+				'attachment_id' => 'required|integer|exists:attachments,id',
+			];
+			$validator = Validator::make($request->all(), $validations, $error_messages);
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => $validator->errors()->all(),
+				]);
+			}
+
+			DB::beginTransaction();
+			$attachment = Attachment::where('id', $request->attachment_id)->first();
+			$attachment->view_status = 1;
+			$attachment->save();
+
+			$pcv_proof_view_pending_count = Attachment::where('attachment_of_id', 3441)
+				->where('attachment_type_id', 3200)
+				->where('view_status', 0)
+				->where('entity_id', $request->petty_cash_detail_id)
+				->count();
+
+			DB::commit();
+			return response()->json([
+				'success' => true,
+				'attachment' => $attachment,
+				'pcv_proof_view_pending_count' => $pcv_proof_view_pending_count,
+			]);
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => ['Error : ' . $e->getMessage() . '. Line : ' . $e->getLine() . '. File : ' . $e->getFile()],
 			]);
 		}
 	}

@@ -488,6 +488,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/petty-cash/manager/get-list/', 'Uitoux\EYatra\PettyCashManagerVerificationController@listPettyCashVerificationManager')->name('listPettyCashVerificationManager');
 		Route::post('eyatra/petty-cash/manager/approve/save', 'Uitoux\EYatra\PettyCashManagerVerificationController@pettycashManagerVerificationSave')->name('pettycashManagerVerificationSave');
 		Route::get('eyatra/petty-cash/manager/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashManagerVerificationController@pettycashManagerVerificationView')->name('pettycashManagerVerificationView');
+		Route::post('petty-cash/proof-upload/view-status-save', 'Uitoux\EYatra\PettyCashManagerVerificationController@proofUploadViewStatusSave')->name('pettyCashProofUploadViewStatusSave');
 
 		//PETTY CASH VERIFICATION VIEW FOR FINANCE
 		Route::get('eyatra/petty-cash/finance/get-list/', 'Uitoux\EYatra\PettyCashFinanceVerificationController@listPettyCashVerificationFinance')->name('listPettyCashVerificationFinance');

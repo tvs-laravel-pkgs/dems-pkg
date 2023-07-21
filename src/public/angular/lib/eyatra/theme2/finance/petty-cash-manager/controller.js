@@ -118,7 +118,7 @@ app.component('eyatraPettyCashManagerList', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraPettyCashManagerView', {
     templateUrl: pettycash_manager_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $mdSelect) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $mdSelect, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -139,7 +139,39 @@ app.component('eyatraPettyCashManagerView', {
                 $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
 
+            if(response.data.pcv_proof_view_pending_count > 0){
+                self.show_pcv_process_btn = false;
+            }else{
+                self.show_pcv_process_btn = true;
+            }
         });
+
+        $scope.proofUploadViewHandler = function(pcv_detail_index,pcv_detail_id,attachment_id,attachment_index) {
+            $.ajax({
+                url: laravel_routes['pettyCashProofUploadViewStatusSave'],
+                method: "POST",
+                data: {
+                    attachment_id : attachment_id,
+                    petty_cash_detail_id : pcv_detail_id,
+                }
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    custom_noty('error', res.errors);
+                } else {
+                    self.petty_cash_other[pcv_detail_index].attachments[attachment_index].view_status = res.attachment.view_status;
+                    if(res.pcv_proof_view_pending_count > 0){
+                        self.show_pcv_process_btn = false;
+                    }else{
+                        self.show_pcv_process_btn = true;
+                    }
+                    $scope.$apply();
+                }
+            })
+            .fail(function(xhr) {
+                custom_noty('error', 'Something went wrong at server.');
+            });
+        }
 
         var form_id = '#approve';
         var v = jQuery(form_id).validate({
