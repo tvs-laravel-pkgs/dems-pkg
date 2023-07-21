@@ -46,6 +46,7 @@ app.component('eyatraPettyCashManagerList', {
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
                     { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
+                    { data: 'number', name: 'petty_cash.number', searchable: true },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },

@@ -11,12 +11,14 @@ use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
 use Yajra\Datatables\Datatables;
+use Validator;
 
 class PettyCashManagerVerificationController extends Controller {
 	public function listPettyCashVerificationManager(Request $r) {
 		// $type_id = $r->type_id;
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
+			'petty_cash.number',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
 			'petty_cash.total',
 			'users.name as ename',
@@ -129,7 +131,7 @@ class PettyCashManagerVerificationController extends Controller {
 			}
 
 		} elseif ($type_id == 2) {
-			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status')
+			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
@@ -173,10 +175,24 @@ class PettyCashManagerVerificationController extends Controller {
 	}
 
 	public function pettycashManagerVerificationSave(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
+				$validator = Validator::make($request->all(), [
+	                'approve' => [
+	                    'required',
+	                    'exists:petty_cash,id',
+	                ]
+	            ]);
+	            if ($validator->fails()) {
+	                return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => $validator->errors()->all(),
+	                ]);
+	            }
+
 				$employee_petty_cash_check = Employee::select(
 					'outlets.amount_eligible',
 					'outlets.amount_limit'
@@ -209,15 +225,34 @@ class PettyCashManagerVerificationController extends Controller {
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
+				$validator = Validator::make($request->all(), [
+	                'reject' => [
+	                    'required',
+	                    'exists:petty_cash,id',
+	                ]
+	            ]);
+	            if ($validator->fails()) {
+	                return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => $validator->errors()->all(),
+	                ]);
+	            }
+				
 				$petty_cash_manager_reject = PettyCash::where('id', $request->reject)->update(['status_id' => 3282, 'remarks' => $request->remarks, 'rejection_id' => $request->rejection_id, 'updated_by' => Auth::user()->id, 'approval_remarks' => NULL, 'updated_at' => Carbon::now()]);
 				DB::commit();
 				return response()->json(['success' => true]);
 			}
 			$request->session()->flash('success', 'Petty Cash Manager Verification successfully!');
 			return response()->json(['success' => true]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
 		}
 	}
 }

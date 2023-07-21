@@ -41,6 +41,7 @@ app.component('eyatraPettyCashList', {
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
                     { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
+                    { data: 'number', name: 'petty_cash.number', searchable: true },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
@@ -185,6 +186,8 @@ app.component('eyatraPettyCashForm', {
             console.log(self.petty_cash_others);
             self.user_role = response.data.user_role;
             self.emp_details = response.data.emp_details;
+            self.pcv_request_date_past_days = response.data.pcv_request_date_past_days;
+            self.pcv_invoice_date_past_days = response.data.pcv_invoice_date_past_days;
             self.petty_cash_removal_id = [];
             self.petty_cash_attach_removal_ids = [];
             self.petty_cash_other_removal_id = [];
@@ -219,9 +222,16 @@ app.component('eyatraPettyCashForm', {
                     self.localConveyanceCal();
                 }
 
-                $("#petty_cash_other_date, #petty_cash_other_invoice_date").datepicker({
+                $("#petty_cash_other_date").datepicker({
                     todayHighlight: true,
                     autoclose: true,
+                    startDate: '-'+ self.pcv_request_date_past_days +'d',
+                    endDate: "today",
+                });
+                $("#petty_cash_other_invoice_date").datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                    startDate: '-'+ self.pcv_invoice_date_past_days +'d',
                     endDate: "today",
                 });
             }, 500);

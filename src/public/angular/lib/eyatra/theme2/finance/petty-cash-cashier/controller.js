@@ -42,6 +42,7 @@ app.component('eyatraPettyCashCashierList', {
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
                     { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
+                    { data: 'number', name: 'petty_cash.number', searchable: true },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
@@ -112,6 +113,7 @@ app.component('eyatraPettyCashCashierView', {
             self.wallet_mode_list = response.data.wallet_mode_list;
             self.rejection_list = response.data.rejection_list;
             self.employee = response.data.employee;
+            self.cashier_payment_date = response.data.cashier_payment_date;
             console.log(self.employee);
             self.localconveyance_attachment_url = eyatra_petty_cash_local_conveyance_attachment_url;
             self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
@@ -144,6 +146,25 @@ app.component('eyatraPettyCashCashierView', {
             }
         });
 
+
+        self.searchCoaCodes = function(query) {
+            if (query) {
+                return new Promise(function(resolve, reject) {
+                    $http
+                        .post(
+                            laravel_routes['expenseVoucherAdvanceSearchOracleCoaCodes'], {
+                                key: query,
+                            }
+                        )
+                        .then(function(response) {
+                            resolve(response.data);
+                        });
+                });
+            } else {
+                return [];
+            }
+        }
+
         $.validator.addMethod('positiveNumber',
             function(value) {
                 return Number(value) > 0;
@@ -162,7 +183,7 @@ app.component('eyatraPettyCashCashierView', {
                     required: true,
                 },
                 'reference_number': {
-                    required: true,
+                    // required: true,
                 },
 
                 'date': {

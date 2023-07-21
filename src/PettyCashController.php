@@ -13,6 +13,9 @@ use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\AngularController;
+use App\FinancialYear;
+use App\SerialNumberGroup;
+use Validator;
 
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
@@ -30,6 +33,7 @@ class PettyCashController extends Controller {
 
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
+			'petty_cash.number',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
 			'petty_cash.total',
 			'users.name as ename',
@@ -102,6 +106,8 @@ class PettyCashController extends Controller {
 	public function pettycashFormData($type_id = NULL, $pettycash_id = NULL) {
 		//GET LOCALCONVEYANCE ID AND NAME
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
+		$pcv_request_date_past_days = Config::where('id', 4034)->first()->name;
+		$pcv_invoice_date_past_days = Config::where('id', 4035)->first()->name;
 
 		if (!$pettycash_id) {
 			$petty_cash = new PettyCashEmployeeDetails;
@@ -205,6 +211,8 @@ class PettyCashController extends Controller {
 			->first();
 		$this->data['user_role'] = $user_role;
 		$this->data['emp_details'] = $emp_details;
+		$this->data['pcv_request_date_past_days'] = $pcv_request_date_past_days;
+		$this->data['pcv_invoice_date_past_days'] = $pcv_invoice_date_past_days;
 		return response()->json($this->data);
 	}
 
@@ -311,7 +319,7 @@ class PettyCashController extends Controller {
 			//VIEW OTHER EXPENSE
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
-			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status')
+			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
@@ -596,6 +604,7 @@ class PettyCashController extends Controller {
 
 			//ADD PETTY CASH
 			$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
+			$petty_cash_employee_edit->company_id = Auth::user()->company_id;
 			$petty_cash_employee_edit->employee_id = $request->employee_id;
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
 			$petty_cash_employee_edit->status_id = 3280;
@@ -604,6 +613,60 @@ class PettyCashController extends Controller {
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
 			$petty_cash_employee_edit->updated_at = NULL;
 			$petty_cash_employee_edit->save();
+			if(empty($request->id) && $request->petty_cash_type_id == 3441){
+				$outlet_id = !empty(Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+				if (!$outlet_id) {
+					return response()->json([
+						'success' => false,
+						'errors' => 'Outlet not found!'
+					]);
+				}
+	            $financial_year = getFinancialYear();
+				$financial_year_id = FinancialYear::where('from', $financial_year)
+					->where('company_id', Auth::user()->company_id)
+					->pluck('id')
+					->first();
+				if (!$financial_year_id) {
+					return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => [
+	                        'Financial Year Not Found',
+	                    ],
+	                ]);
+				}
+
+	            $generate_number = SerialNumberGroup::generateNumber(6, $financial_year_id, $outlet_id);
+	            if (!$generate_number['success']) {
+	                return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => [
+	                        'No PCV Serial number found for FY : ' . $financial_year->from,
+	                    ],
+	                ]);
+	            }
+
+	            $error_messages = [
+	                'number.required' => 'Serial number is required',
+	                'number.unique' => 'Serial number is already taken',
+	            ];
+	            $validator = Validator::make($generate_number, [
+	                'number' => [
+	                    'required',
+	                    'unique:petty_cash,number',
+	                ],
+	            ], $error_messages);
+	            if ($validator->fails()) {
+	                return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => $validator->errors()->all(),
+	                ]);
+	            }
+	            $petty_cash_employee_edit->number = $generate_number['number'];
+	            $petty_cash_employee_edit->save();
+			}
 
 			//ADD LOCALCONVEYANCE
 			if ($request->type_id == 1) {
@@ -741,6 +804,13 @@ class PettyCashController extends Controller {
 						        } 
 		                        $petty_cash_other->gstin=$response['gstin'];
 							}
+                    	}else{
+                    		$petty_cash_other->invoice_date = null;
+							$petty_cash_other->invoice_amount = null;
+							$petty_cash_other->invoice_number = null;
+							$petty_cash_other->gstin = null;
+							$petty_cash_other->tax = null;
+
                     	}
 						//dd($petty_cash_data_other);
 						$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
