@@ -193,7 +193,7 @@ app.component('eyatraPettyCashForm', {
             self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
             if (self.action == 'Add') {
                 $.each(self.petty_cash_locals, function(index, value) {
-                    value.invoice = 1;
+                    // value.invoice = 1;
                 });
             }
             $("#employee_id").val(self.emp_details.emp_id);
@@ -218,7 +218,17 @@ app.component('eyatraPettyCashForm', {
                 } else { // LOCAL CONVEYANCE
                     self.localConveyanceCal();
                 }
+
+                $("#petty_cash_other_date, #petty_cash_other_invoice_date").datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                    endDate: "today",
+                });
             }, 500);
+
+
+
+
             $rootScope.loading = false;
         });
 
@@ -412,7 +422,7 @@ app.component('eyatraPettyCashForm', {
             $(self.petty_cash_others).each(function(key, value) {
                 let invoice_amount = parseFloat(value.invoice_amount || 0);
                 let amount = parseFloat(value.amount || 0);
-                if(value.invoice == 1){
+                if(value.invoice == 'Yes'){
                     //INVOICE
                    total_petty_cash_other_amount += invoice_amount;
                 }else{
@@ -469,7 +479,8 @@ app.component('eyatraPettyCashForm', {
                 amount: '',
                 tax: '',
                 remarks: '',
-                invoice: '0',
+                // invoice: '0',
+                invoice: 'No',
                 invoice_date: '',
                 invoice_amount: '',
                 invoice_no: '',
