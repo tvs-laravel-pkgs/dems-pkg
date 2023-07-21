@@ -115,6 +115,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id','view_status')->get();
 		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
 		$this->data['proof_view_pending_count'] = Attachment::where('attachment_of_id', 3442)
+			->where('attachment_type_id', 3200)
 			->where('view_status', 0)
 			->where('entity_id', $expense_voucher_view->id)
 			->count();
