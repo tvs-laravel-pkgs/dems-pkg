@@ -713,7 +713,7 @@ class PettyCashController extends Controller {
 									->where('attachment_type_id', 3200)
 									->where('entity_id', $petty_cash_data_other['petty_cash_other_id'])
 									->count();
-								if($pcv_attachment_count == 0){
+								if($pcv_attachment_count == 0 && empty($petty_cash_data_other['attachments'])){
 									return response()->json([
 										'success' => false,
 										'errors' => ['Kindly upload the proof attachement']
