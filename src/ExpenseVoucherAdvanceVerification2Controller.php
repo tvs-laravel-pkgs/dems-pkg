@@ -327,9 +327,9 @@ class ExpenseVoucherAdvanceVerification2Controller extends Controller {
 
 					if ($advance_petty_cash->advance_amount > $advance_pcv_claim->expense_amount) {
 						// $advance_petty_cash->status_id = 3472;
-						// $advance_pcv_claim->status_id = 3472; //Payment Pending from Employee
-						$advance_petty_cash->status_id = 3470; //Paid
-						$advance_pcv_claim->status_id = 3470; //Paid
+						$advance_pcv_claim->status_id = 3472; //Payment Pending from Employee
+						// $advance_petty_cash->status_id = 3470; //Paid
+						// $advance_pcv_claim->status_id = 3470; //Paid
 					} elseif ($advance_petty_cash->advance_amount < $advance_pcv_claim->expense_amount) {
 						$advance_petty_cash->status_id = 3470; //Paid
 						$advance_pcv_claim->status_id = 3470; //Paid

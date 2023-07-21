@@ -12,6 +12,7 @@ use Uitoux\EYatra\ExpenseVoucherAdvanceRequestClaim;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\ReimbursementTranscation;
 use Yajra\Datatables\Datatables;
+use Validator;
 
 class ExpenseAdvanceCahsierRepaidController extends Controller {
 	// public function listExpenseVoucherCashierRepaidList(Request $r) {
@@ -85,6 +86,7 @@ class ExpenseAdvanceCahsierRepaidController extends Controller {
 			'expense_voucher_advance_requests.advance_amount as advance_amount',
 			// DB::raw('IF(expense_voucher_advance_requests.balance_amount IS NULL,"--",expense_voucher_advance_requests.balance_amount) as balance_amount'),
 			DB::raw('IF(expense_voucher_advance_request_claims.balance_amount IS NULL,"--",expense_voucher_advance_request_claims.balance_amount) as balance_amount'),
+			'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
 			'expense_voucher_advance_requests.status_id as status_id',
 			'configs.name as status'
 		)
@@ -96,7 +98,7 @@ class ExpenseAdvanceCahsierRepaidController extends Controller {
 			->join('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
 			->join('configs', 'configs.id', 'expense_voucher_advance_request_claims.status_id')
 			// ->whereIn('expense_voucher_advance_requests.status_id', [3472])
-			->whereIn('expense_voucher_advance_request_claims.status_id', [3472])
+			->where('expense_voucher_advance_request_claims.status_id', 3472)
 			// ->where('expense_voucher_advance_requests.balance_amount', '>', 0)
 			->where('expense_voucher_advance_request_claims.balance_amount', '>', 0)
 			// ->whereNotNull('expense_voucher_advance_requests.balance_amount')
@@ -227,17 +229,45 @@ class ExpenseAdvanceCahsierRepaidController extends Controller {
 		//dd($request->all());
 		DB::beginTransaction();
 		try {
-			if ($request->id) {
-				$employee_expense_voucher_id = $request->id;
-			} else {
-				return back()->with('error', 'Expense Voucher Advance not found');
+			$error_messages = [
+				'id.required' => 'Expense voucher advance ID is required',
+				'id.exists' => 'Expense voucher advance data not found',
+			];
+			$validations = [
+				'id' => [
+					'required',
+					'exists:expense_voucher_advance_requests,id',
+				],
+			];
+			$validator = Validator::make($request->all(), $validations, $error_messages);
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => $validator->errors()->all(),
+				]);
 			}
+			$employee_expense_voucher_id = $request->id;
+			// if ($request->id) {
+			// 	$employee_expense_voucher_id = $request->id;
+			// } else {
+			// 	return back()->with('error', 'Expense Voucher Advance not found');
+			// }
 			$expense_voucher_advance = ExpenseVoucherAdvanceRequest::where('id', $employee_expense_voucher_id)->first();
 			// $expense_voucher_advance->status_id = 3473;
 			// $expense_voucher_advance->save();
 
 			$expense_voucher_advance_request_claim = ExpenseVoucherAdvanceRequestClaim::where('expense_voucher_advance_request_id', $employee_expense_voucher_id)->first();
-			$expense_voucher_advance_request_claim->status_id = 3473; //Employee Return balance Expense Amount
+			if(!$expense_voucher_advance_request_claim){
+				return response()->json([
+                    'success' => false,
+                    'error' => 'Validation Error',
+                    'errors' => ['Expense voucher advance claim data not Found'],
+                ]);
+			}
+
+			// $expense_voucher_advance_request_claim->status_id = 3473; //Employee Return balance Expense Amount
+			$expense_voucher_advance_request_claim->status_id = 3470; //PAID
 			$expense_voucher_advance_request_claim->save();
 
 			$outlet_id = $expense_voucher_advance->employee->outlet_id;
@@ -347,7 +377,8 @@ class ExpenseAdvanceCahsierRepaidController extends Controller {
 					// $expense_voucher_advance->save();
 
 					$expense_voucher_advance_request_claim = ExpenseVoucherAdvanceRequestClaim::where('expense_voucher_advance_request_id', $employee_expense_voucher_id)->first();
-					$expense_voucher_advance_request_claim->status_id = 3473; //Employee Return balance Expense Amount
+					// $expense_voucher_advance_request_claim->status_id = 3473; //Employee Return balance Expense Amount
+					$expense_voucher_advance_request_claim->status_id = 3470; //PAID
 					$expense_voucher_advance_request_claim->save(); 
 					$outlet_id = $expense_voucher_advance->employee->outlet_id;
 

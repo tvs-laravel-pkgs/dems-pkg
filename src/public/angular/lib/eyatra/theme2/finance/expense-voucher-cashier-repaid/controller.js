@@ -42,7 +42,8 @@ app.component('eyatraExpenseVoucherAdvanceCashierRepaidList', {
             columns: [
                 { data: 'checkbox', searchable: false },
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'id', name: 'expense_voucher_advance_requests.id', searchable: true },
+                // { data: 'id', name: 'expense_voucher_advance_requests.id', searchable: true },
+                { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
                 // { data: 'ecode', name: 'e.code', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: false },

@@ -31,8 +31,9 @@ class ExpenseVoucherAdvanceController extends Controller {
 			'expense_voucher_advance_requests.status_id as status_id',
 			'configs.name as status',
 			'expense_voucher_advance_request_claims.employee_return_payment_mode_id',
-			'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
-			'advance_pcv_claim_statuses.name as advance_pcv_claim_status',
+			// 'expense_voucher_advance_request_claims.number as advance_pcv_claim_number',
+			DB::raw('IF(expense_voucher_advance_request_claims.number IS NULL,"--",expense_voucher_advance_request_claims.number) as advance_pcv_claim_number'),
+			DB::raw('IF(advance_pcv_claim_statuses.name IS NULL,"--",advance_pcv_claim_statuses.name) as advance_pcv_claim_status'),			
 			'expense_voucher_advance_request_claims.status_id as advance_pcv_claim_status_id'
 		)
 			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
