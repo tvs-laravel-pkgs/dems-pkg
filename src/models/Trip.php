@@ -719,7 +719,7 @@ class Trip extends Model {
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-60 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
 		$data['is_self_booking_approval_must'] = Config::where('id', 3972)->first()->name;
-
+		$data['employee_return_payment_balance_cash_limit'] = Config::where('id', 4037)->first()->name;
 		return response()->json($data);
 	}
 
