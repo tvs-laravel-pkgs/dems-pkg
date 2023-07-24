@@ -149,6 +149,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_advance->id)->select('name', 'id')->get();
 		$expense_voucher_advance->attachments = $expense_voucher_advance_attachment;
 		$this->data['employee_return_payment_mode_list'] = Config::select('name', 'id')->where('config_type_id', 569)->orderBy('id', 'asc')->get();
+		$this->data['employee_return_balance_cash_limit'] = Config::where('id', 4036)->first()->name;
 
 		return response()->json($this->data);
 	}

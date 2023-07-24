@@ -290,6 +290,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             self.expense_voucher_advance_claim = response.data.expense_voucher_advance_claim;
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
             self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
+            self.employee_return_balance_cash_limit = response.data.employee_return_balance_cash_limit;
             self.expense_voucher_attach_removal_ids = [];
             // console.log(self.expense_voucher_advance_attachment_url);
 
@@ -377,7 +378,9 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                         if(!self.advane_balance_return_payment_mode_id){
                             // self.advane_balance_return_payment_mode_id = self.expense_voucher_advance.employee_return_payment_mode_id;
                             if(!self.expense_voucher_advance.employee_return_payment_mode_id){
-                                if(balance_amount < 1000){
+                                console.log("self.employee_return_balance_cash_limit")
+                                console.log(self.employee_return_balance_cash_limit)
+                                if(balance_amount < self.employee_return_balance_cash_limit){
                                     self.advane_balance_return_payment_mode_id = 4010; //CASH
                                 }else{
                                     self.advane_balance_return_payment_mode_id = 4011; //Bank Transfer
