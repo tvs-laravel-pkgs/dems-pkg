@@ -375,7 +375,16 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                         //BALANCE RETURN BY EMPLOYEE TO COMPANY
                         self.form_submit_type = 2;
                         if(!self.advane_balance_return_payment_mode_id){
-                            self.advane_balance_return_payment_mode_id = self.expense_voucher_advance.employee_return_payment_mode_id;   
+                            // self.advane_balance_return_payment_mode_id = self.expense_voucher_advance.employee_return_payment_mode_id;
+                            if(!self.expense_voucher_advance.employee_return_payment_mode_id){
+                                if(balance_amount < 1000){
+                                    self.advane_balance_return_payment_mode_id = 4010; //CASH
+                                }else{
+                                    self.advane_balance_return_payment_mode_id = 4011; //Bank Transfer
+                                }
+                            }else{
+                                self.advane_balance_return_payment_mode_id = self.expense_voucher_advance.employee_return_payment_mode_id;
+                            }       
                         }
                         
                         $("#employee-return-payment-modal").modal('show');
