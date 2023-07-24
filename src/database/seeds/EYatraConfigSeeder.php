@@ -91,6 +91,8 @@ class EYatraConfigSeeder extends Seeder {
 			575 => 'PCV - Invoice Date Past Days',
 			576 => 'Advance PCV - Employee Return Balance Cash Limit',
 			577 => 'Trip Claim - Employee Return Balance Cash Limit',
+			578 => 'Advance PCV - Is Financier Payment Date Should Be Current Date',
+			579 => 'PCV - Is Financier Payment Date Should Be Current Date',
 		];
 
 		$configs = [
@@ -1443,6 +1445,15 @@ class EYatraConfigSeeder extends Seeder {
 			4051 => [
 				'name' => 'View',
 				'config_type_id' => 520,
+			],
+			
+			4061 => [
+				'name' => 'Yes',
+				'config_type_id' => 578,
+			],
+			4062 => [
+				'name' => 'Yes',
+				'config_type_id' => 579,
 			],
 		];
 
