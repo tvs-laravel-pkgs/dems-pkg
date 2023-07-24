@@ -90,6 +90,7 @@ class EYatraConfigSeeder extends Seeder {
 			574 => 'PCV - Request Date Past Days',
 			575 => 'PCV - Invoice Date Past Days',
 			576 => 'Advance PCV - Employee Return Balance Cash Limit',
+			577 => 'Trip Claim - Employee Return Balance Cash Limit',
 		];
 
 		$configs = [
@@ -1425,6 +1426,10 @@ class EYatraConfigSeeder extends Seeder {
 			4036 => [
 				'name' => '1000',
 				'config_type_id' => 576,
+			],
+			4037 => [
+				'name' => '1000',
+				'config_type_id' => 577,
 			],
 		];
 
