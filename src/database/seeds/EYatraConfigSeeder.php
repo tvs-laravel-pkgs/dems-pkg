@@ -89,6 +89,7 @@ class EYatraConfigSeeder extends Seeder {
 			573 => 'PCV - Is Cashier Payment Date Should Be Current Date',
 			574 => 'PCV - Request Date Past Days',
 			575 => 'PCV - Invoice Date Past Days',
+			576 => 'Advance PCV - Employee Return Balance Cash Limit',
 		];
 
 		$configs = [
@@ -1420,6 +1421,10 @@ class EYatraConfigSeeder extends Seeder {
 			4035 => [
 				'name' => '5',
 				'config_type_id' => 575,
+			],
+			4036 => [
+				'name' => '1000',
+				'config_type_id' => 576,
 			],
 		];
 
