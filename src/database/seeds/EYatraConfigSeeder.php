@@ -1431,6 +1431,19 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => '1000',
 				'config_type_id' => 577,
 			],
+			4038 => [
+				'name' => 'Advance PCV Attachment',
+				'config_type_id' => 519,
+			],
+			4039 => [
+				'name' => 'PCV Attachment',
+				'config_type_id' => 519,
+			],
+
+			4051 => [
+				'name' => 'View',
+				'config_type_id' => 520,
+			],
 		];
 
 		//SAVING CONFIG TYPES
