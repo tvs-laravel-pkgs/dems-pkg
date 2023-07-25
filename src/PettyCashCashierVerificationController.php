@@ -87,6 +87,7 @@ class PettyCashCashierVerificationController extends Controller {
 	public function pettycashCashierVerificationView($type_id, $pettycash_id) {
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
 		$cashier_payment_date = null;
+		$proof_view_pending = false;
 		if ($type_id == 1) {
 			$this->data['petty_cash'] = $petty_cash = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date'), 'entities.name as expence_type_name', 'purpose.name as purpose_type', 'travel.name as travel_type', 'configs.name as status', 'petty_cash.employee_id', 'petty_cash.total', 'employees.payment_mode_id')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
@@ -171,7 +172,18 @@ class PettyCashCashierVerificationController extends Controller {
 				->first();
 			//dd($this->data['employee']);
 			foreach ($petty_cash_other as $key => $value) {
-				$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
+				// $petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
+				$petty_cash_attachment = Attachment::where('attachments.attachment_of_id', 3441)
+					->leftjoin('activity_logs as proof_activity_logs', function ($join) {
+						$join->on('proof_activity_logs.entity_id', 'attachments.id')
+							->where('proof_activity_logs.user_id', Auth::id())
+							->where('proof_activity_logs.entity_type_id', 4039) //PCV Attachment
+							->where('proof_activity_logs.activity_id', 4052); //Cashier View
+					})
+					->where('attachments.entity_id', $value->id)
+					->select('attachments.name', 'attachments.id',DB::raw('IF(proof_activity_logs.entity_id IS NULL,0 ,1) as view_status'))
+					->get();
+
 				$value->attachments = $petty_cash_attachment;
 			}
 
@@ -181,6 +193,23 @@ class PettyCashCashierVerificationController extends Controller {
 
 			$is_cashier_payment_date_should_be_current_date = Config::where('id', 4033)->first()->name;
 			$cashier_payment_date = $is_cashier_payment_date_should_be_current_date == "Yes" ? date('d-m-Y') : null;
+
+			$pcv_attachment_ids = Attachment::where('attachment_of_id', 3441)
+				->where('attachment_type_id', 3200)
+				->where('entity_id', $petty_cash_other[0]->id)
+				->pluck('id');
+			$pcv_attachment_count = Attachment::where('attachment_of_id', 3441)
+				->where('attachment_type_id', 3200)
+				->where('entity_id', $petty_cash_other[0]->id)
+				->count();
+			$viewed_attachment_count = ActivityLog::where('user_id' , Auth::id())
+				->whereIn('entity_id', $pcv_attachment_ids)
+				->where('entity_type_id', 4039) //PCV Attachment
+				->where('activity_id', 4052) //Cashier View
+				->count();
+			if($pcv_attachment_count > 0 && $pcv_attachment_count != $viewed_attachment_count){
+				$proof_view_pending = true;
+			}
 		}
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$this->data['payment_mode_list'] = $payment_mode_list;
@@ -205,6 +234,7 @@ class PettyCashCashierVerificationController extends Controller {
 
 		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
 		$this->data['cashier_payment_date'] = $cashier_payment_date;
+		$this->data['proof_view_pending'] = $proof_view_pending;
 		return response()->json($this->data);
 	}
 
@@ -347,17 +377,17 @@ class PettyCashCashierVerificationController extends Controller {
 
 				$employee = Employee::where('id', $request->emp_id)->first();
 				//Check Outlet have reimpursement amount or not
-				$outlet_reimbursement_amount = Outlet::where('id', $employee->outlet_id)->pluck('reimbursement_amount')->first();
-				if ($outlet_reimbursement_amount > 0) {
+				// $outlet_reimbursement_amount = Outlet::where('id', $employee->outlet_id)->pluck('reimbursement_amount')->first();
+				// if ($outlet_reimbursement_amount > 0) {
 					// $petty_cash_cashier_approve = PettyCash::where('id', $request->petty_cash_id)->update(['status_id' => 3283, 'remarks' => NULL, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
 					
 					$petty_cash_cashier_approve = PettyCash::where('id', $request->petty_cash_id)->first();
-					if(isset($request->coa_code1_id)){
-						$petty_cash_cashier_approve->coa_code1_id = $request->coa_code1_id;
-					}
-					if(isset($request->coa_code2_id)){
-						$petty_cash_cashier_approve->coa_code2_id = $request->coa_code2_id;
-					}
+					// if(isset($request->coa_code1_id)){
+					// 	$petty_cash_cashier_approve->coa_code1_id = $request->coa_code1_id;
+					// }
+					// if(isset($request->coa_code2_id)){
+					// 	$petty_cash_cashier_approve->coa_code2_id = $request->coa_code2_id;
+					// }
 					$petty_cash_cashier_approve->status_id = 3283;
 					$petty_cash_cashier_approve->remarks = null;
 					$petty_cash_cashier_approve->rejection_id = null;
@@ -365,59 +395,60 @@ class PettyCashCashierVerificationController extends Controller {
 					$petty_cash_cashier_approve->save();
 
 					//Reimbursement Transaction
-					$previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
+					// $previous_balance_amount = ReimbursementTranscation::where('outlet_id', Auth::user()->entity->outlet_id)->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->pluck('balance_amount')->first();
 					// dd($previous_balance_amount);
-					if ($previous_balance_amount) {
-						$balance_amount = $previous_balance_amount - $request->amount;
-						$reimbursementtranscation = new ReimbursementTranscation;
-						$reimbursementtranscation->outlet_id = $employee->outlet_id;
-						$reimbursementtranscation->company_id = Auth::user()->company_id;
-						if ($request->type_id == 1) {
-							$reimbursementtranscation->transcation_id = 3270;
-							$reimbursementtranscation->transcation_type = 3270;
-						} else {
-							$reimbursementtranscation->transcation_id = 3272;
-							$reimbursementtranscation->transcation_type = 3272;
-						}
-						$reimbursementtranscation->transaction_date = Carbon::now();
-						// $reimbursementtranscation->transcation_type = 3272;
-						$reimbursementtranscation->petty_cash_id = $request->petty_cash_id;
-						$reimbursementtranscation->amount = $request->amount;
-						$reimbursementtranscation->balance_amount = $balance_amount;
-						$reimbursementtranscation->save();
-						$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
+					// if ($previous_balance_amount) {
+					// 	$balance_amount = $previous_balance_amount - $request->amount;
+					// 	$reimbursementtranscation = new ReimbursementTranscation;
+					// 	$reimbursementtranscation->outlet_id = $employee->outlet_id;
+					// 	$reimbursementtranscation->company_id = Auth::user()->company_id;
+					// 	if ($request->type_id == 1) {
+					// 		$reimbursementtranscation->transcation_id = 3270;
+					// 		$reimbursementtranscation->transcation_type = 3270;
+					// 	} else {
+					// 		$reimbursementtranscation->transcation_id = 3272;
+					// 		$reimbursementtranscation->transcation_type = 3272;
+					// 	}
+					// 	$reimbursementtranscation->transaction_date = Carbon::now();
+					// 	// $reimbursementtranscation->transcation_type = 3272;
+					// 	$reimbursementtranscation->petty_cash_id = $request->petty_cash_id;
+					// 	$reimbursementtranscation->amount = $request->amount;
+					// 	$reimbursementtranscation->balance_amount = $balance_amount;
+					// 	$reimbursementtranscation->save();
+					// 	$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
 
-						//Outlet
-						$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
-					} else {
-						$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
-						// dd($outlet->reimbursement_amount);
-						if ($outlet->reimbursement_amount >= 0) {
-							$balance_amount = $outlet->reimbursement_amount - $request->amount;
-							$reimbursementtranscation = new ReimbursementTranscation;
-							$reimbursementtranscation->outlet_id = $employee->outlet_id;
-							$reimbursementtranscation->company_id = Auth::user()->company_id;
-							if ($request->type_id == 1) {
-								$reimbursementtranscation->transcation_id = 3270;
-								$reimbursementtranscation->transcation_type = 3270;
-							} else {
-								$reimbursementtranscation->transcation_id = 3272;
-								$reimbursementtranscation->transcation_type = 3272;
-							}
-							$reimbursementtranscation->transaction_date = Carbon::now();
-							// $reimbursementtranscation->transcation_type = 3272;
-							$reimbursementtranscation->petty_cash_id = $request->petty_cash_id;
-							$reimbursementtranscation->amount = $request->amount;
-							$reimbursementtranscation->balance_amount = $balance_amount;
-							$reimbursementtranscation->save();
-							$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
-						} else {
-							return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
-						}
-					}
+					// 	//Outlet
+					// 	$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->update(['reimbursement_amount' => $balance_amount]);
+					// } else {
+					// 	$outlet = Outlet::where('id', $employee->outlet_id)->where('company_id', Auth::user()->company_id)->select('reimbursement_amount')->first();
+					// 	// dd($outlet->reimbursement_amount);
+					// 	if ($outlet->reimbursement_amount >= 0) {
+					// 		$balance_amount = $outlet->reimbursement_amount - $request->amount;
+					// 		$reimbursementtranscation = new ReimbursementTranscation;
+					// 		$reimbursementtranscation->outlet_id = $employee->outlet_id;
+					// 		$reimbursementtranscation->company_id = Auth::user()->company_id;
+					// 		if ($request->type_id == 1) {
+					// 			$reimbursementtranscation->transcation_id = 3270;
+					// 			$reimbursementtranscation->transcation_type = 3270;
+					// 		} else {
+					// 			$reimbursementtranscation->transcation_id = 3272;
+					// 			$reimbursementtranscation->transcation_type = 3272;
+					// 		}
+					// 		$reimbursementtranscation->transaction_date = Carbon::now();
+					// 		// $reimbursementtranscation->transcation_type = 3272;
+					// 		$reimbursementtranscation->petty_cash_id = $request->petty_cash_id;
+					// 		$reimbursementtranscation->amount = $request->amount;
+					// 		$reimbursementtranscation->balance_amount = $balance_amount;
+					// 		$reimbursementtranscation->save();
+					// 		$outlet = Outlet::where('id', $employee->outlet_id)->update(['reimbursement_amount' => $balance_amount, 'updated_at' => Carbon::now()]);
+					// 	} else {
+					// 		return response()->json(['success' => false, 'errors' => ['This outlet has no expense voucher amount']]);
+					// 	}
+					// }
 					//PAYMENT SAVE
 					if ($request->type_id == 1) {
-						$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3253, 'payment_mode_id' => $request->payment_mode_id]);
+						// $payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3253, 'payment_mode_id' => $request->payment_mode_id]);
+						$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3253, 'payment_mode_id' => 3244]);
 						$payment->fill($request->all());
 						$payment->date = date('Y-m-d', strtotime($request->date));
 						$payment->payment_of_id = 3253;
@@ -430,7 +461,8 @@ class PettyCashCashierVerificationController extends Controller {
 						$activity['activity'] = "paid";
 						$activity_log = ActivityLog::saveLog($activity);
 					} elseif ($request->type_id == 2) {
-						$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
+						// $payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3254, 'payment_mode_id' => $request->payment_mode_id]);
+						$payment = Payment::firstOrNew(['entity_id' => $request->petty_cash_id, 'payment_of_id' => 3254, 'payment_mode_id' => 3244]);
 						$payment->fill($request->all());
 						$payment->date = date('Y-m-d', strtotime($request->date));
 						$payment->payment_of_id = 3254;
@@ -456,9 +488,9 @@ class PettyCashCashierVerificationController extends Controller {
 
 					DB::commit();
 					return response()->json(['success' => true]);
-				} else {
-					return response()->json(['success' => false, 'errors' => ['This outlet has no reimbursement amount']]);
-				}
+				// } else {
+				// 	return response()->json(['success' => false, 'errors' => ['This outlet has no reimbursement amount']]);
+				// }
 			} else {
 				$validator = Validator::make($request->all(), [
 	                'reject' => [
@@ -487,5 +519,11 @@ class PettyCashCashierVerificationController extends Controller {
 				],
 			]);
 		}
+	}
+
+	public function proofViewSave(Request $request) {
+		$request->request->add(['activity' => 'Cashier View']);
+		$request->request->add(['activity_id' => 4052]);  //Cashier View
+		return PettyCashEmployeeDetails::proofViewSave($request);
 	}
 }

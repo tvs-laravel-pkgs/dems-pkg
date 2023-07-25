@@ -12,6 +12,7 @@ use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequestClaim;
 use Yajra\Datatables\Datatables;
 use Validator;
+use Uitoux\EYatra\ActivityLog;
 
 class ExpenseVoucherAdvanceVerificationController extends Controller {
 
@@ -112,13 +113,44 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 		// 	->first();
 		$this->data['expense_voucher_view'] = $expense_voucher_view = ExpenseVoucherAdvanceRequest::getExpenseVoucherAdvanceRequestData($id);
 		$this->data['rejection_list'] = Entity::select('name', 'id')->where('entity_type_id', 511)->where('company_id', Auth::user()->company_id)->get();
-		$expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id','view_status')->get();
+		// $expense_voucher_advance_attachment = Attachment::where('attachment_of_id', 3442)->where('entity_id', $expense_voucher_view->id)->select('name', 'id','view_status')->get();
+		$expense_voucher_advance_attachment = Attachment::where('attachments.attachment_of_id', 3442)
+			->leftjoin('activity_logs as proof_activity_logs', function ($join) {
+				$join->on('proof_activity_logs.entity_id', 'attachments.id')
+					->where('proof_activity_logs.user_id', Auth::id())
+					->where('proof_activity_logs.entity_type_id', 4038) //Advance PCV Attachment
+					->where('proof_activity_logs.activity_id', 4051); //Manager View
+			})
+			->where('attachments.entity_id', $expense_voucher_view->id)
+			->select('attachments.name', 'attachments.id',DB::raw('IF(proof_activity_logs.entity_id IS NULL,0 ,1) as view_status'))
+			->get();
 		$expense_voucher_view->attachments = $expense_voucher_advance_attachment;
-		$this->data['proof_view_pending_count'] = Attachment::where('attachment_of_id', 3442)
+		// $this->data['proof_view_pending_count'] = Attachment::where('attachment_of_id', 3442)
+		// 	->where('attachment_type_id', 3200)
+		// 	->where('view_status', 0)
+		// 	->where('entity_id', $expense_voucher_view->id)
+		// 	->count();
+
+		$advance_pcv_attachment_ids = Attachment::where('attachment_of_id', 3442)
 			->where('attachment_type_id', 3200)
-			->where('view_status', 0)
+			->where('entity_id', $expense_voucher_view->id)
+			->pluck('id');
+		$advance_pcv_attachment_count = Attachment::where('attachment_of_id', 3442)
+			->where('attachment_type_id', 3200)
 			->where('entity_id', $expense_voucher_view->id)
 			->count();
+		$viewed_attachment_count = ActivityLog::where('user_id' , Auth::id())
+			->whereIn('entity_id', $advance_pcv_attachment_ids)
+			->where('entity_type_id', 4038) //Advance PCV Attachment
+			->where('activity_id', 4051) //Manager View
+			->count();
+
+		$proof_view_pending = false;	
+		if($advance_pcv_attachment_count && $advance_pcv_attachment_count != $viewed_attachment_count){
+			$proof_view_pending = true;
+		}
+		$this->data['proof_view_pending'] = $proof_view_pending;
+
 		return response()->json($this->data);
 	}
 
@@ -324,52 +356,58 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 		}
 	}
 
-	public function proofUploadViewStatusUpdate(Request $request) {
-		try {
-			$error_messages = [
-				'expense_voucher_advance_request_id.required' => 'Expense Voucher Advance Request ID is required',
-				'expense_voucher_advance_request_id.integer' => 'Expense Voucher Advance Request ID is invalid',
-				'expense_voucher_advance_request_id.exists' => 'Expense Voucher Advance Request data is not found',
-				'attachment_id.required' => 'Attachment ID is required',
-				'attachment_id.integer' => 'Attachment ID is invalid',
-				'attachment_id.exists' => 'Attachment data is not found',
-			];
-			$validations = [
-				'expense_voucher_advance_request_id' => 'required|integer|exists:expense_voucher_advance_requests,id',
-				'attachment_id' => 'required|integer|exists:attachments,id',
-			];
-			$validator = Validator::make($request->all(), $validations, $error_messages);
-			if ($validator->fails()) {
-				return response()->json([
-					'success' => false,
-					'error' => 'Validation Error',
-					'errors' => $validator->errors()->all(),
-				]);
-			}
+	// public function proofUploadViewStatusUpdate(Request $request) {
+	// 	try {
+	// 		$error_messages = [
+	// 			'expense_voucher_advance_request_id.required' => 'Expense Voucher Advance Request ID is required',
+	// 			'expense_voucher_advance_request_id.integer' => 'Expense Voucher Advance Request ID is invalid',
+	// 			'expense_voucher_advance_request_id.exists' => 'Expense Voucher Advance Request data is not found',
+	// 			'attachment_id.required' => 'Attachment ID is required',
+	// 			'attachment_id.integer' => 'Attachment ID is invalid',
+	// 			'attachment_id.exists' => 'Attachment data is not found',
+	// 		];
+	// 		$validations = [
+	// 			'expense_voucher_advance_request_id' => 'required|integer|exists:expense_voucher_advance_requests,id',
+	// 			'attachment_id' => 'required|integer|exists:attachments,id',
+	// 		];
+	// 		$validator = Validator::make($request->all(), $validations, $error_messages);
+	// 		if ($validator->fails()) {
+	// 			return response()->json([
+	// 				'success' => false,
+	// 				'error' => 'Validation Error',
+	// 				'errors' => $validator->errors()->all(),
+	// 			]);
+	// 		}
 
-			DB::beginTransaction();
-			$attachment = Attachment::where('id', $request->attachment_id)->first();
-			$attachment->view_status = 1;
-			$attachment->save();
+	// 		DB::beginTransaction();
+	// 		$attachment = Attachment::where('id', $request->attachment_id)->first();
+	// 		$attachment->view_status = 1;
+	// 		$attachment->save();
 
-			$proof_view_pending_count = Attachment::where('attachment_of_id', 3442)
-				->where('attachment_type_id', 3200)
-				->where('view_status', 0)
-				->where('entity_id', $request->expense_voucher_advance_request_id)
-				->count();
+	// 		$proof_view_pending_count = Attachment::where('attachment_of_id', 3442)
+	// 			->where('attachment_type_id', 3200)
+	// 			->where('view_status', 0)
+	// 			->where('entity_id', $request->expense_voucher_advance_request_id)
+	// 			->count();
 
-			DB::commit();
-			return response()->json([
-				'success' => true,
-				'attachment' => $attachment,
-				'proof_view_pending_count' => $proof_view_pending_count,
-			]);
-		} catch (\Exception $e) {
-			DB::rollBack();
-			return response()->json([
-				'success' => false,
-				'errors' => ['Error : ' . $e->getMessage() . '. Line : ' . $e->getLine() . '. File : ' . $e->getFile()],
-			]);
-		}
+	// 		DB::commit();
+	// 		return response()->json([
+	// 			'success' => true,
+	// 			'attachment' => $attachment,
+	// 			'proof_view_pending_count' => $proof_view_pending_count,
+	// 		]);
+	// 	} catch (\Exception $e) {
+	// 		DB::rollBack();
+	// 		return response()->json([
+	// 			'success' => false,
+	// 			'errors' => ['Error : ' . $e->getMessage() . '. Line : ' . $e->getLine() . '. File : ' . $e->getFile()],
+	// 		]);
+	// 	}
+	// }
+
+	public function proofViewUpdate(Request $request) {
+		$request->request->add(['activity' => 'Manager View']);
+		$request->request->add(['activity_id' => 4051]);  //Manager View
+		return ExpenseVoucherAdvanceRequest::proofViewUpdate($request);
 	}
 }

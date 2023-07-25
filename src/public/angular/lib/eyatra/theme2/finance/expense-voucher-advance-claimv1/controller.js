@@ -104,7 +104,13 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
             self.expense_voucher_view = response.data.expense_voucher_view;
             self.rejection_list = response.data.rejection_list;
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
-            if(response.data.proof_view_pending_count > 0){
+            // if(response.data.proof_view_pending_count > 0){
+            //     self.show_pcv_expense_process_btn = false;
+            // }else{
+            //     self.show_pcv_expense_process_btn = true;
+            // }
+
+            if(response.data.proof_view_pending == true){
                 self.show_pcv_expense_process_btn = false;
             }else{
                 self.show_pcv_expense_process_btn = true;
@@ -222,12 +228,17 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
             }
         });
 
-        $scope.proofUploadViewHandler = function(id,index) {
+        $scope.proofUploadViewHandler = function(attachment, index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
             $.ajax({
-                url: laravel_routes['expenseVoucherAdvanceProofUploadViewStatusUpdate'],
+                url: laravel_routes['expenseVoucherAdvanceManagerProofViewUpdate'],
                 method: "POST",
                 data: {
-                    attachment_id : id,
+                    attachment_id : attachment.id,
                     expense_voucher_advance_request_id : self.expense_voucher_view.id,
                 }
             })
@@ -235,8 +246,8 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                 if (!res.success) {
                     custom_noty('error', res.errors);
                 } else {
-                    self.expense_voucher_view.attachments[index].view_status = res.attachment.view_status;
-                    if(res.proof_view_pending_count > 0){
+                    self.expense_voucher_view.attachments[index].view_status = 1; //VIEWED
+                    if(res.proof_view_pending == true){
                         self.show_pcv_expense_process_btn = false;
                     }else{
                         self.show_pcv_expense_process_btn = true;

@@ -2,7 +2,12 @@
 
 namespace Uitoux\EYatra;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use DB;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Uitoux\EYatra\ActivityLog;
+use Validator;
+use Auth;
 
 class ExpenseVoucherAdvanceRequest extends Model {
 	use SoftDeletes;
@@ -57,5 +62,75 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			->where('expense_voucher_advance_requests.id', $id)
 			->first();
 		return $expense_voucher_advance_request;
+	}
+
+	public static function proofViewUpdate(Request $request){
+		try {
+			$error_messages = [
+				'attachment_id.required' => 'Attachment ID is required',
+				'attachment_id.integer' => 'Attachment ID is invalid',
+				'attachment_id.exists' => 'Attachment data is not found',
+				'expense_voucher_advance_request_id.required' => 'Expense Voucher Advance Request ID is required',
+				'expense_voucher_advance_request_id.integer' => 'Expense Voucher Advance Request ID is invalid',
+				'expense_voucher_advance_request_id.exists' => 'Expense Voucher Advance Request data is not found',
+				'activity_id.required' => 'Activity ID is required',
+				'activity_id.integer' => 'Activity ID is invalid',
+				'activity_id.exists' => 'Activity data is not found',
+				'activity.required' => 'Activity is required',
+			];
+			$validations = [
+				'attachment_id' => 'required|integer|exists:attachments,id',
+				'expense_voucher_advance_request_id' => 'required|integer|exists:expense_voucher_advance_requests,id',
+				'activity_id' => 'required|integer|exists:configs,id',
+				'activity' => 'required',
+			];
+			$validator = Validator::make($request->all(), $validations, $error_messages);
+			if ($validator->fails()) {
+				return response()->json([
+					'success' => false,
+					'error' => 'Validation Error',
+					'errors' => $validator->errors()->all(),
+				]);
+			}
+
+			DB::beginTransaction();
+
+			$activity['entity_id'] = $request->attachment_id;
+			$activity['entity_type'] = 'Advance PCV Attachment';
+			$activity['details'] = "Attachment is viewed";
+			$activity['activity'] = $request->activity;
+			$activity_log = ActivityLog::saveLog($activity);
+
+			$advance_pcv_attachment_ids = Attachment::where('attachment_of_id', 3442)
+				->where('attachment_type_id', 3200)
+				->where('entity_id', $request->expense_voucher_advance_request_id)
+				->pluck('id');
+			$advance_pcv_attachment_count = Attachment::where('attachment_of_id', 3442)
+				->where('attachment_type_id', 3200)
+				->where('entity_id', $request->expense_voucher_advance_request_id)
+				->count();
+			$viewed_attachment_count = ActivityLog::where('user_id' , Auth::id())
+				->whereIn('entity_id', $advance_pcv_attachment_ids)
+				->where('entity_type_id', 4038)
+				->where('activity_id', $request->activity_id)
+				->count();
+
+			$proof_view_pending = false;	
+			if($advance_pcv_attachment_count != $viewed_attachment_count){
+				$proof_view_pending = true;
+			}
+
+			DB::commit();
+			return response()->json([
+				'success' => true,
+				'proof_view_pending' => $proof_view_pending,
+			]);
+		} catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => ['Error : ' . $e->getMessage() . '. Line : ' . $e->getLine() . '. File : ' . $e->getFile()],
+			]);
+		}
 	}
 }

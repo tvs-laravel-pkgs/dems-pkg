@@ -291,6 +291,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
             self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
             self.employee_return_balance_cash_limit = response.data.employee_return_balance_cash_limit;
+            self.company = response.data.company_data;
             self.expense_voucher_attach_removal_ids = [];
             // console.log(self.expense_voucher_advance_attachment_url);
 

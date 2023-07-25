@@ -134,6 +134,13 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             } else {
                 self.type_id = 0;
             }
+
+            if(response.data.proof_view_pending == true){
+                self.show_pcv_expense_process_btn = false;
+            }else{
+                self.show_pcv_expense_process_btn = true;
+            }
+            self.financiar_payment_date = response.data.financiar_payment_date;
         });
 
         $(".bottom-expand-btn").on('click', function() {
@@ -183,7 +190,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                     required: true,
                 },
                 'reference_number': {
-                    required: true,
+                    // required: true,
                     maxlength: 100,
                     minlength: 3,
                 },
@@ -318,6 +325,39 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                     });
             },
         });
+
+        $scope.proofUploadViewHandler = function(attachment, index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
+            $.ajax({
+                url: laravel_routes['expenseVoucherAdvanceFinanciarProofViewUpdate'],
+                method: "POST",
+                data: {
+                    attachment_id : attachment.id,
+                    expense_voucher_advance_request_id : self.expense_voucher_view.id,
+                }
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    custom_noty('error', res.errors);
+                } else {
+                    self.expense_voucher_view.attachments[index].view_status = 1; //VIEWED
+                    if(res.proof_view_pending == true){
+                        self.show_pcv_expense_process_btn = false;
+                    }else{
+                        self.show_pcv_expense_process_btn = true;
+                    }
+                    $scope.$apply();
+                }
+            })
+            .fail(function(xhr) {
+                custom_noty('error', 'Something went wrong at server.');
+            });
+        }
+
         /* Modal Md Select Hide */
         $('.modal').bind('click', function(event) {
             if ($('.md-select-menu-container').hasClass('md-active')) {

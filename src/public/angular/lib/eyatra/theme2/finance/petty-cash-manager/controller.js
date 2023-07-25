@@ -139,19 +139,24 @@ app.component('eyatraPettyCashManagerView', {
                 $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
 
-            if(response.data.pcv_proof_view_pending_count > 0){
+            if(response.data.proof_view_pending == true){
                 self.show_pcv_process_btn = false;
             }else{
                 self.show_pcv_process_btn = true;
             }
         });
 
-        $scope.proofUploadViewHandler = function(pcv_detail_index,pcv_detail_id,attachment_id,attachment_index) {
+        $scope.proofUploadViewHandler = function(pcv_detail_index,pcv_detail_id,attachment,attachment_index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
             $.ajax({
-                url: laravel_routes['pettyCashProofUploadViewStatusSave'],
+                url: laravel_routes['pettyCashProofManagerViewSave'],
                 method: "POST",
                 data: {
-                    attachment_id : attachment_id,
+                    attachment_id : attachment.id,
                     petty_cash_detail_id : pcv_detail_id,
                 }
             })
@@ -159,8 +164,9 @@ app.component('eyatraPettyCashManagerView', {
                 if (!res.success) {
                     custom_noty('error', res.errors);
                 } else {
-                    self.petty_cash_other[pcv_detail_index].attachments[attachment_index].view_status = res.attachment.view_status;
-                    if(res.pcv_proof_view_pending_count > 0){
+                    // self.petty_cash_other[pcv_detail_index].attachments[attachment_index].view_status = res.attachment.view_status;
+                    self.petty_cash_other[pcv_detail_index].attachments[attachment_index].view_status = 1;
+                    if(res.proof_view_pending == true){
                         self.show_pcv_process_btn = false;
                     }else{
                         self.show_pcv_process_btn = true;

@@ -129,6 +129,11 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
             console.log($scope.showApproveLayout);
             console.log($scope.showApproveModal);
 
+            if(response.data.proof_view_pending == true){
+                self.show_pcv_expense_process_btn = false;
+            }else{
+                self.show_pcv_expense_process_btn = true;
+            }
         });
 
         $(".bottom-expand-btn").on('click', function() {
@@ -181,10 +186,10 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
         }
 
         $scope.approveModalHandler = function(){
-            if(!self.coa_code1_detail){
-                custom_noty('error', 'Kindly select the coa code');
-                return;
-            }
+            // if(!self.coa_code1_detail){
+            //     custom_noty('error', 'Kindly select the coa code');
+            //     return;
+            // }
             $("#alert-modal-approve").modal('show');
         }
 
@@ -348,6 +353,39 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
                     });
             },
         });
+
+        $scope.proofUploadViewHandler = function(attachment, index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
+            $.ajax({
+                url: laravel_routes['expenseVoucherAdvanceCashierProofViewUpdate'],
+                method: "POST",
+                data: {
+                    attachment_id : attachment.id,
+                    expense_voucher_advance_request_id : self.expense_voucher_view.id,
+                }
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    custom_noty('error', res.errors);
+                } else {
+                    self.expense_voucher_view.attachments[index].view_status = 1; //VIEWED
+                    if(res.proof_view_pending == true){
+                        self.show_pcv_expense_process_btn = false;
+                    }else{
+                        self.show_pcv_expense_process_btn = true;
+                    }
+                    $scope.$apply();
+                }
+            })
+            .fail(function(xhr) {
+                custom_noty('error', 'Something went wrong at server.');
+            });
+        }
+        
         /* Modal Md Select Hide */
         $('.modal').bind('click', function(event) {
             if ($('.md-select-menu-container').hasClass('md-active')) {

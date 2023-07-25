@@ -150,7 +150,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 		$expense_voucher_advance->attachments = $expense_voucher_advance_attachment;
 		$this->data['employee_return_payment_mode_list'] = Config::select('name', 'id')->where('config_type_id', 569)->orderBy('id', 'asc')->get();
 		$this->data['employee_return_balance_cash_limit'] = Config::where('id', 4036)->first()->name;
-
+		$this->data['company_data'] = Company::where('id', Auth::user()->company_id)->first();
 		return response()->json($this->data);
 	}
 
@@ -520,15 +520,15 @@ class ExpenseVoucherAdvanceController extends Controller {
 	                ]);
 	            }
 
-	            $advance_pcv_natural_account_code = Config::where('id', 4031)->first()->name;
-	            $coa_code_id = CoaCode::where('oracle_code', $advance_pcv_natural_account_code)
-	            	->pluck('id')
-	            	->first();
+	            // $advance_pcv_natural_account_code = Config::where('id', 4031)->first()->name;
+	            // $coa_code_id = CoaCode::where('oracle_code', $advance_pcv_natural_account_code)
+	            // 	->pluck('id')
+	            // 	->first();
 				$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 				$expense_voucher_advance->company_id = Auth::user()->company_id;
 				$expense_voucher_advance->number = $generate_number['number'];
 				$expense_voucher_advance->created_by = Auth::user()->id;
-				$expense_voucher_advance->coa_code_id = $coa_code_id;
+				// $expense_voucher_advance->coa_code_id = $coa_code_id;
 				$expense_voucher_advance->status_id = 3460;//Waiting for Manager Approval
 			}
 
