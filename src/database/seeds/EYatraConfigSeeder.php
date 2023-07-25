@@ -1443,7 +1443,15 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			4051 => [
-				'name' => 'View',
+				'name' => 'Manager View',
+				'config_type_id' => 520,
+			],
+			4052 => [
+				'name' => 'Cashier View',
+				'config_type_id' => 520,
+			],
+			4053 => [
+				'name' => 'Financier View',
 				'config_type_id' => 520,
 			],
 			
