@@ -331,6 +331,7 @@ app.component('eyatraTripClaimForm', {
             self.extras = response.data.extras;
             self.trip = response.data.trip;
             self.employee_return_payment_balance_cash_limit = response.data.employee_return_payment_balance_cash_limit;
+            self.company_data = response.data.company_data;
             self.transport_attachments = response.data.trip.transport_attachments;
             self.lodging_attachments = response.data.trip.lodging_attachments;
             self.boarding_attachments = response.data.trip.boarding_attachments;

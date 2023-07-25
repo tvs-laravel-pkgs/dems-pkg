@@ -719,7 +719,6 @@ class Trip extends Model {
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-60 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
 		$data['is_self_booking_approval_must'] = Config::where('id', 3972)->first()->name;
-		$data['employee_return_payment_balance_cash_limit'] = Config::where('id', 4037)->first()->name;
 		return response()->json($data);
 	}
 
@@ -1742,7 +1741,8 @@ class Trip extends Model {
 			->where('operating_states.company_id', Auth::user()->company_id)
 			->pluck('nstates.gstin_state_code');
 		$data['employee_return_payment_mode_list'] = collect(Config::select('name', 'id')->where('config_type_id', 569)->orderBy('id', 'asc')->get());
-
+		$data['employee_return_payment_balance_cash_limit'] = Config::where('id', 4037)->first()->name;
+		$data['company_data'] = Company::select('id','transfer_bank_name','transfer_account_number','transfer_ifsc_code')->where('id', Auth::user()->company_id)->first();
 		return response()->json($data);
 	}
 
