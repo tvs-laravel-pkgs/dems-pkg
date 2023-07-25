@@ -341,7 +341,7 @@ class Employee extends Model {
 			->leftjoin('companies as reporting_to_grade_companies', 'reporting_to_grade_companies.id', 'reporting_to_grades.company_id')
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereBetween('employees.created_at', [$fromDateTime, $toDateTime])
-			->whereIn('employees.lob_id', [4, 15, 12]) //DLOB, OESL, DSBU
+			->whereIn('employees.lob_id', [4, 15, 12, 8]) //DLOB, OESL, DSBU, SS
 			->get();
 
 		if (count($hrmsEmployees) == 0) {
@@ -559,8 +559,16 @@ class Employee extends Model {
 									}
 								}else if ($hrmsEmployee->lob_code == 'OESL') {
 									$businessId = 2; //OESL
+								}else if ($hrmsEmployee->lob_code == 'SS') {
+									if ((strpos(strtolower($hrmsEmployee->sbu_code), 'common') !== false)||
+									(strpos(strtolower($hrmsEmployee->sbu_code), 'f&a') !== false)||
+									(strpos(strtolower($hrmsEmployee->sbu_code), 'psd') !== false)||
+									(strpos(strtolower($hrmsEmployee->sbu_code), 'ipm') !== false)||
+									(strpos(strtolower($hrmsEmployee->sbu_code), 'its') !== false)||
+									(strpos(strtolower($hrmsEmployee->sbu_code), 'kmic') !== false)) {
+										$businessId = 1; //DLOB
+									}
 								}
-
 								if ($businessId && $hrmsEmployee->function_name) {
 									$funcCompanyId = Company::where('code', $hrmsEmployee->func_company_adre_code)->pluck('id')->first();
 									if (!$funcCompanyId) {
@@ -1096,8 +1104,8 @@ class Employee extends Model {
 				->where('employees.id', $employeeId)
 				->first();
 
-			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL, DSBU
-			if (!in_array($hrmsEmployee->lob_id, [4, 15, 12])) {
+			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL, DSBU, SS
+			if (!in_array($hrmsEmployee->lob_id, [4, 15, 12, 8])) {
 				continue;
 			}
 
@@ -1303,12 +1311,21 @@ class Employee extends Model {
 									} else {
 										$businessId = 1; //DLOB
 									}
-								}else if ($employeeUpdateDetail['employee']->lob_code == 'DSBU') {
+								} else if ($employeeUpdateDetail['employee']->lob_code == 'DSBU') {
 									if (strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'dist') !== false) {
 										$businessId = 1; //DLOB
 									}
 								} else if ($employeeUpdateDetail['employee']->lob_code == 'OESL') {
 									$businessId = 2; //OESL
+								} else if ($employeeUpdateDetail['employee']->lob_code == 'SS') {
+									if ((strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'common') !== false)||
+									(strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'f&a') !== false)||
+									(strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'psd') !== false)||
+									(strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'ipm') !== false)||
+									(strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'its') !== false)||
+									(strpos(strtolower($employeeUpdateDetail['employee']->sbu_code), 'kmic') !== false)) {
+										$businessId = 1; //DLOB
+									}
 								}
 
 								if ($businessId && !empty($employeeUpdateDetail['function']->function_name)) {
@@ -1546,7 +1563,7 @@ class Employee extends Model {
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereNotNull('employees.deleted_at')
 			->whereBetween('employees.deleted_at', [$fromDateTime, $toDateTime])
-			->whereIn('employees.lob_id', [4, 15, 12]) //DLOB, OESL, DSBU
+			->whereIn('employees.lob_id', [4, 15, 12, 8]) //DLOB, OESL, DSBU, SS
 			->get();
 
 		if (count($hrmsDeletionEmployees) == 0) {
@@ -1790,7 +1807,7 @@ class Employee extends Model {
 			->leftjoin('companies as reporting_to_companies', 'reporting_to_companies.id', 'reporting_to_employees.company_id')
 			->where('employees.company_id', $hrmsCompanyId)
 			->whereBetween('employees.updated_at', [$fromDateTime, $toDateTime])
-			->whereIn('employees.lob_id', [4, 15, 12]) //DLOB, OESL, DSBU
+			->whereIn('employees.lob_id', [4, 15, 12, 8]) //DLOB, OESL, DSBU, SS
 			->whereNotNull('employees.reporting_to_id')
 			->get();
 
@@ -2144,12 +2161,12 @@ class Employee extends Model {
 		$employeeDefaultRole = Config::where('id', 3975)->first()->name;
 		DB::beginTransaction();
 		try {
-			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL, DSBU
-			if (!in_array($hrmsEmployee->lob_id, [4, 15, 12])) {
+			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL, DSBU, SS
+			if (!in_array($hrmsEmployee->lob_id, [4, 15, 12, 8])) {
 				return response()->json([
 					'success' => false,
 					'error' => 'Validation Error',
-					'errors' => ['Employee LOB should be DLOB, OESL, DSBU'],
+					'errors' => ['Employee LOB should be DLOB, OESL, DSBU, SS'],
 				]);
 			}
 
@@ -2342,8 +2359,16 @@ class Employee extends Model {
 							}
 						} else if ($hrmsEmployee->lob_code == 'OESL') {
 							$businessId = 2; //OESL
+						} else if ($hrmsEmployee->lob_code == 'SS') {
+							if ((strpos(strtolower($hrmsEmployee->sbu_code), 'common') !== false)||
+							(strpos(strtolower($hrmsEmployee->sbu_code), 'f&a') !== false)||
+							(strpos(strtolower($hrmsEmployee->sbu_code), 'psd') !== false)||
+							(strpos(strtolower($hrmsEmployee->sbu_code), 'ipm') !== false)||
+							(strpos(strtolower($hrmsEmployee->sbu_code), 'its') !== false)||
+							(strpos(strtolower($hrmsEmployee->sbu_code), 'kmic') !== false)) {
+								$businessId = 1; //DLOB
+							}
 						}
-
 						if ($businessId && $hrmsEmployee->function_name) {
 							$funcCompanyId = Company::where('code', $hrmsEmployee->func_company_adre_code)->pluck('id')->first();
 							if (!$funcCompanyId) {
