@@ -1229,6 +1229,14 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Travelx Invoice',
 				'config_type_id' => 550,
 			],
+			3833 => [
+				'name' => 'OESL Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			3834 => [
+				'name' => 'OESL Travelx Invoice',
+				'config_type_id' => 550,
+			],
 
 			//COMPANY BUSINESS UNITS
 			3841 => [
