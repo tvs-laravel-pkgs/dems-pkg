@@ -47,6 +47,12 @@ class TravelexPermissionSeeder extends Seeder {
 				'name' => 'eyatra-trip-report',
 				'display_name' => 'Trip Report',
 			],
+			5711 => [
+				'display_order' => 5,
+				'parent_id' => 5500,
+				'name' => 'trip-claim-employee-return-payment-detail',
+				'display_name' => 'Employee Return Payment Detail',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

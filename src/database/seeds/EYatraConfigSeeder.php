@@ -82,6 +82,17 @@ class EYatraConfigSeeder extends Seeder {
 			566 => 'On Visit Cancel Agent Notification Is Required',
 			567 => 'Enable Ticket Cancell SMS To Agent',
 			568 => 'HRMS To Travelex Employee Sync Categories',
+			569 => 'Employee Return Payment Modes',
+			570 => 'Employee Return Payment Banks',
+			571 => 'Advance PCV - Natural Account Code',
+			572 => 'Advance PCV - Is Cashier Payment Date Should Be Current Date',
+			573 => 'PCV - Is Cashier Payment Date Should Be Current Date',
+			574 => 'PCV - Request Date Past Days',
+			575 => 'PCV - Invoice Date Past Days',
+			576 => 'Advance PCV - Employee Return Balance Cash Limit',
+			577 => 'Trip Claim - Employee Return Balance Cash Limit',
+			578 => 'Advance PCV - Is Financier Payment Date Should Be Current Date',
+			579 => 'PCV - Is Financier Payment Date Should Be Current Date',
 		];
 
 		$configs = [
@@ -1333,7 +1344,7 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3971 => [
-				'name' => 'No',
+				'name' => 'Yes',
 				'config_type_id' => 559,
 			],
 			3972 => [
@@ -1378,6 +1389,87 @@ class EYatraConfigSeeder extends Seeder {
 			3991 => [
 				'name' => 'Deletion',
 				'config_type_id' => 568,
+			],
+
+			4010 => [
+				'name' => 'Cash',
+				'config_type_id' => 569,
+			],
+			4011 => [
+				'name' => 'Bank Transfer',
+				'config_type_id' => 569,
+			],
+			4012 => [
+				'name' => 'Debit from my salary',
+				'config_type_id' => 569,
+			],
+
+			4021 => [
+				'name' => 'Test Bank1',
+				'config_type_id' => 570,
+			],
+			4022 => [
+				'name' => 'Test Bank2',
+				'config_type_id' => 570,
+			],
+
+			4031 => [
+				'name' => '114255',
+				'config_type_id' => 571,
+			],
+			4032 => [
+				'name' => 'Yes',
+				'config_type_id' => 572,
+			],
+			4033 => [
+				'name' => 'Yes',
+				'config_type_id' => 573,
+			],
+			4034 => [
+				'name' => '5',
+				'config_type_id' => 574,
+			],
+			4035 => [
+				'name' => '5',
+				'config_type_id' => 575,
+			],
+			4036 => [
+				'name' => '1000',
+				'config_type_id' => 576,
+			],
+			4037 => [
+				'name' => '1000',
+				'config_type_id' => 577,
+			],
+			4038 => [
+				'name' => 'Advance PCV Attachment',
+				'config_type_id' => 519,
+			],
+			4039 => [
+				'name' => 'PCV Attachment',
+				'config_type_id' => 519,
+			],
+
+			4051 => [
+				'name' => 'Manager View',
+				'config_type_id' => 520,
+			],
+			4052 => [
+				'name' => 'Cashier View',
+				'config_type_id' => 520,
+			],
+			4053 => [
+				'name' => 'Financier View',
+				'config_type_id' => 520,
+			],
+			
+			4061 => [
+				'name' => 'Yes',
+				'config_type_id' => 578,
+			],
+			4062 => [
+				'name' => 'Yes',
+				'config_type_id' => 579,
 			],
 		];
 
