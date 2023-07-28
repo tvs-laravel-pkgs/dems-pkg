@@ -4824,6 +4824,7 @@ request is not desired, then those may be rejected.';
 
 		$companyId = $this->company_id;
 		$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+		$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
 
 		// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 		if(!empty($this->employee->department) && $this->employee->department->business_id == 2){
@@ -4920,7 +4921,7 @@ request is not desired, then those may be rejected.';
 			'outlet' => $outletCode,
 			// 'round_off_amount' => $amountDiff,
 			'accounting_class' => $accountingClass,
-			'company' => $company,
+			'company' => $companyCode,
 			'lob' => $lob,
 			'location' => $location,
 			'department' => $department,
@@ -6008,7 +6009,8 @@ request is not desired, then those may be rejected.';
 		$customerSiteNumber = $outletCode;
 		// $accountingClass = 'Payable';
 		$accountingClass = 'Purchase/Expense';
-		$company = $employeeTrip->company ? $employeeTrip->company->oracle_code : '';
+		// $company = $employeeTrip->company ? $employeeTrip->company->oracle_code : '';
+		$company  = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;;
 
 		$sbu = $employeeData->Sbu;
 		$lob = $department = null;
