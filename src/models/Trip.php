@@ -4901,6 +4901,7 @@ request is not desired, then those may be rejected.';
 		])->get();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
+			DB::setDefaultConnection('mysql');
 			return $res;
 		}
 
@@ -6059,6 +6060,7 @@ request is not desired, then those may be rejected.';
 		])->get();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
+			DB::setDefaultConnection('mysql');
 			return $res;
 		}
 
@@ -6265,7 +6267,7 @@ request is not desired, then those may be rejected.';
 			'location' => $location,
 			'department' => $department,
 			'natural_account' => $naturalAccount,
-			'documentType' => $documentType,
+			'document_type' => $documentType,
 			'created_at' => Carbon::now(),
 		]);
 	}
