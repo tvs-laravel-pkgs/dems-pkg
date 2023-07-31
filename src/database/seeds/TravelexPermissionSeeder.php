@@ -53,6 +53,13 @@ class TravelexPermissionSeeder extends Seeder {
 				'name' => 'trip-claim-employee-return-payment-detail',
 				'display_name' => 'Employee Return Payment Detail',
 			],
+
+			5712 => [
+				'display_order' => 102,
+				'parent_id' => 5020,
+				'name' => 'trip-oracle-sync',
+				'display_name' => 'Trip Oracle Sync',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
