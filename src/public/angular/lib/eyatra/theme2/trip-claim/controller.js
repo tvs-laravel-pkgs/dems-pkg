@@ -330,6 +330,8 @@ app.component('eyatraTripClaimForm', {
             self.travel_dates = response.data.travel_dates;
             self.extras = response.data.extras;
             self.trip = response.data.trip;
+            self.employee_return_payment_balance_cash_limit = response.data.employee_return_payment_balance_cash_limit;
+            self.company_data = response.data.company_data;
             self.transport_attachments = response.data.trip.transport_attachments;
             self.lodging_attachments = response.data.trip.lodging_attachments;
             self.boarding_attachments = response.data.trip.boarding_attachments;
@@ -4344,7 +4346,8 @@ app.component('eyatraTripClaimForm', {
                                     if(trip_detail.cliam.employee_return_payment_mode_id){
                                         self.advance_balance_return_payment_mode_id = trip_detail.cliam.employee_return_payment_mode_id;
                                     }else{
-                                        if(balance_amount < 1000){
+                                        // if(balance_amount < 1000){
+                                        if(balance_amount < self.employee_return_payment_balance_cash_limit){
                                             self.advance_balance_return_payment_mode_id = 4010; //CASH
                                         }else{
                                             self.advance_balance_return_payment_mode_id = 4011; //Bank Transfer
