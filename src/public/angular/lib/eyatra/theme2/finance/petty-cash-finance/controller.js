@@ -126,6 +126,13 @@
              var val = d.getDate() + "-" + (d.getMonth() + 1) + "-" + d.getFullYear();
              $("#cuttent_date").val(val);
              // console.log(val);
+
+            if(response.data.proof_view_pending == true){
+                self.show_pcv_process_btn = false;
+            }else{
+                self.show_pcv_process_btn = true;
+            }
+            self.financiar_payment_date = response.data.financiar_payment_date;
          });
 
          $(".bottom-expand-btn").on('click', function() {
@@ -144,6 +151,38 @@
                  $(".separate-bottom-fixed-layer").addClass("in");
              }
          });
+
+         $scope.proofUploadViewHandler = function(pcv_detail_index,pcv_detail_id,attachment,attachment_index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
+            $.ajax({
+                url: laravel_routes['pettyCashProofFinanciarViewSave'],
+                method: "POST",
+                data: {
+                    attachment_id : attachment.id,
+                    petty_cash_detail_id : pcv_detail_id,
+                }
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    custom_noty('error', res.errors);
+                } else {
+                    self.petty_cash_other[pcv_detail_index].attachments[attachment_index].view_status = 1;
+                    if(res.proof_view_pending == true){
+                        self.show_pcv_process_btn = false;
+                    }else{
+                        self.show_pcv_process_btn = true;
+                    }
+                    $scope.$apply();
+                }
+            })
+            .fail(function(xhr) {
+                custom_noty('error', 'Something went wrong at server.');
+            });
+        }
 
          $.validator.addMethod('positiveNumber',
              function(value) {

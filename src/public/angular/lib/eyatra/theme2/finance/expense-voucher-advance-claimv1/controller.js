@@ -37,6 +37,10 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
+                { data: 'request_type', searchable: false },
+                { data: 'request_number', searchable: false },
+                // { data: 'advance_pcv_number', name: 'expense_voucher_advance_requests.number', searchable: true },
+                // { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'date', name: 'date', searchable: false },
@@ -90,7 +94,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraExpenseVoucherAdvanceVerificationView', {
     templateUrl: expense_voucher_advance_verification_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $mdSelect) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $mdSelect, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -100,6 +104,17 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
             self.expense_voucher_view = response.data.expense_voucher_view;
             self.rejection_list = response.data.rejection_list;
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
+            // if(response.data.proof_view_pending_count > 0){
+            //     self.show_pcv_expense_process_btn = false;
+            // }else{
+            //     self.show_pcv_expense_process_btn = true;
+            // }
+
+            if(response.data.proof_view_pending == true){
+                self.show_pcv_expense_process_btn = false;
+            }else{
+                self.show_pcv_expense_process_btn = true;
+            }
         });
 
         var form_id = '#approve';
@@ -116,6 +131,7 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                         contentType: false,
                     })
                     .done(function(res) {
+                        console.log("afafafafdafaf")
                         if (!res.success) {
                             $('#accept_button').button('reset');
                             var errors = '';
@@ -211,6 +227,38 @@ app.component('eyatraExpenseVoucherAdvanceVerificationView', {
                 $mdSelect.hide();
             }
         });
+
+        $scope.proofUploadViewHandler = function(attachment, index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
+            $.ajax({
+                url: laravel_routes['expenseVoucherAdvanceManagerProofViewUpdate'],
+                method: "POST",
+                data: {
+                    attachment_id : attachment.id,
+                    expense_voucher_advance_request_id : self.expense_voucher_view.id,
+                }
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    custom_noty('error', res.errors);
+                } else {
+                    self.expense_voucher_view.attachments[index].view_status = 1; //VIEWED
+                    if(res.proof_view_pending == true){
+                        self.show_pcv_expense_process_btn = false;
+                    }else{
+                        self.show_pcv_expense_process_btn = true;
+                    }
+                    $scope.$apply();
+                }
+            })
+            .fail(function(xhr) {
+                custom_noty('error', 'Something went wrong at server.');
+            });
+        }
 
         $rootScope.loading = false;
     }

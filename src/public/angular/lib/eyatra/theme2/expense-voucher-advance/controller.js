@@ -39,12 +39,16 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                 },
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
+                    { data: 'advance_pcv_number', name: 'expense_voucher_advance_requests.number', searchable: true },
+                    { data: 'status', searchable: false },
+                    { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
+                    { data: 'advance_pcv_claim_status', searchable: false },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'date', name: 'date', searchable: false },
                     { data: 'advance_amount', name: 'expense_voucher_advance_requests.advance_amount', searchable: false },
                     { data: 'balance_amount', name: 'expense_voucher_advance_requests.balance_amount', searchable: false },
-                    { data: 'status', name: 'configs.name', searchable: false },
+                    // { data: 'status', name: 'configs.name', searchable: false },
                 ],
                 rowCallback: function(row, data) {
                     $(row).addClass('highlight-row');
@@ -85,6 +89,7 @@ app.component('eyatraExpenseVoucherAdvanceList', {
             expense_voucher_advance_filter_url
         ).then(function(response) {
             self.status_list = response.data.status_list;
+            self.employee_return_payment_bank_list = response.data.employee_return_payment_bank_list;
         });
         // var dataTable = $('#expense_advance_list').DataTable();
 
@@ -172,6 +177,80 @@ app.component('eyatraExpenseVoucherAdvanceList', {
                 }
             });
         });
+
+        $scope.employeeReturnPaymentUpdateHandler = function(expense_voucher_advance_request_id) {
+            $.ajax({
+                url: expense_voucher_advance_get_data_url + '/' + expense_voucher_advance_request_id,
+                method: "GET",
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    custom_noty('error', errors);
+                } else {
+                    self.expense_voucher_advance_request_claim = res.data.expense_voucher_advance_request_claim;
+                    $("#employee-return-payment-detail-modal").modal('show');
+                    $(".employee_return_date_picker").datepicker("destroy");
+                    $(".employee_return_date_picker").datepicker({
+                        startDate: res.data.expense_voucher_advance.date,
+                        autoclose: true,
+                    });
+                }
+                $scope.$apply();
+            })
+            .fail(function(xhr) {
+                console.log(xhr);
+            });
+        }
+
+        $(document).on('click', '#payment-detail-save-btn', function() {
+            var form_id = '#employee-return-payment-detail-form';
+            var v = jQuery(form_id).validate({
+                ignore: '',
+                errorPlacement: function(error, element) {
+                    if (element.hasClass("employee_return_payment_date")) {
+                        error.appendTo($('.employee_return_payment_date_error'));
+                    }else{
+                        error.insertAfter(element.parent())
+                    }
+                },
+                submitHandler: function(form) {
+                    let formData = new FormData($(form_id)[0]);
+                    $('#payment-detail-save-btn').button('loading');
+                    $.ajax({
+                            url: laravel_routes['expenseVoucherAdvanceEmployeeReturnPaymentSave'],
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                        })
+                        .done(function(res) {
+                            $('#payment-detail-save-btn').button('reset');
+                            if (!res.success) {
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                custom_noty('success', res.message);
+                                $('#employee-return-payment-detail-modal').modal('hide');
+                                setTimeout(function() {
+                                    $('#expense_advance_list').DataTable().draw();
+                                }, 700);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#payment-detail-save-btn').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                },
+            });
+        });
+
         // $rootScope.loading = false;
     }
 });
@@ -208,21 +287,26 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             self.action = response.data.action;
 
             self.expense_voucher_advance = response.data.expense_voucher_advance;
+            self.expense_voucher_advance_claim = response.data.expense_voucher_advance_claim;
             self.expense_voucher_advance_attachment_url = eyatra_expense_voucher_advance_attachment_url;
+            self.employee_return_payment_mode_list = response.data.employee_return_payment_mode_list;
+            self.employee_return_balance_cash_limit = response.data.employee_return_balance_cash_limit;
+            self.company = response.data.company_data;
             self.expense_voucher_attach_removal_ids = [];
             // console.log(self.expense_voucher_advance_attachment_url);
 
             if (self.action == 'Edit') {
                 self.action = 'Edit';
-                if (self.expense_voucher_advance.status_id == 3464 || self.expense_voucher_advance.status_id == 3466 || self.expense_voucher_advance.status_id == 3469 || self.expense_voucher_advance.status_id == 3471) {
+                // if (self.expense_voucher_advance.status_id == 3464 || self.expense_voucher_advance.status_id == 3466 || self.expense_voucher_advance.status_id == 3469 || self.expense_voucher_advance.status_id == 3471) {
+                if (self.expense_voucher_advance.status_id == 3464 && (!self.expense_voucher_advance_claim || self.expense_voucher_advance_claim.status_id == 3466 || self.expense_voucher_advance_claim.status_id == 3469 || self.expense_voucher_advance_claim.status_id == 3471)) {
                     $("#date").prop('readonly', true);
                     $(".date").removeAttr('data-provide');
                     $("#advance_amount").prop('readonly', true);
                     $("#description").prop('readonly', true);
-                    self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee.user.name;
+                    self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee ? (response.data.expense_voucher_advance.employee.user ? response.data.expense_voucher_advance.employee.user.name : null) : null;
                     $("#employee_id").val(response.data.expense_voucher_advance.employee_id);
                 } else {
-                    self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee.user.name;
+                    self.expense_voucher_advance.employee = response.data.expense_voucher_advance.employee ? (response.data.expense_voucher_advance.employee.user ? response.data.expense_voucher_advance.employee.user.name : null) : null;
                     $("#employee_id").val(response.data.expense_voucher_advance.employee_id);
                 }
             } else {
@@ -281,6 +365,98 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
 
         });
 
+        $scope.advancePcvSubmitHandler = function(){
+            $scope.advancePcvFormValidator();
+            if ($("#expense_voucher_advance").valid()) {
+                let advance_amount = parseFloat(self.expense_voucher_advance.advance_amount || 0);
+                let expense_amount = parseFloat(self.expense_voucher_advance.expense_amount || 0);
+                if(expense_amount > 0){
+                    let balance_amount = (advance_amount - expense_amount);
+                    if(balance_amount > 0)
+                    {
+                        //BALANCE RETURN BY EMPLOYEE TO COMPANY
+                        self.form_submit_type = 2;
+                        if(!self.advane_balance_return_payment_mode_id){
+                            // self.advane_balance_return_payment_mode_id = self.expense_voucher_advance.employee_return_payment_mode_id;
+                            if(!self.expense_voucher_advance.employee_return_payment_mode_id){
+                                console.log("self.employee_return_balance_cash_limit")
+                                console.log(self.employee_return_balance_cash_limit)
+                                if(balance_amount < self.employee_return_balance_cash_limit){
+                                    self.advane_balance_return_payment_mode_id = 4010; //CASH
+                                }else{
+                                    self.advane_balance_return_payment_mode_id = 4011; //Bank Transfer
+                                }
+                            }else{
+                                self.advane_balance_return_payment_mode_id = self.expense_voucher_advance.employee_return_payment_mode_id;
+                            }       
+                        }
+                        
+                        $("#employee-return-payment-modal").modal('show');
+                    }else{
+                        self.form_submit_type = 1;
+                        self.advane_balance_return_payment_mode_id = null;
+                        $("#employee-return-payment-modal").modal('hide');
+                        setTimeout(function() {
+                            $('#expense_voucher_advance').submit();
+                        }, 400);
+                    }
+                }else{
+                    self.form_submit_type = 1;
+                    self.advane_balance_return_payment_mode_id = null;
+                    setTimeout(function() {
+                        $('#expense_voucher_advance').submit();
+                    }, 400);
+                }
+            }
+        }
+
+        $scope.employeeReturnPaymentSubmitHandler = function(){
+            self.form_submit_type = 2;
+            if(!self.advane_balance_return_payment_mode_id){
+                custom_noty('error', 'Kindly select the payment mode');
+                return;
+            }
+            setTimeout(function() {
+                $('#expense_voucher_advance').submit();
+            }, 400);
+        }
+
+        $scope.advancePcvFormValidator = function(){
+            var form_id = '#expense_voucher_advance';
+            var v = jQuery(form_id).validate({
+                errorPlacement: function(error, element) {
+                    error.insertAfter(element)
+                },
+                ignore: '',
+                rules: {
+                    'employee_id': {
+                        required: true,
+                    },
+                    'date': {
+                        required: true,
+                    },
+                    'advance_amount': {
+                        required: true,
+                    },
+                    'description': {
+                        required: true,
+                        minlength: 5,
+                        // maxlength: 191,
+                        maxlength: 250,
+                    },
+                    'expense_description': {
+                        required: true,
+                        minlength: 5,
+                        // maxlength: 191,
+                        maxlength: 250,
+                    },
+                    'expense_amount': {
+                        required: true,
+                    },
+                }
+            });
+        }
+
         var form_id = '#expense_voucher_advance';
         var v = jQuery(form_id).validate({
             errorPlacement: function(error, element) {
@@ -300,12 +476,14 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                 'description': {
                     required: true,
                     minlength: 5,
-                    maxlength: 191,
+                    // maxlength: 191,
+                    maxlength: 250,
                 },
                 'expense_description': {
                     required: true,
                     minlength: 5,
-                    maxlength: 191,
+                    // maxlength: 191,
+                    maxlength: 250,
                 },
                 'expense_amount': {
                     required: true,
@@ -334,6 +512,9 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
 
             submitHandler: function(form) {
                 let formData = new FormData($(form_id)[0]);
+                if(self.form_submit_type == 2){
+                    $('#employee_return_payment_btn').button('loading');
+                }
                 $('#submit').button('loading');
                 $.ajax({
                         url: laravel_routes['expenseVoucherSave'],
@@ -341,10 +522,14 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                         data: formData,
                         processData: false,
                         contentType: false,
+                        async: false,
                     })
                     .done(function(res) {
                         console.log(res.message);
                         if (!res.success) {
+                            if(self.form_submit_type == 2){
+                                $('#employee_return_payment_btn').button('reset');
+                            }
                             $('#submit').button('reset');
                             var errors = '';
                             for (var i in res.errors) {
@@ -363,11 +548,19 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
                             setTimeout(function() {
                                 $noty.close();
                             }, 5000);
+                            if(self.form_submit_type == 2){
+                                $("#employee-return-payment-detail-modal").modal('hide');
+                                $('body').removeClass('modal-open');
+                                $('.modal-backdrop').remove();
+                            }
                             $location.path('/expense/voucher-advance/list')
                             $scope.$apply()
                         }
                     })
                     .fail(function(xhr) {
+                        if(self.form_submit_type == 2){
+                            $('#employee_return_payment_btn').button('reset');
+                        }
                         $('#submit').button('reset');
                         custom_noty('error', 'Something went wrong at server');
                     });

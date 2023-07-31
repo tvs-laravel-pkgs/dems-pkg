@@ -41,6 +41,7 @@ app.component('eyatraPettyCashList', {
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
                     { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
+                    { data: 'number', name: 'petty_cash.number', searchable: true },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
@@ -185,6 +186,8 @@ app.component('eyatraPettyCashForm', {
             console.log(self.petty_cash_others);
             self.user_role = response.data.user_role;
             self.emp_details = response.data.emp_details;
+            self.pcv_request_date_past_days = response.data.pcv_request_date_past_days;
+            self.pcv_invoice_date_past_days = response.data.pcv_invoice_date_past_days;
             self.petty_cash_removal_id = [];
             self.petty_cash_attach_removal_ids = [];
             self.petty_cash_other_removal_id = [];
@@ -193,7 +196,7 @@ app.component('eyatraPettyCashForm', {
             self.other_expense_attachment_url = eyatra_petty_cash_other_expense_attachment_url;
             if (self.action == 'Add') {
                 $.each(self.petty_cash_locals, function(index, value) {
-                    value.invoice = 1;
+                    // value.invoice = 1;
                 });
             }
             $("#employee_id").val(self.emp_details.emp_id);
@@ -218,7 +221,24 @@ app.component('eyatraPettyCashForm', {
                 } else { // LOCAL CONVEYANCE
                     self.localConveyanceCal();
                 }
+
+                $("#petty_cash_other_date").datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                    startDate: '-'+ self.pcv_request_date_past_days +'d',
+                    endDate: "today",
+                });
+                $("#petty_cash_other_invoice_date").datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                    startDate: '-'+ self.pcv_invoice_date_past_days +'d',
+                    endDate: "today",
+                });
             }, 500);
+
+
+
+
             $rootScope.loading = false;
         });
 
@@ -386,25 +406,44 @@ app.component('eyatraPettyCashForm', {
         }
 
         //OTHER EXPENSE AMOUNT CALCULATE
+        // self.otherConveyanceCal = function() {
+        //     var total_petty_cash_other_amount = 0;
+        //     $('.otherConveyance_amount').each(function() {
+        //         var other_amount = parseInt($(this).closest('tr').find('.otherConveyance_amount_check_validation').val() || 0);
+        //         var other_tax = parseInt($(this).closest('tr').find('.otherConveyance_tax_check_validation').val() || 0);
+        //         if (!$.isNumeric(other_amount)) {
+        //             other_amount = 0;
+        //         }
+        //         if (!$.isNumeric(other_tax)) {
+        //             other_tax = 0;
+        //         }
+        //         current_total = other_amount + other_tax;
+        //         total_petty_cash_other_amount += current_total;
+        //     });
+        //     $('.other_expenses').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
+        //     $('.total_petty_cash_other_amount').val(total_petty_cash_other_amount.toFixed(2));
+        //     $('.claim_total_amount').val(total_petty_cash_other_amount.toFixed(2));
+        //     $('.claim_total_amount').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
+        //     // caimTotalAmount();
+        // }
+
         self.otherConveyanceCal = function() {
-            var total_petty_cash_other_amount = 0;
-            $('.otherConveyance_amount').each(function() {
-                var other_amount = parseInt($(this).closest('tr').find('.otherConveyance_amount_check_validation').val() || 0);
-                var other_tax = parseInt($(this).closest('tr').find('.otherConveyance_tax_check_validation').val() || 0);
-                if (!$.isNumeric(other_amount)) {
-                    other_amount = 0;
+            let total_petty_cash_other_amount = 0;
+            $(self.petty_cash_others).each(function(key, value) {
+                let invoice_amount = parseFloat(value.invoice_amount || 0);
+                let amount = parseFloat(value.amount || 0);
+                if(value.invoice == 'Yes'){
+                    //INVOICE
+                   total_petty_cash_other_amount += invoice_amount;
+                }else{
+                   total_petty_cash_other_amount += amount;
                 }
-                if (!$.isNumeric(other_tax)) {
-                    other_tax = 0;
-                }
-                current_total = other_amount + other_tax;
-                total_petty_cash_other_amount += current_total;
             });
+
             $('.other_expenses').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
             $('.total_petty_cash_other_amount').val(total_petty_cash_other_amount.toFixed(2));
             $('.claim_total_amount').val(total_petty_cash_other_amount.toFixed(2));
             $('.claim_total_amount').text('₹ ' + total_petty_cash_other_amount.toFixed(2));
-            // caimTotalAmount();
         }
 
         //TOTAL AMOUNT CALCULATE
@@ -450,7 +489,8 @@ app.component('eyatraPettyCashForm', {
                 amount: '',
                 tax: '',
                 remarks: '',
-                invoice: '0',
+                // invoice: '0',
+                invoice: 'No',
                 invoice_date: '',
                 invoice_amount: '',
                 invoice_no: '',
