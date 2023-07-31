@@ -13,6 +13,9 @@ use Uitoux\EYatra\PettyCash;
 use Uitoux\EYatra\PettyCashEmployeeDetails;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\AngularController;
+use App\FinancialYear;
+use App\SerialNumberGroup;
+use Validator;
 
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
@@ -30,6 +33,7 @@ class PettyCashController extends Controller {
 
 		$petty_cash = PettyCash::select(
 			'petty_cash.id',
+			'petty_cash.number',
 			DB::raw('DATE_FORMAT(petty_cash.date , "%d/%m/%Y")as date'),
 			'petty_cash.total',
 			'users.name as ename',
@@ -102,6 +106,8 @@ class PettyCashController extends Controller {
 	public function pettycashFormData($type_id = NULL, $pettycash_id = NULL) {
 		//GET LOCALCONVEYANCE ID AND NAME
 		$this->data['localconveyance'] = $localconveyance_id = Entity::select('id')->where('name', 'LIKE', '%Local Conveyance%')->where('company_id', Auth::user()->company_id)->where('entity_type_id', 512)->first();
+		$pcv_request_date_past_days = Config::where('id', 4034)->first()->name;
+		$pcv_invoice_date_past_days = Config::where('id', 4035)->first()->name;
 
 		if (!$pettycash_id) {
 			$petty_cash = new PettyCashEmployeeDetails;
@@ -150,6 +156,7 @@ class PettyCashController extends Controller {
 				foreach ($petty_cash_other as $key => $value) {
 					$petty_cash_attachment = Attachment::where('attachment_of_id', 3441)->where('entity_id', $value->id)->select('name', 'id')->get();
 					$value->attachments = $petty_cash_attachment;
+					$value->invoice = $value->invoice == 1 ? "Yes" : "No";
 				}
 
 			} else {
@@ -204,6 +211,8 @@ class PettyCashController extends Controller {
 			->first();
 		$this->data['user_role'] = $user_role;
 		$this->data['emp_details'] = $emp_details;
+		$this->data['pcv_request_date_past_days'] = $pcv_request_date_past_days;
+		$this->data['pcv_invoice_date_past_days'] = $pcv_invoice_date_past_days;
 		return response()->json($this->data);
 	}
 
@@ -310,7 +319,7 @@ class PettyCashController extends Controller {
 			//VIEW OTHER EXPENSE
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
-			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status')
+			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
@@ -353,8 +362,217 @@ class PettyCashController extends Controller {
 		return response()->json($this->data);
 	}
 
+	//OLD 21 JULY 2023
+	// public function pettycashSave(Request $request) {
+	// 	//dd($request->all());
+	// 	try {
+	// 		// $validator = Validator::make($request->all(), [
+	// 		// 	'purpose_id' => [
+	// 		// 		'required',
+	// 		// 	],
+	// 		// ]);
+	// 		// if ($validator->fails()) {
+	// 		// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+	// 		// }
+	// 		DB::beginTransaction();
+
+	// 		//GET AMOUNT LIMIT,TWO,FOUR WHEELER AMOUNT PER KM BASED ON EMPLOYEE
+	// 		$employee_petty_cash_check = Employee::select(
+	// 			'outlets.amount_eligible',
+	// 			'outlets.amount_limit',
+	// 			'outlets.expense_voucher_limit',
+	// 			'gae.two_wheeler_limit',
+	// 			'gae.four_wheeler_limit')
+	// 			->join('outlets', 'outlets.id', 'employees.outlet_id')
+	// 			->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
+	// 			->where('employees.id', $request->employee_id)->first();
+
+	// 		$get_two_four_wheeler_id = Entity::PettyCashTravelModeList();
+
+	// 		//CHECK VALIDATION FOR MAXIMUM ELEGIBILITY AMOUNT LIMIT
+	// 		if ($employee_petty_cash_check->expense_voucher_limit < $request->claim_total_amount) {
+	// 			return response()->json(['success' => false, 'errors' => ['The maximum amount limit is ' . $employee_petty_cash_check->expense_voucher_limit]]);
+	// 		}
+
+	// 		//ADD PETTY CASH
+	// 		$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
+	// 		$petty_cash_employee_edit->employee_id = $request->employee_id;
+	// 		$petty_cash_employee_edit->total = $request->claim_total_amount;
+	// 		$petty_cash_employee_edit->status_id = 3280;
+	// 		$petty_cash_employee_edit->petty_cash_type_id = $request->petty_cash_type_id;
+	// 		$petty_cash_employee_edit->date = Carbon::now();
+	// 		$petty_cash_employee_edit->created_by = Auth::user()->id;
+	// 		$petty_cash_employee_edit->updated_at = NULL;
+	// 		$petty_cash_employee_edit->save();
+
+	// 		//ADD LOCALCONVEYANCE
+	// 		if ($request->type_id == 1) {
+	// 			if ($request->petty_cash) {
+	// 				//REMOVE LOCALCONVEYANCE ID LIST
+	// 				if (!empty($request->petty_cash_removal_id)) {
+	// 					$petty_cash_removal_id = json_decode($request->petty_cash_removal_id, true);
+	// 					PettyCashEmployeeDetails::whereIn('id', $petty_cash_removal_id)->delete();
+
+	// 					$attachment_remove = json_decode($request->petty_cash_removal_id, true);
+	// 					Attachment::where('entity_id', $attachment_remove)->where('attachment_of_id', 3440)->delete();
+	// 				}
+	// 				//REMOVE LOCAL CONVEYANCE ATTACHMENT
+	// 				if (!empty($request->petty_cash_attach_removal_ids)) {
+	// 					$petty_cash_attach_removal_ids = json_decode($request->petty_cash_attach_removal_ids, true);
+	// 					Attachment::whereIn('id', $petty_cash_attach_removal_ids)->delete();
+	// 				}
+
+	// 				//CHECK TRAVEL MODE,DATE AND DIFFERENCE_KM BASED ON PER DAY KM LIMIT
+	// 				foreach ($request->petty_cash as $petty_cash_data) {
+	// 					$voucher_km_difference[$petty_cash_data['travel_mode_id']][$petty_cash_data['date']][] = $petty_cash_data['difference_km'];
+	// 				}
+	// 				foreach ($voucher_km_difference as $travel_mode_id => $date_array) {
+	// 					foreach ($date_array as $date_key => $distance_array) {
+	// 						//TWO WHEELER
+	// 						if ($travel_mode_id == $get_two_four_wheeler_id[0]->id) {
+	// 							$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
+	// 							if ($total_distance > $employee_petty_cash_check->two_wheeler_limit) {
+
+	// 								return response()->json(['success' => false, 'errors' => ['Maximum Two wheeler distance limit per day is ' . $employee_petty_cash_check->two_wheeler_limit]]);
+	// 							}
+	// 						}
+	// 						//FOUR WHEELER
+	// 						if ($travel_mode_id == $get_two_four_wheeler_id[1]->id) {
+	// 							$total_distance = array_sum($voucher_km_difference[$travel_mode_id][$date_key]);
+	// 							if ($total_distance > $employee_petty_cash_check->four_wheeler_limit) {
+
+	// 								return response()->json(['success' => false, 'errors' => ['Maximum Four wheeler distance limit per day is ' . $employee_petty_cash_check->four_wheeler_limit]]);
+	// 							}
+	// 						}
+	// 					}
+	// 				}
+	// 				//END CHECK TRAVEL MODE,DATE AND DIFFERENCE_KM BASED ON PER DAY KM LIMIT //
+
+	// 				//ADD LOCALCONVEYANCE TO TABLE
+	// 				foreach ($request->petty_cash as $petty_cash_data) {
+	// 					$petty_cash = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data['petty_cash_id']]);
+	// 					$petty_cash->fill($petty_cash_data);
+	// 					//dd($petty_cash_data);
+	// 					$petty_cash->remarks=$petty_cash_data['remarks'];
+	// 					$petty_cash->petty_cash_id = $petty_cash_employee_edit->id;
+	// 					$petty_cash->expence_type = $petty_cash_data['localconveyance'];
+	// 					$date = date("Y-m-d", strtotime($petty_cash_data['date']));
+	// 					$petty_cash->date = $date;
+	// 					$petty_cash->created_by = Auth::user()->id;
+	// 					$petty_cash->created_at = Carbon::now();
+	// 					$petty_cash->save();
+	// 					//STORE ATTACHMENT
+	// 					$item_images = storage_path('petty-cash/localconveyance/attachments/');
+	// 					Storage::makeDirectory($item_images, 0777);
+	// 					if (!empty($petty_cash_data['attachments'])) {
+	// 						foreach ($petty_cash_data['attachments'] as $key => $attachement) {
+	// 							$random_file_name = $petty_cash->id . '_Localconveyance_file_' . rand(1, 1000) . '.';
+	// 							$extension = $attachement->getClientOriginalExtension();
+	// 							// dd($name . $extension);
+	// 							$attachement->move(storage_path('app/public/petty-cash/localconveyance/attachments/'), $random_file_name . $extension);
+	// 							$attachement_petty_cash = new Attachment;
+	// 							$attachement_petty_cash->attachment_of_id = 3440;
+	// 							$attachement_petty_cash->attachment_type_id = 3200;
+	// 							$attachement_petty_cash->entity_id = $petty_cash->id;
+	// 							$attachement_petty_cash->name = $random_file_name . $extension;
+	// 							$attachement_petty_cash->save();
+	// 						}
+	// 					}
+	// 				}
+	// 			} else {
+	// 				return response()->json(['success' => false, 'errors' => ['Local Conveyance is empty!']]);
+	// 			}
+	// 		} else {
+	// 			//ADD OTHER EXPENSE
+	// 			if ($request->petty_cash_other) {
+	// 				//REMOVE OTHER EXPENSE ATTACHMENT
+	// 				if (!empty($request->petty_cash_other_attach_removal_ids)) {
+	// 					$petty_cash_other_attach_removal_ids = json_decode($request->petty_cash_other_attach_removal_ids, true);
+	// 					Attachment::whereIn('id', $petty_cash_other_attach_removal_ids)->delete();
+	// 				}
+	// 				//REMOVE OTHER EXPENSE IDS
+	// 				if (!empty($request->petty_cash_other_removal_id)) {
+	// 					$petty_cash_other_removal_id = json_decode($request->petty_cash_other_removal_id, true);
+	// 					PettyCashEmployeeDetails::whereIn('id', $petty_cash_other_removal_id)->delete();
+
+	// 					$attachment_remove = json_decode($request->petty_cash_other_removal_id, true);
+	// 					Attachment::where('entity_id', $attachment_remove)->where('attachment_of_id', 3441)->delete();
+	// 				}
+	// 				//ADD OTHER EXPENSE TO TABLE
+	// 				foreach ($request->petty_cash_other as $petty_cash_data_other) {
+	// 					if($petty_cash_data_other['invoice'] == 1 && empty($petty_cash_data_other['attachments'])){
+	// 						return response()->json([
+	// 							'success' => false,
+	// 							'errors' => ['Kindly upload the proof attachement']
+	// 						]);
+	// 					}
+	// 					$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
+	// 					$petty_cash_other->fill($petty_cash_data_other);
+	// 					$petty_cash_other->invoice=$petty_cash_data_other['invoice'];
+	// 					if($petty_cash_data_other['invoice'] == 1){
+	// 					$petty_cash_other->invoice_date=date("Y-m-d", strtotime($petty_cash_data_other['invoice_date']));
+	// 					$petty_cash_other->invoice_amount=$petty_cash_data_other['invoice_amount'];
+	// 					$petty_cash_other->invoice_number=$petty_cash_data_other['invoice_number'];
+	// 				// 	$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($petty_cash_data_other['gstin'],"",false);
+	// 		        // //dd($response);
+	// 		        // if(!$response['success']){
+	// 			    // return response()->json([
+    //                 //     'success' => false,
+    //                 //     'errors' => [
+    //                 //       $response['error']
+    //                 //     ],
+    //                 // ]);
+	// 		        // } 
+    //                 //     $petty_cash_other->gstin=$response['gstin'];
+    //                 }
+	// 					//dd($petty_cash_data_other);
+	// 					$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
+	// 					$petty_cash_other->petty_cash_id = $petty_cash_employee_edit->id;
+	// 					$date = date("Y-m-d", strtotime($petty_cash_data_other['date_other']));
+	// 					$petty_cash_other->date = $date;
+	// 					$petty_cash_other->created_by = Auth::user()->id;
+	// 					$petty_cash_other->created_at = Carbon::now();
+	// 					$petty_cash_other->save();
+	// 					//STORE ATTACHMENT
+	// 					$item_images = storage_path('petty-cash/other/attachments/');
+	// 					Storage::makeDirectory($item_images, 0777);
+	// 					if (!empty($petty_cash_data_other['attachments'])) {
+	// 						foreach ($petty_cash_data_other['attachments'] as $key => $attachement) {
+	// 							// $name = $attachement->getClientOriginalName();
+	// 							$random_file_name = $petty_cash_other->id . '_Other_Expense_file_' . rand(1, 1000) . '.';
+	// 							$extension = $attachement->getClientOriginalExtension();
+	// 							$attachement->move(storage_path('app/public/petty-cash/other/attachments/'), $random_file_name . $extension);
+	// 							$attachement_petty_other = new Attachment;
+	// 							$attachement_petty_other->attachment_of_id = 3441;
+	// 							$attachement_petty_other->attachment_type_id = 3200;
+	// 							$attachement_petty_other->entity_id = $petty_cash_other->id;
+	// 							$attachement_petty_other->name = $random_file_name . $extension;
+	// 							$attachement_petty_other->save();
+
+	// 						}
+	// 					}
+	// 				}
+	// 			} else {
+	// 				return response()->json(['success' => false, 'errors' => ['Other Expense is empty!']]);
+	// 			}
+	// 		}
+
+	// 		DB::commit();
+	// 		if ($request->id) {
+	// 			return response()->json(['success' => true, 'message' => 'Petty Cash updated successfully']);
+	// 		} else {
+	// 			return response()->json(['success' => true, 'message' => 'Petty Cash saved successfully']);
+	// 		}
+	// 		// $request->session()->flash('success', 'Petty Cash saved successfully!');
+	// 		// return response()->json(['success' => true]);
+	// 	} catch (Exception $e) {
+	// 		DB::rollBack();
+	// 		return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+	// 	}
+	// }
+
 	public function pettycashSave(Request $request) {
-		//dd($request->all());
+		// dd($request->all());
 		try {
 			// $validator = Validator::make($request->all(), [
 			// 	'purpose_id' => [
@@ -386,6 +604,7 @@ class PettyCashController extends Controller {
 
 			//ADD PETTY CASH
 			$petty_cash_employee_edit = PettyCash::firstOrNew(['petty_cash.id' => $request->id]);
+			$petty_cash_employee_edit->company_id = Auth::user()->company_id;
 			$petty_cash_employee_edit->employee_id = $request->employee_id;
 			$petty_cash_employee_edit->total = $request->claim_total_amount;
 			$petty_cash_employee_edit->status_id = 3280;
@@ -394,6 +613,60 @@ class PettyCashController extends Controller {
 			$petty_cash_employee_edit->created_by = Auth::user()->id;
 			$petty_cash_employee_edit->updated_at = NULL;
 			$petty_cash_employee_edit->save();
+			if(empty($request->id) && $request->petty_cash_type_id == 3441){
+				$outlet_id = !empty(Auth::user()->entity->outlet_id) ? Auth::user()->entity->outlet_id : null;
+				if (!$outlet_id) {
+					return response()->json([
+						'success' => false,
+						'errors' => 'Outlet not found!'
+					]);
+				}
+	            $financial_year = getFinancialYear();
+				$financial_year_id = FinancialYear::where('from', $financial_year)
+					->where('company_id', Auth::user()->company_id)
+					->pluck('id')
+					->first();
+				if (!$financial_year_id) {
+					return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => [
+	                        'Financial Year Not Found',
+	                    ],
+	                ]);
+				}
+
+	            $generate_number = SerialNumberGroup::generateNumber(6, $financial_year_id, $outlet_id);
+	            if (!$generate_number['success']) {
+	                return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => [
+	                        'No PCV Serial number found for FY : ' . $financial_year->from,
+	                    ],
+	                ]);
+	            }
+
+	            $error_messages = [
+	                'number.required' => 'Serial number is required',
+	                'number.unique' => 'Serial number is already taken',
+	            ];
+	            $validator = Validator::make($generate_number, [
+	                'number' => [
+	                    'required',
+	                    'unique:petty_cash,number',
+	                ],
+	            ], $error_messages);
+	            if ($validator->fails()) {
+	                return response()->json([
+	                    'success' => false,
+	                    'error' => 'Validation Error',
+	                    'errors' => $validator->errors()->all(),
+	                ]);
+	            }
+	            $petty_cash_employee_edit->number = $generate_number['number'];
+	            $petty_cash_employee_edit->save();
+			}
 
 			//ADD LOCALCONVEYANCE
 			if ($request->type_id == 1) {
@@ -490,25 +763,55 @@ class PettyCashController extends Controller {
 					}
 					//ADD OTHER EXPENSE TO TABLE
 					foreach ($request->petty_cash_other as $petty_cash_data_other) {
+						if($petty_cash_data_other['invoice'] == 'Yes'){
+							if(empty($petty_cash_data_other['petty_cash_other_id'])){
+								if(empty($petty_cash_data_other['attachments'])){
+									return response()->json([
+										'success' => false,
+										'errors' => ['Kindly upload the proof attachement']
+									]);
+								}
+							}else{
+								$pcv_attachment_count = Attachment::where('attachment_of_id', 3441)
+									->where('attachment_type_id', 3200)
+									->where('entity_id', $petty_cash_data_other['petty_cash_other_id'])
+									->count();
+								if($pcv_attachment_count == 0 && empty($petty_cash_data_other['attachments'])){
+									return response()->json([
+										'success' => false,
+										'errors' => ['Kindly upload the proof attachement']
+									]);
+								}
+							}
+						}
+
 						$petty_cash_other = PettyCashEmployeeDetails::firstOrNew(['id' => $petty_cash_data_other['petty_cash_other_id']]);
 						$petty_cash_other->fill($petty_cash_data_other);
-						$petty_cash_other->invoice=$petty_cash_data_other['invoice'];
-						if($petty_cash_data_other['invoice'] == 1){
-						$petty_cash_other->invoice_date=date("Y-m-d", strtotime($petty_cash_data_other['invoice_date']));
-						$petty_cash_other->invoice_amount=$petty_cash_data_other['invoice_amount'];
-						$petty_cash_other->invoice_number=$petty_cash_data_other['invoice_number'];
-						$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($petty_cash_data_other['gstin'],"",false);
-			        //dd($response);
-			        if(!$response['success']){
-				    return response()->json([
-                        'success' => false,
-                        'errors' => [
-                          $response['error']
-                        ],
-                    ]);
-			        } 
-                        $petty_cash_other->gstin=$response['gstin'];
-                    }
+						$petty_cash_other->invoice = $petty_cash_data_other['invoice'] == "Yes" ? 1 : 0;
+						if($petty_cash_data_other['invoice'] == 'Yes'){
+							$petty_cash_other->invoice_date=date("Y-m-d", strtotime($petty_cash_data_other['invoice_date']));
+							$petty_cash_other->invoice_amount=$petty_cash_data_other['invoice_amount'];
+							$petty_cash_other->invoice_number=$petty_cash_data_other['invoice_number'];
+							if(isset($petty_cash_data_other['gstin'])){
+								$response=app('App\Http\Controllers\AngularController')->verifyGSTIN($petty_cash_data_other['gstin'],"",false);
+						        if(!$response['success']){
+								    return response()->json([
+				                        'success' => false,
+				                        'errors' => [
+				                          $response['error']
+				                        ],
+				                    ]);
+						        } 
+		                        $petty_cash_other->gstin=$response['gstin'];
+							}
+                    	}else{
+                    		$petty_cash_other->invoice_date = null;
+							$petty_cash_other->invoice_amount = null;
+							$petty_cash_other->invoice_number = null;
+							$petty_cash_other->gstin = null;
+							$petty_cash_other->tax = null;
+
+                    	}
 						//dd($petty_cash_data_other);
 						$petty_cash_other->expence_type = $petty_cash_data_other['other_expence'];
 						$petty_cash_other->petty_cash_id = $petty_cash_employee_edit->id;
@@ -547,11 +850,14 @@ class PettyCashController extends Controller {
 			} else {
 				return response()->json(['success' => true, 'message' => 'Petty Cash saved successfully']);
 			}
-			// $request->session()->flash('success', 'Petty Cash saved successfully!');
-			// return response()->json(['success' => true]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
 		}
 	}
 

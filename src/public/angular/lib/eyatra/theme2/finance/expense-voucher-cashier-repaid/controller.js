@@ -42,14 +42,17 @@ app.component('eyatraExpenseVoucherAdvanceCashierRepaidList', {
             columns: [
                 { data: 'checkbox', searchable: false },
                 { data: 'action', searchable: false, class: 'action' },
-                { data: 'id', name: 'expense_voucher_advance_requests.id', searchable: true },
-                { data: 'ecode', name: 'e.code', searchable: true },
+                // { data: 'id', name: 'expense_voucher_advance_requests.id', searchable: true },
+                { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
+                // { data: 'ecode', name: 'e.code', searchable: true },
+                { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: false },
                 { data: 'oname', name: 'outlets.name', searchable: false },
                 { data: 'date', name: 'expense_voucher_advance_requests.date', searchable: false },
                 { data: 'advance_amount', name: 'expense_voucher_advance_requests.advance_amount', searchable: false },
                 { data: 'balance_amount', searchable: false },
-                { data: 'status', name: 'status.name', searchable: true },
+                // { data: 'status', name: 'status.name', searchable: true },
+                { data: 'status', name: 'configs.name', searchable: true },
             ],
             rowCallback: function(row, data) {
                 $(row).addClass('highlight-row');

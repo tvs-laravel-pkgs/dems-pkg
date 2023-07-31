@@ -36,6 +36,10 @@ app.component('eyatraExpenseVoucherAdvanceVerification3List', {
 
             columns: [
                 { data: 'action', searchable: false, class: 'action' },
+                { data: 'request_type', searchable: false },
+                { data: 'request_number', searchable: false },
+                // { data: 'advance_pcv_claim_number', name: 'expense_voucher_advance_request_claims.number', searchable: true },
+                // { data: 'advance_pcv_number', name: 'expense_voucher_advance_requests.number', searchable: true },
                 { data: 'ename', name: 'users.name', searchable: true },
                 { data: 'ecode', name: 'employees.code', searchable: true },
                 { data: 'oname', name: 'outlets.name', searchable: true },
@@ -109,7 +113,8 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             if (self.expense_voucher_view.status_id == '3462') {
                 self.type_id = 1;
                 $scope.showApproveLayout = true;
-            } else if (self.expense_voucher_view.status_id == '3468') {
+            // } else if (self.expense_voucher_view.status_id == '3468') {
+            } else if (self.expense_voucher_view.advance_pcv_claim_status_id == '3468') {
 
                 if (parseInt(self.expense_voucher_view.expense_amount) <= parseInt(self.expense_voucher_view.advance_amount)) {
                     $scope.showApproveLayout = false;
@@ -129,6 +134,13 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
             } else {
                 self.type_id = 0;
             }
+
+            if(response.data.proof_view_pending == true){
+                self.show_pcv_expense_process_btn = false;
+            }else{
+                self.show_pcv_expense_process_btn = true;
+            }
+            self.financiar_payment_date = response.data.financiar_payment_date;
         });
 
         $(".bottom-expand-btn").on('click', function() {
@@ -178,7 +190,7 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                     required: true,
                 },
                 'reference_number': {
-                    required: true,
+                    // required: true,
                     maxlength: 100,
                     minlength: 3,
                 },
@@ -313,6 +325,39 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
                     });
             },
         });
+
+        $scope.proofUploadViewHandler = function(attachment, index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
+            $.ajax({
+                url: laravel_routes['expenseVoucherAdvanceFinanciarProofViewUpdate'],
+                method: "POST",
+                data: {
+                    attachment_id : attachment.id,
+                    expense_voucher_advance_request_id : self.expense_voucher_view.id,
+                }
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    custom_noty('error', res.errors);
+                } else {
+                    self.expense_voucher_view.attachments[index].view_status = 1; //VIEWED
+                    if(res.proof_view_pending == true){
+                        self.show_pcv_expense_process_btn = false;
+                    }else{
+                        self.show_pcv_expense_process_btn = true;
+                    }
+                    $scope.$apply();
+                }
+            })
+            .fail(function(xhr) {
+                custom_noty('error', 'Something went wrong at server.');
+            });
+        }
+
         /* Modal Md Select Hide */
         $('.modal').bind('click', function(event) {
             if ($('.md-select-menu-container').hasClass('md-active')) {

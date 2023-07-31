@@ -46,6 +46,7 @@ app.component('eyatraPettyCashManagerList', {
                 columns: [
                     { data: 'action', searchable: false, class: 'action' },
                     { data: 'petty_cash_type', name: 'petty_cash_type.name', searchable: true },
+                    { data: 'number', name: 'petty_cash.number', searchable: true },
                     { data: 'ename', name: 'users.name', searchable: true },
                     { data: 'ecode', name: 'employees.code', searchable: true },
                     { data: 'oname', name: 'outlets.name', searchable: true },
@@ -117,7 +118,7 @@ app.component('eyatraPettyCashManagerList', {
 //------------------------------------------------------------------------------------------------------------------------
 app.component('eyatraPettyCashManagerView', {
     templateUrl: pettycash_manager_view_template_url,
-    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $mdSelect) {
+    controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $mdSelect, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         $http.get(
@@ -138,7 +139,45 @@ app.component('eyatraPettyCashManagerView', {
                 $('.separate-page-title').html('<p class="breadcrumb">Expense Voucher / <a href="#!/petty-cash/verification1">Expense Voucher list</a> / View</p><h3 class="title">Other Expense Voucher Claim</h3>');
             }
 
+            if(response.data.proof_view_pending == true){
+                self.show_pcv_process_btn = false;
+            }else{
+                self.show_pcv_process_btn = true;
+            }
         });
+
+        $scope.proofUploadViewHandler = function(pcv_detail_index,pcv_detail_id,attachment,attachment_index) {
+            if(attachment && attachment.view_status == 1){
+                //ALREADY VIEWED BY USER
+                return;
+            }
+
+            $.ajax({
+                url: laravel_routes['pettyCashProofManagerViewSave'],
+                method: "POST",
+                data: {
+                    attachment_id : attachment.id,
+                    petty_cash_detail_id : pcv_detail_id,
+                }
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    custom_noty('error', res.errors);
+                } else {
+                    // self.petty_cash_other[pcv_detail_index].attachments[attachment_index].view_status = res.attachment.view_status;
+                    self.petty_cash_other[pcv_detail_index].attachments[attachment_index].view_status = 1;
+                    if(res.proof_view_pending == true){
+                        self.show_pcv_process_btn = false;
+                    }else{
+                        self.show_pcv_process_btn = true;
+                    }
+                    $scope.$apply();
+                }
+            })
+            .fail(function(xhr) {
+                custom_noty('error', 'Something went wrong at server.');
+            });
+        }
 
         var form_id = '#approve';
         var v = jQuery(form_id).validate({

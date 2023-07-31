@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CoaCode extends Model {
@@ -46,5 +47,19 @@ class CoaCode extends Model {
 	public function subGroup() {
 		return $this->belongsTo('Uitoux\EYatra\Entity', 'sub_group')->where('entity_type_id', 517);
 
+	}
+
+	public static function searchOracleCoaCodes(Request $request) {
+	    $key = $request->key;
+	    $list = self::select(
+	            'id',
+	            'oracle_code'
+	        )
+	        ->where(function ($q) use ($key) {
+	            $q->where('number', 'like', '%' . $key . '%')
+	                ->orWhere('oracle_code', 'like', '%' . $key . '%')
+	            ;
+	        })->get();
+	    return response()->json($list);
 	}
 }

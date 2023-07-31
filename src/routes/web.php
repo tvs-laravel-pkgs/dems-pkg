@@ -280,16 +280,21 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/expense/voucher-advance/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherView')->name('expenseVoucherView');
 		Route::get('eyatra/expense/voucher-advance/delete/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherDelete')->name('expenseVoucherDelete');
 		Route::get('eyatra/expense/voucher-advance/filter-data', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@ExpenseVoucherAdvanceFilterData')->name('ExpenseVoucherAdvanceFilterData');
+		Route::get('eyatra/expense-voucher-advance/get-data/{id}', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@expenseVoucherGetData')->name('expenseVoucherAdvanceGetData');
+		Route::post('expense-voucher-advance/employee-return-payment-save', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@employeeReturnPaymentSave')->name('expenseVoucherAdvanceEmployeeReturnPaymentSave');
+		Route::post('expense-voucher-advance/search-oracle-coa-codes', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@searchOracleCoaCodes')->name('expenseVoucherAdvanceSearchOracleCoaCodes');
 
 		//EXPENSE VOUCHER ADVANCE VERIFICATION MANAGER
 		Route::get('eyatra/expense/voucher-advance/verification/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@listExpenseVoucherverificationRequest')->name('listExpenseVoucherverificationRequest');
 		Route::post('eyatra/expense/voucher-advance/verification/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationSave')->name('expenseVoucherVerificationSave');
 		Route::get('eyatra/expense/voucher-advance/verification/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@expenseVoucherVerificationView')->name('expenseVoucherVerificationView');
+		Route::post('expense-voucher-advance/manager/proof-view-update', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerificationController@proofViewUpdate')->name('expenseVoucherAdvanceManagerProofViewUpdate');
 
 		//EXPENSE VOUCHER ADVANCE VERIFICATION CASHIER
 		Route::get('eyatra/expense/voucher-advance/verification2/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@listExpenseVoucherverification2Request')->name('listExpenseVoucherverification2Request');
 		Route::post('eyatra/expense/voucher-advance/verification2/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@expenseVoucherVerification2Save')->name('expenseVoucherVerification2Save');
 		Route::get('eyatra/expense/voucher-advance/verification2/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@expenseVoucherVerification2View')->name('expenseVoucherVerification2View');
+		Route::post('expense-voucher-advance/cashier/proof-view-update', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification2Controller@proofViewUpdate')->name('expenseVoucherAdvanceCashierProofViewUpdate');
 
 		//EXPENSE VOUCHER ADVANCE RE-PAID CASHIER
 		Route::get('eyatra/expense/voucher-advance/cashier-repaid/list', 'Uitoux\EYatra\ExpenseAdvanceCahsierRepaidController@listExpenseVoucherCashierRepaidList')->name('listExpenseVoucherCashierRepaidList');
@@ -302,6 +307,8 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/expense/voucher-advance/verification3/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@listExpenseVoucherverification3Request')->name('listExpenseVoucherverification3Request');
 		Route::post('eyatra/expense/voucher-advance/verification3/save', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@expenseVoucherVerification3Save')->name('expenseVoucherVerification3Save');
 		Route::get('eyatra/expense/voucher-advance/verification3/view/{id?}', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@expenseVoucherVerification3View')->name('expenseVoucherVerification3View');
+		Route::post('expense-voucher-advance/financiar/proof-view-update', 'Uitoux\EYatra\ExpenseVoucherAdvanceVerification3Controller@proofViewUpdate')->name('expenseVoucherAdvanceFinanciarProofViewUpdate');
+
 		//EXPENSE VOUCHER ADVANCE RE-PAID FINANCIER
 		Route::get('eyatra/expense/voucher-advance/financer-repaid/list', 'Uitoux\EYatra\ExpenseAdvanceFinancierRepaidController@listExpenseVoucherFinancierRepaidList')->name('listExpenseVoucherFinancierRepaidList');
 
@@ -486,16 +493,19 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/petty-cash/manager/get-list/', 'Uitoux\EYatra\PettyCashManagerVerificationController@listPettyCashVerificationManager')->name('listPettyCashVerificationManager');
 		Route::post('eyatra/petty-cash/manager/approve/save', 'Uitoux\EYatra\PettyCashManagerVerificationController@pettycashManagerVerificationSave')->name('pettycashManagerVerificationSave');
 		Route::get('eyatra/petty-cash/manager/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashManagerVerificationController@pettycashManagerVerificationView')->name('pettycashManagerVerificationView');
+		Route::post('petty-cash/manager/proof-view-save', 'Uitoux\EYatra\PettyCashManagerVerificationController@proofViewSave')->name('pettyCashProofManagerViewSave');
 
 		//PETTY CASH VERIFICATION VIEW FOR FINANCE
 		Route::get('eyatra/petty-cash/finance/get-list/', 'Uitoux\EYatra\PettyCashFinanceVerificationController@listPettyCashVerificationFinance')->name('listPettyCashVerificationFinance');
 		Route::post('eyatra/petty-cash/finance/save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationSave')->name('pettycashFinanceVerificationSave');
 		Route::get('eyatra/petty-cash/finance/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashFinanceVerificationController@pettycashFinanceVerificationView')->name('pettycashFinanceVerificationView');
+		Route::post('petty-cash/financiar/proof-view-save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@proofViewSave')->name('pettyCashProofFinanciarViewSave');
 
 		//PETTY CASH VERIFICATION VIEW FOR CASHIER
 		Route::get('eyatra/petty-cash/cashier/get-list/', 'Uitoux\EYatra\PettyCashCashierVerificationController@listPettyCashVerificationCashier')->name('listPettyCashVerificationCashier');
 		Route::post('eyatra/petty-cash/cashier/save', 'Uitoux\EYatra\PettyCashCashierVerificationController@pettycashCashierVerificationSave')->name('pettycashCashierVerificationSave');
 		Route::get('eyatra/petty-cash/cashier/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashCashierVerificationController@pettycashCashierVerificationView')->name('pettycashCashierVerificationView');
+		Route::post('petty-cash/cashier/proof-view-save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@proofViewSave')->name('pettyCashProofCashierViewSave');
 
 		//ALTERNATE APPROVE LIST
 		Route::get('eyatra/alternate-approve/request/get-list', 'Uitoux\EYatra\AlternateApproveController@listAlternateApproveRequest')->name('listAlternateApproveRequest');
