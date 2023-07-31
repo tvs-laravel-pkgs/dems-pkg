@@ -575,6 +575,11 @@ class TripClaimController extends Controller {
 	            ]);
             }
 
+            DB::table('ey_employee_claims')->where('id', $request->claim_id)->update([
+            	'employee_return_payment_receipt_no' => isset($request->employee_return_payment_receipt_no) ? $request->employee_return_payment_receipt_no : null,
+            	'employee_return_payment_receipt_date' => isset($request->employee_return_payment_receipt_date) ?  date('Y-m-d', strtotime((str_replace('/', '-', $request->employee_return_payment_receipt_date)))) : null,
+            ]);
+
             $message = 'Details updated successfully!';
             DB::commit();
             return response()->json([

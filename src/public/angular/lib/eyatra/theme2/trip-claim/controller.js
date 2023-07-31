@@ -191,8 +191,8 @@ app.component('eyatraTripClaimList', {
                     self.claim_detail = res.data.trip.cliam;
                     
                     $("#employee-return-payment-detail-modal").modal('show');
-                    $(".employee_return_payment_date_picker").datepicker("destroy");
-                    $(".employee_return_payment_date_picker").datepicker({
+                    $(".employee_return_date_picker").datepicker("destroy");
+                    $(".employee_return_date_picker").datepicker({
                         startDate: employee_return_payment_start_date,
                         autoclose: true,
                     });
