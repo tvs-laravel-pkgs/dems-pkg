@@ -16,6 +16,7 @@ use App\Http\Controllers\AngularController;
 use App\FinancialYear;
 use App\SerialNumberGroup;
 use Validator;
+use Entrust;
 
 class PettyCashController extends Controller {
 	public function listPettyCashRequest(Request $r) {
@@ -82,21 +83,36 @@ class PettyCashController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				if ($petty_cash->status_id == 3280 || $petty_cash->status_id == 3282 || $petty_cash->status_id == 3284) {
-					return '
-				<a href="#!/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
-					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
-				</a>
-				<a href="#!/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
+				// 	return '
+				// <a href="#!/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
+				// 	<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+				// </a>
+				// <a href="#!/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
+				// 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				// </a>';
 				/*<a href="javascript:;" data-toggle="modal" data-target="#petty_cash_confirm_box"
 				onclick="angular.element(this).scope().deletePettycash(' . $petty_cash->id . ')" dusk = "delete-btn" title="Delete">
                 <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
                 </a>*/
+	                $action = '';
+	                if($type_id == 2 && Entrust::can('eyatra-pcv-edit')){
+		                $action .= '<a href="#!/petty-cash/edit/' . $type_id . '/' . $petty_cash->id . '">
+							<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+						</a>';
+					}
+
+					if($type_id == 2 && Entrust::can('eyatra-pcv-view')){
+						$action .= '<a href="#!/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>';
+					}
+					return $action;
 				} else {
-					return '<a href="#!/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
+					if($type_id == 2 && Entrust::can('eyatra-pcv-view')){
+						return '<a href="#!/petty-cash/view/' . $type_id . '/' . $petty_cash->id . '">
+						<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+					</a>';
+				}
 				}
 
 			})
