@@ -121,6 +121,43 @@ class TravelexPermissionSeeder extends Seeder {
 				'name' => 'eyatra-advance-pcv-employee-return-payment-detail',
 				'display_name' => 'Advance PCV Employee Return Payment Detail',
 			],
+			5723 => [
+				'display_order' => 9,
+				'parent_id' => 5600,
+				'name' => 'eyatra-advance-pcv-manager-view',
+				'display_name' => 'Advance PCV Manager View',
+			],
+			5724 => [
+				'display_order' => 10,
+				'parent_id' => 5600,
+				'name' => 'eyatra-advance-pcv-Financier-view',
+				'display_name' => 'Advance PCV Financier View',
+			],
+			5725 => [
+				'display_order' => 11,
+				'parent_id' => 5600,
+				'name' => 'eyatra-advance-pcv-cashier-view',
+				'display_name' => 'Advance PCV Cashier View',
+			],
+
+			5726 => [
+				'display_order' => 12,
+				'parent_id' => 5600,
+				'name' => 'eyatra-pcv-manager-view',
+				'display_name' => 'PCV Manager View',
+			],
+			5727 => [
+				'display_order' => 13,
+				'parent_id' => 5600,
+				'name' => 'eyatra-pcv-Financier-view',
+				'display_name' => 'PCV Financier View',
+			],
+			5728 => [
+				'display_order' => 14,
+				'parent_id' => 5600,
+				'name' => 'eyatra-pcv-cashier-view',
+				'display_name' => 'PCV Cashier View',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
