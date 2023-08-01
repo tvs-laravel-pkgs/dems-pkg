@@ -3,9 +3,13 @@ app.component('eyatraExpenseVoucherAdvanceList', {
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-
+        if(!self.hasPermission('eyatra-advance-pcv')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         $list_data_url = expense_voucher_advance_list_data_url;
-        self.add_permission = self.hasPermission('eyatra-indv-expense-vouchers');
+        // self.add_permission = self.hasPermission('eyatra-indv-expense-vouchers');
+        self.add_permission = self.hasPermission('eyatra-advance-pcv-add');
         //alert(self.add_permission);
         var dataTable = '';
         $http.get(
@@ -263,6 +267,11 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
         var self = this;
         self.type_id = $routeParams.type_id;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-advance-pcv-add') && !self.hasPermission('eyatra-advance-pcv-edit')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
+
         self.angular_routes = angular_routes;
         $http.get(
             $form_data_url
@@ -575,6 +584,10 @@ app.component('eyatraExpenseVoucherAdvanceView', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-advance-pcv-view')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         $http.get(
             expense_voucher_advance_view_data_url + '/' + $routeParams.id
         ).then(function(response) {
