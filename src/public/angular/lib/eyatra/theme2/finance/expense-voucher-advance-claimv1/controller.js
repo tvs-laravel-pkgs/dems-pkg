@@ -4,6 +4,10 @@ app.component('eyatraExpenseVoucherAdvanceVerificationList', {
         //alert();
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-indv-expense-vouchers-verification1')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
 
         $list_data_url = expense_voucher_advance_verification_list_data_url;
 
