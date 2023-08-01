@@ -77,9 +77,11 @@ class PettyCashCashierVerificationController extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-				return '
+				if($type_id == 2 && Entrust::can("eyatra-pcv-cashier-view")){
+					return '
 					<a href="#!/petty-cash/verification2/view/' . $type_id . '/' . $petty_cash->id . '">
 					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a>';
+				}
 			})
 			->make(true);
 	}
