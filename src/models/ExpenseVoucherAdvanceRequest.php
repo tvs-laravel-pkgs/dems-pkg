@@ -212,28 +212,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			DB::setDefaultConnection('mysql');
 			return $res;
 		}
-
-		// DB::table('oracle_ap_invoice_exports')->insert([
-		// 	'company_id' => $companyId,
-		// 	'business_unit' => $businessUnitName,
-		// 	'invoice_source' => $invoiceSource,
-		// 	'invoice_number' => $invoiceNumber,
-		// 	'invoice_date' => $invoiceDate,
-		// 	'supplier_number' => $supplierNumber,
-		// 	'supplier_site_name' => $supplierSiteName,
-		// 	'invoice_type' => $invoiceType,
-		// 	'invoice_description' => $description,
-		// 	'amount' => round($amount),
-		// 	'outlet' => $outletCode,
-		// 	'accounting_class' => $accountingClass,
-		// 	'company' => $companyCode,
-		// 	'lob' => $lob,
-		// 	'location' => $location,
-		// 	'department' => $department,
-		// 	'natural_account' => $naturalAccount,
-		// 	'document_type' => $documentType,
-		// 	'created_at' => Carbon::now(),
-		// ]);
+		
 		saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $amount, $accountingClass, $companyCode, $lob, $location, $department, $naturalAccount, $documentType);
 
 		$res['success'] = true;
