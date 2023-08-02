@@ -30,6 +30,7 @@ use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
+use Uitoux\EYatra\PettyCash;
 
 class ExportReportController extends Controller {
 	// Report list filter
@@ -3640,6 +3641,42 @@ class ExportReportController extends Controller {
 						$expense_voucher_advance_request->oracle_claim_sync_status = 1; //SYNCED
 						$expense_voucher_advance_request->save();
 					}
+				}
+				DB::commit();
+			} catch (\Exception $e) {
+				DB::rollBack();
+				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
+				continue;
+			}
+		}
+	}
+
+	public function pcvOracleSync($id = null) {
+		$pcv_details = PettyCash::select([
+			'id',
+		])
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('id', $id);
+				}
+			})
+			->where('total', '>', 0)
+			->where('petty_cash_type_id', 3441) //PCV Expense
+			->whereIn('status_id', [3283]) //Paid
+			->where('oracle_sync_status', 0)
+			->get();
+
+		foreach ($pcv_details as $pcv_detail) {
+			try {
+				DB::beginTransaction();
+				$petty_cash = PettyCash::find($pcv_detail['id']);
+
+				$r = $petty_cash->generateClaimApOracleAxapta();
+				if (!$r['success']) {
+					dump($r);
+				} else {
+					$petty_cash->oracle_sync_status = 1; //SYNCED
+					$petty_cash->save();
 				}
 				DB::commit();
 			} catch (\Exception $e) {

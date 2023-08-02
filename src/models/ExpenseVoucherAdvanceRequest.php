@@ -294,7 +294,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
 		$customerSiteNumber = $outletCode;
 		$accountingClass = 'Purchase/Expense';
-		$company  = isset($advancePcv->company->oem_business_unit->code) ? $advancePcv->company->oem_business_unit->code : null;;
+		$company  = isset($advancePcv->company->oem_business_unit->code) ? $advancePcv->company->oem_business_unit->code : null;
 		$sbu = $employeeData->Sbu;
 		$lob = $department = null;
 		if ($sbu) {
