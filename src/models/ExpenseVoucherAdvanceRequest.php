@@ -336,14 +336,14 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			return $res;
 		}
 
-		$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, $prePaymentNumber, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $invoiceAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType);
+		saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, $prePaymentNumber, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $invoiceAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType);
 
 		//IF ADVANCE RECEIVED
 		if ($advancePcv->advance_amount && $advancePcv->advance_amount > 0) {
 			if ($advancePcvClaim->balance_amount && $advancePcvClaim->balance_amount != '0.00') {
 				//EMPLOYEE TO COMPANY
 				if ($advancePcvClaim->balance_amount > 0) {
-					$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, abs($advancePcvClaim->balance_amount), $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $documentType);
+					saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, abs($advancePcvClaim->balance_amount), $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $documentType);
 				}
 			}
 		}
@@ -351,33 +351,5 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		$res['success'] = true;
 		DB::setDefaultConnection('mysql');
 		return $res;
-	}
-
-
-	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outlet, $amount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType) {
-		return $apInvoiceId = DB::table('oracle_ap_invoice_exports')->insertGetId([
-			'company_id' => $companyId,
-			'business_unit' => $businessUnit,
-			'invoice_source' => $invoiceSource,
-			'invoice_number' => $invoiceNumber,
-			'invoice_amount' => $invoiceAmount,
-			'invoice_date' => $invoiceDate,
-			'pre_payment_invoice_number' => $prePaymentInvoiceNumber,
-			'pre_payment_amount' => $prePaymentAmount,			
-			'supplier_number' => $supplierNumber,
-			'supplier_site_name' => $supplierSiteName,
-			'invoice_type' => $invoiceType,
-			'invoice_description' => $description,
-			'outlet' => $outlet,
-			'amount' => round($amount),
-			'accounting_class' => $accountingClass,
-			'company' => $company,
-			'lob' => $lob,
-			'location' => $location,
-			'department' => $department,
-			'natural_account' => $naturalAccount,
-			'document_type' => $documentType,
-			'created_at' => Carbon::now(),
-		]);
 	}
 }

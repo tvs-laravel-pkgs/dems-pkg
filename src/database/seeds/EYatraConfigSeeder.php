@@ -1259,6 +1259,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Advance PCV Claim Invoice',
 				'config_type_id' => 550,
 			],
+			3837 => [
+				'name' => 'PCV Invoice',
+				'config_type_id' => 550,
+			],
 
 			//COMPANY BUSINESS UNITS
 			3841 => [
