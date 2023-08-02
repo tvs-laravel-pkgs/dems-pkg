@@ -103,6 +103,10 @@
      controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope) {
          var self = this;
          self.hasPermission = HelperService.hasPermission;
+         if(!self.hasPermission('eyatra-pcv-financier-view')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
          $http.get(
              petty_cash_finance_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
          ).then(function(response) {
