@@ -160,7 +160,7 @@ class PettyCashController extends Controller {
 				//OTHER
 				$petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*',
 					DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'),
-					'petty_cash.id as petty_cash_id', 'petty_cash.employee_id', 'users.name as ename', 'entities.name as other_expence')
+					'petty_cash.id as petty_cash_id', 'petty_cash.employee_id', 'users.name as ename', 'entities.name as other_expence',DB::raw('DATE_FORMAT(petty_cash_employee_details.invoice_date,"%d-%m-%Y") as invoice_date'))
 					->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 					->join('employees', 'employees.id', 'petty_cash.employee_id')
 					->join('users', 'users.entity_id', 'employees.id')
