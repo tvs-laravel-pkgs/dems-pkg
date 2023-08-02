@@ -103,10 +103,13 @@ app.component('eyatraPettyCashCashierView', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-        if(!self.hasPermission('eyatra-pcv-cashier-view')){
-            window.location = "#!/permission-denied";
-            return false;
+        if($routeParams.type_id == 2){
+            if(!self.hasPermission('eyatra-pcv-cashier-view')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
         }
+        
         $http.get(
             petty_cash_cashier_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
