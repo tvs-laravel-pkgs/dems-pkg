@@ -125,6 +125,13 @@ app.component('eyatraPettyCashManagerView', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $mdSelect, $scope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if($routeParams.type_id == 2){
+            if(!self.hasPermission('eyatra-pcv-manager-view')){
+                window.location = "#!/permission-denied";
+                return false;
+            }    
+        }
+        
         $http.get(
             petty_cash_manager_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
