@@ -97,6 +97,10 @@ app.component('eyatraExpenseVoucherAdvanceVerification3View', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-advance-pcv-financier-view')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         $http.get(
             expense_voucher_advance_verification3_view_data_url + '/' + $routeParams.id
         ).then(function(response) {
