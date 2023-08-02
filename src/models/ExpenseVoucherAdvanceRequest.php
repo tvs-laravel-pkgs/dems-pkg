@@ -171,7 +171,6 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		$amount = $this->advance_amount;
 		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
 		$accountingClass = 'Purchase/Expense';
-		$company = $this->company ? $this->company->oracle_code : '';
 
 		$sbu = $employeeData->Sbu;
 		$lob = $department = null;
@@ -206,6 +205,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			'invoice_number' => $invoiceNumber,
 			'business_unit' => $companyBusinessUnit,
 			'invoice_source' => $invoiceSource,
+			'document_type' => $documentType,
 		])->get();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
@@ -213,27 +213,28 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			return $res;
 		}
 
-		DB::table('oracle_ap_invoice_exports')->insert([
-			'company_id' => $companyId,
-			'business_unit' => $businessUnitName,
-			'invoice_source' => $invoiceSource,
-			'invoice_number' => $invoiceNumber,
-			'invoice_date' => $invoiceDate,
-			'supplier_number' => $supplierNumber,
-			'supplier_site_name' => $supplierSiteName,
-			'invoice_type' => $invoiceType,
-			'invoice_description' => $description,
-			'amount' => round($amount),
-			'outlet' => $outletCode,
-			'accounting_class' => $accountingClass,
-			'company' => $companyCode,
-			'lob' => $lob,
-			'location' => $location,
-			'department' => $department,
-			'natural_account' => $naturalAccount,
-			'document_type' => $documentType,
-			'created_at' => Carbon::now(),
-		]);
+		// DB::table('oracle_ap_invoice_exports')->insert([
+		// 	'company_id' => $companyId,
+		// 	'business_unit' => $businessUnitName,
+		// 	'invoice_source' => $invoiceSource,
+		// 	'invoice_number' => $invoiceNumber,
+		// 	'invoice_date' => $invoiceDate,
+		// 	'supplier_number' => $supplierNumber,
+		// 	'supplier_site_name' => $supplierSiteName,
+		// 	'invoice_type' => $invoiceType,
+		// 	'invoice_description' => $description,
+		// 	'amount' => round($amount),
+		// 	'outlet' => $outletCode,
+		// 	'accounting_class' => $accountingClass,
+		// 	'company' => $companyCode,
+		// 	'lob' => $lob,
+		// 	'location' => $location,
+		// 	'department' => $department,
+		// 	'natural_account' => $naturalAccount,
+		// 	'document_type' => $documentType,
+		// 	'created_at' => Carbon::now(),
+		// ]);
+		saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $amount, $accountingClass, $companyCode, $lob, $location, $department, $naturalAccount, $documentType);
 
 		$res['success'] = true;
 		DB::setDefaultConnection('mysql');
@@ -329,6 +330,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			'invoice_number' => $invoiceNumber,
 			'business_unit' => $businessUnitName,
 			'invoice_source' => $invoiceSource,
+			'document_type' => $documentType,
 		])->get();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
