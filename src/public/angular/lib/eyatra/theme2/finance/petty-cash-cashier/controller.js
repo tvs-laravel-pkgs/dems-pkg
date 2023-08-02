@@ -3,6 +3,10 @@ app.component('eyatraPettyCashCashierList', {
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-indv-expense-vouchers-verification2')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         // if ($routeParams.expence_type == 1) {
         $list_data_url = eyatra_pettycash_cashier_list_url;
         // } else {

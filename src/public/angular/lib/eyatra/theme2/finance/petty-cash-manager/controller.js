@@ -1,9 +1,13 @@
 app.component('eyatraPettyCashManagerList', {
     templateUrl: eyatra_pettycash_manager_list_template_url,
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams) {
-        //alert('this');
+        // alert('this');
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-indv-expense-vouchers-verification1')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         // alert($routeParams.type_id);
         // if ($routeParams.expense_type == 1) {
         $list_data_url = eyatra_pettycash_manager_list_url;

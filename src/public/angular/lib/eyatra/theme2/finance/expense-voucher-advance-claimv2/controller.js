@@ -3,7 +3,10 @@ app.component('eyatraExpenseVoucherAdvanceVerification2List', {
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-
+        if(!self.hasPermission('eyatra-indv-expense-vouchers-verification2')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         $list_data_url = expense_voucher_advance_verification2_list_data_url;
 
         var dataTable = $('#expense_advance_verification2_list').DataTable({

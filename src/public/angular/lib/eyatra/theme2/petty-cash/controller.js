@@ -4,6 +4,10 @@ app.component('eyatraPettyCashList', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.add_permission = self.hasPermission('eyatra-indv-expense-vouchers');
+        if(!self.hasPermission('eyatra-pcv')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         //alert(self.add_permission);
         var dataTable = '';
         $list_data_url = eyatra_pettycash_get_list;
@@ -156,6 +160,12 @@ app.component('eyatraPettyCashForm', {
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         self.search_permission = self.hasPermission('eyatra-indv-expense-vouchers-verification2');
+        if(self.type_id == 2){
+            if(!self.hasPermission('eyatra-pcv-add') && !self.hasPermission('eyatra-pcv-edit')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }
         // alert(self.search_permission);
         $http.get(
             $form_data_url
@@ -603,6 +613,10 @@ app.component('eyatraPettyCashView', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-pcv-view')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         $http.get(
             petty_cash_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {
