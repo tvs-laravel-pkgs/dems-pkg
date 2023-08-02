@@ -3,6 +3,10 @@ app.component('eyatraPettyCashCashierList', {
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-indv-expense-vouchers-verification2')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         // if ($routeParams.expence_type == 1) {
         $list_data_url = eyatra_pettycash_cashier_list_url;
         // } else {
@@ -99,6 +103,13 @@ app.component('eyatraPettyCashCashierView', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if($routeParams.type_id == 2){
+            if(!self.hasPermission('eyatra-pcv-cashier-view')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }
+        
         $http.get(
             petty_cash_cashier_view_url + '/' + $routeParams.type_id + '/' + $routeParams.pettycash_id
         ).then(function(response) {

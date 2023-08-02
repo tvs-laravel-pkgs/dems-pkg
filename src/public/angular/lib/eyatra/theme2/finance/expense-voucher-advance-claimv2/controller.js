@@ -3,7 +3,10 @@ app.component('eyatraExpenseVoucherAdvanceVerification2List', {
     controller: function(HelperService, $rootScope, $scope, $http, $routeParams, $location) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
-
+        if(!self.hasPermission('eyatra-indv-expense-vouchers-verification2')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         $list_data_url = expense_voucher_advance_verification2_list_data_url;
 
         var dataTable = $('#expense_advance_verification2_list').DataTable({
@@ -84,6 +87,10 @@ app.component('eyatraExpenseVoucherAdvanceVerification2View', {
     controller: function($http, $location, $routeParams, HelperService, $rootScope, $timeout, $scope, $mdSelect) {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
+        if(!self.hasPermission('eyatra-advance-pcv-cashier-view')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
         $http.get(
             expense_voucher_advance_verification2_view_data_url + '/' + $routeParams.id
         ).then(function(response) {

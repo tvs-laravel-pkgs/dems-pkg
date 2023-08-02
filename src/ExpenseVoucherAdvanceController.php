@@ -15,6 +15,7 @@ use Validator;
 use App\FinancialYear;
 use App\SerialNumberGroup;
 use Yajra\Datatables\Datatables;
+use Entrust;
 
 class ExpenseVoucherAdvanceController extends Controller {
 	public function listExpenseVoucherRequest(Request $r) {
@@ -67,26 +68,59 @@ class ExpenseVoucherAdvanceController extends Controller {
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				$payment_detail_icon = asset('public/img/content/yatra/table/payment-detail.svg');
 				if ($expense_voucher_requests->status_id == 3460 || $expense_voucher_requests->status_id == 3463 || $expense_voucher_requests->status_id == 3465) {
-					return '
-				<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
-					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
-				</a>
-				<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>
-				<a href="javascript:;" data-toggle="modal" data-target="#expense_voucher_confirm_box"
-				onclick="angular.element(this).scope().deleteExpenseVoucher(' . $expense_voucher_requests->id . ')" dusk = "delete-btn" title="Delete">
-                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
-                </a>';
+				// 	return '
+				// <a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
+				// 	<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+				// </a>
+				// <a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+				// 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				// </a>
+				// <a href="javascript:;" data-toggle="modal" data-target="#expense_voucher_confirm_box"
+				// onclick="angular.element(this).scope().deleteExpenseVoucher(' . $expense_voucher_requests->id . ')" dusk = "delete-btn" title="Delete">
+                // <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
+                // </a>';
+				$action = '';
+				if(Entrust::can('eyatra-advance-pcv-edit')){
+	                $action .= '
+					<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
+						<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+					</a>';
+				}
+				if(Entrust::can('eyatra-advance-pcv-view')){
+					$action .='<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+						<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+					</a>';
+				}
+				if(Entrust::can('eyatra-advance-pcv-delete')){
+					$action .='<a href="javascript:;" data-toggle="modal" data-target="#expense_voucher_confirm_box"
+					onclick="angular.element(this).scope().deleteExpenseVoucher(' . $expense_voucher_requests->id . ')" dusk = "delete-btn" title="Delete">
+	                <img src="' . $img3 . '" alt="delete" class="img-responsive" onmouseover=this.src="' . $img3_active . '" onmouseout=this.src="' . $img3 . '" >
+	                </a>';
+				}
+                return $action;
+
 				// } elseif ($expense_voucher_requests->status_id == 3464 || $expense_voucher_requests->status_id == 3466 || $expense_voucher_requests->status_id == 3469 || $expense_voucher_requests->status_id == 3471) {
 				} elseif ($expense_voucher_requests->status_id == 3464 && (!$expense_voucher_requests->advance_pcv_claim_status_id || $expense_voucher_requests->advance_pcv_claim_status_id == 3466 || $expense_voucher_requests->advance_pcv_claim_status_id == 3469 || $expense_voucher_requests->advance_pcv_claim_status_id == 3471)) {
-					$action = '
-				<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
-					<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
-				</a>
-				<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
+				// 	$action = '
+				// <a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
+				// 	<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+				// </a>
+				// <a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+				// 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+				// </a>';
+
+					$action = '';
+					if(Entrust::can('eyatra-advance-pcv-edit')){
+						$action .= '<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
+							<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+						</a>';
+					}
+
+					if(Entrust::can('eyatra-advance-pcv-view')){
+						$action .='<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+							<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
+						</a>';
+					}
 					return $action;
 				} else {
 					
@@ -94,11 +128,15 @@ class ExpenseVoucherAdvanceController extends Controller {
 				// 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
 				// </a>';
 					$action = '';
-					$action .= '<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
-				 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a>';
+					if(Entrust::can('eyatra-advance-pcv-view')){
+						$action .= '<a href="#!/expense/voucher-advance/view/' . $expense_voucher_requests->id . '">
+					 	<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a>';
+					 }
 
 					if(($expense_voucher_requests->employee_return_payment_mode_id == 4010 || $expense_voucher_requests->employee_return_payment_mode_id == 4011) && ($expense_voucher_requests->advance_pcv_claim_status_id == 3470)){
-						$action .= '<a type="button" onclick="angular.element(this).scope().employeeReturnPaymentUpdateHandler(' . $expense_voucher_requests->id . ')"><img src="' . $payment_detail_icon . '" title="Employee Return Payment Detail" alt="Employee Return Payment Detail" class="img-responsive" onmouseover=this.src="' . $payment_detail_icon . '" onmouseout=this.src="' . $payment_detail_icon . '"></a> ';
+						if(Entrust::can('eyatra-advance-pcv-employee-return-payment-detail')){
+							$action .= '<a type="button" onclick="angular.element(this).scope().employeeReturnPaymentUpdateHandler(' . $expense_voucher_requests->id . ')"><img src="' . $payment_detail_icon . '" title="Employee Return Payment Detail" alt="Employee Return Payment Detail" class="img-responsive" onmouseover=this.src="' . $payment_detail_icon . '" onmouseout=this.src="' . $payment_detail_icon . '"></a> ';
+						}
 					}
 					return $action;
 				}

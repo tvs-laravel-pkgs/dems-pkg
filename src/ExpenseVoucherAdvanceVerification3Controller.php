@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Validator;
 use Yajra\Datatables\Datatables;
+use Entrust;
 
 class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 	public function listExpenseVoucherverification3Request(Request $r) {
@@ -64,11 +65,11 @@ class ExpenseVoucherAdvanceVerification3Controller extends Controller {
 				$img1_active = asset('public/img/content/yatra/table/edit-active.svg');
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
-
-				return '
-				<a href="#!/expense/voucher-advance/verification3/view/' . $expense_voucher_requests->id . '">
-					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" >
-				</a>';
+				if(Entrust::can('eyatra-advance-pcv-financier-view')){
+					return '
+					<a href="#!/expense/voucher-advance/verification3/view/' . $expense_voucher_requests->id . '">
+					<img src="' . $img2 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img2_active . '" onmouseout=this.src="' . $img2 . '" ></a>';
+				}
 			})
 			->addColumn('request_type', function ($expense_voucher_requests) {
 				$request_type = "PCV";
