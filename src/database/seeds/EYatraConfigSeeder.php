@@ -1251,6 +1251,14 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'OESL Travelx Invoice',
 				'config_type_id' => 550,
 			],
+			3835 => [
+				'name' => 'Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			3836 => [
+				'name' => 'Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
 
 			//COMPANY BUSINESS UNITS
 			3841 => [

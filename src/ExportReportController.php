@@ -29,6 +29,7 @@ use Uitoux\EYatra\Region;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
+use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 
 class ExportReportController extends Controller {
 	// Report list filter
@@ -3573,5 +3574,79 @@ class ExportReportController extends Controller {
 		}
 	}
 
-	
+	public function advancePcvOracleSync($id = null) {
+		$advance_details = ExpenseVoucherAdvanceRequest::select([
+			'id',
+			DB::raw("'Advance' as category"),
+		])
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('id', $id);
+				}
+			})
+			->where('advance_amount', '>', 0)
+			->whereIn('status_id', [3470, 3464]) //Advance Amount Approved and Paid
+			->where('oracle_pre_payment_sync_status', 0)
+			->groupBy('id')
+			->get()
+			->toArray();
+
+		$claim_details = ExpenseVoucherAdvanceRequest::select(
+			'expense_voucher_advance_requests.id',
+			DB::raw("'Claim' as category")
+		)
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('expense_voucher_advance_requests.id', $id);
+				}
+			})
+			->join('expense_voucher_advance_request_claims as claims', 'claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
+			->where('claims.expense_amount', '>', 0)
+			->where('claims.status_id', 3470) //Paid
+			->where('expense_voucher_advance_requests.oracle_claim_sync_status', 0) 
+			->groupBy('expense_voucher_advance_requests.id')
+			->get()
+			->toArray();
+
+		$advance_pcv_details = array_merge($advance_details, $claim_details);
+		array_multisort(
+			array_column($advance_pcv_details, 'id'),
+			SORT_ASC,
+			$advance_pcv_details
+		);
+
+		foreach ($advance_pcv_details as $advance_pcv_detail) {
+			try {
+				DB::beginTransaction();
+				$expense_voucher_advance_request = ExpenseVoucherAdvanceRequest::find($advance_pcv_detail['id']);
+
+				//ADVANCE SYNC
+				if ($advance_pcv_detail['category'] == 'Advance') {
+					$r = $expense_voucher_advance_request->generatePrePaymentApOracleAxapta();
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$expense_voucher_advance_request->oracle_pre_payment_sync_status = 1; //SYNCED
+						$expense_voucher_advance_request->save();
+					}
+				}
+
+				//CLAIM SYNC
+				if ($advance_pcv_detail['category'] == 'Claim') {
+					$r = $expense_voucher_advance_request->generateClaimApOracleAxapta();
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$expense_voucher_advance_request->oracle_claim_sync_status = 1; //SYNCED
+						$expense_voucher_advance_request->save();
+					}
+				}
+				DB::commit();
+			} catch (\Exception $e) {
+				DB::rollBack();
+				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
+				continue;
+			}
+		}
+	}
 }
