@@ -93,6 +93,10 @@ class EYatraConfigSeeder extends Seeder {
 			577 => 'Trip Claim - Employee Return Balance Cash Limit',
 			578 => 'Advance PCV - Is Financier Payment Date Should Be Current Date',
 			579 => 'PCV - Is Financier Payment Date Should Be Current Date',
+			580 => 'Advance PCV - Pre Payment Natural Account',
+			581 => 'Advance PCV - Claim Natural Account',
+			582 => 'Advance PCV Balance - Employee To Company Natural Account',
+			583 => 'PCV Invoice Natural Account',
 		];
 
 		$configs = [
@@ -1240,6 +1244,14 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Travelx Invoice',
 				'config_type_id' => 550,
 			],
+			3833 => [
+				'name' => 'OESL Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			3834 => [
+				'name' => 'OESL Travelx Invoice',
+				'config_type_id' => 550,
+			],
 
 			//COMPANY BUSINESS UNITS
 			3841 => [
@@ -1263,6 +1275,14 @@ class EYatraConfigSeeder extends Seeder {
 			3861 => [
 				'name' => '570222',
 				'config_type_id' => 553,
+			],
+			3862 => [
+				'name' => '152668',
+				'config_type_id' => 580,
+			],
+			3863 => [
+				'name' => '570222',
+				'config_type_id' => 581,
 			],
 
 			3881 => [
@@ -1291,6 +1311,14 @@ class EYatraConfigSeeder extends Seeder {
 			3921 => [
 				'name' => '152674',
 				'config_type_id' => 557,
+			],
+			3922 => [
+				'name' => '152674',
+				'config_type_id' => 582,
+			],
+			3923 => [
+				'name' => '570222',
+				'config_type_id' => 583,
 			],
 
 			3941 => [

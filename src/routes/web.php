@@ -651,4 +651,7 @@ Route::get('eyatra/report-list/data', 'Uitoux\EYatra\ExportReportController@getR
 Route::get('eyatra/report-data/mail', 'Uitoux\EYatra\ExportReportController@sendMail')->name('sendMail');
 Route::get('eyatra/pending-trip/mail', 'Uitoux\EYatra\MailController@sendMail')->name('sendPendingTripMail');
 Route::get('GetCMSEmployeeDetails/{empCode?}', 'Uitoux\EYatra\SoapController@GetCMSEmployeeDetails');
+
+Route::get('/trip/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripOracleSync')->name('tripOracleSync');
 Route::post('eyatra/trip/report', 'Uitoux\EYatra\ExportReportController@tripReport')->name('tripReport');
+
