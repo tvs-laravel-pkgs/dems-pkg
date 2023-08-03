@@ -130,7 +130,7 @@ class TravelexPermissionSeeder extends Seeder {
 			5724 => [
 				'display_order' => 10,
 				'parent_id' => 5600,
-				'name' => 'eyatra-advance-pcv-Financier-view',
+				'name' => 'eyatra-advance-pcv-financier-view',
 				'display_name' => 'Advance PCV Financier View',
 			],
 			5725 => [
@@ -149,7 +149,7 @@ class TravelexPermissionSeeder extends Seeder {
 			5727 => [
 				'display_order' => 13,
 				'parent_id' => 5600,
-				'name' => 'eyatra-pcv-Financier-view',
+				'name' => 'eyatra-pcv-financier-view',
 				'display_name' => 'PCV Financier View',
 			],
 			5728 => [
