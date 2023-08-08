@@ -3508,8 +3508,9 @@ class ExportReportController extends Controller {
 				}
 			})
 			->where('advance_received', '>', 0)
-			->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
+			// ->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
 			->where('oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
+			->whereIn('status_id', [3028, 3026])
 			->groupBy('id')
 			->get()
 			->toArray();
@@ -3525,8 +3526,10 @@ class ExportReportController extends Controller {
 			})
 			->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
 			->where('eyec.total_amount', '>', 0)
-			->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
+			// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
 			->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
+			->where('trips.status_id', 3026)
+			->where('eyec.status_id', 3026)
 			->groupBy('trips.id')
 			->get()
 			->toArray();
