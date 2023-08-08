@@ -6190,7 +6190,15 @@ request is not desired, then those may be rejected.';
 						if ($lodgingTaxInvoice && (($lodgingTaxInvoice->cgst > 0 && $lodgingTaxInvoice->sgst > 0) || ($lodgingTaxInvoice->igst > 0))) {
 							$taxDetailRes = $this->getLodgingTaxDetail($lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, $lodgingTaxInvoice->tax_percentage);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging', $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , $claimManagerApprovedDate);
+							$lineDescription = "Lodging";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , $claimManagerApprovedDate);
 						}
 
 						//DRY WASH
@@ -6198,7 +6206,15 @@ request is not desired, then those may be rejected.';
 						if ($drywashTaxInvoice && (($drywashTaxInvoice->cgst > 0 && $drywashTaxInvoice->sgst > 0) || ($drywashTaxInvoice->igst > 0))) {
 							$taxDetailRes = $this->getLodgingTaxDetail($drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, $drywashTaxInvoice->tax_percentage);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging - Dry Wash', $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
+							$lineDescription = "Lodging-DryWash";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
 						}
 
 						//BOARDING
@@ -6206,14 +6222,29 @@ request is not desired, then those may be rejected.';
 						if ($boardingTaxInvoice && (($boardingTaxInvoice->cgst > 0 && $boardingTaxInvoice->sgst > 0) || ($boardingTaxInvoice->igst > 0))) {
 							$taxDetailRes = $this->getLodgingTaxDetail($boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, $boardingTaxInvoice->tax_percentage);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging - Boarding', $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
+							$lineDescription = "Lodging-Boarding";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
 						}
 					} else {
 						//SINGLE
 						if (($lodging->cgst > 0 && $lodging->sgst > 0) || ($lodging->igst > 0)) {
 							$taxDetailRes = $this->getLodgingTaxDetail($lodging->cgst, $lodging->sgst, $lodging->igst, $lodging->tax_percentage);
+							$lineDescription = "Lodging";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging', $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
 						}
 					}
 				}
