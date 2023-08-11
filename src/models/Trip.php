@@ -4828,9 +4828,11 @@ request is not desired, then those may be rejected.';
 
 		// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 		if(!empty($this->employee->department) && $this->employee->department->business_id == 2){
-			$transactionDetail = $this->company ? $this->company->oeslPrePaymentInvoiceTransaction() : null;
+			// $transactionDetail = $this->company ? $this->company->oeslPrePaymentInvoiceTransaction() : null;
+			$transactionDetail = $this->company ? $this->company->invoiceTransaction() : null;
 		}else{
-			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
+			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
+			$transactionDetail = $this->company ? $this->company->invoiceTransaction() : null;
 		}
 		// $invoiceSource = 'Pre Payment Invoice';
 		$invoiceSource = 'Travelex';
@@ -5935,10 +5937,12 @@ request is not desired, then those may be rejected.';
 
 		if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 2){
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->oeslInvoiceTransaction() : null;
-			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->oeslClaimRefundInvoiceTransaction() : null;
+			// $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->oeslClaimRefundInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->oeslInvoiceTransaction() : null;
 		}else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
-			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
+			// $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 		}
 
 		// $invoiceSource = 'Invoice';
