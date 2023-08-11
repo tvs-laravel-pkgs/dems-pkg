@@ -4845,7 +4845,8 @@ request is not desired, then those may be rejected.';
 
 		$businessUnitName = $companyBusinessUnit;
 		$invoiceNumber = $this->number;
-		$invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
+		// $invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
+		$invoiceDate = $this->updated_at ? date("Y-m-d", strtotime($this->updated_at)) : null;
 		$employeeData = $this->employee;
 		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		// $invoiceType = 'Standard';
