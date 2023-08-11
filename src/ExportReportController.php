@@ -3498,6 +3498,7 @@ class ExportReportController extends Controller {
 	}
 
 	public function tripOracleSync($id = null) {
+		$pre_payment_check_status_id = Config::where('id', 4082)->first()->name;
 		$advance_amount_trips = Trip::select([
 			'id',
 			DB::raw("'Advance amount' as category"),
@@ -3510,7 +3511,12 @@ class ExportReportController extends Controller {
 			->where('advance_received', '>', 0)
 			// ->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
 			->where('oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
-			->whereIn('status_id', [3028, 3026])
+			// ->whereIn('status_id', [3028, 3026])
+			->where(function($q) use ($pre_payment_check_status_id) {
+                if($pre_payment_check_status_id == "Yes"){
+                    $q->whereIn('status_id', [3028, 3026]);
+                }
+            })
 			->groupBy('id')
 			->get()
 			->toArray();
