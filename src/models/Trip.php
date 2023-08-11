@@ -5970,6 +5970,7 @@ request is not desired, then those may be rejected.';
 			'amount_to_pay',
 			'balance_amount',
 			'created_at',
+			'updated_at',
 		])
 			->where('trip_id', $employeeTrip->id)
 			->first();
@@ -5981,7 +5982,8 @@ request is not desired, then those may be rejected.';
 		$prePaymentAmount = null;
 		if ($employeeClaim) {
 			$invoiceAmount = round($employeeClaim->total_amount);
-			$invoiceDate = $employeeClaim->created_at ? date("Y-m-d", strtotime($employeeClaim->created_at)) : null;
+			// $invoiceDate = $employeeClaim->created_at ? date("Y-m-d", strtotime($employeeClaim->created_at)) : null;
+			$invoiceDate = $employeeClaim->updated_at ? date("Y-m-d", strtotime($employeeClaim->updated_at)) : null;
 			$invoiceNumber = $employeeClaim->number;
 
 			if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
