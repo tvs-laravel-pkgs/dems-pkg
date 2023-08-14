@@ -4823,16 +4823,21 @@ request is not desired, then those may be rejected.';
 		$res['errors'] = [];
 
 		$companyId = $this->company_id;
-		$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
-		$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
+		// $companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+		// $companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
 
 		// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 		if(!empty($this->employee->department) && $this->employee->department->business_id == 2){
 			// $transactionDetail = $this->company ? $this->company->oeslPrePaymentInvoiceTransaction() : null;
-			$transactionDetail = $this->company ? $this->company->invoiceTransaction() : null;
+			$transactionDetail = $this->company ? $this->company->oeslPrePaymentInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($this->company->oes_business_unit->name) ? $this->company->oes_business_unit->name : null;
+			$companyCode = isset($this->company->oes_business_unit->code) ? $this->company->oes_business_unit->code : null;
 		}else{
 			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
-			$transactionDetail = $this->company ? $this->company->invoiceTransaction() : null;
+			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
+
+			$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+			$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
 		}
 		// $invoiceSource = 'Pre Payment Invoice';
 		$invoiceSource = 'Travelex';
@@ -4845,8 +4850,22 @@ request is not desired, then those may be rejected.';
 
 		$businessUnitName = $companyBusinessUnit;
 		$invoiceNumber = $this->number;
+
+		$tripApprovalLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3581) //Outstation Trip
+			->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+			->where('entity_id', $this->id)
+			->first();
+		$tripManagerApprovedDate = null;
+		if($tripApprovalLog){
+			$tripManagerApprovedDate = $tripApprovalLog->approved_date;
+		}
+
 		// $invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
-		$invoiceDate = $this->updated_at ? date("Y-m-d", strtotime($this->updated_at)) : null;
+		$invoiceDate = $tripManagerApprovedDate;
 		$employeeData = $this->employee;
 		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		// $invoiceType = 'Standard';
@@ -5932,18 +5951,21 @@ request is not desired, then those may be rejected.';
 
 		$employeeTrip = $this;
 		$companyId = $employeeTrip->company_id;
-		$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
+		// $companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
 
 		// $transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 
 		if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 2){
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->oeslInvoiceTransaction() : null;
-			// $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->oeslClaimRefundInvoiceTransaction() : null;
-			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->oeslInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->oeslClaimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->oes_business_unit->name) ? $employeeTrip->company->oes_business_unit->name : null;
+			$company  = isset($employeeTrip->company->oes_business_unit->code) ? $employeeTrip->company->oes_business_unit->code : null;
+
 		}else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
-			// $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
-			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
+			$company  = isset($employeeTrip->company->oem_business_unit->code) ? $employeeTrip->company->oem_business_unit->code : null;
 		}
 
 		// $invoiceSource = 'Invoice';
@@ -6050,7 +6072,7 @@ request is not desired, then those may be rejected.';
 		// $accountingClass = 'Payable';
 		$accountingClass = 'Purchase/Expense';
 		// $company = $employeeTrip->company ? $employeeTrip->company->oracle_code : '';
-		$company  = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;;
+		// $company  = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;;
 
 		$sbu = $employeeData->Sbu;
 		$lob = $department = null;
