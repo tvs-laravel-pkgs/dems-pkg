@@ -3498,6 +3498,7 @@ class ExportReportController extends Controller {
 	}
 
 	public function tripOracleSync($id = null) {
+		$sync_method = Config::where('id', 4091)->first()->name;
 		$pre_payment_check_status_id = Config::where('id', 4082)->first()->name;
 		$advance_amount_trips = Trip::select([
 			'id',
@@ -3512,11 +3513,15 @@ class ExportReportController extends Controller {
 			// ->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
 			->where('oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
 			// ->whereIn('status_id', [3028, 3026])
-			->where(function($q) use ($pre_payment_check_status_id) {
+			->where(function($q) use ($pre_payment_check_status_id , $sync_method) {
                 if($pre_payment_check_status_id == "Yes"){
                     $q->whereIn('status_id', [3028, 3026]);
                 }
+                if($sync_method == "auto"){
+                	$q->whereDate('updated_at', '<', date('Y-m-d'));
+                }
             })
+            ->where('status_id','!=', 3032) //Cancelled
 			->groupBy('id')
 			->get()
 			->toArray();
@@ -3536,6 +3541,11 @@ class ExportReportController extends Controller {
 			->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
 			->where('trips.status_id', 3026)
 			->where('eyec.status_id', 3026)
+			->where(function($q) use ($sync_method) {
+                if($sync_method == "auto"){
+                	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));
+                }
+            })
 			->groupBy('trips.id')
 			->get()
 			->toArray();
