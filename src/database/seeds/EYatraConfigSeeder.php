@@ -98,6 +98,7 @@ class EYatraConfigSeeder extends Seeder {
 			582 => 'Advance PCV Balance - Employee To Company Natural Account',
 			583 => 'PCV Invoice Natural Account',
 			584 => 'Oracle - Pre Payment Check Status Id',
+			585 => 'Trips Oracle Sync Method',
 		];
 
 		$configs = [
@@ -1504,6 +1505,10 @@ class EYatraConfigSeeder extends Seeder {
 			4082 => [
 				'name' => 'Yes',
 				'config_type_id' => 584,
+			],
+			4091 => [
+				'name' => 'auto',
+				'config_type_id' => 585,
 			],
 		];
 
