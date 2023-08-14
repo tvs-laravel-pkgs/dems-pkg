@@ -3501,41 +3501,47 @@ class ExportReportController extends Controller {
 		$sync_method = Config::where('id', 4091)->first()->name;
 		$pre_payment_check_status_id = Config::where('id', 4082)->first()->name;
 		$advance_amount_trips = Trip::select([
-			'id',
+			'trips.id',
 			DB::raw("'Advance amount' as category"),
+			'departments.business_id',
 		])
+			->join('employees', 'employees.id', 'trips.employee_id')
+			->join('departments', 'departments.id', 'employees.department_id')
 			->where(function ($query) use ($id) {
 				if ($id) {
-					$query->where('id', $id);
+					$query->where('trips.id', $id);
 				}
 			})
-			->where('advance_received', '>', 0)
+			->where('trips.advance_received', '>', 0)
 			// ->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
-			->where('oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
+			->where('trips.oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
 			// ->whereIn('status_id', [3028, 3026])
 			->where(function($q) use ($pre_payment_check_status_id , $sync_method) {
                 if($pre_payment_check_status_id == "Yes"){
-                    $q->whereIn('status_id', [3028, 3026]);
+                    $q->whereIn('trips.status_id', [3028, 3026]);
                 }
                 if($sync_method == "auto"){
-                	$q->whereDate('updated_at', '<', date('Y-m-d'));
+                	$q->whereDate('trips.updated_at', '<', date('Y-m-d'));
                 }
             })
-            ->where('status_id','!=', 3032) //Cancelled
-			->groupBy('id')
+            ->where('trips.status_id','!=', 3032) //Cancelled
+			->groupBy('trips.id')
 			->get()
 			->toArray();
 
-		$claimed_trips = Trip::select(
+		$claimed_trips = Trip::select([
 			'trips.id',
-			DB::raw("'Trip claim' as category")
-		)
+			DB::raw("'Trip claim' as category"),
+			'departments.business_id',
+		])
 			->where(function ($query) use ($id) {
 				if ($id) {
 					$query->where('trips.id', $id);
 				}
 			})
 			->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
+			->join('employees', 'employees.id', 'trips.employee_id')
+			->join('departments', 'departments.id', 'employees.department_id')
 			->where('eyec.total_amount', '>', 0)
 			// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
 			->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
@@ -3561,6 +3567,20 @@ class ExportReportController extends Controller {
 			try {
 				DB::beginTransaction();
 				$trip = Trip::find($trip_detail['id']);
+				if($trip_detail['business_id'] == 1 && $trip->advance_received > 0){
+					//DLOB
+					$trip_approval_log = ApprovalLog::select([
+						'id',
+						DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+					])
+						->where('type_id', 3581) //Outstation Trip
+						->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+						->where('entity_id', $trip->id)
+						->first();
+					if($trip_approval_log && $trip_approval_log->approved_date < '2023-08-01'){
+						continue;
+					}
+				}
 
 				//ADVANCE AMOUNT SYNC
 				if ($trip_detail['category'] == 'Advance amount') {
