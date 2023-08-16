@@ -6050,7 +6050,12 @@ request is not desired, then those may be rejected.';
 		if ($employeeTrip->selfVisits->isNotEmpty()) {
 			foreach ($employeeTrip->selfVisits as $selfVisit) {
 				if (!empty($selfVisit->booking)) {
-					$employeeTransportValue += floatval($selfVisit->booking->invoice_amount);
+					// $employeeTransportValue += floatval($selfVisit->booking->invoice_amount);
+					if($selfVisit->booking->invoice_amount && $selfVisit->booking->invoice_amount != '0.00'){
+						$employeeTransportValue += floatval($selfVisit->booking->invoice_amount);
+					}else{
+						$employeeTransportValue += (floatval($selfVisit->booking->amount) + floatval($selfVisit->booking->other_charges) + floatval($selfVisit->booking->round_off));
+					}
 				}
 			}
 		}

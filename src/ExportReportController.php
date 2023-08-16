@@ -618,7 +618,10 @@ class ExportReportController extends Controller {
 								$res = $this->employeeAxaptaExportProcess(6, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$tot_consolidated_amount += $res;
 
-								Trip::where('id', $employeeTrip->id)->update([
+								// Trip::where('id', $employeeTrip->id)->update([
+								// 	'advance_ax_export_sync' => 1,
+								// ]);
+								DB::table('trips')->where('id', $employeeTrip->id)->update([
 									'advance_ax_export_sync' => 1,
 								]);
 							}
@@ -655,9 +658,12 @@ class ExportReportController extends Controller {
 
 						if ($employeeTrip->ey_employee_claim_status_id == 3026) {
 							//AX SYNCHED
-							Trip::where('id', $employeeTrip->id)->update([
-								'self_ax_export_synched' => 1,
-							]);
+							// Trip::where('id', $employeeTrip->id)->update([
+							// 	'self_ax_export_synched' => 1,
+							// ]);
+							DB::table('trips')->where('id', $employeeTrip->id)->update([
+									'self_ax_export_synched' => 1,
+								]);
 						} else {
 
 							// Trip::where('id', $employeeTrip->id)->update([
@@ -2623,7 +2629,10 @@ class ExportReportController extends Controller {
 									$this->hondaOeslEmployeeAxaptaProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								}
 
-								Trip::where('id', $employeeTrip->id)->update([
+								// Trip::where('id', $employeeTrip->id)->update([
+								// 	'advance_ax_export_sync' => 1,
+								// ]);
+								DB::table('trips')->where('id', $employeeTrip->id)->update([
 									'advance_ax_export_sync' => 1,
 								]);
 							}
@@ -2673,9 +2682,13 @@ class ExportReportController extends Controller {
 
 						if ($employeeTrip->ey_employee_claim_status_id == 3026) {
 							//COMPLETED
-							Trip::where('id', $employeeTrip->id)->update([
-								'self_ax_export_synched' => 1,
-							]);
+							// Trip::where('id', $employeeTrip->id)->update([
+							// 	'self_ax_export_synched' => 1,
+							// ]);
+							DB::table('trips')->where('id', $employeeTrip->id)->update([
+									'self_ax_export_synched' => 1,
+								]);
+
 						} else {
 
 							// Trip::where('id', $employeeTrip->id)->update([
