@@ -1045,6 +1045,317 @@ app.component('importJobs', {
     }
 });
 
+app.component('hrmsEmployeeSyncLogList', {
+    templateUrl: hrms_employee_sync_log_list_template_url,
+    controller: function(HelperService, $rootScope, $scope, $http, $routeParams) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.type_id = $routeParams.type_id;
+
+        if(self.type_id == 3961){
+            //EMPLOYEE ADDITION
+            if(!self.hasPermission('hrms-to-travelex-employee-addition')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }else if(self.type_id == 3962){
+            //EMPLOYEE UPDATION
+            if(!self.hasPermission('hrms-to-travelex-employee-updation')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }else if(self.type_id == 3963){
+            //EMPLOYEE DELETION
+            if(!self.hasPermission('hrms-to-travelex-employee-deletion')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }else if(self.type_id == 3964){
+            //EMPLOYEE REPORTING TO UPDATION
+            if(!self.hasPermission('hrms-to-travelex-employee-reporting-to-updation')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
+        }
+
+        $http.get(
+            laravel_routes['getHrmsEmployeeSyncLogFilterData']
+        ).then(function(response) {
+            self.user_company = response.data.user_company; 
+        });
+
+        setTimeout(function() {
+            let cols = null;
+            if(self.type_id == 3961){
+                //EMPLOYEE ADDITION
+                cols = [
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                    { data: 'from_date_time',  searchable: false },
+                    { data: 'to_date_time',  searchable: false },
+                    { data: 'new_count',  searchable: false },
+                ];
+            }else if(self.type_id == 3962){
+                //EMPLOYEE UPDATION
+                cols = [
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                    { data: 'from_date_time',  searchable: false },
+                    { data: 'to_date_time',  searchable: false },
+                    { data: 'update_count',  searchable: false },
+                ];
+            }
+            else if(self.type_id == 3963){
+                //EMPLOYEE DELETION
+                cols = [
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                    { data: 'from_date_time',  searchable: false },
+                    { data: 'to_date_time',  searchable: false },
+                    { data: 'delete_count',  searchable: false },
+                ];
+            }
+            else if(self.type_id == 3964){
+                //EMPLOYEE REPORTING TO UPDATION
+                cols = [
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                    { data: 'from_date_time',  searchable: false },
+                    { data: 'to_date_time',  searchable: false },
+                    { data: 'update_count',  searchable: false },
+                ];
+            }
+
+            var dataTable = $('#employee_sync_log_list_table').DataTable({
+                stateSave: true,
+                "dom": dom_structure_separate,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "Search",
+                    "lengthMenu": "Rows Per Page _MENU_",
+                    "paginate": {
+                        "next": '<i class="icon ion-ios-arrow-forward"></i>',
+                        "previous": '<i class="icon ion-ios-arrow-back"></i>'
+                    },
+                },
+                pageLength: 10,
+                processing: true,
+                serverSide: true,
+                paging: true,
+                ordering: false,
+                ajax: {
+                    url: laravel_routes['getHrmsEmployeeSyncLogList'],
+                    type: "GET",
+                    dataType: "json",
+                    data: function(d) {
+                        d.type_id = self.type_id;
+                    }
+                },
+                columns: cols,
+                rowCallback: function(row, data) {
+                    $(row).addClass('highlight-row');
+                }
+            });
+
+            // $('#eyatra_designation_table_filter').find('input').addClass("on_focus");
+            $('.on_focus').focus();
+            $('.dataTables_length select').select2();
+            if(self.type_id == 3961){
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Addition</p><h3 class="title">HRMS To Travelex Employee Addition</h3>');
+                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-addition-sync">' +
+                'Sync' +'</button>'); 
+            }else if(self.type_id == 3962){
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Updation</p><h3 class="title">HRMS To Travelex Employee Updation</h3>');
+                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-updation-sync">' +
+                'Sync' +'</button>');
+            }else if(self.type_id == 3963){
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Deletion</p><h3 class="title">HRMS To Travelex Employee Deletion</h3>');
+                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-deletion-sync">' +
+                'Sync' +'</button>');
+            }else if(self.type_id == 3964){
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Reporting To Updation</p><h3 class="title">HRMS To Travelex Employee Reporting To Updation</h3>');
+                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-reporting-to-update-sync">' +
+                'Sync' +'</button>');
+            }
+
+            $('.employee-addition-sync').on("click", function() {
+                $('.employee-addition-sync').button('loading');
+                $.ajax({
+                    method: "POST",
+                    url: laravel_routes['hrmsEmployeeAdditionSync'],
+                    data: {
+                        company_id: self.user_company.id,
+                        company_code: self.user_company.code
+                    },
+                })
+                .done(function(res) {
+                    $('.employee-addition-sync').button('reset');
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', res.message);
+                        dataTable.draw();
+                    }
+                })
+                .fail(function(xhr) {
+                    $('.employee-addition-sync').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+            });
+
+            $('.employee-updation-sync').on("click", function() {
+                $('.employee-updation-sync').button('loading');
+                $.ajax({
+                    method: "POST",
+                    url: laravel_routes['hrmsEmployeeUpdationSync'],
+                    data: {
+                        company_id: self.user_company.id,
+                        company_code: self.user_company.code
+                    },
+                })
+                .done(function(res) {
+                    $('.employee-updation-sync').button('reset');
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', res.message);
+                        dataTable.draw();
+                    }
+                })
+                .fail(function(xhr) {
+                    $('.employee-updation-sync').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+            });
+
+            $('.employee-deletion-sync').on("click", function() {
+                $('.employee-deletion-sync').button('loading');
+                $.ajax({
+                    method: "POST",
+                    url: laravel_routes['hrmsEmployeeDeletionSync'],
+                    data: {
+                        company_id: self.user_company.id,
+                        company_code: self.user_company.code
+                    },
+                })
+                .done(function(res) {
+                    $('.employee-deletion-sync').button('reset');
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', res.message);
+                        dataTable.draw();
+                    }
+                })
+                .fail(function(xhr) {
+                    $('.employee-deletion-sync').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+            });
+
+            $('.employee-reporting-to-update-sync').on("click", function() {
+                $('.employee-reporting-to-update-sync').button('loading');
+                $.ajax({
+                    method: "POST",
+                    url: laravel_routes['hrmsEmployeeReportingToUpdateSync'],
+                    data: {
+                        company_id: self.user_company.id,
+                        company_code: self.user_company.code
+                    },
+                })
+                .done(function(res) {
+                    $('.employee-reporting-to-update-sync').button('reset');
+                    if (!res.success) {
+                        var errors = '';
+                        for (var i in res.errors) {
+                            errors += '<li>' + res.errors[i] + '</li>';
+                        }
+                        custom_noty('error', errors);
+                    } else {
+                        custom_noty('success', res.message);
+                        dataTable.draw();
+                    }
+                })
+                .fail(function(xhr) {
+                    $('.employee-reporting-to-update-sync').button('reset');
+                    custom_noty('error', 'Something went wrong at server');
+                });
+            });
+
+            $rootScope.loading = false;
+        }, 500);
+    }
+});
+
+app.component('hrmsEmployeeManualAddition', {
+    templateUrl: hrms_employee_manual_addition_template_url,
+    controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+        self.employee = null;
+        if(!self.hasPermission('hrms-to-travelex-employee-manual-addition')){
+            window.location = "#!/permission-denied";
+            return false;
+        }
+
+        $http.get(
+            laravel_routes['getHrmsEmployeeSyncLogFilterData']
+        ).then(function(response) {
+            self.user_company = response.data.user_company; 
+        });
+
+        $scope.manualAdditionSubmit = function () {
+            var split_form_id = '#hrms-employee-manual-addition-form';
+            var v = jQuery(split_form_id).validate({
+                ignore: '',
+                rules: {
+                    'employee_code': {
+                        required: true,
+                    },
+                },
+                submitHandler: function (form) {
+                    let formData = new FormData($(split_form_id)[0]);
+                    $('#submit').button('loading');
+                    $.ajax({
+                        url: laravel_routes['hrmsEmployeeManualAddition'],
+                        method: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                    })
+                        .done(function (response) {
+                            $('#submit').button('reset');
+                            if (!response.success) {
+                                var errors = '';
+                                for (var i in response.errors) {
+                                    errors += '<li>' + response.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                            } else {
+                                self.employee_code = null;
+                                self.employee = response.employee;
+                                custom_noty('success', response.message);
+                            }
+                            $scope.$apply();
+                        })
+                        .fail(function (xhr) {
+                            $('#submit').button('reset');
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
+            });
+        }
+    }
+});
+
 
 //End
 //------------------------------------------------------------------------------------------------------------------

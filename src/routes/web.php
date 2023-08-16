@@ -96,7 +96,7 @@ Route::group(['middleware' => ['api']], function () {
 		//PROFILE IMAGE SAVE
 		Route::post('/profile/save/image', 'Uitoux\EYatra\Api\ProfileController@saveImage')->name('profileSaveImage');
 		Route::get('/profile/Getvehicle-detail', 'Uitoux\EYatra\Api\ProfileController@getVehicleData')->name('getVehicleData');
-	    Route::post('/profile/save/vehicle-detail', 'Uitoux\EYatra\Api\ProfileController@saveVehicleDetails')->name('saveVehicleDetails');
+		Route::post('/profile/save/vehicle-detail', 'Uitoux\EYatra\Api\ProfileController@saveVehicleDetails')->name('saveVehicleDetails');
 
 		//NOTIFICATION
 		Route::post('notification/get-list', 'Uitoux\EYatra\Api\DashboardController@getNotification');
@@ -264,6 +264,14 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/import/type/get', 'Uitoux\EYatra\EmployeeController@getImportFormData')->name('getImportFormData');
 
 		//END
+		//HRMS TO TRAVELEX EMPLOYEE SYNC
+		Route::get('hrms-employee-sync/log-list', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeSyncLogList')->name('getHrmsEmployeeSyncLogList');
+		Route::get('hrms-employee-sync/log-filter-data', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeSyncLogFilterData')->name('getHrmsEmployeeSyncLogFilterData');
+		Route::post('/hrms-employee-addition/sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeAdditionSync')->name('hrmsEmployeeAdditionSync');
+		Route::post('/hrms-employee-updation/sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeUpdationSync')->name('hrmsEmployeeUpdationSync');
+		Route::post('/hrms-employee-deletion/sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeDeletionSync')->name('hrmsEmployeeDeletionSync');
+		Route::post('/hrms-employee/reporting-to-sync', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeReportingToSync')->name('hrmsEmployeeReportingToUpdateSync');
+		Route::post('/hrms-employee/manual-addition', 'Uitoux\EYatra\EmployeeController@hrmsEmployeeManualAddition')->name('hrmsEmployeeManualAddition');
 
 		//EXPENSE VOUCHER ADVANCE
 		Route::get('eyatra/expense/voucher-advance/list', 'Uitoux\EYatra\ExpenseVoucherAdvanceController@listExpenseVoucherRequest')->name('listExpenseVoucherRequest');
@@ -641,3 +649,7 @@ Route::get('eyatra/report-list/data', 'Uitoux\EYatra\ExportReportController@getR
 Route::get('eyatra/report-data/mail', 'Uitoux\EYatra\ExportReportController@sendMail')->name('sendMail');
 Route::get('eyatra/pending-trip/mail', 'Uitoux\EYatra\MailController@sendMail')->name('sendPendingTripMail');
 Route::get('GetCMSEmployeeDetails/{empCode?}', 'Uitoux\EYatra\SoapController@GetCMSEmployeeDetails');
+
+Route::get('/trip/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripOracleSync')->name('tripOracleSync');
+Route::post('eyatra/trip/report', 'Uitoux\EYatra\ExportReportController@tripReport')->name('tripReport');
+

@@ -365,7 +365,19 @@ app.component('eyatraTripForm', {
                 var d2 = new Date();
                 var d1 = start_date.split("-");
                 var start_date_trip = new Date(d1[2], parseInt(d1[1]) - 1, d1[0]);
-                if (start_date_trip >= d2) {
+
+                let start_day = String(start_date_trip.getDate()).padStart(2, '0');
+                let start_month = String(start_date_trip.getMonth() + 1).padStart(2, '0');
+                let start_year = start_date_trip.getFullYear();
+                let trip_start_date = start_year + '-' + start_month + '-' + start_day;
+
+                let current_day = String(d2.getDate()).padStart(2, '0');
+                let current_month = String(d2.getMonth() + 1).padStart(2, '0');
+                let current_year = d2.getFullYear();
+                let current_date = current_year + '-' + current_month + '-' + current_day;
+
+                // if (start_date_trip >= d2) {
+                if (trip_start_date >= current_date) {
                     $("#advance").show().prop('disabled', false);
                     // $("#advance_amount").prop('readonly', false);
                     if (self.advance_eligibility == 0) {
@@ -696,15 +708,21 @@ app.component('eyatraTripForm', {
             console.log(value+' - '+index)
             if (value == "3792") {
                 self.trip.visits[index].booking_method_name = "Self";
+                $('#active_' + index).prop('checked', true);
+                $('#inactive_' + index).prop('checked', false);
             }
             else if (value == "3793") {
                 self.trip.visits[index].booking_method_name = "Agent";
+                $('#inactive_' + index).prop('checked', true);
+                $('#active_' + index).prop('checked', false);
             }
         }
         $scope.onChangeTravelMode = (id, key) => {
             if (self.claimable_travel_mode_list.includes(id)) {
                 self.trip.visits[key].booking_method_name = "Agent";
                 // $('#inactive_' + key).attr('disabled', false);
+                $('#inactive_' + key).prop('checked', true);
+                $('#active_' + key).prop('checked', false);
             } else {
                 self.trip.visits[key].booking_method_name = "Self";
                 // self.trip.visits[key].self_booking_approval = "1";
@@ -717,6 +735,7 @@ app.component('eyatraTripForm', {
                 }
                 $('#active_' + key).prop('checked', true);
                 // $('#inactive_' + key).attr('disabled', true);
+                $('#inactive_' + key).prop('checked', false);
             }
         }
 

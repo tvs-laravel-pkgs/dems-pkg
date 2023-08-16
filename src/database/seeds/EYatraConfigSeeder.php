@@ -74,6 +74,31 @@ class EYatraConfigSeeder extends Seeder {
 			558 => 'HRMS To Travelex Employee Sync Types',
 			559 => 'Enable Agent Booking Preference In Trip',
 			560 => 'Trip Self Booking Approval Must',
+			561 => 'HRMS To Travelex New Employee Default Role',
+			562 => 'Enable Ticket Booking Request Email To Agent',
+			563 => 'Is Fare Doc Required In Claims For Visit',
+			564 => 'On Claim Visit Proof Upload Value',
+			565 => 'On Trip Cancel Agent Notification Is Required',
+			566 => 'On Visit Cancel Agent Notification Is Required',
+			567 => 'Enable Ticket Cancell SMS To Agent',
+			568 => 'HRMS To Travelex Employee Sync Categories',
+			569 => 'Employee Return Payment Modes',
+			570 => 'Employee Return Payment Banks',
+			571 => 'Advance PCV - Natural Account Code',
+			572 => 'Advance PCV - Is Cashier Payment Date Should Be Current Date',
+			573 => 'PCV - Is Cashier Payment Date Should Be Current Date',
+			574 => 'PCV - Request Date Past Days',
+			575 => 'PCV - Invoice Date Past Days',
+			576 => 'Advance PCV - Employee Return Balance Cash Limit',
+			577 => 'Trip Claim - Employee Return Balance Cash Limit',
+			578 => 'Advance PCV - Is Financier Payment Date Should Be Current Date',
+			579 => 'PCV - Is Financier Payment Date Should Be Current Date',
+			580 => 'Advance PCV - Pre Payment Natural Account',
+			581 => 'Advance PCV - Claim Natural Account',
+			582 => 'Advance PCV Balance - Employee To Company Natural Account',
+			583 => 'PCV Invoice Natural Account',
+			584 => 'Oracle - Pre Payment Check Status Id',
+			585 => 'Trips Oracle Sync Method',
 		];
 
 		$configs = [
@@ -1115,7 +1140,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 541,
 			],
 			3751 => [
-				'name' => 'Fare Detail',
+				'name' => 'Fare Detail(Agent Ticket)',
 				'config_type_id' => 541,
 			],
 			3752 => [
@@ -1221,6 +1246,22 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Travelx Invoice',
 				'config_type_id' => 550,
 			],
+			3833 => [
+				'name' => 'OESL Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			3834 => [
+				'name' => 'OESL Travelx Invoice',
+				'config_type_id' => 550,
+			],
+			3835 => [
+				'name' => 'Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
+			3836 => [
+				'name' => 'OESL Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
 
 			//COMPANY BUSINESS UNITS
 			3841 => [
@@ -1238,12 +1279,20 @@ class EYatraConfigSeeder extends Seeder {
 
 			//ORACLE NATURAL ACCOUNT
 			3860 => [
-				'name' => '152668',
+				'name' => '153668',
 				'config_type_id' => 552,
 			],
 			3861 => [
 				'name' => '570222',
 				'config_type_id' => 553,
+			],
+			3862 => [
+				'name' => '152668',
+				'config_type_id' => 580,
+			],
+			3863 => [
+				'name' => '570222',
+				'config_type_id' => 581,
 			],
 
 			3881 => [
@@ -1270,8 +1319,16 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3921 => [
-				'name' => '152674',
+				'name' => '153674',
 				'config_type_id' => 557,
+			],
+			3922 => [
+				'name' => '152674',
+				'config_type_id' => 582,
+			],
+			3923 => [
+				'name' => '570222',
+				'config_type_id' => 583,
 			],
 
 			3941 => [
@@ -1311,14 +1368,147 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Employee Reporting To Updation',
 				'config_type_id' => 558,
 			],
+			3965 => [
+				'name' => 'Employee Manual Addition',
+				'config_type_id' => 558,
+			],
 
 			3971 => [
-				'name' => 'No',
+				'name' => 'Yes',
 				'config_type_id' => 559,
 			],
 			3972 => [
 				'name' => 'No',
 				'config_type_id' => 560,
+			],
+
+			3975 => [
+				'name' => 'Employee',
+				'config_type_id' => 561,
+			],
+
+			3981 => [
+				'name' => 'No',
+				'config_type_id' => 562,
+			],
+			3982 => [
+				'name' => 'Yes',
+				'config_type_id' => 563,
+			],
+			3983 => [
+				'name' => 'Yes',
+				'config_type_id' => 564,
+			],
+			3984 => [
+				'name' => 'No',
+				'config_type_id' => 565,
+			],
+			3985 => [
+				'name' => 'No',
+				'config_type_id' => 566,
+			],
+			3986 => [
+				'name' => 'No',
+				'config_type_id' => 567,
+			],
+
+			3990 => [
+				'name' => 'New Addition',
+				'config_type_id' => 568,
+			],
+			3991 => [
+				'name' => 'Deletion',
+				'config_type_id' => 568,
+			],
+
+			4010 => [
+				'name' => 'Cash',
+				'config_type_id' => 569,
+			],
+			4011 => [
+				'name' => 'Bank Transfer',
+				'config_type_id' => 569,
+			],
+			4012 => [
+				'name' => 'Debit from my salary',
+				'config_type_id' => 569,
+			],
+
+			4021 => [
+				'name' => 'Test Bank1',
+				'config_type_id' => 570,
+			],
+			4022 => [
+				'name' => 'Test Bank2',
+				'config_type_id' => 570,
+			],
+
+			4031 => [
+				'name' => '114255',
+				'config_type_id' => 571,
+			],
+			4032 => [
+				'name' => 'Yes',
+				'config_type_id' => 572,
+			],
+			4033 => [
+				'name' => 'Yes',
+				'config_type_id' => 573,
+			],
+			4034 => [
+				'name' => '5',
+				'config_type_id' => 574,
+			],
+			4035 => [
+				'name' => '5',
+				'config_type_id' => 575,
+			],
+			4036 => [
+				'name' => '1000',
+				'config_type_id' => 576,
+			],
+			4037 => [
+				'name' => '1000',
+				'config_type_id' => 577,
+			],
+			4038 => [
+				'name' => 'Advance PCV Attachment',
+				'config_type_id' => 519,
+			],
+			4039 => [
+				'name' => 'PCV Attachment',
+				'config_type_id' => 519,
+			],
+
+			4051 => [
+				'name' => 'Manager View',
+				'config_type_id' => 520,
+			],
+			4052 => [
+				'name' => 'Cashier View',
+				'config_type_id' => 520,
+			],
+			4053 => [
+				'name' => 'Financier View',
+				'config_type_id' => 520,
+			],
+			
+			4061 => [
+				'name' => 'Yes',
+				'config_type_id' => 578,
+			],
+			4062 => [
+				'name' => 'Yes',
+				'config_type_id' => 579,
+			],
+
+			4082 => [
+				'name' => 'Yes',
+				'config_type_id' => 584,
+			],
+			4091 => [
+				'name' => 'auto',
+				'config_type_id' => 585,
 			],
 		];
 

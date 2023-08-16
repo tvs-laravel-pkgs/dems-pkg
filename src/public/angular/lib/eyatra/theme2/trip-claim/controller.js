@@ -263,6 +263,10 @@ app.component('eyatraTripClaimForm', {
             self.operating_states = response.data.operating_states;
             self.sbu_lists = response.data.sbu_lists;
             self.attachment_type_lists = response.data.attachment_type_lists;
+            self.attachment_type_lists = response.data.attachment_type_lists.filter(function (el) {
+              return el.id != 3750; //ALL
+            });
+
             self.upload = response.data.upload;
             self.view = response.data.view;
             self.delete = response.data.delete;
@@ -296,8 +300,18 @@ app.component('eyatraTripClaimForm', {
                         custom_city_show = true;
                     }
 
-                    if(visit.booking_method_id == 3040 && self.is_grade_leader == true){
-                        //SELF AND LEADER GRADE
+                    // if(visit.booking_method_id == 3040 && self.is_grade_leader == true){
+                    //     //SELF AND LEADER GRADE
+                    //    visit.attachment_status = 'Yes'; 
+                    // }
+
+                    if(self.trip && !self.trip.cliam && visit.booking_method_id == 3042){
+                        //AGENT
+                       visit.attachment_status = 'Yes'; 
+                    }
+
+                    if(self.trip && !self.trip.cliam && visit.booking_method_id == 3040){
+                        //SELF
                        visit.attachment_status = 'Yes'; 
                     }
                 });
@@ -698,6 +712,9 @@ app.component('eyatraTripClaimForm', {
                             custom_noty('success', res.message);
                             self.trip.trip_attachments = res.trip_attachments;
                             self.attachment_type_lists = res.attachment_type_lists;
+                            self.attachment_type_lists = res.attachment_type_lists.filter(function (el) {
+                              return el.id != 3750; //ALL
+                            });
                             self.document_type_id = null;
                             $("#upload_document").val('').trigger('change');
                             $scope.isDeviation()
@@ -723,6 +740,9 @@ app.component('eyatraTripClaimForm', {
                     custom_noty('success', res.data.message);
                     self.trip.trip_attachments = res.data.trip_attachments;
                     self.attachment_type_lists = res.data.attachment_type_lists;
+                    self.attachment_type_lists = res.data.attachment_type_lists.filter(function (el) {
+                      return el.id != 3750; //ALL
+                    });
                     self.document_type_id = null;
                     $("#upload_document").val('').trigger('change');
                     $scope.isDeviation()
@@ -2060,9 +2080,9 @@ app.component('eyatraTripClaimForm', {
                     // self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
                     // if(self.is_grade_leader == false && !!bookedBySelf){
                     if(self.is_grade_leader == false && !!bookedBySelf && visitInvoiceTotalAmount > 0){
-                        is_deviation = true;
-                        attachmentError = 'Fare detail document not uploaded'
-                        self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                        // is_deviation = true;
+                        // attachmentError = 'Fare detail document not uploaded'
+                        // self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
                     }
                     // if(!self.is_grade_leader && !!tollFeeExpenseType) { // Toll fee expense is selected in others 
                     //     is_deviation = true;
@@ -2084,11 +2104,11 @@ app.component('eyatraTripClaimForm', {
                         // Fare detail document validation
                         // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1) {
                         // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf) {
-                        if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf && visitInvoiceTotalAmount > 0) {
-                            is_deviation = true;
-                            attachmentError = 'Fare detail document not uploaded'
-                            self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
-                        }
+                        // if (jQuery.inArray(3751, tripAttachmentTypeIds) == -1 && self.is_grade_leader == false && !!bookedBySelf && visitInvoiceTotalAmount > 0) {
+                            // is_deviation = true;
+                            // attachmentError = 'Fare detail document not uploaded'
+                            // self.deviationTypeName += (self.deviationTypeName ? ', ' : '') + attachmentError;
+                        // }
                         // Lodging detail document validation
                         // if (self.trip.lodgings.length > 0 && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
                             // if (self.trip.lodgings.length > 0 && check_lodge_attachment == true && jQuery.inArray(3752, tripAttachmentTypeIds) == -1) {
@@ -2152,12 +2172,13 @@ app.component('eyatraTripClaimForm', {
             if((self.trip.visits).length > 0){
                 $(self.trip.visits).each(function(index, visit) {
                     // if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17){
-                    if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272){
+                    if(visit.attachment_status == 'Yes' && visit.booking_method_id == 3040 && visit.travel_mode_id != 15 && visit.travel_mode_id != 16 && visit.travel_mode_id != 17 && visit.travel_mode_id != 272 && visit.travel_mode_id != 271 && visit.travel_mode_id != 270){
                         //proof upload yes and booking method self and travel mode not equal to two Wheeler, four wheeler, office vehicle
                         if ((self.trip.trip_attachments).length == 0) {
                             // leader_proof_error.push('Fare detail document not uploaded');
                             if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount) && parseFloat(visit.self_booking.invoice_amount) > 0){
-                                leader_proof_error.push('Fare detail document not uploaded');
+                                // leader_proof_error.push('Fare detail document not uploaded');
+                                leader_proof_error.push('Self booking attachment not uploaded');
                             }
                         }else {
                             var tripAttachmentTypeIds = [];
@@ -2169,12 +2190,12 @@ app.component('eyatraTripClaimForm', {
                             // 3751 : fare doc
                             // 3755 : self doc
                             if ($.inArray(3750, tripAttachmentTypeIds) == -1) {
-                                if ($.inArray(3751, tripAttachmentTypeIds) == -1) {
-                                    // leader_proof_error.push('Fare detail document not uploaded');
-                                    if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount) && parseFloat(visit.self_booking.invoice_amount) > 0){
-                                        leader_proof_error.push('Fare detail document not uploaded');
-                                    }
-                                }
+                                // if ($.inArray(3751, tripAttachmentTypeIds) == -1) {
+                                //     // leader_proof_error.push('Fare detail document not uploaded');
+                                //     if(visit.self_booking && visit.self_booking.invoice_amount && !isNaN(visit.self_booking.invoice_amount) && parseFloat(visit.self_booking.invoice_amount) > 0){
+                                //         leader_proof_error.push('Fare detail document not uploaded');
+                                //     }
+                                // }
  
                                 if ($.inArray(3755, tripAttachmentTypeIds) == -1) {
                                     leader_proof_error.push('Self booking attachment not uploaded');
@@ -2848,7 +2869,8 @@ app.component('eyatraTripClaimForm', {
                 custom_noty('error', "Ending KM is required");
                 return;
             }
-            if (self.fareDetailsKmModalValues.kmStart > self.fareDetailsKmModalValues.kmEnd) {
+            // if (self.fareDetailsKmModalValues.kmStart > self.fareDetailsKmModalValues.kmEnd) {
+            if (Math.round(self.fareDetailsKmModalValues.kmStart) > Math.round(self.fareDetailsKmModalValues.kmEnd)) {
                 custom_noty('error', "Enter value grater than starting KM");
                 return;
             }
@@ -3803,6 +3825,7 @@ app.component('eyatraTripClaimForm', {
         });
         $(document).on('click', '#modal_attachment_submit', function() {
             trip_attachment_save = 1;
+            $("#modal_attachment_submit").prop("disabled", true);
             $('#claim_attachment_expense_form').submit();
         });
 

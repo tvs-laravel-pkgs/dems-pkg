@@ -617,6 +617,10 @@ class ExportReportController extends Controller {
 								//ADVANCE TRIP AMOUNT
 								$res = $this->employeeAxaptaExportProcess(6, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$tot_consolidated_amount += $res;
+
+								Trip::where('id', $employeeTrip->id)->update([
+									'advance_ax_export_sync' => 1,
+								]);
 							}
 						} else {
 							continue;
@@ -655,9 +659,11 @@ class ExportReportController extends Controller {
 								'self_ax_export_synched' => 1,
 							]);
 						} else {
-							Trip::where('id', $employeeTrip->id)->update([
-								'advance_ax_export_sync' => 1,
-							]);
+
+							// Trip::where('id', $employeeTrip->id)->update([
+							// 	'advance_ax_export_sync' => 1,
+							// ]);
+
 						}
 
 						// DB::commit();
@@ -1459,13 +1465,22 @@ class ExportReportController extends Controller {
 							}
 						}
 
+						if($business_id == 2){
+							//OESL
+							$debit_account_no = '41854182732';
+						}else if($business_id == 3){
+							//HONDA
+							$debit_account_no = '40711975675';
+						}
+
 						$local_trip = [
 							'P',
 							$l_no++,
 							$local['Account_Number'],
 							'295723',
 							'MOBILITY',
-							'40711975675',
+							// '40711975675',
+							$debit_account_no,
 							$payment_type,
 							'',
 							date('d-m-Y', strtotime($local['Created_Date_and_Time'])),
@@ -2286,6 +2301,7 @@ class ExportReportController extends Controller {
 			'ECode',
 			'Sbu',
 			'State',
+			'Trip Number',
 			'Date of Request',
 			'Date of Booking',
 			'Date Of Travel',
@@ -2334,7 +2350,8 @@ class ExportReportController extends Controller {
 			DB::raw('SUM(COALESCE(visit_bookings.total, 0) + COALESCE(visit_bookings.agent_total, 0)) as total_amount'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.amount, 0)),2,"en_IN") as cr_amount'),
 			DB::raw('COALESCE(visit_bookings.reference_number, "") as ref'),
-			DB::raw('COALESCE(visit_bookings.type_id, "") as type')
+			DB::raw('COALESCE(visit_bookings.type_id, "") as type'),
+			'trips.number as trip_number'
 		)
 			->leftJoin('employees', 'employees.id', 'trips.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -2379,6 +2396,7 @@ class ExportReportController extends Controller {
 						$booking_detail['emp_code'],
 						$booking_detail['sbu'],
 						$booking_detail['state'],
+						$booking_detail['trip_number'],
 						$booking_detail['date_of_request'],
 						$booking_detail['date_of_booking'],
 						$booking_detail['date_of_travel'],
@@ -2411,6 +2429,7 @@ class ExportReportController extends Controller {
 					$booking_detail['emp_code'],
 					$booking_detail['sbu'],
 					$booking_detail['state'],
+					$booking_detail['trip_number'],
 					$booking_detail['date_of_request'],
 					$booking_detail['date_of_booking'],
 					$booking_detail['date_of_travel'],
@@ -2603,6 +2622,10 @@ class ExportReportController extends Controller {
 									//HONDA
 									$this->hondaOeslEmployeeAxaptaProcess(4, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								}
+
+								Trip::where('id', $employeeTrip->id)->update([
+									'advance_ax_export_sync' => 1,
+								]);
 							}
 						} else {
 							continue;
@@ -2654,9 +2677,11 @@ class ExportReportController extends Controller {
 								'self_ax_export_synched' => 1,
 							]);
 						} else {
-							Trip::where('id', $employeeTrip->id)->update([
-								'advance_ax_export_sync' => 1,
-							]);
+
+							// Trip::where('id', $employeeTrip->id)->update([
+							// 	'advance_ax_export_sync' => 1,
+							// ]);
+
 						}
 					} catch (\Exception $e) {
 						$exceptionErrors[] = "Trip ID ( " . $employeeTrip->id . " ) : " . $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile();
@@ -2931,7 +2956,7 @@ class ExportReportController extends Controller {
 
 			//CREDIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode.' : '.$employeeName.' : '.$toCity .' - Advance', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_CC_501', 6, $employeeCode . ':' . $employeeName . '-Adv', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, 'TTP_SBI_OD_501', 6, $employeeCode . ':' . $employeeName . '-Adv', 0.00, $employeeTrip->advance_received, 'C', $employeeTrip->outletCode, '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
 		} else if ($type == 2) {
 			//TRAVEL EXPENSES
 			// $toCity = Visit::join('ncities','ncities.id','visits.to_city_id')
@@ -3077,7 +3102,7 @@ class ExportReportController extends Controller {
 
 			//CREDIT ENTRY
 			// $this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_CC_501', 6, $employeeCode.':'.$employeeName.':'.$toCity.'-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
-			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_CC_501', 6, $employeeCode . ':' . $employeeName . '-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_OD_501', 6, $employeeCode . ':' . $employeeName . '-Payment', 0.00, $employeeTrip->balance_amount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 		} else if ($type == 4) {
 			//HONDA ADVANCE DEBIT AND CREDIT ENTRY
 			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, $employeeTrip->outletCode, '192', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, '1480652137', 2, $employeeCode . ':' . $employeeName . '-Adv', $employeeTrip->advance_received, 0.00, 'F', '', '', $employeeTrip->invoiceNumber, $employeeTrip->createdAtDate, $employeeTrip->ax_company_code);
@@ -3341,4 +3366,251 @@ class ExportReportController extends Controller {
 		$axaptaExport->fill($data);
 		$axaptaExport->save();
 	}
+
+	//Trip report
+	public function tripReport(Request $r) {
+		ini_set('max_execution_time', 0);
+		$date = explode(' to ', $r->period);
+		$from_date = date('Y-m-d', strtotime($date[0]));
+		$to_date = date('Y-m-d', strtotime($date[1]));
+		$business_ids = $r->businesses;
+		if ($r->businesses) {
+			if (in_array('-1', json_decode($r->businesses))) {
+				$business_ids = Business::pluck('id')->toArray();
+			} else {
+				$business_ids = json_decode($r->businesses);
+			}
+		}
+
+		$excel_headers = [
+			'Sl.No',
+			'Business',
+			'Employee Code',
+			'Employee Name',
+			'Outlet Code',
+			'Outlet Name',
+			'Trip Number',
+			'Description',
+			'Purpose',
+			'Trip Start Date',
+			'Trip End Date',
+			'Trip Created Date',
+			'Advance Received',
+			'Claimed Date',
+			'Trip Claim Number',
+			'Transport',
+			'Lodging',
+			'Boarding',
+			'Local Travel',
+			// 'Beta Amount',
+			'Total Amount',
+		];
+
+		$trip_details = Trip::select([
+			'trips.id',
+			'businesses.name as business',
+			'employees.code as employee_code',
+			'users.name as employee_name',
+			'outlets.code as outlet_code',
+			'outlets.name as outlet_name',
+			'trips.number as trip_number',
+			'trips.description',
+			'entities.name as purpose',
+			DB::raw('COALESCE(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), "") as trip_start_date'),
+			DB::raw('COALESCE(DATE_FORMAT(trips.end_date,"%d-%m-%Y"), "") as trip_end_date'),
+			DB::raw('COALESCE(DATE_FORMAT(trips.created_at,"%d-%m-%Y"), "") as trip_created_at'),
+			'trips.advance_received',
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as claimed_date'),
+			'ey_employee_claims.number as claim_number',
+			'ey_employee_claims.transport_total',
+			'ey_employee_claims.lodging_total',
+			'ey_employee_claims.boarding_total',
+			'ey_employee_claims.local_travel_total',
+			// 'ey_employee_claims.beta_amount',
+			'ey_employee_claims.total_amount',			
+		])
+			->leftjoin('employees', 'employees.id', 'trips.employee_id')
+			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftjoin('users', function ($user_q) {
+				$user_q->on('employees.id', 'users.entity_id')
+					->where('users.user_type_id', 3121);
+			})
+			->leftjoin('outlets', 'outlets.id', 'trips.outlet_id')
+			->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->leftjoin('departments', 'departments.id', 'employees.department_id')
+			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
+			->leftjoin('entities', 'entities.id', 'trips.purpose_id')
+			->where('trips.status_id', 3026)
+			->where('ey_employee_claims.status_id', 3026)
+			->whereDate('trips.start_date', '>=', $from_date)
+			->whereDate('trips.end_date', '<=', $to_date)
+			->whereIn('departments.business_id', $business_ids)
+			->groupBy('trips.id')
+			->get()
+			->toArray();
+
+
+		if (count($trip_details) == 0) {
+			return redirect()->back()->with(['error' => 'No Records Found!']);
+		}
+
+		$export_details = [];
+		$s_no = 1;
+		foreach ($trip_details as $trip_detail) {
+				$export_data = [
+					$s_no++,
+					$trip_detail['business'],
+					$trip_detail['employee_code'],
+					$trip_detail['employee_name'],
+					$trip_detail['outlet_code'],
+					$trip_detail['outlet_name'],
+					$trip_detail['trip_number'],
+					$trip_detail['description'],
+					$trip_detail['purpose'],
+					$trip_detail['trip_start_date'],
+					$trip_detail['trip_end_date'],
+					$trip_detail['trip_created_at'],
+					floatval($trip_detail['advance_received']),
+					$trip_detail['claimed_date'],
+					$trip_detail['claim_number'],
+					floatval($trip_detail['transport_total']),
+					floatval($trip_detail['lodging_total']),
+					floatval($trip_detail['boarding_total']),
+					floatval($trip_detail['local_travel_total']),
+					// $trip_detail['beta_amount'],
+					floatval($trip_detail['total_amount']),
+				];
+				$export_details[] = $export_data;
+		}
+
+		$title = 'Trip_Report_' . Carbon::now();
+		$sheet_name = 'Trip Report';
+		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
+			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+				$sheet->fromArray($export_details, NULL, 'A1');
+				$sheet->row(1, $excel_headers);
+				$sheet->row(1, function ($row) {
+					$row->setBackground('#c4c4c4');
+				});
+			});
+			$excel->setActiveSheetIndex(0);
+		})->download('xlsx');
+	}
+
+	public function tripOracleSync($id = null) {
+		$sync_method = Config::where('id', 4091)->first()->name;
+		$pre_payment_check_status_id = Config::where('id', 4082)->first()->name;
+		$advance_amount_trips = Trip::select([
+			'trips.id',
+			DB::raw("'Advance amount' as category"),
+			'departments.business_id',
+		])
+			->join('employees', 'employees.id', 'trips.employee_id')
+			->join('departments', 'departments.id', 'employees.department_id')
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('trips.id', $id);
+				}
+			})
+			->where('trips.advance_received', '>', 0)
+			// ->where('advance_ax_export_sync', 1) //AX ADVANCE AMOUNT SYNC
+			->where('trips.oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
+			// ->whereIn('status_id', [3028, 3026])
+			->where(function($q) use ($pre_payment_check_status_id , $sync_method) {
+                if($pre_payment_check_status_id == "Yes"){
+                    $q->whereIn('trips.status_id', [3028, 3026]);
+                }
+                if($sync_method == "auto"){
+                	$q->whereDate('trips.updated_at', '<', date('Y-m-d'));
+                }
+            })
+            ->where('trips.status_id','!=', 3032) //Cancelled
+			->groupBy('trips.id')
+			->get()
+			->toArray();
+
+		$claimed_trips = Trip::select([
+			'trips.id',
+			DB::raw("'Trip claim' as category"),
+			'departments.business_id',
+		])
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('trips.id', $id);
+				}
+			})
+			->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
+			->join('employees', 'employees.id', 'trips.employee_id')
+			->join('departments', 'departments.id', 'employees.department_id')
+			->where('eyec.total_amount', '>', 0)
+			// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
+			->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
+			->where('trips.status_id', 3026)
+			->where('eyec.status_id', 3026)
+			->where(function($q) use ($sync_method) {
+                if($sync_method == "auto"){
+                	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));
+                }
+            })
+			->groupBy('trips.id')
+			->get()
+			->toArray();
+
+		$trip_details = array_merge($advance_amount_trips, $claimed_trips);
+		array_multisort(
+			array_column($trip_details, 'id'),
+			SORT_ASC,
+			$trip_details
+		);
+
+		foreach ($trip_details as $trip_detail) {
+			try {
+				// DB::beginTransaction();
+				$trip = Trip::find($trip_detail['id']);
+				if($trip_detail['business_id'] == 1 && $trip->advance_received > 0){
+					//DLOB
+					$trip_approval_log = ApprovalLog::select([
+						'id',
+						DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+					])
+						->where('type_id', 3581) //Outstation Trip
+						->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+						->where('entity_id', $trip->id)
+						->first();
+					if($trip_approval_log && $trip_approval_log->approved_date < '2023-08-01'){
+						continue;
+					}
+				}
+
+				//ADVANCE AMOUNT SYNC
+				if ($trip_detail['category'] == 'Advance amount') {
+					$r = $trip->generatePrePaymentApOracleAxapta();
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$trip->oracle_pre_payment_sync_status = 1; //SYNCED
+						$trip->save();
+					}
+				}
+
+				//TRIP CLAIM SYNC
+				if ($trip_detail['category'] == 'Trip claim') {
+					$r = $trip->generateInvoiceApOracleAxapta();
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$trip->oracle_invoice_sync_status = 1; //SYNCED
+						$trip->save();
+					}
+				}
+				// DB::commit();
+			} catch (\Exception $e) {
+				// DB::rollBack();
+				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
+				continue;
+			}
+		}
+	}
+
+	
 }
