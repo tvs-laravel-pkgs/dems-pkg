@@ -3580,30 +3580,30 @@ class ExportReportController extends Controller {
 			try {
 				DB::beginTransaction();
 				$trip = Trip::find($trip_detail['id']);
-				if($trip_detail['business_id'] == 1 && $trip->advance_received > 0){
-					//DLOB
-					$trip_approval_log = ApprovalLog::select([
-						'id',
-						DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
-					])
-						->where('type_id', 3581) //Outstation Trip
-						->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
-						->where('entity_id', $trip->id)
-						->first();
+				// if($trip_detail['business_id'] == 1 && $trip->advance_received > 0){
+				// 	//DLOB
+				// 	$trip_approval_log = ApprovalLog::select([
+				// 		'id',
+				// 		DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+				// 	])
+				// 		->where('type_id', 3581) //Outstation Trip
+				// 		->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+				// 		->where('entity_id', $trip->id)
+				// 		->first();
 
-					$trip_claim_approval_log = ApprovalLog::select([
-						'id',
-						DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
-					])
-						->where('type_id', 3581) //Outstation Trip
-						->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
-						->where('entity_id', $trip->id)
-						->first();
-					// if($trip_approval_log && $trip_approval_log->approved_date < '2023-08-01'){
-					if($trip_approval_log && $trip_approval_log->approved_date < '2023-08-01' && $trip_claim_approval_log && $trip_claim_approval_log->approved_date >= "2023-08-01"){
-						continue;
-					}
-				}
+				// 	$trip_claim_approval_log = ApprovalLog::select([
+				// 		'id',
+				// 		DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+				// 	])
+				// 		->where('type_id', 3581) //Outstation Trip
+				// 		->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
+				// 		->where('entity_id', $trip->id)
+				// 		->first();
+				// 	// if($trip_approval_log && $trip_approval_log->approved_date < '2023-08-01'){
+				// 	if($trip_approval_log && $trip_approval_log->approved_date < '2023-08-01' && $trip_claim_approval_log && $trip_claim_approval_log->approved_date >= "2023-08-01"){
+				// 		continue;
+				// 	}
+				// }
 
 				//ADVANCE AMOUNT SYNC
 				if ($trip_detail['category'] == 'Advance amount') {
