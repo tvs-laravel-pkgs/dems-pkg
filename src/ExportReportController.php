@@ -3578,7 +3578,7 @@ class ExportReportController extends Controller {
 
 		foreach ($trip_details as $trip_detail) {
 			try {
-				DB::beginTransaction();
+				// DB::beginTransaction();
 				$trip = Trip::find($trip_detail['id']);
 				// if($trip_detail['business_id'] == 1 && $trip->advance_received > 0){
 				// 	//DLOB
@@ -3626,9 +3626,9 @@ class ExportReportController extends Controller {
 						$trip->save();
 					}
 				}
-				DB::commit();
+				// DB::commit();
 			} catch (\Exception $e) {
-				DB::rollBack();
+				// DB::rollBack();
 				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
 				continue;
 			}
