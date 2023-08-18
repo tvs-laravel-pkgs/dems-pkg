@@ -187,6 +187,10 @@ class Trip extends Model {
 			->orderBy('date_time', 'DESC');
 	}
 
+	public function branch() {
+		return $this->belongsTo('Uitoux\EYatra\Outlet', 'outlet_id');
+	}
+
 	public static function generate($employee, $trip_number, $faker, $trip_status_id, $admin) {
 		$trip = new Trip();
 		$trip->employee_id = $employee->id;
@@ -4832,6 +4836,10 @@ request is not desired, then those may be rejected.';
 			$transactionDetail = $this->company ? $this->company->oeslPrePaymentInvoiceTransaction() : null;
 			$companyBusinessUnit = isset($this->company->oes_business_unit->name) ? $this->company->oes_business_unit->name : null;
 			$companyCode = isset($this->company->oes_business_unit->code) ? $this->company->oes_business_unit->code : null;
+		}else if(!empty($this->employee->department) && $this->employee->department->business_id == 3){
+			$transactionDetail = $this->company ? $this->company->hondaPrePaymentInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+			$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
 		}else{
 			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
@@ -4882,7 +4890,8 @@ request is not desired, then those may be rejected.';
 		}
 
 		$amount = $this->advance_received;
-		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		// $outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		$outletCode = $this->branch ? $this->branch->oracle_code_l2 : null;
 		// $accountingClass = 'Payable';
 		$accountingClass = 'Purchase/Expense';
 		$company = $this->company ? $this->company->oracle_code : '';
@@ -5961,6 +5970,12 @@ request is not desired, then those may be rejected.';
 			$companyBusinessUnit = isset($employeeTrip->company->oes_business_unit->name) ? $employeeTrip->company->oes_business_unit->name : null;
 			$company  = isset($employeeTrip->company->oes_business_unit->code) ? $employeeTrip->company->oes_business_unit->code : null;
 
+		}else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 3){
+			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->hondaInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->hondaClaimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
+			$company  = isset($employeeTrip->company->oem_business_unit->code) ? $employeeTrip->company->oem_business_unit->code : null;
+
 		}else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
@@ -6072,7 +6087,8 @@ request is not desired, then those may be rejected.';
 			$employeeLocalTravelValue = floatval($employeeClaim->local_travel_total);
 		}
 
-		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		// $outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		$outletCode = $this->branch ? $this->branch->oracle_code_l2 : null;
 		$customerSiteNumber = $outletCode;
 		// $accountingClass = 'Payable';
 		$accountingClass = 'Purchase/Expense';
