@@ -1262,6 +1262,18 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'OESL Travel Claim Refund Invoice',
 				'config_type_id' => 550,
 			],
+			3837 => [
+				'name' => 'Honda Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			3838 => [
+				'name' => 'Honda Travelx Invoice',
+				'config_type_id' => 550,
+			],
+			3839 => [
+				'name' => 'Honda Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
 
 			//COMPANY BUSINESS UNITS
 			3841 => [
