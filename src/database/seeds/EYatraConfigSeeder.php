@@ -1288,6 +1288,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'BPCL',
 				'config_type_id' => 551,
 			],
+			3844 => [
+				'name' => 'INVESTMENT',
+				'config_type_id' => 551,
+			],
 
 			//ORACLE NATURAL ACCOUNT
 			3860 => [
