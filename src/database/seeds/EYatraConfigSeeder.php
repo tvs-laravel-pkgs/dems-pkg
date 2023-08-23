@@ -1522,6 +1522,19 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'auto',
 				'config_type_id' => 585,
 			],
+
+			4101 => [
+				'name' => 'Investment Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4102 => [
+				'name' => 'Investment Travelx Invoice',
+				'config_type_id' => 550,
+			],
+			4103 => [
+				'name' => 'Investment Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
 		];
 
 		//SAVING CONFIG TYPES
