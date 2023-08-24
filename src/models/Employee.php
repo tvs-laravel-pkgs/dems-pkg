@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra;
 use App\Entity;
 use App\HrmsToTravelxEmployeeSyncLog;
+use App\HrmsToTravelxSyncLog;
 use App\MailConfiguration;
 use App\Mail\TravelexConfigMail;
 use App\User;
@@ -2550,6 +2551,12 @@ class Employee extends Model {
 
 			$employeeAdditionData = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 
+			//SYNC LOG
+			$syncLog = new HrmsToTravelxSyncLog();
+			$syncLog->type_id = 3965; //Employee Manual Addition
+			$syncLog->employee_id = $employee->id;
+			$syncLog->save();
+
 			//EMPLOYEE ADDITION MAIL TO EMPLOYEE, CC REPORTING MANAGE AND OUTLET HR
 			if ($employeeAdditionData && $user->email) {
 				$toEmail = [$user->email];
@@ -2598,8 +2605,8 @@ class Employee extends Model {
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
 				$arr['type'] = 1;
 				$arr['employee'] = $employeeAdditionData;
-				$mail_instance = new TravelexConfigMail($arr);
-				$mail = Mail::send($mail_instance);
+				// $mail_instance = new TravelexConfigMail($arr);
+				// $mail = Mail::send($mail_instance);
 			}
 			DB::commit();
 			return response()->json([
