@@ -9,6 +9,8 @@ class BankDetail extends Model {
 	public $timestamps = false;
 
 	protected $fillable = [
+		'detail_of_id',
+		'entity_id',
 		'bank_name',
 		'branch_name',
 		'account_name',

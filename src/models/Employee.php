@@ -382,6 +382,27 @@ class Employee extends Model {
 					}
 				}
 				$hrmsEmployeeData->outlet_hr_email = $outletHrEmail;
+
+				//BANK DETAILS
+				$hrmsEmployeeData->bank_name = null;
+				$hrmsEmployeeData->ifsc_code = null;
+				$hrmsEmployeeData->account_number = null;
+				$bankDetail = DB::table('bank_accounts')->select([
+					'id',
+					'bank_name',
+					'ifsc_code',
+					'number',
+				])
+					->where('company_id', $hrmsEmployeeData->company_id)
+					->where('bank_accountable_type', "App\Models\Employee")
+					->where('bank_accountable_id', $hrmsEmployeeData->id)
+					->orderBy('id', 'DESC')
+					->first();
+				if(!empty($bankDetail)){
+					$hrmsEmployeeData->bank_name = $bankDetail->bank_name;
+					$hrmsEmployeeData->ifsc_code = $bankDetail->ifsc_code;
+					$hrmsEmployeeData->account_number = $bankDetail->number;
+				}
 			}
 		}
 
@@ -824,6 +845,32 @@ class Employee extends Model {
 						}
 						$user->save();
 
+						//BANK DETAIL SAVE
+						if (isset($hrmsEmployee->bank_name)) {
+							$employeeBankDetail = BankDetail::firstOrNew([
+								'detail_of_id' => 3121,
+								'entity_id' => $employee->id,
+							]);
+
+							if ($employeeBankDetail->exists) {
+								if($hrmsEmployee->bank_name){
+									$employeeBankDetail->bank_name = $hrmsEmployee->bank_name;
+								}
+								if($hrmsEmployee->ifsc_code){
+									$employeeBankDetail->ifsc_code = $hrmsEmployee->ifsc_code;
+								}
+								if($hrmsEmployee->account_number){
+									$employeeBankDetail->account_number = $hrmsEmployee->account_number;
+								}
+							}else{
+								$employeeBankDetail->bank_name = $hrmsEmployee->bank_name;
+								$employeeBankDetail->ifsc_code = $hrmsEmployee->ifsc_code;
+								$employeeBankDetail->account_number = $hrmsEmployee->account_number;
+							}
+							$employeeBankDetail->account_type_id = 3243;
+							$employeeBankDetail->save();
+						}
+
 						//USER ROLE MAP
 						$employeeRoleId = Role::where('name' , $employeeDefaultRole)
 							->where('company_id', $employee->company_id)
@@ -865,7 +912,8 @@ class Employee extends Model {
 							$arr['subject'] = 'Travelex login access enabled';
 							$arr['content'] = 'Hi ' . $user->name . ', we have enabled travelex access for your login, please give your ecode with  AD password  to login travelex application.';
 							$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
-							$arr['type'] = 1;
+							// $arr['type'] = 1;
+							$arr['type'] = 2;
 							$arr['employee'] = $employeeAdditionData;
 							$mail_instance = new TravelexConfigMail($arr);
 							$mail = Mail::send($mail_instance);
@@ -935,7 +983,8 @@ class Employee extends Model {
 				$arr['subject'] = 'Employee Addition';
 				$arr['content'] = 'The below employee please create in Axapta vendor master immediatly';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
-				$arr['type'] = 2;
+				// $arr['type'] = 2;
+				$arr['type'] = 3;
 				$arr['employee_details'] = $employeeSyncedData;
 				$mail_instance = new TravelexConfigMail($arr);
 				$mail = Mail::send($mail_instance);
@@ -1459,7 +1508,8 @@ class Employee extends Model {
 				$arr['subject'] = 'Employee Update';
 				$arr['content'] = 'The below employee changes has been made in travelex system FYI.';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
-				$arr['type'] = 2;
+				// $arr['type'] = 2;
+				$arr['type'] = 4;
 				$arr['employee_details'] = $employeeSyncedData;
 				$mail_instance = new TravelexConfigMail($arr);
 				$mail = Mail::send($mail_instance);
@@ -1700,7 +1750,8 @@ class Employee extends Model {
 				$arr['subject'] = 'Employee Deletion';
 				$arr['content'] = 'The below employees travelex login access has been disabled please deactivate the same set of employees in Axapta vendor master.';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
-				$arr['type'] = 2;
+				// $arr['type'] = 2;
+				$arr['type'] = 4;
 				$arr['employee_details'] = $employeeSyncedData;
 				$mail_instance = new TravelexConfigMail($arr);
 				$mail = Mail::send($mail_instance);
@@ -1962,7 +2013,8 @@ class Employee extends Model {
 				$arr['subject'] = 'Employee Update';
 				$arr['content'] = 'The below employee changes has been made in travelex system FYI.';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
-				$arr['type'] = 2;
+				// $arr['type'] = 2;
+				$arr['type'] = 4;
 				$arr['employee_details'] = $employeeSyncedData;
 				$mail_instance = new TravelexConfigMail($arr);
 				$mail = Mail::send($mail_instance);
@@ -1999,6 +2051,10 @@ class Employee extends Model {
 			'function' => $employee->Department ? $employee->Department->name : '',
 			'repoting_to_code' => $employee->reportingTo ? $employee->reportingTo->code : '',
 			'repoting_to_name' => isset($employee->reportingTo->user) ? $employee->reportingTo->user->name : '',
+			'pan_number' => $employee->pan_no,
+			'bank_name' => isset($employee->bankDetail) ? $employee->bankDetail->bank_name : '',
+			'bank_ifsc_code' => isset($employee->bankDetail) ? $employee->bankDetail->ifsc_code : '',
+			'bank_account_number' => isset($employee->bankDetail) ? $employee->bankDetail->account_number : '',
 			'category' => $category,
 		];
 		return $employeeData;
@@ -2155,6 +2211,26 @@ class Employee extends Model {
 		}
 		$hrmsEmployee->outlet_hr_email = $outletHrEmail;
 
+		//BANK DETAILS
+		$bankDetail = DB::table('bank_accounts')->select([
+			'id',
+			'bank_name',
+			'ifsc_code',
+			'number',
+		])
+			->where('company_id', $hrmsEmployee->company_id)
+			->where('bank_accountable_type', "App\Models\Employee")
+			->where('bank_accountable_id', $hrmsEmployee->id)
+			->orderBy('id', 'DESC')
+			->first();
+		$hrmsEmployee->bank_name = null;
+		$hrmsEmployee->ifsc_code = null;
+		$hrmsEmployee->account_number = null;
+		if(!empty($bankDetail)){
+			$hrmsEmployee->bank_name = $bankDetail->bank_name;
+			$hrmsEmployee->ifsc_code = $bankDetail->ifsc_code;
+			$hrmsEmployee->account_number = $bankDetail->number;
+		}
 		DB::setDefaultConnection('mysql');
 
 		$employeeSyncedData = [];
@@ -2548,6 +2624,32 @@ class Employee extends Model {
 				}
 			}
 
+			//BANK DETAIL SAVE
+			if (isset($hrmsEmployee->bank_name)) {
+				$employeeBankDetail = BankDetail::firstOrNew([
+					'detail_of_id' => 3121,
+					'entity_id' => $employee->id,
+				]);
+
+				if ($employeeBankDetail->exists) {
+					if($hrmsEmployee->bank_name){
+						$employeeBankDetail->bank_name = $hrmsEmployee->bank_name;
+					}
+					if($hrmsEmployee->ifsc_code){
+						$employeeBankDetail->ifsc_code = $hrmsEmployee->ifsc_code;
+					}
+					if($hrmsEmployee->account_number){
+						$employeeBankDetail->account_number = $hrmsEmployee->account_number;
+					}
+				}else{
+					$employeeBankDetail->bank_name = $hrmsEmployee->bank_name;
+					$employeeBankDetail->ifsc_code = $hrmsEmployee->ifsc_code;
+					$employeeBankDetail->account_number = $hrmsEmployee->account_number;
+				}
+				$employeeBankDetail->account_type_id = 3243;
+				$employeeBankDetail->save();
+			}
+
 			$employeeAdditionData = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 
 			//EMPLOYEE ADDITION MAIL TO EMPLOYEE, CC REPORTING MANAGE AND OUTLET HR
@@ -2569,7 +2671,8 @@ class Employee extends Model {
 				$arr['subject'] = 'Travelex login access enabled';
 				$arr['content'] = 'Hi ' . $user->name . ', we have enabled travelex access for your login, please give your ecode with  AD password  to login travelex application.';
 				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
-				$arr['type'] = 1;
+				// $arr['type'] = 1;
+				$arr['type'] = 2;
 				$arr['employee'] = $employeeAdditionData;
 				$mail_instance = new TravelexConfigMail($arr);
 				$mail = Mail::send($mail_instance);
