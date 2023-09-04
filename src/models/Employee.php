@@ -23,6 +23,7 @@ use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\BankDetail;
+use App\HrmsToTravelxSyncLog;
 
 class Employee extends Model {
 	use SoftDeletes;
@@ -2651,6 +2652,13 @@ class Employee extends Model {
 				$employeeBankDetail->save();
 			}
 
+			//SYNC LOG
+			$syncLog = new HrmsToTravelxSyncLog();
+			$syncLog->type_id = 3965; //Employee Manual Addition
+			$syncLog->employee_id = $employee->id;
+			$syncLog->created_by_id = Auth::id();
+			$syncLog->save();
+
 			$employeeAdditionData = self::hrmsToDemsEmployeeData($employee, 'New Addition');
 
 			//EMPLOYEE ADDITION MAIL TO EMPLOYEE, CC REPORTING MANAGE AND OUTLET HR
@@ -2680,31 +2688,31 @@ class Employee extends Model {
 			}
 
 			//EMPLOYEE ADDITION MAIL TO AX
-			if ($employeeAdditionData) {
-				$mailConfig = MailConfiguration::select(
-					'to_email',
-					'cc_email'
-				)
-					->where('company_id', $request->company_id)
-					->where('config_id', 3945) //HRMS To Travelex Employee Manual Addition Mail
-					->first();
+			// if ($employeeAdditionData) {
+			// 	$mailConfig = MailConfiguration::select(
+			// 		'to_email',
+			// 		'cc_email'
+			// 	)
+			// 		->where('company_id', $request->company_id)
+			// 		->where('config_id', 3945) //HRMS To Travelex Employee Manual Addition Mail
+			// 		->first();
 
-				$to = explode(',', $mailConfig->to_email);
-				$cc = explode(',', $mailConfig->cc_email);
+			// 	$to = explode(',', $mailConfig->to_email);
+			// 	$cc = explode(',', $mailConfig->cc_email);
 
-				$arr = [];
-				$arr['from_mail'] = env('MAIL_FROM_ADDRESS', 'travelex@tvs.in');
-				$arr['from_name'] = 'DEMS-Admin';
-				$arr['to_email'] = $to;
-				$arr['cc_email'] = $cc;
-				$arr['subject'] = 'Employee Addition';
-				$arr['content'] = 'The below employee please create in Axapta vendor master immediatly';
-				$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
-				$arr['type'] = 1;
-				$arr['employee'] = $employeeAdditionData;
-				$mail_instance = new TravelexConfigMail($arr);
-				$mail = Mail::send($mail_instance);
-			}
+			// 	$arr = [];
+			// 	$arr['from_mail'] = env('MAIL_FROM_ADDRESS', 'travelex@tvs.in');
+			// 	$arr['from_name'] = 'DEMS-Admin';
+			// 	$arr['to_email'] = $to;
+			// 	$arr['cc_email'] = $cc;
+			// 	$arr['subject'] = 'Employee Addition';
+			// 	$arr['content'] = 'The below employee please create in Axapta vendor master immediatly';
+			// 	$arr['blade_file'] = 'mail.hrms_to_travelex_employee_report';
+			// 	$arr['type'] = 1;
+			// 	$arr['employee'] = $employeeAdditionData;
+			// 	$mail_instance = new TravelexConfigMail($arr);
+			// 	$mail = Mail::send($mail_instance);
+			// }
 			DB::commit();
 			return response()->json([
 				'success' => true,
