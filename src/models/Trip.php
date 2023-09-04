@@ -4840,6 +4840,10 @@ request is not desired, then those may be rejected.';
 			$transactionDetail = $this->company ? $this->company->hondaPrePaymentInvoiceTransaction() : null;
 			$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
 			$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
+		}else if(!empty($this->employee->department) && $this->employee->department->business_id == 8){
+			$transactionDetail = $this->company ? $this->company->investmentPrePaymentInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($this->company->investment_business_unit->name) ? $this->company->investment_business_unit->name : null;
+			$companyCode = isset($this->company->investment_business_unit->code) ? $this->company->investment_business_unit->code : null;
 		}else{
 			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
@@ -5976,6 +5980,11 @@ request is not desired, then those may be rejected.';
 			$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
 			$company  = isset($employeeTrip->company->oem_business_unit->code) ? $employeeTrip->company->oem_business_unit->code : null;
 
+		}else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 8){
+			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->investmentInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->investmentClaimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->investment_business_unit->name) ? $employeeTrip->company->investment_business_unit->name : null;
+			$company  = isset($employeeTrip->company->investment_business_unit->code) ? $employeeTrip->company->investment_business_unit->code : null;
 		}else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
