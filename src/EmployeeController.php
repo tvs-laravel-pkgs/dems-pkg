@@ -88,7 +88,7 @@ class EmployeeController extends Controller {
 			->leftJoin('employees as m', 'e.reporting_to_id', 'm.id')
 			->join('outlets as o', 'o.id', 'e.outlet_id')
 		// ->join('users as u', 'u.entity_id', 'e.id')
-
+            ->leftjoin('departments', 'departments.id', 'e.department_id')
 			->join('users as u', function ($join) {
 				$join->on('u.entity_id', '=', 'e.id')
 					->where('u.user_type_id', 3121);
@@ -139,11 +139,12 @@ class EmployeeController extends Controller {
 		// })
 		// ->
 		// ->orWhere('mngr.user_type_id', 3121)
-			->where('e.company_id', Auth::user()->company_id)
-			->orderBy('e.code', 'asc')
-			->groupBy('e.id')
-		;
-		// dd($employees);
+			->where('e.company_id', Auth::user()->company_id);
+			if (Entrust::can('eyatra-employee-oesl')) {
+				$employees->where('departments.business_id', 2);
+			}
+			$employees->groupBy('e.id')->get();
+		 //dd($employees);
 		return Datatables::of($employees)
 			->addColumn('action', function ($employee) {
 

@@ -158,6 +158,12 @@ class TravelexPermissionSeeder extends Seeder {
 				'name' => 'eyatra-pcv-cashier-view',
 				'display_name' => 'PCV Cashier View',
 			],
+			9013 => [
+				'display_order' => 4,
+				'parent_id' => 5520,
+				'name' => 'eyatra-employee-oesl',
+				'display_name' => 'Oesl Business Employee Master',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

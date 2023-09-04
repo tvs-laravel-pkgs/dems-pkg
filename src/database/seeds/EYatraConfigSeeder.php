@@ -97,6 +97,8 @@ class EYatraConfigSeeder extends Seeder {
 			581 => 'Advance PCV - Claim Natural Account',
 			582 => 'Advance PCV Balance - Employee To Company Natural Account',
 			583 => 'PCV Invoice Natural Account',
+			584 => 'Oracle - Pre Payment Check Status Id',
+			585 => 'Trips Oracle Sync Method',
 		];
 
 		$configs = [
@@ -1252,6 +1254,26 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'OESL Travelx Invoice',
 				'config_type_id' => 550,
 			],
+			3835 => [
+				'name' => 'Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
+			3836 => [
+				'name' => 'OESL Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
+			3837 => [
+				'name' => 'Honda Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			3838 => [
+				'name' => 'Honda Travelx Invoice',
+				'config_type_id' => 550,
+			],
+			3839 => [
+				'name' => 'Honda Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
 
 			//COMPANY BUSINESS UNITS
 			3841 => [
@@ -1266,10 +1288,14 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'BPCL',
 				'config_type_id' => 551,
 			],
+			3844 => [
+				'name' => 'INVESTMENT',
+				'config_type_id' => 551,
+			],
 
 			//ORACLE NATURAL ACCOUNT
 			3860 => [
-				'name' => '152668',
+				'name' => '153668',
 				'config_type_id' => 552,
 			],
 			3861 => [
@@ -1309,7 +1335,7 @@ class EYatraConfigSeeder extends Seeder {
 			],
 
 			3921 => [
-				'name' => '152674',
+				'name' => '153674',
 				'config_type_id' => 557,
 			],
 			3922 => [
@@ -1490,6 +1516,28 @@ class EYatraConfigSeeder extends Seeder {
 			4062 => [
 				'name' => 'Yes',
 				'config_type_id' => 579,
+			],
+
+			4082 => [
+				'name' => 'Yes',
+				'config_type_id' => 584,
+			],
+			4091 => [
+				'name' => 'auto',
+				'config_type_id' => 585,
+			],
+
+			4101 => [
+				'name' => 'Investment Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4102 => [
+				'name' => 'Investment Travelx Invoice',
+				'config_type_id' => 550,
+			],
+			4103 => [
+				'name' => 'Investment Travel Claim Refund Invoice',
+				'config_type_id' => 550,
 			],
 		];
 
