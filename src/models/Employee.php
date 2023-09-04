@@ -419,6 +419,7 @@ class Employee extends Model {
 				try {
 					$skip = false;
 					$recordErrors = [];
+					$companyId = $outlet = $grade = $designation = $sbu = $businessId = $department = $reportingToEmployeeExistId = null;
 
 					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
 					// if (!in_array($hrmsEmployee->lob_id, [4, 15])) {
@@ -708,6 +709,7 @@ class Employee extends Model {
 
 					if (!$skip) {
 						//REPORTING TO SAVE
+						$reportingToEmployee = $reportingToUser = null;
 						if ($hrmsEmployee->reporting_to_employee_code) {
 							// $reportingToEmployee = Employee::withTrashed()->firstOrNew([
 							// 	'company_id' => $reportingToCompanyId,
@@ -1227,6 +1229,7 @@ class Employee extends Model {
 				try {
 					$skip = false;
 					$recordErrors = [];
+					$companyId = $outlet = $grade = $designation = $businessId = $department = null;
 
 					//EMPLOYEE COMPANY
 					if (!$employeeUpdateDetail['employee']->employee_company_adre_code) {
@@ -1638,6 +1641,7 @@ class Employee extends Model {
 				try {
 					$skip = false;
 					$recordErrors = [];
+					$companyId = null;
 
 					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
 					// if (!in_array($hrmsDeletionEmployee->lob_id, [4, 15])) {
@@ -1884,6 +1888,7 @@ class Employee extends Model {
 				try {
 					$skip = false;
 					$recordErrors = [];
+					$employeeExistId = $reportingEmployeeExistId = null;
 
 					//CHECK EMPLOYEE LOB IS NOT DLOB, OESL
 					// if (!in_array($employeeReportingDetail->lob_id, [4, 15])) {
