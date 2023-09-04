@@ -919,8 +919,8 @@ class Employee extends Model {
 							// $arr['type'] = 1;
 							$arr['type'] = 2;
 							$arr['employee'] = $employeeAdditionData;
-							$mail_instance = new TravelexConfigMail($arr);
-							$mail = Mail::send($mail_instance);
+							// $mail_instance = new TravelexConfigMail($arr);
+							// $mail = Mail::send($mail_instance);
 						}
 
 					}
@@ -2688,8 +2688,8 @@ class Employee extends Model {
 				// $arr['type'] = 1;
 				$arr['type'] = 2;
 				$arr['employee'] = $employeeAdditionData;
-				$mail_instance = new TravelexConfigMail($arr);
-				$mail = Mail::send($mail_instance);
+				// $mail_instance = new TravelexConfigMail($arr);
+				// $mail = Mail::send($mail_instance);
 			}
 
 			//EMPLOYEE ADDITION MAIL TO AX
