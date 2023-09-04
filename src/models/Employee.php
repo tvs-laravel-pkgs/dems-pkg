@@ -22,6 +22,7 @@ use Uitoux\EYatra\Lob;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Sbu;
 use Uitoux\EYatra\Config;
+use Uitoux\EYatra\BankDetail;
 
 class Employee extends Model {
 	use SoftDeletes;
