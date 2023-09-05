@@ -390,15 +390,17 @@ class Employee extends Model {
 				$hrmsEmployeeData->ifsc_code = null;
 				$hrmsEmployeeData->account_number = null;
 				$bankDetail = DB::table('bank_accounts')->select([
-					'id',
-					'bank_name',
-					'ifsc_code',
-					'number',
+					'bank_accounts.id',
+					// 'bank_accounts.bank_name',
+					DB::raw('IF(banks.label IS NULL,bank_accounts.bank_name,banks.label) as bank_name'),
+					'bank_accounts.ifsc_code',
+					'bank_accounts.number',
 				])
-					->where('company_id', $hrmsEmployeeData->company_id)
-					->where('bank_accountable_type', "App\Models\Employee")
-					->where('bank_accountable_id', $hrmsEmployeeData->id)
-					->orderBy('id', 'DESC')
+					->leftjoin('banks','banks.id','bank_accounts.bank_id')
+					->where('bank_accounts.company_id', $hrmsEmployeeData->company_id)
+					->where('bank_accounts.bank_accountable_type', "App\Models\Employee")
+					->where('bank_accounts.bank_accountable_id', $hrmsEmployeeData->id)
+					->orderBy('bank_accounts.id', 'DESC')
 					->first();
 				if(!empty($bankDetail)){
 					$hrmsEmployeeData->bank_name = $bankDetail->bank_name;
@@ -2220,16 +2222,19 @@ class Employee extends Model {
 
 		//BANK DETAILS
 		$bankDetail = DB::table('bank_accounts')->select([
-			'id',
-			'bank_name',
-			'ifsc_code',
-			'number',
+			'bank_accounts.id',
+			// 'bank_accounts.bank_name',
+			DB::raw('IF(banks.label IS NULL,bank_accounts.bank_name,banks.label) as bank_name'),
+			'bank_accounts.ifsc_code',
+			'bank_accounts.number',
 		])
-			->where('company_id', $hrmsEmployee->company_id)
-			->where('bank_accountable_type', "App\Models\Employee")
-			->where('bank_accountable_id', $hrmsEmployee->id)
-			->orderBy('id', 'DESC')
+			->leftjoin('banks','banks.id','bank_accounts.bank_id')
+			->where('bank_accounts.company_id', $hrmsEmployee->company_id)
+			->where('bank_accounts.bank_accountable_type', "App\Models\Employee")
+			->where('bank_accounts.bank_accountable_id', $hrmsEmployee->id)
+			->orderBy('bank_accounts.id', 'DESC')
 			->first();
+		
 		$hrmsEmployee->bank_name = null;
 		$hrmsEmployee->ifsc_code = null;
 		$hrmsEmployee->account_number = null;
