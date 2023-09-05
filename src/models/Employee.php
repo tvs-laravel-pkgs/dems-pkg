@@ -875,6 +875,11 @@ class Employee extends Model {
 							}
 							$employeeBankDetail->account_type_id = 3243;
 							$employeeBankDetail->save();
+
+							if(!$employee->payment_mode_id){
+								$employee->payment_mode_id = 3244; //BANK
+								$employee->save();
+							}
 						}
 
 						//USER ROLE MAP
@@ -2660,6 +2665,11 @@ class Employee extends Model {
 				}
 				$employeeBankDetail->account_type_id = 3243;
 				$employeeBankDetail->save();
+
+				if(!$employee->payment_mode_id){
+					$employee->payment_mode_id = 3244; //BANK
+					$employee->save();
+				}
 			}
 
 			//SYNC LOG
