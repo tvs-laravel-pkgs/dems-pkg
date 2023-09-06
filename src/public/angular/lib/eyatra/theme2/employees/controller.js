@@ -1054,25 +1054,25 @@ app.component('hrmsEmployeeSyncLogList', {
 
         if(self.type_id == 3961){
             //EMPLOYEE ADDITION
-            if(!self.hasPermission('hrms-to-travelex-employee-addition')){
+            if(!self.hasPermission('hrms-to-travelex-employee-addition-log')){
                 window.location = "#!/permission-denied";
                 return false;
             }
         }else if(self.type_id == 3962){
             //EMPLOYEE UPDATION
-            if(!self.hasPermission('hrms-to-travelex-employee-updation')){
+            if(!self.hasPermission('hrms-to-travelex-employee-updation-log')){
                 window.location = "#!/permission-denied";
                 return false;
             }
         }else if(self.type_id == 3963){
             //EMPLOYEE DELETION
-            if(!self.hasPermission('hrms-to-travelex-employee-deletion')){
+            if(!self.hasPermission('hrms-to-travelex-employee-deletion-log')){
                 window.location = "#!/permission-denied";
                 return false;
             }
         }else if(self.type_id == 3964){
             //EMPLOYEE REPORTING TO UPDATION
-            if(!self.hasPermission('hrms-to-travelex-employee-reporting-to-updation')){
+            if(!self.hasPermission('hrms-to-travelex-employee-reporting-to-updation-log')){
                 window.location = "#!/permission-denied";
                 return false;
             }
@@ -1158,20 +1158,28 @@ app.component('hrmsEmployeeSyncLogList', {
             $('.dataTables_length select').select2();
             if(self.type_id == 3961){
                 $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Addition</p><h3 class="title">HRMS To Travelex Employee Addition</h3>');
-                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-addition-sync">' +
+                if(self.hasPermission('hrms-to-travelex-employee-addition')){
+                    $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-addition-sync">' +
                 'Sync' +'</button>'); 
+                }
             }else if(self.type_id == 3962){
                 $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Updation</p><h3 class="title">HRMS To Travelex Employee Updation</h3>');
-                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-updation-sync">' +
-                'Sync' +'</button>');
+                if(self.hasPermission('hrms-to-travelex-employee-updation')){
+                    $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-updation-sync">' +
+                    'Sync' +'</button>');
+                }
             }else if(self.type_id == 3963){
                 $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Deletion</p><h3 class="title">HRMS To Travelex Employee Deletion</h3>');
-                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-deletion-sync">' +
-                'Sync' +'</button>');
+                if(self.hasPermission('hrms-to-travelex-employee-deletion')){
+                    $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-deletion-sync">' +
+                    'Sync' +'</button>');
+                }
             }else if(self.type_id == 3964){
                 $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee Reporting To Updation</p><h3 class="title">HRMS To Travelex Employee Reporting To Updation</h3>');
-                $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-reporting-to-update-sync">' +
-                'Sync' +'</button>');
+                if(self.hasPermission('hrms-to-travelex-employee-reporting-to-updation')){
+                    $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-reporting-to-update-sync">' +
+                    'Sync' +'</button>');
+                }
             }
 
             $('.employee-addition-sync').on("click", function() {

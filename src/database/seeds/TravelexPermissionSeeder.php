@@ -164,6 +164,31 @@ class TravelexPermissionSeeder extends Seeder {
 				'name' => 'eyatra-employee-oesl',
 				'display_name' => 'Oesl Business Employee Master',
 			],
+
+			9020 => [
+				'display_order' => 10,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-addition-log',
+				'display_name' => 'HRMS To Travelex Employee Addition Log',
+			],
+			9021 => [
+				'display_order' => 11,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-updation-log',
+				'display_name' => 'HRMS To Travelex Employee Updation Log',
+			],
+			9022 => [
+				'display_order' => 12,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-deletion-log',
+				'display_name' => 'HRMS To Travelex Employee Deletion Log',
+			],
+			9023 => [
+				'display_order' => 13,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-reporting-to-updation-log',
+				'display_name' => 'HRMS To Travelex Employee Reporting To Updation Log',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
