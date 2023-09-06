@@ -30,6 +30,7 @@ use Uitoux\EYatra\LodgingShareDetail;
 use Uitoux\EYatra\LodgingTaxInvoice;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\OperatingStates;
+use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Uitoux\EYatra\Sbu;
 use Validator;
 use App\Oracle\OtherTypeTransactionDetail;
@@ -1503,7 +1504,7 @@ class Trip extends Model {
 
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
-		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km', 'gae.outstation_trip_amount', 'sbus.id as sbu_id', 'sbus.name as sbu_name')
+		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km', 'gae.outstation_trip_amount', 'sbus.id as sbu_id', 'sbus.name as sbu_name','gae.check_guest_house_approval_attachment')
 			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
@@ -2506,13 +2507,18 @@ class Trip extends Model {
 						}
 					}
 
+
+					$checkGuestHouseApprovalAttachment = GradeAdvancedEligiblity::where('grade_id', $trip->employee->grade_id)->pluck('check_guest_house_approval_attachment')->first();
+
 					$lodging_guest_house_cities = Lodging::join('ncities','ncities.id','lodgings.city_id')
 						->where('lodgings.trip_id', $trip->id)
 						->where('lodgings.attachment_status', 1)
 						->where('lodgings.stay_type_id', 3340) //LODGE STAY
 						->where('ncities.guest_house_status',1)
 						->pluck('ncities.id');
-					if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+					// if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+					// if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+					if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false && $checkGuestHouseApprovalAttachment == 1) {
 						$validations['guest_house_approval_document'] = 'required';
             		}
 

@@ -2216,7 +2216,8 @@ app.component('eyatraTripClaimForm', {
             console.log("is_grade_leader : "+self.is_grade_leader)
 
             // Guest house approved document validate
-            if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
+            // if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
+            if (self.employee.check_guest_house_approval_attachment == 1 && self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
                 $(self.trip.lodgings).each(function(key, lodge) {
                     console.log(lodge.stay_type_id);
                     // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
