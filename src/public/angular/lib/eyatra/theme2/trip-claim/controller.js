@@ -370,7 +370,8 @@ app.component('eyatraTripClaimForm', {
             self.grandTotalTaxInvoice = {};
 
             self.is_grade_leader = false;
-            if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
+            // if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
+            if(self.employee.grade && self.employee.is_leader_grade == 1){
                 self.is_grade_leader = true;
             }
 
