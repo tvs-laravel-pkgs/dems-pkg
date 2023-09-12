@@ -45,12 +45,15 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			'expense_voucher_advance_request_claims.balance_amount',
 			'expense_voucher_advance_request_claims.description as expense_description',
 			'expense_voucher_advance_request_claims.status_id as advance_pcv_claim_status_id',
+			'expense_voucher_advance_request_claims.remarks as claim_rejecion_remarks',
 			'advance_pcv_claim_statuses.name as advance_pcv_claim_status',
 			'employees.code',
 			'employees.id as employee_id',
 			'employees.payment_mode_id',
 			'users.name',
 			'employee_return_payment_modes.name as employee_return_payment_mode',
+			'expense_voucher_advance_requests.rejection_id',
+			'expense_voucher_advance_requests.remarks as advance_request_rejecion_remarks',
 		])
 			->leftjoin('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')

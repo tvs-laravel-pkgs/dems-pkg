@@ -35,7 +35,7 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 		)
 			->leftJoin('configs', 'configs.id', 'expense_voucher_advance_requests.status_id')
 			->join('employees', 'employees.id', 'expense_voucher_advance_requests.employee_id')
-			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			// ->join('outlets', 'outlets.id', 'employees.outlet_id')
 			->join('users', 'users.entity_id', 'employees.id')
 			->leftjoin('expense_voucher_advance_request_claims', 'expense_voucher_advance_request_claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
 			->leftJoin('configs as advance_pcv_claim_statuses', 'advance_pcv_claim_statuses.id', 'expense_voucher_advance_request_claims.status_id')
@@ -226,11 +226,17 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 				$error_messages = [
 					'approve.required' => 'Expense voucher advance request ID is required',
 					'approve.exists' => 'Expense voucher advance request data not found',
+					'employee_id.required' => "Employee id is required",
+					'employee_id.exists' => "Employee data not found",
 				];
 				$validations = [
 					'approve' => [
 						'required',
 						'exists:expense_voucher_advance_requests,id',
+					],
+					'employee_id' => [
+						'required',
+						'exists:employees,id',
 					],
 				];
 				$validator = Validator::make($request->all(), $validations, $error_messages);
@@ -248,6 +254,14 @@ class ExpenseVoucherAdvanceVerificationController extends Controller {
 				)
 					->join('outlets', 'outlets.id', 'employees.outlet_id')
 					->where('employees.id', $request->employee_id)->first();
+
+				if(empty($employee_cash_check)){
+					return response()->json([
+						'success' => false,
+						'errors' => ['Kindly map the outlet for perticular employee'],
+					]);
+				}
+
 				if ($request->expense_amount) {
 					$expense_voucher_advance_request_claim = ExpenseVoucherAdvanceRequestClaim::where('expense_voucher_advance_request_id', $request->approve)->first();
 					if(!$expense_voucher_advance_request_claim){

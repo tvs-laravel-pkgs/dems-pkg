@@ -376,6 +376,12 @@ class ExpenseVoucherAdvanceController extends Controller {
 	public function expenseVoucherSave(Request $request) {
 		// dd($request->all());
 		try {
+			$error_messages = [
+                'employee_id.required' => "Employee id is required",
+                'date.required' => "Date is required",
+                'advance_amount.required' => "Advance amount is required",
+                'description.required' => "Description is required",
+            ];
 			$validator = Validator::make($request->all(), [
 				'employee_id' => [
 					'required',
@@ -396,7 +402,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				'expense_description' => [
 					'nullable',
 				],
-			]);
+			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			}
@@ -406,6 +412,12 @@ class ExpenseVoucherAdvanceController extends Controller {
 			)
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->where('employees.id', $request->employee_id)->first();
+			if(empty($employee_cash_check)){
+				return response()->json([
+					'success' => false,
+					'errors' => ['Kindly map the outlet for perticular employee'],
+				]);
+			}
 
 				//CHECK VALIDATION FOR MAXIMUM ELEGIBILITY AMOUNT LIMIT
 			if ($request->advance_amount > $employee_cash_check->expense_voucher_limit) {
@@ -417,7 +429,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			}
 
 			if ($request->id) {
-				$expense_voucher_advance = ExpenseVoucherAdvanceRequest::findOrFail($request->id);
+				$expense_voucher_advance = ExpenseVoucherAdvanceRequest::find($request->id);
 				if(!$expense_voucher_advance){
 					return response()->json([
 	                    'success' => false,
