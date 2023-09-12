@@ -335,7 +335,7 @@ class PettyCashController extends Controller {
 			//VIEW OTHER EXPENSE
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
-			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number')
+			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number','petty_cash.remarks as petty_cash_remarks','petty_cash.status_id')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')

@@ -503,7 +503,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/petty-cash/cashier/get-list/', 'Uitoux\EYatra\PettyCashCashierVerificationController@listPettyCashVerificationCashier')->name('listPettyCashVerificationCashier');
 		Route::post('eyatra/petty-cash/cashier/save', 'Uitoux\EYatra\PettyCashCashierVerificationController@pettycashCashierVerificationSave')->name('pettycashCashierVerificationSave');
 		Route::get('eyatra/petty-cash/cashier/view/{type_id}/{pettycash_id}', 'Uitoux\EYatra\PettyCashCashierVerificationController@pettycashCashierVerificationView')->name('pettycashCashierVerificationView');
-		Route::post('petty-cash/cashier/proof-view-save', 'Uitoux\EYatra\PettyCashFinanceVerificationController@proofViewSave')->name('pettyCashProofCashierViewSave');
+		Route::post('petty-cash/cashier/proof-view-save', 'Uitoux\EYatra\PettyCashCashierVerificationController@proofViewSave')->name('pettyCashProofCashierViewSave');
 
 		//ALTERNATE APPROVE LIST
 		Route::get('eyatra/alternate-approve/request/get-list', 'Uitoux\EYatra\AlternateApproveController@listAlternateApproveRequest')->name('listAlternateApproveRequest');
