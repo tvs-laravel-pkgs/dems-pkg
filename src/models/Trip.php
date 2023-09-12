@@ -30,6 +30,7 @@ use Uitoux\EYatra\LodgingShareDetail;
 use Uitoux\EYatra\LodgingTaxInvoice;
 use Uitoux\EYatra\NState;
 use Uitoux\EYatra\OperatingStates;
+use Uitoux\EYatra\GradeAdvancedEligiblity;
 use Uitoux\EYatra\Sbu;
 use Validator;
 use App\Oracle\OtherTypeTransactionDetail;
@@ -185,6 +186,10 @@ class Trip extends Model {
 			->where('activity_id', 3323)
 			->where('details', 'Trip is Approved by Manager')
 			->orderBy('date_time', 'DESC');
+	}
+
+	public function branch() {
+		return $this->belongsTo('Uitoux\EYatra\Outlet', 'outlet_id');
 	}
 
 	public static function generate($employee, $trip_number, $faker, $trip_status_id, $admin) {
@@ -1500,7 +1505,7 @@ class Trip extends Model {
 
 		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
-		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km', 'gae.outstation_trip_amount', 'sbus.id as sbu_id', 'sbus.name as sbu_name')
+		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km', 'gae.outstation_trip_amount', 'sbus.id as sbu_id', 'sbus.name as sbu_name','gae.check_guest_house_approval_attachment','gae.is_leader_grade')
 			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('users', 'users.entity_id', 'employees.id')
@@ -2381,8 +2386,10 @@ class Trip extends Model {
 			// 	}
 			// }
 
+			$isLeaderGrade = GradeAdvancedEligiblity::where('grade_id', $trip->employee->grade_id)->pluck('is_leader_grade')->first();
 			$is_grade_leader = false;
-			if (!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9'])) {
+			// if (!empty($trip->employee->grade) && in_array($trip->employee->grade->name, ['L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9'])) {
+			if (!empty($trip->employee->grade) && $isLeaderGrade == 1) {
 				$is_grade_leader = true;
 			}
 
@@ -2498,13 +2505,18 @@ class Trip extends Model {
 						}
 					}
 
+
+					$checkGuestHouseApprovalAttachment = GradeAdvancedEligiblity::where('grade_id', $trip->employee->grade_id)->pluck('check_guest_house_approval_attachment')->first();
+
 					$lodging_guest_house_cities = Lodging::join('ncities','ncities.id','lodgings.city_id')
 						->where('lodgings.trip_id', $trip->id)
 						->where('lodgings.attachment_status', 1)
 						->where('lodgings.stay_type_id', 3340) //LODGE STAY
 						->where('ncities.guest_house_status',1)
 						->pluck('ncities.id');
-					if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+					// if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+					// if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false) {
+					if (count($lodging_guest_house_cities) > 0 && !in_array(3756, $attachement_types) && $is_grade_leader == false && $checkGuestHouseApprovalAttachment == 1) {
 						$validations['guest_house_approval_document'] = 'required';
             		}
 
@@ -4823,14 +4835,29 @@ request is not desired, then those may be rejected.';
 		$res['errors'] = [];
 
 		$companyId = $this->company_id;
-		$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
-		$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
+		// $companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+		// $companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
 
 		// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 		if(!empty($this->employee->department) && $this->employee->department->business_id == 2){
+			// $transactionDetail = $this->company ? $this->company->oeslPrePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->oeslPrePaymentInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($this->company->oes_business_unit->name) ? $this->company->oes_business_unit->name : null;
+			$companyCode = isset($this->company->oes_business_unit->code) ? $this->company->oes_business_unit->code : null;
+		}else if(!empty($this->employee->department) && $this->employee->department->business_id == 3){
+			$transactionDetail = $this->company ? $this->company->hondaPrePaymentInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+			$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
+		}else if(!empty($this->employee->department) && $this->employee->department->business_id == 8){
+			$transactionDetail = $this->company ? $this->company->investmentPrePaymentInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($this->company->investment_business_unit->name) ? $this->company->investment_business_unit->name : null;
+			$companyCode = isset($this->company->investment_business_unit->code) ? $this->company->investment_business_unit->code : null;
 		}else{
+			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
+
+			$companyBusinessUnit = isset($this->company->oem_business_unit->name) ? $this->company->oem_business_unit->name : null;
+			$companyCode = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;
 		}
 		// $invoiceSource = 'Pre Payment Invoice';
 		$invoiceSource = 'Travelex';
@@ -4843,7 +4870,22 @@ request is not desired, then those may be rejected.';
 
 		$businessUnitName = $companyBusinessUnit;
 		$invoiceNumber = $this->number;
-		$invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
+
+		$tripApprovalLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3581) //Outstation Trip
+			->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+			->where('entity_id', $this->id)
+			->first();
+		$tripManagerApprovedDate = null;
+		if($tripApprovalLog){
+			$tripManagerApprovedDate = $tripApprovalLog->approved_date;
+		}
+
+		// $invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
+		$invoiceDate = $tripManagerApprovedDate;
 		$employeeData = $this->employee;
 		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		// $invoiceType = 'Standard';
@@ -4860,7 +4902,8 @@ request is not desired, then those may be rejected.';
 		}
 
 		$amount = $this->advance_received;
-		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		// $outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		$outletCode = $this->branch ? $this->branch->oracle_code_l2 : null;
 		// $accountingClass = 'Payable';
 		$accountingClass = 'Purchase/Expense';
 		$company = $this->company ? $this->company->oracle_code : '';
@@ -5929,14 +5972,32 @@ request is not desired, then those may be rejected.';
 
 		$employeeTrip = $this;
 		$companyId = $employeeTrip->company_id;
-		$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
+		// $companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
 
 		// $transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 
 		if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 2){
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->oeslInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->oeslClaimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->oes_business_unit->name) ? $employeeTrip->company->oes_business_unit->name : null;
+			$company  = isset($employeeTrip->company->oes_business_unit->code) ? $employeeTrip->company->oes_business_unit->code : null;
+
+		}else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 3){
+			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->hondaInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->hondaClaimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
+			$company  = isset($employeeTrip->company->oem_business_unit->code) ? $employeeTrip->company->oem_business_unit->code : null;
+
+		}else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 8){
+			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->investmentInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->investmentClaimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->investment_business_unit->name) ? $employeeTrip->company->investment_business_unit->name : null;
+			$company  = isset($employeeTrip->company->investment_business_unit->code) ? $employeeTrip->company->investment_business_unit->code : null;
 		}else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
+			$company  = isset($employeeTrip->company->oem_business_unit->code) ? $employeeTrip->company->oem_business_unit->code : null;
 		}
 
 		// $invoiceSource = 'Invoice';
@@ -5948,6 +6009,13 @@ request is not desired, then those may be rejected.';
 			$documentType = $transactionDetail->type ? $transactionDetail->type : $documentType;
 		}
 
+		$claimRefundInvoiceSource = 'Travelex';
+		$claimRefundDocumentType = 'Invoice';
+		if (!empty($claimRefundDetail)) {
+			$claimRefundInvoiceSource = $claimRefundDetail->batch ? $claimRefundDetail->batch : $claimRefundInvoiceSource;
+			$claimRefundDocumentType = $claimRefundDetail->type ? $claimRefundDetail->type : $claimRefundDocumentType;
+		}
+
 		$employeeClaim = EmployeeClaim::select([
 			'id',
 			'number',
@@ -5957,6 +6025,7 @@ request is not desired, then those may be rejected.';
 			'amount_to_pay',
 			'balance_amount',
 			'created_at',
+			'updated_at',
 		])
 			->where('trip_id', $employeeTrip->id)
 			->first();
@@ -5968,7 +6037,8 @@ request is not desired, then those may be rejected.';
 		$prePaymentAmount = null;
 		if ($employeeClaim) {
 			$invoiceAmount = round($employeeClaim->total_amount);
-			$invoiceDate = $employeeClaim->created_at ? date("Y-m-d", strtotime($employeeClaim->created_at)) : null;
+			// $invoiceDate = $employeeClaim->created_at ? date("Y-m-d", strtotime($employeeClaim->created_at)) : null;
+			$invoiceDate = $employeeClaim->updated_at ? date("Y-m-d", strtotime($employeeClaim->updated_at)) : null;
 			$invoiceNumber = $employeeClaim->number;
 
 			if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
@@ -5982,15 +6052,29 @@ request is not desired, then those may be rejected.';
 		$customerCode = $employeeData ? $employeeData->code : null;
 		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		$invoiceType = 'Standard';
-		$description = '';
+		$invoiceDescription = '';
 		if (!empty($employeeData->code)) {
-			$description .= $employeeData->code;
+			$invoiceDescription .= $employeeData->code;
 		}
 		if (!empty($employeeData->user->name)) {
-			$description .= ' - ' . ($employeeData->user->name);
+			$invoiceDescription .= ' - ' . ($employeeData->user->name);
 		}
 		if (!empty($employeeTrip->purpose->name)) {
-			$description .= ' - ' . ($employeeTrip->purpose->name);
+			$invoiceDescription .= ' - ' . ($employeeTrip->purpose->name);
+		}
+
+
+		$tripClaimApprovalLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3581) //Outstation Trip
+			->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
+			->where('entity_id', $employeeTrip->id)
+			->first();
+		$claimManagerApprovedDate = null;
+		if($tripClaimApprovalLog){
+			$claimManagerApprovedDate = $tripClaimApprovalLog->approved_date;
 		}
 
 		//VISITS
@@ -5998,7 +6082,12 @@ request is not desired, then those may be rejected.';
 		if ($employeeTrip->selfVisits->isNotEmpty()) {
 			foreach ($employeeTrip->selfVisits as $selfVisit) {
 				if (!empty($selfVisit->booking)) {
-					$employeeTransportValue += floatval($selfVisit->booking->invoice_amount);
+					// $employeeTransportValue += floatval($selfVisit->booking->invoice_amount);
+					if($selfVisit->booking->invoice_amount && $selfVisit->booking->invoice_amount != '0.00'){
+						$employeeTransportValue += floatval($selfVisit->booking->invoice_amount);
+					}else{
+						$employeeTransportValue += (floatval($selfVisit->booking->amount) + floatval($selfVisit->booking->other_charges) + floatval($selfVisit->booking->round_off));
+					}
 				}
 			}
 		}
@@ -6015,12 +6104,13 @@ request is not desired, then those may be rejected.';
 			$employeeLocalTravelValue = floatval($employeeClaim->local_travel_total);
 		}
 
-		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		// $outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		$outletCode = $this->branch ? $this->branch->oracle_code_l2 : null;
 		$customerSiteNumber = $outletCode;
 		// $accountingClass = 'Payable';
 		$accountingClass = 'Purchase/Expense';
 		// $company = $employeeTrip->company ? $employeeTrip->company->oracle_code : '';
-		$company  = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;;
+		// $company  = isset($this->company->oem_business_unit->code) ? $this->company->oem_business_unit->code : null;;
 
 		$sbu = $employeeData->Sbu;
 		$lob = $department = null;
@@ -6140,7 +6230,7 @@ request is not desired, then those may be rejected.';
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
 		// $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
-		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType);
+		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType , $claimManagerApprovedDate);
 
 		// //LODGING-GST ENTRY
 		// if ($lodgingCgstSgstTaxableAmount && $lodgingCgstSgstTaxableAmount > 0) {
@@ -6167,7 +6257,15 @@ request is not desired, then those may be rejected.';
 						if ($lodgingTaxInvoice && (($lodgingTaxInvoice->cgst > 0 && $lodgingTaxInvoice->sgst > 0) || ($lodgingTaxInvoice->igst > 0))) {
 							$taxDetailRes = $this->getLodgingTaxDetail($lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, $lodgingTaxInvoice->tax_percentage);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging', $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType);
+							$lineDescription = "Lodging";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , $claimManagerApprovedDate);
 						}
 
 						//DRY WASH
@@ -6175,7 +6273,15 @@ request is not desired, then those may be rejected.';
 						if ($drywashTaxInvoice && (($drywashTaxInvoice->cgst > 0 && $drywashTaxInvoice->sgst > 0) || ($drywashTaxInvoice->igst > 0))) {
 							$taxDetailRes = $this->getLodgingTaxDetail($drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, $drywashTaxInvoice->tax_percentage);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging - Dry Wash', $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType);
+							$lineDescription = "Lodging-DryWash";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
 						}
 
 						//BOARDING
@@ -6183,14 +6289,29 @@ request is not desired, then those may be rejected.';
 						if ($boardingTaxInvoice && (($boardingTaxInvoice->cgst > 0 && $boardingTaxInvoice->sgst > 0) || ($boardingTaxInvoice->igst > 0))) {
 							$taxDetailRes = $this->getLodgingTaxDetail($boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, $boardingTaxInvoice->tax_percentage);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging - Boarding', $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType);
+							$lineDescription = "Lodging-Boarding";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
 						}
 					} else {
 						//SINGLE
 						if (($lodging->cgst > 0 && $lodging->sgst > 0) || ($lodging->igst > 0)) {
 							$taxDetailRes = $this->getLodgingTaxDetail($lodging->cgst, $lodging->sgst, $lodging->igst, $lodging->tax_percentage);
+							$lineDescription = "Lodging";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, 'Lodging', $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType);
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
 						}
 					}
 				}
@@ -6208,7 +6329,7 @@ request is not desired, then those may be rejected.';
 				$roundOffNaturalAccount = $roundOffTransaction->natural_account;
 			}
 
-			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType);
+			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType , $claimManagerApprovedDate);
 		}
 
 		//IF ADVANCE RECEIVED
@@ -6216,7 +6337,7 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				//EMPLOYEE TO COMPANY
 				if ($employeeClaim->amount_to_pay == 2) {
-					$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $documentType);
+					$this->saveApOracleExport($companyId, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, null, $invoiceDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , $claimManagerApprovedDate);
 				}
 			}
 
@@ -6236,7 +6357,7 @@ request is not desired, then those may be rejected.';
 		return $res;
 	}
 
-	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentInvoiceDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outlet, $amount, $taxClassification, $cgst, $sgst, $igst, $roundOffAmount, $hsnCode, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType) {
+	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentInvoiceDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outlet, $amount, $taxClassification, $cgst, $sgst, $igst, $roundOffAmount, $hsnCode, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType, $accountingDate = null) {
 		return $apInvoiceId = DB::table('oracle_ap_invoice_exports')->insertGetId([
 			'company_id' => $companyId,
 			'business_unit' => $businessUnit,
@@ -6251,7 +6372,7 @@ request is not desired, then those may be rejected.';
 			'supplier_site_name' => $supplierSiteName,
 			'invoice_type' => $invoiceType,
 			// 'description' => $description,
-			'invoice_description' => $description,
+			'invoice_description' => $invoiceDescription,
 			'outlet' => $outlet,
 			'amount' => $amount,
 			'tax_classification' => $taxClassification,
@@ -6268,6 +6389,7 @@ request is not desired, then those may be rejected.';
 			'department' => $department,
 			'natural_account' => $naturalAccount,
 			'document_type' => $documentType,
+			'accounting_date' => $accountingDate,
 			'created_at' => Carbon::now(),
 		]);
 	}

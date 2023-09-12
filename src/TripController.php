@@ -155,7 +155,8 @@ class TripController extends Controller {
 			$get_previous_trips = Trip::select('id')
 				->where('employee_id', Auth::user()->entity_id)
 				->where('id', '!=', $request->id)
-				->whereIn('advance_request_approval_status_id', [3260, 3261])
+				// ->whereIn('advance_request_approval_status_id', [3260, 3261])
+				->where('advance_received','>', 0)
 				->whereNotIn('status_id', [3026, 3032])
 				->orderBy('id', 'DESC')->first();
 			//dd($get_previous_trips);

@@ -284,7 +284,8 @@ app.component('eyatraTripClaimForm', {
             self.grandTotalTaxInvoice = {};
 
             self.is_grade_leader = false;
-            if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
+            // if(self.employee.grade && $.inArray(self.employee.grade, ['L1','L2','L3','L4','L5','L6','L7','L8','L9']) != -1){
+            if(self.employee.grade && self.employee.is_leader_grade == 1){
                 self.is_grade_leader = true;
             }
 
@@ -2130,7 +2131,8 @@ app.component('eyatraTripClaimForm', {
             console.log("is_grade_leader : "+self.is_grade_leader)
 
             // Guest house approved document validate
-            if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
+            // if (self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
+            if (self.employee.check_guest_house_approval_attachment == 1 && self.trip.lodgings.length > 0 && jQuery.inArray(3756, tripAttachmentTypeIds) == -1) {
                 $(self.trip.lodgings).each(function(key, lodge) {
                     console.log(lodge.stay_type_id);
                     // if (lodge.stay_type_id != 3342) { // 3342 -> Office Guest house
@@ -2723,6 +2725,7 @@ app.component('eyatraTripClaimForm', {
                 lodge_name: '',
                 remarks: '',
                 attachment_status: 'Yes',
+                gstin_readonly: true,
                 // attachment_status: proof_upload_status,
             });
         }
