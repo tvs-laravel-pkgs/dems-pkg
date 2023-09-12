@@ -39,8 +39,8 @@ class PettyCashFinanceVerificationController extends Controller {
 			->join('configs', 'configs.id', 'petty_cash.status_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
-			->join('outlets', 'outlets.id', 'employees.outlet_id')
-			->join('employees as cashier', 'cashier.id', 'outlets.cashier_id')
+			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+			->leftjoin('employees as cashier', 'cashier.id', 'outlets.cashier_id')
 			->where('petty_cash.status_id', 3285)
 			->where('users.user_type_id', 3121)
 		// ->where('outlets.amount_eligible', 0)
@@ -357,12 +357,15 @@ class PettyCashFinanceVerificationController extends Controller {
 		try {
 			DB::beginTransaction();
 			if ($request->petty_cash_id) {
+				$error_messages = [
+	                'petty_cash_id.required' => "Petty cash id is required",
+	            ];
 				$validator = Validator::make($request->all(), [
 	                'petty_cash_id' => [
 	                    'required',
 	                    'exists:petty_cash,id',
 	                ]
-	            ]);
+	            ],$error_messages);
 	            if ($validator->fails()) {
 	                return response()->json([
 	                    'success' => false,
@@ -475,12 +478,15 @@ class PettyCashFinanceVerificationController extends Controller {
 				// 	return response()->json(['success' => false, 'errors' => ['This outlet has no reimbursement amount']]);
 				// }
 			} else {
+				$error_messages = [
+	                'reject.required' => "Petty cash id is required",
+	            ];
 				$validator = Validator::make($request->all(), [
 	                'reject' => [
 	                    'required',
 	                    'exists:petty_cash,id',
 	                ]
-	            ]);
+	            ], $error_messages);
 	            if ($validator->fails()) {
 	                return response()->json([
 	                    'success' => false,
