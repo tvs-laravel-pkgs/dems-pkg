@@ -389,12 +389,14 @@ class Employee extends Model {
 				$hrmsEmployeeData->bank_name = null;
 				$hrmsEmployeeData->ifsc_code = null;
 				$hrmsEmployeeData->account_number = null;
+				$hrmsEmployeeData->branch_name = null;
 				$bankDetail = DB::table('bank_accounts')->select([
 					'bank_accounts.id',
 					// 'bank_accounts.bank_name',
 					DB::raw('IF(banks.label IS NULL,bank_accounts.bank_name,banks.label) as bank_name'),
 					'bank_accounts.ifsc_code',
 					'bank_accounts.number',
+					'bank_accounts.branch_name',
 				])
 					->leftjoin('banks','banks.id','bank_accounts.bank_id')
 					->where('bank_accounts.company_id', $hrmsEmployeeData->company_id)
@@ -406,6 +408,22 @@ class Employee extends Model {
 					$hrmsEmployeeData->bank_name = $bankDetail->bank_name;
 					$hrmsEmployeeData->ifsc_code = $bankDetail->ifsc_code;
 					$hrmsEmployeeData->account_number = $bankDetail->number;
+					$hrmsEmployeeData->branch_name = $bankDetail->branch_name;
+				}
+
+				//OUTLET ADDRESS
+				$hrmsEmployeeData->hrms_state = null;
+				$outletAddressDetail = DB::table('addresses')->select([
+					'addresses.id',
+					'states.name as state_name',
+				])
+					->leftjoin('states','states.id','addresses.state_id')
+					->where('addresses.addressable_type', "App\Models\Outlet")
+					->where('addresses.addressable_id', $hrmsEmployeeData->outlet_id)
+					->orderBy('addresses.id', 'DESC')
+					->first();
+				if(!empty($outletAddressDetail)){
+					$hrmsEmployeeData->hrms_state = $outletAddressDetail->state_name;
 				}
 			}
 		}
@@ -480,6 +498,7 @@ class Employee extends Model {
 								$outlet->created_at = Carbon::now();
 							}
 							$outlet->name = $hrmsEmployee->outlet_name;
+							$outlet->hrms_state = $hrmsEmployee->hrms_state;
 							$outlet->save();
 						}
 					} else {
@@ -868,10 +887,14 @@ class Employee extends Model {
 								if($hrmsEmployee->account_number){
 									$employeeBankDetail->account_number = $hrmsEmployee->account_number;
 								}
+								if($hrmsEmployee->branch_name){
+									$employeeBankDetail->branch_name = $hrmsEmployee->branch_name;
+								}
 							}else{
 								$employeeBankDetail->bank_name = $hrmsEmployee->bank_name;
 								$employeeBankDetail->ifsc_code = $hrmsEmployee->ifsc_code;
 								$employeeBankDetail->account_number = $hrmsEmployee->account_number;
+								$employeeBankDetail->branch_name = $hrmsEmployee->branch_name;
 							}
 							$employeeBankDetail->account_type_id = 3243;
 							$employeeBankDetail->save();
@@ -2060,6 +2083,7 @@ class Employee extends Model {
 			'designation' => $employee->designation ? $employee->designation->name : '',
 			'grade' => $employee->grade->name,
 			'outlet' => $employee->outlet->code,
+			'outlet_name' => $employee->outlet->name,
 			'lob' => isset($employee->Sbu->lob) ? $employee->Sbu->lob->name : '',
 			'sbu' => $employee->Sbu ? $employee->Sbu->name : '',
 			'function' => $employee->Department ? $employee->Department->name : '',
@@ -2069,7 +2093,9 @@ class Employee extends Model {
 			'bank_name' => isset($employee->bankDetail) ? $employee->bankDetail->bank_name : '',
 			'bank_ifsc_code' => isset($employee->bankDetail) ? $employee->bankDetail->ifsc_code : '',
 			'bank_account_number' => isset($employee->bankDetail) ? $employee->bankDetail->account_number : '',
+			'bank_branch_name' => isset($employee->bankDetail) ? $employee->bankDetail->branch_name : '',
 			'category' => $category,
+			'outlet_hrms_state' => $employee->outlet->hrms_state,
 		];
 		return $employeeData;
 	}
@@ -2232,6 +2258,7 @@ class Employee extends Model {
 			DB::raw('IF(banks.label IS NULL,bank_accounts.bank_name,banks.label) as bank_name'),
 			'bank_accounts.ifsc_code',
 			'bank_accounts.number',
+			'bank_accounts.branch_name',
 		])
 			->leftjoin('banks','banks.id','bank_accounts.bank_id')
 			->where('bank_accounts.company_id', $hrmsEmployee->company_id)
@@ -2243,10 +2270,27 @@ class Employee extends Model {
 		$hrmsEmployee->bank_name = null;
 		$hrmsEmployee->ifsc_code = null;
 		$hrmsEmployee->account_number = null;
+		$hrmsEmployee->branch_name = null;
 		if(!empty($bankDetail)){
 			$hrmsEmployee->bank_name = $bankDetail->bank_name;
 			$hrmsEmployee->ifsc_code = $bankDetail->ifsc_code;
 			$hrmsEmployee->account_number = $bankDetail->number;
+			$hrmsEmployee->branch_name = $bankDetail->branch_name;
+		}
+
+		//OUTLET ADDRESS
+		$hrmsEmployee->hrms_state = null;
+		$outletAddressDetail = DB::table('addresses')->select([
+			'addresses.id',
+			'states.name as state_name',
+		])
+			->leftjoin('states','states.id','addresses.state_id')
+			->where('addresses.addressable_type', "App\Models\Outlet")
+			->where('addresses.addressable_id', $hrmsEmployee->outlet_id)
+			->orderBy('addresses.id', 'DESC')
+			->first();
+		if(!empty($outletAddressDetail)){
+			$hrmsEmployee->hrms_state = $outletAddressDetail->state_name;
 		}
 		DB::setDefaultConnection('mysql');
 
@@ -2333,6 +2377,7 @@ class Employee extends Model {
 						$outlet->created_at = Carbon::now();
 					}
 					$outlet->name = $hrmsEmployee->outlet_name;
+					$outlet->hrms_state = $hrmsEmployee->hrms_state;
 					$outlet->save();
 				}
 			} else {
@@ -2658,10 +2703,14 @@ class Employee extends Model {
 					if($hrmsEmployee->account_number){
 						$employeeBankDetail->account_number = $hrmsEmployee->account_number;
 					}
+					if($hrmsEmployee->branch_name){
+						$employeeBankDetail->branch_name = $hrmsEmployee->branch_name;
+					}
 				}else{
 					$employeeBankDetail->bank_name = $hrmsEmployee->bank_name;
 					$employeeBankDetail->ifsc_code = $hrmsEmployee->ifsc_code;
 					$employeeBankDetail->account_number = $hrmsEmployee->account_number;
+					$employeeBankDetail->branch_name = $hrmsEmployee->branch_name;
 				}
 				$employeeBankDetail->account_type_id = 3243;
 				$employeeBankDetail->save();
