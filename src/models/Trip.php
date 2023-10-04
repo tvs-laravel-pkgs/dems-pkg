@@ -643,7 +643,7 @@ class Trip extends Model {
 
 			$trip = Trip::find($trip_id);
 
-			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032]))) {
+			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032,3028]))) {
 				$data['success'] = false;
 				$data['error'] = 'Not possible to update the Trip details';
 				return response()->json($data);
