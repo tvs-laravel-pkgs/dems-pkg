@@ -1368,6 +1368,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'HRMS To Travelex Employee Manual Addition Mail',
 				'config_type_id' => 539,
 			],
+			3946 => [
+				'name' => 'Oracle Supplier Number Missing Mail',
+				'config_type_id' => 539,
+			],
 
 			3961 => [
 				'name' => 'Employee Addition',

@@ -648,7 +648,7 @@ class ExportReportController extends Controller {
 						}
 
 						//TRIP ADVANCE COMPANY TO EMPLOYEE BALANCE PAYMENT
-						if ($employeeTrip->amount_to_pay == 1) {
+						if ($employeeTrip->advance_received > 0 && $employeeTrip->amount_to_pay == 1) {
 							if ($employeeTrip->balance_amount && $employeeTrip->balance_amount != '0.00') {
 								// if($employeeTrip->totalAmount && $employeeTrip->totalAmount != '0.00'){
 								$res = $this->employeeAxaptaExportProcess(7, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
@@ -2654,7 +2654,7 @@ class ExportReportController extends Controller {
 						}
 
 						//TRAVEL ADVANCE BALANCE AMOUNT PAID BY COMPANY TO EMPLOYEE
-						if ($employeeTrip->amount_to_pay == 1) {
+						if ($employeeTrip->advance_received > 0 && $employeeTrip->amount_to_pay == 1) {
 							if ($employeeTrip->balance_amount > 0) {
 								// $this->hondaOeslEmployeeAxaptaProcess(3, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								if ($employeeTrip->business_id == 2) {
@@ -2668,7 +2668,7 @@ class ExportReportController extends Controller {
 						}
 
 						//TRAVEL ADVANCE BALANCE AMOUNT PAID BY EMPLOYEE TO COMPANY
-						if ($employeeTrip->amount_to_pay == 2) {
+						if ($employeeTrip->advance_received > 0 && $employeeTrip->amount_to_pay == 2) {
 							if ($employeeTrip->balance_amount > 0) {
 								if ($employeeTrip->business_id == 3) {
 									//HONDA
