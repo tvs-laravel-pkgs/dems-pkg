@@ -99,6 +99,7 @@ class EYatraConfigSeeder extends Seeder {
 			583 => 'PCV Invoice Natural Account',
 			584 => 'Oracle - Pre Payment Check Status Id',
 			585 => 'Trips Oracle Sync Method',
+			586 => 'City Types',
 		];
 
 		$configs = [
@@ -1367,6 +1368,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'HRMS To Travelex Employee Manual Addition Mail',
 				'config_type_id' => 539,
 			],
+			3946 => [
+				'name' => 'Oracle Supplier Number Missing Mail',
+				'config_type_id' => 539,
+			],
 
 			3961 => [
 				'name' => 'Employee Addition',
@@ -1538,6 +1543,12 @@ class EYatraConfigSeeder extends Seeder {
 			4103 => [
 				'name' => 'Investment Travel Claim Refund Invoice',
 				'config_type_id' => 550,
+			],
+
+
+			4111 => [
+				'name' => 'Others',
+				'config_type_id' => 586,
 			],
 		];
 

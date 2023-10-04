@@ -79,7 +79,7 @@ class TripClaimController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->where('trips.employee_id', Auth::user()->entity_id)
+			// ->where('trips.employee_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 		// ->orderBy('trips.created_at', 'desc');
 			->orderBy('trips.id', 'desc');
@@ -87,6 +87,9 @@ class TripClaimController extends Controller {
 		// if (!Entrust::can('view-all-trips')) {
 		// 	$trips->where('trips.employee_id', Auth::user()->entity_id);
 		// }
+			if (!Entrust::can('view-all-claims')) {
+				$trips->where('trips.employee_id', Auth::user()->entity_id);
+			}
 		return Datatables::of($trips)
 			->addColumn('action', function ($trip) {
 				$img1 = asset('public/img/content/yatra/table/edit.svg');

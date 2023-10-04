@@ -30,6 +30,7 @@ use Uitoux\EYatra\SoapController;
 use Uitoux\EYatra\WalletDetail;
 use Validator;
 use Yajra\Datatables\Datatables;
+use Uitoux\EYatra\Trip;
 
 class EmployeeController extends Controller {
 
@@ -375,6 +376,14 @@ class EmployeeController extends Controller {
 				$employee->deleted_at = NULL;
 			}
 			$employee->save();
+
+			//EMPLOYEE TRIP MANAGER UPDATE
+			if(!empty($request->reporting_to_id)){
+				Trip::where('employee_id', $employee->id)->update([
+					'manager_id' => $request->reporting_to_id,
+				]);
+			}
+
 			$activity['entity_id'] = $employee->id;
 			$activity['entity_type'] = "Employee";
 			$activity['details'] = empty($request->id) ? "Employee is  Added" : "Employee is  updated";

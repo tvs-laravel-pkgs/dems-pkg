@@ -2811,6 +2811,7 @@ app.component('eyatraTripClaimForm', {
                 lodge_name: '',
                 remarks: '',
                 attachment_status: 'Yes',
+                gstin_readonly: true,
                 // attachment_status: proof_upload_status,
             });
         }
