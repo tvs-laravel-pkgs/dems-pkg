@@ -643,7 +643,7 @@ class Trip extends Model {
 
 			$trip = Trip::find($trip_id);
 
-			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032]))) {
+			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032,3028]))) {
 				$data['success'] = false;
 				$data['error'] = 'Not possible to update the Trip details';
 				return response()->json($data);
@@ -1374,7 +1374,7 @@ class Trip extends Model {
 		$data = [];
 		$trip = Trip::with(
 			['visits' => function ($q) {
-				$q->orderBy('id', 'asc');
+				$q->where('status_id','!=', 3062)->orderBy('id', 'asc');
 			},
 				'visits.fromCity',
 				'visits.toCity',
@@ -1395,7 +1395,7 @@ class Trip extends Model {
 				'purpose',
 				'status',
 				'selfVisits' => function ($q) {
-					$q->orderBy('id', 'asc');
+					$q->where('status_id','!=', 3062)->orderBy('id', 'asc');
 				},
 				'lodgings',
 				'lodgings.lodgingTaxInvoice',
@@ -1502,7 +1502,7 @@ class Trip extends Model {
 		$data['travel_dates_list'] = $travel_dates_list;
 		$data['lodging_dates_list'] = $travel_dates_list;
 
-		$to_cities = Visit::where('trip_id', $trip_id)->pluck('to_city_id')->toArray();
+		$to_cities = Visit::where('trip_id', $trip_id)->where('status_id', '!=', 3062)->pluck('to_city_id')->toArray();
 		$data['success'] = true;
 		$data['employee'] = $employee = Employee::select('users.name as name', 'employees.code as code', 'designations.name as designation', 'entities.name as grade', 'employees.grade_id', 'employees.id', 'employees.gender', 'gae.two_wheeler_per_km', 'gae.four_wheeler_per_km', 'gae.outstation_trip_amount', 'sbus.id as sbu_id', 'sbus.name as sbu_name','gae.check_guest_house_approval_attachment','gae.is_leader_grade')
 			->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
@@ -1513,7 +1513,7 @@ class Trip extends Model {
 			->where('employees.id', $trip->employee_id)
 			->where('users.user_type_id', 3121)->first();
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
-			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
+			->where('visits.trip_id', $trip->id)->where('visits.status_id', '!=', 3062)->pluck('cities.name')->toArray();
 		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
 		// $start_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MIN(visits.departure_date),"%d/%m/%Y") as start_date'))->first();
 		// $end_date = $trip->visits()->select(DB::raw('DATE_FORMAT(MAX(visits.departure_date),"%d/%m/%Y") as end_date'))->first();
@@ -1544,7 +1544,7 @@ class Trip extends Model {
 
 		//DONT REVERT - ABDUL
 		$trip->cities = $data['cities'] = count($travel_cities) > 0 ? trim(implode(', ', $travel_cities)) : '--';
-		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
+		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->where('visits.status_id', '!=', 3062)->first();
 		// }
 		if (!empty($to_cities)) {
 			$city_list = collect(NCity::select('id', 'name', 'guest_house_status')->where('company_id', Auth::user()->company_id)->whereIn('id', $to_cities)->groupby('id')->get()->prepend(['id' => '', 'name' => 'Select City']));
@@ -1627,6 +1627,7 @@ class Trip extends Model {
 		$data['cities_with_expenses'] = $cities_with_expenses;
 		$travel_cities_list = collect(Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
 				->where('visits.trip_id', $trip->id)
+				->where('visits.status_id', '!=', 3062)
 				->select('cities.id', 'cities.name')
 				->orderBy('visits.id', 'asc')
 				->get()->prepend(['id' => '', 'name' => 'Select City']));
@@ -1818,7 +1819,7 @@ class Trip extends Model {
 
 		$trip = Trip::with([
 			'visits' => function ($q) {
-				$q->orderBy('id', 'asc');
+				$q->where('status_id','!=',3062)->orderBy('id', 'asc');
 			},
 			'visits.fromCity',
 			'visits.toCity',
@@ -1844,7 +1845,7 @@ class Trip extends Model {
 			'employee.Sbu',
 			'employee.Sbu.lob',
 			'selfVisits' => function ($q) {
-				$q->orderBy('id', 'asc');
+				$q->where('status_id','!=',3062)->orderBy('id', 'asc');
 			},
 			'purpose',
 			'lodgings',
@@ -1937,7 +1938,7 @@ class Trip extends Model {
 		// Trip employee claim amount update by Karthick T on 22-08-2022
 
 		$travel_cities = Visit::leftjoin('ncities as cities', 'visits.to_city_id', 'cities.id')
-			->where('visits.trip_id', $trip->id)->pluck('cities.name')->toArray();
+			->where('visits.trip_id', $trip->id)->where('visits.status_id','!=',3062)->pluck('cities.name')->toArray();
 
 		// $transport_total = Visit::select(
 		// 	DB::raw('COALESCE(SUM(visit_bookings.amount), 0.00) as visit_amount'),
@@ -1997,7 +1998,7 @@ class Trip extends Model {
 		// $data['total_amount'] = number_format($total_amount, 2, '.', '');
 
 		$data['travel_cities'] = !empty($travel_cities) ? trim(implode(', ', $travel_cities)) : '--';
-		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->first();
+		$data['travel_dates'] = $travel_dates = Visit::select(DB::raw('MAX(DATE_FORMAT(visits.arrival_date,"%d/%m/%Y")) as max_date'), DB::raw('MIN(DATE_FORMAT(visits.departure_date,"%d/%m/%Y")) as min_date'))->where('visits.trip_id', $trip->id)->where('visits.status_id','!=',3062)->first();
 
 		$data['trip_claim_rejection_list'] = collect(Entity::trip_claim_rejection()->prepend(['id' => '', 'name' => 'Select Rejection Reason']));
 
@@ -2039,7 +2040,7 @@ class Trip extends Model {
 			$local_travel_amount = number_format(array_sum(array_column($emp_fy_amounts, 'local_travel_total')), 2, '.', ',');
 			$beta_amount = number_format(array_sum(array_column($emp_fy_amounts, 'beta_amount')), 2, '.', ',');
 		}
-		$visit = Visit::select('id')->where('trip_id', $trip->id)->where('booking_method_id', 3040)->get()->toArray();
+		$visit = Visit::select('id')->where('trip_id', $trip->id)->where('booking_method_id', 3040)->where('status_id','!=',3062)->get()->toArray();
 		$lodge = Lodging::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$board = Boarding::where('trip_id', $trip->id)->pluck('trip_id')->count();
 		$other = LocalTravel::where('trip_id', $trip->id)->pluck('trip_id')->count();
@@ -2055,6 +2056,7 @@ class Trip extends Model {
 			->join('visits', 'visits.trip_id', 'trips.id')
 			->join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->where('visits.booking_method_id', 3040)
+			->where('visits.status_id','!=',3062)
 			->where('trips.id', $trip->id)
 		//->where('trips.employee_id', $trip->employee->id)
 			->get()->toArray();
@@ -2198,9 +2200,9 @@ class Trip extends Model {
 			// dd($request->all());
 			//starting ending Km validation
 			if (!empty($request->visits)) {
-				$visit_id = Visit::select('id')->where('trip_id', $request->trip_id)->count();
-				$two_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 15)->count();
-				$four_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 16)->count();
+				$visit_id = Visit::select('id')->where('trip_id', $request->trip_id)->where('status_id','!=',3062)->count();
+				$two_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 15)->where('status_id','!=',3062)->count();
+				$four_wheeler_count = Visit::select('travel_mode_id')->where('trip_id', $request->trip_id)->where('travel_mode_id', '=', 16)->where('status_id','!=',3062)->count();
 				$visit_proof_upload_value = Config::where('id', 3983)->first()->name;
 
 				$tripData = Trip::find($request->trip_id);
@@ -2475,6 +2477,7 @@ class Trip extends Model {
 						->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
 						->where('visits.booking_method_id', 3040) //SELF
 						->where('visits.attachment_status', 1)
+						->where('visits.status_id','!=', 3062)
 						->count();
 					if ($self_fare_detail_count > 0) {
 						if(!in_array(3755, $attachement_types)){
@@ -2494,6 +2497,7 @@ class Trip extends Model {
 						->whereNotIn('visits.travel_mode_id', [15,16,17,270,271,272])
 						->where('visits.booking_method_id', 3042) //AGENT
 						->where('visits.attachment_status', 1)
+						->where('visits.status_id','!=', 3062)
 						->count();
 					if ($agent_fare_detail_count > 0) {
 						if(!in_array(3751, $attachement_types)){
@@ -2524,7 +2528,7 @@ class Trip extends Model {
 						$validations['guest_house_approval_document'] = 'required';
             		}
 
-					$visit_count = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->count();
+					$visit_count = Visit::join('visit_bookings', 'visit_bookings.visit_id', 'visits.id')->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])->where('visits.trip_id', $trip->id)->where('visits.attachment_status', 1)->where('visits.status_id','!=', 3062)->count();
 					if ($visit_count > 0 && !in_array(3751, $attachement_types)) {
 						// Fare Detail Type
 						// $validations['fare_detail_doc'] = 'required';
@@ -2554,6 +2558,7 @@ class Trip extends Model {
 						->where('visits.trip_id', $trip->id)
 						->where('visits.self_booking_approval', 1)
 						->where('visits.trip_mode_id', 3793) // 3793 -> Overnight
+						->where('visits.status_id','!=', 3062)
 						->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
 						// Others Type
@@ -3843,7 +3848,7 @@ class Trip extends Model {
 					->where('attachment_type_id', 3200)
 					->where('entity_id', $request->trip_id)
 					->count();
-				$self_booking_count = Visit::where('booking_method_id', 3040)->where('trip_id', $request->trip_id)->select('id', 'booking_method_id')->get();
+				$self_booking_count = Visit::where('booking_method_id', 3040)->where('trip_id', $request->trip_id)->where('status_id','!=', 3062)->select('id', 'booking_method_id')->get();
 				if (!empty($self_booking_count->booking_method_id) == 3040) {
 					foreach ($self_booking_count as $key => $value) {
 						$transport_count = VisitBooking::where('visit_id', $value->id)->count();
