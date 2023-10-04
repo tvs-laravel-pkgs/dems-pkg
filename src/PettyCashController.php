@@ -50,7 +50,7 @@ class PettyCashController extends Controller {
 			->leftJoin('configs as petty_cash_type', 'petty_cash_type.id', 'petty_cash.petty_cash_type_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
-			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
 			->where('petty_cash.employee_id', Auth::user()->entity_id)
 			->where('users.user_type_id', 3121)
 			->orderBy('petty_cash.id', 'desc')
@@ -335,7 +335,7 @@ class PettyCashController extends Controller {
 			//VIEW OTHER EXPENSE
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
-			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number')
+			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number','petty_cash.remarks as petty_cash_remarks','petty_cash.status_id')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
 				->join('entities', 'entities.id', 'petty_cash_employee_details.expence_type')
@@ -598,6 +598,18 @@ class PettyCashController extends Controller {
 			// if ($validator->fails()) {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
+			$error_messages = [
+                'employee_id.required' => "Employee id is required",
+            ];
+			$validator = Validator::make($request->all(), [
+				'employee_id' => [
+					'required',
+					'exists:employees,id',
+				],
+			], $error_messages);
+			if ($validator->fails()) {
+				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
+			}
 			DB::beginTransaction();
 
 			//GET AMOUNT LIMIT,TWO,FOUR WHEELER AMOUNT PER KM BASED ON EMPLOYEE
@@ -608,8 +620,15 @@ class PettyCashController extends Controller {
 				'gae.two_wheeler_limit',
 				'gae.four_wheeler_limit')
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
-				->join('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
+				->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 				->where('employees.id', $request->employee_id)->first();
+
+			if(empty($employee_petty_cash_check)){
+				return response()->json([
+					'success' => false,
+					'errors' => ['Kindly map the outlet for perticular employee'],
+				]);
+			}
 
 			$get_two_four_wheeler_id = Entity::PettyCashTravelModeList();
 

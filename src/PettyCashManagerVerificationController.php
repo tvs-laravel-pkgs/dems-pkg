@@ -36,7 +36,7 @@ class PettyCashManagerVerificationController extends Controller {
 			->leftJoin('configs as petty_cash_type', 'petty_cash_type.id', 'petty_cash.petty_cash_type_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
-			->join('outlets', 'outlets.id', 'employees.outlet_id')
+			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
 			->where('petty_cash.status_id', 3280)
 			->where('users.user_type_id', 3121)
 			->where('employees.reporting_to_id', Auth::user()->entity_id)
@@ -212,12 +212,20 @@ class PettyCashManagerVerificationController extends Controller {
 		try {
 			DB::beginTransaction();
 			if ($request->approve) {
+				$error_messages = [
+	                'approve.required' => "Petty cash id is required",
+	                'employee_id.required' => "Employee id is required",
+	            ];
 				$validator = Validator::make($request->all(), [
 	                'approve' => [
 	                    'required',
 	                    'exists:petty_cash,id',
-	                ]
-	            ]);
+	                ],
+	                'employee_id' => [
+						'required',
+						'exists:employees,id',
+					],
+	            ], $error_messages);
 	            if ($validator->fails()) {
 	                return response()->json([
 	                    'success' => false,
@@ -232,6 +240,13 @@ class PettyCashManagerVerificationController extends Controller {
 				)
 					->join('outlets', 'outlets.id', 'employees.outlet_id')
 					->where('employees.id', $request->employee_id)->first();
+				if(empty($employee_petty_cash_check)){
+					return response()->json([
+						'success' => false,
+						'errors' => ['Kindly map the outlet for perticular employee'],
+					]);
+				}
+				
 				if ($employee_petty_cash_check->amount_eligible != 0) {
 					if ($employee_petty_cash_check->amount_limit >= $request->amount) {
 						$petty_cash_manager_approve = PettyCash::where('id', $request->approve)->update(['status_id' => 3281, 'remarks' => NULL, 'approval_remarks' => $request->approval_remarks, 'rejection_id' => NULL, 'updated_by' => Auth::user()->id, 'updated_at' => Carbon::now()]);
@@ -258,12 +273,15 @@ class PettyCashManagerVerificationController extends Controller {
 				DB::commit();
 				return response()->json(['success' => true]);
 			} else {
+				$error_messages = [
+	                'reject.required' => "Petty cash id is required",
+	            ];
 				$validator = Validator::make($request->all(), [
 	                'reject' => [
 	                    'required',
 	                    'exists:petty_cash,id',
 	                ]
-	            ]);
+	            ], $error_messages);
 	            if ($validator->fails()) {
 	                return response()->json([
 	                    'success' => false,
