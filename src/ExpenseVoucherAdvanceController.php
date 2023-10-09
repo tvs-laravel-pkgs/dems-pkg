@@ -67,6 +67,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 				$img3 = asset('public/img/content/yatra/table/delete.svg');
 				$img3_active = asset('public/img/content/yatra/table/delete-active.svg');
 				$payment_detail_icon = asset('public/img/content/yatra/table/payment-detail.svg');
+				$claim_img = asset('public/img/content/yatra/table/claim.svg');
 				if ($expense_voucher_requests->status_id == 3460 || $expense_voucher_requests->status_id == 3463 || $expense_voucher_requests->status_id == 3465) {
 				// 	return '
 				// <a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
@@ -112,7 +113,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 					$action = '';
 					if(Entrust::can('eyatra-advance-pcv-edit')){
 						$action .= '<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
-							<img src="' . $img1 . '" alt="View" class="img-responsive" onmouseover=this.src="' . $img1_active . '" onmouseout=this.src="' . $img1 . '" >
+							<img src="' . $claim_img . '" alt="View" class="img-responsive" onmouseover=this.src="' . $claim_img . '" onmouseout=this.src="' . $claim_img . '" >
 						</a>';
 					}
 
