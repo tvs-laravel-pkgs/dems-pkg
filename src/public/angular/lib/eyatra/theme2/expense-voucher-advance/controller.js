@@ -276,6 +276,8 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
+            fileUpload();
+            $('.attachments').imageuploadify();
             if (!response.data.success) {
                 // $noty = new Noty({
                 //     type: 'error',
