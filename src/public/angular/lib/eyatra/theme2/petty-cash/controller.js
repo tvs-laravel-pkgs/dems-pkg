@@ -252,6 +252,9 @@ app.component('eyatraPettyCashForm', {
             $rootScope.loading = false;
         });
 
+        /* Image Uploadify Funtion */
+        $('.image_uploadify').imageuploadify();
+
         //GET KM RATE FROM GRADE
         $scope.getRatePerkm = function(id, index) {
             if (id == self.extras.travel_mode_list[0].id) {
