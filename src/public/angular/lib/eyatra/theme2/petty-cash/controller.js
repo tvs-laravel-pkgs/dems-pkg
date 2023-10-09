@@ -170,6 +170,8 @@ app.component('eyatraPettyCashForm', {
         $http.get(
             $form_data_url
         ).then(function(response) {
+            fileUpload();
+            $('.image_uploadify').imageuploadify();
             if (!response.data.success) {
                 $noty = new Noty({
                     type: 'error',
@@ -251,6 +253,9 @@ app.component('eyatraPettyCashForm', {
 
             $rootScope.loading = false;
         });
+
+        /* Image Uploadify Funtion */
+        $('.image_uploadify').imageuploadify();
 
         //GET KM RATE FROM GRADE
         $scope.getRatePerkm = function(id, index) {
