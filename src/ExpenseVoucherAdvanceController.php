@@ -112,7 +112,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 
 					$action = '';
 					if(Entrust::can('eyatra-advance-pcv-edit')){
-						$action .= '<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '">
+						$action .= '<a href="#!/expense/voucher-advance/edit/' . $expense_voucher_requests->id . '?page_type=2" title="Claim">
 							<img src="' . $claim_img . '" alt="View" class="img-responsive" onmouseover=this.src="' . $claim_img . '" onmouseout=this.src="' . $claim_img . '" >
 						</a>';
 					}

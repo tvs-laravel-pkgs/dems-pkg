@@ -267,6 +267,7 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
         var self = this;
         self.type_id = $routeParams.type_id;
         self.hasPermission = HelperService.hasPermission;
+        self.page_type = typeof($location.search().page_type) === 'undefined' ? '' : $location.search().page_type;
         if(!self.hasPermission('eyatra-advance-pcv-add') && !self.hasPermission('eyatra-advance-pcv-edit')){
             window.location = "#!/permission-denied";
             return false;
@@ -307,7 +308,12 @@ app.component('eyatraExpenseVoucherAdvanceForm', {
             // console.log(self.expense_voucher_advance_attachment_url);
 
             if (self.action == 'Edit') {
-                self.action = 'Edit';
+                // self.action = 'Edit';
+                if(self.page_type == 2){
+                    self.action = 'Claim';
+                }else{
+                    self.action = 'Edit';
+                }
                 // if (self.expense_voucher_advance.status_id == 3464 || self.expense_voucher_advance.status_id == 3466 || self.expense_voucher_advance.status_id == 3469 || self.expense_voucher_advance.status_id == 3471) {
                 if (self.expense_voucher_advance.status_id == 3464 && (!self.expense_voucher_advance_claim || self.expense_voucher_advance_claim.status_id == 3466 || self.expense_voucher_advance_claim.status_id == 3469 || self.expense_voucher_advance_claim.status_id == 3471)) {
                     $("#date").prop('readonly', true);
