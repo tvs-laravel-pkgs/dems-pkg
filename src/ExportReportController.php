@@ -2647,6 +2647,7 @@ class ExportReportController extends Controller {
 								//OESL
 								$this->hondaOeslEmployeeAxaptaProcess(2, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 								$this->hondaOeslEmployeeAxaptaProcess(9, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
+								$this->hondaOeslEmployeeAxaptaProcess(10, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
 							} elseif ($employeeTrip->business_id == 3) {
 								//HONDA
 								$this->hondaOeslEmployeeAxaptaProcess(5, $employeeTrip, $axaptaAccountTypes, $axaptaBankDetails);
@@ -3268,6 +3269,12 @@ class ExportReportController extends Controller {
 			if ($employeeLodgingRoundoff != 0) {
 				$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, 510, '193', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '644203', 0, $employeeCode . ':' . $employeeName . '-Roff', $employeeLodgingRoundoff, 0.00, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 			}
+		} elseif ($type == 10){
+			//DEBIT ENTRY
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, '5100652016', 2, $employeeCode . ':' . $employeeName . ':ClaimTotalAmount', $employeeTrip->totalAmount, '0.00', 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
+
+			//CREDIT ENTRY
+			$this->saveHondaOeslAxaptaExport($employeeTrip->company_id, $employeeTrip->business_id, 3791, $employeeTrip->id, '510', '192', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, 'TTP_SBI_OD_501', 6, $employeeCode . ':' . $employeeName . ':ClaimTotalAmount', 0.00, $employeeTrip->totalAmount, 'C', $employeeTrip->outletCode, '', $employeeTrip->documentNumber, $employeeTrip->invoiceDate, $employeeTrip->ax_company_code);
 		}
 	}
 
