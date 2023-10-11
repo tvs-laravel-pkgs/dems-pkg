@@ -22,7 +22,7 @@ class TripController extends Controller {
 			->join('entities as purpose', 'purpose.id', 'trips.purpose_id')
 			->join('configs as status', 'status.id', 'trips.status_id')
 			->leftJoin('users', 'users.entity_id', 'trips.employee_id')
-			// ->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id') //NEED TO ENABLE
+			->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id') //NEED TO ENABLE
 			->where('users.user_type_id', 3121)
 			->select(
 				'trips.id',
@@ -39,8 +39,8 @@ class TripController extends Controller {
 				'purpose.name as purpose',
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
-				'status.name as status'
-				// 'ey_employee_claims.id as claim_id' //NEED TO ENABLE
+				'status.name as status',
+				'ey_employee_claims.id as claim_id' //NEED TO ENABLE
 			)
 			->where('e.company_id', Auth::user()->company_id)
 
@@ -98,8 +98,8 @@ class TripController extends Controller {
 				$action = '';
 
 				// if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
-				if (($trip->status_id == '3032' && !empty($trip->approve_remarks)) || $trip->status_id == '3021' || $trip->status_id == '3022') { //NEED TO DISABLE
-				// if (($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022') || ($trip->status_id == '3028' && !$trip->claim_id)) { //NEED TO ENABLE
+				// if (($trip->status_id == '3032' && !empty($trip->approve_remarks)) || $trip->status_id == '3021' || $trip->status_id == '3022') { //NEED TO DISABLE
+				if (($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022') || ($trip->status_id == '3028' && !$trip->claim_id)) { //NEED TO ENABLE
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
 						$edit_class = "";
