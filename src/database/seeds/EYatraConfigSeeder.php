@@ -1561,7 +1561,18 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Investment Advance PCV Pre Payment Invoice',
 				'config_type_id' => 550,
 			],
-
+			4108 => [
+				'name' => 'DLOB Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4109 => [
+				'name' => 'OESL Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4110 => [
+				'name' => 'Honda Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
 
 			4111 => [
 				'name' => 'Others',
@@ -1570,6 +1581,10 @@ class EYatraConfigSeeder extends Seeder {
 			4131 => [
 				'name' => '153668',
 				'config_type_id' => 587,
+			],
+			4132 => [
+				'name' => 'Investment Advance PCV Claim Invoice',
+				'config_type_id' => 550,
 			],
 		];
 
