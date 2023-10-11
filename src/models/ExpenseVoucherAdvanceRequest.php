@@ -208,7 +208,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		}
 
 		$amount = $advancePcv->advance_amount;
-		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
+		$outletCode = $advancePcv->outlet ? $advancePcv->outlet->oracle_code_l2 : null;
 		$accountingClass = 'Purchase/Expense';
 		$company = $advancePcv->company ? $advancePcv->company->oracle_code : null;
 		$sbu = $employeeData->Sbu;
