@@ -1544,6 +1544,22 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Investment Travel Claim Refund Invoice',
 				'config_type_id' => 550,
 			],
+			4104 => [
+				'name' => 'DLOB Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4105 => [
+				'name' => 'OESL Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4106 => [
+				'name' => 'Honda Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4107 => [
+				'name' => 'Investment Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
 
 
 			4111 => [
