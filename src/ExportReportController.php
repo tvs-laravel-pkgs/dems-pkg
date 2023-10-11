@@ -3660,7 +3660,24 @@ class ExportReportController extends Controller {
 			->get()
 			->toArray();
 
-		$advance_pcv_details = array_merge($advance_details);
+		$claimed_details = ExpenseVoucherAdvanceRequest::select([
+			'expense_voucher_advance_requests.id',
+			DB::raw("'Claim' as category"),
+		])
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('id', $id);
+				}
+			})
+			->join('expense_voucher_advance_request_claims as claims', 'claims.expense_voucher_advance_request_id', 'expense_voucher_advance_requests.id')
+			->where('claims.expense_amount', '>', 0)
+			->where('expense_voucher_advance_requests.oracle_claim_sync_status', 0)
+			->where('claims.status_id', 3470) //Paid
+			->groupBy('expense_voucher_advance_requests.id')
+			->get()
+			->toArray();
+
+		$advance_pcv_details = array_merge($advance_details,$claimed_details);
 		array_multisort(
 			array_column($advance_pcv_details, 'id'),
 			SORT_ASC,
@@ -3677,6 +3694,17 @@ class ExportReportController extends Controller {
 						dump($r);
 					} else {
 						$expense_voucher_advance_request->oracle_pre_payment_sync_status = 1; //SYNCED
+						$expense_voucher_advance_request->save();
+					}
+				}
+
+				//CLAIM SYNC
+				if ($advance_pcv_detail['category'] == 'Claim') {
+					$r = $expense_voucher_advance_request->generateInvoiceApOracleAxapta();
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$expense_voucher_advance_request->oracle_claim_sync_status = 1; //SYNCED
 						$expense_voucher_advance_request->save();
 					}
 				}

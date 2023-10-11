@@ -7,6 +7,7 @@ use DB;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\ApprovalLog;
+use Uitoux\EYatra\ExpenseVoucherAdvanceRequestClaim;
 use Validator;
 use Auth;
 use App\Portal;
@@ -37,6 +38,10 @@ class ExpenseVoucherAdvanceRequest extends Model {
 
 	public function company() {
 		return $this->belongsTo('App\Company')->withTrashed();
+	}
+
+	public function outlet() {
+		return $this->belongsTo('Uitoux\EYatra\Outlet', 'outlet_id')->withTrashed();
 	}
 
 	public static function getExpenseVoucherAdvanceRequestData($id){
@@ -218,7 +223,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			$department = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
 		}
 		$location = $outletCode;
-		$naturalAccount = Config::where('id', 4131)->first()->name;
+		$naturalAccount = Config::where('id', 3862)->first()->name;
 		$supplierSiteName = $outletCode;
 
 		$bpas_portal = Portal::select([
@@ -252,7 +257,157 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			return $res;
 		}
 
-		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($amount), $description, $accountingClass, $companyCode, $lob, $location, $department, $naturalAccount, );
+		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($amount), $description, $accountingClass, $companyCode, $lob, $location, $department, $naturalAccount);
+
+		$res['success'] = true;
+		DB::setDefaultConnection('mysql');
+		return $res;
+	}
+
+	public function generateInvoiceApOracleAxapta() {
+		$res = [];
+		$res['success'] = false;
+		$res['errors'] = [];
+
+		$advancePcv = $this;
+		if(!empty($advancePcv->employee->department) && $advancePcv->employee->department->business_id == 2){
+			$transactionDetail = $advancePcv->company ? $advancePcv->company->oeslAdvancePcvClaimInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($advancePcv->company->oes_business_unit->name) ? $advancePcv->company->oes_business_unit->name : null;
+			$company = isset($advancePcv->company->oes_business_unit->code) ? $advancePcv->company->oes_business_unit->code : null;
+		}else if(!empty($advancePcv->employee->department) && $advancePcv->employee->department->business_id == 3){
+			$transactionDetail = $advancePcv->company ? $advancePcv->company->hondaAdvancePcvClaimInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($advancePcv->company->oem_business_unit->name) ? $advancePcv->company->oem_business_unit->name : null;
+			$company = isset($advancePcv->company->oem_business_unit->code) ? $advancePcv->company->oem_business_unit->code : null;
+
+		}else if(!empty($advancePcv->employee->department) && $advancePcv->employee->department->business_id == 8){
+			$transactionDetail = $advancePcv->company ? $advancePcv->company->investmentAdvancePcvClaimInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($advancePcv->company->investment_business_unit->name) ? $advancePcv->company->investment_business_unit->name : null;
+			$company = isset($advancePcv->company->investment_business_unit->code) ? $advancePcv->company->investment_business_unit->code : null;
+		}else{
+			$transactionDetail = $advancePcv->company ? $advancePcv->company->dlobAdvancePcvClaimInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($advancePcv->company->oem_business_unit->name) ? $advancePcv->company->oem_business_unit->name : null;
+			$company  = isset($advancePcv->company->oem_business_unit->code) ? $advancePcv->company->oem_business_unit->code : null;
+		}
+
+		$invoiceSource = 'Travelex';
+		$documentType = 'PCV Reimbursement';
+		if (!empty($transactionDetail)) {
+			$invoiceSource = $transactionDetail->batch ? $transactionDetail->batch : $invoiceSource;
+			$documentType = $transactionDetail->type ? $transactionDetail->type : $documentType;
+		}
+
+		$advancePcvClaim = ExpenseVoucherAdvanceRequestClaim::select([
+			'expense_voucher_advance_request_claims.id',
+			'expense_voucher_advance_request_claims.number',
+			'expense_voucher_advance_request_claims.expense_amount',
+			'expense_voucher_advance_request_claims.balance_amount',
+			'expense_voucher_advance_request_claims.description',
+			'outlets.oracle_code_l2',
+		])
+			->leftjoin('outlets','outlets.id','expense_voucher_advance_request_claims.outlet_id')
+			->where('expense_voucher_advance_request_claims.expense_voucher_advance_request_id', $advancePcv->id)
+			->first();
+
+		$invoiceAmount = null;
+		$invoiceNumber = null;
+		$prePaymentNumber = null;
+		$prePaymentAmount = null;
+		$description = null;
+		$outletCode = null;
+		if ($advancePcvClaim) {
+			$invoiceAmount = $advancePcvClaim->expense_amount;
+			$invoiceNumber = $advancePcvClaim->number;
+
+			if ($advancePcv->advance_amount && $advancePcv->advance_amount > 0) {
+				$prePaymentNumber = $advancePcv->number;
+				$prePaymentAmount = $advancePcv->advance_amount;
+			}
+			$description = $advancePcvClaim->description;
+			$outletCode = $advancePcvClaim->oracle_code_l2;
+		}
+		$businessUnitName = $companyBusinessUnit;
+		$employeeData = $advancePcv->employee;
+		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		$invoiceType = 'Standard';
+		$invoiceDescription = '';
+		if (!empty($employeeData->code)) {
+			$invoiceDescription .= $employeeData->code;
+		}
+		if (!empty($employeeData->user->name)) {
+			$invoiceDescription .= ',' . ($employeeData->user->name);
+		}
+		if (!empty($description)) {
+			$invoiceDescription .= ',' . ($description);
+		}
+
+		$advancePcvClaimApprovalLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3585) //Advance Expenses
+			->where('approval_type_id', 3617) //Advance Expenses Claim - Manager Approved
+			->where('entity_id', $advancePcv->id)
+			->first();
+		$claimManagerApprovedDate = null;
+		if($advancePcvClaimApprovalLog){
+			$claimManagerApprovedDate = $advancePcvClaimApprovalLog->approved_date;
+		}
+
+		$customerSiteNumber = $outletCode;
+		$accountingClass = 'Purchase/Expense';
+		$sbu = $employeeData->Sbu;
+		$lob = $department = null;
+		if ($sbu) {
+			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
+			$department = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
+		}
+		$location = $outletCode;
+		$naturalAccount = Config::where('id', 3863)->first()->name;
+		$empToCompanyNaturalAccount = Config::where('id', 3922)->first()->name;
+		$supplierSiteName = $outletCode;
+		
+		$bpas_portal = Portal::select([
+			'db_host_name',
+			'db_port_number',
+			'db_name',
+			'db_user_name',
+			'db_password',
+		])
+			->where('id', 1)
+			->first();
+		DB::setDefaultConnection('dynamic');
+		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $bpas_portal->db_host_name);
+		$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $bpas_portal->db_port_number);
+		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
+		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $bpas_portal->db_name);
+		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $bpas_portal->db_user_name);
+		$db_password = dataBaseConfig::set('database.connections.dynamic.password', $bpas_portal->db_password);
+		DB::purge('dynamic');
+		DB::reconnect('dynamic');
+
+		$apInvoiceExport = DB::table('oracle_ap_invoice_exports')->where([
+			'invoice_number' => $invoiceNumber,
+			'business_unit' => $businessUnitName,
+			'invoice_source' => $invoiceSource,
+			'document_type' => $documentType,
+		])->first();
+		if (!empty($apInvoiceExport)) {
+			$res['errors'] = ['Invoice already exported to oracle table'];
+			DB::setDefaultConnection('mysql');
+			return $res;
+		}
+
+		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, $prePaymentNumber, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($invoiceAmount), $invoiceDescription, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+
+		//IF ADVANCE RECEIVED
+		if ($advancePcv->advance_amount && $advancePcv->advance_amount > 0) {
+			if ($advancePcvClaim->balance_amount && $advancePcvClaim->balance_amount != '0.00') {
+				//EMPLOYEE TO COMPANY
+				if ($advancePcvClaim->balance_amount > 0) {
+					saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round(abs($advancePcvClaim->balance_amount)), $invoiceDescription, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+				}
+			}
+		}
 
 		$res['success'] = true;
 		DB::setDefaultConnection('mysql');
