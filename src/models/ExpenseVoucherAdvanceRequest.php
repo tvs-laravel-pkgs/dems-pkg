@@ -9,6 +9,9 @@ use Uitoux\EYatra\ActivityLog;
 use Uitoux\EYatra\ApprovalLog;
 use Validator;
 use Auth;
+use App\Portal;
+use Uitoux\EYatra\Config;
+use Config as dataBaseConfig;
 
 class ExpenseVoucherAdvanceRequest extends Model {
 	use SoftDeletes;
@@ -162,7 +165,6 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			$companyCode = isset($advancePcv->company->investment_business_unit->code) ? $advancePcv->company->investment_business_unit->code : null;
 		}else{
 			$transactionDetail = $advancePcv->company ? $advancePcv->company->dlobAdvancePcvPrePaymentInvoiceTransaction() : null;
-
 			$companyBusinessUnit = isset($advancePcv->company->oem_business_unit->name) ? $advancePcv->company->oem_business_unit->name : null;
 			$companyCode = isset($advancePcv->company->oem_business_unit->code) ? $advancePcv->company->oem_business_unit->code : null;
 		}
@@ -176,24 +178,24 @@ class ExpenseVoucherAdvanceRequest extends Model {
 
 		$businessUnitName = $companyBusinessUnit;
 		$invoiceNumber = $advancePcv->number;
-
-		$tripApprovalLog = ApprovalLog::select([
+		$advancePcvApprovalLog = ApprovalLog::select([
 			'id',
 			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
 		])
-			->where('type_id', 3581) //Outstation Trip
-			->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
-			->where('entity_id', $this->id)
+			->where('type_id', 3585) //Advance Expenses
+			->where('approval_type_id', 3614) //Advance Expenses Request - Manager Approved
+			->where('entity_id', $advancePcv->id)
 			->first();
-		$tripManagerApprovedDate = null;
-		if($tripApprovalLog){
-			$tripManagerApprovedDate = $tripApprovalLog->approved_date;
+		$advancePcvApprovedDate = null;
+		if($advancePcvApprovalLog){
+			$advancePcvApprovedDate = $advancePcvApprovalLog->approved_date;
 		}
 
-		$invoiceDate = $tripManagerApprovedDate;
-		$employeeData = $this->employee;
+		$invoiceDate = $advancePcvApprovedDate;
+		$employeeData = $advancePcv->employee;
 		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		$invoiceType = 'Prepayment';
+
 		$description = '';
 		if (!empty($employeeData->code)) {
 			$description .= $employeeData->code;
@@ -201,44 +203,22 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		if (!empty($employeeData->user->name)) {
 			$description .= ',' . ($employeeData->user->name);
 		}
-		if (!empty($this->purpose)) {
-			$description .= ',' . ($this->purpose->name);
+		if (!empty($advancePcv->description)) {
+			$description .= ',' . ($advancePcv->description);
 		}
 
-		$description .= ',Travel Date : ' . date('Y-m-d', strtotime($this->start_date)) .' to '. date('Y-m-d', strtotime($this->end_date));
-		$tripLocations = Visit::select([
-			DB::raw("CASE 
-				WHEN tocity.type_id = 4111 and visits.other_city is not null 
-				THEN visits.other_city 
-				WHEN tocity.type_id = 4111 and visits.other_city is null 
-				THEN tocity.name
-				ELSE tocity.name 
-				END as location"),
-		])
-			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
-			->whereNotIn('visits.status_id', [3062]) //Cancelled
-			->where('visits.trip_id', $this->id)
-			->orderBy('visits.id')
-			->get()
-			->implode('location', ',');
-
-		if($tripLocations){
-			$description .= ',Travel Place : ' . ($tripLocations);
-		}
-
-		$amount = $this->advance_received;
-		$outletCode = $this->branch ? $this->branch->oracle_code_l2 : null;
+		$amount = $advancePcv->advance_amount;
+		$outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
 		$accountingClass = 'Purchase/Expense';
-		$company = $this->company ? $this->company->oracle_code : '';
-
+		$company = $advancePcv->company ? $advancePcv->company->oracle_code : null;
 		$sbu = $employeeData->Sbu;
 		$lob = $department = null;
-		if ($sbu) {
+		if (!empty($sbu)) {
 			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
 			$department = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
 		}
 		$location = $outletCode;
-		$naturalAccount = Config::where('id', 3860)->first()->name;
+		$naturalAccount = Config::where('id', 4131)->first()->name;
 		$supplierSiteName = $outletCode;
 
 		$bpas_portal = Portal::select([
@@ -256,43 +236,23 @@ class ExpenseVoucherAdvanceRequest extends Model {
 		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
 		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $bpas_portal->db_name);
 		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $bpas_portal->db_user_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $bpas_portal->db_password);
+		$db_password = dataBaseConfig::set('database.connections.dynamic.password', $bpas_portal->db_password);
 		DB::purge('dynamic');
 		DB::reconnect('dynamic');
 
-		$apInvoiceExports = DB::table('oracle_ap_invoice_exports')->where([
+		$apInvoiceExport = DB::table('oracle_ap_invoice_exports')->where([
 			'invoice_number' => $invoiceNumber,
 			'business_unit' => $companyBusinessUnit,
 			'invoice_source' => $invoiceSource,
-		])->get();
-		if (count($apInvoiceExports) > 0) {
-			$res['errors'] = ['Already exported to oracle table'];
+			'document_type' => $documentType,
+		])->first();
+		if (!empty($apInvoiceExport)) {
+			$res['errors'] = ['Invoice already exported to oracle table'];
 			DB::setDefaultConnection('mysql');
 			return $res;
 		}
 
-		DB::table('oracle_ap_invoice_exports')->insert([
-			'company_id' => $advancePcv->company_id,
-			'business_unit' => $businessUnitName,
-			'invoice_source' => $invoiceSource,
-			'invoice_number' => $invoiceNumber,
-			'invoice_date' => $invoiceDate,
-			'supplier_number' => $supplierNumber,
-			'supplier_site_name' => $supplierSiteName,
-			'invoice_type' => $invoiceType,
-			'invoice_description' => $description,
-			'amount' => round($amount),
-			'outlet' => $outletCode,
-			'accounting_class' => $accountingClass,
-			'company' => $companyCode,
-			'lob' => $lob,
-			'location' => $location,
-			'department' => $department,
-			'natural_account' => $naturalAccount,
-			'document_type' => $documentType,
-			'accounting_date' => $invoiceDate,
-			'created_at' => Carbon::now(),
-		]);
+		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($amount), $description, $accountingClass, $companyCode, $lob, $location, $department, $naturalAccount, );
 
 		$res['success'] = true;
 		DB::setDefaultConnection('mysql');

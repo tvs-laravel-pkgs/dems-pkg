@@ -28,6 +28,7 @@ use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Region;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
+use Uitoux\EYatra\ExpenseVoucherAdvanceRequest;
 use Yajra\Datatables\Datatables;
 
 class ExportReportController extends Controller {
@@ -3636,6 +3637,50 @@ class ExportReportController extends Controller {
 				// DB::commit();
 			} catch (\Exception $e) {
 				// DB::rollBack();
+				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
+				continue;
+			}
+		}
+	}
+
+	public function advancePcvOracleSync($id = null) {
+		$advance_details = ExpenseVoucherAdvanceRequest::select([
+			'id',
+			DB::raw("'Advance' as category"),
+		])
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('id', $id);
+				}
+			})
+			->where('advance_amount', '>', 0)
+			->where('oracle_pre_payment_sync_status', 0)
+			->whereIn('status_id', [3470, 3464]) //Paid or Advance Amount Approved
+			->groupBy('id')
+			->get()
+			->toArray();
+
+		$advance_pcv_details = array_merge($advance_details);
+		array_multisort(
+			array_column($advance_pcv_details, 'id'),
+			SORT_ASC,
+			$advance_pcv_details
+		);
+		foreach ($advance_pcv_details as $advance_pcv_detail) {
+			try {
+				$expense_voucher_advance_request = ExpenseVoucherAdvanceRequest::find($advance_pcv_detail['id']);
+				
+				//ADVANCE SYNC
+				if ($advance_pcv_detail['category'] == 'Advance') {
+					$r = $expense_voucher_advance_request->generatePrePaymentApOracleAxapta();
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$expense_voucher_advance_request->oracle_pre_payment_sync_status = 1; //SYNCED
+						$expense_voucher_advance_request->save();
+					}
+				}
+			} catch (\Exception $e) {
 				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
 				continue;
 			}
