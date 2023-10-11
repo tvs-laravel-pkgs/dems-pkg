@@ -39,7 +39,8 @@ class PettyCashFinanceVerificationController extends Controller {
 			->join('configs', 'configs.id', 'petty_cash.status_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
-			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+			// ->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+			->leftjoin('outlets', 'outlets.id', 'petty_cash.outlet_id')
 			->leftjoin('employees as cashier', 'cashier.id', 'outlets.cashier_id')
 			->where('petty_cash.status_id', 3285)
 			->where('users.user_type_id', 3121)
@@ -136,6 +137,7 @@ class PettyCashFinanceVerificationController extends Controller {
 			$this->data['wallet_detail'] = $wallet_detail = WalletDetail::where('entity_id', $petty_cash[0]->employee_id)->where('wallet_of_id', 3121)->first();
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
+			$this->data['petty_cash_detail'] = PettyCash::with(['outlet'])->find($pettycash_id);
 			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','employees.payment_mode_id','petty_cash.number')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')

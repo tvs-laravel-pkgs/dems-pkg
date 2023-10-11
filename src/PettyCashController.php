@@ -50,7 +50,8 @@ class PettyCashController extends Controller {
 			->leftJoin('configs as petty_cash_type', 'petty_cash_type.id', 'petty_cash.petty_cash_type_id')
 			->join('employees', 'employees.id', 'petty_cash.employee_id')
 			->join('users', 'users.entity_id', 'employees.id')
-			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+			// ->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
+			->leftjoin('outlets', 'outlets.id', 'petty_cash.outlet_id')
 			->where('petty_cash.employee_id', Auth::user()->entity_id)
 			->where('users.user_type_id', 3121)
 			->orderBy('petty_cash.id', 'desc')
@@ -335,6 +336,7 @@ class PettyCashController extends Controller {
 			//VIEW OTHER EXPENSE
 		} elseif ($type_id == 2) {
 			// dd($petty_cash);
+			$this->data['petty_cash_detail'] = PettyCash::with(['outlet'])->find($pettycash_id);
 			$this->data['petty_cash_other'] = $petty_cash_other = PettyCashEmployeeDetails::select('petty_cash_employee_details.*', DB::raw('DATE_FORMAT(petty_cash_employee_details.date,"%d-%m-%Y") as date_other'), 'petty_cash.employee_id', 'entities.name as other_expence', 'petty_cash.total', 'configs.name as status','petty_cash.number','petty_cash.remarks as petty_cash_remarks','petty_cash.status_id')
 				->join('petty_cash', 'petty_cash.id', 'petty_cash_employee_details.petty_cash_id')
 				->join('employees', 'employees.id', 'petty_cash.employee_id')
@@ -700,6 +702,7 @@ class PettyCashController extends Controller {
 	                ]);
 	            }
 	            $petty_cash_employee_edit->number = $generate_number['number'];
+	            $petty_cash_employee_edit->outlet_id = $outlet_id;
 	            $petty_cash_employee_edit->save();
 			}
 

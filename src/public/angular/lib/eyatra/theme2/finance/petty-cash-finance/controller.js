@@ -119,6 +119,7 @@
              self.cheque_detail = response.data.cheque_detail;
              self.wallet_detail = response.data.wallet_detail;
              self.petty_cash = response.data.petty_cash;
+             self.petty_cash_detail = response.data.petty_cash_detail;
              self.petty_cash_other = response.data.petty_cash_other;
              self.payment_mode_list = response.data.payment_mode_list;
              self.wallet_mode_list = response.data.wallet_mode_list;

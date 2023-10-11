@@ -17,4 +17,8 @@ class PettyCash extends Model {
 		'created_by',
 	];
 
+	public function outlet() {
+		return $this->belongsTo('Uitoux\EYatra\Outlet')->withTrashed();
+	}
+
 }
