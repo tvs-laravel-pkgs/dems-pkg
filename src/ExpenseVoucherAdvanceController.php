@@ -496,6 +496,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 			                ]);
 			            }
 						$expense_voucher_advance_request_claim->number = $generate_number['number'];
+						$expense_voucher_advance_request_claim->outlet_id = $outlet_id;
 					}
 
 					$balance_amount = floatval($request->advance_amount) - floatval($request->expense_amount);
@@ -577,6 +578,7 @@ class ExpenseVoucherAdvanceController extends Controller {
 	            // 	->first();
 				$expense_voucher_advance = new ExpenseVoucherAdvanceRequest;
 				$expense_voucher_advance->company_id = Auth::user()->company_id;
+				$expense_voucher_advance->outlet_id = $outlet_id;
 				$expense_voucher_advance->number = $generate_number['number'];
 				$expense_voucher_advance->created_by = Auth::user()->id;
 				// $expense_voucher_advance->coa_code_id = $coa_code_id;
