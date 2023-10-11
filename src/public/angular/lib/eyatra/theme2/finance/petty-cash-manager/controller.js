@@ -137,6 +137,7 @@ app.component('eyatraPettyCashManagerView', {
         ).then(function(response) {
             // console.log(response);
             self.petty_cash = response.data.petty_cash;
+            self.petty_cash_detail = response.data.petty_cash_detail;
             self.type_id = $routeParams.type_id;
             self.petty_cash_other = response.data.petty_cash_other;
             self.rejection_list = response.data.rejection_list;
