@@ -644,7 +644,7 @@ class Trip extends Model {
 			$trip = Trip::find($trip_id);
 
 			// if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032]))) { //NEED TO DISABLE
-			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032,3028]))) { //NEED TO ENABLE
+			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032, 3028, 3033]))) { //NEED TO ENABLE
 				$data['success'] = false;
 				$data['error'] = 'Not possible to update the Trip details';
 				return response()->json($data);
