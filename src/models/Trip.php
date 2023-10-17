@@ -1434,7 +1434,7 @@ class Trip extends Model {
 		//dd($trip->lodgings);
 
 		$ey_employee_data = EmployeeClaim::where('trip_id', $trip_id)->first();
-		if (!empty($ey_employee_data) && (!Entrust::can('claim-edit') || (!in_array($trip->status_id, [3023, 3024, 3033])))) {
+		if (!empty($ey_employee_data) && (!Entrust::can('claim-edit') || (!in_array($trip->status_id, [3023, 3024, 3033, 3028])))) {
 			$data['success'] = false;
 			$data['error'] = 'Not possible to update the Claim details';
 			return response()->json($data);

@@ -170,9 +170,15 @@ class TripApprovalController extends Controller {
 
 			})
 			->addColumn('title', function ($trip) {
-					if($trip->claim_number == '--'){
-					$title ='Trip';
-					}else{
+					// if($trip->claim_number == '--'){
+					// $title ='Trip';
+					// }else{
+					// 	$title ='Claim';
+					// }
+
+					if($trip->status_id == 3021){
+						$title ='Trip';
+					}else if($trip->status_id == 3023 || $trip->status_id == 3029){
 						$title ='Claim';
 					}
 				return $title;
