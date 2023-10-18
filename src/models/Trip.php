@@ -5002,7 +5002,7 @@ request is not desired, then those may be rejected.';
 			'department' => $department,
 			'natural_account' => $naturalAccount,
 			'document_type' => $documentType,
-			'accounting_date' => $invoiceDate,
+			'accounting_date' => date("Y-m-d"),
 			'created_at' => Carbon::now(),
 		]);
 
@@ -6278,7 +6278,7 @@ request is not desired, then those may be rejected.';
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
 		// $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
-		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $claimManagerApprovedDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType , $claimManagerApprovedDate);
+		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $claimManagerApprovedDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType , date("Y-m-d"));
 
 		// //LODGING-GST ENTRY
 		// if ($lodgingCgstSgstTaxableAmount && $lodgingCgstSgstTaxableAmount > 0) {
@@ -6318,7 +6318,7 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Travel Place : ' . ($tripLocations);
 							}
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , $claimManagerApprovedDate);
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"));
 						}
 
 						//DRY WASH
@@ -6339,7 +6339,7 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Travel Place : ' . ($tripLocations);
 							}
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
 
 						//BOARDING
@@ -6360,7 +6360,7 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Travel Place : ' . ($tripLocations);
 							}
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
 					} else {
 						//SINGLE
@@ -6379,7 +6379,7 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Travel Place : ' . ($tripLocations);
 							}
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , $claimManagerApprovedDate);
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
 					}
 				}
@@ -6397,7 +6397,7 @@ request is not desired, then those may be rejected.';
 				$roundOffNaturalAccount = $roundOffTransaction->natural_account;
 			}
 
-			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType , $claimManagerApprovedDate);
+			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType , date("Y-m-d"));
 		}
 
 		//IF ADVANCE RECEIVED
@@ -6405,7 +6405,7 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				//EMPLOYEE TO COMPANY
 				if ($employeeClaim->amount_to_pay == 2) {
-					$this->saveApOracleExport($companyId, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , $claimManagerApprovedDate);
+					$this->saveApOracleExport($companyId, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , date("Y-m-d"));
 				}
 			}
 
