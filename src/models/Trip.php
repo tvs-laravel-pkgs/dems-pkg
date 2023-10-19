@@ -338,8 +338,7 @@ class Trip extends Model {
 				$i = 0;
 
 				//Check Visits booking status pending or booked.If Pending means remove
-				$existing_book_pending_visits = Visit::withTrashed()
-					->where('trip_id', $trip->id)
+				$existing_book_pending_visits = Visit::where('trip_id', $trip->id)
 					->where('booking_status_id', 3060) //PENDING
 					->pluck('id')
 					->toArray();
