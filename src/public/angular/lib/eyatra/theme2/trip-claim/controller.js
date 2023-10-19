@@ -1170,28 +1170,30 @@ app.component('eyatraTripClaimForm', {
         // }
 
         function convert_to_24h(time_str) {
-            // Convert a string like 10:05:23 PM to 24h format, returns like [22,5,23]
-            var time = time_str.match(/(\d+):(\d+) (\w)/);
-            var hours = Number(time[1]);
-            var minutes = Number(time[2]);
-            //alert(minutes);
-            //var seconds = Number(time[3]);
-            var meridian = time[3].toLowerCase();
+            if(time_str){
+                // Convert a string like 10:05:23 PM to 24h format, returns like [22,5,23]
+                var time = time_str.match(/(\d+):(\d+) (\w)/);
+                var hours = Number(time[1]);
+                var minutes = Number(time[2]);
+                //alert(minutes);
+                //var seconds = Number(time[3]);
+                var meridian = time[3].toLowerCase();
 
-            if (meridian == 'p' && hours < 12) {
-                hours += 12;
-            } else if (meridian == 'a' && hours == 12) {
-                hours -= 12;
+                if (meridian == 'p' && hours < 12) {
+                    hours += 12;
+                } else if (meridian == 'a' && hours == 12) {
+                    hours -= 12;
+                }
+                //alert(minutes.count());
+                if (hours < 10) {
+                    hours = '0' + hours;
+                }
+                if (minutes < 10) {
+                    minutes = minutes + '0';
+                }
+                //alert(hours, minutes);
+                return hours + ':' + minutes + ':00';
             }
-            //alert(minutes.count());
-            if (hours < 10) {
-                hours = '0' + hours;
-            }
-            if (minutes < 10) {
-                minutes = minutes + '0';
-            }
-            //alert(hours, minutes);
-            return hours + ':' + minutes + ':00';
         };
 
         //ENABLE DISABLE DATE 

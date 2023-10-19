@@ -36,6 +36,7 @@ use Validator;
 use App\Oracle\OtherTypeTransactionDetail;
 use App\Portal;
 use Config as dataBaseConfig;
+use File;
 
 
 class Trip extends Model {
@@ -337,6 +338,62 @@ class Trip extends Model {
 				$i = 0;
 
 				//Check Visits booking status pending or booked.If Pending means remove
+				$existing_book_pending_visits = Visit::withTrashed()
+					->where('trip_id', $trip->id)
+					->where('booking_status_id', 3060) //PENDING
+					->pluck('id')
+					->toArray();
+				if(!empty($trip->cliam)){
+					if(count($existing_book_pending_visits) > 0){
+						VisitBooking::withTrashed()
+							->whereIn('visit_id', $existing_book_pending_visits)
+							->forceDelete();
+					}
+					$existing_lodgings = Lodging::withTrashed()
+						->where('trip_id', $trip->id)
+						->pluck('id')
+						->toArray();
+					if(count($existing_lodgings) > 0){
+						LodgingTaxInvoice::withTrashed()
+							->whereIn('lodging_id', $existing_lodgings)
+							->forceDelete();
+						Lodging::withTrashed()
+							->whereIn('id', $existing_lodgings)
+							->forceDelete();
+					}
+
+					Boarding::withTrashed()
+						->where('trip_id', $trip->id)
+						->forceDelete();
+					LocalTravel::withTrashed()
+						->where('trip_id', $trip->id)
+						->forceDelete();
+
+					$trip_claim_data = EmployeeClaim::withTrashed()->where('id', $trip->cliam->id)->first();
+					$trip_claim_data->total_trip_days = 0;
+					$trip_claim_data->total_amount = 0;
+					$trip_claim_data->transport_total = 0;
+					$trip_claim_data->lodging_total = 0;
+					$trip_claim_data->boarding_total = 0;
+					$trip_claim_data->local_travel_total = 0;
+					$trip_claim_data->beta_amount = 0;
+					$trip_claim_data->amount_to_pay = null;
+					$trip_claim_data->balance_amount = 0;
+					$trip_claim_data->save();
+
+					$existing_trip_attachments = Attachment::whereIn('attachment_of_id', [3750,3751,3752,3753,3754,3755,3756])
+						->where('attachment_type_id', 3200) //Multi Attachments
+						->where('entity_id', $trip->id)
+						->get();
+					foreach ($existing_trip_attachments as $existing_trip_attachment) {
+						$attachment_file = 'storage/app/public/trip/claim/' . $trip->id . '/' . $existing_trip_attachment->name;
+						if (File::exists($attachment_file)){
+							File::delete($attachment_file);
+						}
+						$existing_trip_attachment->delete();
+					}
+				}
+
 				$visit = Visit::where('trip_id', $trip->id)->where('booking_status_id', 3060)->forceDelete();
 				$booking_methods = ['Self','Agent'];
 				foreach ($request->visits as $key => $visit_data) {
@@ -519,6 +576,7 @@ class Trip extends Model {
 			'status',
 			'managerApprovedTripLog',
 			'managerApprovedTripLog.user',
+			'cliam',
 		])
 			->find($trip_id);
 		//dd($trip);
