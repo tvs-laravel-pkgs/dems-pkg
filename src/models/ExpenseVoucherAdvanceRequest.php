@@ -257,7 +257,7 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			return $res;
 		}
 
-		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($amount), $description, $accountingClass, $companyCode, $lob, $location, $department, $naturalAccount);
+		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $invoiceDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($amount), $description, $accountingClass, $companyCode, $lob, $location, $department, $naturalAccount, null, date("Y-m-d"));
 
 		$res['success'] = true;
 		DB::setDefaultConnection('mysql');
@@ -397,14 +397,14 @@ class ExpenseVoucherAdvanceRequest extends Model {
 			return $res;
 		}
 
-		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, $prePaymentNumber, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($invoiceAmount), $invoiceDescription, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+		saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, $prePaymentNumber, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round($invoiceAmount), $invoiceDescription, $accountingClass, $company, $lob, $location, $department, $naturalAccount, null, date("Y-m-d"));
 
 		//IF ADVANCE RECEIVED
 		if ($advancePcv->advance_amount && $advancePcv->advance_amount > 0) {
 			if ($advancePcvClaim->balance_amount && $advancePcvClaim->balance_amount != '0.00') {
 				//EMPLOYEE TO COMPANY
 				if ($advancePcvClaim->balance_amount > 0) {
-					saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round(abs($advancePcvClaim->balance_amount)), $invoiceDescription, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
+					saveApOracleExport($advancePcv->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $outletCode, $documentType, round(abs($advancePcvClaim->balance_amount)), $invoiceDescription, $accountingClass, $company, $lob, $location, $department, $naturalAccount , null, date("Y-m-d"));
 				}
 			}
 		}

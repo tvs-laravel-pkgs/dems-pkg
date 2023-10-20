@@ -663,4 +663,5 @@ Route::get('GetCMSEmployeeDetails/{empCode?}', 'Uitoux\EYatra\SoapController@Get
 Route::get('/trip/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripOracleSync')->name('tripOracleSync');
 Route::post('eyatra/trip/report', 'Uitoux\EYatra\ExportReportController@tripReport')->name('tripReport');
 Route::get('/advance-pcv/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@advancePcvOracleSync')->name('advancePcvOracleSync');
+Route::get('/pcv/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@pcvOracleSync')->name('pcvOracleSync');
 
