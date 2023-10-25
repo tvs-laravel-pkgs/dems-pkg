@@ -1581,6 +1581,22 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Investment Advance PCV Claim Invoice',
 				'config_type_id' => 550,
 			],
+			4133 => [
+				'name' => 'DLOB PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4134 => [
+				'name' => 'OESL PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4135 => [
+				'name' => 'Honda PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4136 => [
+				'name' => 'Investment PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
 		];
 
 		//SAVING CONFIG TYPES
