@@ -699,6 +699,8 @@ class Trip extends Model {
 			$data['success'] = true;
 
 			$trip = Trip::find($trip_id);
+			$trip_from_date = date('Y-m-d', strtotime($trip->start_date));
+			$trip->trip_from_minus_5_days = date('d-m-Y', strtotime("-5 days", strtotime($trip_from_date)));
 
 			// if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032]))) { //NEED TO DISABLE
 			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032, 3028, 3033]))) { //NEED TO ENABLE
