@@ -83,7 +83,6 @@ class PettyCash extends Model {
 		$invoiceNumber = $pcv->number;
 		$dmsGrnNumber = null;
 		$pcvInvoice = false;
-		$description = $pcvDetail->remarks;
 		if($pcvDetail){
 			if($pcvDetail->invoice == 1){
 				//INVOICE
@@ -95,6 +94,16 @@ class PettyCash extends Model {
 
 		$businessUnitName = $companyBusinessUnit;
 		$employeeData = $pcv->employee;
+		$description = '';
+		if (!empty($employeeData->code)) {
+			$description .= $employeeData->code;
+		}
+		if (!empty($employeeData->user->name)) {
+			$description .= ',' . ($employeeData->user->name);
+		}
+		if (!empty($pcvDetail->remarks)) {
+			$description .= ',' . ($pcvDetail->remarks);
+		}
 		$customerCode = $employeeData ? $employeeData->code : null;
 		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
 		$invoiceType = 'Standard';
