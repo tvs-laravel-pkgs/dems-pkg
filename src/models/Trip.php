@@ -2999,10 +2999,12 @@ class Trip extends Model {
 						if ($lodge_info['sharing_type_id'] == 3811) {
 							//SHARING WITH CLAIM
 							if (isset($lodge_info['gstin']) && isset($lodge_info['reference_number']) && isset($lodge_info['invoice_date'])) {
+								$lodging_share_with_claims[] = $lodge_info;
+								
 								$logding_row = $lodge_info['gstin'] . "|" . $lodge_info['reference_number'] . "|" . $lodge_info['invoice_date'];
 								isset($lodging_unique_share_with_claims[$logding_row]) or $lodging_unique_share_with_claims[$logding_row] = $lodge_info;
 							}
-							$lodging_share_with_claims[] = $lodge_info;
+							// $lodging_share_with_claims[] = $lodge_info;
 						}
 					}
 
