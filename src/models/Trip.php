@@ -4968,14 +4968,14 @@ request is not desired, then those may be rejected.';
 			$description .= ',' . ($this->purpose->name);
 		}
 
-		$description .= ',Travel Date : ' . date('Y-m-d', strtotime($this->start_date)) .' to '. date('Y-m-d', strtotime($this->end_date));
+		$description .= ',Date:' . date('Y-m-d', strtotime($this->start_date)) .' to '. date('Y-m-d', strtotime($this->end_date));
 		$tripLocations = Visit::select([
 			DB::raw("CASE 
 				WHEN tocity.type_id = 4111 and visits.other_city is not null 
 				THEN visits.other_city 
 				WHEN tocity.type_id = 4111 and visits.other_city is null 
-				THEN tocity.name
-				ELSE tocity.name 
+				THEN TRIM(SUBSTRING_INDEX(tocity.name, '-', 1))
+				ELSE TRIM(SUBSTRING_INDEX(tocity.name, '-', 1)) 
 				END as location"),
 		])
 			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
@@ -4986,8 +4986,9 @@ request is not desired, then those may be rejected.';
 			->implode('location', ',');
 
 		if($tripLocations){
-			$description .= ',Travel Place : ' . ($tripLocations);
+			$description .= ',Place:' . ($tripLocations);
 		}
+		$description = substr($description, 0, 250);
 
 		$amount = $this->advance_received;
 		// $outletCode = $employeeData->outlet ? $employeeData->outlet->oracle_code_l2 : null;
@@ -6152,15 +6153,15 @@ request is not desired, then those may be rejected.';
 			$invoiceDescription .= ',' . ($employeeTrip->purpose->name);
 		}
 
-		$invoiceDescription .= ',Travel Date : ' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+		$invoiceDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
 
 		$tripLocations = Visit::select([
 			DB::raw("CASE 
 				WHEN tocity.type_id = 4111 and visits.other_city is not null 
 				THEN visits.other_city 
 				WHEN tocity.type_id = 4111 and visits.other_city is null 
-				THEN tocity.name
-				ELSE tocity.name 
+				THEN TRIM(SUBSTRING_INDEX(tocity.name, '-', 1))
+				ELSE TRIM(SUBSTRING_INDEX(tocity.name, '-', 1))
 				END as location"),
 		])
 			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
@@ -6170,8 +6171,9 @@ request is not desired, then those may be rejected.';
 			->get()
 			->implode('location', ',');
 		if($tripLocations){
-			$invoiceDescription .= ',Travel Place : ' . ($tripLocations);
+			$invoiceDescription .= ',Place:' . ($tripLocations);
 		}
+		$invoiceDescription = substr($invoiceDescription, 0, 250);
 
 		$tripClaimApprovalLog = ApprovalLog::select([
 			'id',
