@@ -6376,10 +6376,11 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= "," .$lodging->invoice_date;
 							}
 
-							$lineDescription .= ',Travel Date : ' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
 							if($tripLocations){
-								$lineDescription .= ',Travel Place : ' . ($tripLocations);
+								$lineDescription .= ',Place:' . ($tripLocations);
 							}
+							$lineDescription = substr($lineDescription, 0, 250);
 
 							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"));
 						}
@@ -6397,10 +6398,11 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= "," .$lodging->invoice_date;
 							}
 
-							$lineDescription .= ',Travel Date : ' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
 							if($tripLocations){
-								$lineDescription .= ',Travel Place : ' . ($tripLocations);
+								$lineDescription .= ',Place:' . ($tripLocations);
 							}
+							$lineDescription = substr($lineDescription, 0, 250);
 
 							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
@@ -6418,10 +6420,11 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= "," .$lodging->invoice_date;
 							}
 
-							$lineDescription .= ',Travel Date : ' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
 							if($tripLocations){
-								$lineDescription .= ',Travel Place : ' . ($tripLocations);
+								$lineDescription .= ',Place:' . ($tripLocations);
 							}
+							$lineDescription = substr($lineDescription, 0, 250);
 
 							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
@@ -6437,10 +6440,11 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= "," .$lodging->invoice_date;
 							}
 
-							$lineDescription .= ',Travel Date : ' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
 							if($tripLocations){
-								$lineDescription .= ',Travel Place : ' . ($tripLocations);
+								$lineDescription .= ',Place:' . ($tripLocations);
 							}
+							$lineDescription = substr($lineDescription, 0, 250);
 
 							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
