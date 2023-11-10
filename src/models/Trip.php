@@ -1751,6 +1751,7 @@ class Trip extends Model {
 		//LODGE SHARE DETAILS
 		if (count($trip->lodgings) > 0) {
 			foreach ($trip->lodgings as $lodge_data) {
+				$is_lodging_leader_grade = '';
 				$lodge_share_data = [];
 				foreach ($lodge_data->shareDetails as $share_key => $share_data) {
 					$lodge_share_data[$share_key] = LodgingShareDetail::select([
@@ -1764,6 +1765,7 @@ class Trip extends Model {
 						'grades.name as grade',
 						'designations.name as designation',
 						'sbus.name as sbu',
+						'gae.is_leader_grade',
 					])
 						->join('employees', 'employees.id', 'lodging_share_details.employee_id')
 						->join('outlets', 'outlets.id', 'employees.outlet_id')
@@ -1771,6 +1773,7 @@ class Trip extends Model {
 						->leftjoin('designations', 'designations.id', 'employees.designation_id')
 						->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 						->join('users', 'users.entity_id', 'employees.id')
+						->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 						->where('users.user_type_id', 3121) //EMPLOYEE
 						->where('lodging_share_details.id', $share_data->id)
 						->first();
@@ -1797,7 +1800,13 @@ class Trip extends Model {
 							$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 						}
 					}
+
+
+					if(isset($lodge_share_data[$share_key]->is_leader_grade)  && $lodge_share_data[$share_key]->is_leader_grade == 1){
+						$is_lodging_leader_grade = 1;
+					}
 				}
+				$lodge_data['is_leader_grade'] = $is_lodging_leader_grade;
 				$lodge_data['sharing_employees'] = $lodge_share_data;
 			}
 		}
@@ -3415,6 +3424,7 @@ class Trip extends Model {
 				//LODGE SHARE DETAILS
 				if (count($saved_lodgings->lodgings) > 0) {
 					foreach ($saved_lodgings->lodgings as $lodge_data) {
+						$is_lodging_leader_grade = '';
 						$lodge_share_data = [];
 						foreach ($lodge_data->shareDetails as $share_key => $share_data) {
 							$lodge_share_data[$share_key] = LodgingShareDetail::select([
@@ -3428,6 +3438,7 @@ class Trip extends Model {
 								'grades.name as grade',
 								'designations.name as designation',
 								'sbus.name as sbu',
+								'gae.is_leader_grade',
 							])
 								->join('employees', 'employees.id', 'lodging_share_details.employee_id')
 								->join('outlets', 'outlets.id', 'employees.outlet_id')
@@ -3435,6 +3446,7 @@ class Trip extends Model {
 								->leftjoin('designations', 'designations.id', 'employees.designation_id')
 								->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 								->join('users', 'users.entity_id', 'employees.id')
+								->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 								->where('users.user_type_id', 3121) //EMPLOYEE
 								->where('lodging_share_details.id', $share_data->id)
 								->first();
@@ -3460,7 +3472,12 @@ class Trip extends Model {
 									$lodge_share_data[$share_key]->eligible_amount = $lodge_expense_config->eligible_amount;
 								}
 							}
+
+							if(isset($lodge_share_data[$share_key]->is_leader_grade)  && $lodge_share_data[$share_key]->is_leader_grade == 1){
+								$is_lodging_leader_grade = 1;
+							}
 						}
+						$lodge_data['is_leader_grade'] = $is_lodging_leader_grade;
 						$lodge_data['sharing_employees'] = $lodge_share_data;
 					}
 				}
