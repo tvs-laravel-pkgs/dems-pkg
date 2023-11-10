@@ -524,7 +524,7 @@ app.component('eyatraTripClaimForm', {
                 self.trip.lodgings[index].no_of_sharing = null;
                 self.trip.lodgings[index].sharing_employees = [];
                 self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
-                self.trip.lodgings[index].is_leader_grade = false;
+                self.trip.lodgings[index].is_leader_grade = '';
                 $('#sharing-detail-modal').modal('hide');
                 $scope.assignEligibleAmount(self.trip.lodgings[index].city_id, 3001, index, self.trip.lodgings[index].stay_type_id);
             }
@@ -632,7 +632,7 @@ app.component('eyatraTripClaimForm', {
             $('#sharing-detail-save').button('loading');
             var index = self.sharing_detail.index;
             var total_sharing_normal_eligible_amt = 0;
-            let sharing_employee_have_leader_grade = false;
+            let sharing_employee_have_leader_grade = '';
             $(self.sharing_detail.sharing_employees).each(function(key, data) {
                 // if(data.normal.eligible_amount){
                 //     total_sharing_normal_eligible_amt += parseFloat(data.normal.eligible_amount);
@@ -642,7 +642,7 @@ app.component('eyatraTripClaimForm', {
                 }
 
                 if(data.is_leader_grade == 1){
-                    sharing_employee_have_leader_grade = true;
+                    sharing_employee_have_leader_grade = data.is_leader_grade;
                 }
             });
 
@@ -670,7 +670,7 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings[index].sharing_employees = [];
             // self.trip.lodgings[index].sharing_home_eligible_amt = 0;
             self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
-            self.trip.lodgings[index].is_leader_grade = false;
+            self.trip.lodgings[index].is_leader_grade = '';
             if(self.trip.lodgings[index].stay_type_id == 3340){
                 //LODGE STAY
                 if(!self.trip.lodgings[index].sharing_type_id){
