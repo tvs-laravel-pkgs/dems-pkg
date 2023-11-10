@@ -524,6 +524,7 @@ app.component('eyatraTripClaimForm', {
                 self.trip.lodgings[index].no_of_sharing = null;
                 self.trip.lodgings[index].sharing_employees = [];
                 self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+                self.trip.lodgings[index].is_leader_grade = false;
                 $('#sharing-detail-modal').modal('hide');
                 $scope.assignEligibleAmount(self.trip.lodgings[index].city_id, 3001, index, self.trip.lodgings[index].stay_type_id);
             }
@@ -631,6 +632,7 @@ app.component('eyatraTripClaimForm', {
             $('#sharing-detail-save').button('loading');
             var index = self.sharing_detail.index;
             var total_sharing_normal_eligible_amt = 0;
+            let sharing_employee_have_leader_grade = false;
             $(self.sharing_detail.sharing_employees).each(function(key, data) {
                 // if(data.normal.eligible_amount){
                 //     total_sharing_normal_eligible_amt += parseFloat(data.normal.eligible_amount);
@@ -638,11 +640,16 @@ app.component('eyatraTripClaimForm', {
                 if(data.eligible_amount){
                     total_sharing_normal_eligible_amt += parseFloat(data.eligible_amount);
                 }
+
+                if(data.is_leader_grade == 1){
+                    sharing_employee_have_leader_grade = true;
+                }
             });
 
             self.trip.lodgings[index].no_of_sharing = self.sharing_detail.no_of_sharing;
             self.trip.lodgings[index].sharing_employees = self.sharing_detail.sharing_employees;
             self.trip.lodgings[index].sharing_normal_eligible_amt = total_sharing_normal_eligible_amt;
+            self.trip.lodgings[index].is_leader_grade = sharing_employee_have_leader_grade;
             $scope.assignEligibleAmount(self.trip.lodgings[index].city_id, 3001, index, self.trip.lodgings[index].stay_type_id);
             $('#sharing-detail-save').button('reset');
             $('#sharing-detail-modal').modal('hide');
@@ -663,6 +670,7 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings[index].sharing_employees = [];
             // self.trip.lodgings[index].sharing_home_eligible_amt = 0;
             self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+            self.trip.lodgings[index].is_leader_grade = false;
             if(self.trip.lodgings[index].stay_type_id == 3340){
                 //LODGE STAY
                 if(!self.trip.lodgings[index].sharing_type_id){
@@ -1982,6 +1990,7 @@ app.component('eyatraTripClaimForm', {
             let isLodgingDeviated = false;
             $('.is_lodging_deviation_amount').each(function() {
                 let lodgeBeforeTaxAmount = $(this).val();
+                let lodging_is_leader_grade = $(this).attr('data-isleadergrade');
                 if(lodgeBeforeTaxAmount && self.is_grade_leader == false){
                     let lodgeEligibleAmount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
                     if (!$.isNumeric(lodgeBeforeTaxAmount)) {
@@ -1996,7 +2005,8 @@ app.component('eyatraTripClaimForm', {
                         lodgeEligibleAmount = parseInt(lodgeEligibleAmount);
                     }
 
-                    if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
+                    // if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
+                    if (!lodging_is_leader_grade && (lodgeBeforeTaxAmount > lodgeEligibleAmount)) {
                         is_deviation = true;
                         let isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
                         if ($.inArray(isDeviationType, lodgingDeviation) == -1){

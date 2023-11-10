@@ -4851,12 +4851,14 @@ request is not desired, then those may be rejected.';
 				'grades.name as grade',
 				'designations.name as designation',
 				'sbus.name as sbu',
+				'gae.is_leader_grade',
 			])
 				->join('outlets', 'outlets.id', 'employees.outlet_id')
 				->join('entities as grades', 'grades.id', 'employees.grade_id')
 				->leftjoin('designations', 'designations.id', 'employees.designation_id')
 				->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
 				->join('users', 'users.entity_id', 'employees.id')
+				->leftjoin('grade_advanced_eligibility as gae', 'gae.grade_id', 'employees.grade_id')
 				->where('users.user_type_id', 3121) //EMPLOYEE
 				->where('employees.id', $request->employee_id)
 				->first();
