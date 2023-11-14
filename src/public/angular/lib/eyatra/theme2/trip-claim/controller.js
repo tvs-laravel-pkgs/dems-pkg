@@ -2028,8 +2028,8 @@ app.component('eyatraTripClaimForm', {
                         lodgeEligibleAmount = parseInt(lodgeEligibleAmount);
                     }
 
-                    // if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
-                    if (!lodging_is_leader_grade && (lodgeBeforeTaxAmount > lodgeEligibleAmount)) {
+                    if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
+                    // if (!lodging_is_leader_grade && (lodgeBeforeTaxAmount > lodgeEligibleAmount)) {
                         is_deviation = true;
                         let isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
                         if ($.inArray(isDeviationType, lodgingDeviation) == -1){
