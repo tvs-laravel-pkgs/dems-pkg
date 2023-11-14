@@ -657,6 +657,11 @@ app.component('eyatraTripClaimForm', {
 
         $scope.sharingDetailCloseHandler = function(){
             if (self.sharing_detail) {
+                if(Math.round((self.sharing_detail.sharing_employees).length) != Math.round(self.sharing_detail.no_of_sharing)){
+                    custom_noty('error', 'Kindly add the balance sharing employee detail');
+                    return;
+                }
+
                 let total_sharing_normal_eligible_amt = 0;
                 let sharing_employee_have_leader_grade = '';
                 $(self.sharing_detail.sharing_employees).each(function(key, data) {
