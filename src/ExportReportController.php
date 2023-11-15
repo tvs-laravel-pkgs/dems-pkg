@@ -3614,6 +3614,15 @@ class ExportReportController extends Controller {
 
 				//ADVANCE AMOUNT SYNC
 				if ($trip_detail['category'] == 'Advance amount') {
+					$tripManagerApprovedAt = ApprovalLog::where('type_id', 3581) //Outstation Trip
+						->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+						->where('entity_id', $trip->id)
+						->pluck('approved_at')
+						->first();
+					if(empty($tripManagerApprovedAt)){
+						continue;
+					}
+
 					$r = $trip->generatePrePaymentApOracleAxapta();
 					if (!$r['success']) {
 						dump($r);
@@ -3625,6 +3634,15 @@ class ExportReportController extends Controller {
 
 				//TRIP CLAIM SYNC
 				if ($trip_detail['category'] == 'Trip claim') {
+					$tripClaimManagerApprovedAt = ApprovalLog::where('type_id', 3581) //Outstation Trip
+						->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
+						->where('entity_id', $trip->id)
+						->pluck('approved_at')
+						->first();
+					if(empty($tripClaimManagerApprovedAt)){	
+						continue;
+					}
+
 					$r = $trip->generateInvoiceApOracleAxapta();
 					if (!$r['success']) {
 						dump($r);
