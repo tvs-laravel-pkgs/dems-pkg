@@ -100,6 +100,7 @@ class EYatraConfigSeeder extends Seeder {
 			584 => 'Oracle - Pre Payment Check Status Id',
 			585 => 'Trips Oracle Sync Method',
 			586 => 'City Types',
+			587 => 'HRMS To Travelex Employee Processed Lobs',
 		];
 
 		$configs = [
@@ -1596,6 +1597,11 @@ class EYatraConfigSeeder extends Seeder {
 			4136 => [
 				'name' => 'Investment PCV Claim Invoice',
 				'config_type_id' => 550,
+			],
+
+			4145 => [
+				'name' => 'DLOB,SS,DSBU,OESL',
+				'config_type_id' => 587,
 			],
 		];
 
