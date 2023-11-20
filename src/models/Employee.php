@@ -2129,6 +2129,9 @@ class Employee extends Model {
 			$dbPassword = config('custom.HRMS_DB_PASSWORD');
 		}
 
+		$hrmsToDemsValidLobs = Config::where('id', 4145)->first()->name;
+		$hrmsToDemsValidLobs = explode(",", $hrmsToDemsValidLobs);
+
 		DB::setDefaultConnection('dynamic');
 		dataBaseConfig::set('database.connections.dynamic.host', $dbHostName);
 		dataBaseConfig::set('database.connections.dynamic.port', $dbPortNumber);
@@ -2194,7 +2197,7 @@ class Employee extends Model {
 			->join('companies', 'companies.id', 'employees.company_id')
 			->leftjoin('outlets', 'outlets.id', 'employees.outlet_id')
 			->leftjoin('companies as outlet_companies', 'outlet_companies.id', 'outlets.company_id')
-			->join('grades', 'grades.id', 'employees.grade_id')
+			->leftjoin('grades', 'grades.id', 'employees.grade_id')
 			->leftjoin('companies as grade_companies', 'grade_companies.id', 'grades.company_id')
 			->leftjoin('designations', 'designations.id', 'employees.designation_id')
 			->leftjoin('companies as designation_companies', 'designation_companies.id', 'designations.company_id')
@@ -2299,11 +2302,19 @@ class Employee extends Model {
 		DB::beginTransaction();
 		try {
 			//CHECK EMPLOYEE LOB IS NOT DLOB, OESL, DSBU, SS
-			if (!in_array($hrmsEmployee->lob_id, [4, 15, 12, 8])) {
+			// if (!in_array($hrmsEmployee->lob_id, [4, 15, 12, 8])) {
+			// 	return response()->json([
+			// 		'success' => false,
+			// 		'error' => 'Validation Error',
+			// 		'errors' => ['Employee LOB should be DLOB, OESL, DSBU, SS'],
+			// 	]);
+			// }
+
+			if (!in_array($hrmsEmployee->lob_code, $hrmsToDemsValidLobs)) {
 				return response()->json([
 					'success' => false,
 					'error' => 'Validation Error',
-					'errors' => ['Employee LOB should be DLOB, OESL, DSBU, SS'],
+					'errors' => ['The employee lob should be '. implode(',', $hrmsToDemsValidLobs)],
 				]);
 			}
 
