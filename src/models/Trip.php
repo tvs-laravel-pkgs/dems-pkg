@@ -2231,6 +2231,9 @@ class Trip extends Model {
 
 		$data['approval_status'] = Trip::validateAttachment($trip_id);
 		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
+		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
+			->where('operating_states.company_id', Auth::user()->company_id)
+			->pluck('nstates.gstin_state_code');
 
 		return response()->json($data);
 	}
