@@ -5070,6 +5070,7 @@ request is not desired, then those may be rejected.';
 			'business_unit' => $businessUnitName,
 			'invoice_source' => $invoiceSource,
 			'invoice_number' => $invoiceNumber,
+			'invoice_amount' => round($amount),
 			'invoice_date' => $invoiceDate,
 			'supplier_number' => $supplierNumber,
 			'supplier_site_name' => $supplierSiteName,
@@ -6494,7 +6495,7 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				//EMPLOYEE TO COMPANY
 				if ($employeeClaim->amount_to_pay == 2) {
-					$this->saveApOracleExport($companyId, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , date("Y-m-d"));
+					$this->saveApOracleExport($companyId, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, $employeeClaim->balance_amount, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , date("Y-m-d"));
 				}
 			}
 
