@@ -2577,11 +2577,11 @@ class Employee extends Model {
 					}
 				}
 			} else {
-				return response()->json([
-					'success' => false,
-					'error' => 'Validation Error',
-					'errors' => ['The reporting to employee detail is required'],
-				]);
+				// return response()->json([
+				// 	'success' => false,
+				// 	'error' => 'Validation Error',
+				// 	'errors' => ['The reporting to employee detail is required'],
+				// ]);
 			}
 
 			//REPORTING TO EMPLOYEE SAVE
