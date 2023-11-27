@@ -1076,6 +1076,12 @@ app.component('hrmsEmployeeSyncLogList', {
                 window.location = "#!/permission-denied";
                 return false;
             }
+        }else if(self.type_id == 3966){
+            //EMPLOYEE LOB UPDATION
+            if(!self.hasPermission('hrms-to-travelex-employee-lob-updation-log')){
+                window.location = "#!/permission-denied";
+                return false;
+            }
         }
 
         $http.get(
@@ -1114,6 +1120,14 @@ app.component('hrmsEmployeeSyncLogList', {
             }
             else if(self.type_id == 3964){
                 //EMPLOYEE REPORTING TO UPDATION
+                cols = [
+                    { data: 'action', searchable: false, class: 'action', class: 'text-left' },
+                    { data: 'from_date_time',  searchable: false },
+                    { data: 'to_date_time',  searchable: false },
+                    { data: 'update_count',  searchable: false },
+                ];
+            } else if(self.type_id == 3966){
+                //EMPLOYEE LOB UPDATION
                 cols = [
                     { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                     { data: 'from_date_time',  searchable: false },
@@ -1180,6 +1194,8 @@ app.component('hrmsEmployeeSyncLogList', {
                     $('.add_new_button').html('<button type="button" class="btn btn-secondary employee-reporting-to-update-sync">' +
                     'Sync' +'</button>');
                 }
+            }else if(self.type_id == 3966){
+                $('.separate-page-header-content .data-table-title').html('<p class="breadcrumb">Masters / HRMS To Travelex Employee LOB Updation</p><h3 class="title">HRMS To Travelex Employee LOB Updation</h3>');
             }
 
             $('.employee-addition-sync').on("click", function() {
