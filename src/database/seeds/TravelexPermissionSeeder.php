@@ -195,6 +195,12 @@ class TravelexPermissionSeeder extends Seeder {
 				'name' => 'view-all-claims',
 				'display_name' => 'View All Claims',
 			],
+			9025 => [
+				'display_order' => 14,
+				'parent_id' => 5520,
+				'name' => 'hrms-to-travelex-employee-lob-updation-log',
+				'display_name' => 'HRMS To Travelex Employee LOB Updation Log',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {
