@@ -1373,6 +1373,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Oracle Supplier Number Missing Mail',
 				'config_type_id' => 539,
 			],
+			3947 => [
+				'name' => 'HRMS To Travelex Employee LOB Change Mail',
+				'config_type_id' => 539,
+			],
 
 			3961 => [
 				'name' => 'Employee Addition',
