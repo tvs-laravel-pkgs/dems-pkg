@@ -2309,7 +2309,7 @@ class Employee extends Model {
 			// 		'errors' => ['Employee LOB should be DLOB, OESL, DSBU, SS'],
 			// 	]);
 			// }
-
+			if(!empty($hrmsEmployee->lob_code)){
 			if (!in_array($hrmsEmployee->lob_code, $hrmsToDemsValidLobs)) {
 				return response()->json([
 					'success' => false,
@@ -2317,7 +2317,7 @@ class Employee extends Model {
 					'errors' => ['The employee lob should be '. implode(',', $hrmsToDemsValidLobs)],
 				]);
 			}
-
+			}
 			//EMPLOYEE COMPANY
 			if (!$hrmsEmployee->adre_code) {
 				return response()->json([
