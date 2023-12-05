@@ -51,6 +51,7 @@ class Employee extends Model {
 		'deleted_by',
 	];
 
+	//company
 	public function company() {
 		return $this->belongsTo('App\Company');
 	}
