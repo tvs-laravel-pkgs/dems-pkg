@@ -3108,7 +3108,7 @@ class Trip extends Model {
 							if(intval($lodging_data['stayed_days']) > intval($daysStayed)){
 								return response()->json([
 									'success' => false,
-									'errors' => ['Lodge stay days will be less than or equal to : '. intval($lodgingTotalDays)],
+									'errors' => ['Lodge stay days will be less than or equal to : '. intval($daysStayed)],
 								]);
 							}
 						}
