@@ -234,11 +234,15 @@ class Trip extends Model {
 				$employeeData = [];
 				$employeeData['mobile_number'] = $authUser->mobile_number;
 				$employeeData['email_id'] = $authUser->email;
+				$employeeData['sbu_id'] = !empty($authUser->entity->sbu_id) ? $authUser->entity->sbu_id : null;
+				$employeeData['department_id'] = !empty($authUser->entity->department_id) ? $authUser->entity->department_id : null;
 				$employeeErrorMessages = [
 					'mobile_number.required' => 'The employee mobile number is required',
 					'mobile_number.digits' => 'The employee mobile number must be 10 digits',
 					'email_id.required' => 'The employee email is required',
 					'email_id.email' => 'The employee email id must be a valid email address',
+					'sbu_id.required' => 'The employee SBU is required, Kindy contact support team to update!',
+					'department_id.required' => 'The employee Department is required, Kindy contact support team to update.',
 				];
 				$employeeValidator = Validator::make($employeeData, [
 					'mobile_number' => [
@@ -248,6 +252,12 @@ class Trip extends Model {
 					'email_id' => [
 						'required',
 						'email',
+					],
+					'sbu_id' => [
+						'required',
+					],
+					'department_id' => [
+						'required',
 					],
 				], $employeeErrorMessages);
 				if ($employeeValidator->fails()) {
@@ -3053,6 +3063,44 @@ class Trip extends Model {
 								'success' => false,
 								'errors' => ['Lodging check out date time should be greater than the check in date time'],
 							]);
+						}
+
+
+						// 3340 : Lodge Stay
+						// 3341 : Flat Claim
+						//lodging days validation
+						if($lodging_data['stay_type_id'] == 3340 || $lodging_data['stay_type_id'] == 3341){
+							if(empty(intval($lodging_data['stayed_days']))){
+								return response()->json([
+									'success' => false,
+									'errors' => ['Lodge stay days is required!'],
+								]);
+							}
+
+							if(empty($lodge_check_in_time)){
+								return response()->json([
+									'success' => false,
+									'errors' => ['Lodge check in time is required!'],
+								]);
+							}
+
+							if(empty($lodge_checkout_time)){
+								return response()->json([
+									'success' => false,
+									'errors' => ['Lodge check out time is required!'],
+								]);
+							}
+
+							$lodgingCheckInDateTime = DateTime::createFromFormat('d-m-Y g:i A', $lodge_check_in_date . ' ' . $lodge_check_in_time);
+							$lodgingCheckoutDateTime = DateTime::createFromFormat('d-m-Y g:i A', $lodge_checkout_date . ' ' . $lodge_checkout_time);
+							$lodgingDifference = $lodgingCheckoutDateTime->diff($lodgingCheckInDateTime);
+							$lodgingTotalDays = $lodgingDifference->days;
+							if(intval($lodging_data['stayed_days']) <= intval($lodgingTotalDays)){
+								return response()->json([
+									'success' => false,
+									'errors' => ['Lodge stay days will be less than or equal to : '. intval($lodgingTotalDays)],
+								]);
+							}
 						}
 
 
