@@ -3091,11 +3091,21 @@ class Trip extends Model {
 								]);
 							}
 
-							$lodgingCheckInDateTime = DateTime::createFromFormat('d-m-Y g:i A', $lodge_check_in_date . ' ' . $lodge_check_in_time);
-							$lodgingCheckoutDateTime = DateTime::createFromFormat('d-m-Y g:i A', $lodge_checkout_date . ' ' . $lodge_checkout_time);
-							$lodgingDifference = $lodgingCheckoutDateTime->diff($lodgingCheckInDateTime);
-							$lodgingTotalDays = $lodgingDifference->days;
-							if(intval($lodging_data['stayed_days']) > intval($lodgingTotalDays)){
+
+							$checkInDate = $lodge_check_in_date;
+							$checkInTime = $lodge_check_in_time;
+							$checkOutDate = $lodge_checkout_date;
+							$checkOutTime = $lodge_checkout_time;
+							$checkInDateTime = Carbon::parse($checkInDate . ' ' . $checkInTime);
+							$checkOutDateTime = Carbon::parse($checkOutDate . ' ' . $checkOutTime);
+							$hoursDiff = $checkInDateTime->diffInHours($checkOutDateTime);
+							if ($hoursDiff > 24) {
+							    $daysStayed = $checkInDateTime->diffInDays($checkOutDateTime);
+							} else {
+							    $daysStayed = 1;
+							}
+
+							if(intval($lodging_data['stayed_days']) > intval($daysStayed)){
 								return response()->json([
 									'success' => false,
 									'errors' => ['Lodge stay days will be less than or equal to : '. intval($lodgingTotalDays)],
