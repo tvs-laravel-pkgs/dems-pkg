@@ -3095,7 +3095,7 @@ class Trip extends Model {
 							$lodgingCheckoutDateTime = DateTime::createFromFormat('d-m-Y g:i A', $lodge_checkout_date . ' ' . $lodge_checkout_time);
 							$lodgingDifference = $lodgingCheckoutDateTime->diff($lodgingCheckInDateTime);
 							$lodgingTotalDays = $lodgingDifference->days;
-							if(intval($lodging_data['stayed_days']) <= intval($lodgingTotalDays)){
+							if(intval($lodging_data['stayed_days']) > intval($lodgingTotalDays)){
 								return response()->json([
 									'success' => false,
 									'errors' => ['Lodge stay days will be less than or equal to : '. intval($lodgingTotalDays)],
