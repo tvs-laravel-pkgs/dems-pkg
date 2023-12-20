@@ -751,6 +751,9 @@ app.component('eyatraTripForm', {
             }
         }
 
+        $scope.tripEditConfirmHandler = () => {
+            $("#trip-form").submit();
+        }
 
         var form_id = '#trip-form';
         var v = jQuery(form_id).validate({
@@ -813,6 +816,7 @@ app.component('eyatraTripForm', {
 
                 let formData = new FormData($(form_id)[0]);
                 $('.btn-submit').button('loading');
+                $("#trip_edit_confirm").button('loading');
                 $.ajax({
                         url: laravel_routes['saveTrip'],
                         method: "POST",
@@ -824,6 +828,7 @@ app.component('eyatraTripForm', {
                         // console.log(res.success);
                         if (!res.success) {
                             $('.btn-submit').button('reset');
+                            $("#trip_edit_confirm").button('reset');
                             /*var errors = '';
                             for (var i in res.errors) {
                                 errors += '<li>' + res.errors[i] + '</li>';
@@ -848,6 +853,7 @@ app.component('eyatraTripForm', {
                     })
                     .fail(function(xhr) {
                         $('.btn-submit').button('reset');
+                        $("#trip_edit_confirm").button('reset');
                         custom_noty('error', 'Something went wrong at server');
                     });
             },
