@@ -206,6 +206,7 @@ app.component('eyatraOutstationClaimVerificationView', {
             self.state_code = response.data.state_code;
             self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
+            self.operating_states = response.data.operating_states;
             if (response.data.trip.trip_attachments.length === 0 && response.data.trip.google_attachments.length === 0) {
                 $scope.visit = false;
             } else {
@@ -344,10 +345,24 @@ app.component('eyatraOutstationClaimVerificationView', {
                     self.trip.lodgings[index].sgst = parseFloat(amount * (sgstPercentage / 100)).toFixed(2);
                     self.trip.lodgings[index].igst = 0.00;
                 } else {
-                    let igstPercentage = taxPercentage;
-                    self.trip.lodgings[index].cgst = 0.00;
-                    self.trip.lodgings[index].sgst = 0.00;
-                    self.trip.lodgings[index].igst = parseFloat(amount * (igstPercentage / 100)).toFixed(2);
+                    // let igstPercentage = taxPercentage;
+                    // self.trip.lodgings[index].cgst = 0.00;
+                    // self.trip.lodgings[index].sgst = 0.00;
+                    // self.trip.lodgings[index].igst = parseFloat(amount * (igstPercentage / 100)).toFixed(2);
+
+                    if($.inArray(gstCode, self.operating_states) !== -1)
+                    {
+                        let cgstPercentage = taxPercentage / 2;
+                        let sgstPercentage = taxPercentage / 2;
+                        self.trip.lodgings[index].cgst = parseFloat(amount * (cgstPercentage / 100)).toFixed(2);
+                        self.trip.lodgings[index].sgst = parseFloat(amount * (sgstPercentage / 100)).toFixed(2);
+                        self.trip.lodgings[index].igst = 0.00;
+                    }else{
+                        let igstPercentage = taxPercentage;
+                        self.trip.lodgings[index].cgst = 0.00;
+                        self.trip.lodgings[index].sgst = 0.00;
+                        self.trip.lodgings[index].igst = parseFloat(amount * (igstPercentage / 100)).toFixed(2);
+                    }
                 }
             }
             const lodgingAmount = parseFloat(self.trip.lodgings[index].amount) || 0.00;

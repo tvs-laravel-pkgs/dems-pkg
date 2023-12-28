@@ -144,8 +144,26 @@ class TripClaimVerificationTwoController extends Controller {
 		$additional_approve = Auth::user()->company->additional_approve;
 		$financier_approve = Auth::user()->company->financier_approve;
 		$gstin_available= Lodging::select('lodgings.gstin as lodging_gstin','visit_bookings.gstin as transport_gstin')->join('visits','visits.trip_id','lodgings.trip_id')->join('visit_bookings','visit_bookings.visit_id','visits.id')->where('lodgings.trip_id',$trip_id)->get()->first();
+
+
+		$gstin_available_lodgings = Lodging::where('trip_id', $trip_id)
+			->where(function ($query) {
+				$query->whereNotNull('gstin')
+					->orWhere('gstin','!=', '');
+			})
+			->count();
+		$gstin_available_visits = Visit::where('visits.trip_id', $trip_id)
+			->join('visit_bookings','visit_bookings.visit_id','visits.id')
+			->where(function ($query) {
+				$query->whereNotNull('visit_bookings.gstin')
+					->orWhere('visit_bookings.gstin','!=', '');
+			})
+			->where('visits.status_id','!=', 3062)
+			->count();
+
 		// if ($additional_approve == '1' && ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
-		if ($additional_approve == 1 && !empty($gstin_available) && ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
+		// if ($additional_approve == 1 && !empty($gstin_available) && ($gstin_available->lodging_gstin != null || $gstin_available->transport_gstin != null)) {
+		if ($additional_approve == 1 && ($gstin_available_lodgings > 0 || $gstin_available_visits > 0)) {
 			$employee_claim->status_id = 3036; //Claim Verification Pending
 			$trip->status_id = 3036; //Claim Verification Pending
 		} else if ($financier_approve == '1') {

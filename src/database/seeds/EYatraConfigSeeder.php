@@ -100,6 +100,7 @@ class EYatraConfigSeeder extends Seeder {
 			584 => 'Oracle - Pre Payment Check Status Id',
 			585 => 'Trips Oracle Sync Method',
 			586 => 'City Types',
+			587 => 'HRMS To Travelex Employee Processed Lobs',
 		];
 
 		$configs = [
@@ -1372,6 +1373,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Oracle Supplier Number Missing Mail',
 				'config_type_id' => 539,
 			],
+			3947 => [
+				'name' => 'HRMS To Travelex Employee LOB Change Mail',
+				'config_type_id' => 539,
+			],
 
 			3961 => [
 				'name' => 'Employee Addition',
@@ -1391,6 +1396,10 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3965 => [
 				'name' => 'Employee Manual Addition',
+				'config_type_id' => 558,
+			],
+			3966 => [
+				'name' => 'Employee LOB Updation',
 				'config_type_id' => 558,
 			],
 
@@ -1544,11 +1553,63 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'Investment Travel Claim Refund Invoice',
 				'config_type_id' => 550,
 			],
-
+			4104 => [
+				'name' => 'DLOB Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4105 => [
+				'name' => 'OESL Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4106 => [
+				'name' => 'Honda Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4107 => [
+				'name' => 'Investment Advance PCV Pre Payment Invoice',
+				'config_type_id' => 550,
+			],
+			4108 => [
+				'name' => 'DLOB Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4109 => [
+				'name' => 'OESL Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4110 => [
+				'name' => 'Honda Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
 
 			4111 => [
 				'name' => 'Others',
 				'config_type_id' => 586,
+			],
+			4132 => [
+				'name' => 'Investment Advance PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4133 => [
+				'name' => 'DLOB PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4134 => [
+				'name' => 'OESL PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4135 => [
+				'name' => 'Honda PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+			4136 => [
+				'name' => 'Investment PCV Claim Invoice',
+				'config_type_id' => 550,
+			],
+
+			4145 => [
+				'name' => 'DLOB,SS,DSBU,OESL',
+				'config_type_id' => 587,
 			],
 		];
 

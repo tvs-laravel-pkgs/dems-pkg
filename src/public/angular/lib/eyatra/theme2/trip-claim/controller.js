@@ -610,6 +610,7 @@ app.component('eyatraTripClaimForm', {
                 self.trip.lodgings[index].no_of_sharing = null;
                 self.trip.lodgings[index].sharing_employees = [];
                 self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+                self.trip.lodgings[index].is_leader_grade = '';
                 $('#sharing-detail-modal').modal('hide');
                 $scope.assignEligibleAmount(self.trip.lodgings[index].city_id, 3001, index, self.trip.lodgings[index].stay_type_id);
             }
@@ -717,6 +718,7 @@ app.component('eyatraTripClaimForm', {
             $('#sharing-detail-save').button('loading');
             var index = self.sharing_detail.index;
             var total_sharing_normal_eligible_amt = 0;
+            let sharing_employee_have_leader_grade = '';
             $(self.sharing_detail.sharing_employees).each(function(key, data) {
                 // if(data.normal.eligible_amount){
                 //     total_sharing_normal_eligible_amt += parseFloat(data.normal.eligible_amount);
@@ -724,13 +726,46 @@ app.component('eyatraTripClaimForm', {
                 if(data.eligible_amount){
                     total_sharing_normal_eligible_amt += parseFloat(data.eligible_amount);
                 }
+
+                if(data.is_leader_grade == 1){
+                    sharing_employee_have_leader_grade = data.is_leader_grade;
+                }
             });
 
             self.trip.lodgings[index].no_of_sharing = self.sharing_detail.no_of_sharing;
             self.trip.lodgings[index].sharing_employees = self.sharing_detail.sharing_employees;
             self.trip.lodgings[index].sharing_normal_eligible_amt = total_sharing_normal_eligible_amt;
+            self.trip.lodgings[index].is_leader_grade = sharing_employee_have_leader_grade;
             $scope.assignEligibleAmount(self.trip.lodgings[index].city_id, 3001, index, self.trip.lodgings[index].stay_type_id);
             $('#sharing-detail-save').button('reset');
+            $('#sharing-detail-modal').modal('hide');
+        }
+
+        $scope.sharingDetailCloseHandler = function(){
+            if (self.sharing_detail) {
+                if(Math.round((self.sharing_detail.sharing_employees).length) != Math.round(self.sharing_detail.no_of_sharing)){
+                    custom_noty('error', 'Kindly add the balance sharing employee detail');
+                    return;
+                }
+
+                let total_sharing_normal_eligible_amt = 0;
+                let sharing_employee_have_leader_grade = '';
+                $(self.sharing_detail.sharing_employees).each(function(key, data) {
+                    if(data.eligible_amount){
+                        total_sharing_normal_eligible_amt += parseFloat(data.eligible_amount);
+                    }
+
+                    if(data.is_leader_grade == 1){
+                        sharing_employee_have_leader_grade = data.is_leader_grade;
+                    }
+                });
+
+                self.trip.lodgings[self.sharing_detail.index].no_of_sharing = self.sharing_detail.no_of_sharing;
+                self.trip.lodgings[self.sharing_detail.index].sharing_employees = self.sharing_detail.sharing_employees;
+                self.trip.lodgings[self.sharing_detail.index].sharing_normal_eligible_amt = total_sharing_normal_eligible_amt;
+                self.trip.lodgings[self.sharing_detail.index].is_leader_grade = sharing_employee_have_leader_grade;
+                $scope.assignEligibleAmount(self.trip.lodgings[self.sharing_detail.index].city_id, 3001, self.sharing_detail.index, self.trip.lodgings[self.sharing_detail.index].stay_type_id);
+            }
             $('#sharing-detail-modal').modal('hide');
         }
 
@@ -749,6 +784,7 @@ app.component('eyatraTripClaimForm', {
             self.trip.lodgings[index].sharing_employees = [];
             // self.trip.lodgings[index].sharing_home_eligible_amt = 0;
             self.trip.lodgings[index].sharing_normal_eligible_amt = 0;
+            self.trip.lodgings[index].is_leader_grade = '';
             if(self.trip.lodgings[index].stay_type_id == 3340){
                 //LODGE STAY
                 if(!self.trip.lodgings[index].sharing_type_id){
@@ -1256,28 +1292,30 @@ app.component('eyatraTripClaimForm', {
         // }
 
         function convert_to_24h(time_str) {
-            // Convert a string like 10:05:23 PM to 24h format, returns like [22,5,23]
-            var time = time_str.match(/(\d+):(\d+) (\w)/);
-            var hours = Number(time[1]);
-            var minutes = Number(time[2]);
-            //alert(minutes);
-            //var seconds = Number(time[3]);
-            var meridian = time[3].toLowerCase();
+            if(time_str){
+                // Convert a string like 10:05:23 PM to 24h format, returns like [22,5,23]
+                var time = time_str.match(/(\d+):(\d+) (\w)/);
+                var hours = Number(time[1]);
+                var minutes = Number(time[2]);
+                //alert(minutes);
+                //var seconds = Number(time[3]);
+                var meridian = time[3].toLowerCase();
 
-            if (meridian == 'p' && hours < 12) {
-                hours += 12;
-            } else if (meridian == 'a' && hours == 12) {
-                hours -= 12;
+                if (meridian == 'p' && hours < 12) {
+                    hours += 12;
+                } else if (meridian == 'a' && hours == 12) {
+                    hours -= 12;
+                }
+                //alert(minutes.count());
+                if (hours < 10) {
+                    hours = '0' + hours;
+                }
+                if (minutes < 10) {
+                    minutes = minutes + '0';
+                }
+                //alert(hours, minutes);
+                return hours + ':' + minutes + ':00';
             }
-            //alert(minutes.count());
-            if (hours < 10) {
-                hours = '0' + hours;
-            }
-            if (minutes < 10) {
-                minutes = minutes + '0';
-            }
-            //alert(hours, minutes);
-            return hours + ':' + minutes + ':00';
         };
 
         //ENABLE DISABLE DATE 
@@ -2066,6 +2104,7 @@ app.component('eyatraTripClaimForm', {
             let isLodgingDeviated = false;
             $('.is_lodging_deviation_amount').each(function() {
                 let lodgeBeforeTaxAmount = $(this).val();
+                let lodging_is_leader_grade = $(this).attr('data-isleadergrade');
                 if(lodgeBeforeTaxAmount && self.is_grade_leader == false){
                     let lodgeEligibleAmount = $(this).closest('.is_deviation_amount_row').find('.eligible_amount').val();
                     if (!$.isNumeric(lodgeBeforeTaxAmount)) {
@@ -2081,6 +2120,7 @@ app.component('eyatraTripClaimForm', {
                     }
 
                     if (lodgeBeforeTaxAmount > lodgeEligibleAmount) {
+                    // if (!lodging_is_leader_grade && (lodgeBeforeTaxAmount > lodgeEligibleAmount)) {
                         is_deviation = true;
                         let isDeviationType = $(this).closest('.is_deviation_amount_row').find('.deviation_type').val()
                         if ($.inArray(isDeviationType, lodgingDeviation) == -1){
