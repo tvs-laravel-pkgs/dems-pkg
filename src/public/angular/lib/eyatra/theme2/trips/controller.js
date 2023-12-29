@@ -466,7 +466,12 @@ app.component('eyatraTripForm', {
                         self.trip.visits[index].departure_date = self.trip.end_date ? self.trip.end_date : self.trip.start_date;
                     } else {
                         //SET START DATE FOR OTHERS
-                        self.trip.visits[index].departure_date = self.trip.start_date ? self.trip.start_date : '';
+                        // self.trip.visits[index].departure_date = self.trip.start_date ? self.trip.start_date : '';
+                        if(value.departure_date){
+                            self.trip.visits[index].departure_date = value.departure_date;
+                        }else{
+                            self.trip.visits[index].departure_date = self.trip.start_date ? self.trip.start_date : '';
+                        }
                     }
                 });
             }
