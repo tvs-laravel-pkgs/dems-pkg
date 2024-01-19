@@ -29,4 +29,8 @@ class LodgingTaxInvoice extends Model {
 		return $this->belongsTo('Uitoux\EYatra\Lodging');
 	}
 
+	public function typeData() {
+		return $this->belongsTo('Uitoux\EYatra\Config', 'type_id');
+	}
+
 }
