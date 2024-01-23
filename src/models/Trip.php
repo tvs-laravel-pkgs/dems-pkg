@@ -6316,6 +6316,7 @@ request is not desired, then those may be rejected.';
 		$supplierSiteName = $outletCode;
 
 		$roundOffTransaction = OtherTypeTransactionDetail::apRoundOffTransaction();
+		$lodgeHsnCode = Config::where('id', 3771)->pluck('hsn_code')->first();
 		$bpas_portal = Portal::select([
 			'db_host_name',
 			'db_port_number',
@@ -6462,8 +6463,8 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Place:' . ($tripLocations);
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
-
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"));
+							$hsnCode = $lodgingTaxInvoice->typeData ? $lodgingTaxInvoice->typeData->hsn_code : null; 
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"));
 						}
 
 						//DRY WASH
@@ -6484,8 +6485,8 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Place:' . ($tripLocations);
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
-
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$hsnCode = $drywashTaxInvoice->typeData ? $drywashTaxInvoice->typeData->hsn_code : null;
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
 
 						//BOARDING
@@ -6506,8 +6507,8 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Place:' . ($tripLocations);
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
-
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$hsnCode = $boardingTaxInvoice->typeData ? $boardingTaxInvoice->typeData->hsn_code : null;
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
 					} else {
 						//SINGLE
@@ -6527,7 +6528,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, null, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, $lodgeHsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
 						}
 					}
 				}
