@@ -201,7 +201,7 @@ class EYatraConfigSeeder extends Seeder {
 			],
 			3036 => [
 				/*'name' => 'Claim Verification Pending',*/
-				'name' => 'Nodel Approval Pending',
+				'name' => 'Nodal Approval Pending',
 				'config_type_id' => 535,
 			],
 			3037 => [
@@ -1610,6 +1610,22 @@ class EYatraConfigSeeder extends Seeder {
 			4145 => [
 				'name' => 'DLOB,SS,DSBU,OESL',
 				'config_type_id' => 587,
+			],
+			3845 => [
+				'name' => 'DLOB-PV',
+				'config_type_id' => 551,
+			],
+			4098 => [
+				'name' => 'DLOB-PV Travelx Invoice',
+				'config_type_id' => 550,
+			],
+			4099 => [
+				'name' => 'DLOB-PV Travel Claim Refund Invoice',
+				'config_type_id' => 550,
+			],
+			4100 => [
+				'name' => 'DLOB-PV Travelx Pre Payment Invoice',
+				'config_type_id' => 550,
 			],
 		];
 
