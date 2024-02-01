@@ -1612,7 +1612,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 587,
 			],
 			3845 => [
-				'name' => 'DLOB-PV',
+				'name' => 'Car Dealership (PV)',
 				'config_type_id' => 551,
 			],
 			4098 => [
