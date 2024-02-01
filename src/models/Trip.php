@@ -4941,7 +4941,13 @@ request is not desired, then those may be rejected.';
 			$transactionDetail = $this->company ? $this->company->investmentPrePaymentInvoiceTransaction() : null;
 			$companyBusinessUnit = isset($this->company->investment_business_unit->name) ? $this->company->investment_business_unit->name : null;
 			$companyCode = isset($this->company->investment_business_unit->code) ? $this->company->investment_business_unit->code : null;
-		}else{
+		}
+		else if(!empty($this->employee->department) && $this->employee->department->business_id == 9){
+			$transactionDetail = $this->company ? $this->company->dlobPvPrePaymentInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($this->company->dlob_pv_business_unit->name) ? $this->company->dlob_pv_business_unit->name : null;
+			$companyCode = isset($this->company->dlob_pv_business_unit->code) ? $this->company->dlob_pv_business_unit->code : null;
+		}
+		else{
 			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 
@@ -6106,7 +6112,14 @@ request is not desired, then those may be rejected.';
 			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->investmentClaimRefundInvoiceTransaction() : null;
 			$companyBusinessUnit = isset($employeeTrip->company->investment_business_unit->name) ? $employeeTrip->company->investment_business_unit->name : null;
 			$company  = isset($employeeTrip->company->investment_business_unit->code) ? $employeeTrip->company->investment_business_unit->code : null;
-		}else{
+		}
+		else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 9){
+			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->dlobPvInvoiceTransaction() : null;
+			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->dlobPvClaimRefundInvoiceTransaction() : null;
+			$companyBusinessUnit = isset($employeeTrip->company->dlob_pv_business_unit->name) ? $employeeTrip->company->dlob_pv_business_unit->name : null;
+			$company  = isset($employeeTrip->company->dlob_pv_business_unit->code) ? $employeeTrip->company->dlob_pv_business_unit->code : null;
+		}
+		else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;
 			$companyBusinessUnit = isset($employeeTrip->company->oem_business_unit->name) ? $employeeTrip->company->oem_business_unit->name : null;
