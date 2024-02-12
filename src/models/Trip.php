@@ -6373,7 +6373,7 @@ request is not desired, then those may be rejected.';
 
 		//ROUND OFF
 		$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
-		$roundOffAmt = round($employeeTrip->totalAmount) - $employeeTrip->totalAmount;
+		$roundOffAmt = round($employeeClaim->total_amount) - $employeeClaim->total_amount;
 		$employeeLodgingRoundoff += floatval($roundOffAmt);
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
