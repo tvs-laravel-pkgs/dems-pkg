@@ -2495,8 +2495,8 @@ class Employee extends Model {
 						}
 						$sbu->save();
 
-						$pv_sbu_code_deatils = Config::select('name')
-								->where('id',4146)
+						$pv_sbu_code_deatils = Config::where('id',4146)
+								->pluck('name')
 								->first();
 						$pv_sbu_codes = explode(',',$pv_sbu_code_deatils);
 						//EMPLOYEE DEPARTMENT
