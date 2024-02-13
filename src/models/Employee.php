@@ -2495,11 +2495,16 @@ class Employee extends Model {
 						}
 						$sbu->save();
 
+						$pv_sbu_code_deatils = Config::select('name')
+								->where('id',4146)
+								->first();
+						$pv_sbu_codes = explode(',',$pv_sbu_code_deatils);
 						//EMPLOYEE DEPARTMENT
 						$businessId = null;
 						if ($hrmsEmployee->lob_code == 'DLOB') {
-							if (strpos(strtolower($hrmsEmployee->sbu_code), 'honda') !== false) {
-								$businessId = 3; //HONDA
+							if (in_array(strtoupper($hrmsEmployee->sbu_code), $pv_sbu_codes)) {
+								$businessId = 9; //PV
+								//$businessId = 3; //HONDA
 							} else {
 								$businessId = 1; //DLOB
 							}

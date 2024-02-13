@@ -1627,6 +1627,10 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'DLOB-PV Travelx Pre Payment Invoice',
 				'config_type_id' => 550,
 			],
+			4146 => [
+				'name' => 'RENCOMN,RENSALE,RENSERV,HONDASALE,HONDASERV,HONDACOMMON,RIPL,HONDA,TVSONE',
+				'config_type_id' => 587,
+			],
 		];
 
 		//SAVING CONFIG TYPES
