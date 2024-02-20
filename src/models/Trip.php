@@ -2685,7 +2685,7 @@ class Trip extends Model {
 
 					if ($is_grade_leader == false) {
 						if ($boardingAmount > $boardingEligibleAmount) {
-							return response()->json(['success' => false, 'errors' => ['Boarding amount is not greater than eligible amount']]);
+							return response()->json(['success' => false, 'errors' => ['Boarding amount is greater than eligible amount']]);
 						}
 					}
 				}
