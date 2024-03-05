@@ -1,6 +1,9 @@
 <?php
 
 namespace Uitoux\EYatra;
+
+use App\BusinessLob;
+use App\BusinessSbu;
 use App\Entity;
 use App\HrmsToTravelxEmployeeSyncLog;
 use App\MailConfiguration;
