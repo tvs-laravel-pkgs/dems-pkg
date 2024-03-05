@@ -2821,7 +2821,7 @@ class Employee extends Model {
 	}
 
 	public static function hrmsEmployeeManualAddition($request) {
-		// dd($request->all());
+		
 		$hrmsPortalConfig = config('custom.HRMS_PORTAL_CONFIG');
 		if ($hrmsPortalConfig == true) {
 			$hrmsPortal = DB::table('portals')->select([
@@ -3047,8 +3047,7 @@ class Employee extends Model {
 					if($businessDetail->check_lob_sbu == 1){
 						$checkLobSbu = true;
 						$businessLobId = BusinessLob::where('business_lobs.business_id', $businessDetail->id)
-							->join('lobs','lobs.id','business_lobs.lob_id')
-							->where('lobs.name', $hrmsEmployee->lob_code)
+							->where(DB::raw('LOWER(TRIM(business_lobs.lob))'), strtolower(trim($hrmsEmployee->lob_code)))
 							->pluck('business_lobs.id')
 							->first();
 					}
@@ -3211,13 +3210,11 @@ class Employee extends Model {
 					if(!$businessId){
 						if($businessDetail->check_lob_sbu == 1){
 							$businessLobPrimaryIds = BusinessLob::where('business_lobs.business_id', $businessDetail->id)
-								->join('lobs','lobs.id','business_lobs.lob_id')
-								->where('lobs.name', $hrmsEmployee->lob_code)
+								->where(DB::raw('LOWER(TRIM(business_lobs.lob))'), strtolower(trim($hrmsEmployee->lob_code)))
 								->pluck('business_lobs.id');
 							if($businessLobPrimaryIds){
 								$businessLobSbuId = BusinessSbu::whereIn('business_lob_sbus.business_lob_id', $businessLobPrimaryIds)
-									->join('sbus','sbus.id','business_lob_sbus.sbu_id')
-									->where('sbus.name', $hrmsEmployee->sbu_code)
+									->where(DB::raw('LOWER(TRIM(business_lob_sbus.sbu))'), strtolower(trim($hrmsEmployee->sbu_code)))
 									->pluck('business_lob_sbus.id')
 									->first();
 								if($businessLobSbuId){
