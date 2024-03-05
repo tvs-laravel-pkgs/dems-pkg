@@ -1334,6 +1334,7 @@ app.component('hrmsEmployeeManualAddition', {
             laravel_routes['getHrmsEmployeeSyncLogFilterData']
         ).then(function(response) {
             self.user_company = response.data.user_company; 
+            self.hrms_company_detail = response.data.hrms_company_detail;
         });
 
         $scope.manualAdditionSubmit = function () {

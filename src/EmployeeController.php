@@ -1,6 +1,8 @@
 <?php
 
 namespace Uitoux\EYatra;
+
+use App\HrmsCompany;
 use App\HrmsToTravelxEmployeeSyncLog;
 use App\Http\Controllers\Controller;
 use App\Role;
@@ -868,6 +870,11 @@ class EmployeeController extends Controller {
 		])
 			->where('id', Auth::user()->company_id)
 			->first();
+		$this->data['hrms_company_detail'] = HrmsCompany::select([
+			'id',
+			'name',
+		])->get();
+
 		return response()->json($this->data);
 	}
 
