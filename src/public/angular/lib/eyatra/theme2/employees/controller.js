@@ -313,11 +313,13 @@ app.component('eyatraEmployeeForm', {
                 self.switch_password = 'No';
                 $("#hide_password").hide();
                 $("#password").prop('disabled', true);
-                $scope.getDesignation(self.employee.grade_id);
-                //$scope.selectPaymentMode(self.employee.payment_mode_id);
-                $scope.getApiData(self.employee.code);
-                $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
-                $scope.getDepartmentBasedonBusiness(self.employee.department.business_id);
+                setTimeout(function() {
+                    $scope.getDesignation(self.employee.grade_id);
+                    //$scope.selectPaymentMode(self.employee.payment_mode_id);
+                    $scope.getApiData(self.employee.code);
+                    $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
+                    $scope.getDepartmentBasedonBusiness(self.employee.department.business_id);
+                }, 700);
             } else {
                 $("#hide_password").show();
                 $("#password").prop('disabled', false);
