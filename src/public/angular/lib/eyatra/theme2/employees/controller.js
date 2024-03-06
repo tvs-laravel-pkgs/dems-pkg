@@ -309,7 +309,7 @@ app.component('eyatraEmployeeForm', {
                     self.employee.grade_id = '';
                     self.employee.designation_id = '';
                 }
-                self.employee.reporting_to_id = response.data.employee.reporting_to_name.id;
+                self.employee.reporting_to_id = response.data.employee.reporting_to_name ? response.data.employee.reporting_to_name.id : null;
                 self.switch_password = 'No';
                 $("#hide_password").hide();
                 $("#password").prop('disabled', true);
