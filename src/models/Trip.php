@@ -682,6 +682,18 @@ class Trip extends Model {
 
 	public static function getTripFormData($trip_id) {
 		$data = [];
+		if (!Auth::user()->entity->outlet) {
+			$data['success'] = false;
+			$data['error'] = 'The employee outlet details not found. Please reach out to the support team for assistance with mapping.';
+			return response()->json($data);
+		}
+
+		if (!Auth::user()->entity->outlet->address) {
+			$data['success'] = false;
+			$data['error'] = 'The employee outlet address details not found. Please reach out to the support team for assistance with mapping.';
+			return response()->json($data);
+		}
+
 		if (!$trip_id) {
 			$data['action'] = 'New';
 			$trip = new Trip;
@@ -699,6 +711,11 @@ class Trip extends Model {
 			$data['success'] = true;
 
 			$trip = Trip::find($trip_id);
+			if (!$trip) {
+				$data['success'] = false;
+				$data['error'] = 'Trip details not found';
+				return response()->json($data);
+			}
 			$trip_from_date = date('Y-m-d', strtotime($trip->start_date));
 			$trip->trip_from_minus_5_days = date('d-m-Y', strtotime("-5 days", strtotime($trip_from_date)));
 
@@ -759,6 +776,11 @@ class Trip extends Model {
 		$grade = Auth::user()->entity;
 		//dd('ss', Auth::user()->id, Auth::user()->entity->outlet, Auth::user()->entity->outlet->address);
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility', 'travel_advance_limit')->where('grade_id', $grade->grade_id)->first();
+		if (!$grade_eligibility) {
+			$data['success'] = false;
+			$data['error'] = 'The employee grade configuration are missing. Please reach out to the support team for assistance with mapping.';
+			return response()->json($data);
+		}
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
 			$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
