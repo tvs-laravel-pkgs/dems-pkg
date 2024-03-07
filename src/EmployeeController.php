@@ -103,7 +103,7 @@ class EmployeeController extends Controller {
 		// ->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
 			->leftJoin('role_user', 'role_user.user_id', 'u.id')
 		// ->where('users.user_type_id', 3121)
-			->withTrashed()
+			// ->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
