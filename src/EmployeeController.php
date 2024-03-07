@@ -1,6 +1,8 @@
 <?php
 
 namespace Uitoux\EYatra;
+
+use App\HrmsCompany;
 use App\HrmsToTravelxEmployeeSyncLog;
 use App\Http\Controllers\Controller;
 use App\Role;
@@ -101,7 +103,7 @@ class EmployeeController extends Controller {
 		// ->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
 			->leftJoin('role_user', 'role_user.user_id', 'u.id')
 		// ->where('users.user_type_id', 3121)
-			->withTrashed()
+			// ->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
@@ -868,6 +870,11 @@ class EmployeeController extends Controller {
 		])
 			->where('id', Auth::user()->company_id)
 			->first();
+		$this->data['hrms_company_detail'] = HrmsCompany::select([
+			'id',
+			'name',
+		])->get();
+
 		return response()->json($this->data);
 	}
 

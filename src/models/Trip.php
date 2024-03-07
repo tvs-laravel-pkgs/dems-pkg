@@ -682,6 +682,18 @@ class Trip extends Model {
 
 	public static function getTripFormData($trip_id) {
 		$data = [];
+		if (!Auth::user()->entity->outlet) {
+			$data['success'] = false;
+			$data['error'] = 'The employee outlet details not found. Please reach out to the support team for assistance with mapping.';
+			return response()->json($data);
+		}
+
+		if (!Auth::user()->entity->outlet->address) {
+			$data['success'] = false;
+			$data['error'] = 'The employee outlet address details not found. Please reach out to the support team for assistance with mapping.';
+			return response()->json($data);
+		}
+
 		if (!$trip_id) {
 			$data['action'] = 'New';
 			$trip = new Trip;
@@ -699,6 +711,11 @@ class Trip extends Model {
 			$data['success'] = true;
 
 			$trip = Trip::find($trip_id);
+			if (!$trip) {
+				$data['success'] = false;
+				$data['error'] = 'Trip details not found';
+				return response()->json($data);
+			}
 			$trip_from_date = date('Y-m-d', strtotime($trip->start_date));
 			$trip->trip_from_minus_5_days = date('d-m-Y', strtotime("-5 days", strtotime($trip_from_date)));
 
@@ -759,6 +776,11 @@ class Trip extends Model {
 		$grade = Auth::user()->entity;
 		//dd('ss', Auth::user()->id, Auth::user()->entity->outlet, Auth::user()->entity->outlet->address);
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility', 'travel_advance_limit')->where('grade_id', $grade->grade_id)->first();
+		if (!$grade_eligibility) {
+			$data['success'] = false;
+			$data['error'] = 'The employee grade configuration are missing. Please reach out to the support team for assistance with mapping.';
+			return response()->json($data);
+		}
 		if ($grade_eligibility) {
 			$data['advance_eligibility'] = $grade_eligibility->advanced_eligibility;
 			$data['grade_advance_eligibility_amount'] = $grade_eligibility->travel_advance_limit;
@@ -4947,6 +4969,11 @@ request is not desired, then those may be rejected.';
 			$companyBusinessUnit = isset($this->company->dlob_pv_business_unit->name) ? $this->company->dlob_pv_business_unit->name : null;
 			$companyCode = isset($this->company->dlob_pv_business_unit->code) ? $this->company->dlob_pv_business_unit->code : null;
 		}
+		else if(!empty($this->employee->department) && $this->employee->department->business_id == 10){
+            $transactionDetail = $this->company ? $this->company->ttblPrePaymentInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($this->company->ttbl_business_unit->name) ? $this->company->ttbl_business_unit->name : null;
+            $companyCode = isset($this->company->ttbl_business_unit->code) ? $this->company->ttbl_business_unit->code : null;
+        }
 		else{
 			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
@@ -6119,6 +6146,12 @@ request is not desired, then those may be rejected.';
 			$companyBusinessUnit = isset($employeeTrip->company->dlob_pv_business_unit->name) ? $employeeTrip->company->dlob_pv_business_unit->name : null;
 			$company  = isset($employeeTrip->company->dlob_pv_business_unit->code) ? $employeeTrip->company->dlob_pv_business_unit->code : null;
 		}
+		else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 10){
+            $transactionDetail = $employeeTrip->company ? $employeeTrip->company->ttblInvoiceTransaction() : null;
+            $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->ttblClaimRefundInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($employeeTrip->company->ttbl_business_unit->name) ? $employeeTrip->company->ttbl_business_unit->name : null;
+            $company  = isset($employeeTrip->company->ttbl_business_unit->code) ? $employeeTrip->company->ttbl_business_unit->code : null;
+        }
 		else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;
 			$claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->claimRefundInvoiceTransaction() : null;

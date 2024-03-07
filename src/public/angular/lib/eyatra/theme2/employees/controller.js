@@ -309,15 +309,17 @@ app.component('eyatraEmployeeForm', {
                     self.employee.grade_id = '';
                     self.employee.designation_id = '';
                 }
-                self.employee.reporting_to_id = response.data.employee.reporting_to_name.id;
+                self.employee.reporting_to_id = response.data.employee.reporting_to_name ? response.data.employee.reporting_to_name.id : null;
                 self.switch_password = 'No';
                 $("#hide_password").hide();
                 $("#password").prop('disabled', true);
-                $scope.getDesignation(self.employee.grade_id);
-                //$scope.selectPaymentMode(self.employee.payment_mode_id);
-                $scope.getApiData(self.employee.code);
-                $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
-                $scope.getDepartmentBasedonBusiness(self.employee.department.business_id);
+                setTimeout(function() {
+                    $scope.getDesignation(self.employee.grade_id);
+                    //$scope.selectPaymentMode(self.employee.payment_mode_id);
+                    $scope.getApiData(self.employee.code);
+                    $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
+                    $scope.getDepartmentBasedonBusiness(self.employee.department.business_id);
+                }, 700);
             } else {
                 $("#hide_password").show();
                 $("#password").prop('disabled', false);
@@ -1334,6 +1336,7 @@ app.component('hrmsEmployeeManualAddition', {
             laravel_routes['getHrmsEmployeeSyncLogFilterData']
         ).then(function(response) {
             self.user_company = response.data.user_company; 
+            self.hrms_company_detail = response.data.hrms_company_detail;
         });
 
         $scope.manualAdditionSubmit = function () {
