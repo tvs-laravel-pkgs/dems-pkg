@@ -3545,6 +3545,7 @@ class ExportReportController extends Controller {
                 }
             })
             ->where('trips.status_id','!=', 3032) //Cancelled
+            ->whereNotIn('departments.business_id', [10]) //TTBL
 			->groupBy('trips.id')
 			->get()
 			->toArray();
@@ -3572,6 +3573,7 @@ class ExportReportController extends Controller {
                 	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));
                 }
             })
+            ->whereNotIn('departments.business_id', [10]) //TTBL
 			->groupBy('trips.id')
 			->get()
 			->toArray();
