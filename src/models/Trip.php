@@ -521,6 +521,13 @@ class Trip extends Model {
 				}
 			}
 
+			if(!$employee->reporting_to_id){
+				return response()->json([
+					'success' => false,
+					'errors' => ['The employee reporting details not found. Please reach out to the support team for assistance with mapping.']
+				]);
+			}
+
 			DB::commit();
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
