@@ -6626,4 +6626,97 @@ request is not desired, then those may be rejected.';
 		return $taxDetail;
 	}
 
+	public function generatePrePaymentApTallyAxapta() {
+		
+		//VENDOR
+		$res = [];
+		$res['success'] = false;
+		$res['errors'] = [];
+
+		$companyCode = $this->employee->department ? $this->employee->department->business->oracle_code : null;
+		$businessUnit = $this->employee->department ? $this->employee->department->business->business_unit : null;
+		$businessUnitName = $this->employee->department ? $this->employee->department->business->business_unit_name : null;
+
+		// $invoiceSource = 'Pre Payment Invoice';
+		$invoiceSource = 'Travelex';
+		$documentType = 'Invoice';
+
+		$template = 'Normal JV';
+		$invoiceNumber = $this->number;
+
+		$tripApprovalLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3581) //Outstation Trip
+			->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+			->where('entity_id', $this->id)
+			->first();
+		$tripManagerApprovedDate = null;
+		if($tripApprovalLog){
+			$tripManagerApprovedDate = $tripApprovalLog->approved_date;
+		}
+
+		$invoiceDate = $tripManagerApprovedDate;
+		$employeeData = $this->employee;
+		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		$medhodAdj = 'Advanced';
+
+		$debit = $this->advance_received;
+		$credit = $this->advance_received;
+		$outletCode = $this->branch ? $this->branch->oracle_code_l2 : null;
+		
+		//$company = $this->company ? $this->company->oracle_code : '';
+
+		$sbu = $employeeData->Sbu;
+		$lob = $costCenter = null;
+		if ($sbu) {
+			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
+			$costCenter = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
+		}
+		$location = $outletCode;
+		$accountNumber = Config::where('id', 3860)->first()->name;
+		$accountingDate = date("Y-m-d");
+
+		// $invoice_details = [];
+
+		$invoice_details = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $costCenter, $invoiceNumber, 
+		$invoiceDate, $accountingDate, $companyCode, $lob, $location, $accountNumber, $debit, null, $medhodAdj);
+        
+		$invoice_details_1 = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $costCenter, $invoiceNumber, 
+		$invoiceDate, $accountingDate, $companyCode, $lob, $location, $accountNumber, null, $credit, $medhodAdj);
+		$trip_details = array_merge($invoice_details_1, $invoice_details);
+
+	}
+	public function formApTallyExport($type, $businessUnit, $template, $businessUnitName, $supplierNumber, $costCenter, $invoiceNumber, 
+	$invoiceDate, $accountingDate, $companyCode, $lob, $location, $accountNumber, $debit, $credit, $medhodAdj) {
+		
+		$invoiceSource = 'Travelex';
+		if($type == 1) {
+			$details = [
+				'businessUnit' => $businessUnit,
+				'template' => $template,
+				'businessUnitName' => $businessUnitName,
+				'supplierNumber' => $supplierNumber,
+				'prepaymentInvoiceNumber' => $invoiceNumber,
+				'invoiceDate' => $invoiceDate,
+				'accountingDate' => $accountingDate,
+				'company' => $companyCode,
+				'lob' => $lob,
+				'location' => $location,
+				'costCenter' => $costCenter,
+				'accountNumber' => $accountNumber,
+				'debit' => $debit,
+				'credit' => $credit,
+				'methodOfAdj' => $medhodAdj,
+			];
+			// dd($details);
+			return $details;
+		}else{
+			
+		}
+
+	}
+	
+
 }

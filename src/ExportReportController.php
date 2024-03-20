@@ -3659,6 +3659,111 @@ class ExportReportController extends Controller {
 			}
 		}
 	}
+	public function tripTallySync($id = null) {
+		$advance_amount_trips = Trip::select([
+			'trips.id',
+			DB::raw("'Advance amount' as category"),
+			'departments.business_id',
+		])
+			->join('employees', 'employees.id', 'trips.employee_id')
+			->join('departments', 'departments.id', 'employees.department_id')
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('trips.id', $id);
+				}
+			})
+			->where('trips.advance_received', '>', 0)
+			//->where('trips.oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
+			->where('trips.tally_advance_sync_status', 0) //Tally ADVANCE AMOUNT NON SYNC
+			->whereIn('trips.status_id', [3028, 3026])
+			->whereDate('trips.updated_at', '<', date('Y-m-d'))
+            ->where('trips.status_id','!=', 3032) //Cancelled
+			->groupBy('trips.id')
+			->get()
+			->toArray();
 
+		// $claimed_trips = Trip::select([
+		// 	'trips.id',
+		// 	DB::raw("'Trip claim' as category"),
+		// 	'departments.business_id',
+		// ])
+		// 	->where(function ($query) use ($id) {
+		// 		if ($id) {
+		// 			$query->where('trips.id', $id);
+		// 		}
+		// 	})
+		// 	->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
+		// 	->join('employees', 'employees.id', 'trips.employee_id')
+		// 	->join('departments', 'departments.id', 'employees.department_id')
+		// 	->where('eyec.total_amount', '>', 0)
+		// 	// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
+		// 	->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
+		// 	->where('trips.status_id', 3026)
+		// 	->where('eyec.status_id', 3026)
+		// 	->whereDate('eyec.updated_at', '<', date('Y-m-d'))
+		// 	->groupBy('trips.id')
+		// 	->get()
+		// 	->toArray();
+			
+		$trip_details = array_merge($advance_amount_trips);
+		array_multisort(
+			array_column($trip_details, 'id'),
+			SORT_ASC,
+			$trip_details
+		);
+
+		foreach ($trip_details as $trip_detail) {
+			try {
+				// DB::beginTransaction();
+				$trip = Trip::find($trip_detail['id']);
+
+				//ADVANCE AMOUNT SYNC
+				if ($trip_detail['category'] == 'Advance amount') {
+					$tripManagerApprovedAt = ApprovalLog::where('type_id', 3581) //Outstation Trip
+						->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+						->where('entity_id', $trip->id)
+						->pluck('approved_at')
+						->first();
+					if(empty($tripManagerApprovedAt)){
+						continue;
+					}
+					
+					$r = $trip->generatePrePaymentApTallyAxapta();
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$trip->tally_advance_sync_status = 1; //SYNCED
+						$trip->save();
+					}
+				}
+
+				//TRIP CLAIM SYNC
+				// if ($trip_detail['category'] == 'Trip claim') {
+				// 	$tripClaimManagerApprovedAt = ApprovalLog::where('type_id', 3581) //Outstation Trip
+				// 		->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
+				// 		->where('entity_id', $trip->id)
+				// 		->pluck('approved_at')
+				// 		->first();
+				// 	if(empty($tripClaimManagerApprovedAt)){	
+				// 		continue;
+				// 	}
+
+				// 	$r = $trip->generateInvoiceApOracleAxapta();
+				// 	dd("fff");
+				// 	if (!$r['success']) {
+				// 		dump($r);
+				// 	} else {
+				// 		$trip->oracle_invoice_sync_status = 1; //SYNCED
+				// 		$trip->save();
+				// 	}
+				// }
+				// DB::commit();
+			} catch (\Exception $e) {
+				// DB::rollBack();
+				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
+				continue;
+			}
+		}
+	}
 	
 }
