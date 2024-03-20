@@ -6627,22 +6627,17 @@ request is not desired, then those may be rejected.';
 	}
 
 	public function generatePrePaymentApTallyAxapta() {
-		
-		//VENDOR
 		$res = [];
 		$res['success'] = false;
 		$res['errors'] = [];
 
-		$companyCode = $this->employee->department ? $this->employee->department->business->oracle_code : null;
-		$businessUnit = $this->employee->department ? $this->employee->department->business->business_unit : null;
-		$businessUnitName = $this->employee->department ? $this->employee->department->business->business_unit_name : null;
-
-		// $invoiceSource = 'Pre Payment Invoice';
-		$invoiceSource = 'Travelex';
-		$documentType = 'Invoice';
+		$trip = $this;
+		$companyCode = $trip->employee->department->business->oracle_code;
+		$businessUnit = $trip->employee->department->business->business_unit;
+		$businessUnitName = $trip->employee->department->business->business_unit_name;
 
 		$template = 'Normal JV';
-		$invoiceNumber = $this->number;
+		$invoiceNumber = $trip->number;
 
 		$tripApprovalLog = ApprovalLog::select([
 			'id',
@@ -6650,56 +6645,45 @@ request is not desired, then those may be rejected.';
 		])
 			->where('type_id', 3581) //Outstation Trip
 			->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
-			->where('entity_id', $this->id)
+			->where('entity_id', $trip->id)
 			->first();
-		$tripManagerApprovedDate = null;
+		$invoiceDate = null;
 		if($tripApprovalLog){
-			$tripManagerApprovedDate = $tripApprovalLog->approved_date;
+			$invoiceDate = $tripApprovalLog->approved_date;
 		}
 
-		$invoiceDate = $tripManagerApprovedDate;
-		$employeeData = $this->employee;
-		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
-		$medhodAdj = 'Advanced';
-
-		$debit = $this->advance_received;
-		$credit = $this->advance_received;
-		$outletCode = $this->branch ? $this->branch->oracle_code_l2 : null;
-		
-		//$company = $this->company ? $this->company->oracle_code : '';
-
-		$sbu = $employeeData->Sbu;
+		$supplierNumber = 'EMP_' . ($trip->employee->code);
+		$location = $trip->branch ? $trip->branch->oracle_code_l2 : null;
+		$sbu = $trip->employee->Sbu;
 		$lob = $costCenter = null;
 		if ($sbu) {
 			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
 			$costCenter = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
 		}
-		$location = $outletCode;
 		$accountNumber = Config::where('id', 3860)->first()->name;
 		$accountingDate = date("Y-m-d");
+		$medhodOfAdj = 'Advanced';
 
-		// $invoice_details = [];
+		$debitDetails = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, $medhodOfAdj);
 
-		$invoice_details = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $costCenter, $invoiceNumber, 
-		$invoiceDate, $accountingDate, $companyCode, $lob, $location, $accountNumber, $debit, null, $medhodAdj);
-        
-		$invoice_details_1 = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $costCenter, $invoiceNumber, 
-		$invoiceDate, $accountingDate, $companyCode, $lob, $location, $accountNumber, null, $credit, $medhodAdj);
-		$trip_details = array_merge($invoice_details_1, $invoice_details);
+		$creditDetails = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, null, $trip->advance_received, $medhodOfAdj);
+		$tripDetails = array_merge($debitDetails, $creditDetails);
 
+		$res['success'] = true;
+		return $res;
 	}
-	public function formApTallyExport($type, $businessUnit, $template, $businessUnitName, $supplierNumber, $costCenter, $invoiceNumber, 
-	$invoiceDate, $accountingDate, $companyCode, $lob, $location, $accountNumber, $debit, $credit, $medhodAdj) {
-		
-		$invoiceSource = 'Travelex';
+
+	public function formApTallyExport($type, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
+		$details = null;
 		if($type == 1) {
+			//ADVANCE
 			$details = [
 				'businessUnit' => $businessUnit,
 				'template' => $template,
 				'businessUnitName' => $businessUnitName,
 				'supplierNumber' => $supplierNumber,
 				'prepaymentInvoiceNumber' => $invoiceNumber,
-				'invoiceDate' => $invoiceDate,
+				'invoiceDate' => date('Y-m-d', strtotime($invoiceDate)),
 				'accountingDate' => $accountingDate,
 				'company' => $companyCode,
 				'lob' => $lob,
@@ -6708,15 +6692,12 @@ request is not desired, then those may be rejected.';
 				'accountNumber' => $accountNumber,
 				'debit' => $debit,
 				'credit' => $credit,
-				'methodOfAdj' => $medhodAdj,
+				'methodOfAdj' => $medhodOfAdj,
 			];
-			// dd($details);
-			return $details;
 		}else{
-			
+			//CLAIM
 		}
-
+		return $details;
 	}
-	
 
 }

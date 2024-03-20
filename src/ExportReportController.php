@@ -3660,24 +3660,24 @@ class ExportReportController extends Controller {
 		}
 	}
 	public function tripTallySync($id = null) {
-		$advance_amount_trips = Trip::select([
+		$advanceAmountTrips = Trip::select([
 			'trips.id',
 			DB::raw("'Advance amount' as category"),
 			'departments.business_id',
 		])
 			->join('employees', 'employees.id', 'trips.employee_id')
 			->join('departments', 'departments.id', 'employees.department_id')
+			->join('businesses', 'businesses.id', 'departments.business_id')
 			->where(function ($query) use ($id) {
 				if ($id) {
 					$query->where('trips.id', $id);
 				}
 			})
 			->where('trips.advance_received', '>', 0)
-			//->where('trips.oracle_pre_payment_sync_status', 0) //ORACLE ADVANCE AMOUNT NON SYNC
-			->where('trips.tally_advance_sync_status', 0) //Tally ADVANCE AMOUNT NON SYNC
+			->where('trips.tally_advance_sync_status', 0) //TALLY ADVANCE AMOUNT NON SYNC
 			->whereIn('trips.status_id', [3028, 3026])
 			->whereDate('trips.updated_at', '<', date('Y-m-d'))
-            ->where('trips.status_id','!=', 3032) //Cancelled
+            ->where('businesses.erp_sync_type', 2) //TALLY
 			->groupBy('trips.id')
 			->get()
 			->toArray();
@@ -3705,20 +3705,19 @@ class ExportReportController extends Controller {
 		// 	->get()
 		// 	->toArray();
 			
-		$trip_details = array_merge($advance_amount_trips);
+		$tripDetails = array_merge($advanceAmountTrips);
 		array_multisort(
-			array_column($trip_details, 'id'),
+			array_column($tripDetails, 'id'),
 			SORT_ASC,
-			$trip_details
+			$tripDetails
 		);
 
-		foreach ($trip_details as $trip_detail) {
+		foreach ($tripDetails as $tripDetail) {
 			try {
-				// DB::beginTransaction();
-				$trip = Trip::find($trip_detail['id']);
+				$trip = Trip::find($tripDetail['id']);
 
 				//ADVANCE AMOUNT SYNC
-				if ($trip_detail['category'] == 'Advance amount') {
+				if ($tripDetail['category'] == 'Advance amount') {
 					$tripManagerApprovedAt = ApprovalLog::where('type_id', 3581) //Outstation Trip
 						->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
 						->where('entity_id', $trip->id)
@@ -3757,9 +3756,7 @@ class ExportReportController extends Controller {
 				// 		$trip->save();
 				// 	}
 				// }
-				// DB::commit();
 			} catch (\Exception $e) {
-				// DB::rollBack();
 				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
 				continue;
 			}
