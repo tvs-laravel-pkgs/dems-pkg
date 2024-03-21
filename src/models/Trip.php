@@ -6673,6 +6673,234 @@ request is not desired, then those may be rejected.';
 		return $res;
 	}
 
+	public function generateInvoiceApTallyAxapta() {
+		$res = [];
+		$res['success'] = false;
+		$res['errors'] = [];
+
+		$employeeTrip = $this;
+		$businessUnit = $employeeTrip->employee->department->business->business_unit;
+		$template = 'Travelex';
+		$company = $employeeTrip->employee->department->business->oracle_code;		
+
+		$employeeClaim = EmployeeClaim::select([
+			'id',
+			'number',
+			'total_amount',
+			'boarding_total',
+			'local_travel_total',
+			'amount_to_pay',
+			'balance_amount',
+			'created_at',
+			'updated_at',
+		])
+			->where('trip_id', $employeeTrip->id)
+			->first();
+
+		$invoiceAmount = null;
+		$invoiceNumber = null;
+		$prePaymentNumber = null;
+		$prePaymentAmount = null;
+		if ($employeeClaim) {
+			$invoiceAmount = round($employeeClaim->total_amount);
+			$invoiceNumber = $employeeClaim->number;
+			if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
+				$prePaymentNumber = $employeeTrip->number;
+				$prePaymentAmount = $employeeTrip->advance_received;
+			}
+		}
+
+		$employeeData = $employeeTrip->employee;
+		$supplierNumber = 'EMP_' . ($employeeData->code);
+		$invoiceDescription = '';
+		if (!empty($employeeData->code)) {
+			$invoiceDescription .= $employeeData->code;
+		}
+		if (!empty($employeeData->user->name)) {
+			$invoiceDescription .= ',' . ($employeeData->user->name);
+		}
+		if (!empty($employeeTrip->purpose->name)) {
+			$invoiceDescription .= ',' . ($employeeTrip->purpose->name);
+		}
+		$invoiceDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+
+		$tripLocations = Visit::select([
+			DB::raw("CASE 
+				WHEN tocity.type_id = 4111 and visits.other_city is not null 
+				THEN visits.other_city 
+				WHEN tocity.type_id = 4111 and visits.other_city is null 
+				THEN TRIM(SUBSTRING_INDEX(tocity.name, '-', 1))
+				ELSE TRIM(SUBSTRING_INDEX(tocity.name, '-', 1))
+				END as location"),
+		])
+			->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+			->whereNotIn('visits.status_id', [3062]) //Cancelled
+			->where('visits.trip_id', $employeeTrip->id)
+			->orderBy('visits.id')
+			->get()
+			->implode('location', ',');
+		if($tripLocations){
+			$invoiceDescription .= ',Place:' . ($tripLocations);
+		}
+		$invoiceDescription = substr($invoiceDescription, 0, 250);
+
+		$tripApprovalLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3581) //Outstation Trip
+			->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+			->where('entity_id', $employeeTrip->id)
+			->first();
+		$tripApprovedDate = null;
+		if($tripApprovalLog){
+			$tripApprovedDate = $tripApprovalLog->approved_date;
+		}
+
+		$tripClaimApprovalLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3581) //Outstation Trip
+			->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
+			->where('entity_id', $employeeTrip->id)
+			->first();
+		$claimManagerApprovedDate = null;
+		if($tripClaimApprovalLog){
+			$claimManagerApprovedDate = $tripClaimApprovalLog->approved_date;
+		}
+
+		//VISITS
+		$employeeTransportValue = 0;
+		if ($employeeTrip->selfVisits->isNotEmpty()) {
+			foreach ($employeeTrip->selfVisits as $selfVisit) {
+				if (!empty($selfVisit->booking)) {
+					if($selfVisit->booking->invoice_amount && $selfVisit->booking->invoice_amount != '0.00'){
+						$employeeTransportValue += floatval($selfVisit->booking->invoice_amount);
+					}else{
+						$employeeTransportValue += (floatval($selfVisit->booking->amount) + floatval($selfVisit->booking->other_charges) + floatval($selfVisit->booking->round_off));
+					}
+				}
+			}
+		}
+
+		//BOARDING
+		$employeeBoardingValue = 0;
+		if ($employeeTrip->boardings->isNotEmpty()) {
+			$employeeBoardingValue = floatval($employeeClaim->boarding_total);
+		}
+
+		//LOCAL TRAVELS
+		$employeeLocalTravelValue = 0;
+		if ($employeeTrip->localTravels->isNotEmpty()) {
+			$employeeLocalTravelValue = floatval($employeeClaim->local_travel_total);
+		}
+
+		$location = $employeeTrip->branch ? $employeeTrip->branch->oracle_code_l2 : null;
+		$sbu = $employeeData->Sbu;
+		$lob = $costCenter = null;
+		if ($sbu) {
+			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
+			$costCenter = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
+		}
+
+		//LODGING
+		$lodgeWithoutGstValue = 0;
+		if ($employeeTrip->lodgings->isNotEmpty()) {
+			foreach ($employeeTrip->lodgings as $lodging) {
+				//LODGE STAY
+				$lodgeWithoutGstValue += floatval($lodging->amount);
+			}
+		}
+
+		$withoutTaxAmount = ($employeeTransportValue + $employeeBoardingValue + $employeeLocalTravelValue + $lodgeWithoutGstValue);
+
+		//WITHOUT TAX AMOUNT 
+		$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 570222, $withoutTaxAmount, null, null, null,null, null, null,null);
+
+		//GST LODGING
+		if ($employeeTrip->lodgings->isNotEmpty()) {
+			foreach ($employeeTrip->lodgings as $lodging) {
+				if ($lodging->stay_type_id == 3340) {
+					//HAS MULTIPLE TAX INVOICE
+					if ($lodging->has_multiple_tax_invoice == "Yes") {
+						$lodgingTaxInvoice = $lodging->lodgingTaxInvoice;
+						if ($lodgingTaxInvoice && (($lodgingTaxInvoice->cgst > 0 && $lodgingTaxInvoice->sgst > 0) || ($lodgingTaxInvoice->igst > 0))) {
+							if(($lodgingTaxInvoice->cgst > 0 && $lodgingTaxInvoice->sgst > 0)){
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $lodgingTaxInvoice->cgst, null, null, null,null, null, null,null);
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $lodgingTaxInvoice->sgst, null, null, null,null, null, null,null);
+							}else{
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodgingTaxInvoice->igst, null, null, null,null, null, null,null);
+							}
+						}
+
+						//DRY WASH
+						$drywashTaxInvoice = $lodging->drywashTaxInvoice;
+						if ($drywashTaxInvoice && (($drywashTaxInvoice->cgst > 0 && $drywashTaxInvoice->sgst > 0) || ($drywashTaxInvoice->igst > 0))) {
+							if(($drywashTaxInvoice->cgst > 0 && $drywashTaxInvoice->sgst > 0)){
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $drywashTaxInvoice->cgst, null, null, null,null, null, null,null);
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $drywashTaxInvoice->sgst, null, null, null,null, null, null,null);
+							}else{
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $drywashTaxInvoice->igst, null, null, null,null, null, null,null);
+							}
+						}
+
+						//BOARDING
+						$boardingTaxInvoice = $lodging->boardingTaxInvoice;
+						if ($boardingTaxInvoice && (($boardingTaxInvoice->cgst > 0 && $boardingTaxInvoice->sgst > 0) || ($boardingTaxInvoice->igst > 0))) {
+							if(($boardingTaxInvoice->cgst > 0 && $boardingTaxInvoice->sgst > 0)){
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $boardingTaxInvoice->cgst, null, null, null,null, null, null,null);
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $boardingTaxInvoice->sgst, null, null, null,null, null, null,null);
+							}else{
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $boardingTaxInvoice->igst, null, null, null,null, null, null,null);
+							}
+						}
+					} else {
+						//SINGLE
+						if (($lodging->cgst > 0 && $lodging->sgst > 0) || ($lodging->igst > 0)) {
+							if(($lodging->cgst > 0 && $lodging->sgst > 0)){
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $lodging->cgst, null, null, null,null, null, null,null);
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $lodging->sgst, null, null, null,null, null, null,null);
+							}else{
+								$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodging->igst, null, null, null,null, null, null,null);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		//ROUND OFF
+		$employeeLodgingRoundoff = floatval($employeeTrip->lodgings()->sum('round_off'));
+		$roundOffAmt = round($employeeClaim->total_amount) - $employeeClaim->total_amount;
+		$employeeLodgingRoundoff += floatval($roundOffAmt);
+		if ($employeeLodgingRoundoff && $employeeLodgingRoundoff != '0.00') {
+			$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $employeeLodgingRoundoff, null, null, null,null, null, null,null);
+		}
+
+		//IF ADVANCE
+		if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
+			$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 153668, null, $employeeTrip->advance_received, null, 'Agst Ref', $prePaymentNumber,$tripApprovedDate, $employeeTrip->advance_received, 'cr');
+
+
+			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
+				if ($employeeClaim->amount_to_pay == 2) {
+					//EMPLOYEE TO COMPANY
+					$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 153668,  $employeeClaim->balance_amount, null, null, null,null, null, null,null);
+				}elseif($employeeClaim->amount_to_pay == 1){
+					//COMPANY TO EMPLOYEE
+					$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 153668, null, $employeeClaim->balance_amount, null, null,null, null, null,null);
+				}
+			}
+		}else{
+			//IF NON ADVANCE
+			$this->formApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, null, $invoiceAmount, null, null, null,null, null, null);
+		}
+
+		$res['success'] = true;
+		return $res;
+	}
+
 	public function formApTallyExport($type, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
 		$details = null;
 		if($type == 1) {
