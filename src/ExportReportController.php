@@ -3682,30 +3682,31 @@ class ExportReportController extends Controller {
 			->get()
 			->toArray();
 
-		// $claimed_trips = Trip::select([
-		// 	'trips.id',
-		// 	DB::raw("'Trip claim' as category"),
-		// 	'departments.business_id',
-		// ])
-		// 	->where(function ($query) use ($id) {
-		// 		if ($id) {
-		// 			$query->where('trips.id', $id);
-		// 		}
-		// 	})
-		// 	->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
-		// 	->join('employees', 'employees.id', 'trips.employee_id')
-		// 	->join('departments', 'departments.id', 'employees.department_id')
-		// 	->where('eyec.total_amount', '>', 0)
-		// 	// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
-		// 	->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
-		// 	->where('trips.status_id', 3026)
-		// 	->where('eyec.status_id', 3026)
-		// 	->whereDate('eyec.updated_at', '<', date('Y-m-d'))
-		// 	->groupBy('trips.id')
-		// 	->get()
-		// 	->toArray();
-			
-		$tripDetails = array_merge($advanceAmountTrips);
+		$claimeAmountTrips = Trip::select([
+			'trips.id',
+			DB::raw("'Trip claim' as category"),
+			'departments.business_id',
+		])
+			->where(function ($query) use ($id) {
+				if ($id) {
+					$query->where('trips.id', $id);
+				}
+			})
+			->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
+			->join('employees', 'employees.id', 'trips.employee_id')
+			->join('departments', 'departments.id', 'employees.department_id')
+			->where('eyec.total_amount', '>', 0)
+			// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
+			//->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
+			->where('trips.tally_claim_sync_status', 0)
+			->where('trips.status_id', 3026)
+			->where('eyec.status_id', 3026)
+			->whereDate('eyec.updated_at', '<', date('Y-m-d'))
+			->groupBy('trips.id')
+			->get()
+			->toArray();
+			//dd($claimeAmountTrips);
+		$tripDetails = array_merge($advanceAmountTrips, $claimeAmountTrips);
 		array_multisort(
 			array_column($tripDetails, 'id'),
 			SORT_ASC,
@@ -3737,25 +3738,24 @@ class ExportReportController extends Controller {
 				}
 
 				//TRIP CLAIM SYNC
-				// if ($trip_detail['category'] == 'Trip claim') {
-				// 	$tripClaimManagerApprovedAt = ApprovalLog::where('type_id', 3581) //Outstation Trip
-				// 		->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
-				// 		->where('entity_id', $trip->id)
-				// 		->pluck('approved_at')
-				// 		->first();
-				// 	if(empty($tripClaimManagerApprovedAt)){	
-				// 		continue;
-				// 	}
-
-				// 	$r = $trip->generateInvoiceApOracleAxapta();
-				// 	dd("fff");
-				// 	if (!$r['success']) {
-				// 		dump($r);
-				// 	} else {
-				// 		$trip->oracle_invoice_sync_status = 1; //SYNCED
-				// 		$trip->save();
-				// 	}
-				// }
+				if ($tripDetail['category'] == 'Trip claim') {
+					$tripClaimManagerApprovedAt = ApprovalLog::where('type_id', 3581) //Outstation Trip
+						->where('approval_type_id', 3601) //Outstation Trip Claim - Manager Approved
+						->where('entity_id', $trip->id)
+						->pluck('approved_at')
+						->first();
+					if(empty($tripClaimManagerApprovedAt)){	
+						continue;
+					}
+					$r = $trip->generateInvoiceApTallyAxapta();
+					
+					if (!$r['success']) {
+						dump($r);
+					} else {
+						$trip->oracle_invoice_sync_status = 1; //SYNCED
+						$trip->save();
+					}
+				}
 			} catch (\Exception $e) {
 				dump($e->getMessage() . ' Line: ' . $e->getLine() . ' File: ' . $e->getFile());
 				continue;
