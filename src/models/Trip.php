@@ -6809,15 +6809,20 @@ request is not desired, then those may be rejected.';
 		$lodgeWithoutGstValue = 0;
 		if ($employeeTrip->lodgings->isNotEmpty()) {
 			foreach ($employeeTrip->lodgings as $lodging) {
-				//LODGE STAY
+				//LODxE STAY
 				$lodgeWithoutGstValue += floatval($lodging->amount);
 			}
 		}
 
+		$withoutTaxAccountNumber = Config::where('id', 3861)->first()->name;
+		$advanceAccountNumber = Config::where('id', 3867)->first()->name;
+		$accountNumberCgst = Config::where('id', 3864)->first()->name;
+		$accountNumberSgst = Config::where('id', 3865)->first()->name;
+
 		$withoutTaxAmount = ($employeeTransportValue + $employeeBoardingValue + $employeeLocalTravelValue + $lodgeWithoutGstValue);
 
 		//WITHOUT TAX AMOUNT 
-		$withOutTax = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 570222, $withoutTaxAmount, null, null, null,null, null, null,null);
+		$withOutTax = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $withoutTaxAccountNumber, $withoutTaxAmount, null, null, null,null, null, null,null);
 		
 		$lodgingInvoiceCgst = [];
 		$lodgingInvoiceSgst = [];
@@ -6845,11 +6850,24 @@ request is not desired, then those may be rejected.';
 					if ($lodging->has_multiple_tax_invoice == "Yes") {
 						$lodgingTaxInvoice = $lodging->lodgingTaxInvoice;
 						if ($lodgingTaxInvoice && (($lodgingTaxInvoice->cgst > 0 && $lodgingTaxInvoice->sgst > 0) || ($lodgingTaxInvoice->igst > 0))) {
+							$lineDescription = "Lodging";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							if($tripLocations){
+								$lineDescription .= ',Place:' . ($tripLocations);
+							}
+							$lineDescription = substr($lineDescription, 0, 250);
 							if(($lodgingTaxInvoice->cgst > 0 && $lodgingTaxInvoice->sgst > 0)){
-								$lodgingInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $lodgingTaxInvoice->cgst, null, null, null,null, null, null,null);
-								$lodgingInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $lodgingTaxInvoice->sgst, null, null, null,null, null, null,null);
+								$lodgingInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $lodgingTaxInvoice->cgst, null, $lineDescription, null,null, null, null,null);
+								$lodgingInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $lodgingTaxInvoice->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$lodgingInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodgingTaxInvoice->igst, null, null, null,null, null, null,null);
+								$lodgingInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodgingTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
@@ -6857,11 +6875,26 @@ request is not desired, then those may be rejected.';
 						//DRY WASH
 						$drywashTaxInvoice = $lodging->drywashTaxInvoice;
 						if ($drywashTaxInvoice && (($drywashTaxInvoice->cgst > 0 && $drywashTaxInvoice->sgst > 0) || ($drywashTaxInvoice->igst > 0))) {
+
+							$lineDescription = "Lodging-DryWash";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							if($tripLocations){
+								$lineDescription .= ',Place:' . ($tripLocations);
+							}
+							$lineDescription = substr($lineDescription, 0, 250);
+
 							if(($drywashTaxInvoice->cgst > 0 && $drywashTaxInvoice->sgst > 0)){
-								$drywashInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $drywashTaxInvoice->cgst, null, null, null,null, null, null,null);
-								$drywashInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $drywashTaxInvoice->sgst, null, null, null,null, null, null,null);
+								$drywashInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $drywashTaxInvoice->cgst, null, $lineDescription, null,null, null, null,null);
+								$drywashInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $drywashTaxInvoice->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$drywashInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $drywashTaxInvoice->igst, null, null, null,null, null, null,null);
+								$drywashInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $drywashTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
@@ -6869,22 +6902,51 @@ request is not desired, then those may be rejected.';
 						//BOARDING
 						$boardingTaxInvoice = $lodging->boardingTaxInvoice;
 						if ($boardingTaxInvoice && (($boardingTaxInvoice->cgst > 0 && $boardingTaxInvoice->sgst > 0) || ($boardingTaxInvoice->igst > 0))) {
+
+							$lineDescription = "Lodging-Boarding";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							if($tripLocations){
+								$lineDescription .= ',Place:' . ($tripLocations);
+							}
+							$lineDescription = substr($lineDescription, 0, 250);
+
 							if(($boardingTaxInvoice->cgst > 0 && $boardingTaxInvoice->sgst > 0)){
-								$boardingInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $boardingTaxInvoice->cgst, null, null, null,null, null, null,null);
-								$boardingInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $boardingTaxInvoice->sgst, null, null, null,null, null, null,null);
+								$boardingInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $boardingTaxInvoice->cgst, null, $lineDescription, null,null, null, null,null);
+								$boardingInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $boardingTaxInvoice->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$boardingInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $boardingTaxInvoice->igst, null, null, null,null, null, null,null);
+								$boardingInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $boardingTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
 					} else {
 						//SINGLE
 						if (($lodging->cgst > 0 && $lodging->sgst > 0) || ($lodging->igst > 0)) {
+
+							$lineDescription = "Lodging";
+							if($lodging->reference_number){
+								$lineDescription .= "," .$lodging->reference_number;
+							}
+							if($lodging->invoice_date){
+								$lineDescription .= "," .$lodging->invoice_date;
+							}
+
+							$lineDescription .= ',Date:' . date('Y-m-d', strtotime($employeeTrip->start_date)) .' to '. date('Y-m-d', strtotime($employeeTrip->end_date));
+							if($tripLocations){
+								$lineDescription .= ',Place:' . ($tripLocations);
+							}
+							$lineDescription = substr($lineDescription, 0, 250);
 							if(($lodging->cgst > 0 && $lodging->sgst > 0)){
-								$lodgingInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156201, $lodging->cgst, null, null, null,null, null, null,null);
-								$lodgingInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 156202, $lodging->sgst, null, null, null,null, null, null,null);
+								$lodgingInvoiceCgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $lodging->cgst, null, $lineDescription, null,null, null, null,null);
+								$lodgingInvoiceSgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $lodging->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$lodgingInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodging->igst, null, null, null,null, null, null,null);
+								$lodgingInvoiceIgst = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodging->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
@@ -6903,16 +6965,16 @@ request is not desired, then those may be rejected.';
 
 		//IF ADVANCE
 		if ($employeeTrip->advance_received && $employeeTrip->advance_received > 0) {
-			$claimAdvance = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 153668, null, $employeeTrip->advance_received, null, 'Agst Ref', $prePaymentNumber,$tripApprovedDate, $employeeTrip->advance_received, 'cr');
+			$claimAdvance = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $advanceAccountNumber, null, $employeeTrip->advance_received, null, 'Agst Ref', $prePaymentNumber,$tripApprovedDate, $employeeTrip->advance_received, 'cr');
 
 
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				if ($employeeClaim->amount_to_pay == 2) {
 					//EMPLOYEE TO COMPANY
-					$employeeToCompany = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 153668,  $employeeClaim->balance_amount, null, null, null,null, null, null,null);
+					$employeeToCompany = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $advanceAccountNumber,  $employeeClaim->balance_amount, null, null, null,null, null, null,null);
 				}elseif($employeeClaim->amount_to_pay == 1){
 					//COMPANY TO EMPLOYEE
-					$companyToemployee = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 153668, null, $employeeClaim->balance_amount, null, null,null, null, null,null);
+					$companyToemployee = $this->claimApTallyExport(2, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $advanceAccountNumber, null, $employeeClaim->balance_amount, null, null,null, null, null,null);
 				}
 
 			}
