@@ -6665,9 +6665,10 @@ request is not desired, then those may be rejected.';
 		$employeeUserName = $employee->user ? $employee->user->name : "";
 
 		$tallyExports = [];
-		$tallyExports[] = $this->advanceApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, 'Advanced');
+		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, 'Advanced');
 
-		$tallyExports[] = $this->advanceApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP-Vendor('. $employeeUserName .')', null, $trip->advance_received, null);
+		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP-Vendor('. $employeeUserName .')', null, $trip->advance_received, null);
+		dd($tallyExports);
 		$res['success'] = true;
 		return $res;
 	}
@@ -6988,28 +6989,24 @@ request is not desired, then those may be rejected.';
 		return $res;
 	}
 
-	public function advanceApTallyExport($type, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
-		$details = null;
-		if($type == 1) {
-			//ADVANCE
-			$details = [
-				'businessUnit' => $businessUnit,
-				'template' => $template,
-				'businessUnitName' => $businessUnitName,
-				'supplierNumber' => $supplierNumber,
-				'prepaymentInvoiceNumber' => $invoiceNumber,
-				'invoiceDate' => date('Y-m-d', strtotime($invoiceDate)),
-				'accountingDate' => $accountingDate,
-				'company' => $companyCode,
-				'lob' => $lob,
-				'location' => $location,
-				'costCenter' => $costCenter,
-				'accountNumber' => $accountNumber,
-				'debit' => $debit,
-				'credit' => $credit,
-				'methodOfAdj' => $medhodOfAdj,
-			];
-		}
+	public function advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
+		$details = [
+			'businessUnit' => $businessUnit,
+			'template' => $template,
+			'businessUnitName' => $businessUnitName,
+			'supplierNumber' => $supplierNumber,
+			'prepaymentInvoiceNumber' => $invoiceNumber,
+			'invoiceDate' => date('Y-m-d', strtotime($invoiceDate)),
+			'accountingDate' => $accountingDate,
+			'company' => $companyCode,
+			'lob' => $lob,
+			'location' => $location,
+			'costCenter' => $costCenter,
+			'accountNumber' => $accountNumber,
+			'debit' => $debit,
+			'credit' => $credit,
+			'methodOfAdj' => $medhodOfAdj,
+		];
 		return $details;
 	}
 
