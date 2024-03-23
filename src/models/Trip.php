@@ -6668,7 +6668,6 @@ request is not desired, then those may be rejected.';
 		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, 'Advanced');
 
 		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP-Vendor('. $employeeUserName .')', null, $trip->advance_received, null);
-		dd($tallyExports);
 		$res['success'] = true;
 		return $res;
 	}
