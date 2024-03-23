@@ -6632,10 +6632,11 @@ request is not desired, then those may be rejected.';
 		$res['errors'] = [];
 
 		$trip = $this;
-		$companyCode = $trip->employee->department->business->oracle_code;
-		$businessUnit = $trip->employee->department->business->business_unit;
-		$businessUnitName = $trip->employee->department->business->business_unit_name;
-
+		$employee = $trip->employee;
+		$employeeBusiness = $employee->department->business;
+		$companyCode = $employeeBusiness->oracle_code;
+		$businessUnit = $employeeBusiness->business_unit;
+		$businessUnitName = $employeeBusiness->business_unit_name;
 		$template = 'Normal JV';
 		$invoiceNumber = $trip->number;
 
@@ -6652,23 +6653,21 @@ request is not desired, then those may be rejected.';
 			$invoiceDate = $tripApprovalLog->approved_date;
 		}
 
-		$supplierNumber = 'EMP_' . ($trip->employee->code);
+		$supplierNumber = 'EMP_' . ($employee->code);
 		$location = $trip->branch ? $trip->branch->oracle_code_l2 : null;
-		$sbu = $trip->employee->Sbu;
+		$sbu = $employee->Sbu;
 		$lob = $costCenter = null;
 		if ($sbu) {
 			$lob = $sbu->oracle_code ? $sbu->oracle_code : null;
 			$costCenter = $sbu->oracle_cost_centre ? $sbu->oracle_cost_centre : null;
 		}
 		$accountNumber = Config::where('id', 3860)->first()->name;
-		$accountingDate = date("Y-m-d");
-		$medhodOfAdj = 'Advanced';
+		$employeeUserName = $employee->user ? $employee->user->name : "";
 
-		$debitDetails = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, $medhodOfAdj);
+		$tallyExports = [];
+		$tallyExports[] = $this->advanceApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, 'Advanced');
 
-		$creditDetails = $this->formApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, null, $trip->advance_received, $medhodOfAdj);
-		$tripDetails = array_merge($debitDetails, $creditDetails);
-
+		$tallyExports[] = $this->advanceApTallyExport(1, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP-Vendor('. $employeeUserName .')', null, $trip->advance_received, null);
 		$res['success'] = true;
 		return $res;
 	}
@@ -6989,7 +6988,7 @@ request is not desired, then those may be rejected.';
 		return $res;
 	}
 
-	public function formApTallyExport($type, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
+	public function advanceApTallyExport($type, $businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
 		$details = null;
 		if($type == 1) {
 			//ADVANCE
