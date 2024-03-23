@@ -3695,17 +3695,17 @@ class ExportReportController extends Controller {
 			->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
 			->join('employees', 'employees.id', 'trips.employee_id')
 			->join('departments', 'departments.id', 'employees.department_id')
+			->join('businesses', 'businesses.id', 'departments.business_id')
 			->where('eyec.total_amount', '>', 0)
-			// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
-			//->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
 			->where('trips.tally_claim_sync_status', 0)
 			->where('trips.status_id', 3026)
 			->where('eyec.status_id', 3026)
+			->where('businesses.erp_sync_type', 2) //TALLY
 			->whereDate('eyec.updated_at', '<', date('Y-m-d'))
 			->groupBy('trips.id')
 			->get()
 			->toArray();
-			//dd($claimeAmountTrips);
+
 		$tripDetails = array_merge($advanceAmountTrips, $claimeAmountTrips);
 		array_multisort(
 			array_column($tripDetails, 'id'),
@@ -3744,7 +3744,7 @@ class ExportReportController extends Controller {
 						->where('entity_id', $trip->id)
 						->pluck('approved_at')
 						->first();
-					if(empty($tripClaimManagerApprovedAt)){	
+					if(empty($tripClaimManagerApprovedAt)){
 						continue;
 					}
 					$r = $trip->generateInvoiceApTallyAxapta();
@@ -3752,7 +3752,7 @@ class ExportReportController extends Controller {
 					if (!$r['success']) {
 						dump($r);
 					} else {
-						$trip->oracle_invoice_sync_status = 1; //SYNCED
+						$trip->tally_claim_sync_status = 1; //SYNCED
 						$trip->save();
 					}
 				}

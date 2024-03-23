@@ -6816,7 +6816,7 @@ request is not desired, then those may be rejected.';
 		}
 
 		$withoutTaxAccountNumber = Config::where('id', 3861)->first()->name;
-		$advanceAccountNumber = Config::where('id', 3867)->first()->name;
+		$advanceAccountNumber = Config::where('id', 3866)->first()->name;
 		$accountNumberCgst = Config::where('id', 3864)->first()->name;
 		$accountNumberSgst = Config::where('id', 3865)->first()->name;
 
@@ -6967,7 +6967,6 @@ request is not desired, then those may be rejected.';
 			//IF NON ADVANCE
 			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $employeeData->code, null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
 		}
-
 		$res['success'] = true;
 		return $res;
 	}
@@ -6993,33 +6992,27 @@ request is not desired, then those may be rejected.';
 		return $details;
 	}
 
-	public function claimApTallyExport($type, $businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, $accountingDate, $company, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $lineDescription, $methodOfAdj, $prePaymentNumber, $tripApprovedDate,$advanceReceived, $crDr) {
-	
-		$details = null;
-		if ($type == 2) {
-			// Claim
-			$details = [
-				'businessUnit' => $businessUnit,
-				'template' => $template,
-				'invoiceNumber' => $invoiceNumber,
-				'invoiceDate' => date('Y-m-d', strtotime($claimManagerApprovedDate)),
-				'accountingDate' => date('Y-m-d', strtotime($accountingDate)),
-				'company' => $company,
-				'lob' => $lob,
-				'location' => $location,
-				'costCenter' => $costCenter,
-				'accountNumber' => $accountNumber,
-				'debit' => $debit,
-				'credit' => $credit,
-				'lineDescription' => $lineDescription,
-				'methodOfAdj' => $methodOfAdj,
-				'advanceInvoiceNumber' => $prePaymentNumber,
-				'advanceDate' => $tripApprovedDate,
-				'Amount' => $advanceReceived,
-				'DrCr' => $crDr,
-			];
-		} 
-		
+	public function claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, $accountingDate, $company, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $lineDescription, $methodOfAdj, $prePaymentNumber, $tripApprovedDate,$advanceReceived, $crDr) {
+		$details = [
+			'businessUnit' => $businessUnit,
+			'template' => $template,
+			'invoiceNumber' => $invoiceNumber,
+			'invoiceDate' => date('Y-m-d', strtotime($claimManagerApprovedDate)),
+			'accountingDate' => date('Y-m-d', strtotime($accountingDate)),
+			'company' => $company,
+			'lob' => $lob,
+			'location' => $location,
+			'costCenter' => $costCenter,
+			'accountNumber' => $accountNumber,
+			'debit' => $debit,
+			'credit' => $credit,
+			'lineDescription' => $lineDescription,
+			'methodOfAdj' => $methodOfAdj,
+			'advanceInvoiceNumber' => $prePaymentNumber,
+			'advanceDate' => $tripApprovedDate,
+			'Amount' => $advanceReceived,
+			'DrCr' => $crDr,
+		];
 		return $details;
 	}
 	
