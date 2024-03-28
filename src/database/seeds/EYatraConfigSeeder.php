@@ -1657,7 +1657,15 @@ class EYatraConfigSeeder extends Seeder {
             ],
 			3866 => [
                 'name' => '153668',
-                'config_type_id' => 553,
+                'config_type_id' => 526,
+            ],
+			3867 => [
+                'name' => '570222',
+                'config_type_id' => 526,
+            ],
+			3868 => [
+                'name' => '432070',
+                'config_type_id' => 526,
             ],
 		];
 

@@ -6819,6 +6819,8 @@ request is not desired, then those may be rejected.';
 		$advanceAccountNumber = Config::where('id', 3866)->first()->name;
 		$accountNumberCgst = Config::where('id', 3864)->first()->name;
 		$accountNumberSgst = Config::where('id', 3865)->first()->name;
+		$accountNumberIgst = Config::where('id', 3867)->first()->name;
+		$accountNumberRoundOff = Config::where('id', 3868)->first()->name;
 
 		$withoutTaxAmount = ($employeeTransportValue + $employeeBoardingValue + $employeeLocalTravelValue + $lodgeWithoutGstValue);
 
@@ -6847,12 +6849,12 @@ request is not desired, then those may be rejected.';
 								$lineDescription .= ',Place:' . ($tripLocations);
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
-
+							
 							if($lodgingTaxInvoice->cgst > 0 && $lodgingTaxInvoice->sgst > 0){
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $lodgingTaxInvoice->cgst, null, $lineDescription, null,null, null, null,null);
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $lodgingTaxInvoice->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodgingTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
+								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberIgst, $lodgingTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
@@ -6879,7 +6881,7 @@ request is not desired, then those may be rejected.';
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $drywashTaxInvoice->cgst, null, $lineDescription, null,null, null, null,null);
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $drywashTaxInvoice->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $drywashTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
+								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberIgst, $drywashTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
@@ -6906,7 +6908,7 @@ request is not desired, then those may be rejected.';
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $boardingTaxInvoice->cgst, null, $lineDescription, null,null, null, null,null);
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $boardingTaxInvoice->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $boardingTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
+								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberIgst, $boardingTaxInvoice->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
@@ -6931,7 +6933,7 @@ request is not desired, then those may be rejected.';
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberCgst, $lodging->cgst, null, $lineDescription, null,null, null, null,null);
 								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberSgst, $lodging->sgst, null, $lineDescription, null,null, null, null,null);
 							}else{
-								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $lodging->igst, null, $lineDescription, null,null, null, null,null);
+								$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberIgst, $lodging->igst, null, $lineDescription, null,null, null, null,null);
 							}
 
 						}
@@ -6945,7 +6947,7 @@ request is not desired, then those may be rejected.';
 		$roundOffAmt = round($employeeClaim->total_amount) - $employeeClaim->total_amount;
 		$employeeLodgingRoundoff += floatval($roundOffAmt);
 		if ($employeeLodgingRoundoff && $employeeLodgingRoundoff != '0.00') {
-			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, null, $employeeLodgingRoundoff, null, 'Roundoff', null, null, null, null,null);
+			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberRoundOff, $employeeLodgingRoundoff, null, 'Roundoff', null, null, null, null,null);
 		}
 
 		//IF ADVANCE
@@ -6972,48 +6974,121 @@ request is not desired, then those may be rejected.';
 	}
 
 	public function advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
-		$details = [
-			'businessUnit' => $businessUnit,
+
+		$res = [];
+		$res['errors'] = [];
+		$universal_portal = Portal::select([
+			'db_host_name',
+			'db_port_number',
+			'db_name',
+			'db_user_name',
+			'db_password',
+		])
+			->where('id', 2)
+			->first();
+		DB::setDefaultConnection('dynamic');
+		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $universal_portal->db_host_name);
+		$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $universal_portal->db_port_number);
+		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
+		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $universal_portal->db_name);
+		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $universal_portal->db_user_name);
+		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $universal_portal->db_password);
+		DB::purge('dynamic');
+		DB::reconnect('dynamic');
+
+		$apTallyAdvanceExports = DB::table('ap_tally_invoices')->where([
+			'invoice_number' => $invoiceNumber,
+			'business_unit' => $businessUnit,
+		])->get();
+		if (count($apTallyAdvanceExports) > 0) {
+			$res['errors'] = ['Already exported to Tally table'];
+			DB::setDefaultConnection('mysql');
+			return $res;
+		}
+
+		DB::table('ap_tally_invoices')->insert([
+			'business_unit' => $businessUnit,
 			'template' => $template,
-			'businessUnitName' => $businessUnitName,
-			'supplierNumber' => $supplierNumber,
-			'prepaymentInvoiceNumber' => $invoiceNumber,
-			'invoiceDate' => date('Y-m-d', strtotime($invoiceDate)),
-			'accountingDate' => $accountingDate,
+			'business_unit_name' => $businessUnitName,
+			'supplier_number' => $supplierNumber,
+			'invoice_number' => $invoiceNumber,
+			'invoice_date' => date('Y-m-d', strtotime($invoiceDate)),
+			'accounting_date' => $accountingDate,
 			'company' => $companyCode,
 			'lob' => $lob,
 			'location' => $location,
-			'costCenter' => $costCenter,
-			'accountNumber' => $accountNumber,
+			'cost_center' => $costCenter,
+			'account' => $accountNumber,
 			'debit' => $debit,
 			'credit' => $credit,
-			'methodOfAdj' => $medhodOfAdj,
-		];
-		return $details;
+			'method_of_adj' => $medhodOfAdj,
+			'created_at' => Carbon::now(),
+		]);
+
+		$res['success'] = true;
+		DB::setDefaultConnection('mysql');
+		return $res;
+
 	}
 
 	public function claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, $accountingDate, $company, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $lineDescription, $methodOfAdj, $prePaymentNumber, $tripApprovedDate,$advanceReceived, $crDr) {
-		$details = [
-			'businessUnit' => $businessUnit,
+		
+		$res = [];
+		$res['errors'] = [];
+		$universal_portal = Portal::select([
+			'db_host_name',
+			'db_port_number',
+			'db_name',
+			'db_user_name',
+			'db_password',
+		])
+			->where('id', 2)
+			->first();
+		DB::setDefaultConnection('dynamic');
+		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $universal_portal->db_host_name);
+		$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $universal_portal->db_port_number);
+		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
+		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $universal_portal->db_name);
+		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $universal_portal->db_user_name);
+		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $universal_portal->db_password);
+		DB::purge('dynamic');
+		DB::reconnect('dynamic');
+
+		$apTallyInvoiceExports = DB::table('ap_tally_invoices')->where([
+			'invoice_number' => $invoiceNumber,
+			'business_unit' => $businessUnit,
+		])->get();
+		if (count($apTallyInvoiceExports) > 0) {
+			$res['errors'] = ['Already exported to Tally table'];
+			DB::setDefaultConnection('mysql');
+			return $res;
+		}
+
+		DB::table('ap_tally_invoices')->insert([
+			'business_unit' => $businessUnit,
 			'template' => $template,
-			'invoiceNumber' => $invoiceNumber,
-			'invoiceDate' => date('Y-m-d', strtotime($claimManagerApprovedDate)),
-			'accountingDate' => date('Y-m-d', strtotime($accountingDate)),
+			'invoice_number' => $invoiceNumber,
+			'invoice_date' => date('Y-m-d', strtotime($claimManagerApprovedDate)),
+			'accounting_date' => date('Y-m-d', strtotime($accountingDate)),
 			'company' => $company,
 			'lob' => $lob,
 			'location' => $location,
-			'costCenter' => $costCenter,
-			'accountNumber' => $accountNumber,
+			'cost_center' => $costCenter,
+			'account' => $accountNumber,
 			'debit' => $debit,
 			'credit' => $credit,
-			'lineDescription' => $lineDescription,
-			'methodOfAdj' => $methodOfAdj,
-			'advanceInvoiceNumber' => $prePaymentNumber,
-			'advanceDate' => $tripApprovedDate,
-			'Amount' => $advanceReceived,
-			'DrCr' => $crDr,
-		];
-		return $details;
+			'line_description' => $lineDescription,
+			'method_of_adj' => $methodOfAdj,
+			'advance_invoice_number' => $prePaymentNumber,
+			'advance_date' => $tripApprovedDate,
+			'amount' => $advanceReceived,
+			'dr_cr' => $crDr,
+			'created_at' => Carbon::now(),
+		]);
+
+		$res['success'] = true;
+		DB::setDefaultConnection('mysql');
+		return $res;
 	}
 	
 
