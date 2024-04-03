@@ -6996,7 +6996,7 @@ request is not desired, then those may be rejected.';
 		DB::purge('dynamic');
 		DB::reconnect('dynamic');
 
-		$apTallyAdvanceExports = DB::table('ap_tally_invoices')->where([
+		$apTallyAdvanceExports = DB::table('travelex_tally_invoices')->where([
 			'invoice_number' => $invoiceNumber,
 			'business_unit' => $businessUnit,
 		])->get();
@@ -7006,7 +7006,7 @@ request is not desired, then those may be rejected.';
 			return $res;
 		}
 
-		DB::table('ap_tally_invoices')->insert([
+		DB::table('travelex_tally_invoices')->insert([
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'business_unit_name' => $businessUnitName,
@@ -7054,7 +7054,7 @@ request is not desired, then those may be rejected.';
 		DB::purge('dynamic');
 		DB::reconnect('dynamic');
 
-		$apTallyInvoiceExports = DB::table('ap_tally_invoices')->where([
+		$apTallyInvoiceExports = DB::table('travelex_tally_invoices')->where([
 			'invoice_number' => $invoiceNumber,
 			'business_unit' => $businessUnit,
 		])->get();
@@ -7064,7 +7064,7 @@ request is not desired, then those may be rejected.';
 			return $res;
 		}
 
-		DB::table('ap_tally_invoices')->insert([
+		DB::table('travelex_tally_invoices')->insert([
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'invoice_number' => $invoiceNumber,
