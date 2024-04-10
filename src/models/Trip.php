@@ -6996,16 +6996,6 @@ request is not desired, then those may be rejected.';
 		DB::purge('dynamic');
 		DB::reconnect('dynamic');
 
-		$apTallyAdvanceExports = DB::table('travelex_tally_invoices')->where([
-			'invoice_number' => $invoiceNumber,
-			'business_unit' => $businessUnit,
-		])->get();
-		if (count($apTallyAdvanceExports) > 0) {
-			$res['errors'] = ['Already exported to Tally table'];
-			DB::setDefaultConnection('mysql');
-			return $res;
-		}
-
 		DB::table('travelex_tally_invoices')->insert([
 			'business_unit' => $businessUnit,
 			'template' => $template,
@@ -7053,16 +7043,6 @@ request is not desired, then those may be rejected.';
 		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $universal_portal->db_password);
 		DB::purge('dynamic');
 		DB::reconnect('dynamic');
-
-		$apTallyInvoiceExports = DB::table('travelex_tally_invoices')->where([
-			'invoice_number' => $invoiceNumber,
-			'business_unit' => $businessUnit,
-		])->get();
-		if (count($apTallyInvoiceExports) > 0) {
-			$res['errors'] = ['Already exported to Tally table'];
-			DB::setDefaultConnection('mysql');
-			return $res;
-		}
 
 		DB::table('travelex_tally_invoices')->insert([
 			'business_unit' => $businessUnit,
