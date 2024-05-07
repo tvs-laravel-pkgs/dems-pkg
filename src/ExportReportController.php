@@ -3527,6 +3527,7 @@ class ExportReportController extends Controller {
 		])
 			->join('employees', 'employees.id', 'trips.employee_id')
 			->join('departments', 'departments.id', 'employees.department_id')
+			->join('businesses', 'businesses.id', 'departments.business_id')
 			->where(function ($query) use ($id) {
 				if ($id) {
 					$query->where('trips.id', $id);
@@ -3545,6 +3546,7 @@ class ExportReportController extends Controller {
                 }
             })
             ->where('trips.status_id','!=', 3032) //Cancelled
+			->where('businesses.erp_sync_type', 1) //Oracle
 			->groupBy('trips.id')
 			->get()
 			->toArray();
@@ -3562,11 +3564,13 @@ class ExportReportController extends Controller {
 			->join('ey_employee_claims as eyec', 'eyec.trip_id', 'trips.id')
 			->join('employees', 'employees.id', 'trips.employee_id')
 			->join('departments', 'departments.id', 'employees.department_id')
+			->join('businesses', 'businesses.id', 'departments.business_id')
 			->where('eyec.total_amount', '>', 0)
 			// ->where('trips.self_ax_export_synched', 1) //AX TRIP CLIAM SYNC
 			->where('trips.oracle_invoice_sync_status', 0) //ORACLE TRIP CLAIM NON SYNC
 			->where('trips.status_id', 3026)
 			->where('eyec.status_id', 3026)
+			->where('businesses.erp_sync_type', 1) //Oracle
 			->where(function($q) use ($sync_method) {
                 if($sync_method == "auto"){
                 	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));
