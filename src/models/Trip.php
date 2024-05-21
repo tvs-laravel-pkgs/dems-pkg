@@ -6958,16 +6958,16 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				if ($employeeClaim->amount_to_pay == 2) {
 					//EMPLOYEE TO COMPANY
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP-Vendor('.$employeeUserName.')',  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP-Vendor('.$employeeData->code.')',  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}elseif($employeeClaim->amount_to_pay == 1){
 					//COMPANY TO EMPLOYEE
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter,'EMP-Vendor('.$employeeUserName.')', null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter,'EMP-Vendor('.$employeeData->code.')', null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}
 
 			}
 		}else{
 			//IF NON ADVANCE
-			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $employeeData->code, null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
+			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP-Vendor('.$employeeData->code.')', null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
 		}
 		$res['success'] = true;
 		return $res;
