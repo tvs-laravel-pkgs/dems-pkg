@@ -30,6 +30,7 @@ app.component('deviationApproval', {
             columns: [
                 { data: 'emp_code', name: 'employees.code', searchable: true },
                 { data: 'user_name', name: 'users.name', searchable: true },
+                { data: 'business_name', name: 'businesses.name', searchable: true },
                 { data: 'sbu', name: 'sbus.name', searchable: false },
                 { data: 'status', searchable: false },
             ],
