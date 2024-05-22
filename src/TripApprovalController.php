@@ -44,7 +44,14 @@ class TripApprovalController extends Controller {
 			->join('employees as employee', 'employee.id', 'trips.employee_id')
 			->leftjoin('employees as trip_manager_employee', 'trip_manager_employee.id', 'trips.manager_id')
 			->leftJoin('sbus','sbus.id','employee.sbu_id')
-			->leftJoin('deviation_approver_sbus','deviation_approver_sbus.sbu_id','sbus.id')
+			->leftJoin('departments','departments.id','employee.department_id')
+			//->leftJoin('deviation_approver_sbus','deviation_approver_sbus.sbu_id','sbus.id')
+
+			->leftjoin('deviation_approver_sbus', function($join) {
+		        $join->on('sbus.id', 'deviation_approver_sbus.sbu_id')
+		        ->where('deviation_approver_sbus.business_id', '=', DB::raw('departments.business_id'))
+		        	;
+		    })
             ->leftjoin('deviation_approvers', 'deviation_approvers.id', 'deviation_approver_sbus.deviation_approver_id')
             
 			//->leftjoin('employees as senior_manager_employee', 'senior_manager_employee.id', 'trip_manager_employee.reporting_to_id')
@@ -106,11 +113,11 @@ class TripApprovalController extends Controller {
 				if (count($sub_employee_id) > 0) {
 					$trips->where(function($q) use ($ids){ //Alternate seniour manager
     				$q->where(function($reportingQ) use ($ids) {
-        			$reportingQ->where('employee.reporting_to_id', $ids)
+        			$reportingQ->whereIn('employee.reporting_to_id', $ids)
        				 ->whereIn('trips.status_id', [3021,3023]);
     				})
     				->orWhere(function($seniorQ) use ($ids) {
-        			$seniorQ->where('deviation_approvers.deviation_employee_id', $ids)
+        			$seniorQ->whereIn('deviation_approvers.deviation_employee_id', $ids)
         			->whereIn('trips.status_id', [3029]);
     				});
 				})
