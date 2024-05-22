@@ -17,7 +17,8 @@ class DeviationController extends Controller {
                 'deviation_approvers.deleted_at',
                 DB::raw('GROUP_CONCAT(sbus.name) as sbu'),
                 'employees.code as emp_code',
-                'users.name as user_name'
+                'users.name as user_name',
+                'businesses.name as business_name'
             )->leftjoin('deviation_approver_sbus', 'deviation_approver_sbus.deviation_approver_id', 'deviation_approvers.id')
 			->leftjoin('sbus', 'sbus.id', 'deviation_approver_sbus.sbu_id')
 			->leftjoin('employees', 'employees.id', 'deviation_approvers.deviation_employee_id')
@@ -25,8 +26,9 @@ class DeviationController extends Controller {
                 $j->on('users.entity_id', 'employees.id')
                 ->where('users.user_type_id', 3121);    // 3121 -> Employee
             })
+            ->leftjoin('businesses', 'businesses.id', 'deviation_approver_sbus.business_id')
 			->orderby('deviation_approvers.id', 'DESC')
-			->groupBy('deviation_approvers.id');
+			->groupBy('deviation_approvers.id','deviation_approver_sbus.business_id');
 		// dd($list);
 		return Datatables::of($list)
 			->addColumn('status', function ($list) {
