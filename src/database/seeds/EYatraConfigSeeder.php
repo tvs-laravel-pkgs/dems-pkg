@@ -1647,6 +1647,26 @@ class EYatraConfigSeeder extends Seeder {
                 'name' => 'TTBL Travelx Pre Payment Invoice',
                 'config_type_id' => 550,
             ],
+			3864 => [
+                'name' => '156201',
+                'config_type_id' => 553,
+            ],
+			3865 => [
+                'name' => '156202',
+                'config_type_id' => 553,
+            ],
+			3866 => [
+                'name' => '153668',
+                'config_type_id' => 526,
+            ],
+			3867 => [
+                'name' => '570222',
+                'config_type_id' => 526,
+            ],
+			3868 => [
+                'name' => '432070',
+                'config_type_id' => 526,
+            ],
 		];
 
 		//SAVING CONFIG TYPES
