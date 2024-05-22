@@ -100,7 +100,7 @@ class TripController extends Controller {
 				// if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
 				// if (($trip->status_id == '3032' && !empty($trip->approve_remarks)) || $trip->status_id == '3021' || $trip->status_id == '3022') { //NEED TO DISABLE
 				// if (($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022') || ($trip->status_id == '3028' && !$trip->claim_id)) { //NEED TO ENABLE
-				if ($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3033') { 
+				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3033') { 
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
 						$edit_class = "";

@@ -1612,7 +1612,7 @@ class EYatraConfigSeeder extends Seeder {
 				'config_type_id' => 587,
 			],
 			3845 => [
-				'name' => 'DLOB-PV',
+				'name' => 'Car Dealership (PV)',
 				'config_type_id' => 551,
 			],
 			4098 => [
@@ -1627,6 +1627,26 @@ class EYatraConfigSeeder extends Seeder {
 				'name' => 'DLOB-PV Travelx Pre Payment Invoice',
 				'config_type_id' => 550,
 			],
+			4146 => [
+				'name' => 'RENCOMN,RENSALE,RENSERV,HONDASALE,HONDASERV,HONDACOMMON,RIPL,HONDA,TVSONE',
+				'config_type_id' => 587,
+			],
+			3846 => [
+                'name' => 'TTBL',
+                'config_type_id' => 551,
+            ],
+            4112 => [
+                'name' => 'TTBL Travelx Invoice',
+                'config_type_id' => 550,
+            ],
+            4113 => [
+                'name' => 'TTBL Travel Claim Refund Invoice',
+                'config_type_id' => 550,
+            ],
+            4114 => [
+                'name' => 'TTBL Travelx Pre Payment Invoice',
+                'config_type_id' => 550,
+            ],
 		];
 
 		//SAVING CONFIG TYPES
