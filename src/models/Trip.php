@@ -37,7 +37,10 @@ use App\Oracle\OtherTypeTransactionDetail;
 use App\Portal;
 use Config as dataBaseConfig;
 use File;
-
+use GuzzleHttp\Client as GuzzleHttpClient;
+use GuzzleHttp\RequestOptions as RequestOptions;
+use GuzzleHttp\Exception\BadResponseException as GuzzleHttpException;
+use GuzzleHttp\Exception\GuzzleException;
 
 class Trip extends Model {
 	use SoftDeletes;
@@ -6975,28 +6978,16 @@ request is not desired, then those may be rejected.';
 
 	public function advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
 
-		$res = [];
-		$res['errors'] = [];
-		$universal_portal = Portal::select([
-			'db_host_name',
-			'db_port_number',
-			'db_name',
-			'db_user_name',
-			'db_password',
-		])
-			->where('id', 2)
-			->first();
-		DB::setDefaultConnection('dynamic');
-		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $universal_portal->db_host_name);
-		$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $universal_portal->db_port_number);
-		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
-		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $universal_portal->db_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $universal_portal->db_user_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $universal_portal->db_password);
-		DB::purge('dynamic');
-		DB::reconnect('dynamic');
-
-		DB::table('travelex_tally_invoices')->insert([
+		$data = [];
+		if (empty($invoiceNumber)) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					"Invoice Number Required",
+				],
+			]);
+		}
+		$data = [
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'business_unit_name' => $businessUnitName,
@@ -7013,38 +7004,44 @@ request is not desired, then those may be rejected.';
 			'credit' => $credit,
 			'method_of_adj' => $medhodOfAdj,
 			'created_at' => Carbon::now(),
-		]);
+		];
 
-		$res['success'] = true;
-		DB::setDefaultConnection('mysql');
-		return $res;
+		// API endpoint
+		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
+
+		$client = new GuzzleHttpClient();
+        try{
+            $response = $client->request('POST',$url, [
+                'headers' => [
+                    'Content-Type' => 'application/octet-stream'
+                ],
+                RequestOptions::JSON => $data
+            ]);
+            return [
+                'success' => true,
+                'datas' => $response->getBody()->getContents()
+            ];
+        } catch(GuzzleException $e){
+            return [
+                'success' => false,
+                'datas' => $e->getMessage()
+            ];
+        }
 
 	}
 
 	public function claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, $accountingDate, $company, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $lineDescription, $methodOfAdj, $prePaymentNumber, $tripApprovedDate,$advanceReceived, $crDr) {
 		
-		$res = [];
-		$res['errors'] = [];
-		$universal_portal = Portal::select([
-			'db_host_name',
-			'db_port_number',
-			'db_name',
-			'db_user_name',
-			'db_password',
-		])
-			->where('id', 2)
-			->first();
-		DB::setDefaultConnection('dynamic');
-		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $universal_portal->db_host_name);
-		$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $universal_portal->db_port_number);
-		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
-		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $universal_portal->db_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $universal_portal->db_user_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $universal_portal->db_password);
-		DB::purge('dynamic');
-		DB::reconnect('dynamic');
-
-		DB::table('travelex_tally_invoices')->insert([
+		$data = [];
+		if (empty($invoiceNumber)) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					"Invoice Number Required",
+				],
+			]);
+		}
+		$data = [
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'invoice_number' => $invoiceNumber,
@@ -7064,12 +7061,29 @@ request is not desired, then those may be rejected.';
 			'amount' => $advanceReceived,
 			'dr_cr' => $crDr,
 			'created_at' => Carbon::now(),
-		]);
+		];
+		// API endpoint
+		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
 
-		$res['success'] = true;
-		DB::setDefaultConnection('mysql');
-		return $res;
-	}
+		$client = new GuzzleHttpClient();
+        try{
+            $response = $client->request('POST',$url, [
+                'headers' => [
+                    'Content-Type' => 'application/octet-stream'
+                ],
+                RequestOptions::JSON => $data
+            ]);
+            return [
+                'success' => true,
+                'datas' => $response->getBody()->getContents()
+            ];
+        } catch(GuzzleException $e){
+            return [
+                'success' => false,
+                'datas' => $e->getMessage()
+            ];
+        }
+			}
 	
 
 }
