@@ -37,7 +37,7 @@ use App\Oracle\OtherTypeTransactionDetail;
 use App\Portal;
 use Config as dataBaseConfig;
 use File;
-use GuzzleHttp\Client as GuzzleHttpClient;
+use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions as RequestOptions;
 use GuzzleHttp\Exception\BadResponseException as GuzzleHttpException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -7003,30 +7003,29 @@ request is not desired, then those may be rejected.';
 			'debit' => $debit,
 			'credit' => $credit,
 			'method_of_adj' => $medhodOfAdj,
-			'created_at' => Carbon::now(),
 		];
 
-		// API endpoint
 		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
 
-		$client = new GuzzleHttpClient();
-        try{
-            $response = $client->request('POST',$url, [
-                'headers' => [
-                    'Content-Type' => 'application/octet-stream'
-                ],
-                RequestOptions::JSON => $data
-            ]);
-            return [
-                'success' => true,
-                'datas' => $response->getBody()->getContents()
-            ];
-        } catch(GuzzleException $e){
-            return [
-                'success' => false,
-                'datas' => $e->getMessage()
-            ];
-        }
+		$client = new Client();
+
+		try {
+			$response = $client->request('POST', $url, [
+				'headers' => [
+					'Content-Type' => 'application/octet-stream'
+				],
+				'json' => $data
+			]);
+			return [
+				'success' => true,
+				'datas' => $response->getBody()->getContents()
+			];
+		} catch (GuzzleException $e) {
+			return [
+				'success' => false,
+				'datas' => $e->getMessage()
+			];
+		}
 
 	}
 
@@ -7060,30 +7059,29 @@ request is not desired, then those may be rejected.';
 			'advance_date' => $tripApprovedDate,
 			'amount' => $advanceReceived,
 			'dr_cr' => $crDr,
-			'created_at' => Carbon::now(),
 		];
-		// API endpoint
 		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
 
-		$client = new GuzzleHttpClient();
-        try{
-            $response = $client->request('POST',$url, [
-                'headers' => [
-                    'Content-Type' => 'application/octet-stream'
-                ],
-                RequestOptions::JSON => $data
-            ]);
-            return [
-                'success' => true,
-                'datas' => $response->getBody()->getContents()
-            ];
-        } catch(GuzzleException $e){
-            return [
-                'success' => false,
-                'datas' => $e->getMessage()
-            ];
-        }
-			}
+		$client = new Client();
+
+		try {
+			$response = $client->request('POST', $url, [
+				'headers' => [
+					'Content-Type' => 'application/octet-stream'
+				],
+				'json' => $data
+			]);
+			return [
+				'success' => true,
+				'datas' => $response->getBody()->getContents()
+			];
+		} catch (GuzzleException $e) {
+			return [
+				'success' => false,
+				'datas' => $e->getMessage()
+			];
+		}
+	}
 	
 
 }
