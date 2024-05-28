@@ -7004,7 +7004,9 @@ request is not desired, then those may be rejected.';
 			'credit' => $credit,
 			'method_of_adj' => $medhodOfAdj,
 		];
-
+		$wrappedData = [
+			'datas' => [$data]
+		];
 		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
 
 		$client = new Client();
@@ -7014,7 +7016,7 @@ request is not desired, then those may be rejected.';
 				'headers' => [
 					'Content-Type' => 'application/json'
 				],
-				'json' => $data
+				'json' => $wrappedData
 			]);
 			return [
 				'success' => true,
@@ -7060,6 +7062,9 @@ request is not desired, then those may be rejected.';
 			'amount' => $advanceReceived,
 			'dr_cr' => $crDr,
 		];
+		$wrappedData = [
+			'datas' => [$data]
+		];
 		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
 
 		$client = new Client();
@@ -7069,13 +7074,12 @@ request is not desired, then those may be rejected.';
 				'headers' => [
 					'Content-Type' => 'application/json'
 				],
-				'json' => $data
+				'json' => $wrappedData
 			]);
 			return [
 				'success' => true,
 				'datas' => $response->getBody()->getContents()
 			];
-			
 		} catch (GuzzleException $e) {
 			return [
 				'success' => false,
