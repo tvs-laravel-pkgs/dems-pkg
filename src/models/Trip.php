@@ -7012,7 +7012,7 @@ request is not desired, then those may be rejected.';
 		try {
 			$response = $client->request('POST', $url, [
 				'headers' => [
-					'Content-Type' => 'application/octet-stream'
+					'Content-Type' => 'application/json'
 				],
 				'json' => $data
 			]);
@@ -7067,7 +7067,7 @@ request is not desired, then those may be rejected.';
 		try {
 			$response = $client->request('POST', $url, [
 				'headers' => [
-					'Content-Type' => 'application/octet-stream'
+					'Content-Type' => 'application/json'
 				],
 				'json' => $data
 			]);
@@ -7075,6 +7075,7 @@ request is not desired, then those may be rejected.';
 				'success' => true,
 				'datas' => $response->getBody()->getContents()
 			];
+			
 		} catch (GuzzleException $e) {
 			return [
 				'success' => false,
