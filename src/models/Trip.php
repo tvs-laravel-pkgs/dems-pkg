@@ -6670,8 +6670,15 @@ request is not desired, then those may be rejected.';
 		$tallyExports = [];
 		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, 'Advanced');
 
-		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP-Vendor('. $employee->code .')', null, $trip->advance_received, null);
-		$res['success'] = true;
+		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP_' . $employee->code , null, $trip->advance_received, null);
+		
+		$response = $this->sendTallyExportsToApi($tallyExports);
+
+		if ($response['success']) {
+			$res['success'] = true;
+		} else {
+			$res['errors'][] = $response['datas'];
+		}
 		return $res;
 	}
 
@@ -6961,24 +6968,29 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				if ($employeeClaim->amount_to_pay == 2) {
 					//EMPLOYEE TO COMPANY
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP-Vendor('.$employeeData->code.')',  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP_'.$employeeData->code ,  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}elseif($employeeClaim->amount_to_pay == 1){
 					//COMPANY TO EMPLOYEE
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter,'EMP-Vendor('.$employeeData->code.')', null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter,'EMP_' .$employeeData->code, null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}
 
 			}
 		}else{
 			//IF NON ADVANCE
-			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP-Vendor('.$employeeData->code.')', null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
+			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP_' .$employeeData->code, null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
 		}
-		$res['success'] = true;
+		$response = $this->sendTallyExportsToApi($tallyExports);
+
+		if ($response['success']) {
+			$res['success'] = true;
+		} else {
+			$res['errors'][] = $response['datas'];
+		}
 		return $res;
 	}
 
 	public function advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
 
-		$data = [];
 		if (empty($invoiceNumber)) {
 			return response()->json([
 				'success' => false,
@@ -6987,7 +6999,7 @@ request is not desired, then those may be rejected.';
 				],
 			]);
 		}
-		$data = [
+		return [
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'business_unit_name' => $businessUnitName,
@@ -7004,30 +7016,7 @@ request is not desired, then those may be rejected.';
 			'credit' => $credit,
 			'method_of_adj' => $medhodOfAdj,
 		];
-		$wrappedData = [
-			'datas' => [$data]
-		];
-		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
-
-		$client = new Client();
-
-		try {
-			$response = $client->request('POST', $url, [
-				'headers' => [
-					'Content-Type' => 'application/json'
-				],
-				'json' => $wrappedData
-			]);
-			return [
-				'success' => true,
-				'datas' => $response->getBody()->getContents()
-			];
-		} catch (GuzzleException $e) {
-			return [
-				'success' => false,
-				'datas' => $e->getMessage()
-			];
-		}
+		
 
 	}
 
@@ -7069,6 +7058,32 @@ request is not desired, then those may be rejected.';
 
 		$client = new Client();
 
+		try {
+			$response = $client->request('POST', $url, [
+				'headers' => [
+					'Content-Type' => 'application/json'
+				],
+				'json' => $wrappedData
+			]);
+			return [
+				'success' => true,
+				'datas' => $response->getBody()->getContents()
+			];
+		} catch (GuzzleException $e) {
+			return [
+				'success' => false,
+				'datas' => $e->getMessage()
+			];
+		}
+	}
+	public function sendTallyExportsToApi($tallyExports) {
+		$wrappedData = [
+			'datas' => json_decode(json_encode($tallyExports))
+		];
+		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
+	
+		$client = new Client();
+	
 		try {
 			$response = $client->request('POST', $url, [
 				'headers' => [
