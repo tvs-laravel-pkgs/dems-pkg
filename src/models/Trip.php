@@ -7022,7 +7022,6 @@ request is not desired, then those may be rejected.';
 
 	public function claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, $accountingDate, $company, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $lineDescription, $methodOfAdj, $prePaymentNumber, $tripApprovedDate,$advanceReceived, $crDr) {
 		
-		$data = [];
 		if (empty($invoiceNumber)) {
 			return response()->json([
 				'success' => false,
@@ -7031,7 +7030,7 @@ request is not desired, then those may be rejected.';
 				],
 			]);
 		}
-		$data = [
+		return [
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'invoice_number' => $invoiceNumber,
@@ -7051,30 +7050,6 @@ request is not desired, then those may be rejected.';
 			'amount' => $advanceReceived,
 			'dr_cr' => $crDr,
 		];
-		$wrappedData = [
-			'datas' => [$data]
-		];
-		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
-
-		$client = new Client();
-
-		try {
-			$response = $client->request('POST', $url, [
-				'headers' => [
-					'Content-Type' => 'application/json'
-				],
-				'json' => $wrappedData
-			]);
-			return [
-				'success' => true,
-				'datas' => $response->getBody()->getContents()
-			];
-		} catch (GuzzleException $e) {
-			return [
-				'success' => false,
-				'datas' => $e->getMessage()
-			];
-		}
 	}
 	public function sendTallyExportsToApi($tallyExports) {
 		$wrappedData = [
