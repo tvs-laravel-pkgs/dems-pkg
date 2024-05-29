@@ -3755,8 +3755,10 @@ class ExportReportController extends Controller {
 					}
 					$r = $trip->generateInvoiceApTallyAxapta();
 					
-					if (!$r['success']) {
+					if (isset($r['data']['errorDatas'][0]['errors'])) {
 						dump($r);
+						$trip->tally_claim_sync_status = 0; //Non SYNCED
+						$trip->save();
 					} else {
 						$trip->tally_claim_sync_status = 1; //SYNCED
 						$trip->save();
