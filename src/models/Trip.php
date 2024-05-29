@@ -6674,12 +6674,16 @@ request is not desired, then those may be rejected.';
 		
 		$response = $this->sendTallyExportsToApi($tallyExports);
 
-		if ($response['success']) {
-			$res['success'] = true;
-		} else {
-			$res['errors'][] = $response['datas'];
+		// if ($response['success']) {
+		// 	$res['success'] = true;
+		// } else {
+		// 	$res['errors'][] = $response['datas'];
+		// }
+		if(isset($response['data']['errorDatas'][0]['errors'])){
+			$error_message = Trip::where('id', $trip->id)
+			->update(['tally_advance_sync_errors' => $response['data']['errorDatas'][0]['errors']]);
 		}
-		return $res;
+		return $response;
 	}
 
 	public function generateInvoiceApTallyAxapta() {
@@ -6981,12 +6985,16 @@ request is not desired, then those may be rejected.';
 		}
 		$response = $this->sendTallyExportsToApi($tallyExports);
 
-		if ($response['success']) {
-			$res['success'] = true;
-		} else {
-			$res['errors'][] = $response['datas'];
+		// if ($response['success']) {
+		// 	$res['success'] = true;
+		// } else {
+		// 	$res['errors'][] = $response['datas'];
+		// }
+		if(isset($response['data']['errorDatas'][0]['errors'])){
+			$error_message = Trip::where('id', $employeeTrip->id)
+			->update(['tally_claim_sync_errors' => $response['data']['errorDatas'][0]['errors']]);
 		}
-		return $res;
+		return $response;
 	}
 
 	public function advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
