@@ -7066,7 +7066,8 @@ request is not desired, then those may be rejected.';
 		$wrappedData = [
 			'datas' => json_decode(json_encode($tallyExports))
 		];
-		$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
+		//$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
+		$url = config('custom.TALLY_TTBL_AP_INVOICES');
 	
 		$client = new Client();
 	
