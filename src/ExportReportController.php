@@ -3733,9 +3733,12 @@ class ExportReportController extends Controller {
 					}
 					
 					$r = $trip->generatePrePaymentApTallyAxapta();
-					if (!$r['success']) {
+					if (isset($r['data']['errorDatas'][0]['errors'])) {
 						dump($r);
+						$trip->tally_advance_sync_status = 0; //Non SYNCED
+						$trip->save();
 					} else {
+						dump($r);
 						$trip->tally_advance_sync_status = 1; //SYNCED
 						$trip->save();
 					}
@@ -3753,9 +3756,12 @@ class ExportReportController extends Controller {
 					}
 					$r = $trip->generateInvoiceApTallyAxapta();
 					
-					if (!$r['success']) {
+					if (isset($r['data']['errorDatas'][0]['errors'])) {
 						dump($r);
+						$trip->tally_claim_sync_status = 0; //Non SYNCED
+						$trip->save();
 					} else {
+						dump($r);
 						$trip->tally_claim_sync_status = 1; //SYNCED
 						$trip->save();
 					}

@@ -37,7 +37,10 @@ use App\Oracle\OtherTypeTransactionDetail;
 use App\Portal;
 use Config as dataBaseConfig;
 use File;
-
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions as RequestOptions;
+use GuzzleHttp\Exception\BadResponseException as GuzzleHttpException;
+use GuzzleHttp\Exception\GuzzleException;
 
 class Trip extends Model {
 	use SoftDeletes;
@@ -6667,9 +6670,21 @@ request is not desired, then those may be rejected.';
 		$tallyExports = [];
 		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, 'Advanced');
 
-		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP-Vendor('. $employee->code .')', null, $trip->advance_received, null);
-		$res['success'] = true;
-		return $res;
+		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP_' . $employee->code , null, $trip->advance_received, null);
+		
+		$response = $this->sendTallyExportsToApi($tallyExports);
+
+		// if ($response['success']) {
+		// 	$res['success'] = true;
+		// } else {
+		// 	$res['errors'][] = $response['datas'];
+		$data = json_decode($response['data'], true);
+
+		if(isset($data['data']['errorDatas'][0]['errors'])){
+			$error_message = Trip::where('id', $trip->id)
+			->update(['tally_advance_sync_errors' => $data['data']['errorDatas'][0]['errors']]);
+		}
+		return $data;
 	}
 
 	public function generateInvoiceApTallyAxapta() {
@@ -6958,45 +6973,44 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				if ($employeeClaim->amount_to_pay == 2) {
 					//EMPLOYEE TO COMPANY
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP-Vendor('.$employeeData->code.')',  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP_'.$employeeData->code ,  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}elseif($employeeClaim->amount_to_pay == 1){
 					//COMPANY TO EMPLOYEE
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter,'EMP-Vendor('.$employeeData->code.')', null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter,'EMP_' .$employeeData->code, null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}
 
 			}
 		}else{
 			//IF NON ADVANCE
-			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP-Vendor('.$employeeData->code.')', null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
+			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP_' .$employeeData->code, null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
 		}
-		$res['success'] = true;
-		return $res;
+		$response = $this->sendTallyExportsToApi($tallyExports);
+
+		// if ($response['success']) {
+		// 	$res['success'] = true;
+		// } else {
+		// 	$res['errors'][] = $response['datas'];
+		// }
+		$data = json_decode($response['data'], true);
+
+		if(isset($data['data']['errorDatas'][0]['errors'])){
+			$error_message = Trip::where('id', $employeeTrip->id)
+			->update(['tally_claim_sync_errors' => $data['data']['errorDatas'][0]['errors']]);
+		}
+		return $data;
 	}
 
 	public function advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, $accountingDate, $companyCode, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $medhodOfAdj) {
 
-		$res = [];
-		$res['errors'] = [];
-		$universal_portal = Portal::select([
-			'db_host_name',
-			'db_port_number',
-			'db_name',
-			'db_user_name',
-			'db_password',
-		])
-			->where('id', 2)
-			->first();
-		DB::setDefaultConnection('dynamic');
-		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $universal_portal->db_host_name);
-		$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $universal_portal->db_port_number);
-		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
-		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $universal_portal->db_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $universal_portal->db_user_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $universal_portal->db_password);
-		DB::purge('dynamic');
-		DB::reconnect('dynamic');
-
-		DB::table('travelex_tally_invoices')->insert([
+		if (empty($invoiceNumber)) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					"Invoice Number Required",
+				],
+			]);
+		}
+		return [
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'business_unit_name' => $businessUnitName,
@@ -7012,39 +7026,22 @@ request is not desired, then those may be rejected.';
 			'debit' => $debit,
 			'credit' => $credit,
 			'method_of_adj' => $medhodOfAdj,
-			'created_at' => Carbon::now(),
-		]);
-
-		$res['success'] = true;
-		DB::setDefaultConnection('mysql');
-		return $res;
+		];
+		
 
 	}
 
 	public function claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, $accountingDate, $company, $lob, $location, $costCenter, $accountNumber, $debit, $credit, $lineDescription, $methodOfAdj, $prePaymentNumber, $tripApprovedDate,$advanceReceived, $crDr) {
 		
-		$res = [];
-		$res['errors'] = [];
-		$universal_portal = Portal::select([
-			'db_host_name',
-			'db_port_number',
-			'db_name',
-			'db_user_name',
-			'db_password',
-		])
-			->where('id', 2)
-			->first();
-		DB::setDefaultConnection('dynamic');
-		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $universal_portal->db_host_name);
-		$db_port_number = dataBaseConfig::set('database.connections.dynamic.port', $universal_portal->db_port_number);
-		$db_port_driver = dataBaseConfig::set('database.connections.dynamic.driver', "mysql");
-		$db_name = dataBaseConfig::set('database.connections.dynamic.database', $universal_portal->db_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.username', $universal_portal->db_user_name);
-		$db_username = dataBaseConfig::set('database.connections.dynamic.password', $universal_portal->db_password);
-		DB::purge('dynamic');
-		DB::reconnect('dynamic');
-
-		DB::table('travelex_tally_invoices')->insert([
+		if (empty($invoiceNumber)) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					"Invoice Number Required",
+				],
+			]);
+		}
+		return [
 			'business_unit' => $businessUnit,
 			'template' => $template,
 			'invoice_number' => $invoiceNumber,
@@ -7063,12 +7060,34 @@ request is not desired, then those may be rejected.';
 			'advance_date' => $tripApprovedDate,
 			'amount' => $advanceReceived,
 			'dr_cr' => $crDr,
-			'created_at' => Carbon::now(),
-		]);
-
-		$res['success'] = true;
-		DB::setDefaultConnection('mysql');
-		return $res;
+		];
+	}
+	public function sendTallyExportsToApi($tallyExports) {
+		$wrappedData = [
+			'datas' => json_decode(json_encode($tallyExports))
+		];
+		//$url = 'https://universe.tvs.in/tvs-universe/cms/travelex/tally';
+		$url = config('custom.TALLY_TTBL_AP_INVOICES');
+	
+		$client = new Client();
+	
+		try {
+			$response = $client->request('POST', $url, [
+				'headers' => [
+					'Content-Type' => 'application/json'
+				],
+				'json' => $wrappedData
+			]);
+			return [
+				'success' => true,
+				'data' => $response->getBody()->getContents()
+			];
+		} catch (GuzzleException $e) {
+			return [
+				'success' => false,
+				'data' => $e->getMessage()
+			];
+		}
 	}
 	
 
