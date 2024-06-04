@@ -412,6 +412,7 @@ app.component('eyatraTripClaimForm', {
             $('.claim-sbu').addClass('ng-hide');
             $(self.sbu_lists).each(function(key, value) {
                 if (value.id == response.data.employee.sbu_id) {
+                    self.trip.cliam.sbu_id = response.data.employee.sbu_id;
                     $('.drop-down').removeClass('ng-hide');
                     $('.claim-sbu').addClass('ng-hide');
                     drop_down_show = true;
