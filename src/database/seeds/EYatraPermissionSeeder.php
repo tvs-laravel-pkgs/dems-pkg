@@ -1219,6 +1219,12 @@ class EYatraPermissionSeeder extends Seeder {
 				'name' => 'claim-delete-attachment',
 				'display_name' => 'Delete Claim Attachment',
 			],
+			9026 => [
+				'display_order' => 2,
+				'parent_id' => 5709,
+				'name' => 'eyatra-mis-report-admin',
+				'display_name' => 'Mis Report Admin',
+			],
 		];
 
 		foreach ($permissions as $permission_id => $permsion) {

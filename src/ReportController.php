@@ -14,6 +14,7 @@ use Uitoux\EYatra\LocalTrip;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Trip;
 use Yajra\Datatables\Datatables;
+use Entrust;
 
 class ReportController extends Controller {
 
@@ -24,8 +25,12 @@ class ReportController extends Controller {
 		->pluck('departments.business_id')
 		->first();
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
-		$data['outlet_list'] = collect(Outlet::select('name', 'id')->where('business_id', $business_id)->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
-
+		if(Entrust::can('eyatra-mis-report-admin')){
+			$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+		} else {
+			$data['outlet_list'] = collect(Outlet::select('name', 'id')->where('business_id', $business_id)->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+		}
+		
 		// $data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->where('id', '!=', 3027)->where('id', '!=', 3033)->where('id', '!=', 3035)->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		// $data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->whereNotIn('id',[3025, 3027,3030, 3031, 3033, 3034, 3035, 3037])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		$data['trip_status_list'] = collect(Config::select('name', 'id')->whereIn('config_type_id', [501, 535])->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->whereNotIn('id',[3025, 3027,3030, 3031, 3033, 3034, 3035, 3037])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
