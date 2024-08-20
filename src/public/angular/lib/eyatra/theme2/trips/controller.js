@@ -234,7 +234,7 @@ app.component('eyatraTripForm', {
                     $('.datepicker.tripStartDate').datepicker('destroy');
                     $(".datepicker.tripStartDate").datepicker({
                         startDate: self.trip.trip_from_minus_5_days,
-                        setDate: self.trip.start_date,
+                        setDate: self.trip.created_at,
                         //startDate: self.trip.start_date,
                         //endDate: self.trip.end_date,
                         autoclose: true,

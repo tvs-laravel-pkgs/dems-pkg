@@ -719,7 +719,7 @@ class Trip extends Model {
 				$data['error'] = 'Trip details not found';
 				return response()->json($data);
 			}
-			$trip_from_date = date('Y-m-d', strtotime($trip->start_date));
+			$trip_from_date = date('Y-m-d', strtotime($trip->created_at));
 			$trip->trip_from_minus_5_days = date('d-m-Y', strtotime("-5 days", strtotime($trip_from_date)));
 
 			// if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032]))) { //NEED TO DISABLE

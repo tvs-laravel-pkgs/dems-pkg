@@ -1898,6 +1898,7 @@ class ExportReportController extends Controller {
 				}
 			})
 			->whereNotNull('lodgings.gstin')
+			->whereNull('lodgings.deleted_at')
 			->where('lodgings.gstin', '!=', '')
 			->groupBy('lodgings.id')
 			->get();
@@ -2101,6 +2102,7 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->where('trips.status_id', 3026)
 			->whereNotNull('lodgings.gstin')
+			->whereNull('lodgings.deleted_at')
 			->whereDate('trips.claimed_date', '>=', $from_date)
 			->whereDate('trips.claimed_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
@@ -2173,6 +2175,7 @@ class ExportReportController extends Controller {
 				->leftJoin('lodgings', 'lodgings.id', 'lodging_tax_invoices.lodging_id')
 				->leftJoin('configs', 'configs.id', 'lodging_tax_invoices.type_id')
 				->where('lodging_tax_invoices.lodging_id', $gst_lodging['id'])
+				->whereNull('lodgings.deleted_at')
 				->where('lodging_tax_invoices.type_id', '!=', 3775)
 				->get()->toArray();
 			if ($gst_lodging['has_multiple_tax_invoice'] == 0) {
