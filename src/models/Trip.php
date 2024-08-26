@@ -2215,6 +2215,7 @@ class Trip extends Model {
 			->where('ey_addresses.entity_id', $trip->outlet_id)
 			->pluck('nstates.gstin_state_code')->first();
 
+		$approval_log = DB::table('approval_logs')->where('entity_id', $trip_id)->orderBy('id', 'desc')->first();
 		$trip->transport_basic = $transport_basic;
 		$trip->transport_cgst = $transport_cgst;
 		$trip->transport_sgst = $transport_sgst;
@@ -2247,6 +2248,7 @@ class Trip extends Model {
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
 		$data['state_code'] = $state_code;
+		$data['approval_log'] = $approval_log;
 
 		if ($trip->employee->tripEmployeeClaim) {
 			if (($trip->employee->tripEmployeeClaim->is_justify_my_trip == 1) || ($trip->employee->tripEmployeeClaim->remarks != '')) {

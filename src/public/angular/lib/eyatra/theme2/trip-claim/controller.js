@@ -4295,6 +4295,7 @@ app.component('eyatraTripClaimView', {
                 return;
             }
             self.trip = response.data.trip;
+            self.approval_log = response.data.approval_log;
             self.gender = (response.data.trip.employee.gender).toLowerCase();
             self.travel_cities = response.data.travel_cities;
             self.travel_dates = response.data.travel_dates;
