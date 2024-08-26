@@ -1228,7 +1228,7 @@ class Trip extends Model {
 		$trip_id = $r->trip_id;
 		//$trip = Trip::find($r->trip_id);
 		//CHECK IF FINANCIER APPROVE THE ADVANCE REQUEST
-		$trip = Trip::where('id', $trip_id)->where('advance_received', '>', 0)->where('status_id', 3028)->where('batch', 1)->first();
+		$trip = Trip::where('id', $trip_id)->where('advance_received', '>', 0)->where('status_id', 3028)->first();
 		if ($trip) {
 			$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 			$notification = sendnotification($type = 12, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Advance Amount Repay');
