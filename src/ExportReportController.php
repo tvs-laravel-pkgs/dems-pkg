@@ -3579,6 +3579,7 @@ class ExportReportController extends Controller {
                 	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));
                 }
             })
+			->whereNotIn('trips.id', $advance_amount_trips->id)
 			->groupBy('trips.id')
 			->get()
 			->toArray();
