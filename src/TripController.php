@@ -37,7 +37,7 @@ class TripController extends Controller {
 				DB::raw('CONCAT(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), " to ", DATE_FORMAT(trips.end_date,"%d-%m-%Y")) as travel_period'),
 				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				'purpose.name as purpose',
-				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
+				DB::raw('IF((trips.advance_received) IS NULL,"0.00",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
 				'status.name as status',
 				'ey_employee_claims.id as claim_id' //NEED TO ENABLE
@@ -100,7 +100,8 @@ class TripController extends Controller {
 				// if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
 				// if (($trip->status_id == '3032' && !empty($trip->approve_remarks)) || $trip->status_id == '3021' || $trip->status_id == '3022') { //NEED TO DISABLE
 				// if (($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022') || ($trip->status_id == '3028' && !$trip->claim_id)) { //NEED TO ENABLE
-				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' || $trip->status_id == '3033') { 
+				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' && $trip->advance_received == '0' || $trip->status_id == '3033' && $trip->advance_received == '0') { 
+					//dd($trip->advance_received);
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
 						$edit_class = "";

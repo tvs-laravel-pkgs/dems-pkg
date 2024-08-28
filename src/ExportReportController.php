@@ -3553,7 +3553,7 @@ class ExportReportController extends Controller {
 			->groupBy('trips.id')
 			->get()
 			->toArray();
-
+		$advance_trip_ids = array_column($advance_amount_trips, 'id');
 		$claimed_trips = Trip::select([
 			'trips.id',
 			DB::raw("'Trip claim' as category"),
@@ -3578,8 +3578,11 @@ class ExportReportController extends Controller {
                 if($sync_method == "auto"){
                 	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));
                 }
-            })
-			->groupBy('trips.id')
+            });
+			if (!empty($advance_trip_ids)) {
+				$claimed_trips->whereNotIn('trips.id', $advance_trip_ids);
+			}
+			$claimed_trips = $claimed_trips->groupBy('trips.id')
 			->get()
 			->toArray();
 
