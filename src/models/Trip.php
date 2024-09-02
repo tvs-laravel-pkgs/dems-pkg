@@ -6,7 +6,6 @@ namespace Uitoux\EYatra;
 
 use App\Attachment;
 use App\Company;
-use App\Entity;
 use App\FinancialYear;
 use App\SerialNumberGroup;
 use App\User;
