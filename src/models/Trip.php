@@ -6,6 +6,7 @@ namespace Uitoux\EYatra;
 
 use App\Attachment;
 use App\Company;
+use App\Entity;
 use App\FinancialYear;
 use App\SerialNumberGroup;
 use App\User;
@@ -1621,6 +1622,10 @@ class Trip extends Model {
 		// dd($values);
 
 		$data['travel_values'] = $values;
+		$emp_id = Trip::where('id', $trip_id)->pluck('employee_id')->first();
+		$grade_id = Employee::where('id', $emp_id)->pluck('grade_id')->first();
+		$check_grade = Entity::where('id', $grade_id)->where('name', 'like', '%W%')->first();
+		$data['check_grade'] = $check_grade;
 		// dd($values);
 
 		//DAYS CALC BTW START & END DATE
@@ -3993,6 +3998,8 @@ class Trip extends Model {
 
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->remarks = $request->remarks;
+				$employee_claim->job_card_date = $request->job_card_date;
+				$employee_claim->job_card_number = $request->job_card_number;
 				$employee_claim->save();
 
 				//STORE GOOGLE ATTACHMENT
