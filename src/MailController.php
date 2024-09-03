@@ -25,10 +25,10 @@ class MailController extends Controller
         $trip_mail = Trip::pendingTripMail($date,$status,$title);
         
         //10-CANCELLATION
-        //$date = date('Y-m-d', strtotime('-11days'));
-        //$title='Cancelled';
+        $date = date('Y-m-d', strtotime('-11days'));
+        $title='Cancelled';
         //$local_trip_mail = LocalTrip::pendingTripMail($date,$status,$title);
-        //$trip_mail = Trip::pendingTripMail($date,$status,$title);
+        $trip_mail = Trip::pendingTripMail($date,$status,$title);
         
         $status='Claim Generation';
         //2- NORMAL
