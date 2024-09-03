@@ -1625,6 +1625,8 @@ class Trip extends Model {
 		$grade_id = Employee::where('id', $emp_id)->pluck('grade_id')->first();
 		$check_grade = Entity::where('id', $grade_id)->where('name', 'like', '%W%')->where('entity_type_id', 500)->first();
 		$data['check_grade'] = $check_grade;
+		$config_grade = Config::where('id', 4149)->pluck('name')->first();
+		$data['config_grade'] = $config_grade;
 		// dd($values);
 
 		//DAYS CALC BTW START & END DATE
