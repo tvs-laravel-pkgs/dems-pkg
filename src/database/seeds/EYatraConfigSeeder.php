@@ -101,6 +101,9 @@ class EYatraConfigSeeder extends Seeder {
 			585 => 'Trips Oracle Sync Method',
 			586 => 'City Types',
 			587 => 'HRMS To Travelex Employee Processed Lobs',
+			588 => 'GST Validation',
+			589 => 'Static mail',
+			590 => 'show',
 		];
 
 		$configs = [
@@ -1674,6 +1677,10 @@ class EYatraConfigSeeder extends Seeder {
 			4148 => [
 				'name' => 'oeslacc.mdu@tvs.in',
 				'config_type_id' => 589,
+			],
+			4149 => [
+				'name' => 'show',
+				'config_type_id' => 590,
 			],
 		];
 

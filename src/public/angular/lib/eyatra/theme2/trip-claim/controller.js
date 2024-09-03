@@ -239,6 +239,8 @@ app.component('eyatraTripClaimForm', {
                 return;
             }
             console.log(response.data);
+            self.check_grade = response.data.check_grade;
+            self.config_grade = response.data.config_grade;
             self.grade_travel = response.data.grade_travel;
             self.cities_with_expenses = response.data.cities_with_expenses;
             self.employee = response.data.employee;

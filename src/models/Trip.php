@@ -1621,6 +1621,12 @@ class Trip extends Model {
 		// dd($values);
 
 		$data['travel_values'] = $values;
+		$emp_id = Trip::where('id', $trip_id)->pluck('employee_id')->first();
+		$grade_id = Employee::where('id', $emp_id)->pluck('grade_id')->first();
+		$check_grade = Entity::where('id', $grade_id)->where('name', 'like', '%W%')->where('entity_type_id', 500)->first();
+		$data['check_grade'] = $check_grade;
+		$config_grade = Config::where('id', 4149)->pluck('name')->first();
+		$data['config_grade'] = $config_grade;
 		// dd($values);
 
 		//DAYS CALC BTW START & END DATE
@@ -3993,6 +3999,8 @@ class Trip extends Model {
 
 				$employee_claim->created_by = Auth::user()->id;
 				$employee_claim->remarks = $request->remarks;
+				$employee_claim->job_card_date = $request->job_card_date;
+				$employee_claim->job_card_number = $request->job_card_number;
 				$employee_claim->save();
 
 				//STORE GOOGLE ATTACHMENT
@@ -4171,6 +4179,8 @@ class Trip extends Model {
 				->join('visits', 'visits.trip_id', 'trips.id')
 				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+				->leftjoin('employees', 'employees.id', 'trips.employee_id')
+				->leftjoin('entities', 'entities.id', 'employees.grade_id')
 			// ->whereDate('trips.created_at', $date)
 			// // ->whereDate('trips.end_date', $date)
 			// ->where('trips.status_id', '=', 3021)
@@ -4182,6 +4192,8 @@ class Trip extends Model {
 						$q->whereDate('trips.created_at', $date);
 					}
 				})
+				->where('entities.entity_type_id', 500)
+				->where('entities.name', 'not like', '%L%')
 				->groupBy('trips.id')
 				->get();
 		} elseif ($status == 'Claim Generation') {
