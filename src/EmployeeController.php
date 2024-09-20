@@ -923,29 +923,44 @@ class EmployeeController extends Controller {
 	}
 	public function getEmployeeDetails(Request $request){
 		try {
-			DB::beginTransaction();
-
-			$employee_details = Employee::select('employees.code as employee_code',
-				'users.name as employee_name',
-				'reporting_user.username as reporting_ecode',
-				'reporting_user.name as reporting_name',
-				'reporting_user.mobile_number as reporting_mobile_number',
-				'reporting_user.email as reporting_email')
+			$employee_details = Employee::select('employees.code as code',
+				'users.name as name',
+				'users.mobile_number as mobile_number',
+				'users.email as email')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->leftJoin('users as reporting_user', 'reporting_user.entity_id', 'employees.reporting_to_id')
-				->where('employees.code', $request->ecode)
+				->where('employees.code', $request->code)
 				->where('users.user_type_id', 3121)
 				->first();
-
+	
 			if (empty($employee_details)) {
-				throw new \Exception('Employee Not Found');
+				return response()->json(['success' => false, 'message' => ['Code Not Found']]);
 			}
-
-			DB::commit();
-
-			return response()->json($employee_details);
+	
+			$reporting_details = Employee::select('users.username as code',
+				'users.name as name',
+				'users.mobile_number as mobile_number',
+				'users.email as email')
+				->leftJoin('users', 'users.entity_id', 'employees.reporting_to_id')
+				->where('employees.code', $request->code)
+				->where('users.user_type_id', 3121)
+				->first();
+	
+				return response()->json([
+					'success' => true,
+					'user' => [
+						'code' => $employee_details->code,
+						'name' => $employee_details->name,
+						'mobile_number' => $employee_details->mobile_number,
+						'email' => $employee_details->email,
+						'reporting_to' => [
+							'code' => $reporting_details->code,
+							'name' => $reporting_details->name,
+							'mobile_number' => $reporting_details->mobile_number,
+							'email' => $reporting_details->email
+						]
+					]
+				]);
 		} catch (\Exception $e) {
-			DB::rollBack();
 			return response()->json(['success' => false, 'message' => [$e->getMessage()]]);
 		}
 	}
