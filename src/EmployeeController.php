@@ -926,8 +926,20 @@ class EmployeeController extends Controller {
 			$employee_details = Employee::select('employees.code as code',
 				'users.name as name',
 				'users.mobile_number as mobile_number',
-				'users.email as email')
+				'users.email as email',
+				'entities.name as grade',
+				'designations.name as designations',
+				'outlets.name as outlet_name',
+				'sbus.name as sbu',
+				'departments.name as department',
+				'sbus.oracle_code as oracle_code',
+				'sbus.oracle_cost_centre as oracle_cost_centre')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
+				->leftJoin('entities', 'entities.id', 'employees.grade_id')
+				->leftJoin('designations', 'designations.id', 'employees.designation_id')
+				->leftJoin('outlets', 'outlets.id', 'employees.outlet_id')
+				->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+				->leftJoin('departments', 'departments.id', 'employees.department_id')
 				->where('employees.code', $request->code)
 				->where('users.user_type_id', 3121)
 				->first();
@@ -939,12 +951,24 @@ class EmployeeController extends Controller {
 			$reporting_details = Employee::select('users.username as code',
 				'users.name as name',
 				'users.mobile_number as mobile_number',
-				'users.email as email')
+				'users.email as email',
+				'entities.name as grade',
+				'designations.name as designation',
+				'outlets.name as outlet_name',
+				'sbus.name as sbu',
+				'departments.name as department',
+				'sbus.oracle_code as oracle_code',
+				'sbus.oracle_cost_centre as oracle_cost_centre')
 				->leftJoin('users', 'users.entity_id', 'employees.reporting_to_id')
+				->leftJoin('entities', 'entities.id', 'employees.grade_id')
+				->leftJoin('designations', 'designations.id', 'employees.designation_id')
+				->leftJoin('outlets', 'outlets.id', 'employees.outlet_id')
+				->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
+				->leftJoin('departments', 'departments.id', 'employees.department_id')
 				->where('employees.code', $request->code)
 				->where('users.user_type_id', 3121)
 				->first();
-	
+
 				return response()->json([
 					'success' => true,
 					'user' => [
@@ -952,11 +976,25 @@ class EmployeeController extends Controller {
 						'name' => $employee_details->name,
 						'mobile_number' => $employee_details->mobile_number,
 						'email' => $employee_details->email,
+						'grade' => $employee_details->grade,
+						'designation' => $employee_details->designations,
+						'outlet_name' => $employee_details->outlet_name,
+						'department' => $employee_details->department,
+						'sbu' => $employee_details->sbu,
+						'oracle_lob_code' => $employee_details->oracle_code,
+						'oracle_cost_centre' => $employee_details->oracle_cost_centre,
 						'reporting_to' => [
 							'code' => $reporting_details->code,
 							'name' => $reporting_details->name,
 							'mobile_number' => $reporting_details->mobile_number,
-							'email' => $reporting_details->email
+							'email' => $reporting_details->email,
+							'grade' => $reporting_details->grade,
+							'designation' => $reporting_details->designation,
+							'outlet_name' => $reporting_details->outlet_name,
+							'department' => $reporting_details->department,
+							'sbu' => $reporting_details->sbu,
+							'oracle_lob_code' => $reporting_details->oracle_code,
+							'oracle_cost_centre' => $reporting_details->oracle_cost_centre,
 						]
 					]
 				]);
