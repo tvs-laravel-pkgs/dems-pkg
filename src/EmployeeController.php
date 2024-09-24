@@ -933,7 +933,8 @@ class EmployeeController extends Controller {
 				'sbus.name as sbu',
 				'departments.name as department',
 				'sbus.oracle_code as oracle_code',
-				'sbus.oracle_cost_centre as oracle_cost_centre')
+				'sbus.oracle_cost_centre as oracle_cost_centre',
+				'employees.reporting_to_id')
 				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->leftJoin('entities', 'entities.id', 'employees.grade_id')
 				->leftJoin('designations', 'designations.id', 'employees.designation_id')
@@ -959,13 +960,13 @@ class EmployeeController extends Controller {
 				'departments.name as department',
 				'sbus.oracle_code as oracle_code',
 				'sbus.oracle_cost_centre as oracle_cost_centre')
-				->leftJoin('users', 'users.entity_id', 'employees.reporting_to_id')
+				->leftJoin('users', 'users.entity_id', 'employees.id')
 				->leftJoin('entities', 'entities.id', 'employees.grade_id')
 				->leftJoin('designations', 'designations.id', 'employees.designation_id')
 				->leftJoin('outlets', 'outlets.id', 'employees.outlet_id')
 				->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
 				->leftJoin('departments', 'departments.id', 'employees.department_id')
-				->where('employees.code', $request->code)
+				->where('employees.id', $employee_details->reporting_to_id)
 				->where('users.user_type_id', 3121)
 				->first();
 
