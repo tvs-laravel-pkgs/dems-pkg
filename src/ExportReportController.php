@@ -1841,6 +1841,28 @@ class ExportReportController extends Controller {
 			'DATE',
 			'HSN CODE',
 		];
+		$export_details_sheet2 = [];
+		$excel_headers_sheet2 = [
+			'EMPLOYEE CODE',
+			'EMPLOYEE NAME',
+			'OUTLET',
+			'SBU',
+			'CLAIM NUMBER',
+			'CLAIM DATE',
+			'INVOICE NUMBER',
+			'LODGING GST NUMBER',
+			'LODGING INVOICE NUMBER',
+			'LODGING INVOICE DATE',
+			'SUPPLIER NAME',
+			'ITEM NAME',              
+			'MULTIPLE AMOUNT',        
+			'MULTIPLE_TAX PERCENTAGE',
+			'MULTIPLE_CGST AMOUNT',   
+			'MULTIPLE_SGST AMOUNT',   
+			'MULTIPLE_IGST AMOUNT', 
+			'DATE',
+			'HSN CODE',
+		];
 		$gst_details = EmployeeClaim::select(
 			DB::raw('COALESCE(employees.code, "") as emp_code'),
 			DB::raw('COALESCE(users.name, "") as emp_name'),
@@ -1861,7 +1883,8 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(lodgings.cgst, 0)),2,"en_IN") as cgst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.sgst, 0)),2,"en_IN") as sgst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
-			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as date')
+			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as date'),
+			DB::raw('COALESCE(lodgings.id, "") as lodging_id')
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'employees.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -1872,6 +1895,8 @@ class ExportReportController extends Controller {
 			->leftJoin('visits', 'visits.trip_id', 'trips.id')
 			->leftJoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->leftJoin('lodgings', 'lodgings.trip_id', 'trips.id')
+			->leftJoin('lodging_tax_invoices', 'lodging_tax_invoices.lodging_id', 'lodgings.id')
+			->leftJoin('configs', 'configs.id', 'lodging_tax_invoices.type_id')
 			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
 			->leftJoin('ey_addresses as a', function ($join) {
 				$join->on('a.entity_id', '=', 'outlets.id')
@@ -1938,16 +1963,69 @@ class ExportReportController extends Controller {
 
 			$export_details[] = $export_data;
 		}
+		$export_details_sheet2 = [];
+
+		// Process GST details for the second sheet as well
+		foreach ($gst_details as $gst_detail) {
+			$lodging_invoices = DB::table('lodging_tax_invoices')
+				->leftJoin('configs', 'configs.id', 'lodging_tax_invoices.type_id')
+				->where('lodging_tax_invoices.lodging_id', $gst_detail->lodging_id)
+				->select(
+					DB::raw('COALESCE(configs.name, "") as item_description'),
+					DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.without_tax_amount, 0)),2,"en_IN") as multiple_amount'),
+					DB::raw('COALESCE(lodging_tax_invoices.tax_percentage, "") as multilple_tax_percentage'),
+					DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.cgst, 0)),2,"en_IN") as multilple_cgst'),
+					DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.sgst, 0)),2,"en_IN") as multilple_sgst'),
+					DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.igst, 0)),2,"en_IN") as multilple_igst')
+				)->where('lodging_tax_invoices.type_id', '!=', 3775)
+				->get();
+
+			// Populate data for the second sheet
+			foreach ($lodging_invoices as $invoice) {
+				$export_data_sheet2 = [
+					$gst_detail->emp_code,
+					$gst_detail->emp_name,
+					$gst_detail->outlet,
+					$gst_detail->sbu,
+					$gst_detail->claim_number,
+					$gst_detail->claim_date,
+					$gst_detail->invoice_number,
+					$gst_detail->gst_number,
+					$gst_detail->reference_number,
+					$gst_detail->invoice_date,
+					$gst_detail->supplier_name,
+					$invoice->item_description,
+					$invoice->multiple_amount,
+					$invoice->multilple_tax_percentage,
+					$invoice->multilple_cgst,
+					$invoice->multilple_sgst,
+					$invoice->multilple_igst,
+					$gst_detail->date,
+					$lodgingHsnCode,
+				];
+				$export_details_sheet2[] = $export_data_sheet2;
+			}
+		}
+
 		$title = 'GST_REPORT_' . Carbon::now();
-		$sheet_name = 'GST REPORT';
-		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
-			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+		$sheet_name1 = 'GST REPORT';
+		$sheet_name2 = 'GST REPORT ITEMS';
+		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $export_details_sheet2, $excel_headers_sheet2, $sheet_name1, $sheet_name2) {
+			$excel->sheet($sheet_name1, function ($sheet) use ($export_details, $excel_headers) {
 				$sheet->fromArray($export_details, NULL, 'A1');
 				$sheet->row(1, $excel_headers);
 				$sheet->row(1, function ($row) {
 					$row->setBackground('#c4c4c4');
 				});
 			});
+			$excel->sheet($sheet_name2, function ($sheet) use ($export_details_sheet2, $excel_headers_sheet2) {
+				$sheet->fromArray($export_details_sheet2, NULL, 'A1');
+				$sheet->row(1, $excel_headers_sheet2);
+				$sheet->row(1, function ($row) {
+					$row->setBackground('#c4c4c4');
+				});
+			});
+		
 			$excel->setActiveSheetIndex(0);
 		})->download('xlsx');
 	}
