@@ -237,6 +237,7 @@ app.component('eyatraTripForm', {
                         setDate: self.trip.created_at,
                         //startDate: self.trip.start_date,
                         //endDate: self.trip.end_date,
+                        endDate: new Date("2024-09-30"),
                         autoclose: true,
                     });
 
@@ -247,6 +248,7 @@ app.component('eyatraTripForm', {
                         setDate: self.trip.end_date,
                         //startDate: self.trip.start_date,
                         // endDate: self.trip.end_date,
+                        endDate: new Date("2024-09-30"),
                         autoclose: true,
                     });
                 }, 800);
@@ -344,12 +346,14 @@ app.component('eyatraTripForm', {
             $(".datepicker.tripStartDate").datepicker({
                 startDate: '-5d',
                 //endDate: self.trip.end_date,
+                endDate: new Date("2024-09-30"),
                 autoclose: true,
             });
 
             //TRIP END DATE
             $(".datepicker.tripEndDate").datepicker({
                 startDate: '-5d',
+                endDate: new Date("2024-09-30"),
                 autoclose: true,
             });
 
@@ -363,7 +367,6 @@ app.component('eyatraTripForm', {
             //if (self.trip_advance_amount_employee_edit == 0) {
             $("#advance_amount").prop('readonly', true);
             //}
-
             $scope.AdvanceAmountDisable = function(start_date) {
                 var d2 = new Date();
                 var d1 = start_date.split("-");
