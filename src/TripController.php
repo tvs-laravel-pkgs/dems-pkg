@@ -43,7 +43,7 @@ class TripController extends Controller {
 				'ey_employee_claims.id as claim_id' //NEED TO ENABLE
 			)
 			->where('e.company_id', Auth::user()->company_id)
-
+			->where('e.business_id', Auth::user()->business_id)
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
