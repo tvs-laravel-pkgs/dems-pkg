@@ -37,6 +37,7 @@ class Employee extends Model {
 		'code',
 		'outlet_id',
 		'reporting_to_id',
+		'business_id',
 		'grade_id',
 		'payment_mode_id',
 		'department_id',
