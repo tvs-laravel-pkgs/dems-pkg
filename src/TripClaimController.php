@@ -44,7 +44,7 @@ class TripClaimController extends Controller {
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
-
+			->where('e.business_id', Auth::user()->business_id)
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));

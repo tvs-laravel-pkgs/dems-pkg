@@ -101,11 +101,13 @@ class TripApprovalController extends Controller {
 					$trips->whereIn('employee.reporting_to_id', $ids)//alternate manager
                        ->whereIn('trips.status_id', [3021,3023]) //CLAIM REQUESTED
 					   ->where('employee.company_id', Auth::user()->company_id)
+					   ->where('employee.business_id', Auth::user()->business_id)
 					;
 				} else {
 					$trips->where('employee.reporting_to_id', Auth::user()->entity_id)
 						->whereIn('trips.status_id', [3021,3023]) //CLAIM REQUESTED
 						->where('employee.company_id', Auth::user()->company_id)
+						->where('employee.business_id', Auth::user()->business_id)
 					;
 				}
 			}else if(Entrust::can('eyatra-indv-trip-verifications') && Entrust::can('eyatra-indv-employee-claims-verification1') && Entrust::can('eyatra-indv-employee-claims-verification2')) {
@@ -121,6 +123,7 @@ class TripApprovalController extends Controller {
         			->whereIn('trips.status_id', [3029]);
     				});
 				})
+				->where('employee.business_id', Auth::user()->business_id)
 				->where('employee.company_id', Auth::user()->company_id); 
 				} else {
 					$trips->where(function($q) use ($ids){
@@ -133,6 +136,7 @@ class TripApprovalController extends Controller {
         			->whereIn('trips.status_id', [3029]);
     				});
 					})
+					->where('employee.business_id', Auth::user()->business_id)
 			       ->where('employee.company_id', Auth::user()->company_id); 
 			    }
 			} else {
