@@ -1884,7 +1884,8 @@ class Trip extends Model {
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3034, 3030, 3026, 3025, 3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);
-
+		$business_id = Auth::user()->business_id;
+		$data['business_id'] = $business_id;
 		$data['success'] = true;
 		//dd($data);
 		return response()->json($data);
