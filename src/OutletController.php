@@ -14,6 +14,7 @@ use Uitoux\EYatra\NState;
 use Uitoux\EYatra\Outlet;
 use Uitoux\EYatra\Sbu;
 use Validator;
+use App\User;
 use Yajra\Datatables\Datatables;
 
 class OutletController extends Controller {
@@ -28,14 +29,16 @@ class OutletController extends Controller {
 			->leftjoin('regions as r', 'r.state_id', 's.id')
 			->leftJoin('countries as c', 'c.id', 's.country_id')
 			->leftJoin('employees', 'employees.id', 'outlets.cashier_id')
-			->leftJoin('users', function ($join) {
-				$join->on('users.entity_id', 'employees.id')
-					->where('users.user_type_id', 3121);
-			})
+			// ->leftJoin('users', function ($join) {
+			// 	$join->on('users.entity_id', 'employees.id')
+			// 		->where('users.user_type_id', 3121);
+			// })
+			->leftJoin('businesses', 'businesses.id', 'outlets.business_id')
 			->select(
 				'outlets.id',
 				'outlets.code',
 				'outlets.name',
+				'outlets.cashier_id',
 				DB::raw('IF(city.name IS NULL,"---",city.name) as city_name'),
 				// 'city.name as city_name',
 				DB::raw('IF(s.name IS NULL,"---",s.name) as state_name'),
@@ -45,7 +48,8 @@ class OutletController extends Controller {
 				// 'c.name as country_name',
 				DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'),
 				'employees.code as emp_code',
-				'users.name as emp_name'
+				// 'users.name as emp_name',
+				'businesses.name as business_name'
 			)
 			->where('outlets.company_id', Auth::user()->company_id)
 		// ->where('a.address_of_id', 3160)
@@ -109,6 +113,14 @@ class OutletController extends Controller {
 					return '<span style="color:green">Active</span>';
 				}
 			})
+			->addColumn('cashier_name', function ($outlet) {
+     			$outlet_cashier = User::withTrashed()
+     				->select('name')
+     				->where('entity_id', $outlet->cashier_id)
+     				->where('user_type_id', 3121) //Employee
+     				->first();
+     			return $outlet_cashier ? $outlet_cashier->name : "---";
+     		})
 			->make(true);
 	}
 
@@ -218,6 +230,7 @@ class OutletController extends Controller {
 			'sbu_list' => $sbu_list,
 			'cashier_list' => Employee::getList(),
 			'nodel_list' => Employee::getList(),
+			'business_list' => collect(Business::select('name', 'id')->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '', 'name' => 'Select Business']),
 			// 'city_list' => NCity::getList(),
 		];
 		//$this->data['sbu_outlet'] = [];
@@ -331,6 +344,7 @@ class OutletController extends Controller {
 			$error_messages = [
 				'code.required' => 'Outlet Code is Required',
 				'outlet_name.required' => 'Outlet Name is Required',
+				'business_id.required' => 'Business is Required',
 				'line_1.required' => 'Address Line1 is Required',
 				'city_id.required' => 'City is Required',
 				'pincode.required' => 'Pincode is Required',
@@ -341,6 +355,7 @@ class OutletController extends Controller {
 			$validator = Validator::make($request->all(), [
 				'code' => 'required',
 				'outlet_name' => 'required',
+				'business_id' => 'required',
 				'line_1' => 'required',
 				'cashier_id' => 'required',
 				'nodel_id'=>'required',
@@ -349,8 +364,10 @@ class OutletController extends Controller {
 				// 'state_id' => 'required',
 				'city_id' => 'required',
 				'pincode' => 'required',
-				'code' => 'required|unique:outlets,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
-				'outlet_name' => 'required|unique:outlets,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				// 'code' => 'required|unique:outlets,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				'code' => 'required|unique:outlets,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',business_id,' . $request->business_id,
+				// 'outlet_name' => 'required|unique:outlets,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id,
+				'outlet_name' => 'required|unique:outlets,name,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',business_id,' . $request->business_id,
 			], $error_messages);
 			if ($validator->fails()) {
 				return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
@@ -365,7 +382,9 @@ class OutletController extends Controller {
 				$outlet->updated_at = NULL;
 			} else {
 				$outlet = Outlet::withTrashed()->find($request->id);
-				$address = Address::where('entity_id', $request->id)->first();
+				$address = Address::where('entity_id', $request->id)
+					->where('address_of_id',3160)
+					->first();
 				if(!$address){
 					$address = new Address;
 				}
@@ -433,7 +452,7 @@ class OutletController extends Controller {
 				return response()->json(['success' => true, 'message' => 'Outlet Updated Successfully']);
 			}
 			return response()->json(['success' => true]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
@@ -450,6 +469,7 @@ class OutletController extends Controller {
             'employee.user',
             'employeeNodel',
             'employeeNodel.user',
+            'businessData'
 		])->select('*', DB::raw('IF(outlets.amount_eligible = 1,"Yes","No") as amount_eligible'), DB::raw('format(amount_limit,2,"en_IN") as amount_limit'), DB::raw('IF(outlets.deleted_at IS NULL,"Active","Inactive") as status'))
 			->withTrashed()
 			->find($outlet_id);

@@ -52,8 +52,10 @@ app.component('eyatraOutlets', {
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'outlets.code', searchable: true },
                 { data: 'name', name: 'outlets.name', searchable: true },
+                { data: 'business_name', name: 'businesses.name', searchable: true },
                 { data: 'emp_code', name: 'employees.code', searchable: true },
-                { data: 'emp_name', name: 'users.name', searchable: true },
+                // { data: 'emp_name', name: 'users.name', searchable: true },
+                { data: 'cashier_name', searchable: false },
                 { data: 'region_name', name: 'r.name', searchable: true },
                 { data: 'city_name', name: 'city.name', searchable: true },
                 { data: 'state_name', name: 's.name', searchable: true },
@@ -529,6 +531,9 @@ app.component('eyatraOutletForm', {
                     required: true,
                     minlength: 3,
                     maxlength: 191,
+                },
+                'business_id': {
+                    required: true,
                 },
                 'lob_id': {
                     required: true,
