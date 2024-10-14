@@ -96,24 +96,27 @@ class EmployeeController extends Controller {
 				$join->on('u.entity_id', '=', 'e.id')
 					->where('u.user_type_id', 3121);
 			})
-			->leftJoin('users as mngr', function ($join) {
-				$join->on('mngr.entity_id', 'm.id')
-					->where('mngr.user_type_id', 3121);
-			})
+			// ->leftJoin('users as mngr', function ($join) {
+			// 	$join->on('mngr.entity_id', 'm.id')
+			// 		->where('mngr.user_type_id', 3121);
+			// })
 		// ->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
 			->leftJoin('role_user', 'role_user.user_id', 'u.id')
+			->leftJoin('businesses', 'businesses.id', 'e.business_id')
 		// ->where('users.user_type_id', 3121)
 			// ->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
+				'e.reporting_to_id',
 				'u.name',
 				'o.code as outlet_code',
-				DB::raw('CONCAT(m.code," / ",mngr.name) as manager_code'),
+				// DB::raw('CONCAT(m.code," / ",mngr.name) as manager_code'),
 				// DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
 				// DB::raw('IF(mngr.name IS NULL,"--",mngr.name) as manager_name'),
 				'grd.name as grade',
-				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
+				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status'),
+				'businesses.name as business_name'
 			)
 			->where(function ($query) use ($r, $outlet) {
 				if (!empty($outlet)) {
@@ -188,6 +191,14 @@ class EmployeeController extends Controller {
 					return '<span style="color:#63ce63;">Active</span>';
 				}
 			})
+			->addColumn('manager_code', function ($employee) {
+     			$employee_manager = User::withTrashed()
+     				->select('name')
+     				->where('entity_id', $employee->reporting_to_id)
+     				->where('user_type_id', 3121) //Employee
+     				->first();
+     			return $employee_manager ? $employee->code." / ". $employee_manager->name : "--";
+     		})
 			->make(true);
 	}
 
