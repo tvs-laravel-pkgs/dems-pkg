@@ -698,6 +698,14 @@ class Trip extends Model {
 		}
 
 		if (!$trip_id) {
+			//IF EMPLOYEE DLOB OR DLOB PV THEN NOT ALLOW TO CREATE TRIP REQUEST.
+			if(Auth::user()->business_id == 1 || Auth::user()->business_id == 9){
+				return response()->json([
+					'success'=> false,
+					'error' => 'Kindly use valid user login to create trip request!'
+				]);
+			}
+
 			$data['action'] = 'New';
 			$trip = new Trip;
 			$visit = new Visit;

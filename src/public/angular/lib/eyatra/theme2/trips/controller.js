@@ -202,7 +202,7 @@ app.component('eyatraTripForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 2000);
                 $location.path('/trips')
                 return;
             }
