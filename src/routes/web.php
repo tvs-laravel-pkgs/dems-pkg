@@ -256,6 +256,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/employee/filter', 'Uitoux\EYatra\EmployeeController@filterEYatraEmployee')->name('filterEYatraEmployee');
 		Route::post('eyatra/employee/get-designation', 'Uitoux\EYatra\EmployeeController@getDesignationByGrade')->name('getDesignationByGrade');
 		Route::post('eyatra/manager/get-list', 'Uitoux\EYatra\EmployeeController@getManagerByOutlet')->name('getManagerByOutlet');
+		Route::post('eyatra/employee/get-outlet', 'Uitoux\EYatra\EmployeeController@getOutletByBusiness')->name('employeeGetOutletByBusiness');
 
 		//EMPLOYEES IMPORT
 		Route::get('import-employee/list', 'Uitoux\EYatra\EmployeeController@getImportJobsList')->name('getImportJobsList');
