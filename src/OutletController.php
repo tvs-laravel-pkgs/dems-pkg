@@ -300,16 +300,18 @@ class OutletController extends Controller {
 		$key = $r->key;
 		$cashier_list = Employee::select(
 
-			'name',
-			'code',
-			'employees.id as entity_id'
+			'users.name',
+			'employees.code',
+			'employees.id as entity_id',
+			'businesses.name as business_name'
 		)
 			->join('users', 'users.entity_id', 'employees.id')
+			->leftjoin('businesses', 'businesses.id', 'employees.business_id')
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
-				$q->where('code', 'like', '%' . $key . '%')
-					->orWhere('name', 'like', '%' . $key . '%')
+				$q->where('employees.code', 'like', '%' . $key . '%')
+					->orWhere('users.name', 'like', '%' . $key . '%')
 				;
 			})
 
@@ -321,16 +323,18 @@ class OutletController extends Controller {
 		$key = $r->key;
 		$nodel_list = Employee::select(
 
-			'name',
-			'code',
-			'employees.id as entity_id'
+			'users.name',
+			'employees.code',
+			'employees.id as entity_id',
+			'businesses.name as business_name'
 		)
 			->join('users', 'users.entity_id', 'employees.id')
+			->leftjoin('businesses', 'businesses.id', 'employees.business_id')
 			->where('users.user_type_id', 3121)
 			->where('employees.company_id', Auth::user()->company_id)
 			->where(function ($q) use ($key) {
-				$q->where('code', 'like', '%' . $key . '%')
-					->orWhere('name', 'like', '%' . $key . '%')
+				$q->where('employees.code', 'like', '%' . $key . '%')
+					->orWhere('users.name', 'like', '%' . $key . '%')
 				;
 			})
 
