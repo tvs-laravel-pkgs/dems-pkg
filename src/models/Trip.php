@@ -5000,6 +5000,16 @@ request is not desired, then those may be rejected.';
             $companyBusinessUnit = isset($this->company->ttbl_business_unit->name) ? $this->company->ttbl_business_unit->name : null;
             $companyCode = isset($this->company->ttbl_business_unit->code) ? $this->company->ttbl_business_unit->code : null;
         }
+        else if(!empty($this->employee->department) && $this->employee->department->business_id == 11){
+            $transactionDetail = $this->company ? $this->company->vmsPrePaymentInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($this->company->vms_business_unit->name) ? $this->company->vms_business_unit->name : null;
+            $companyCode = isset($this->company->vms_business_unit->code) ? $this->company->vms_business_unit->code : null;
+        }
+        else if(!empty($this->employee->department) && $this->employee->department->business_id == 12){
+            $transactionDetail = $this->company ? $this->company->pmsPrePaymentInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($this->company->pms_business_unit->name) ? $this->company->pms_business_unit->name : null;
+            $companyCode = isset($this->company->pms_business_unit->code) ? $this->company->pms_business_unit->code : null;
+        }
 		else{
 			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
@@ -6177,6 +6187,18 @@ request is not desired, then those may be rejected.';
             $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->ttblClaimRefundInvoiceTransaction() : null;
             $companyBusinessUnit = isset($employeeTrip->company->ttbl_business_unit->name) ? $employeeTrip->company->ttbl_business_unit->name : null;
             $company  = isset($employeeTrip->company->ttbl_business_unit->code) ? $employeeTrip->company->ttbl_business_unit->code : null;
+        }
+        else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 11){
+            $transactionDetail = $employeeTrip->company ? $employeeTrip->company->vmsInvoiceTransaction() : null;
+            $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->vmsClaimRefundInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($employeeTrip->company->vms_business_unit->name) ? $employeeTrip->company->vms_business_unit->name : null;
+            $company  = isset($employeeTrip->company->vms_business_unit->code) ? $employeeTrip->company->vms_business_unit->code : null;
+        }
+        else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 12){
+            $transactionDetail = $employeeTrip->company ? $employeeTrip->company->pmsInvoiceTransaction() : null;
+            $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->pmsClaimRefundInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($employeeTrip->company->pms_business_unit->name) ? $employeeTrip->company->pms_business_unit->name : null;
+            $company  = isset($employeeTrip->company->pms_business_unit->code) ? $employeeTrip->company->pms_business_unit->code : null;
         }
 		else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;

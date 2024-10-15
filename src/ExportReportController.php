@@ -3556,6 +3556,7 @@ class ExportReportController extends Controller {
             })
             ->where('trips.status_id','!=', 3032) //Cancelled
 			->where('businesses.erp_sync_type', 1) //Oracle
+			->where('trips.hold_data_sync', 0)
 			->groupBy('trips.id')
 			->get()
 			->toArray();
@@ -3580,6 +3581,7 @@ class ExportReportController extends Controller {
 			->where('trips.status_id', 3026)
 			->where('eyec.status_id', 3026)
 			->where('businesses.erp_sync_type', 1) //Oracle
+			->where('trips.hold_data_sync', 0)
 			->where(function($q) use ($sync_method) {
                 if($sync_method == "auto"){
                 	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));

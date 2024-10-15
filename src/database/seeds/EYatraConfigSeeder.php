@@ -1638,6 +1638,14 @@ class EYatraConfigSeeder extends Seeder {
                 'name' => 'TTBL',
                 'config_type_id' => 551,
             ],
+            3847 => [
+                'name' => 'VMS',
+                'config_type_id' => 551,
+            ],
+            3848 => [
+                'name' => 'PMS',
+                'config_type_id' => 551,
+            ],
             4112 => [
                 'name' => 'TTBL Travelx Invoice',
                 'config_type_id' => 550,
@@ -1650,6 +1658,34 @@ class EYatraConfigSeeder extends Seeder {
                 'name' => 'TTBL Travelx Pre Payment Invoice',
                 'config_type_id' => 550,
             ],
+            4115 => [
+                'name' => 'VMS Travelx Pre Payment Invoice',
+                'config_type_id' => 550,
+            ],
+            4116 => [
+                'name' => 'PMS Travelx Pre Payment Invoice',
+                'config_type_id' => 550,
+            ],
+            4117 => [
+                'name' => 'VMS Travelx Invoice',
+                'config_type_id' => 550,
+            ],
+            4118 => [
+                'name' => 'VMS Travel Claim Refund Invoice',
+                'config_type_id' => 550,
+            ],
+
+
+            4119 => [
+                'name' => 'PMS Travelx Invoice',
+                'config_type_id' => 550,
+            ],
+            4120 => [
+                'name' => 'PMS Travel Claim Refund Invoice',
+                'config_type_id' => 550,
+            ],
+
+
 			3864 => [
                 'name' => '156201',
                 'config_type_id' => 553,
