@@ -116,7 +116,8 @@ class EmployeeController extends Controller {
 				// DB::raw('IF(mngr.name IS NULL,"--",mngr.name) as manager_name'),
 				'grd.name as grade',
 				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status'),
-				'businesses.name as business_name'
+				'businesses.name as business_name',
+				'm.code as manager_code'
 			)
 			->where(function ($query) use ($r, $outlet) {
 				if (!empty($outlet)) {
@@ -197,7 +198,7 @@ class EmployeeController extends Controller {
      				->where('entity_id', $employee->reporting_to_id)
      				->where('user_type_id', 3121) //Employee
      				->first();
-     			return $employee_manager ? $employee->code." / ". $employee_manager->name : "--";
+     			return $employee_manager ? $employee->manager_code." / ". $employee_manager->name : "--";
      		})
 			->make(true);
 	}
