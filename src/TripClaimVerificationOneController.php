@@ -256,6 +256,8 @@ class TripClaimVerificationOneController extends Controller {
 	}
 
 	public function approveTripClaimVerificationOne(Request $r) {
+		try{
+		DB::beginTransaction();
 		$additional_approve = Auth::user()->company->additional_approve;
 		$financier_approve = Auth::user()->company->financier_approve;
 		$trip_id=$r->trip_id;
@@ -321,12 +323,22 @@ class TripClaimVerificationOneController extends Controller {
 		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3601, Auth::user()->entity_id, Carbon::now());
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
-
+		DB::commit();
 		return response()->json(['success' => true]);
+	    }catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
 	}
 
 	public function rejectTripClaimVerificationOne(Request $r) {
-
+		try{
+		DB::beginTransaction();
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -359,7 +371,18 @@ class TripClaimVerificationOneController extends Controller {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
 
+		DB::commit();
 		return response()->json(['success' => true]);
+
+		}catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
 	}
 
 	// Updating view status by Karthick T on 20-01-2022
