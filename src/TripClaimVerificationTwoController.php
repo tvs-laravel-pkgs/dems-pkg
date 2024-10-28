@@ -115,6 +115,8 @@ class TripClaimVerificationTwoController extends Controller {
 	}
 
 	public function approveTripClaimVerificationTwo(Request $r) {
+		try{
+		DB::beginTransaction();
 		$trip_id=$r->trip_id;
 		$trip = Trip::find($trip_id);
 
@@ -186,11 +188,23 @@ class TripClaimVerificationTwoController extends Controller {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
 		$notification = sendnotification($type = 13, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
+		
+		DB::commit();
 		return response()->json(['success' => true]);
+		}catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
 	}
 
 	public function rejectTripClaimVerificationTwo(Request $r) {
-
+		try{
+		DB::beginTransaction();
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -222,7 +236,18 @@ class TripClaimVerificationTwoController extends Controller {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
 
+		DB::commit();
 		return response()->json(['success' => true]);
+
+		}catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
 	}
 
 }
