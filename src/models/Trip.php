@@ -1398,6 +1398,8 @@ class Trip extends Model {
 	}
 
 	public static function approveTrip($r) {
+		try{
+		DB::beginTransaction();
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -1432,10 +1434,23 @@ class Trip extends Model {
 		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, Auth::user()->entity_id, Carbon::now());
 		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 
+		DB::commit();
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
+		}catch (\Exception $e) {
+		DB::rollBack();
+		return response()->json([
+			'success' => false,
+			'errors' => [
+				'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+			],
+		]);
+		}
 	}
 
 	public static function rejectTrip($r) {
+		try{
+		DB::beginTransaction();
+		
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -1456,7 +1471,17 @@ class Trip extends Model {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 3, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Rejected');
 
+		DB::commit();
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
+		}catch (\Exception $e) {
+		DB::rollBack();
+		return response()->json([
+			'success' => false,
+			'errors' => [
+				'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+			],
+		]);
+		}
 	}
 
 	public static function getClaimFormData($trip_id) {
