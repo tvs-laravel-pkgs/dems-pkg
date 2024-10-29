@@ -1875,6 +1875,7 @@ class Trip extends Model {
 			}
 		}
 
+		$emp_business_id = $trip->employee->business_id;
 		$data['trip'] = $trip;
 		$data['km_end_twowheeler'] = $km_end_twowheeler;
 		$data['km_end_fourwheeler'] = $km_end_fourwheeler;
@@ -1883,6 +1884,7 @@ class Trip extends Model {
 		$data['sbu_lists'] = Sbu::getSbuList();
 		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
 			->where('operating_states.company_id', Auth::user()->company_id)
+			->where('operating_states.business_id', $emp_business_id)
 			->pluck('nstates.gstin_state_code');
 
 		return response()->json($data);
@@ -2285,6 +2287,7 @@ class Trip extends Model {
 		$trip->local_travel_amount = $local_travel_amount;
 		$trip->emp_amount_financial_year_from = $emp_amount_financial_year_from;
 		$trip->emp_amount_financial_year_to = $emp_amount_financial_year_to;
+		$emp_business_id = $trip->employee->business_id;
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
 		$data['state_code'] = $state_code;
@@ -2300,6 +2303,7 @@ class Trip extends Model {
 		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
 		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
 			->where('operating_states.company_id', Auth::user()->company_id)
+			->where('operating_states.business_id', $emp_business_id)
 			->pluck('nstates.gstin_state_code');
 
 		return response()->json($data);
