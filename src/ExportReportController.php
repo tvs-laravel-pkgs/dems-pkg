@@ -2029,7 +2029,8 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.round_off, 0)),2,"en_IN") as round_off'),
 			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%m-%Y"), "") as tax_period'),
-			'employees.business_id'
+			'employees.business_id',
+			'city.state_id as state_id'
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -2079,7 +2080,8 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(lodgings.round_off, 0)),2,"en_IN") as round_off'),
 			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%m-%Y"), "") as tax_period'),
 			DB::raw('COALESCE(lodgings.has_multiple_tax_invoice, "") as has_multiple_tax_invoice'),
-			'employees.business_id'
+			'employees.business_id',
+			'city.state_id as state_id'
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -2121,7 +2123,7 @@ class ExportReportController extends Controller {
 		$s_no++;
 
 		foreach ($gst_transports as $gst_transport_key => $gst_transport) {
-			$business_transport_gstin = OperatingStates::where('business_id', $gst_transport['business_id'])->pluck('gst_number')->first();
+			$business_transport_gstin = OperatingStates::where('business_id', $gst_transport['business_id'])->where('nstate_id', $gst_transport['state_id'])->pluck('gst_number')->first();
 			$transport_data = [
 				//$gst_transport['business_gstin'],
 				$business_transport_gstin,
@@ -2170,7 +2172,7 @@ class ExportReportController extends Controller {
 			$export_details[] = $transport_data;
 		}
 		foreach ($gst_lodgings as $gst_lodging_key => $gst_lodging) {
-			$business_lodging_gstin = OperatingStates::where('business_id', $gst_lodging['business_id'])->pluck('gst_number')->first();
+			$business_lodging_gstin = OperatingStates::where('business_id', $gst_lodging['business_id'])->where('nstate_id', $gst_lodging['state_id'])->pluck('gst_number')->first();
 			$multiple_taxs = LodgingTaxInvoice::select(
 				DB::raw('COALESCE(configs.name, "") as multiple_description'),
 				DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.without_tax_amount, 0)),2,"en_IN") as multiple_amount'),
