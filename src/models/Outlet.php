@@ -37,6 +37,11 @@ class Outlet extends Model {
 	public function employeeNodel() {
 		return $this->belongsTo('Uitoux\EYatra\Employee', 'nodel_id');
 	}
+
+	public function businessData() {
+		return $this->belongsTo('Uitoux\EYatra\Business', 'business_id');
+	}
+
 	public static function getList() {
 		return Outlet::select('id', 'name')->where('company_id', Auth::user()->company_id)->get();
 	}

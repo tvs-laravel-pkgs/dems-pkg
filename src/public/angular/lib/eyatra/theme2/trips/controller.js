@@ -4,6 +4,7 @@ app.component('eyatraTrips', {
         var self = this;
         self.hasPermission = HelperService.hasPermission;
         self.permission = self.hasPermission('trip-add');
+        console.log(self);
         $http.get(
             trip_filter_data_url
         ).then(function(response) {
@@ -11,6 +12,7 @@ app.component('eyatraTrips', {
             self.employee_list = response.data.employee_list;
             self.purpose_list = response.data.purpose_list;
             self.trip_status_list = response.data.trip_status_list;
+            self.business_id = response.data.business_id;
             $rootScope.loading = false;
         });
 
@@ -200,7 +202,7 @@ app.component('eyatraTripForm', {
                 }).show();
                 setTimeout(function() {
                     $noty.close();
-                }, 1000);
+                }, 2000);
                 $location.path('/trips')
                 return;
             }
@@ -237,7 +239,7 @@ app.component('eyatraTripForm', {
                         setDate: self.trip.created_at,
                         //startDate: self.trip.start_date,
                         //endDate: self.trip.end_date,
-                        endDate: new Date("2024-09-30"),
+                        //endDate: new Date("2024-09-30"),
                         autoclose: true,
                     });
 
@@ -346,7 +348,7 @@ app.component('eyatraTripForm', {
             $(".datepicker.tripStartDate").datepicker({
                 startDate: '-5d',
                 //endDate: self.trip.end_date,
-                endDate: new Date("2024-09-30"),
+                //endDate: new Date("2024-09-30"),
                 autoclose: true,
             });
 

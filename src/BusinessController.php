@@ -29,7 +29,7 @@ class BusinessController extends Controller
             'users.name as created_by'
         )
             ->join('users', 'businesses.created_by', 'users.id')
-            ->join('business_finances','business_id','businesses.id')
+            ->join('business_finances','business_finances.business_id','businesses.id')
             ->groupBy('businesses.id');
 
         /*if (!Entrust::can('eyatra-all-company-view')) {

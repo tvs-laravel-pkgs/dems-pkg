@@ -41,8 +41,10 @@ app.component('eyatraEmployees', {
                 { data: 'action', searchable: false, class: 'action', class: 'text-left' },
                 { data: 'code', name: 'e.code', searchable: true },
                 { data: 'name', name: 'u.name', searchable: true },
+                { data: 'business_name', name: 'businesses.name', searchable: true },
                 { data: 'outlet_code', name: 'o.code', searchable: true },
-                { data: 'manager_code', name: 'm.code', searchable: true },
+                // { data: 'manager_code', name: 'm.code', searchable: true },
+                { data: 'manager_code', searchable: false },
                 // { data: 'manager_name', name: 'mngr.name', searchable: true },
                 { data: 'grade', name: 'grd.name', searchable: true },
                 { data: 'status', name: 'c.name', searchable: false },
@@ -317,8 +319,9 @@ app.component('eyatraEmployeeForm', {
                     $scope.getDesignation(self.employee.grade_id);
                     //$scope.selectPaymentMode(self.employee.payment_mode_id);
                     $scope.getApiData(self.employee.code);
-                    $scope.getSbuBasedonLob(self.employee.sbu.lob_id);
+                    $scope.getSbuBasedonLob(self.employee.sbu.lob_id, self.employee.department.business_id);
                     $scope.getDepartmentBasedonBusiness(self.employee.department.business_id);
+                    $scope.getOutletBasedOnBusiness(self.employee.department.business_id);
                 }, 700);
             } else {
                 $("#hide_password").show();
@@ -389,13 +392,13 @@ app.component('eyatraEmployeeForm', {
             }
         }
 
-        $scope.getSbuBasedonLob = function(lob_id) {
+        $scope.getSbuBasedonLob = function(lob_id, business_id) {
 
             //alert(lob_id);
             $.ajax({
                     url: get_sbu_by_lob,
                     method: "POST",
-                    data: { lob_id: lob_id },
+                    data: { lob_id: lob_id, business_id: business_id },
                 })
                 .done(function(res) {
                     self.extras.sbu_list = [];
@@ -473,6 +476,29 @@ app.component('eyatraEmployeeForm', {
                 $("#hide_password").show();
                 $("#password").prop('disabled', false);
             }
+        }
+
+        $scope.getOutletBasedOnBusiness = function(business_id) {
+            $.ajax({
+                url: employee_get_outlet_by_business,
+                method: "POST",
+                data: { business_id: business_id },
+            })
+            .done(function(res) {
+                if (!res.success) {
+                    var errors = '';
+                    for (var i in res.errors) {
+                        errors += '<li>' + res.errors[i] + '</li>';
+                    }
+                    custom_noty('error', errors);
+                }
+                self.extras.outlet_list = [];
+                self.extras.outlet_list = res.outlet_list;
+                $scope.$apply()
+            })
+            .fail(function(xhr) {
+                console.log(xhr);
+            });
         }
 
         $.validator.addMethod('positiveNumber',

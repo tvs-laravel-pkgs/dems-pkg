@@ -186,6 +186,14 @@ class TripController extends Controller {
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->first();
 		} else {
+			//IF EMPLOYEE DLOB OR DLOB PV THEN NOT ALLOW TO CREATE TRIP REQUEST.
+			if(Auth::user()->business_id == 1 || Auth::user()->business_id == 9){
+				return response()->json([
+					'success'=> false,
+					'errors' => ['Kindly use valid user login to create trip request!']
+				]);
+			}
+
 			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
 				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
 				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])

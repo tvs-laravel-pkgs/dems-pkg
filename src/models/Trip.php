@@ -698,6 +698,14 @@ class Trip extends Model {
 		}
 
 		if (!$trip_id) {
+			//IF EMPLOYEE DLOB OR DLOB PV THEN NOT ALLOW TO CREATE TRIP REQUEST.
+			if(Auth::user()->business_id == 1 || Auth::user()->business_id == 9){
+				return response()->json([
+					'success'=> false,
+					'error' => 'Kindly use valid user login to create trip request!'
+				]);
+			}
+
 			$data['action'] = 'New';
 			$trip = new Trip;
 			$visit = new Visit;
@@ -1390,6 +1398,8 @@ class Trip extends Model {
 	}
 
 	public static function approveTrip($r) {
+		try{
+		DB::beginTransaction();
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -1424,10 +1434,23 @@ class Trip extends Model {
 		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, Auth::user()->entity_id, Carbon::now());
 		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 
+		DB::commit();
 		return response()->json(['success' => true, 'message' => 'Trip approved successfully!']);
+		}catch (\Exception $e) {
+		DB::rollBack();
+		return response()->json([
+			'success' => false,
+			'errors' => [
+				'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+			],
+		]);
+		}
 	}
 
 	public static function rejectTrip($r) {
+		try{
+		DB::beginTransaction();
+		
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -1448,7 +1471,17 @@ class Trip extends Model {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 3, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Rejected');
 
+		DB::commit();
 		return response()->json(['success' => true, 'message' => 'Trip rejected successfully!']);
+		}catch (\Exception $e) {
+		DB::rollBack();
+		return response()->json([
+			'success' => false,
+			'errors' => [
+				'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+			],
+		]);
+		}
 	}
 
 	public static function getClaimFormData($trip_id) {
@@ -1842,6 +1875,7 @@ class Trip extends Model {
 			}
 		}
 
+		$emp_business_id = $trip->employee->business_id;
 		$data['trip'] = $trip;
 		$data['km_end_twowheeler'] = $km_end_twowheeler;
 		$data['km_end_fourwheeler'] = $km_end_fourwheeler;
@@ -1850,6 +1884,7 @@ class Trip extends Model {
 		$data['sbu_lists'] = Sbu::getSbuList();
 		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
 			->where('operating_states.company_id', Auth::user()->company_id)
+			->where('operating_states.business_id', $emp_business_id)
 			->pluck('nstates.gstin_state_code');
 
 		return response()->json($data);
@@ -1884,7 +1919,8 @@ class Trip extends Model {
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$data['financier_status_list'] = collect(Config::select('name', 'id')->whereIn('id', [3034, 3030, 3026, 3025, 3031])->orderBy('id', 'asc')->get())->prepend(['id' => '', 'name' => 'Select Status']);
-
+		$business_id = Auth::user()->business_id;
+		$data['business_id'] = $business_id;
 		$data['success'] = true;
 		//dd($data);
 		return response()->json($data);
@@ -2251,6 +2287,7 @@ class Trip extends Model {
 		$trip->local_travel_amount = $local_travel_amount;
 		$trip->emp_amount_financial_year_from = $emp_amount_financial_year_from;
 		$trip->emp_amount_financial_year_to = $emp_amount_financial_year_to;
+		$emp_business_id = $trip->employee->business_id;
 		$data['trip'] = $trip;
 		$data['trip_justify'] = 0;
 		$data['state_code'] = $state_code;
@@ -2266,6 +2303,7 @@ class Trip extends Model {
 		$data['view'] = URL::asset('public/img/content/yatra/table/view.svg');
 		$data['operating_states'] = OperatingStates::join('nstates', 'nstates.id', 'operating_states.nstate_id')
 			->where('operating_states.company_id', Auth::user()->company_id)
+			->where('operating_states.business_id', $emp_business_id)
 			->pluck('nstates.gstin_state_code');
 
 		return response()->json($data);
@@ -4991,6 +5029,16 @@ request is not desired, then those may be rejected.';
             $companyBusinessUnit = isset($this->company->ttbl_business_unit->name) ? $this->company->ttbl_business_unit->name : null;
             $companyCode = isset($this->company->ttbl_business_unit->code) ? $this->company->ttbl_business_unit->code : null;
         }
+        else if(!empty($this->employee->department) && $this->employee->department->business_id == 11){
+            $transactionDetail = $this->company ? $this->company->vmsPrePaymentInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($this->company->vms_business_unit->name) ? $this->company->vms_business_unit->name : null;
+            $companyCode = isset($this->company->vms_business_unit->code) ? $this->company->vms_business_unit->code : null;
+        }
+        else if(!empty($this->employee->department) && $this->employee->department->business_id == 12){
+            $transactionDetail = $this->company ? $this->company->pmsPrePaymentInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($this->company->pms_business_unit->name) ? $this->company->pms_business_unit->name : null;
+            $companyCode = isset($this->company->pms_business_unit->code) ? $this->company->pms_business_unit->code : null;
+        }
 		else{
 			// $transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
 			$transactionDetail = $this->company ? $this->company->prePaymentInvoiceTransaction() : null;
@@ -6168,6 +6216,18 @@ request is not desired, then those may be rejected.';
             $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->ttblClaimRefundInvoiceTransaction() : null;
             $companyBusinessUnit = isset($employeeTrip->company->ttbl_business_unit->name) ? $employeeTrip->company->ttbl_business_unit->name : null;
             $company  = isset($employeeTrip->company->ttbl_business_unit->code) ? $employeeTrip->company->ttbl_business_unit->code : null;
+        }
+        else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 11){
+            $transactionDetail = $employeeTrip->company ? $employeeTrip->company->vmsInvoiceTransaction() : null;
+            $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->vmsClaimRefundInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($employeeTrip->company->vms_business_unit->name) ? $employeeTrip->company->vms_business_unit->name : null;
+            $company  = isset($employeeTrip->company->vms_business_unit->code) ? $employeeTrip->company->vms_business_unit->code : null;
+        }
+        else if(!empty($employeeTrip->employee->department) && $employeeTrip->employee->department->business_id == 12){
+            $transactionDetail = $employeeTrip->company ? $employeeTrip->company->pmsInvoiceTransaction() : null;
+            $claimRefundDetail = $employeeTrip->company ? $employeeTrip->company->pmsClaimRefundInvoiceTransaction() : null;
+            $companyBusinessUnit = isset($employeeTrip->company->pms_business_unit->name) ? $employeeTrip->company->pms_business_unit->name : null;
+            $company  = isset($employeeTrip->company->pms_business_unit->code) ? $employeeTrip->company->pms_business_unit->code : null;
         }
 		else{
 			$transactionDetail = $employeeTrip->company ? $employeeTrip->company->invoiceTransaction() : null;

@@ -96,24 +96,28 @@ class EmployeeController extends Controller {
 				$join->on('u.entity_id', '=', 'e.id')
 					->where('u.user_type_id', 3121);
 			})
-			->leftJoin('users as mngr', function ($join) {
-				$join->on('mngr.entity_id', 'm.id')
-					->where('mngr.user_type_id', 3121);
-			})
+			// ->leftJoin('users as mngr', function ($join) {
+			// 	$join->on('mngr.entity_id', 'm.id')
+			// 		->where('mngr.user_type_id', 3121);
+			// })
 		// ->leftJoin('users as mngr', 'mngr.entity_id', 'm.id')
 			->leftJoin('role_user', 'role_user.user_id', 'u.id')
+			->leftJoin('businesses', 'businesses.id', 'e.business_id')
 		// ->where('users.user_type_id', 3121)
 			// ->withTrashed()
 			->select(
 				'e.id',
 				'e.code',
+				'e.reporting_to_id',
 				'u.name',
 				'o.code as outlet_code',
-				DB::raw('CONCAT(m.code," / ",mngr.name) as manager_code'),
+				// DB::raw('CONCAT(m.code," / ",mngr.name) as manager_code'),
 				// DB::raw('IF(m.code IS NULL,"--",m.code) as manager_code'),
 				// DB::raw('IF(mngr.name IS NULL,"--",mngr.name) as manager_name'),
 				'grd.name as grade',
-				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status')
+				DB::raw('IF(e.deleted_at IS NULL, "Active","Inactive") as status'),
+				'businesses.name as business_name',
+				'm.code as manager_code'
 			)
 			->where(function ($query) use ($r, $outlet) {
 				if (!empty($outlet)) {
@@ -188,6 +192,14 @@ class EmployeeController extends Controller {
 					return '<span style="color:#63ce63;">Active</span>';
 				}
 			})
+			->addColumn('manager_code', function ($employee) {
+     			$employee_manager = User::withTrashed()
+     				->select('name')
+     				->where('entity_id', $employee->reporting_to_id)
+     				->where('user_type_id', 3121) //Employee
+     				->first();
+     			return $employee_manager ? $employee->manager_code." / ". $employee_manager->name : "--";
+     		})
 			->make(true);
 	}
 
@@ -216,7 +228,8 @@ class EmployeeController extends Controller {
 			$employee->roles = $employee->user->roles()->pluck('role_id')->toArray();
 			$this->data['success'] = true;
 		}
-		$outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
+		// $outlet_list = collect(Outlet::getList())->prepend(['id' => '', 'name' => 'Select Outlet']);
+		$outlet_list = collect();
 		$payment_mode_list = collect(Config::paymentModeList())->prepend(['id' => '', 'name' => 'Select Payment Mode']);
 		$wallet_mode_list = collect(Entity::walletModeList())->prepend(['id' => '', 'name' => 'Select Wallet Type']);
 		$role_list = collect(Role::getList());
@@ -291,22 +304,26 @@ class EmployeeController extends Controller {
 			];
 
 			$validator = Validator::make($request->all(), [
-				'code' => [
-					'unique:employees,code,' . $request->id . ',id',
-					'required:true',
-				],
-				'mobile_number' => [
-					'required:true',
-					'unique:users,mobile_number,' . $request->user_id . ',id',
-				],
+				// 'code' => [
+				// 	'unique:employees,code,' . $request->id . ',id',
+				// 	'required:true',
+				// ],
+				'code' => 'required|unique:employees,code,' . $request->id . ',id,company_id,' . Auth::user()->company_id . ',business_id,' . $request->business_id,
+				// 'mobile_number' => [
+				// 	'required:true',
+				// 	'unique:users,mobile_number,' . $request->user_id . ',id',
+				// ],
+				'mobile_number' => 'required|unique:users,mobile_number,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id . ',business_id,' . $request->business_id,
 				'name' => [
 					'required:true',
 				],
-				'username' => [
-					'required:true',
-					'unique:users,username,' . $request->user_id . ',id',
+				// 'username' => [
+				// 	'required:true',
+				// 	'unique:users,username,' . $request->user_id . ',id',
 
-				],
+				// ],
+				'username' => 'required|unique:users,username,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id . ',business_id,' . $request->business_id,
+
 				// 'email' => [
 				// 	'required:true',
 				// 	'unique:users,email,' . $request->user_id . ',id',
@@ -395,6 +412,7 @@ class EmployeeController extends Controller {
 			$user = User::withTrashed()->firstOrNew([
 				'id' => $request->user_id,
 			]);
+			$user->business_id = $request->business_id;
 			$user->mobile_number = $request->mobile_number;
 			$user->entity_type = 0;
 			$user->user_type_id = 3121;
@@ -428,7 +446,10 @@ class EmployeeController extends Controller {
 
 			//BANK DETAIL SAVE
 			if ($request->bank_name) {
-				$bank_detail = BankDetail::firstOrNew(['entity_id' => $employee->id]);
+				$bank_detail = BankDetail::firstOrNew([
+					'detail_of_id' => 3121, //Employee
+					'entity_id' => $employee->id,
+				]);
 				$bank_detail->fill($request->all());
 				$bank_detail->detail_of_id = 3121;
 				$bank_detail->entity_id = $employee->id;
@@ -437,7 +458,10 @@ class EmployeeController extends Controller {
 			}
 			//CHEQUE DETAIL SAVE
 			if ($request->cheque_favour) {
-				$cheque_detail = ChequeDetail::firstOrNew(['entity_id' => $employee->id]);
+				$cheque_detail = ChequeDetail::firstOrNew([
+					'detail_of_id' => 3121,//Employee
+					'entity_id' => $employee->id,
+				]);
 				$cheque_detail->fill($request->all());
 				$cheque_detail->detail_of_id = 3121;
 				$cheque_detail->entity_id = $employee->id;
@@ -447,7 +471,10 @@ class EmployeeController extends Controller {
 
 			//WALLET SAVE
 			if ($request->type_id) {
-				$wallet_detail = WalletDetail::firstOrNew(['entity_id' => $employee->id]);
+				$wallet_detail = WalletDetail::firstOrNew([
+					'wallet_of_id' => 3121,//Employee
+					'entity_id' => $employee->id
+				]);
 				$wallet_detail->fill($request->all());
 				$wallet_detail->wallet_of_id = 3121;
 				$wallet_detail->entity_id = $employee->id;
@@ -462,9 +489,15 @@ class EmployeeController extends Controller {
 
 				return response()->json(['success' => true, 'message' => ['Employee Updated Successfully']]);
 			}
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+
 		}
 	}
 
@@ -546,8 +579,10 @@ class EmployeeController extends Controller {
 		$manager_list = Employee::leftJoin('users as emp_user', 'emp_user.entity_id', 'employees.id')->select(
 			'emp_user.name',
 			'employees.code',
-			'employees.id'
+			'employees.id',
+			'businesses.name as business_name'
 		)
+			->leftjoin('businesses','businesses.id','employees.business_id')
 			->where(function ($q) use ($key) {
 				$q->where('employees.code', 'like', '%' . $key . '%')
 					->orWhere('emp_user.name', 'like', '%' . $key . '%')
@@ -569,7 +604,7 @@ class EmployeeController extends Controller {
 	public function getSbuByLob(Request $request) {
 		//dd($request);
 		if (!empty($request->lob_id)) {
-			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sub Business']);
+			$sbu_list = collect(Sbu::where('lob_id', $request->lob_id)->where('business_id', $request->business_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Sub Business']);
 		} else {
 			$sbu_list = [];
 		}
@@ -717,9 +752,14 @@ class EmployeeController extends Controller {
 			DB::commit();
 			return response()->json(['success' => true, 'message' => 'Uploading in Progress']);
 
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
-			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
 		}
 	}
 
@@ -851,7 +891,7 @@ class EmployeeController extends Controller {
 			}
 			DB::commit();
 			return response()->json(['success' => true, 'message' => ['Reporting manager updated successfully']]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		} catch (\Exception $e) {
@@ -1002,6 +1042,27 @@ class EmployeeController extends Controller {
 		} catch (\Exception $e) {
 			return response()->json(['success' => false, 'message' => [$e->getMessage()]]);
 		}
+	}
+
+	public function getOutletByBusiness(Request $request) {
+		try{
+			$outlet_list = [];
+			if (!empty($request->business_id)) {
+				$outlet_list = collect(Outlet::where('company_id', Auth::user()->company_id)->where('business_id', $request->business_id)->select('name', 'id')->get())->prepend(['id' => '', 'name' => 'Select Outlet']);
+			}
+			return response()->json([
+				'success'=> true, 
+				'outlet_list' => $outlet_list
+			]);
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
+
 	}
 
 }

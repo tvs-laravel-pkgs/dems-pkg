@@ -93,7 +93,8 @@ class TripClaimVerificationThreeController extends Controller {
 	}
 
 	public function approveFinancierTripClaimVerification($trip_id) {
-
+		try{
+		DB::beginTransaction();
 		// dd($trip_id);
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
@@ -114,7 +115,17 @@ class TripClaimVerificationThreeController extends Controller {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Payment Pending');
 
+		DB::commit();
 		return response()->json(['success' => true]);
+		}catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
 	}
 	public function approveTripClaimVerificationThree(Request $r) {
 		// dd($r->all());
@@ -178,14 +189,15 @@ class TripClaimVerificationThreeController extends Controller {
 
 			DB::commit();
 			return response()->json(['success' => true]);
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			DB::rollBack();
 			return response()->json(['success' => false, 'errors' => ['Exception Error' => $e->getMessage()]]);
 		}
 	}
 
 	public function rejectTripClaimVerificationThree(Request $r) {
-
+		try{
+		DB::beginTransaction();
 		$trip = Trip::find($r->trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -205,7 +217,17 @@ class TripClaimVerificationThreeController extends Controller {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
 
+		DB::commit();
 		return response()->json(['success' => true]);
+		}catch (\Exception $e) {
+			DB::rollBack();
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
 	}
 
 	public function holdTripClaimVerificationThree(Request $r) {

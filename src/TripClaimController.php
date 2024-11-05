@@ -29,6 +29,7 @@ class TripClaimController extends Controller {
 			->select(
 				'trips.id',
 				'claims.number as claim_number',
+				'claims.total_amount as claim_total_amount',
 				'trips.number',
 				'e.code as ecode',
 				'users.name as ename',

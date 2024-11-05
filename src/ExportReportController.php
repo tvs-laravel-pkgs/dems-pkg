@@ -2028,7 +2028,9 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(visit_bookings.igst, 0)),2,"en_IN") as igst'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.other_charges, 0)),2,"en_IN") as other_charges'),
 			DB::raw('format(ROUND(IFNULL(visit_bookings.round_off, 0)),2,"en_IN") as round_off'),
-			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%m-%Y"), "") as tax_period')
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%m-%Y"), "") as tax_period'),
+			'employees.business_id',
+			'city.state_id as state_id'
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -2077,7 +2079,9 @@ class ExportReportController extends Controller {
 			DB::raw('format(ROUND(IFNULL(lodgings.igst, 0)),2,"en_IN") as igst'),
 			DB::raw('format(ROUND(IFNULL(lodgings.round_off, 0)),2,"en_IN") as round_off'),
 			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%m-%Y"), "") as tax_period'),
-			DB::raw('COALESCE(lodgings.has_multiple_tax_invoice, "") as has_multiple_tax_invoice')
+			DB::raw('COALESCE(lodgings.has_multiple_tax_invoice, "") as has_multiple_tax_invoice'),
+			'employees.business_id',
+			'city.state_id as state_id'
 		)->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
 			->leftJoin('sbus', 'sbus.id', 'ey_employee_claims.sbu_id')
 			->leftJoin('users', function ($user_q) {
@@ -2117,9 +2121,12 @@ class ExportReportController extends Controller {
 		$export_details = [];
 		$s_no = 1;
 		$s_no++;
+
 		foreach ($gst_transports as $gst_transport_key => $gst_transport) {
+			$business_transport_gstin = OperatingStates::where('business_id', $gst_transport['business_id'])->where('nstate_id', $gst_transport['state_id'])->pluck('gst_number')->first();
 			$transport_data = [
-				$gst_transport['business_gstin'],
+				//$gst_transport['business_gstin'],
+				$business_transport_gstin,
 				$gst_transport['business_unit'],
 				$gst_transport['tax_period'],
 				'Invoice',
@@ -2165,6 +2172,7 @@ class ExportReportController extends Controller {
 			$export_details[] = $transport_data;
 		}
 		foreach ($gst_lodgings as $gst_lodging_key => $gst_lodging) {
+			$business_lodging_gstin = OperatingStates::where('business_id', $gst_lodging['business_id'])->where('nstate_id', $gst_lodging['state_id'])->pluck('gst_number')->first();
 			$multiple_taxs = LodgingTaxInvoice::select(
 				DB::raw('COALESCE(configs.name, "") as multiple_description'),
 				DB::raw('format(ROUND(IFNULL(lodging_tax_invoices.without_tax_amount, 0)),2,"en_IN") as multiple_amount'),
@@ -2180,7 +2188,8 @@ class ExportReportController extends Controller {
 				->get()->toArray();
 			if ($gst_lodging['has_multiple_tax_invoice'] == 0) {
 				$lodging_data = [
-					$gst_lodging['business_gstin'],
+					//$gst_lodging['business_gstin'],
+					$business_lodging_gstin,
 					$gst_lodging['business_unit'],
 					$gst_lodging['tax_period'],
 					'Invoice',
@@ -2228,7 +2237,8 @@ class ExportReportController extends Controller {
 			if ($gst_lodging['has_multiple_tax_invoice'] == 1) {
 				foreach ($multiple_taxs as $multiple_tax_key => $multiple_tax) {
 					$multiple_lodging_data = [
-						$gst_lodging['business_gstin'],
+						//$gst_lodging['business_gstin'],
+						$business_lodging_gstin,
 						$gst_lodging['business_unit'],
 						$gst_lodging['tax_period'],
 						'Invoice',
@@ -3556,6 +3566,7 @@ class ExportReportController extends Controller {
             })
             ->where('trips.status_id','!=', 3032) //Cancelled
 			->where('businesses.erp_sync_type', 1) //Oracle
+			->where('trips.hold_data_sync', 0)
 			->groupBy('trips.id')
 			->get()
 			->toArray();
@@ -3580,6 +3591,7 @@ class ExportReportController extends Controller {
 			->where('trips.status_id', 3026)
 			->where('eyec.status_id', 3026)
 			->where('businesses.erp_sync_type', 1) //Oracle
+			->where('trips.hold_data_sync', 0)
 			->where(function($q) use ($sync_method) {
                 if($sync_method == "auto"){
                 	$q->whereDate('eyec.updated_at', '<', date('Y-m-d'));
