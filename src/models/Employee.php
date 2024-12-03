@@ -47,6 +47,8 @@ class Employee extends Model {
 		'date_of_joining',
 		'aadhar_no',
 		'pan_no',
+		'daily_amount',
+		'monthly_amount',
 		'self_approve',
 		'gender',
 		'date_of_birth',

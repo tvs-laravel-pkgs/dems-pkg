@@ -1064,5 +1064,24 @@ class EmployeeController extends Controller {
 		}
 
 	}
+	public function employeeAvailableBalance() {
+		try{
+			Employee::query()->update([
+				'balance_amount' => \DB::raw('monthly_amount')
+			]);
+	
+			return response()->json([
+				'success' => true,
+				'message' => 'Employee balances updated successfully.',
+			]);
+		} catch (\Exception $e) {
+			return response()->json([
+				'success' => false,
+				'errors' => [
+					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
+				],
+			]);
+		}
+	}
 
 }
