@@ -313,15 +313,21 @@ class TripClaimVerificationOneController extends Controller {
 		$amount = $balance_amount - $employee_claim->total_amount;
 		$balance_amount_update = Employee::where('id', $employee_claim->employee_id)->update(['balance_amount' => $amount]);
 		if($business_id == 10){
-		$claim_amount_details = DB::table('claim_amount_details')->insert([
-			'entity_id' => $trip->id,
-			'employee_id' => $employee_claim->employee_id,
-			'claim_amount' => $employee_claim->total_amount,
-			'claim_date' => Carbon::now(),
-			'created_at' => Carbon::now(),
-			'updated_at' => Carbon::now(),
-			'status_id' => $employee_claim->status_id
-		]);
+			$claim_data = [
+				'entity_id' => $trip->id,
+				'employee_id' => $employee_claim->employee_id,
+				'claim_amount' => $employee_claim->total_amount,
+				'claim_date' => Carbon::now(),
+				'created_at' => Carbon::now(),
+				'updated_at' => Carbon::now(),
+				'status_id' => $employee_claim->status_id,
+			];
+			
+			if ($business_id == 10 && $employee_claim->status_id == 3024) {
+				$claim_data['claim_reject'] = 1;
+			}
+			
+			$claim_amount_details = DB::table('claim_amount_details')->insert($claim_data);
 		}
 
 		// Update attachment status by Karthick T on 20-01-2022

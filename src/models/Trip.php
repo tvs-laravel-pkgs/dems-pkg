@@ -4120,7 +4120,8 @@ class Trip extends Model {
 				$end_of_month = Carbon::now()->endOfMonth()->toDateString();
 				$monthly_total_amounts = DB::table('claim_amount_details')
 				->where('employee_id', $request->employee_id)
-				->where('status_id', 3026)
+				->where('status_id', 3023)
+				->where('claim_reject', 0)
 				->whereBetween('claim_date', [$start_of_month, $end_of_month])
 				->sum('claim_amount');
 				$employee_details = Employee::where('employees.id', $request->employee_id)->first();
