@@ -313,21 +313,15 @@ class TripClaimVerificationOneController extends Controller {
 		$amount = $balance_amount - $employee_claim->total_amount;
 		$balance_amount_update = Employee::where('id', $employee_claim->employee_id)->update(['balance_amount' => $amount]);
 		if($business_id == 10){
-			$claim_data = [
+			$claim_amount_details = DB::table('claim_amount_details')->insert([
 				'entity_id' => $trip->id,
 				'employee_id' => $employee_claim->employee_id,
 				'claim_amount' => $employee_claim->total_amount,
 				'claim_date' => Carbon::now(),
 				'created_at' => Carbon::now(),
 				'updated_at' => Carbon::now(),
-				'status_id' => $employee_claim->status_id,
-			];
-			
-			if ($business_id == 10 && $employee_claim->status_id == 3024) {
-				$claim_data['claim_reject'] = 1;
-			}
-			
-			$claim_amount_details = DB::table('claim_amount_details')->insert($claim_data);
+				'status_id' => $employee_claim->status_id
+			]);
 		}
 
 		// Update attachment status by Karthick T on 20-01-2022
@@ -390,6 +384,14 @@ class TripClaimVerificationOneController extends Controller {
 		$activity['details'] = "Employee Claims V1 Rejected";
 		$activity['activity'] = "reject";
 		$activity_log = ActivityLog::saveLog($activity);
+		$business_id = Auth::user()->business_id;
+		if($business_id == 10){
+			$claim_amount_details_reject = DB::table('claim_amount_details')->where('entity_id', $trip->id)
+			->where('employee_id', $employee_claim->employee_id)
+			->where('status_id', 3023)
+			->where('claim_reject', 0)
+			->update(['claim_reject' => 1]);
+		}
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
