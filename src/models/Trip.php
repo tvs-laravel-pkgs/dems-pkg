@@ -815,6 +815,8 @@ class Trip extends Model {
 		];
 		$data['trip'] = $trip;
 
+		$data['business_id'] = $business_id = Auth::user()->business_id;
+
 		$data['trip_advance_amount_edit'] = $trip_advance_amount_edit;
 		$data['trip_advance_amount_employee_edit'] = $trip_advance_amount_employee_edit;
 
