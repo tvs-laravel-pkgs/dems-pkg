@@ -201,7 +201,7 @@ class TripController extends Controller {
 
 			//Total Trips Pending
 			$total_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3021)->count();
-			if ($total_trips >= 5) {
+			if ($total_trips >= 10) {
 				return response()->json(['success' => false, 'errors' => "Your previous trips waiting for approval!"]);
 			}
 		}

@@ -261,6 +261,7 @@ class TripClaimVerificationOneController extends Controller {
 		$additional_approve = Auth::user()->company->additional_approve;
 		$financier_approve = Auth::user()->company->financier_approve;
 		$trip_id=$r->trip_id;
+		$business_id = Auth::user()->business_id;
 		$trip = Trip::find($trip_id);
 		if (!$trip) {
 			return response()->json(['success' => false, 'errors' => ['Trip not found']]);
@@ -307,6 +308,22 @@ class TripClaimVerificationOneController extends Controller {
 
 		$employee_claim->save();
 		$trip->save();
+
+		$balance_amount = Employee::where('id', $employee_claim->employee_id)->pluck('balance_amount')->first();
+		$amount = $balance_amount - $employee_claim->total_amount;
+		$balance_amount_update = Employee::where('id', $employee_claim->employee_id)->update(['balance_amount' => $amount]);
+		if($business_id == 10){
+			$claim_amount_details = DB::table('claim_amount_details')->insert([
+				'entity_id' => $trip->id,
+				'employee_id' => $employee_claim->employee_id,
+				'claim_amount' => $employee_claim->total_amount,
+				'claim_date' => Carbon::now(),
+				'created_at' => Carbon::now(),
+				'updated_at' => Carbon::now(),
+				'status_id' => $employee_claim->status_id
+			]);
+		}
+
 		// Update attachment status by Karthick T on 20-01-2022
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)
 				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189,3750,3751,3752,3753,3754,3755])
@@ -367,6 +384,14 @@ class TripClaimVerificationOneController extends Controller {
 		$activity['details'] = "Employee Claims V1 Rejected";
 		$activity['activity'] = "reject";
 		$activity_log = ActivityLog::saveLog($activity);
+		$business_id = Auth::user()->business_id;
+		if($business_id == 10){
+			$claim_amount_details_reject = DB::table('claim_amount_details')->where('entity_id', $trip->id)
+			->where('employee_id', $employee_claim->employee_id)
+			->where('status_id', 3023)
+			->where('claim_reject', 0)
+			->update(['claim_reject' => 1]);
+		}
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');

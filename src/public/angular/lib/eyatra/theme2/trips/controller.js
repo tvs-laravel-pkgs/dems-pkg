@@ -411,6 +411,15 @@ app.component('eyatraTripForm', {
 
 
             self.extras = response.data.extras;
+            self.business_id = response.data.business_id;
+            if(self.business_id == 10){
+                self.extras.travel_mode_list = self.extras.travel_mode_list.filter(
+                    (travelMode) => travelMode.travel_mode_id !== 16
+                );
+            }else{
+                self.extras.travel_mode_list = response.data.extras.travel_mode_list;
+            }
+            
             self.action = response.data.action;
             if (self.action == 'New') {
                 // self.trip.trip_type = 'single';

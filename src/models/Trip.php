@@ -815,6 +815,8 @@ class Trip extends Model {
 		];
 		$data['trip'] = $trip;
 
+		$data['business_id'] = $business_id = Auth::user()->business_id;
+
 		$data['trip_advance_amount_edit'] = $trip_advance_amount_edit;
 		$data['trip_advance_amount_employee_edit'] = $trip_advance_amount_employee_edit;
 
@@ -4115,11 +4117,38 @@ class Trip extends Model {
 					$employee_claim->amount_to_pay = 1;
 				}
 
+				$business_id = Auth::user()->business_id;
+				$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
+				$end_of_month = Carbon::now()->endOfMonth()->toDateString();
+				$monthly_total_amounts = DB::table('claim_amount_details')
+				->where('employee_id', $request->employee_id)
+				->where('status_id', 3023)
+				->where('claim_reject', 0)
+				->whereBetween('claim_date', [$start_of_month, $end_of_month])
+				->sum('claim_amount');
+				$employee_details = Employee::where('employees.id', $request->employee_id)->first();
+				if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount){
+					return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
+				}
+				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount){
+					return response()->json(['success' => false, 'errors' => ['Monthly limited amount Validation']]);
+				}
 				$employee_claim->save();
 
+				if($business_id == 10){
+				$claim_amount_details = DB::table('claim_amount_details')->insert([
+					'entity_id' => $trip->id,
+					'employee_id' => $request->employee_id,
+					'claim_amount' => $total_amount,
+					'claim_date' => Carbon::now(),
+					'created_at' => Carbon::now(),
+					'updated_at' => Carbon::now(),
+					'status_id' => $employee_claim->status_id
+				]);
+				}
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-				$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
+				//$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
 
 				DB::commit();
 				return response()->json(['success' => true]);
