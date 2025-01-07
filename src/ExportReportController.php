@@ -1951,6 +1951,131 @@ class ExportReportController extends Controller {
 			$excel->setActiveSheetIndex(0);
 		})->download('xlsx');
 	}
+	public function claimReport(Request $r) {
+		//dd($r->all());
+		ob_end_clean();
+		$date = explode(' to ', $r->period);
+		$from_date = date('Y-m-d', strtotime($date[0]));
+		$to_date = date('Y-m-d', strtotime($date[1]));
+		$region_ids = $outlet_ids = [];
+		if ($r->regions) {
+			if (in_array('-1', json_decode($r->regions))) {
+				$region_ids = Outlet::pluck('id')->toArray();
+			} else {
+				$region_ids = json_decode($r->regions);
+			}
+		}
+		if ($r->outlets) {
+			if (in_array('-1', json_decode($r->outlets))) {
+				$outlet_ids = Outlet::pluck('id')->toArray();
+			} else {
+				$outlet_ids = json_decode($r->outlets);
+			}
+		}
+		// dd($region_ids, $outlet_ids);
+		ini_set('max_execution_time', 0);
+		$excel_headers = [
+			'S NO',
+			'BUSINESS',
+			'EMPLOYEE CODE',
+			'EMPLOYEE NAME',
+			'TRIP NUMBER',
+			'CLAIM NUMBER',
+			'CLAIM DATE',
+			'OUTLET',
+			'STATE',
+			'APPROVER TYPE',
+			'APPROVER CODE',
+			'APPROVER NAME',
+			'CLAIM APPROVED DATE',
+			'AMOUNT',
+		];
+		$claim_details = ApprovalLog::select(
+			DB::raw('COALESCE(employees.code, "") as emp_code'),
+			DB::raw('COALESCE(users.name, "") as emp_name'),
+			DB::raw('COALESCE(businesses.name, "") as business_name'),
+			DB::raw('COALESCE(approvers.username, "") as approver_code'),
+			DB::raw('COALESCE(approvers.name, "") as approver_name'),
+			DB::raw('COALESCE(configs.name, "") as approver_type'),
+			DB::raw('COALESCE(outlets.code, "") as outlet'),
+			DB::raw('COALESCE(s.name, "") as state_name'),
+			DB::raw('COALESCE(trips.number, "") as trip_number'),
+			DB::raw('COALESCE(ey_employee_claims.number, "") as claim_number'),
+			DB::raw('COALESCE(DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y"), "") as claim_date'),
+			DB::raw('format(ROUND(IFNULL(ey_employee_claims.total_amount, 0)),2,"en_IN") as total_amount'),
+			DB::raw('COALESCE(DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y"), "") as approved_date')
+		)->leftJoin('trips', 'trips.id', 'approval_logs.entity_id')
+		->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
+			->leftJoin('users', function ($user_q) {
+				$user_q->on('employees.id', 'users.entity_id')
+					->where('users.user_type_id', 3121);
+			})
+			->leftJoin('outlets', 'outlets.id', 'trips.outlet_id')
+			->leftJoin('ey_addresses as a', function ($join) {
+				$join->on('a.entity_id', '=', 'outlets.id')
+					->where('a.address_of_id', 3160);
+			})
+			->leftJoin('ncities as city', 'city.id', 'a.city_id')
+			->leftJoin('nstates as s', 's.id', 'city.state_id')
+			->leftJoin('regions as r', 'r.state_id', 's.id')
+			->leftJoin('users as approvers', 'approvers.entity_id', 'approval_logs.approved_by_id')
+			->leftJoin('businesses', 'businesses.id', 'employees.business_id')
+			->leftJoin('configs', 'configs.id', 'approval_logs.approval_type_id')
+			->where(function ($q) use ($region_ids, $outlet_ids) {
+				if (count($outlet_ids) == 0) {
+					$q->whereIn('r.id', $region_ids);
+				} else {
+					$q->whereIn('outlets.id', $outlet_ids);
+				}
+			})
+			->whereDate('trips.created_at', '>=', $from_date)
+			->whereDate('trips.created_at', '<=', $to_date)
+			->where(function ($q) use ($r) {
+				if ($r->business_ids != -1) {
+					$q->where('employees.business_id', $r->business_ids);
+				}
+			})
+			->get();
+		// dd($claim_details);
+		if (count($claim_details) == 0) {
+			Session()->flash('error', 'No Data Found');
+		}
+		$export_details = [];
+		$s_no = 1;
+		foreach ($claim_details as $claim_detail_key => $claim_detail) {
+			$export_data = [
+				$s_no++,
+				$claim_detail->emp_code,
+				$claim_detail->business_name,
+				$claim_detail->emp_name,
+				$claim_detail->trip_number,
+				$claim_detail->claim_number,
+				$claim_detail->claim_date,
+				$claim_detail->outlet,
+				$claim_detail->state_name,
+				$claim_detail->approver_type,
+				$claim_detail->approver_code,
+				$claim_detail->approver_name,
+				$claim_detail->approved_date,
+				$claim_detail->total_amount,
+			];
+
+			$export_details[] = $export_data;
+		}
+		$title = 'CLAIM_REPORT_' . Carbon::now();
+		$sheet_name = 'CLAIM REPORT';
+		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
+			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+				$sheet->fromArray($export_details, NULL, 'A1');
+				$sheet->row(1, $excel_headers);
+				$sheet->row(1, function ($row) {
+					$row->setBackground('#c4c4c4');
+				});
+			});
+			$excel->setActiveSheetIndex(0);
+		})->download('xlsx');
+	}
 	//GST REPORT NEW ONE
 	public function employeeGstrReport(Request $r) {
 		ob_end_clean();
