@@ -2006,7 +2006,7 @@ class ExportReportController extends Controller {
 			DB::raw('COALESCE(DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y"), "") as approved_date')
 		)->leftJoin('trips', 'trips.id', 'approval_logs.entity_id')
 		->leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
-			->leftJoin('employees', 'employees.id', 'ey_employee_claims.employee_id')
+			->leftJoin('employees', 'employees.id', 'trips.employee_id')
 			->leftJoin('users', function ($user_q) {
 				$user_q->on('employees.id', 'users.entity_id')
 					->where('users.user_type_id', 3121);
@@ -2046,8 +2046,8 @@ class ExportReportController extends Controller {
 		foreach ($claim_details as $claim_detail_key => $claim_detail) {
 			$export_data = [
 				$s_no++,
-				$claim_detail->emp_code,
 				$claim_detail->business_name,
+				$claim_detail->emp_code,
 				$claim_detail->emp_name,
 				$claim_detail->trip_number,
 				$claim_detail->claim_number,
