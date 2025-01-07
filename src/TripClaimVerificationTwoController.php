@@ -188,6 +188,7 @@ class TripClaimVerificationTwoController extends Controller {
 				'updated_at' => Carbon::now(),
 				'status_id' => $employee_claim->status_id
 			]);
+		}
 		// Update attachment status by Karthick T on 20-01-2022
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)
 				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189,3750,3751,3752,3753,3754,3755])

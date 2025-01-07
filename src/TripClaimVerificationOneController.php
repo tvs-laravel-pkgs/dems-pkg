@@ -309,10 +309,10 @@ class TripClaimVerificationOneController extends Controller {
 		$employee_claim->save();
 		$trip->save();
 
-		$balance_amount = Employee::where('id', $employee_claim->employee_id)->pluck('balance_amount')->first();
-		$amount = $balance_amount - $employee_claim->total_amount;
-		$balance_amount_update = Employee::where('id', $employee_claim->employee_id)->update(['balance_amount' => $amount]);
 		if($business_id == 10){
+			$balance_amount = Employee::where('id', $employee_claim->employee_id)->pluck('balance_amount')->first();
+			$amount = $balance_amount - $employee_claim->total_amount;
+			$balance_amount_update = Employee::where('id', $employee_claim->employee_id)->update(['balance_amount' => $amount]);
 			$claim_amount_details = DB::table('claim_amount_details')->insert([
 				'entity_id' => $trip->id,
 				'employee_id' => $employee_claim->employee_id,
