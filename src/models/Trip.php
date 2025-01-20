@@ -785,6 +785,15 @@ class Trip extends Model {
 		}
 
 		$grade = Auth::user()->entity;
+		$grade_name = Entity::where('id', $grade->grade_id)->pluck('name')->first();
+		$validate_grade = Config::where('id', 4150)->first()->name;
+		$true_grades_array = explode(',', $validate_grade);
+
+		if (Auth::user()->business_id == 11 && in_array($grade_name, $true_grades_array)) {
+			$travelModeQuery = DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.flag', 0)->where('entities.company_id', Auth::user()->company_id);
+		} else {
+			$travelModeQuery = DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id);
+		}
 		//dd('ss', Auth::user()->id, Auth::user()->entity->outlet, Auth::user()->entity->outlet->address);
 		$grade_eligibility = DB::table('grade_advanced_eligibility')->select('advanced_eligibility', 'travel_advance_limit')->where('grade_id', $grade->grade_id)->first();
 		if (!$grade_eligibility) {
@@ -806,7 +815,7 @@ class Trip extends Model {
 			// 'purpose_list' => Entity::uiPurposeList(),
 			'purpose_list' => DB::table('grade_trip_purpose')->select('trip_purpose_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_trip_purpose.trip_purpose_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get()->prepend(['id' => '', 'name' => 'Select Purpose']),
 			// 'travel_mode_list' => Entity::uiTravelModeList(),
-			'travel_mode_list' => DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id)->get(),
+			'travel_mode_list' => $travelModeQuery->get(),
 			'city_list' => NCity::getList(),
 			'employee_city' => Auth::user()->entity->outlet->address->city,
 			'frequently_travelled' => Visit::join('ncities', 'ncities.id', 'visits.to_city_id')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->where('ncities.company_id', Auth::user()->company_id)->select('ncities.id', DB::raw('CONCAT(ncities.name," - ",nstates.name) as name'))->distinct()->limit(10)->get(),
@@ -4117,6 +4126,9 @@ class Trip extends Model {
 					$employee_claim->amount_to_pay = 1;
 				}
 
+				$two_wheeler = Visit::where('visits.trip_id', $trip->id)
+				->where('visits.travel_mode_id', 15)
+				->pluck('travel_mode_id');
 				$business_id = Auth::user()->business_id;
 				$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
 				$end_of_month = Carbon::now()->endOfMonth()->toDateString();
@@ -4127,7 +4139,7 @@ class Trip extends Model {
 				->whereBetween('claim_date', [$start_of_month, $end_of_month])
 				->sum('claim_amount');
 				$employee_details = Employee::where('employees.id', $request->employee_id)->first();
-				if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount){
+				if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
 					return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
 				}
 				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount){
@@ -4135,7 +4147,7 @@ class Trip extends Model {
 				}
 				$employee_claim->save();
 
-				if($business_id == 10){
+				if($business_id == 10 && !empty($employee_details->daily_amount)){
 				$claim_amount_details = DB::table('claim_amount_details')->insert([
 					'entity_id' => $trip->id,
 					'employee_id' => $request->employee_id,
