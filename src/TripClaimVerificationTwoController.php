@@ -178,7 +178,8 @@ class TripClaimVerificationTwoController extends Controller {
 		$employee_claim->save();
 		$trip->save();
 		$business_id = Auth::user()->business_id;
-		if($business_id == 10){
+		$employee_details = Employee::where('employees.id', $employee_claim->employee_id)->first();
+		if($business_id == 10 && !empty($employee_details->daily_amount)){
 			$claim_amount_details = DB::table('claim_amount_details')->insert([
 				'entity_id' => $trip->id,
 				'employee_id' => $employee_claim->employee_id,
@@ -188,6 +189,7 @@ class TripClaimVerificationTwoController extends Controller {
 				'updated_at' => Carbon::now(),
 				'status_id' => $employee_claim->status_id
 			]);
+		}
 		// Update attachment status by Karthick T on 20-01-2022
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)
 				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189,3750,3751,3752,3753,3754,3755])
