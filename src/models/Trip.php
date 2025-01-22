@@ -789,7 +789,7 @@ class Trip extends Model {
 		$validate_grade = Config::where('id', 4150)->first()->name;
 		$true_grades_array = explode(',', $validate_grade);
 
-		if (Auth::user()->business_id == 11 && in_array($grade_name, $true_grades_array)) {
+		if (Auth::user()->business_id == 10 && in_array($grade_name, $true_grades_array)) {
 			$travelModeQuery = DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.flag', 0)->where('entities.company_id', Auth::user()->company_id);
 		} else {
 			$travelModeQuery = DB::table('grade_travel_mode')->select('travel_mode_id', 'entities.name', 'entities.id')->join('entities', 'entities.id', 'grade_travel_mode.travel_mode_id')->where('grade_id', $grade->grade_id)->where('entities.company_id', Auth::user()->company_id);
@@ -4128,7 +4128,7 @@ class Trip extends Model {
 
 				$two_wheeler = Visit::where('visits.trip_id', $trip->id)
 				->where('visits.travel_mode_id', 15)
-				->pluck('travel_mode_id');
+				->pluck('travel_mode_id')->first();
 				$business_id = Auth::user()->business_id;
 				$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
 				$end_of_month = Carbon::now()->endOfMonth()->toDateString();
