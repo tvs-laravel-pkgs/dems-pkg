@@ -4142,12 +4142,12 @@ class Trip extends Model {
 				if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
 					return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
 				}
-				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount){
+				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler)){
 					return response()->json(['success' => false, 'errors' => ['Monthly limited amount Validation']]);
 				}
 				$employee_claim->save();
 
-				if($business_id == 10 && !empty($employee_details->daily_amount)){
+				if($business_id == 10 && !empty($employee_details->daily_amount) && !empty($two_wheeler)){
 				$claim_amount_details = DB::table('claim_amount_details')->insert([
 					'entity_id' => $trip->id,
 					'employee_id' => $request->employee_id,
