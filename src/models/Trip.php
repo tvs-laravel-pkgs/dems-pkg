@@ -4160,7 +4160,7 @@ class Trip extends Model {
 				}
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-				//$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
+				$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
 
 				DB::commit();
 				return response()->json(['success' => true]);
