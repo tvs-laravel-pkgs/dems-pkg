@@ -4203,6 +4203,7 @@ app.component('eyatraTripClaimForm', {
             invalidHandler: function(event, validator) {
                 //custom_noty('error', 'You have errors in all tabs');
                 custom_noty('error', 'Justify the trip');
+                $("#modal_attachment_submit").prop("disabled", false);
             },
             submitHandler: function(form) {
                 //console.log(self.item);

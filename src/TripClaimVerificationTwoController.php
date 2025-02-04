@@ -177,9 +177,12 @@ class TripClaimVerificationTwoController extends Controller {
 		}
 		$employee_claim->save();
 		$trip->save();
+		$two_wheeler = Visit::where('visits.trip_id', $trip->id)
+			->where('visits.travel_mode_id', 15)
+			->pluck('travel_mode_id')->first();
 		$business_id = Auth::user()->business_id;
 		$employee_details = Employee::where('employees.id', $employee_claim->employee_id)->first();
-		if($business_id == 10 && !empty($employee_details->daily_amount)){
+		if($business_id == 10 && !empty($employee_details->daily_amount) && !empty($two_wheeler)){
 			$claim_amount_details = DB::table('claim_amount_details')->insert([
 				'entity_id' => $trip->id,
 				'employee_id' => $employee_claim->employee_id,
