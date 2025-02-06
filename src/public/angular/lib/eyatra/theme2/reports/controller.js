@@ -163,6 +163,74 @@ app.component('eyatraAgentReport', {
         });
     }
 });
+app.component('eyatraClaimStatusReport', {
+    templateUrl: eyatra_employee_claim_status_report_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+
+        $http.get(
+            laravel_routes['getReportFormDetail']
+        ).then(function(res) {
+            self.token = res.data.token;
+            self.region_list = res.data.region_list;
+            self.outlet_list = [];
+            self.business_list = res.data.business_list;
+            self.status_list = res.data.status_list;
+
+            self.report_export_route = res.data.base_url + '/eyatra/claim/status/report';
+            $rootScope.loading = false;
+        });
+
+        $scope.getRegionwiseOutletList = () => {
+            self.outlet_list = self.outlets = [];
+            var region_ids = self.regions.id;
+            if (region_ids) {
+                $http.get(
+                    eyatra_outlet_detail_url + '/' + region_ids
+                ).then(function(res) {
+                    self.outlet_list = res.data.outlet_list;
+                    $rootScope.loading = false;
+                });
+            }
+        }
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+        var form_id = '#claim-report-form';
+        var v = jQuery(form_id).validate({
+            ignore: '',
+            rules: {
+                'regions': {
+                    required: true,
+                },
+                'outlets': {
+                    required: true,
+                },
+                'business_ids': {
+                    required: true,
+                },
+                'period': {
+                    required: true,
+                },
+            },
+            errorPlacement: function(error, element) {
+                error.insertAfter(element);
+            },
+            invalidHandler: function(event, validator) {
+                custom_noty('error', 'You have errors,Please check all tabs');
+            },
+        });
+    }
+});
 app.component('eyatraReportList', {
     templateUrl: eyatra_report_list_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
