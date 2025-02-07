@@ -20,7 +20,7 @@ class ReportController extends Controller {
 	public function eyatraOutstationFilterData() {
 
 		$data['purpose_list'] = collect(Entity::select('name', 'id')->where('entity_type_id', 501)->where('company_id', Auth::user()->company_id)->get())->prepend(['id' => '-1', 'name' => 'Select Purpose']);
-		$data['outlet_list'] = collect(Outlet::select('name', 'id')->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
+		$data['outlet_list'] = collect(Outlet::select('name', 'id')->where('business_id', Auth::user()->business_id)->get())->prepend(['id' => '-1', 'name' => 'Select Outlet']);
 
 		// $data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->where('id', '!=', 3027)->where('id', '!=', 3033)->where('id', '!=', 3035)->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
 		// $data['trip_status_list'] = collect(Config::select('name', 'id')->where('config_type_id', 535)->where(DB::raw('LOWER(name)'), '!=', strtolower("resolved"))->whereNotIn('id',[3025, 3027,3030, 3031, 3033, 3034, 3035, 3037])->orderBy('id', 'asc')->get())->prepend(['id' => '-1', 'name' => 'Select Status']);
@@ -60,6 +60,7 @@ class ReportController extends Controller {
 					}
 				})
 				->where('employees.company_id', Auth::user()->company_id)
+				->where('employees.business_id', Auth::user()->business_id)
 				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
 
 		$data['employee_list'] = $employee_list;
@@ -195,6 +196,7 @@ class ReportController extends Controller {
 				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
 			)
 			->where('e.company_id', Auth::user()->company_id)
+			->where('e.business_id', Auth::user()->business_id)
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
 					$query->where("e.id", $r->get('employee_id'))->orWhere(DB::raw("-1"), $r->get('employee_id'));
@@ -306,6 +308,7 @@ class ReportController extends Controller {
 			)
 			->where('users.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
+			->where('e.business_id', Auth::user()->business_id)
 		// ->where('ey_employee_claims.status_id', 3026)
 			->groupBy('trips.id');
 
