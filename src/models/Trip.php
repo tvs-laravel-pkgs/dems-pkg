@@ -4139,15 +4139,20 @@ class Trip extends Model {
 				->whereBetween('claim_date', [$start_of_month, $end_of_month])
 				->sum('claim_amount');
 				$employee_details = Employee::where('employees.id', $request->employee_id)->first();
-				if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
-					return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
-				}
+				// if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
+				// 	return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
+				// }
 				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler)){
-					return response()->json(['success' => false, 'errors' => ['Monthly limited amount Validation']]);
+					
+					$available_balance = $employee_details->monthly_amount - $total_amount;
+					return response()->json([
+						'success' => false,
+						'errors' => ["Monthly limited amount is {$employee_details->monthly_amount}. Your available balance is {$available_balance}."]
+					]);
 				}
 				$employee_claim->save();
 
-				if($business_id == 10 && !empty($employee_details->daily_amount) && !empty($two_wheeler)){
+				if($business_id == 10 && !empty($employee_details->monthly_amount) && !empty($two_wheeler)){
 				$claim_amount_details = DB::table('claim_amount_details')->insert([
 					'entity_id' => $trip->id,
 					'employee_id' => $request->employee_id,

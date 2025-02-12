@@ -312,7 +312,7 @@ class TripClaimVerificationOneController extends Controller {
 			->where('visits.travel_mode_id', 15)
 			->pluck('travel_mode_id')->first();
 		$employee_details = Employee::where('employees.id', $employee_claim->employee_id)->first();
-		if($business_id == 10 && !empty($employee_details->daily_amount) && !empty($two_wheeler)){
+		if($business_id == 10 && !empty($employee_details->monthly_amount) && !empty($two_wheeler)){
 			$balance_amount = Employee::where('id', $employee_claim->employee_id)->pluck('balance_amount')->first();
 			$amount = $balance_amount - $employee_claim->total_amount;
 			$balance_amount_update = Employee::where('id', $employee_claim->employee_id)->update(['balance_amount' => $amount]);
@@ -392,7 +392,7 @@ class TripClaimVerificationOneController extends Controller {
 		$activity_log = ActivityLog::saveLog($activity);
 		$business_id = Auth::user()->business_id;
 		$employee_details = Employee::where('employees.id', $employee_claim->employee_id)->first();
-		if($business_id == 10 && !empty($employee_details->daily_amount) && !empty($two_wheeler)){
+		if($business_id == 10 && !empty($employee_details->monthly_amount) && !empty($two_wheeler)){
 			$claim_amount_details_reject = DB::table('claim_amount_details')->where('entity_id', $trip->id)
 			->where('employee_id', $employee_claim->employee_id)
 			->where('status_id', 3023)
