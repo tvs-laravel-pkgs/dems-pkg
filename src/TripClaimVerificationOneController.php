@@ -309,7 +309,7 @@ class TripClaimVerificationOneController extends Controller {
 		$employee_claim->save();
 		$trip->save();
 		$two_wheeler = Visit::where('visits.trip_id', $trip->id)
-			->where('visits.travel_mode_id', 15)
+			->whereIn('visits.travel_mode_id',[15,16])
 			->pluck('travel_mode_id')->first();
 		$employee_details = Employee::where('employees.id', $employee_claim->employee_id)->first();
 		if($business_id == 10 && !empty($employee_details->monthly_amount) && !empty($two_wheeler)){
@@ -377,7 +377,7 @@ class TripClaimVerificationOneController extends Controller {
 		$trip->save();
 		// Update attachment status by Karthick T on 20-01-2022
 		$two_wheeler = Visit::where('visits.trip_id', $trip->id)
-			->where('visits.travel_mode_id', 15)
+			->whereIn('visits.travel_mode_id',[15,16])
 			->pluck('travel_mode_id')->first();
 		$update_attachment_status = Attachment::where('entity_id', $trip->id)
 				->whereIn('attachment_of_id', [3180, 3181, 3182, 3183, 3185, 3189])

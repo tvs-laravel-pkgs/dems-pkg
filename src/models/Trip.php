@@ -4127,17 +4127,18 @@ class Trip extends Model {
 				}
 
 				$two_wheeler = Visit::where('visits.trip_id', $trip->id)
-				->where('visits.travel_mode_id', 15)
-				->pluck('travel_mode_id')->first();
+						->whereIn('visits.travel_mode_id',[15,16])
+						->pluck('travel_mode_id')->first();
 				$business_id = Auth::user()->business_id;
+
 				$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
 				$end_of_month = Carbon::now()->endOfMonth()->toDateString();
 				$monthly_total_amounts = DB::table('claim_amount_details')
-				->where('employee_id', $request->employee_id)
-				->where('status_id', 3023)
-				->where('claim_reject', 0)
-				->whereBetween('claim_date', [$start_of_month, $end_of_month])
-				->sum('claim_amount');
+						->where('employee_id', $request->employee_id)
+						->where('status_id', 3023)
+						->where('claim_reject', 0)
+						->whereBetween('claim_date', [$start_of_month, $end_of_month])
+						->sum('claim_amount');
 				$employee_details = Employee::where('employees.id', $request->employee_id)->first();
 				// if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
 				// 	return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
