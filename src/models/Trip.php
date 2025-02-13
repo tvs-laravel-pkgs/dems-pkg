@@ -4165,12 +4165,13 @@ class Trip extends Model {
 					$trip->claim_amount = $employee_details->monthly_amount - $monthly_total_amounts;
 				}
 				$employee_claim->save();
+				$trip->save();
 
 				if($business_id == 10 && !empty($employee_details->monthly_amount) && !empty($two_wheeler)){
 				$claim_amount_details = DB::table('claim_amount_details')->insert([
 					'entity_id' => $trip->id,
 					'employee_id' => $request->employee_id,
-					'claim_amount' => $total_amount,
+					'claim_amount' => $employee_claim->total_amount,
 					'claim_date' => Carbon::now(),
 					'created_at' => Carbon::now(),
 					'updated_at' => Carbon::now(),
