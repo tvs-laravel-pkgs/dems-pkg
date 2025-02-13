@@ -4143,13 +4143,26 @@ class Trip extends Model {
 				// if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
 				// 	return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
 				// }
-				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler)){
+				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler) && $employee_claim->balance_flag == 0){
 					
-					$available_balance = $employee_details->monthly_amount - $total_amount;
+					$available_balance = $employee_details->monthly_amount - $monthly_total_amounts;
+
+					$update_flag = EmployeeClaim::where('id', $employee_claim->id)
+						->update(['balance_flag' => 1]);
+
+					DB::commit();
+
 					return response()->json([
 						'success' => false,
-						'errors' => ["Monthly limited amount is {$employee_details->monthly_amount}. Your available balance is {$available_balance}."]
+						'errors' => ["Monthly Eligible Limit Amount Is {$employee_details->monthly_amount}.",
+        							 "Your Available Balance Is {$available_balance}.",
+        							 "If you click submit, your balance amount will go to Claim."]
 					]);
+				}
+				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler) && $employee_claim->balance_flag == 1){
+					$employee_claim->total_amount = $employee_details->monthly_amount - $monthly_total_amounts;
+					$employee_claim->balance_amount = $employee_details->monthly_amount - $monthly_total_amounts;
+					$trip->claim_amount = $employee_details->monthly_amount - $monthly_total_amounts;
 				}
 				$employee_claim->save();
 
