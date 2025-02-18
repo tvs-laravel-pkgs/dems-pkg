@@ -4175,21 +4175,22 @@ class Trip extends Model {
 				$employee_claim->save();
 				$trip->save();
 
+				
 				if($business_id == 10 && !empty($employee_details->monthly_amount) && !empty($two_wheeler)){
 
-					$claim_amount_details = ClaimAmountDetail::firstOrNew([
-						'entity_id' => $trip->id,
-						'employee_id' => $request->employee_id,
-						'status_id' => $employee_claim->status_id
-					]);
-					$claim_amount_details->claim_amount = $employee_claim->total_amount;
-					$claim_amount_details->claim_date = Carbon::now();
-					$claim_amount_details->created_at = Carbon::now();
-					$claim_amount_details->updated_at = Carbon::now();
-					$claim_amount_details->claim_reject = 0;
-					$claim_amount_details->save();
-					
-					}
+				$claim_amount_details = ClaimAmountDetail::firstOrNew([
+					'entity_id' => $trip->id,
+					'employee_id' => $request->employee_id,
+					'status_id' => $employee_claim->status_id
+				]);
+				$claim_amount_details->claim_amount = $employee_claim->total_amount;
+				$claim_amount_details->claim_date = Carbon::now();
+				$claim_amount_details->created_at = Carbon::now();
+				$claim_amount_details->updated_at = Carbon::now();
+				$claim_amount_details->claim_reject = 0;
+				$claim_amount_details->save();
+				
+				}
 
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
