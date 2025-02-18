@@ -4149,11 +4149,22 @@ app.component('eyatraTripClaimForm', {
                             $('#local_travel_submit').html('Save & Next');
                             $("#local_travel_submit").attr("disabled", false);
                             if (!res.success) {
-                                var errors = '';
+                                var errors = '<ul>';
                                 for (var i in res.errors) {
                                     errors += '<li>' + res.errors[i] + '</li>';
                                 }
-                                custom_noty('error', errors);
+                                errors += '</ul>';
+
+                                new Noty({
+                                    type: 'error',
+                                    text: errors,
+                                    timeout: 20000, // 20 seconds
+                                    layout: 'topRight',
+                                    theme: 'mint',
+                                    progressBar: true
+                                }).show();
+                                self.enable_switch_tab = true;
+                                $scope.$apply()
                             } else {
                                 custom_noty('success', 'Others saved successfully!');
                                 //REFRESH OTHERS

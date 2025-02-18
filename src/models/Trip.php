@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\URL;
 use Mail;
 use Session;
 use Uitoux\EYatra\ApprovalLog;
+use Uitoux\EYatra\ClaimAmountDetail;
 use Uitoux\EYatra\Config;
 use Uitoux\EYatra\Employee;
 use Uitoux\EYatra\EmployeeClaim;
@@ -2337,7 +2338,20 @@ class Trip extends Model {
 			$mode_four_wheeler = false;
 			$two_wheeler_total_km = 0;
 			$four_wheeler_total_km = 0;
+			$business_id = Auth::user()->business_id;
+			$two_wheeler = Visit::where('visits.trip_id', $request->trip_id)
+				->whereIn('visits.travel_mode_id',[15,16])
+				->pluck('travel_mode_id')->first();
 
+			$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
+			$end_of_month = Carbon::now()->endOfMonth()->toDateString();
+			$monthly_total_amounts = DB::table('claim_amount_details')
+					->where('employee_id', $request->employee_id)
+					->where('status_id', 3023)
+					->where('claim_reject', 0)
+					->whereBetween('claim_date', [$start_of_month, $end_of_month])
+					->sum('claim_amount');
+			$employee_details = Employee::where('employees.id', $request->employee_id)->first();
 			// if (isset($request->is_attachment_trip) && $request->is_attachment_trip) {
 			// 	if (floatval($request->claim_total_amount) <= 0) {
 			// 		return response()->json([
@@ -3934,6 +3948,32 @@ class Trip extends Model {
 				// 	$employee_claim->amount_to_pay = 1;
 				// }
 
+				$transport_amount = $employee_claim->transport_total ? $employee_claim->transport_total : 0;
+				$lodging_amount = $employee_claim->lodging_total ? $employee_claim->lodging_total : 0;
+				$boarding_amount = $employee_claim->boarding_total ? $employee_claim->boarding_total : 0;
+				$local_travel_amount = $employee_claim->local_travel_total ? $employee_claim->local_travel_total : 0;
+				$total_amount = $transport_amount + $lodging_amount + $boarding_amount + $local_travel_amount;
+
+				// if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
+				// 	return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
+				// }
+				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler)){
+					
+					$available_balance = $employee_details->monthly_amount - $monthly_total_amounts;
+					$update_flag = EmployeeClaim::where('id', $employee_claim->id)
+						->update(['balance_flag' => 1]);
+
+					DB::commit();
+
+					return response()->json([
+						'success' => false,
+						'errors' => ["Monthly Eligible Limit Amount Is {$employee_details->monthly_amount}.",
+        							 "Your Available Balance Is {$available_balance}.",
+        							 "If you click submit, your balance amount will go to Claim."]
+					]);
+
+				}
+
 				$employee_claim->save();
 
 				// $employee = Employee::where('id', $trip->employee_id)->first();
@@ -4126,58 +4166,31 @@ class Trip extends Model {
 					$employee_claim->amount_to_pay = 1;
 				}
 
-				$two_wheeler = Visit::where('visits.trip_id', $trip->id)
-						->whereIn('visits.travel_mode_id',[15,16])
-						->pluck('travel_mode_id')->first();
-				$business_id = Auth::user()->business_id;
-
-				$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
-				$end_of_month = Carbon::now()->endOfMonth()->toDateString();
-				$monthly_total_amounts = DB::table('claim_amount_details')
-						->where('employee_id', $request->employee_id)
-						->where('status_id', 3023)
-						->where('claim_reject', 0)
-						->whereBetween('claim_date', [$start_of_month, $end_of_month])
-						->sum('claim_amount');
-				$employee_details = Employee::where('employees.id', $request->employee_id)->first();
-				// if($business_id == 10 && !empty($employee_details->daily_amount) && $total_amount > $employee_details->daily_amount && !empty($two_wheeler)){
-				// 	return response()->json(['success' => false, 'errors' => ['Kindly Enter the Amount Below ' . $employee_details->daily_amount]]);
-				// }
-				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler) && $employee_claim->balance_flag == 0){
-					
-					$available_balance = $employee_details->monthly_amount - $monthly_total_amounts;
-
-					$update_flag = EmployeeClaim::where('id', $employee_claim->id)
-						->update(['balance_flag' => 1]);
-
-					DB::commit();
-
-					return response()->json([
-						'success' => false,
-						'errors' => ["Monthly Eligible Limit Amount Is {$employee_details->monthly_amount}.",
-        							 "Your Available Balance Is {$available_balance}.",
-        							 "If you click submit, your balance amount will go to Claim."]
-					]);
-				}
 				if($business_id == 10 && !empty($employee_details->monthly_amount) && $monthly_total_amounts + $total_amount > $employee_details->monthly_amount && !empty($two_wheeler) && $employee_claim->balance_flag == 1){
 					$employee_claim->total_amount = $employee_details->monthly_amount - $monthly_total_amounts;
 					$employee_claim->balance_amount = $employee_details->monthly_amount - $monthly_total_amounts;
 					$trip->claim_amount = $employee_details->monthly_amount - $monthly_total_amounts;
 				}
+
 				$employee_claim->save();
 				$trip->save();
 
 				if($business_id == 10 && !empty($employee_details->monthly_amount) && !empty($two_wheeler)){
-				$claim_amount_details = DB::table('claim_amount_details')->insert([
-					'entity_id' => $trip->id,
-					'employee_id' => $request->employee_id,
-					'claim_amount' => $employee_claim->total_amount,
-					'claim_date' => Carbon::now(),
-					'created_at' => Carbon::now(),
-					'updated_at' => Carbon::now(),
-					'status_id' => $employee_claim->status_id
-				]);
-				}
+
+					$claim_amount_details = ClaimAmountDetail::firstOrNew([
+						'entity_id' => $trip->id,
+						'employee_id' => $request->employee_id,
+						'status_id' => $employee_claim->status_id
+					]);
+					$claim_amount_details->claim_amount = $employee_claim->total_amount;
+					$claim_amount_details->claim_date = Carbon::now();
+					$claim_amount_details->created_at = Carbon::now();
+					$claim_amount_details->updated_at = Carbon::now();
+					$claim_amount_details->claim_reject = 0;
+					$claim_amount_details->save();
+					
+					}
+
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
 				$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
