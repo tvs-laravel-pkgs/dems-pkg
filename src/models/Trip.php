@@ -7225,7 +7225,8 @@ request is not desired, then those may be rejected.';
 				'headers' => [
 					'Content-Type' => 'application/json'
 				],
-				'json' => $wrappedData
+				'json' => $wrappedData,
+				'verify' => false
 			]);
 			return [
 				'success' => true,
