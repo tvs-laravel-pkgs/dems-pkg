@@ -29,6 +29,7 @@ use Uitoux\EYatra\Region;
 use Uitoux\EYatra\Trip;
 use Uitoux\EYatra\Visit;
 use Yajra\Datatables\Datatables;
+use Entrust;
 
 class ExportReportController extends Controller {
 	// Report list filter
@@ -3414,7 +3415,11 @@ class ExportReportController extends Controller {
 				$business_ids = json_decode($r->businesses);
 			}
 		}
-
+		
+		$l_grade = Config::where('id', 4151)->pluck('name')->first();
+		$valid_grade = explode(',', $l_grade);
+		$grade = Entity::whereIn('name', $valid_grade)->pluck('id')->toArray();
+	
 		$excel_headers = [
 			'Sl.No',
 			'Business',
@@ -3481,7 +3486,11 @@ class ExportReportController extends Controller {
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.start_date', '>=', $from_date)
 			->whereDate('trips.end_date', '<=', $to_date)
-			->whereIn('departments.business_id', $business_ids)
+			->whereIn('departments.business_id', $business_ids);
+			if (Entrust::can('eyatra-audit-trip-report')) {
+				$trip_details->whereNotIn('employees.grade_id', $grade); 
+			}
+			$trip_details = $trip_details
 			->groupBy('trips.id')
 			->get()
 			->toArray();
