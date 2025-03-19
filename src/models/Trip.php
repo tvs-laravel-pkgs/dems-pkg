@@ -175,7 +175,7 @@ class Trip extends Model {
 	public function tripAttachments() {
 		return $this->hasMany('Uitoux\EYatra\Attachment', 'entity_id')
 			->where('attachment_type_id', 3200)
-			->whereIn('attachment_of_id', [3750, 3751, 3752, 3753, 3754, 3755, 3756]);
+			->whereIn('attachment_of_id', [3750, 3751, 3752, 3753, 3754, 3755, 3756, 3185]);
 		// ->where('attachment_of_id', '!=', 3185);
 	}
 	public function pendingTripAttachments() {
