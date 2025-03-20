@@ -3862,6 +3862,7 @@ class Trip extends Model {
 							$attachment->name = $name;
 						}
 						$image->move($path, $name);
+						$attachment->view_status = 0;
 						$attachment->save();
 					//}
 
@@ -4145,6 +4146,7 @@ class Trip extends Model {
 							$attachment->entity_id = $trip->id;
 							$attachment->name = $name;
 						}
+						$attachment->view_status = 0;
 						$image->move($path, $name);
 						$attachment->save();
 					//}
