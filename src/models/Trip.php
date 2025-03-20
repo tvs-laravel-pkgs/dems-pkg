@@ -3838,19 +3838,32 @@ class Trip extends Model {
 				Storage::makeDirectory($item_images, 0777);
 				if ($request->hasfile('google_attachments')) {
 
-					foreach ($request->file('google_attachments') as $key => $attachement) {
+					// foreach ($request->file('google_attachments') as $key => $attachement) {
+						$image = $request->file('google_attachments');
 						$value = rand(1, 100);
-						$image = $attachement;
 						$extension = $image->getClientOriginalExtension();
 						$name = $trip->id . 'google_attachment' . $value . '.' . $extension;
-						$image->move(storage_path('app/public/trip/ey_employee_claims/google_attachments/'), $name);
-						$attachement = new Attachment;
-						$attachement->attachment_of_id = 3185;
-						$attachement->attachment_type_id = 3200;
-						$attachement->entity_id = $trip->id;
-						$attachement->name = $name;
-						$attachement->save();
-					}
+						$path = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
+						$attachment = Attachment::where('entity_id', $trip->id)
+							->where('attachment_of_id', 3185)
+							->where('attachment_type_id', 3200)
+							->first();
+						if ($attachment) {
+							$oldFile = $path . $attachment->name;
+							if (file_exists($oldFile)) {
+								unlink($oldFile);
+							}
+							$attachment->name = $name;
+						} else {
+							$attachment = new Attachment;
+							$attachment->attachment_of_id = 3185;
+							$attachment->attachment_type_id = 3200;
+							$attachment->entity_id = $trip->id;
+							$attachment->name = $name;
+						}
+						$image->move($path, $name);
+						$attachment->save();
+					//}
 
 				}
 
@@ -4109,19 +4122,32 @@ class Trip extends Model {
                         ]);
                     }
 
-					foreach ($request->file('google_attachments') as $key => $attachement) {
+					//foreach ($request->file('google_attachments') as $key => $attachement) {
+						$image = $request->file('google_attachments');
 						$value = rand(1, 100);
-						$image = $attachement;
 						$extension = $image->getClientOriginalExtension();
 						$name = $trip->id . 'google_attachment' . $value . '.' . $extension;
-						$image->move(storage_path('app/public/trip/ey_employee_claims/google_attachments/'), $name);
-						$attachement = new Attachment;
-						$attachement->attachment_of_id = 3185;
-						$attachement->attachment_type_id = 3200;
-						$attachement->entity_id = $trip->id;
-						$attachement->name = $name;
-						$attachement->save();
-					}
+						$path = storage_path('app/public/trip/ey_employee_claims/google_attachments/');
+						$attachment = Attachment::where('entity_id', $trip->id)
+							->where('attachment_of_id', 3185)
+							->where('attachment_type_id', 3200)
+							->first();
+						if ($attachment) {
+							$oldFile = $path . $attachment->name;
+							if (file_exists($oldFile)) {
+								unlink($oldFile);
+							}
+							$attachment->name = $name;
+						} else {
+							$attachment = new Attachment;
+							$attachment->attachment_of_id = 3185;
+							$attachment->attachment_type_id = 3200;
+							$attachment->entity_id = $trip->id;
+							$attachment->name = $name;
+						}
+						$image->move($path, $name);
+						$attachment->save();
+					//}
 
 				}
 
