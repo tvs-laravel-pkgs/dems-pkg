@@ -656,3 +656,4 @@ Route::get('/trip/tally-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripT
 Route::post('eyatra/trip/report', 'Uitoux\EYatra\ExportReportController@tripReport')->name('tripReport');
 Route::post('eyatra/employee-details', 'Uitoux\EYatra\EmployeeController@getEmployeeDetails')->name('getEmployeeDetails');
 Route::get('eyatra/employee-available-balance', 'Uitoux\EYatra\EmployeeController@employeeAvailableBalance')->name('employeeAvailableBalance');
+Route::post('eyatra/trip-details/report', 'Uitoux\EYatra\ExportReportController@tripDetailReport')->name('tripDetailReport');
