@@ -4713,30 +4713,32 @@ request is not desired, then those may be rejected.';
 							
 						$trip = Trip::find($pending_trip->id);
 						
-						$financier_approve = Auth::user()->company->financier_approve;
-						$trip->advance_request_approval_status_id = Trip::select('id', 'advance_request_approval_status_id')
-							->where('id', '=', $trip)->where('advance_request_approval_status_id', 3260)->get()->first();
-						
-						if ($financier_approve == '0') {
-							if ($trip->advance_request_approval_status_id != null) {
-								$trip->advance_request_approval_status_id = 3261; //Advance request Approved
-							}
-						}
+						// $financier_approve = Auth::user()->company->financier_approve;
 
+						// $trip->advance_request_approval_status_id = Trip::select('id', 'advance_request_approval_status_id')
+						// 	->where('id', '=', $trip)->where('advance_request_approval_status_id', 3260)->get()->first();
+						
+						// if ($financier_approve == '0') {
+						// 	if ($trip->advance_request_approval_status_id != null) {
+						// 		$trip->advance_request_approval_status_id = 3261; 
+						// 	}
+						// }
+						//$trip->save();
 						$activity['entity_id'] = $trip->id;
 						$activity['entity_type'] = 'trip';
 						$activity['details'] = 'Trip is Approved by Manager';
 						$activity['activity'] = "approve";
-						$activity_log = ActivityLog::saveLog($activity);
+						//$activity_log = ActivityLog::saveLog($activity);
 						$trip->visits()->update(['manager_verification_status_id' => 3081]);
 						$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 
 						$manager = Employee::where('id', $trip->employee_id)->first();
 						$manager_id = $manager->reporting_to_id;
+	
 						//Approval Log
 						$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, $manager_id, Carbon::now());
 						$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
-				} 
+				
 				$cc_email = $arr['cc_email'] = [];
 				$arr['base_url'] = URL::to('/');
 				$arr['title'] = $title;
@@ -4758,6 +4760,7 @@ request is not desired, then those may be rejected.';
 						$message->from('travelex@tvs.in');
 					});
 				}
+			} 
 			}
 			\Log::info('Auto Approve Outstation trip mail completed');
 		} else {
