@@ -1426,13 +1426,6 @@ class Trip extends Model {
 				$trip->advance_request_approval_status_id = 3261; //Advance request Approved
 			}
 		}
-		//PAYMENT SAVE
-		/*$payment = Payment::firstOrNew(['entity_id' => $trip->id]);
-		$payment->fill($r->all());
-		$payment->payment_of_id = 3250;
-		$payment->entity_id = $trip->id;
-		$payment->created_by = Auth::user()->id;
-		$payment->save();*/
 		$trip->approve_remarks = $r->approve_remarks ? $r->approve_remarks : 0;
 		$trip->save();
 		$activity['entity_id'] = $trip->id;
@@ -4334,7 +4327,7 @@ class Trip extends Model {
 					}
 				})
 				->where('entities.entity_type_id', 500)
-				->where('entities.name', 'not like', '%L%')
+				//->where('entities.name', 'not like', '%L%')
 				->groupBy('trips.id')
 				->get();
 		} elseif ($status == 'Claim Generation') {
@@ -4656,6 +4649,122 @@ request is not desired, then those may be rejected.';
 		return 'true';
 	}
 	// Pending outstation trip mail by Karthick T on 15-02-2022
+
+	public static function autoApproveTripMail($date, $status, $title) {
+		$pending_trips = [];
+		if ($status == 'Pending Requsation Approval') {
+			$pending_trips = Trip::select(
+				'trips.id',
+				'trips.number',
+				'trips.employee_id',
+				'users.name as employee_name',
+				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
+				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
+				'fromcity.name as fromcity_name',
+				'tocity.name as tocity_name',
+				DB::raw('DATE_FORMAT(trips.created_at,"%Y-%m-%d") as trip_date')
+			)->leftjoin('users', 'trips.employee_id', 'users.entity_id')
+				->join('visits', 'visits.trip_id', 'trips.id')
+				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+				->leftjoin('employees', 'employees.id', 'trips.employee_id')
+				->leftjoin('entities', 'entities.id', 'employees.grade_id')
+			// ->whereDate('trips.created_at', $date)
+			// // ->whereDate('trips.end_date', $date)
+			// ->where('trips.status_id', '=', 3021)
+				->where(function ($q) use ($date, $title) {
+					$q->where('trips.status_id', '=', 3021);
+					if ($title == 'Cancelled') {
+						$q->whereDate('trips.created_at', '<=', $date);
+					} else {
+						//$q->whereDate('trips.created_at', $date);
+						$q->whereRaw("DATE_FORMAT(trips.created_at, '%Y-%m-%d') LIKE ?", $date);
+					}
+				})
+				->where('entities.entity_type_id', 500)
+				//->where('entities.name', 'not like', '%L%')
+				->groupBy('trips.id')
+				->get();
+
+		} 
+		if (count($pending_trips) > 0) {
+			foreach ($pending_trips as $trip_key => $pending_trip) {
+				$sendSmsAndMail = $pending_trip->trip_date == $date;
+					if ($title == 'Auto-Approve') {
+						$detail = 'The below Trip request is Auto Approved by You';
+					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
+					$subject = 'Trip Auto Approval Mail';
+					$arr['detail'] = $detail;
+					$arr['content'] = $content;
+					$arr['subject'] = $subject;
+					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name', 'users.mobile_number')
+						->join('users', 'users.entity_id', 'employees.reporting_to_id')
+						->where('users.user_type_id', 3121)
+						->where('employees.id', $pending_trip->employee_id)
+						->get()->toArray();
+					//dd($to_email);
+					foreach ($to_email as $key => $value) {
+						$mobile_number = $value['mobile_number'];
+						$employee_id = $value['id'];
+					}
+						$status_update = DB::table('trips')->where('number', $pending_trip->number)
+							->where('status_id', 3021)
+							->update(['reason' => 'Trip Auto Approve ' . date('d-m-Y'), 'status_id' => 3085, 'updated_at' => Carbon::now()]);
+							
+						$trip = Trip::find($pending_trip->id);
+						
+						$financier_approve = Auth::user()->company->financier_approve;
+						$trip->advance_request_approval_status_id = Trip::select('id', 'advance_request_approval_status_id')
+							->where('id', '=', $trip)->where('advance_request_approval_status_id', 3260)->get()->first();
+						
+						if ($financier_approve == '0') {
+							if ($trip->advance_request_approval_status_id != null) {
+								$trip->advance_request_approval_status_id = 3261; //Advance request Approved
+							}
+						}
+
+						$activity['entity_id'] = $trip->id;
+						$activity['entity_type'] = 'trip';
+						$activity['details'] = 'Trip is Approved by Manager';
+						$activity['activity'] = "approve";
+						$activity_log = ActivityLog::saveLog($activity);
+						$trip->visits()->update(['manager_verification_status_id' => 3081]);
+						$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+
+						$manager = Employee::where('id', $trip->employee_id)->first();
+						$manager_id = $manager->reporting_to_id;
+						//Approval Log
+						$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, $manager_id, Carbon::now());
+						$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
+				} 
+				$cc_email = $arr['cc_email'] = [];
+				$arr['base_url'] = URL::to('/');
+				$arr['title'] = $title;
+				$arr['status'] = $status;
+				foreach ($to_email as $key => $value) {
+					$arr['name'] = $value['name'];
+					if ($value['email'] && $value['email'] != '-') {
+						$email_to = $value['email'];
+					}
+
+				}
+				
+				$view_name = 'mail.report_mail';
+
+				if ($sendSmsAndMail && count($email_to) > 0) {
+					Mail::send(['html' => $view_name], $arr, function ($message) use ($subject, $cc_email, $email_to) {
+						$message->to($email_to)->subject($subject);
+						$message->cc($cc_email)->subject($subject);
+						$message->from('travelex@tvs.in');
+					});
+				}
+			}
+			\Log::info('Auto Approve Outstation trip mail completed');
+		} else {
+			\Log::info('No Auto Approve outstation trips.');
+		}
+		return 'true';
+	}
 
 	public static function getPreviousEndKm($request) {
 		$trip = Trip::select([
