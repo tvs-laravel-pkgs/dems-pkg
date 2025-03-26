@@ -3711,6 +3711,147 @@ class ExportReportController extends Controller {
 		})->download('xlsx');
 	}
 
+	public function tripAuditReport(Request $r) {
+		//dd($r->all());
+		ini_set('max_execution_time', 0);
+		$date = explode(' to ', $r->period);
+		$from_date = date('Y-m-d', strtotime($date[0]));
+		$to_date = date('Y-m-d', strtotime($date[1]));
+		$business_ids = $r->businesses;
+		if ($r->businesses) {
+			if (in_array('-1', json_decode($r->businesses))) {
+				$business_ids = Business::pluck('id')->toArray();
+			} else {
+				$business_ids = json_decode($r->businesses);
+			}
+		}
+		
+		$l_grade = Config::where('id', 4151)->pluck('name')->first();
+		$valid_grade = explode(',', $l_grade);
+		$grade = Entity::whereIn('name', $valid_grade)->pluck('id')->toArray();
+	
+		$excel_headers = [
+			'Sl.No',
+			'Business',
+			'Employee Code',
+			'Employee Name',
+			'Outlet Code',
+			'Outlet Name',
+			'Trip Number',
+			'Description',
+			'Purpose',
+			'Trip Start Date',
+			'Trip End Date',
+			'Trip Created Date',
+			'Advance Received',
+			'Claimed Date',
+			'Trip Claim Number',
+			'JobCard Number',
+			'JobCard Date',
+			'Transport',
+			'Lodging',
+			'Boarding',
+			'Local Travel',
+			// 'Beta Amount',
+			'Total Amount',
+		];
+
+		$trip_details = Trip::select([
+			'trips.id',
+			'businesses.name as business',
+			'employees.code as employee_code',
+			'users.name as employee_name',
+			'outlets.code as outlet_code',
+			'outlets.name as outlet_name',
+			'trips.number as trip_number',
+			'trips.description',
+			'entities.name as purpose',
+			DB::raw('COALESCE(DATE_FORMAT(trips.start_date,"%d-%m-%Y"), "") as trip_start_date'),
+			DB::raw('COALESCE(DATE_FORMAT(trips.end_date,"%d-%m-%Y"), "") as trip_end_date'),
+			DB::raw('COALESCE(DATE_FORMAT(trips.created_at,"%d-%m-%Y"), "") as trip_created_at'),
+			'trips.advance_received',
+			DB::raw('COALESCE(DATE_FORMAT(trips.claimed_date,"%d-%m-%Y"), "") as claimed_date'),
+			'ey_employee_claims.number as claim_number',
+			'ey_employee_claims.job_card_number as job_card_number',
+			'ey_employee_claims.job_card_date as job_card_date',
+			'ey_employee_claims.transport_total',
+			'ey_employee_claims.lodging_total',
+			'ey_employee_claims.boarding_total',
+			'ey_employee_claims.local_travel_total',
+			// 'ey_employee_claims.beta_amount',
+			'ey_employee_claims.total_amount',			
+		])
+			->leftjoin('employees', 'employees.id', 'trips.employee_id')
+			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+			->leftjoin('users', function ($user_q) {
+				$user_q->on('employees.id', 'users.entity_id')
+					->where('users.user_type_id', 3121);
+			})
+			->leftjoin('outlets', 'outlets.id', 'trips.outlet_id')
+			->leftjoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
+			->leftjoin('departments', 'departments.id', 'employees.department_id')
+			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
+			->leftjoin('entities', 'entities.id', 'trips.purpose_id')
+			->where('trips.status_id', 3026)
+			->where('ey_employee_claims.status_id', 3026)
+			->whereDate('trips.start_date', '>=', $from_date)
+			->whereDate('trips.end_date', '<=', $to_date)
+			->whereIn('departments.business_id', $business_ids)
+			->whereNotIn('employees.grade_id', $grade)
+			->groupBy('trips.id')
+			->get()
+			->toArray();
+
+
+		if (count($trip_details) == 0) {
+			return redirect()->back()->with(['error' => 'No Records Found!']);
+		}
+
+		$export_details = [];
+		$s_no = 1;
+		foreach ($trip_details as $trip_detail) {
+				$export_data = [
+					$s_no++,
+					$trip_detail['business'],
+					$trip_detail['employee_code'],
+					$trip_detail['employee_name'],
+					$trip_detail['outlet_code'],
+					$trip_detail['outlet_name'],
+					$trip_detail['trip_number'],
+					$trip_detail['description'],
+					$trip_detail['purpose'],
+					$trip_detail['trip_start_date'],
+					$trip_detail['trip_end_date'],
+					$trip_detail['trip_created_at'],
+					floatval($trip_detail['advance_received']),
+					$trip_detail['claimed_date'],
+					$trip_detail['claim_number'],
+					$trip_detail['job_card_number'],
+					$trip_detail['job_card_date'],
+					floatval($trip_detail['transport_total']),
+					floatval($trip_detail['lodging_total']),
+					floatval($trip_detail['boarding_total']),
+					floatval($trip_detail['local_travel_total']),
+					// $trip_detail['beta_amount'],
+					floatval($trip_detail['total_amount']),
+				];
+				$export_details[] = $export_data;
+		}
+
+		$title = 'Trip_Report_' . Carbon::now();
+		$sheet_name = 'Trip Report';
+		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
+			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
+				$sheet->fromArray($export_details, NULL, 'A1');
+				$sheet->row(1, $excel_headers);
+				$sheet->row(1, function ($row) {
+					$row->setBackground('#c4c4c4');
+				});
+			});
+			$excel->setActiveSheetIndex(0);
+		})->download('xlsx');
+	}
+
 	public function tripOracleSync($id = null) {
 		$sync_method = Config::where('id', 4091)->first()->name;
 		$pre_payment_check_status_id = Config::where('id', 4082)->first()->name;
