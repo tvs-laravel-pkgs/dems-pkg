@@ -619,7 +619,7 @@ class Trip extends Model {
 		$trip->purpose_name = $trip->purpose->name;
 		$trip->status_name = $trip->status->name;
 		$current_date = strtotime(date('d-m-Y'));
-		$claim_date = $trip->employee->grade ? $trip->employee->grade->gradeEligibility->claim_active_days : 5;
+		$claim_date = $trip->employee->grade ? $trip->employee->grade->gradeEligibility->claim_active_days : 30;
 
 		// $claim_last_date = strtotime("+" . $claim_date . " day", strtotime($trip->end_date));
 		$tripEndDate = date("Y-m-d", strtotime($trip->end_date));
@@ -729,7 +729,7 @@ class Trip extends Model {
 				return response()->json($data);
 			}
 			$trip_from_date = date('Y-m-d', strtotime($trip->created_at));
-			$trip->trip_from_minus_5_days = date('d-m-Y', strtotime("-5 days", strtotime($trip_from_date)));
+			$trip->trip_from_minus_5_days = date('d-m-Y', strtotime("-30 days", strtotime($trip_from_date)));
 
 			// if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032]))) { //NEED TO DISABLE
 			if (!Entrust::can('trip-edit') || (!in_array($trip->status_id, [3021, 3022, 3032, 3028, 3033]))) { //NEED TO ENABLE
@@ -4691,7 +4691,7 @@ request is not desired, then those may be rejected.';
 			foreach ($pending_trips as $trip_key => $pending_trip) {
 				$sendSmsAndMail = $pending_trip->trip_date == $date;
 					if ($title == 'Auto-Approve') {
-						$detail = 'The below Trip request is Auto Approved by You';
+						$detail = 'The below Trip request is Auto Approved';
 					$content = 'Trip Number -' . $pending_trip->number . ',' . 'Employee Name -' . $pending_trip->employee_name . ',' . 'Trip date -' . $pending_trip->visit_date . ',' . 'Trip From City  -' . $pending_trip->fromcity_name . ',' . 'Trip To City  -' . $pending_trip->tocity_name;
 					$subject = 'Trip Auto Approval Mail';
 					$arr['detail'] = $detail;

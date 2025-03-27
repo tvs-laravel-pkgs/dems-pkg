@@ -346,7 +346,7 @@ app.component('eyatraTripForm', {
             // });
 
             $(".datepicker.tripStartDate").datepicker({
-                startDate: '-5d',
+                startDate: '-30d',
                 //endDate: self.trip.end_date,
                 //endDate: new Date("2024-09-30"),
                 autoclose: true,
@@ -354,7 +354,7 @@ app.component('eyatraTripForm', {
 
             //TRIP END DATE
             $(".datepicker.tripEndDate").datepicker({
-                startDate: '-5d',
+                startDate: '-30d',
                 //endDate: new Date("2024-09-30"),
                 autoclose: true,
             });

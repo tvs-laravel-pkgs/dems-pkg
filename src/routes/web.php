@@ -658,3 +658,5 @@ Route::post('eyatra/employee-details', 'Uitoux\EYatra\EmployeeController@getEmpl
 Route::get('eyatra/employee-available-balance', 'Uitoux\EYatra\EmployeeController@employeeAvailableBalance')->name('employeeAvailableBalance');
 Route::post('eyatra/trip-details/report', 'Uitoux\EYatra\ExportReportController@tripDetailReport')->name('tripDetailReport');
 Route::post('eyatra/after-trip/report', 'Uitoux\EYatra\ExportReportController@afterCompleteTripReport')->name('afterCompleteTripReport');
+Route::post('eyatra/advance-trip/report', 'Uitoux\EYatra\ExportReportController@advanceTripReport')->name('advanceTripReport');
+
