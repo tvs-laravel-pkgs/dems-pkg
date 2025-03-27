@@ -3754,6 +3754,7 @@ class ExportReportController extends Controller {
 			'Local Travel',
 			// 'Beta Amount',
 			'Total Amount',
+			'Status'
 		];
 
 		$trip_details = Trip::select([
@@ -3779,7 +3780,8 @@ class ExportReportController extends Controller {
 			'ey_employee_claims.boarding_total',
 			'ey_employee_claims.local_travel_total',
 			// 'ey_employee_claims.beta_amount',
-			'ey_employee_claims.total_amount',			
+			'ey_employee_claims.total_amount',
+			'configs.name as status'			
 		])
 			->leftjoin('employees', 'employees.id', 'trips.employee_id')
 			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -3792,6 +3794,7 @@ class ExportReportController extends Controller {
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->leftjoin('entities', 'entities.id', 'trips.purpose_id')
+			->leftjoin('configs', 'configs.id', 'trips.status_id')
 			->whereRaw('trips.created_at >= trips.end_date')
 			//->where('trips.status_id', 3026)
 			//->where('ey_employee_claims.status_id', 3026)
@@ -3834,6 +3837,7 @@ class ExportReportController extends Controller {
 					floatval($trip_detail['local_travel_total']),
 					// $trip_detail['beta_amount'],
 					floatval($trip_detail['total_amount']),
+					$trip_detail['status'],
 				];
 				$export_details[] = $export_data;
 		}
@@ -3976,8 +3980,8 @@ class ExportReportController extends Controller {
 				$export_details[] = $export_data;
 		}
 
-		$title = 'Trip_After_Complete_Report_' . Carbon::now();
-		$sheet_name = 'Trip After Complete Report';
+		$title = 'Trip_Advance_Report_' . Carbon::now();
+		$sheet_name = 'Trip Advance Report';
 		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
 			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
 				$sheet->fromArray($export_details, NULL, 'A1');
