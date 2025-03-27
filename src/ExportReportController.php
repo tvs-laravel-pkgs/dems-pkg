@@ -3748,6 +3748,9 @@ class ExportReportController extends Controller {
 			'Trip Claim Number',
 			'JobCard Number',
 			'JobCard Date',
+			'Lodging Name',
+			'Lodging Invoice Number',
+			'Lodging Gst',
 			'Transport',
 			'Lodging',
 			'Boarding',
@@ -3779,7 +3782,10 @@ class ExportReportController extends Controller {
 			'ey_employee_claims.boarding_total',
 			'ey_employee_claims.local_travel_total',
 			// 'ey_employee_claims.beta_amount',
-			'ey_employee_claims.total_amount',			
+			'ey_employee_claims.total_amount',
+			'lodgings.gstin as lodging_gst',	
+			'lodgings.lodge_name as lodge_name',	
+			'lodgings.reference_number as inv_number',			
 		])
 			->leftjoin('employees', 'employees.id', 'trips.employee_id')
 			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -3792,13 +3798,14 @@ class ExportReportController extends Controller {
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->leftjoin('entities', 'entities.id', 'trips.purpose_id')
+			->leftjoin('lodgings', 'lodgings.trip_id', 'trips.id')
 			->where('trips.status_id', 3026)
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.start_date', '>=', $from_date)
 			->whereDate('trips.end_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
 			->whereNotIn('employees.grade_id', $grade)
-			->groupBy('trips.id')
+			//->groupBy('trips.id')
 			->get()
 			->toArray();
 
@@ -3828,6 +3835,9 @@ class ExportReportController extends Controller {
 					$trip_detail['claim_number'],
 					$trip_detail['job_card_number'],
 					$trip_detail['job_card_date'],
+					$trip_detail['lodge_name'],
+					$trip_detail['inv_number'],
+					$trip_detail['lodging_gst'],
 					floatval($trip_detail['transport_total']),
 					floatval($trip_detail['lodging_total']),
 					floatval($trip_detail['boarding_total']),
@@ -3838,8 +3848,8 @@ class ExportReportController extends Controller {
 				$export_details[] = $export_data;
 		}
 
-		$title = 'Trip_Report_' . Carbon::now();
-		$sheet_name = 'Trip Report';
+		$title = 'Trip_Audit_Report_' . Carbon::now();
+		$sheet_name = 'Trip Audit Report';
 		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
 			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
 				$sheet->fromArray($export_details, NULL, 'A1');
