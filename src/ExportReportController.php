@@ -3870,7 +3870,8 @@ class ExportReportController extends Controller {
 				$business_ids = json_decode($r->businesses);
 			}
 		}
-		$date_valid = now()->subDays(7);
+
+		$date_7_days_ago = now()->subDays(7)->toDateString();
 
 		$excel_headers = [
 			'Sl.No',
@@ -3885,6 +3886,7 @@ class ExportReportController extends Controller {
 			'Trip Start Date',
 			'Trip End Date',
 			'Trip Created Date',
+			'Trip Approved Date',
 			'Advance Received',
 			'Claimed Date',
 			'Trip Claim Number',
@@ -3896,6 +3898,7 @@ class ExportReportController extends Controller {
 			'Local Travel',
 			// 'Beta Amount',
 			'Total Amount',
+			'Status',
 		];
 
 		$trip_details = Trip::select([
@@ -3921,7 +3924,10 @@ class ExportReportController extends Controller {
 			'ey_employee_claims.boarding_total',
 			'ey_employee_claims.local_travel_total',
 			// 'ey_employee_claims.beta_amount',
-			'ey_employee_claims.total_amount',			
+			'ey_employee_claims.total_amount',
+			'configs.name as status',	
+			DB::raw('COALESCE(DATE_FORMAT(approval_logs.approved_at,"%d-%m-%Y"), "") as trip_approved_at'),
+
 		])
 			->leftjoin('employees', 'employees.id', 'trips.employee_id')
 			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -3934,9 +3940,15 @@ class ExportReportController extends Controller {
 			->leftjoin('departments', 'departments.id', 'employees.department_id')
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->leftjoin('entities', 'entities.id', 'trips.purpose_id')
-			->whereRaw('trips.created_at >= trips.end_date')
+			->leftjoin('approval_logs', 'approval_logs.entity_id', 'trips.id')
+			->leftjoin('configs', 'configs.id', 'trips.status_id')
 			->whereNotNull('trips.advance_received')
-			->where('trips.status_id', 3028)
+			->where('trips.advance_received', '!=', 0)
+			->where('trips.advance_received', '!=', '')
+			->whereIn('trips.status_id', [3028,3023,3033,3085])
+			->where('approval_logs.type_id', 3581)
+			->where('approval_logs.approval_type_id', 3600)
+			->whereRaw("DATE_ADD(approval_logs.approved_at, INTERVAL 7 DAY) <= CURDATE()")
 			->whereDate('trips.start_date', '>=', $from_date)
 			->whereDate('trips.end_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
@@ -3952,6 +3964,7 @@ class ExportReportController extends Controller {
 		$export_details = [];
 		$s_no = 1;
 		foreach ($trip_details as $trip_detail) {
+
 				$export_data = [
 					$s_no++,
 					$trip_detail['business'],
@@ -3965,6 +3978,7 @@ class ExportReportController extends Controller {
 					$trip_detail['trip_start_date'],
 					$trip_detail['trip_end_date'],
 					$trip_detail['trip_created_at'],
+					$trip_detail['trip_approved_at'],
 					floatval($trip_detail['advance_received']),
 					$trip_detail['claimed_date'],
 					$trip_detail['claim_number'],
@@ -3976,6 +3990,7 @@ class ExportReportController extends Controller {
 					floatval($trip_detail['local_travel_total']),
 					// $trip_detail['beta_amount'],
 					floatval($trip_detail['total_amount']),
+					$trip_detail['status'],
 				];
 				$export_details[] = $export_data;
 		}
