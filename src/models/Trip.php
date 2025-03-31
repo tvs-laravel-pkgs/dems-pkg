@@ -1286,7 +1286,10 @@ class Trip extends Model {
 		// if (!empty($agentBookVisitIds)) {
 		if (!empty($agentBookVisitIds) && $trip_cancel_agent_notify_required == "Yes") {
 			sendEmailNotification($trip, $notification_type = 'Trip Cancel', $trip_type = "Outstation Trip", $agentBookVisitIds);
+		} else {
+			sendEmailNotification($trip, $notification_type = 'Cancel Trip', $trip_type = "Outstation Trip", $agentBookVisitIds = null);
 		}
+		
 		return response()->json(['success' => true]);
 	}
 
