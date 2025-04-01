@@ -241,6 +241,9 @@ app.component('eyatraTripForm', {
                         //endDate: self.trip.end_date,
                         //endDate: new Date("2024-09-30"),
                         autoclose: true,
+                        beforeShowDay: function(date) {
+                            return (date.getMonth() !== 1 && date.getMonth() !== 2);
+                        }
                     });
 
                     //TRIP END DATE
@@ -252,6 +255,9 @@ app.component('eyatraTripForm', {
                         // endDate: self.trip.end_date,
                         //endDate: new Date("2024-09-30"),
                         autoclose: true,
+                        beforeShowDay: function(date) {
+                            return (date.getMonth() !== 1 && date.getMonth() !== 2);
+                        }
                     });
                 }, 800);
 
@@ -350,6 +356,9 @@ app.component('eyatraTripForm', {
                 //endDate: self.trip.end_date,
                 //endDate: new Date("2024-09-30"),
                 autoclose: true,
+                beforeShowDay: function(date) {
+                    return (date.getMonth() !== 2); // Disables March
+                }
             });
 
             //TRIP END DATE
@@ -357,6 +366,9 @@ app.component('eyatraTripForm', {
                 startDate: '-30d',
                 //endDate: new Date("2024-09-30"),
                 autoclose: true,
+                beforeShowDay: function(date) {
+                    return (date.getMonth() !== 2); // Disables March
+                }
             });
 
             if (self.advance_eligibility == 1) {
