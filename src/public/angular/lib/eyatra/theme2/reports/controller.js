@@ -410,7 +410,7 @@ app.component('tripDetailsReport', {
     }
 });
 
-app.component('afterCompleteTripReport', {
+app.component('tripAuditReport', {
     templateUrl: eyatra_trip_report_template_url,
     controller: function(HelperService, $rootScope, $http, $scope) {
         var self = this;
@@ -422,6 +422,50 @@ app.component('afterCompleteTripReport', {
             self.token = res.data.token;
             self.business_list = res.data.business_list;
 
+            self.report_export_route = res.data.base_url + '/eyatra/trip/audit/report';
+            $rootScope.loading = false;
+        });
+
+        $(".daterange").daterangepicker({
+            autoclose: true,
+            locale: {
+                cancelLabel: 'Clear',
+                format: "DD-MM-YYYY",
+                separator: " to ",
+            },
+            showDropdowns: false,
+            autoApply: true,
+        });
+        
+        var form_id = '#report-form';
+        var v = jQuery(form_id).validate({
+            ignore: '',
+            rules: {
+                'period': {                   
+                    required: true,
+                },
+            },
+            errorPlacement: function(error, element) {
+                error.insertAfter(element);
+            },
+            invalidHandler: function(event, validator) {
+                custom_noty('error', 'You have errors, Please check');
+            },
+        });
+    }
+});
+
+app.component('afterCompleteTripReport', {
+    templateUrl: eyatra_trip_report_template_url,
+    controller: function(HelperService, $rootScope, $http, $scope) {
+        var self = this;
+        self.hasPermission = HelperService.hasPermission;
+
+        $http.get(
+            laravel_routes['getReportFormDetail']
+        ).then(function(res) {
+            self.token = res.data.token;
+            self.business_list = res.data.business_list;
             self.report_export_route = res.data.base_url + '/eyatra/after-trip/report';
             $rootScope.loading = false;
         });

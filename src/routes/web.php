@@ -654,6 +654,7 @@ Route::get('GetCMSEmployeeDetails/{empCode?}', 'Uitoux\EYatra\SoapController@Get
 Route::get('/trip/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripOracleSync')->name('tripOracleSync');
 Route::get('/trip/tally-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripTallySync')->name('tripTallySync');
 Route::post('eyatra/trip/report', 'Uitoux\EYatra\ExportReportController@tripReport')->name('tripReport');
+Route::post('eyatra/trip/audit/report', 'Uitoux\EYatra\ExportReportController@tripAuditReport')->name('tripAuditReport');
 Route::post('eyatra/employee-details', 'Uitoux\EYatra\EmployeeController@getEmployeeDetails')->name('getEmployeeDetails');
 Route::get('eyatra/employee-available-balance', 'Uitoux\EYatra\EmployeeController@employeeAvailableBalance')->name('employeeAvailableBalance');
 Route::post('eyatra/trip-details/report', 'Uitoux\EYatra\ExportReportController@tripDetailReport')->name('tripDetailReport');
