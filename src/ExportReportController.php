@@ -4180,7 +4180,7 @@ class ExportReportController extends Controller {
 			// ->whereIn('status_id', [3028, 3026])
 			->where(function($q) use ($pre_payment_check_status_id , $sync_method) {
                 if($pre_payment_check_status_id == "Yes"){
-                    $q->whereIn('trips.status_id', [3028, 3026]);
+                    $q->whereIn('trips.status_id', [3028, 3026, 3085]);
                 }
                 if($sync_method == "auto"){
                 	$q->whereDate('trips.updated_at', '<', date('Y-m-d'));
@@ -4325,7 +4325,7 @@ class ExportReportController extends Controller {
 			})
 			->where('trips.advance_received', '>', 0)
 			->where('trips.tally_advance_sync_status', 0) //TALLY ADVANCE AMOUNT NON SYNC
-			->whereIn('trips.status_id', [3028, 3026])
+			->whereIn('trips.status_id', [3028, 3026, 3085])
 			->whereDate('trips.updated_at', '<', date('Y-m-d'))
             ->where('businesses.erp_sync_type', 2) //TALLY
 			->groupBy('trips.id')

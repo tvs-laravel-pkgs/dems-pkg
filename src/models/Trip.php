@@ -6947,8 +6947,12 @@ request is not desired, then those may be rejected.';
 		if($tripApprovalLog){
 			$invoiceDate = $tripApprovalLog->approved_date;
 		}
-
-		$supplierNumber = 'EMP_' . ($employee->code);
+		if($businessUnit == "TTBL"){
+			$supplierNumber = 'EMP_' . ($employee->code);
+		} else {
+			$supplierNumber = $employee->code;
+		}
+		
 		$location = $trip->branch ? $trip->branch->oracle_code_l2 : null;
 		$sbu = $employee->Sbu;
 		$lob = $costCenter = null;
@@ -6962,8 +6966,7 @@ request is not desired, then those may be rejected.';
 		$tallyExports = [];
 		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $accountNumber, $trip->advance_received, null, 'Advanced');
 
-		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, 'EMP_' . $employee->code , null, $trip->advance_received, null);
-		
+		$tallyExports[] = $this->advanceApTallyExport($businessUnit, $template, $businessUnitName, $supplierNumber, $invoiceNumber, $invoiceDate, date("Y-m-d"), $companyCode, $lob, $location, $costCenter, $supplierNumber , null, $trip->advance_received, null);
 		$response = $this->sendTallyExportsToApi($tallyExports);
 
 		// if ($response['success']) {
@@ -7019,7 +7022,11 @@ request is not desired, then those may be rejected.';
 
 		$employeeData = $employeeTrip->employee;
 		$employeeUserName = $employeeData->user ? $employeeData->user->name: "";
-		$supplierNumber = 'EMP_' . ($employeeData->code);
+		if($businessUnit == "TTBL"){
+			$supplierNumber = 'EMP_' . ($employeeData->code);
+		} else {
+			$supplierNumber = $employeeData->code;
+		}
 		$invoiceDescription = '';
 		if (!empty($employeeData->code)) {
 			$invoiceDescription .= $employeeData->code;
@@ -7265,16 +7272,16 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				if ($employeeClaim->amount_to_pay == 2) {
 					//EMPLOYEE TO COMPANY
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP_'.$employeeData->code ,  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $supplierNumber,  $employeeClaim->balance_amount, null, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}elseif($employeeClaim->amount_to_pay == 1){
 					//COMPANY TO EMPLOYEE
-					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter,'EMP_' .$employeeData->code, null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
+					$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $supplierNumber, null, $employeeClaim->balance_amount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null,null, null, null,null);
 				}
 
 			}
 		}else{
 			//IF NON ADVANCE
-			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, 'EMP_' .$employeeData->code, null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
+			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $supplierNumber, null, $invoiceAmount, 'Stipend Paid to  '. $employeeUserName .' E CODE :  '. $employeeData->code. '', null, null,null, null, null);
 		}
 		$response = $this->sendTallyExportsToApi($tallyExports);
 
