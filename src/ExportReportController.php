@@ -3564,6 +3564,7 @@ class ExportReportController extends Controller {
 			'Business',
 			'Employee Code',
 			'Employee Name',
+			'Grade',
 			'Outlet Code',
 			'Outlet Name',
 			'Trip Number',
@@ -3622,7 +3623,8 @@ class ExportReportController extends Controller {
 			'sbus.name as function',
 			'travel_modes.name as vehicle_detail',
 			'grade_advanced_eligibility.two_wheeler_per_km as two_wheeler_per_km',
-			'grade_advanced_eligibility.four_wheeler_per_km as four_wheeler_per_km',			
+			'grade_advanced_eligibility.four_wheeler_per_km as four_wheeler_per_km',
+			'grade_names.name as grade_name',			
 		])
 			->leftjoin('employees', 'employees.id', 'trips.employee_id')
 			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -3638,13 +3640,14 @@ class ExportReportController extends Controller {
 			->leftjoin('visits', 'visits.trip_id', 'trips.id')
 			->leftjoin('visit_bookings', 'visit_bookings.visit_id', 'visits.id')
 			->leftjoin('entities as travel_modes', 'travel_modes.id', 'visit_bookings.travel_mode_id')
+			->leftjoin('entities as grade_names', 'grade_names.id', 'employees.grade_id')
 			->leftjoin('grade_advanced_eligibility', 'grade_advanced_eligibility.grade_id', 'employees.grade_id')
 			->where('trips.status_id', 3026)
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.start_date', '>=', $from_date)
 			->whereDate('trips.end_date', '<=', $to_date)
 			->whereIn('departments.business_id', $business_ids)
-			//->groupBy('trips.id')
+			->groupBy('trips.id')
 			->get()
 			->toArray();
 
@@ -3667,6 +3670,7 @@ class ExportReportController extends Controller {
 					$trip_detail['business'],
 					$trip_detail['employee_code'],
 					$trip_detail['employee_name'],
+					$trip_detail['grade_name'],
 					$trip_detail['outlet_code'],
 					$trip_detail['outlet_name'],
 					$trip_detail['trip_number'],
@@ -3757,6 +3761,7 @@ class ExportReportController extends Controller {
 			'Local Travel',
 			// 'Beta Amount',
 			'Total Amount',
+			'Status'
 		];
 
 		$trip_details = Trip::select([
@@ -3785,7 +3790,8 @@ class ExportReportController extends Controller {
 			'ey_employee_claims.total_amount',
 			'lodgings.gstin as lodging_gst',	
 			'lodgings.lodge_name as lodge_name',	
-			'lodgings.reference_number as inv_number',			
+			'lodgings.reference_number as inv_number',
+			'configs.name as status'			
 		])
 			->leftjoin('employees', 'employees.id', 'trips.employee_id')
 			->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
@@ -3799,6 +3805,7 @@ class ExportReportController extends Controller {
 			->leftjoin('businesses', 'businesses.id', 'departments.business_id')
 			->leftjoin('entities', 'entities.id', 'trips.purpose_id')
 			->leftjoin('lodgings', 'lodgings.trip_id', 'trips.id')
+			->leftjoin('configs', 'configs.id', 'trips.status_id')
 			->where('trips.status_id', 3026)
 			->where('ey_employee_claims.status_id', 3026)
 			->whereDate('trips.start_date', '>=', $from_date)
@@ -3835,6 +3842,9 @@ class ExportReportController extends Controller {
 					$trip_detail['claim_number'],
 					$trip_detail['job_card_number'],
 					$trip_detail['job_card_date'],
+					$trip_detail['lodge_name'],
+					$trip_detail['inv_number'],
+					$trip_detail['lodging_gst'],
 					floatval($trip_detail['transport_total']),
 					floatval($trip_detail['lodging_total']),
 					floatval($trip_detail['boarding_total']),
@@ -3846,8 +3856,8 @@ class ExportReportController extends Controller {
 				$export_details[] = $export_data;
 		}
 
-		$title = 'Trip_After_Complete_Report_' . Carbon::now();
-		$sheet_name = 'Trip After Complete Report';
+		$title = 'Trip_Audit_Report_' . Carbon::now();
+		$sheet_name = 'Trip Audit Report';
 		Excel::create($title, function ($excel) use ($export_details, $excel_headers, $sheet_name) {
 			$excel->sheet($sheet_name, function ($sheet) use ($export_details, $excel_headers) {
 				$sheet->fromArray($export_details, NULL, 'A1');
