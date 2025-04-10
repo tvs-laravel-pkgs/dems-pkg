@@ -4654,8 +4654,10 @@ request is not desired, then those may be rejected.';
 	// Pending outstation trip mail by Karthick T on 15-02-2022
 
 	public static function autoApproveTripMail($date, $status, $title) {
+		$test = Config::where('id', 1111)->pluck('name')->first();
 		$pending_trips = [];
 		if ($status == 'Pending Requsation Approval') {
+			$date = date('Y-m-d', strtotime('-4days'));
 			$pending_trips = Trip::select(
 				'trips.id',
 				'trips.number',
@@ -4667,18 +4669,18 @@ request is not desired, then those may be rejected.';
 				'tocity.name as tocity_name',
 				DB::raw('DATE_FORMAT(trips.created_at,"%Y-%m-%d") as trip_date')
 			)->leftjoin('users', 'trips.employee_id', 'users.entity_id')
-				->join('visits', 'visits.trip_id', 'trips.id')
-				->join('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
-				->join('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+				->leftjoin('visits', 'visits.trip_id', 'trips.id')
+				->leftjoin('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+				->leftjoin('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftjoin('employees', 'employees.id', 'trips.employee_id')
 				->leftjoin('entities', 'entities.id', 'employees.grade_id')
 			// ->whereDate('trips.created_at', $date)
 			// // ->whereDate('trips.end_date', $date)
 			// ->where('trips.status_id', '=', 3021)
-				->where(function ($q) use ($date, $title) {
+				->where(function ($q) use ($date, $test) {
 					$q->where('trips.status_id', '=', 3021);
-					if ($title == 'Cancelled') {
-						$q->whereDate('trips.created_at', '<=', $date);
+					if ($test == 'Yes') {
+						$q->whereBetween('trips.created_at', ['2025-03-31', $date]);
 					} else {
 						//$q->whereDate('trips.created_at', $date);
 						$q->whereRaw("DATE_FORMAT(trips.created_at, '%Y-%m-%d') LIKE ?", $date);
@@ -4701,7 +4703,7 @@ request is not desired, then those may be rejected.';
 					$arr['content'] = $content;
 					$arr['subject'] = $subject;
 					$to_email = $arr['to_email'] = Employee::select('employees.id', 'users.email as email', 'users.name as name', 'users.mobile_number')
-						->join('users', 'users.entity_id', 'employees.reporting_to_id')
+						->leftjoin('users', 'users.entity_id', 'employees.reporting_to_id')
 						->where('users.user_type_id', 3121)
 						->where('employees.id', $pending_trip->employee_id)
 						->get()->toArray();
