@@ -4657,7 +4657,6 @@ request is not desired, then those may be rejected.';
 		$test = Config::where('id', 1111)->pluck('name')->first();
 		$pending_trips = [];
 		if ($status == 'Pending Requsation Approval') {
-			$date = date('Y-m-d', strtotime('-4days'));
 			$pending_trips = Trip::select(
 				'trips.id',
 				'trips.number',
