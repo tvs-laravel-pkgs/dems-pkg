@@ -4715,6 +4715,13 @@ request is not desired, then those may be rejected.';
 							->where('status_id', 3021)
 							->update(['reason' => 'Trip Auto Approve ' . date('d-m-Y'), 'status_id' => 3085, 'updated_at' => Carbon::now()]);
 							
+						$check_advance_update = Trip::where('number', $pending_trip->number)
+							->where('advance_request_approval_status_id', 3260)
+							->where('status_id', 3085)
+							->whereNotNull('advance_received')
+        					->where('advance_received', '!=', 0.00)
+							->update(['advance_request_approval_status_id' => 3261]);
+
 						$trip = Trip::find($pending_trip->id);
 						
 						// $financier_approve = Auth::user()->company->financier_approve;
