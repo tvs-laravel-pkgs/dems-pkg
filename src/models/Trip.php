@@ -7397,6 +7397,112 @@ request is not desired, then those may be rejected.';
 			];
 		}
 	}
+	public static function newAutoApproveTripMail($date, $status, $title) {
+		$test = Config::where('id', 1111)->value('name');
+	
+		$pending_trips_query = Trip::select(
+			'trips.id', 'trips.number', 'trips.employee_id',
+			'users.name as employee_name',
+			DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
+			DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
+			'fromcity.name as fromcity_name',
+			'tocity.name as tocity_name',
+			DB::raw('DATE_FORMAT(trips.created_at, "%Y-%m-%d") as trip_date')
+		)
+		->leftJoin('users', 'trips.employee_id', 'users.entity_id')
+		->leftJoin('visits', 'visits.trip_id', 'trips.id')
+		->leftJoin('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+		->leftJoin('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+		->leftJoin('employees', 'employees.id', 'trips.employee_id')
+		->leftJoin('entities', 'entities.id', 'employees.grade_id')
+		->where('trips.status_id', 3021)
+		->where('entities.entity_type_id', 500)
+		->groupBy('trips.id');
+	
+		if ($test === 'Yes') {
+			$pending_trips_query->whereBetween('trips.created_at', ['2025-03-31', $date]);
+		} else {
+			$pending_trips_query->whereRaw("DATE_FORMAT(trips.created_at, '%Y-%m-%d') LIKE ?", [$date]);
+		}
+	
+		$pending_trips = $pending_trips_query->get();
+	
+		if ($pending_trips->isEmpty()) {
+			\Log::info('No Auto Approve outstation trips.');
+			return 'true';
+		}
+	
+		foreach ($pending_trips as $pending_trip) {
+			
+			$trip = Trip::find($pending_trip->id);
+			if (!$trip) continue;
+	
+			DB::beginTransaction();
+			try {
+				$trip->reason = 'Trip Auto Approve ' . date('d-m-Y');
+				$trip->status_id = 3085;
+				$trip->updated_at = Carbon::now();
+				$trip->save();
+	
+				if ($trip->advance_request_approval_status_id == 3260 && $trip->advance_received > 0) {
+					$trip->advance_request_approval_status_id = 3261;
+					$trip->save();
+				}
+	
+				$trip->visits()->update(['manager_verification_status_id' => 3081]);
+	
+				$activity = [
+					'entity_id' => $trip->id,
+					'entity_type' => 'trip',
+					'details' => 'Trip is Approved by Manager',
+					'activity' => 'approve',
+				];
+				// ActivityLog::saveLog($activity);
+	
+				$manager = Employee::where('id', $trip->employee_id)->first();
+				$manager_id = $manager->reporting_to_id;
+				if ($manager_id) {
+					ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, $manager_id, Carbon::now());
+				}
+	
+				$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+				$to_email = Employee::select('users.email', 'users.name', 'users.mobile_number')
+					->leftJoin('users', 'users.entity_id', 'employees.reporting_to_id')
+					->where('users.user_type_id', 3121)
+					->where('employees.id', $trip->employee_id)
+					->first();
+	
+				if ($to_email && $to_email->email && $to_email->email != '-') {
+					$arr = [
+						'detail' => 'The below Trip request is Auto Approved',
+						'content' => "Trip Number - {$trip->number}, Employee Name - {$pending_trip->employee_name}, Trip date - {$pending_trip->visit_date}, Trip From City - {$pending_trip->fromcity_name}, Trip To City - {$pending_trip->tocity_name}",
+						'subject' => 'Trip Auto Approval Mail',
+						'to_email' => $to_email->email,
+						'cc_email' => [],
+						'base_url' => URL::to('/'),
+						'title' => $title,
+						'status' => $status,
+						'name' => $to_email->name,
+					];
+	
+					Mail::send(['html' => 'mail.report_mail'], $arr, function ($message) use ($arr) {
+						$message->to($arr['to_email'])->cc($arr['cc_email'])->subject($arr['subject']);
+						$message->from('travelex@tvs.in');
+					});
+	
+					sendnotification(2, $trip, $user, "Outstation Trip", 'Trip Approved');
+				}
+	
+				DB::commit();
+			} catch (\Exception $e) {
+				DB::rollBack();
+				\Log::error('Trip auto-approval failed: ' . $e->getMessage());
+			}
+		}
+	
+		\Log::info('Auto Approve Outstation trip mail completed');
+		return 'true';
+	}
 	
 
 }

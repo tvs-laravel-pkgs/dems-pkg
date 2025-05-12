@@ -104,4 +104,14 @@ class MailController extends Controller
 
         return true;
     }
+    public function sendNewAutoApproveMail() {
+        $status='Pending Requsation Approval';
+        
+        //2- Auto Approve
+        $date = date('Y-m-d', strtotime('-4days'));
+        $title='Auto-Approve';
+        $trip_mail = Trip::newAutoApproveTripMail($date,$status,$title);
+
+        return true;
+    }
 }

@@ -650,6 +650,7 @@ Route::get('eyatra/report-list/data', 'Uitoux\EYatra\ExportReportController@getR
 Route::get('eyatra/report-data/mail', 'Uitoux\EYatra\ExportReportController@sendMail')->name('sendMail');
 Route::get('eyatra/pending-trip/mail', 'Uitoux\EYatra\MailController@sendMail')->name('sendPendingTripMail');
 Route::get('eyatra/auto-approve-trip/mail', 'Uitoux\EYatra\MailController@sendAutoApproveMail')->name('sendAutoApproveMail');
+Route::get('eyatra/auto-approve-trip/new-mail', 'Uitoux\EYatra\MailController@sendNewAutoApproveMail')->name('sendNewAutoApproveMail');
 Route::get('GetCMSEmployeeDetails/{empCode?}', 'Uitoux\EYatra\SoapController@GetCMSEmployeeDetails');
 
 Route::get('/trip/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripOracleSync')->name('tripOracleSync');
