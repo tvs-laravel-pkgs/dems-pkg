@@ -193,6 +193,21 @@ app.component('eyatraOutstationClaimVerificationView', {
         self.eyatra_trip_claim_verification_one_local_travel_attachment_url = eyatra_trip_claim_verification_one_local_travel_attachment_url;
         self.eyatra_trip_claim_google_attachment_url = eyatra_trip_claim_google_attachment_url;
         self.eyatra_trip_claim_transport_attachment_url = eyatra_trip_claim_transport_attachment_url;
+        self.scrollToTop = function() {
+            self.scrollTo(0);
+        };
+        
+        self.scrollToBottom = function() {
+            var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            self.scrollTo(scrollHeight);
+        };
+        
+        self.scrollTo = function(position) {
+            window.scrollTo({
+                top: position,
+                behavior: 'smooth'
+            });
+        };
 
         $http.get(
             $form_data_url
