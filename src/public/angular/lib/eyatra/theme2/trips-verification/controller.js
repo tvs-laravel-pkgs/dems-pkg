@@ -221,7 +221,21 @@ app.component('eyatraTripVerificationForm', {
                 preferred_travel_modes: '',
             });
         }
-
+        self.scrollToTop = function() {
+            self.scrollTo(0);
+        };
+        
+        self.scrollToBottom = function() {
+            var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            self.scrollTo(scrollHeight);
+        };
+        
+        self.scrollTo = function(position) {
+            window.scrollTo({
+                top: position,
+                behavior: 'smooth'
+            });
+        };
         //APPROVE TRIP
         self.approveTrip = function(id) {
             $('#trip_id').val(id);
