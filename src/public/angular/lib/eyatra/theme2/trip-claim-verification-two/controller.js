@@ -130,7 +130,21 @@ app.component('eyatraTripClaimVerificationTwoView', {
         }else{
             self.list_page_url = '/trip/claim/verification2/list';
         }
-
+        self.scrollToTop = function() {
+            self.scrollTo(0);
+        };
+        
+        self.scrollToBottom = function() {
+            var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            self.scrollTo(scrollHeight);
+        };
+        
+        self.scrollTo = function(position) {
+            window.scrollTo({
+                top: position,
+                behavior: 'smooth'
+            });
+        };
         $http.get(
             $form_data_url
         ).then(function(response) {

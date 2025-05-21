@@ -183,6 +183,22 @@ app.component('eyatraTripClaimVerificationOneView', {
             $scope.doSomethingOnClick = function() {
                 $scope.visit = false;
             }
+            self.scrollToTop = function() {
+                self.scrollTo(0);
+            };
+            
+            self.scrollToBottom = function() {
+                var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+                self.scrollTo(scrollHeight);
+            };
+            
+            self.scrollTo = function(position) {
+                window.scrollTo({
+                    top: position,
+                    behavior: 'smooth'
+                });
+            };
+            
             if (self.trip.advance_received) {
                 if (parseFloat(self.total_amount) > parseFloat(self.trip.advance_received)) {
                     self.pay_to_employee = Math.round(parseFloat(self.total_amount) - parseFloat(self.trip.advance_received)).toFixed(2);

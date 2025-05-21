@@ -219,6 +219,21 @@ app.component('eyatraTripForm', {
             self.trip_advance_amount_edit = response.data.trip_advance_amount_edit;
             self.trip_advance_amount_employee_edit = response.data.trip_advance_amount_employee_edit;
             self.is_self_booking_approval_must = response.data.is_self_booking_approval_must;
+            self.scrollToTop = function() {
+                self.scrollTo(0);
+            };
+            
+            self.scrollToBottom = function() {
+                var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+                self.scrollTo(scrollHeight);
+            };
+            
+            self.scrollTo = function(position) {
+                window.scrollTo({
+                    top: position,
+                    behavior: 'smooth'
+                });
+            };
             if (response.data.action == "Edit") {
 
                 //DATERANGE DISABLED
@@ -910,7 +925,21 @@ app.component('eyatraTripView', {
         $scope.requestVisitBookingPopup = function(visit_id) {
             $('#booking_visit_id').val(visit_id);
         }
-
+        self.scrollToTop = function() {
+            self.scrollTo(0);
+        };
+        
+        self.scrollToBottom = function() {
+            var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            self.scrollTo(scrollHeight);
+        };
+        
+        self.scrollTo = function(position) {
+            window.scrollTo({
+                top: position,
+                behavior: 'smooth'
+            });
+        };
         $scope.requestCancelBooking = function() {
             var cancel_booking_visit_id = $('#booking_visit_id').val();
             if (cancel_booking_visit_id) {
