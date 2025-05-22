@@ -649,10 +649,17 @@ Route::get('eyatra/report-list/filter', 'Uitoux\EYatra\ExportReportController@ge
 Route::get('eyatra/report-list/data', 'Uitoux\EYatra\ExportReportController@getReportListData')->name('getReportListData');
 Route::get('eyatra/report-data/mail', 'Uitoux\EYatra\ExportReportController@sendMail')->name('sendMail');
 Route::get('eyatra/pending-trip/mail', 'Uitoux\EYatra\MailController@sendMail')->name('sendPendingTripMail');
+Route::get('eyatra/auto-approve-trip/mail', 'Uitoux\EYatra\MailController@sendAutoApproveMail')->name('sendAutoApproveMail');
+Route::get('eyatra/auto-approve-trip/new-mail', 'Uitoux\EYatra\MailController@sendNewAutoApproveMail')->name('sendNewAutoApproveMail');
 Route::get('GetCMSEmployeeDetails/{empCode?}', 'Uitoux\EYatra\SoapController@GetCMSEmployeeDetails');
 
 Route::get('/trip/oracle-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripOracleSync')->name('tripOracleSync');
 Route::get('/trip/tally-sync/{id?}', 'Uitoux\EYatra\ExportReportController@tripTallySync')->name('tripTallySync');
 Route::post('eyatra/trip/report', 'Uitoux\EYatra\ExportReportController@tripReport')->name('tripReport');
+Route::post('eyatra/trip/audit/report', 'Uitoux\EYatra\ExportReportController@tripAuditReport')->name('tripAuditReport');
 Route::post('eyatra/employee-details', 'Uitoux\EYatra\EmployeeController@getEmployeeDetails')->name('getEmployeeDetails');
 Route::get('eyatra/employee-available-balance', 'Uitoux\EYatra\EmployeeController@employeeAvailableBalance')->name('employeeAvailableBalance');
+Route::post('eyatra/trip-details/report', 'Uitoux\EYatra\ExportReportController@tripDetailReport')->name('tripDetailReport');
+Route::post('eyatra/after-trip/report', 'Uitoux\EYatra\ExportReportController@afterCompleteTripReport')->name('afterCompleteTripReport');
+Route::post('eyatra/advance-trip/report', 'Uitoux\EYatra\ExportReportController@advanceTripReport')->name('advanceTripReport');
+

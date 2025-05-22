@@ -84,4 +84,34 @@ class MailController extends Controller
         //$trip_mail = Trip::pendingTripMail($date,$status,$title);
         return true;
     }
+    public function sendAutoApproveMail() {
+        $status='Pending Requsation Approval';
+        
+        //2- Auto Approve
+        $date = date('Y-m-d', strtotime('-4days'));
+        $title='Auto-Approve';
+        $trip_mail = Trip::autoApproveTripMail($date,$status,$title);
+
+        return true;
+    }
+    public function sendRemainderMail() {
+        $status='Pending Requsation Approval';
+        
+        // Remainder
+        $date = date('Y-m-d', strtotime('-3days'));
+        $title='Remainder';
+        $trip_mail = Trip::pendingTripMail($date,$status,$title);
+
+        return true;
+    }
+    public function sendNewAutoApproveMail() {
+        $status='Pending Requsation Approval';
+        
+        //2- Auto Approve
+        $date = date('Y-m-d', strtotime('-4days'));
+        $title='Auto-Approve';
+        $trip_mail = Trip::newAutoApproveTripMail($date,$status,$title);
+
+        return true;
+    }
 }

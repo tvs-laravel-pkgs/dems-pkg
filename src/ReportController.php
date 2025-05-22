@@ -3,6 +3,7 @@
 namespace Uitoux\EYatra;
 use App\Http\Controllers\Controller;
 use App\User;
+use Entrust;
 use Auth;
 use DB;
 use Excel;
@@ -50,18 +51,30 @@ class ReportController extends Controller {
 	}
 
 	public function getEmployeeByOutlet(Request $r) {
-		$employee_list = collect(Employee::select(DB::raw('CONCAT(users.name, " / ", employees.code) as name'), 'employees.id')
-				->leftJoin('users', 'users.entity_id', 'employees.id')
-				->where('users.user_type_id', 3121)
-				->where(function ($query) use ($r) {
-					if ($r->outlet_id != '-1') {
-						$query->where('employees.outlet_id', $r->outlet_id);
 
-					}
-				})
-				->where('employees.company_id', Auth::user()->company_id)
-				->where('employees.business_id', Auth::user()->business_id)
-				->get())->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+		$l_grade = Config::where('id', 4151)->pluck('name')->first();
+		$valid_grade = explode(',', $l_grade);
+		$grade = Entity::whereIn('name', $valid_grade)->pluck('id')->toArray();
+		
+		$employee_list = Employee::select(
+			DB::raw('CONCAT(users.name, " / ", employees.code) as name'),
+			'employees.id'
+		)
+		->leftJoin('users', 'users.entity_id', 'employees.id');
+		if (Entrust::can('eyatra-audit-trip-report')) {
+		$employee_list->whereNotIn('employees.grade_id', $grade);
+	}
+		$employee_list = $employee_list->where('users.user_type_id', 3121)
+		->where(function ($query) use ($r) {
+			if ($r->outlet_id != '-1') {
+				$query->where('employees.outlet_id', $r->outlet_id);
+			}
+		})
+		->where('employees.company_id', Auth::user()->company_id)
+		->where('employees.business_id', Auth::user()->business_id)
+		->get();
+		$employee_list = collect($employee_list)->prepend(['id' => '-1', 'name' => 'Select Employee Code/Name']);
+	
 
 		$data['employee_list'] = $employee_list;
 		$data['success'] = true;
@@ -173,6 +186,10 @@ class ReportController extends Controller {
 			Session::put('outstation_status_id', $r->status_id);
 		}
 
+		$l_grade = Config::where('id', 4151)->pluck('name')->first();
+		$valid_grade = explode(',', $l_grade);
+		$grade = Entity::whereIn('name', $valid_grade)->pluck('id')->toArray();
+		
 		$trips = Trip::leftJoin('ey_employee_claims', 'ey_employee_claims.trip_id', 'trips.id')
 			->leftJoin('visits as v', 'v.trip_id', 'trips.id')
 			->leftJoin('ncities as c', 'c.id', 'v.from_city_id')
@@ -194,8 +211,11 @@ class ReportController extends Controller {
 				'ey_employee_claims.total_amount', DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name'),
 				'status.name as status',
 				DB::raw('DATE_FORMAT(ey_employee_claims.claim_approval_datetime,"%d/%m/%Y %h:%i %p") as claim_approval_datetime')
-			)
-			->where('e.company_id', Auth::user()->company_id)
+			);
+			if (Entrust::can('eyatra-audit-trip-report')) {
+				$trips->whereNotIn('e.grade_id', $grade);
+			}
+			$trips->where('e.company_id', Auth::user()->company_id)
 			->where('e.business_id', Auth::user()->business_id)
 			->where(function ($query) use ($r) {
 				if ($r->get('employee_id')) {
@@ -277,7 +297,11 @@ class ReportController extends Controller {
 			$outstation_outlet_id = session('outstation_outlet_id');
 			$outstation_status_id = session('outstation_status_id');
 		}
-		
+
+		$l_grade = Config::where('id', 4151)->pluck('name')->first();
+		$valid_grade = explode(',', $l_grade);
+		$grade = Entity::whereIn('name', $valid_grade)->pluck('id')->toArray();
+
 		// dd($employee_id, $purpose_id, $outstation_start_date, $outstation_end_date, $outstation_outlet_id, $outstation_status_id);
 
 		$trips = EmployeeClaim::join('trips', 'trips.id', 'ey_employee_claims.trip_id')
@@ -305,8 +329,11 @@ class ReportController extends Controller {
 				'outlets.code',
 				'bank_details.account_name','bank_details.account_number','bank_details.ifsc_code','bank_details.bank_name','bank_details.branch_name',
 				DB::raw('CONCAT(outlets.code,"-",outlets.name) as outlet_name')
-			)
-			->where('users.user_type_id', 3121)
+			);
+			if (Entrust::can('eyatra-audit-trip-report')) {
+				$trips->whereNotIn('e.grade_id', $grade);
+			}
+			$trips->where('users.user_type_id', 3121)
 			->where('e.company_id', Auth::user()->company_id)
 			->where('e.business_id', Auth::user()->business_id)
 		// ->where('ey_employee_claims.status_id', 3026)

@@ -76,7 +76,7 @@ class TripController extends Controller {
 					$query->where("status.id", $r->get('status_id'))->orWhere(DB::raw("-1"), $r->get('status_id'));
 				}
 			})
-			->whereIN('trips.status_id', [3021, 3022, 3028, 3032, 3038, 3039, 3033])
+			->whereIN('trips.status_id', [3021, 3022, 3028, 3032, 3038, 3039, 3033, 3085])
 		// ->where('trips.employee_id', Auth::user()->entity_id)
 			->groupBy('trips.id')
 		// ->orderBy('trips.created_at', 'desc');
@@ -100,7 +100,7 @@ class TripController extends Controller {
 				// if ($trip->status_id == '3032' && !empty($trip->approve_remarks) || $trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028') {
 				// if (($trip->status_id == '3032' && !empty($trip->approve_remarks)) || $trip->status_id == '3021' || $trip->status_id == '3022') { //NEED TO DISABLE
 				// if (($trip->status_id == '3032' || $trip->status_id == '3021' || $trip->status_id == '3022') || ($trip->status_id == '3028' && !$trip->claim_id)) { //NEED TO ENABLE
-				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' && $trip->advance_received == '0' || $trip->status_id == '3033' && $trip->advance_received == '0') { 
+				if ($trip->status_id == '3021' || $trip->status_id == '3022' || $trip->status_id == '3028' && $trip->advance_received == '0' || $trip->status_id == '3033' && $trip->advance_received == '0' || $trip->status_id == '3085' && $trip->advance_received == '0') { 
 					//dd($trip->advance_received);
 					$edit_class = "visibility:hidden";
 					if (Entrust::can('trip-edit')) {
@@ -200,10 +200,10 @@ class TripController extends Controller {
 				->first();
 
 			//Total Trips Pending
-			$total_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3021)->count();
-			if ($total_trips >= 10) {
-				return response()->json(['success' => false, 'errors' => "Your previous trips waiting for approval!"]);
-			}
+			// $total_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3021)->count();
+			// if ($total_trips >= 10) {
+			// 	return response()->json(['success' => false, 'errors' => "Your previous trips waiting for approval!"]);
+			// }
 		}
 		if ($trip_start_date_data && $trip_start_date_data->status_id != 3032) {
 			return response()->json(['success' => false, 'errors' => "You have another trip on this trip period"]);

@@ -219,6 +219,21 @@ app.component('eyatraTripForm', {
             self.trip_advance_amount_edit = response.data.trip_advance_amount_edit;
             self.trip_advance_amount_employee_edit = response.data.trip_advance_amount_employee_edit;
             self.is_self_booking_approval_must = response.data.is_self_booking_approval_must;
+            self.scrollToTop = function() {
+                self.scrollTo(0);
+            };
+            
+            self.scrollToBottom = function() {
+                var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+                self.scrollTo(scrollHeight);
+            };
+            
+            self.scrollTo = function(position) {
+                window.scrollTo({
+                    top: position,
+                    behavior: 'smooth'
+                });
+            };
             if (response.data.action == "Edit") {
 
                 //DATERANGE DISABLED
@@ -241,6 +256,9 @@ app.component('eyatraTripForm', {
                         //endDate: self.trip.end_date,
                         //endDate: new Date("2024-09-30"),
                         autoclose: true,
+                        beforeShowDay: function(date) {
+                            return (date.getMonth() !== 1 && date.getMonth() !== 2);
+                        }
                     });
 
                     //TRIP END DATE
@@ -252,6 +270,9 @@ app.component('eyatraTripForm', {
                         // endDate: self.trip.end_date,
                         //endDate: new Date("2024-09-30"),
                         autoclose: true,
+                        beforeShowDay: function(date) {
+                            return (date.getMonth() !== 1 && date.getMonth() !== 2);
+                        }
                     });
                 }, 800);
 
@@ -346,17 +367,23 @@ app.component('eyatraTripForm', {
             // });
 
             $(".datepicker.tripStartDate").datepicker({
-                startDate: '-5d',
+                startDate: '-30d',
                 //endDate: self.trip.end_date,
                 //endDate: new Date("2024-09-30"),
                 autoclose: true,
+                beforeShowDay: function(date) {
+                    return (date.getMonth() !== 2); // Disables March
+                }
             });
 
             //TRIP END DATE
             $(".datepicker.tripEndDate").datepicker({
-                startDate: '-5d',
+                startDate: '-30d',
                 //endDate: new Date("2024-09-30"),
                 autoclose: true,
+                beforeShowDay: function(date) {
+                    return (date.getMonth() !== 2); // Disables March
+                }
             });
 
             if (self.advance_eligibility == 1) {
@@ -898,7 +925,21 @@ app.component('eyatraTripView', {
         $scope.requestVisitBookingPopup = function(visit_id) {
             $('#booking_visit_id').val(visit_id);
         }
-
+        self.scrollToTop = function() {
+            self.scrollTo(0);
+        };
+        
+        self.scrollToBottom = function() {
+            var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            self.scrollTo(scrollHeight);
+        };
+        
+        self.scrollTo = function(position) {
+            window.scrollTo({
+                top: position,
+                behavior: 'smooth'
+            });
+        };
         $scope.requestCancelBooking = function() {
             var cancel_booking_visit_id = $('#booking_visit_id').val();
             if (cancel_booking_visit_id) {

@@ -130,10 +130,12 @@ class CityController extends Controller {
 				's.name as state_name'
 			)
 			->where('company_id', Auth::user()->company_id)
-			->where(function ($q) use ($key) {
-				$q->where('ncities.name', 'like', '%' . $key . '%')
-				;
-			})
+			// ->where(function ($q) use ($key) {
+			// 	$q->where('ncities.name', 'like', '%' . $key . '%')
+			// 	;
+			// })
+			->where('ncities.name', 'like', '%' . $key . '%')
+			->limit(20)
 			->get();
 		return response()->json($list);
 	}
