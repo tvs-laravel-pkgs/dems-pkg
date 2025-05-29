@@ -1882,6 +1882,33 @@ class Trip extends Model {
 				$lodge_data['sharing_employees'] = $lodge_share_data;
 			}
 		}
+		$current_date = strtotime(date('d-m-Y'));
+		$claim_date = $trip->employee->grade ? $trip->employee->grade->gradeEligibility->claim_active_days : 30;
+
+		$tripEndDate = date("Y-m-d", strtotime($trip->end_date));
+		$tripApprovedLog = ApprovalLog::select([
+			'id',
+			DB::raw('DATE_FORMAT(approved_at,"%d-%m-%Y") as approved_formatted_date'),
+			DB::raw('DATE_FORMAT(approved_at,"%Y-%m-%d") as approved_date'),
+		])
+			->where('type_id', 3581) //Outstation Trip
+			->where('approval_type_id', 3600) //Outstation Trip - Manager Approved
+			->where('entity_id', $trip->id)
+			->first();
+
+		$claim_last_date = strtotime("+" . $claim_date . " day", strtotime($trip->end_date));
+		if ($tripApprovedLog && $tripApprovedLog->approved_date > $tripEndDate) {
+			$claim_last_date = strtotime("+" . $claim_date . " day", strtotime($tripApprovedLog->approved_formatted_date));
+		}
+
+		$trip_end_date = strtotime($trip->end_date);
+
+		$data['claim_status'] = 0;
+		if ($current_date > $trip_end_date) {
+			if ($current_date <= $claim_last_date) {
+				$data['claim_status'] = 1;
+			}
+		}
 
 		$emp_business_id = $trip->employee->business_id;
 		$data['trip'] = $trip;
