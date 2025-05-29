@@ -280,6 +280,7 @@ app.component('eyatraTripClaimForm', {
             self.state_code = response.data.state_code;
             self.operating_states = response.data.operating_states;
             self.sbu_lists = response.data.sbu_lists;
+            self.claim_status = response.data.claim_status;
             self.attachment_type_lists = response.data.attachment_type_lists;
             self.attachment_type_lists = response.data.attachment_type_lists.filter(function (el) {
               return el.id != 3750; //ALL
