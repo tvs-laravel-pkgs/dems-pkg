@@ -4335,6 +4335,7 @@ class Trip extends Model {
 				'trips.employee_id',
 				'users.name as employee_name',
 				DB::raw('DATE_FORMAT(trips.created_at,"%d/%m/%Y") as created_at'),
+				DB::raw('DATE_FORMAT(trips.created_at,"%d-%m-%Y") as created_date'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
 				'tocity.name as tocity_name',
@@ -4366,6 +4367,7 @@ class Trip extends Model {
 				'trips.employee_id',
 				'users.name as employee_name',
 				DB::raw('DATE_FORMAT(trips.end_date,"%d/%m/%Y") as end_date'),
+				DB::raw('DATE_FORMAT(trips.end_date,"%d-%m-%Y") as end_at'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
 				'tocity.name as tocity_name',
@@ -4395,6 +4397,7 @@ class Trip extends Model {
 				'trips.employee_id',
 				'users.name as employee_name',
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d/%m/%Y") as created_at'),
+				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d-%m-%Y") as created_date'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
 				'tocity.name as tocity_name',
@@ -4424,6 +4427,7 @@ class Trip extends Model {
 				'trips.employee_id',
 				'users.name as employee_name',
 				DB::raw('DATE_FORMAT(ey_employee_claims.created_at,"%d/%m/%Y") as created_at'),
+				DB::raw('DATE_FORMAT(ey_employee_claims.created_date,"%d-%m-%Y") as created_date'),
 				DB::raw('DATE_FORMAT(visits.departure_date,"%d/%m/%Y") as visit_date'),
 				'fromcity.name as fromcity_name',
 				'tocity.name as tocity_name',
@@ -4475,7 +4479,7 @@ request is not desired, then those may be rejected.';
 							->where('status_id', 3021)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_REMINDER'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4486,7 +4490,7 @@ request is not desired, then those may be rejected.';
 							->where('status_id', 3021)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_WARNING'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 8, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4495,7 +4499,7 @@ request is not desired, then those may be rejected.';
 					if ($title == 'Cancelled') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3021)->update(['status_id' => 3038, 'reason' => 'Your Trip not approved,So system Cancelled Automatically', 'updated_at' => Carbon::now()]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 10, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4524,7 +4528,7 @@ request is not desired, then those may be cancelled.';
 							->where('status_id', 3028)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
-						$message = str_replace('YYYY', $pending_trip->end_date, $message);
+						$message = str_replace('YYYY', $pending_trip->end_at, $message);
 						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4535,7 +4539,7 @@ request is not desired, then those may be cancelled.';
 							->where('status_id', 3028)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_GENERATION'));
-						$message = str_replace('YYYY', $pending_trip->end_date, $message);
+						$message = str_replace('YYYY', $pending_trip->end_at, $message);
 						$message = str_replace('ZZZ', 12, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4545,7 +4549,7 @@ request is not desired, then those may be cancelled.';
 						// $status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3032, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically']);
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3028)->update(['status_id' => 3038, 'reason' => 'You have not submitted the claim,So system Cancelled Automatically', 'updated_at' => Carbon::now()]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_REQUEST_CANCELL'));
-						$message = str_replace('YYYY', $pending_trip->end_date, $message);
+						$message = str_replace('YYYY', $pending_trip->end_at, $message);
 						$message = str_replace('ZZZ', 15, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4574,7 +4578,7 @@ request is not desired, then those may be rejected.';
 							->where('status_id', 3023)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4585,7 +4589,7 @@ request is not desired, then those may be rejected.';
 							->where('status_id', 3023)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 8, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4594,7 +4598,7 @@ request is not desired, then those may be rejected.';
 					if ($title == 'Cancelled') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3023)->update(['status_id' => 3039, 'reason' => 'Your claim is not Approved,So system Rejected Automatically', 'updated_at' => Carbon::now()]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 10, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4625,7 +4629,7 @@ request is not desired, then those may be rejected.';
 							->where('status_id', 3029)
 							->update(['reason' => 'Remainder ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_REMINDER'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 2, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4636,7 +4640,7 @@ request is not desired, then those may be rejected.';
 							->where('status_id', 3029)
 							->update(['reason' => 'Warning ' . date('d-m-Y')]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_WARNING'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 5, $message);
 						if ($mobile_number) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);
@@ -4645,7 +4649,7 @@ request is not desired, then those may be rejected.';
 					if ($title == 'Cancelled') {
 						$status_update = DB::table('trips')->where('number', $pending_trip->number)->where('status_id', 3029)->update(['status_id' => 3039, 'reason' => 'Your claim is not Approved by senior Manager,So system Rejected Automatically', 'updated_at' => Carbon::now()]);
 						$message = str_replace('XXXXXX', $pending_trip->number, config('custom.SMS_TEMPLATES.TRIP_CLAIM_CANCELL'));
-						$message = str_replace('YYYY', $pending_trip->created_at, $message);
+						$message = str_replace('YYYY', $pending_trip->created_date, $message);
 						$message = str_replace('ZZZ', 10, $message);
 						if ($mobile_number && $sendSmsAndMail) {
 							sendNotificationTxtMsg($employee_id, $message, $mobile_number);

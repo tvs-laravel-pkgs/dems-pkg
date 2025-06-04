@@ -105,6 +105,9 @@ class MailController extends Controller
         return true;
     }
     public function sendNewAutoApproveMail() {
+        $currentHour = date('H');
+
+        if ($currentHour >= 8 && $currentHour < 11) {
         $status='Pending Requsation Approval';
         
         //2- Auto Approve
@@ -113,5 +116,6 @@ class MailController extends Controller
         $trip_mail = Trip::newAutoApproveTripMail($date,$status,$title);
 
         return true;
+        }
     }
 }
