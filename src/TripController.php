@@ -194,11 +194,19 @@ class TripController extends Controller {
 				]);
 			}
 
-			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
-				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-				->first();
+			// $trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
+			// 	->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+			// 	->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+			// 	->first();
+			$start_date = date("Y-m-d", strtotime($request->start_date));
+			$end_date = date("Y-m-d", strtotime($request->end_date));
 
+			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
+				->where(function($query) use ($start_date, $end_date) {
+					$query->whereBetween('start_date', [$start_date, $end_date])
+						->orWhereBetween('end_date', [$start_date, $end_date]);
+				})
+			->first();
 			//Total Trips Pending
 			// $total_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3021)->count();
 			// if ($total_trips >= 10) {
