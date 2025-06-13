@@ -180,11 +180,20 @@ class TripController extends Controller {
 			}
 		}
 		if ($request->id) {
+			// $trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
+			// 	->where('id', '!=', $request->id)
+			// 	->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+			// 	->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
+			// 	->first();
+			$start_date = date("Y-m-d", strtotime($request->start_date));
+			$end_date = date("Y-m-d", strtotime($request->end_date));
 			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
 				->where('id', '!=', $request->id)
-				->whereBetween('start_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-				->whereBetween('end_date', [date("Y-m-d", strtotime($request->start_date)), date("Y-m-d", strtotime($request->end_date))])
-				->first();
+				->where(function($query) use ($start_date, $end_date) {
+					$query->whereBetween('start_date', [$start_date, $end_date])
+						->orWhereBetween('end_date', [$start_date, $end_date]);
+				})
+			->first();
 		} else {
 			//IF EMPLOYEE DLOB OR DLOB PV THEN NOT ALLOW TO CREATE TRIP REQUEST.
 			if(Auth::user()->business_id == 1 || Auth::user()->business_id == 9){
