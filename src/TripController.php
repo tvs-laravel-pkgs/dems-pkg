@@ -188,11 +188,11 @@ class TripController extends Controller {
 			$start_date = date("Y-m-d", strtotime($request->start_date));
 			$end_date = date("Y-m-d", strtotime($request->end_date));
 			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
-				->where('id', '!=', $request->id)
-				->where(function($query) use ($start_date, $end_date) {
-					$query->whereBetween('start_date', [$start_date, $end_date])
-						->orWhereBetween('end_date', [$start_date, $end_date]);
-				})
+			->where('id', '!=', $request->id)
+			->where(function($query) use ($start_date, $end_date) {
+				$query->where('start_date', '<=', $end_date)
+					->where('end_date', '>=', $start_date);
+			})
 			->first();
 		} else {
 			//IF EMPLOYEE DLOB OR DLOB PV THEN NOT ALLOW TO CREATE TRIP REQUEST.
@@ -211,11 +211,10 @@ class TripController extends Controller {
 			$end_date = date("Y-m-d", strtotime($request->end_date));
 
 			$trip_start_date_data = Trip::where('employee_id', Auth::user()->entity_id)
-				->where(function($query) use ($start_date, $end_date) {
-					$query->whereBetween('start_date', [$start_date, $end_date])
-						->orWhereBetween('end_date', [$start_date, $end_date]);
-				})
-			->first();
+				->where('start_date', '<=', $end_date)
+				->where('end_date', '>=', $start_date)
+				->first();
+
 			//Total Trips Pending
 			// $total_trips = Trip::where('employee_id', Auth::user()->entity_id)->where('status_id', 3021)->count();
 			// if ($total_trips >= 10) {
