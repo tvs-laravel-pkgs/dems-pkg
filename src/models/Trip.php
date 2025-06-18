@@ -3156,12 +3156,14 @@ class Trip extends Model {
 							->where('reference_number', $ref_number)
 							->where('invoice_date', $lodging_invoice_date)
 							->where('lodge_name', $lodging_data['lodge_name'])
-							->where('invoice_amount', $lodging_data['invoice_amount'])
+							//->where('invoice_amount', $lodging_data['invoice_amount'])
+							->whereRaw('ABS(invoice_amount - ?) < 1', [$lodging_data['invoice_amount']])
 							->where('trip_id', '!=', $request->trip_id)
 							->first();
-						$lodging_claim_user = User::where('id', $lodging_check->created_by)->pluck('name')->first();
+
 						if (!empty($lodging_check)) {
-							return response()->json(['success' => false, 'errors' => ["Your Lodging was already claimed by {$lodging_claim_user}"]]);
+							$lodging_claim_user = User::where('id', $lodging_check->created_by)->pluck('name')->first();
+							return response()->json(['success' => false, 'errors' => ["Already Claimed This Invoice By {$lodging_claim_user}"]]);
 						}
 
 						if (isset($lodging_data['id'])) {
