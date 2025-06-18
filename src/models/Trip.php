@@ -3149,6 +3149,20 @@ class Trip extends Model {
 
 					$lodging_total_amount = 0;
 					foreach ($request->lodgings as $lodgeKey => $lodging_data) {
+						$ref_number = (isset($lodging_data['reference_number']) && !empty($lodging_data['reference_number'])) ? $lodging_data['reference_number'] : null;
+						$inv_date = (isset($lodging_data['invoice_date']) && !empty($lodging_data['invoice_date'])) ? $lodging_data['invoice_date'] : null;
+						$lodging_invoice_date = date('Y-m-d', strtotime($inv_date));
+						$lodging_check = Lodging::where('gstin', $lodging_data['gstin'])
+							->where('reference_number', $ref_number)
+							->where('invoice_date', $lodging_invoice_date)
+							->where('lodge_name', $lodging_data['lodge_name'])
+							->where('invoice_amount', $lodging_data['invoice_amount'])
+							->where('trip_id', '!=', $request->trip_id)
+							->first();
+						$lodging_claim_user = User::where('id', $lodging_check->created_by)->pluck('name')->first();
+						if (!empty($lodging_check)) {
+							return response()->json(['success' => false, 'errors' => ["Your Lodging was already claimed by {$lodging_claim_user}"]]);
+						}
 
 						if (isset($lodging_data['id'])) {
 							$lodging = Lodging::where('id', $lodging_data['id'])->first();
