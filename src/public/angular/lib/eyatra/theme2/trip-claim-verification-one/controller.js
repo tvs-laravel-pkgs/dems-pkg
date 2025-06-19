@@ -123,6 +123,8 @@ app.component('eyatraTripClaimVerificationOneView', {
     controller: function($http, $location, $location, HelperService, $routeParams, $rootScope, $scope, $mdSelect) {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? eyatra_trip_claim_verification_one_view_url + '/' : eyatra_trip_claim_verification_one_view_url + '/' + $routeParams.trip_id;
         var self = this;
+        $scope.apiLoaded = false;  // Hide bottom bar initially
+        $scope.visit = false; 
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
         self.eyatra_trip_claim_verification_one_visit_attachment_url = eyatra_trip_claim_verification_one_visit_attachment_url;
@@ -180,6 +182,8 @@ app.component('eyatraTripClaimVerificationOneView', {
             } else {
                 $scope.visit = true;
             }
+            $scope.apiLoaded = true;
+            console.log($scope.apiLoaded);
             $scope.doSomethingOnClick = function() {
                 $scope.visit = false;
             }
@@ -235,7 +239,32 @@ app.component('eyatraTripClaimVerificationOneView', {
             }
         }
         // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
-
+        $scope.viewAllAttachments = function() {
+            angular.forEach($scope.$ctrl.trip.trip_attachments, function(attachment) {
+                var url = '';
+                if (attachment.attachment_name.name === 'Tour Report') {
+                    // Open each Google attachment for Tour Report
+                    angular.forEach($scope.$ctrl.trip.google_attachments, function(attach) {
+                        var gUrl = $scope.$ctrl.eyatra_trip_claim_google_attachment_url + '/' + attach.name;
+                        window.open(gUrl, '_blank');
+                        // Update status for Google attachments
+                        if (attach.id) {
+                            $http.post(laravel_routes['updateAttachmentStatus'], { id: attach.id });
+                        }
+                    });
+                } else {
+                    url = 'storage/app/public/trip/claim/' + attachment.entity_id + '/' + attachment.name;
+                    window.open(url, '_blank');
+                    if (attachment.id) {
+                        $http.post(laravel_routes['updateAttachmentStatus'], { id: attachment.id });
+                    }
+                }
+            });
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        };
+        
         //TOOLTIP MOUSEOVER
         // $(document).on('mouseover', ".attachment_tooltip", function() {
         //     var $this = $(this);
