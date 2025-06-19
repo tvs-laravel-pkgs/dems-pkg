@@ -183,8 +183,7 @@ app.component('eyatraTripClaimVerificationOneView', {
                 $scope.visit = true;
             }
             $scope.apiLoaded = true;
-            console.log($scope.apiLoaded, "ssia");
-            console.log($scope.visit, "ssia");
+            console.log($scope.apiLoaded);
             $scope.doSomethingOnClick = function() {
                 $scope.visit = false;
             }
