@@ -1902,8 +1902,11 @@ class Trip extends Model {
 		}
 
 		$trip_end_date = strtotime($trip->end_date);
-
+		$trip_start_date = strtotime($trip->start_date);
 		$data['claim_status'] = 0;
+		if (($current_date >= $trip_start_date) && ($current_date <= $trip_end_date)) {
+			$data['claim_status'] = 1;
+		}
 		if ($current_date > $trip_end_date) {
 			if ($current_date <= $claim_last_date) {
 				$data['claim_status'] = 1;
