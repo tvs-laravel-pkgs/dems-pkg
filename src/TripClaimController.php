@@ -311,8 +311,7 @@ class TripClaimController extends Controller {
 			$validations = [
 				'id' => 'required|integer|exists:trips,id',
 				'document_type_id' => 'required|integer|exists:configs,id',
-				// 'atttachment' => 'required',
-				'atttachment' => 'required|mimes:jpeg,jpg,pdf,png |max:1024',
+				'atttachment' => 'required|mimes:jpeg,jpg,pdf,png|max:1024',
 			];
 			$validator = Validator::make($r->all(), $validations, $error_messages);
 
