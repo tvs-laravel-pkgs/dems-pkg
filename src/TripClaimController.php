@@ -306,12 +306,13 @@ class TripClaimController extends Controller {
 				'document_type_id.integer' => 'Document type is not correct format',
 				'document_type_id.exists' => 'Document type is not found',
 				'atttachment.required' => 'Document is required',
+				'atttachment.max' => 'Document must not be greater than 1MB',
 			];
 			$validations = [
 				'id' => 'required|integer|exists:trips,id',
 				'document_type_id' => 'required|integer|exists:configs,id',
 				// 'atttachment' => 'required',
-				'atttachment' => 'required|mimes:jpeg,jpg,pdf,png',
+				'atttachment' => 'required|mimes:jpeg,jpg,pdf,png |max:1024',
 			];
 			$validator = Validator::make($r->all(), $validations, $error_messages);
 

@@ -4153,15 +4153,16 @@ class Trip extends Model {
 				Storage::makeDirectory($item_images, 0777);
 				if ($request->hasfile('google_attachments')) {
 					$validator = Validator::make($request->all(), [
-                        'google_attachments.*' => [
-                            'mimes:jpeg,jpg,pdf,png',
+                        'google_attachments' => [
+                            'mimes:jpeg,jpg,pdf,png,doc',
+							 'max:1024',
                         ],
                     ]);
                     if ($validator->fails()) {
                         return response()->json([
                             'success' => false,
                             'error' => 'Validation Error',
-                            'errors' => ['The attachement must be a jpeg, jpg, pdf, or png file.'],
+                            'errors' => ['Tour Report must be JPEG, JPG, PDF, DOC, or PNG and under 1MB.'],
                         ]);
                     }
 
