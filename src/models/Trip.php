@@ -1573,7 +1573,9 @@ class Trip extends Model {
 		if(!empty($higher_grade_emp)){
 			$data['higher_grade_emp'] = 1;
 			$tourReport = $data['tourReport'] = TourReport::where('trip_id', $trip_id)->first();
-			$tour_report_discussion = $data['tour_report_discussion'] = TourReportDiscussion::where('tour_report_id', $tourReport->id)->get();
+			if(!empty($tourReport)){
+				$tour_report_discussion = $data['tour_report_discussion'] = TourReportDiscussion::where('tour_report_id', $tourReport->id)->get();
+			}
 		}
 		if (!empty($ey_employee_data) && (!Entrust::can('claim-edit') || (!in_array($trip->status_id, [3023, 3024, 3033, 3028, 3085])))) {
 			$data['success'] = false;
@@ -7649,5 +7651,5 @@ request is not desired, then those may be rejected.';
 		return 'true';
 	}
 
-	
+
 }
