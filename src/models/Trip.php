@@ -36,8 +36,11 @@ use Uitoux\EYatra\Sbu;
 use Validator;
 use App\Oracle\OtherTypeTransactionDetail;
 use App\Portal;
+use App\TourReport;
+use App\TourReportDiscussion;
 use Config as dataBaseConfig;
 use File;
+use PDF;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions as RequestOptions;
 use GuzzleHttp\Exception\BadResponseException as GuzzleHttpException;
@@ -1559,6 +1562,19 @@ class Trip extends Model {
 		//dd($trip->lodgings);
 
 		$ey_employee_data = EmployeeClaim::where('trip_id', $trip_id)->first();
+
+		$grade_emp = Config::where('id', 4153)->first()->name;
+		$grade_ids = explode(',', $grade_emp);
+
+		$higher_grade_emp = Employee::where('id', Auth::user()->entity_id)
+			->whereIn('grade_id', $grade_ids)
+			->first();
+		$data['higher_grade_emp'] = 0;	
+		if(!empty($higher_grade_emp)){
+			$data['higher_grade_emp'] = 1;
+			$tourReport = $data['tourReport'] = TourReport::where('trip_id', $trip_id)->first();
+			$tour_report_discussion = $data['tour_report_discussion'] = TourReportDiscussion::where('tour_report_id', $tourReport->id)->get();
+		}
 		if (!empty($ey_employee_data) && (!Entrust::can('claim-edit') || (!in_array($trip->status_id, [3023, 3024, 3033, 3028, 3085])))) {
 			$data['success'] = false;
 			$data['error'] = 'Not possible to update the Claim details';
@@ -2359,7 +2375,7 @@ class Trip extends Model {
 			// if ($validator->fails()) {
 			// 	return response()->json(['success' => false, 'errors' => $validator->errors()->all()]);
 			// }
-			DB::beginTransaction();
+			
 			$mode_two_wheeler = false;
 			$mode_four_wheeler = false;
 			$two_wheeler_total_km = 0;
@@ -2388,6 +2404,84 @@ class Trip extends Model {
 			// }
 
 			// dd($request->all());
+			//Tour Report Save 
+			if ($request->is_tour_report) {
+				$tour_report_details = TourReport::where('trip_id', $request->trip_id)
+					->where('employee_id', Auth::user()->entity_id)
+					->first();
+
+				if (!$tour_report_details) {
+					$tour_report_details = new TourReport;
+					$tour_report_details->trip_id = $request->trip_id;
+					$tour_report_details->employee_id = Auth::user()->entity_id;
+				}
+
+				$tour_report_details->purpose_of_visit = $request->purpose_of_visit;
+				$tour_report_details->expected_outcome = $request->expected_outcome;
+				$tour_report_details->people_met = $request->people_met;
+				$tour_report_details->meeting_place = $request->meeting_place;
+				$tour_report_details->meeting_rating = $request->meeting_rating;
+				$tour_report_details->save();
+
+			if ($request->has('discussion_points') && is_array($request->discussion_points)) {
+
+				TourReportDiscussion::where('tour_report_id', $tour_report_details->id)->delete();
+
+				foreach ($request->discussion_points as $point) {
+					if (!empty($point['text'])) {
+						$tour_report_discussion_points = new TourReportDiscussion;
+						$tour_report_discussion_points->tour_report_id = $tour_report_details->id;
+						$tour_report_discussion_points->discussion_point = $point['text'];
+						$tour_report_discussion_points->save();
+					}
+				}
+			}
+			$report = TourReport::where('trip_id', $request->trip_id)->firstOrFail();
+			$discussion_points = TourReportDiscussion::where('tour_report_id', $report->id)->get();
+
+			$employee = User::select('users.name as name', 'users.username as username', 'sbus.name as sbu_name', 'lobs.name as lob_name')
+						->leftjoin('employees', 'employees.id', 'users.entity_id')
+						->leftjoin('sbus', 'sbus.id', 'employees.sbu_id')
+						->leftjoin('lobs', 'lobs.id', 'sbus.lob_id')
+						->where('entity_id', Auth::user()->entity_id)
+						->first();
+			$trip = Trip::find($request->trip_id);
+			$visit = Visit::select('fromcity.name as city_name', 'entities.name as travel_mode')->where('trip_id', $request->trip_id)
+				->leftjoin('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
+				->leftjoin('ncities as tocity', 'tocity.id', 'visits.to_city_id')
+				->leftjoin('entities', 'entities.id', 'visits.travel_mode_id')
+				->first();
+
+			$pdf = PDF::loadView('reports.tour_report', compact('report', 'discussion_points', 'employee', 'trip', 'visit'));
+			$path = storage_path('app/public/trip/ey_employee_claims/google_attachments');
+
+			$filePath = $path . '/' . $request->trip_id . '.pdf';
+			$name = $request->trip_id . '.pdf';
+			$pdf->save($filePath);
+
+			$attachment = Attachment::where('entity_id', $request->trip_id)
+				->where('attachment_of_id', 3185)
+				->where('attachment_type_id', 3200)
+				->first();
+			if ($attachment) {
+				$oldFile = $path . $attachment->name;
+				if (file_exists($oldFile)) {
+					unlink($oldFile);
+				}
+				$attachment->name = $name;
+			} else {
+				$attachment = new Attachment;
+				$attachment->attachment_of_id = 3185;
+				$attachment->attachment_type_id = 3200;
+				$attachment->entity_id = $trip->id;
+				$attachment->name = $name;
+			}
+			$attachment->view_status = 0;
+			$attachment->save();
+
+			}
+			
+			DB::beginTransaction();
 			//starting ending Km validation
 			if (!empty($request->visits)) {
 				$visit_id = Visit::select('id')->where('trip_id', $request->trip_id)->where('status_id','!=',3062)->count();
@@ -7554,6 +7648,6 @@ request is not desired, then those may be rejected.';
 		\Log::info('Auto Approve Outstation trip mail completed');
 		return 'true';
 	}
-	
 
+	
 }

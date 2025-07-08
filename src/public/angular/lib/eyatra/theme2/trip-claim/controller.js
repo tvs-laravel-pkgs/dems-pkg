@@ -188,10 +188,43 @@ app.component('eyatraTripClaimForm', {
         var lodging_save = 0;
         var boarding_save = 0;
         var other_expense_save = 0;
+        var tour_report_save = 0;
         var trip_attachment_save = 0;
         $scope.searchTravelMode;
         $scope.clearSearchTravelMode = function() {
             $scope.searchTravelMode = '';
+        };
+        $scope.tourReport = {
+            purpose_of_visit: '',
+            expected_outcome: '',
+            people_met: '',
+            meeting_place: '',
+            discussion_points: [
+                { text: '' }  // Initial field
+            ]
+        };
+
+        $scope.addDiscussionPoint = function() {
+            $scope.tourReport.discussion_points.push({ text: '' });
+        };
+
+        $scope.removeDiscussionPoint = function(index) {
+            $scope.tourReport.discussion_points.splice(index, 1);
+        };
+        // Model to hold rating
+        $scope.tourReport.meeting_rating = 0;
+
+        // Return color class based on rating value
+        $scope.getRatingClass = function (rating) {
+            var selected = $scope.tourReport.meeting_rating;
+            if (selected >= rating) {
+                if (rating <= 2) return 'text-danger';       // Red
+                if (rating <= 4) return 'text-warning';      // Orange
+                if (rating <= 6) return 'text-yellow';       // Yellow
+                if (rating <= 8) return 'text-success';      // Light green
+                return 'text-success font-weight-bold';      // Dark green
+            }
+            return 'text-muted'; // Unselected stars
         };
 
         /* Modal Md Select Hide */
@@ -256,6 +289,7 @@ app.component('eyatraTripClaimForm', {
             }
             console.log(response.data);
             self.check_grade = response.data.check_grade;
+            self.higher_grade_emp = response.data.higher_grade_emp;
             self.config_grade = response.data.config_grade;
             self.grade_travel = response.data.grade_travel;
             self.cities_with_expenses = response.data.cities_with_expenses;
@@ -307,7 +341,8 @@ app.component('eyatraTripClaimForm', {
             if(self.employee.grade && self.employee.is_leader_grade == 1){
                 self.is_grade_leader = true;
             }
-
+            $scope.tourReport = response.data.tourReport;
+            $scope.tourReport.discussion_points = response.data.tour_report_discussion;
             $scope.otherCityId = 4100
             if (self.action == 'Add') {
                 // self.trip.boardings = [];
@@ -3841,6 +3876,7 @@ app.component('eyatraTripClaimForm', {
                 lodging_save = 1;
                 boarding_save = 1;
                 other_expense_save = 1;
+                tour_report_save = 1;
                 trip_attachment_save = 1;
                 $('#claim_' + active_tab_type + '_expense_form').submit();
                 $scope.proofUploadHandler();
@@ -3869,6 +3905,7 @@ app.component('eyatraTripClaimForm', {
             lodging_save = 1;
             boarding_save = 1;
             other_expense_save = 1;
+            tour_report_save = 1;
             trip_attachment_save = 1;
 
             var current_form = $(this).attr('data-submit_type');
@@ -3934,7 +3971,6 @@ app.component('eyatraTripClaimForm', {
                                     self.enable_switch_tab = false;
                                     $scope.$apply()
                                 } else {
-
                                     custom_noty('success', 'Transport expenses saved successfully!');
                                     // $(res.lodge_checkin_out_date_range_list).each(function(key, val) {
                                     //     self.trip.lodgings[key].date_range_list = val;
@@ -4131,6 +4167,65 @@ app.component('eyatraTripClaimForm', {
                         .fail(function(xhr) {
                             $('#board_submit').html('Save & Next');
                             $("#board_submit").attr("disabled", false);
+                            custom_noty('error', 'Something went wrong at server');
+                        });
+                }
+            },
+        });
+        //Tour Reprt FORM SUBMIT
+        var form_tour_report_id = '#claim_tour_report_expense_form';
+        var v = jQuery(form_tour_report_id).validate({
+            ignore: "",
+            rules: {},
+            errorElement: "div", // default is 'label'
+            errorPlacement: function(error, element) {
+                error.insertAfter(element.parent())
+            },
+            submitHandler: function(form) {
+                //console.log(self.item);
+                if (tour_report_save) {
+                    tour_report_save = 0;
+                    let formData = new FormData($(form_tour_report_id)[0]);
+                    angular.forEach($scope.tourReport.discussion_points, function (item, index) {
+                        formData.append('discussion_points[' + index + '][text]', item.discussion_point);
+                    });
+
+                    formData.append('meeting_rating', $scope.tourReport.meeting_rating);
+                    $('#tour_report_submit').html('loading');
+                    $("#tour_report_submit").attr("disabled", true);
+                    self.enable_switch_tab = false;
+                    $.ajax({
+                            url: eyatra_trip_claim_save_url,
+                            method: "POST",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            async: false,
+                        })
+                        .done(function(res) {
+                            // console.log(res);
+                            if (!res.success) {
+                                $('#tour_report_submit').html('Save & Next');
+                                $("#tour_report_submit").attr("disabled", false);
+                                var errors = '';
+                                for (var i in res.errors) {
+                                    errors += '<li>' + res.errors[i] + '</li>';
+                                }
+                                custom_noty('error', errors);
+                                self.enable_switch_tab = false;
+                                $scope.$apply()
+                            } else {
+
+                                custom_noty('success', 'Tour Report saved successfully!');
+                                self.enable_switch_tab = true;
+                                $scope.$apply()
+                                $('#tour_report_submit').html('Save & Next');
+                                $("#tour_report_submit").attr("disabled", false);
+                            }
+                        })
+                        .fail(function(xhr) {
+                            $('#tour_report_submit').html('Save & Next');
+                            $("#tour_report_submit").attr("disabled", false);
                             custom_noty('error', 'Something went wrong at server');
                         });
                 }
