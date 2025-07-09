@@ -204,27 +204,39 @@ app.component('eyatraTripClaimForm', {
             ]
         };
 
-        $scope.addDiscussionPoint = function() {
-            $scope.tourReport.discussion_points.push({ text: '' });
+        $scope.tourReport = {
+        discussion_points: [{ discussion_point: '' }],
+        meeting_rating: 0
         };
 
-        $scope.removeDiscussionPoint = function(index) {
+        // Add a discussion point
+        $scope.addDiscussionPoint = function () {
+            if (!$scope.tourReport) {
+                $scope.tourReport = {};
+            }
+            if (!$scope.tourReport.discussion_points) {
+                $scope.tourReport.discussion_points = [];
+            }
+            $scope.tourReport.discussion_points.push({ discussion_point: '' });
+        };
+
+        // Remove a discussion point
+        $scope.removeDiscussionPoint = function (index) {
             $scope.tourReport.discussion_points.splice(index, 1);
         };
-        // Model to hold rating
-        $scope.tourReport.meeting_rating = 0;
 
-        // Return color class based on rating value
+        // Get rating class
         $scope.getRatingClass = function (rating) {
+            if (!$scope.tourReport || !$scope.tourReport.meeting_rating) return 'text-muted';
             var selected = $scope.tourReport.meeting_rating;
             if (selected >= rating) {
-                if (rating <= 2) return 'text-danger';       // Red
-                if (rating <= 4) return 'text-warning';      // Orange
-                if (rating <= 6) return 'text-yellow';       // Yellow
-                if (rating <= 8) return 'text-success';      // Light green
-                return 'text-success font-weight-bold';      // Dark green
+                if (rating <= 2) return 'text-danger';
+                if (rating <= 4) return 'text-warning';
+                if (rating <= 6) return 'text-yellow';
+                if (rating <= 8) return 'text-success';
+                return 'text-success font-weight-bold';
             }
-            return 'text-muted'; // Unselected stars
+            return 'text-muted';
         };
 
         /* Modal Md Select Hide */
@@ -4446,6 +4458,9 @@ app.component('eyatraTripClaimView', {
             // self.local_travels_total_amount = response.data.local_travels_total_amount;
             self.total_amount = response.data.trip.employee.trip_employee_claim.total_amount;
             self.trip_justify = response.data.trip_justify;
+            self.higher_grade_emp = response.data.higher_grade_emp;
+            self.tourReport = response.data.tourReport;
+            self.tour_report_discussion = response.data.tour_report_discussion;
             if (self.trip.advance_received) {
                 if (parseFloat(self.total_amount) > parseFloat(self.trip.advance_received)) {
                     self.pay_to_employee = Math.round(parseFloat(self.total_amount) - parseFloat(self.trip.advance_received)).toFixed(2);

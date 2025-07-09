@@ -2087,7 +2087,20 @@ class Trip extends Model {
 			$data['success'] = false;
 			$data['message'] = 'Trip not found';
 		}
+		$grade_emp = Config::where('id', 4153)->first()->name;
+		$grade_ids = explode(',', $grade_emp);
 
+		$higher_grade_emp = Employee::where('id', Auth::user()->entity_id)
+			->whereIn('grade_id', $grade_ids)
+			->first();
+		$data['higher_grade_emp'] = 0;	
+		if(!empty($higher_grade_emp)){
+			$data['higher_grade_emp'] = 1;
+			$tourReport = $data['tourReport'] = TourReport::where('trip_id', $trip_id)->first();
+			if(!empty($tourReport)){
+				$tour_report_discussion = $data['tour_report_discussion'] = TourReportDiscussion::where('tour_report_id', $tourReport->id)->get();
+			}
+		}
 		// Trip employee claim amount update by Karthick T on 22-08-2022
 		/*if (isset($trip->employee->tripEmployeeClaim) && $trip->employee->tripEmployeeClaim) {
 			$tax_details = EmployeeClaim::select(
