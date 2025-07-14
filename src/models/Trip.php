@@ -2461,13 +2461,15 @@ class Trip extends Model {
 						->where('entity_id', Auth::user()->entity_id)
 						->first();
 			$trip = Trip::find($request->trip_id);
+			$trip_purpose = Entity::where('id', $trip->purpose_id)->pluck('name')->first();
+
 			$visit = Visit::select('fromcity.name as city_name', 'entities.name as travel_mode')->where('trip_id', $request->trip_id)
 				->leftjoin('ncities as fromcity', 'fromcity.id', 'visits.from_city_id')
 				->leftjoin('ncities as tocity', 'tocity.id', 'visits.to_city_id')
 				->leftjoin('entities', 'entities.id', 'visits.travel_mode_id')
 				->first();
 
-			$pdf = PDF::loadView('reports.tour_report', compact('report', 'discussion_points', 'employee', 'trip', 'visit'));
+			$pdf = PDF::loadView('reports.tour_report', compact('report', 'discussion_points', 'employee', 'trip', 'visit', 'trip_purpose'));
 			$path = storage_path('app/public/trip/ey_employee_claims/google_attachments');
 
 			$filePath = $path . '/' . $request->trip_id . '.pdf';
