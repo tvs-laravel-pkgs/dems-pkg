@@ -3164,7 +3164,7 @@ class Trip extends Model {
 							->where('trip_id', '!=', $request->trip_id)
 							->first();
 
-						if (!empty($lodging_check)) {
+						if (!empty($lodging_check) && $lodging_data['stay_type_id'] == 3340) {
 							$lodging_claim_user = User::where('id', $lodging_check->created_by)->pluck('name')->first();
 							return response()->json(['success' => false, 'errors' => ["Already Claimed This Invoice By {$lodging_claim_user}"]]);
 						}
