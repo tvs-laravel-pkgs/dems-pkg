@@ -2368,6 +2368,12 @@ class Trip extends Model {
 			$two_wheeler = Visit::where('visits.trip_id', $request->trip_id)
 				->whereIn('visits.travel_mode_id',[15,16])
 				->pluck('travel_mode_id')->first();
+			
+			$job_card_check = EmployeeClaim::where('job_card_number', $request->job_card_number)->whereNotNull('job_card_number')->first();
+
+			if(!empty($job_card_check)){
+				return response()->json(['success' => false, 'errors' => ['Job Card Number Already Exist']]);
+			}
 
 			$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
 			$end_of_month = Carbon::now()->endOfMonth()->toDateString();
