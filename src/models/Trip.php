@@ -528,6 +528,10 @@ class Trip extends Model {
 			DB::commit();
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+
+			// TRIP REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
+			sendWhatsAppNotification($trip, $notification_type = 'Trip Requested');
+
 			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
 			$activity_log = ActivityLog::saveLog($activity);
 
@@ -1289,6 +1293,9 @@ class Trip extends Model {
 		} else {
 			sendEmailNotification($trip, $notification_type = 'Cancel Trip', $trip_type = "Outstation Trip", $agentBookVisitIds = null);
 		}
+
+		// TRIP CANCEL WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Trip Cancel');
 		
 		return response()->json(['success' => true]);
 	}
@@ -1440,6 +1447,10 @@ class Trip extends Model {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		//Approval Log
 		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, Auth::user()->entity_id, Carbon::now());
+
+		// TRIP APPROVED WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Trip Approved');
+
 		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 
 		DB::commit();
@@ -1477,6 +1488,10 @@ class Trip extends Model {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+
+		// TRIP REJECTED WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Trip Rejected');
+
 		$notification = sendnotification($type = 3, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Rejected');
 
 		DB::commit();
@@ -4271,6 +4286,10 @@ class Trip extends Model {
 
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+
+				// CLAIM REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
+				sendWhatsAppNotification($trip, $notification_type = 'Claim Requested');
+
 				$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
 
 				DB::commit();
@@ -4805,6 +4824,10 @@ request is not desired, then those may be rejected.';
 	
 						//Approval Log
 						$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, $manager_id, Carbon::now());
+
+						// TRIP APPROVED WHATSAPP NOTIFICATION TO EMPLOYEE
+						sendWhatsAppNotification($trip, $notification_type = 'Trip Approved');
+
 						$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 				
 				$cc_email = $arr['cc_email'] = [];
@@ -7547,6 +7570,9 @@ request is not desired, then those may be rejected.';
 						$message->from('travelex@tvs.in');
 					});
 	
+					// TRIP APPROVED WHATSAPP NOTIFICATION TO EMPLOYEE
+					sendWhatsAppNotification($trip, $notification_type = 'Trip Approved');
+
 					sendnotification(2, $trip, $user, "Outstation Trip", 'Trip Approved');
 				}
 	

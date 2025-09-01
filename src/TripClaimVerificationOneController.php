@@ -343,6 +343,13 @@ class TripClaimVerificationOneController extends Controller {
 		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3601, Auth::user()->entity_id, Carbon::now());
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
+		if ($employee_claim->is_deviation == 0) {
+			// EMPLOYEE CLAIMS APPROVED WHATSAPP NOTIFICATION TO EMPLOYEE
+			sendWhatsAppNotification($trip, $notification_type = 'Employee Claim Approved');
+		} else {
+			// EMPLOYEE CLAIMS DEVIATION REQUESTED WHATSAPP NOTIFICATION
+			sendWhatsAppNotification($trip, $notification_type = 'Employee Claim Deviation Requested');
+		}
 		DB::commit();
 		return response()->json(['success' => true]);
 	    }catch (\Exception $e) {
@@ -402,6 +409,8 @@ class TripClaimVerificationOneController extends Controller {
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
+
+		sendWhatsAppNotification($trip, $notification_type = 'Employee Claim Rejected');
 
 		DB::commit();
 		return response()->json(['success' => true]);
