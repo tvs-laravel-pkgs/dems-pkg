@@ -224,6 +224,31 @@ app.component('eyatraTripClaimVerificationTwoView', {
                 });
             }
         }
+        $scope.viewAllAttachments = function() {
+            angular.forEach($scope.$ctrl.trip.trip_attachments, function(attachment) {
+                var url = '';
+                if (attachment.attachment_name.name === 'Tour Report') {
+                    // Open each Google attachment for Tour Report
+                    angular.forEach($scope.$ctrl.trip.google_attachments, function(attach) {
+                        var gUrl = $scope.$ctrl.eyatra_trip_claim_google_attachment_url + '/' + attach.name;
+                        window.open(gUrl, '_blank');
+                        // Update status for Google attachments
+                        if (attach.id) {
+                            $http.post(laravel_routes['updateAttachmentStatus'], { id: attach.id });
+                        }
+                    });
+                } else {
+                    url = 'storage/app/public/trip/claim/' + attachment.entity_id + '/' + attachment.name;
+                    window.open(url, '_blank');
+                    if (attachment.id) {
+                        $http.post(laravel_routes['updateAttachmentStatus'], { id: attachment.id });
+                    }
+                }
+            });
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        };
         // UPDATE ATTACHMENT STATUS BY KARTHICK T ON 20-01-2022
 
         // //TOOLTIP MOUSEOVER
