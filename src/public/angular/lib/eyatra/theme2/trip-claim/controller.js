@@ -2861,7 +2861,7 @@ app.component('eyatraTripClaimForm', {
                 } else {
                     self.trip.visits[index].self_booking['cgst'] = 0.00;
                     self.trip.visits[index].self_booking['sgst'] = 0.00;
-                    self.trip.visits[index].self_booking['igst'] = parseFloat(amount * (igst_percentage / 100)).toFixed(2);
+                    self.trip.visits[index].self_booking['igst'] = Math.floor(amount * (igst_percentage / 100)).toFixed(2);
                     self.trip.visits[index].self_booking['tax_percentage'] = 5;
                 }
             }
