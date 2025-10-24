@@ -1857,7 +1857,8 @@ app.component('eyatraTripClaimForm', {
                 $scope.boardingFromToDate();
                 // Calculating from, to date and boarding days by Karthick T on 21-01-2022
             } else {
-                self.trip.boardings[index].amount = '0.00';
+                //self.trip.boardings[index].amount = '0.00';
+                self.trip.boardings[index].amount = '';
             }
         }
         $scope.eligibleAmountCalc = function(actual_amount, index) {
