@@ -3141,7 +3141,7 @@ class Trip extends Model {
 					// LODGE STAY DAYS SHOULD NOT EXCEED TOTAL TRIP DAYS
 					$lodge_stayed_days = (int) array_sum(array_column($request->lodgings, 'stayed_days'));
 					$trip_total_days = (int) $request->trip_total_days;
-					if ($lodge_stayed_days > $trip_total_days) {
+					if ($lodge_stayed_days > $trip_total_days + 1) {
 						return response()->json(['success' => false, 'errors' => ['Total lodging days should be less than total trip days']]);
 					}
 
@@ -5380,7 +5380,8 @@ request is not desired, then those may be rejected.';
 		// $invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
 		$invoiceDate = $tripManagerApprovedDate;
 		$employeeData = $this->employee;
-		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		//$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		$supplierNumber = $employeeData ? $employeeData->supplier_number : null;
 		// $invoiceType = 'Standard';
 		$invoiceType = 'Prepayment';
 		$description = '';
@@ -5431,7 +5432,8 @@ request is not desired, then those may be rejected.';
 		}
 		$location = $outletCode;
 		$naturalAccount = Config::where('id', 3860)->first()->name;
-		$supplierSiteName = $outletCode;
+		//$supplierSiteName = $outletCode;
+		$supplierSiteName = $employeeData ? $employeeData->supplier_site_name : null;
 
 		$bpas_portal = Portal::select([
 			'db_host_name',
@@ -5440,7 +5442,7 @@ request is not desired, then those may be rejected.';
 			'db_user_name',
 			'db_password',
 		])
-			->where('id', 1)
+			->where('id', 2)
 			->first();
 		DB::setDefaultConnection('dynamic');
 		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $bpas_portal->db_host_name);
@@ -5457,6 +5459,9 @@ request is not desired, then those may be rejected.';
 			'business_unit' => $companyBusinessUnit,
 			'invoice_source' => $invoiceSource,
 		])->get();
+		$batchTypeDetail = DB::table('oracle_transaction_batch_type_details')->where([
+			'template_type' => $documentType,
+		])->first();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
 			DB::setDefaultConnection('mysql');
@@ -5470,7 +5475,8 @@ request is not desired, then those may be rejected.';
 		// }
 
 		DB::table('oracle_ap_invoice_exports')->insert([
-			'company_id' => $companyId,
+			'company_id' => $batchTypeDetail->company_id,
+			'batch_type_id' => $batchTypeDetail->id,
 			'business_unit' => $businessUnitName,
 			'invoice_source' => $invoiceSource,
 			'invoice_number' => $invoiceNumber,
@@ -6592,7 +6598,8 @@ request is not desired, then those may be rejected.';
 		$businessUnitName = $companyBusinessUnit;
 		$employeeData = $employeeTrip->employee;
 		$customerCode = $employeeData ? $employeeData->code : null;
-		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		//$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		$supplierNumber = $employeeData ? $employeeData->supplier_number : null;
 		$invoiceType = 'Standard';
 		$invoiceDescription = '';
 		if (!empty($employeeData->code)) {
@@ -6684,7 +6691,8 @@ request is not desired, then those may be rejected.';
 		$location = $outletCode;
 		$naturalAccount = Config::where('id', 3861)->first()->name;
 		$empToCompanyNaturalAccount = Config::where('id', 3921)->first()->name;
-		$supplierSiteName = $outletCode;
+		//$supplierSiteName = $outletCode;
+		$supplierSiteName = $employeeData ? $employeeData->supplier_site_name : null;
 
 		$roundOffTransaction = OtherTypeTransactionDetail::apRoundOffTransaction();
 		$lodgeHsnCode = Config::where('id', 3771)->pluck('hsn_code')->first();
@@ -6695,7 +6703,7 @@ request is not desired, then those may be rejected.';
 			'db_user_name',
 			'db_password',
 		])
-			->where('id', 1)
+			->where('id', 2)
 			->first();
 		DB::setDefaultConnection('dynamic');
 		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $bpas_portal->db_host_name);
@@ -6712,6 +6720,9 @@ request is not desired, then those may be rejected.';
 			'business_unit' => $businessUnitName,
 			'invoice_source' => $invoiceSource,
 		])->get();
+		$batchTypeDetail = DB::table('oracle_transaction_batch_type_details')->where([
+			'template_type' => $documentType,
+		])->first();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
 			DB::setDefaultConnection('mysql');
@@ -6794,7 +6805,7 @@ request is not desired, then those may be rejected.';
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
 		// $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
-		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $claimManagerApprovedDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType , date("Y-m-d"));
+		$apInvoiceId = $this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $claimManagerApprovedDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType , date("Y-m-d"), $batchTypeDetail->id);
 
 		// //LODGING-GST ENTRY
 		// if ($lodgingCgstSgstTaxableAmount && $lodgingCgstSgstTaxableAmount > 0) {
@@ -6835,7 +6846,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 							$hsnCode = $lodgingTaxInvoice->typeData ? $lodgingTaxInvoice->typeData->hsn_code : null; 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 
 						//DRY WASH
@@ -6857,7 +6868,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 							$hsnCode = $drywashTaxInvoice->typeData ? $drywashTaxInvoice->typeData->hsn_code : null;
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 
 						//BOARDING
@@ -6879,7 +6890,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 							$hsnCode = $boardingTaxInvoice->typeData ? $boardingTaxInvoice->typeData->hsn_code : null;
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 					} else {
 						//SINGLE
@@ -6899,7 +6910,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, $lodgeHsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, $lodgeHsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 					}
 				}
@@ -6917,7 +6928,7 @@ request is not desired, then those may be rejected.';
 				$roundOffNaturalAccount = $roundOffTransaction->natural_account;
 			}
 
-			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType , date("Y-m-d"));
+			$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 		}
 
 		//IF ADVANCE RECEIVED
@@ -6925,7 +6936,7 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				//EMPLOYEE TO COMPANY
 				if ($employeeClaim->amount_to_pay == 2) {
-					$this->saveApOracleExport($companyId, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, $employeeClaim->balance_amount, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , date("Y-m-d"));
+					$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, $employeeClaim->balance_amount, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , date("Y-m-d"), $batchTypeDetail->id);
 				}
 			}
 
@@ -6945,9 +6956,10 @@ request is not desired, then those may be rejected.';
 		return $res;
 	}
 
-	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentInvoiceDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outlet, $amount, $taxClassification, $cgst, $sgst, $igst, $roundOffAmount, $hsnCode, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType, $accountingDate = null) {
+	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentInvoiceDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outlet, $amount, $taxClassification, $cgst, $sgst, $igst, $roundOffAmount, $hsnCode, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType, $accountingDate = null, $batch_type_id) {
 		return $apInvoiceId = DB::table('oracle_ap_invoice_exports')->insertGetId([
 			'company_id' => $companyId,
+			'batch_type_id' => $batch_type_id,
 			'business_unit' => $businessUnit,
 			'invoice_source' => $invoiceSource,
 			'invoice_number' => $invoiceNumber,
