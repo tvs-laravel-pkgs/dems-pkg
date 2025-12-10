@@ -298,6 +298,8 @@ class EmployeeController extends Controller {
 				'username.required' => "Username is Required",
 				'mobile_number.unique' => "Mobile Number is already taken",
 				'username.unique' => "Username is already taken",
+				'supplier_number.required' => "Supplier Number is Required",
+				'supplier_site_name.required' => "Supplier Site Name is Required",
 				// 'aadhar_no.unique' => "Aadhar Number is already taken",
 				// 'pan_no.unique' => "PAN Number is already taken",
 				// 'email.unique' => "Email is already taken",
@@ -323,6 +325,8 @@ class EmployeeController extends Controller {
 
 				// ],
 				'username' => 'required|unique:users,username,' . $request->user_id . ',id,company_id,' . Auth::user()->company_id . ',business_id,' . $request->business_id,
+				'supplier_number' => 'required',
+				'supplier_site_name' => 'required',
 
 				// 'email' => [
 				// 	'required:true',
