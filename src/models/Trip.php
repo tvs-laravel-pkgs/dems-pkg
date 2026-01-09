@@ -7361,7 +7361,7 @@ request is not desired, then those may be rejected.';
 		$roundOffAmt = round($employeeClaim->total_amount) - $employeeClaim->total_amount;
 		$employeeLodgingRoundoff += floatval($roundOffAmt);
 		if ($employeeLodgingRoundoff && $employeeLodgingRoundoff != '0.00') {
-			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberRoundOff, $employeeLodgingRoundoff, null, 'Roundoff', null, null, null, null,null);
+			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberRoundOff, $employeeLodgingRoundoff, null, 'Small Sundry Debit/Credit Balances', null, null, null, null,null);
 		}
 
 		//IF ADVANCE
@@ -7440,6 +7440,17 @@ request is not desired, then those may be rejected.';
 				],
 			]);
 		}
+
+		if ($debit != '0.00' && floatval($debit) < 0.00) {
+			$credit = number_format(abs((float) $debit), 2, '.', '');
+			$debit = null;
+		}
+
+		if ($credit != '0.00' && floatval($credit) < 0.00) {
+			$debit = number_format(abs((float) $credit), 2, '.', '');
+			$credit = null;
+		}
+
 		return [
 			'business_unit' => $businessUnit,
 			'template' => $template,
