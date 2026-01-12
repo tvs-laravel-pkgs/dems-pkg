@@ -3125,7 +3125,7 @@ app.component('eyatraTripClaimForm', {
                 }
                 //let lodgePercentage = 12;
                 // if (lodgeWithoutTaxAmount >= 7500) {
-                if (lodgePerDayAmt > 7500) {
+                if (lodgePerDayAmt >= 7500) {
                     lodgePercentage = 18;
                 }
 
@@ -3422,7 +3422,7 @@ app.component('eyatraTripClaimForm', {
 
                 // if (amount >= 7500)
                 // if (lodge_per_day_amt >= 7500)
-                if (lodge_per_day_amt > 7500)
+                if (lodge_per_day_amt >= 7500)
                     percentage = 18;
                 if (gst_state_code == self.state_code) {
                     cgst_percentage = sgst_percentage = percentage / 2;
