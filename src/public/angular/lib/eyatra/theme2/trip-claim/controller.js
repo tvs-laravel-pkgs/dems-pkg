@@ -61,6 +61,7 @@ app.component('eyatraTripClaimList', {
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'claim_total_amount', searchable: false },
                 { data: 'reason', name: 'reason', searchable: true },
+                { data: 'verification_one_remarks', name: 'verification_one_remarks', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
