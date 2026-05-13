@@ -184,6 +184,12 @@ app.component('eyatraTripForm', {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var arr_ind;
+        self._otherCityMap = null;
+        self._otherCityMarker = null;
+        self._otherCityMapVisitIndex = null;
+        self._leafletLoadPromise = null;
+        self._otherCityMapModalHiddenBound = false;
+        $scope.otherCityMapPreview = '';
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
 
@@ -438,6 +444,7 @@ app.component('eyatraTripForm', {
 
 
             self.extras = response.data.extras;
+            self.is_l_grade_employee = !!(response.data.extras && response.data.extras.is_l_grade_employee);
             self._cityById = {};
             if (self.extras.city_list && self.extras.city_list.length) {
                 for (var ci = 0; ci < self.extras.city_list.length; ci++) {
@@ -487,6 +494,193 @@ app.component('eyatraTripForm', {
             $scope.showCheque = false;
             $scope.showWallet = false;
         });
+
+        self.ensureLeafletLoaded = function() {
+            if (typeof window.L !== 'undefined') {
+                return $q.when();
+            }
+            if (self._leafletLoadPromise) {
+                return self._leafletLoadPromise;
+            }
+            self._leafletLoadPromise = $q(function(resolve, reject) {
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                document.head.appendChild(link);
+                var script = document.createElement('script');
+                script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                script.onload = function() {
+                    resolve();
+                };
+                script.onerror = function() {
+                    reject(new Error('Leaflet load failed'));
+                };
+                document.body.appendChild(script);
+            });
+            return self._leafletLoadPromise;
+        };
+
+        self.destroyOtherCityLeafletMap = function() {
+            if (self._otherCityMap) {
+                try {
+                    self._otherCityMap.off();
+                } catch (e) {}
+                try {
+                    self._otherCityMap.remove();
+                } catch (e2) {}
+            }
+            self._otherCityMap = null;
+            self._otherCityMarker = null;
+        };
+
+        self.reverseGeocodeCityFromLatLng = function(lat, lng) {
+            return $http.get('https://nominatim.openstreetmap.org/reverse', {
+                params: {
+                    lat: lat,
+                    lon: lng,
+                    format: 'jsonv2',
+                    addressdetails: 1
+                }
+            }).then(function(res) {
+                var a = (res.data && res.data.address) ? res.data.address : {};
+                var name = a.city || a.town || a.village || a.state_district || a.county || a.state || '';
+                return name ? String(name).trim() : '';
+            }, function() {
+                return '';
+            });
+        };
+
+        self.applyOtherCityFromMapSelection = function(visitIndex, cityName) {
+            if (visitIndex == null || cityName == null || cityName === '') {
+                return;
+            }
+            if (!self.trip || !self.trip.visits || !self.trip.visits[visitIndex]) {
+                return;
+            }
+            var visit = self.trip.visits[visitIndex];
+            visit.other_city = cityName;
+            var tt = (self.trip.trip_type || '').toLowerCase();
+            if ((tt === 'round' || tt === 'multiple') && self.trip.visits.length > 1) {
+                if (visitIndex % 2 === 0 && self.trip.visits[visitIndex + 1]) {
+                    self.trip.visits[visitIndex + 1].other_city = cityName;
+                } else if (visitIndex % 2 === 1 && self.trip.visits[visitIndex - 1]) {
+                    self.trip.visits[visitIndex - 1].other_city = cityName;
+                }
+            }
+            $scope.$evalAsync(function() {});
+        };
+
+        self.initOtherCityLeafletMap = function() {
+            self.destroyOtherCityLeafletMap();
+            var el = document.getElementById('eyatra-other-city-leaflet-map');
+            if (!el || typeof window.L === 'undefined') {
+                return;
+            }
+            el.innerHTML = '';
+            var map = L.map(el, {
+                scrollWheelZoom: true,
+                tap: true
+            });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            self._otherCityMap = map;
+            // Default: Chennai metro area (user can pan / zoom elsewhere before tapping).
+            var chennaiLat = 13.0827;
+            var chennaiLng = 80.2707;
+            var chennaiZoom = 11;
+            map.setView([chennaiLat, chennaiLng], chennaiZoom);
+            map.on('click', function(ev) {
+                var lat = ev.latlng.lat;
+                var lng = ev.latlng.lng;
+                if (!self._otherCityMarker) {
+                    self._otherCityMarker = L.marker([lat, lng]).addTo(map);
+                } else {
+                    self._otherCityMarker.setLatLng([lat, lng]);
+                }
+                self.reverseGeocodeCityFromLatLng(lat, lng).then(function(city) {
+                    $scope.otherCityMapPreview = city;
+                    self.applyOtherCityFromMapSelection(self._otherCityMapVisitIndex, city);
+                });
+            });
+            $timeout(function() {
+                map.invalidateSize();
+            }, 200);
+            $timeout(function() {
+                map.invalidateSize();
+            }, 550);
+        };
+
+        $scope.openOtherCityMapModal = function(visitIndex) {
+            if (!self.is_l_grade_employee) {
+                return;
+            }
+            self._otherCityMapVisitIndex = visitIndex;
+            $scope.otherCityMapPreview = '';
+            self.ensureLeafletLoaded().then(function() {
+                $('#eyatra-other-city-map-modal').modal('show');
+                $timeout(function() {
+                    self.initOtherCityLeafletMap();
+                }, 400);
+            }, function() {
+                custom_noty('error', 'Map could not be loaded. Please type the city name manually.');
+            });
+        };
+
+        $scope.tryOpenOtherCityMap = function(index) {
+            if (!self.is_l_grade_employee) {
+                return;
+            }
+            var visit = self.trip && self.trip.visits && self.trip.visits[index];
+            if (!visit) {
+                return;
+            }
+            var other = (visit.from_city_id == 4100) || (visit.to_city_details && visit.to_city_details.id == 4100);
+            if (!other) {
+                return;
+            }
+            $scope.openOtherCityMapModal(index);
+        };
+
+        $scope.onToCitySelected = function(index, toCityDetails) {
+            $scope.cityChanging(index, toCityDetails);
+            if (toCityDetails && toCityDetails.id == 4100) {
+                $timeout(function() {
+                    $scope.tryOpenOtherCityMap(index);
+                }, 350);
+            }
+        };
+
+        $scope.onFromCityChangeWithOthers = function(cityId, index) {
+            $scope.onChangeFromTrip(cityId, index);
+            if (cityId == 4100) {
+                $timeout(function() {
+                    $scope.tryOpenOtherCityMap(index);
+                }, 350);
+            }
+        };
+
+        $scope.confirmOtherCityMap = function() {
+            var idx = self._otherCityMapVisitIndex;
+            if (idx == null || !$scope.otherCityMapPreview) {
+                return;
+            }
+            self.applyOtherCityFromMapSelection(idx, $scope.otherCityMapPreview);
+            $('#eyatra-other-city-map-modal').modal('hide');
+            self.destroyOtherCityLeafletMap();
+        };
+
+        if (!self._otherCityMapModalHiddenBound) {
+            self._otherCityMapModalHiddenBound = true;
+            $('body').on('hidden.bs.modal', '#eyatra-other-city-map-modal', function() {
+                self.destroyOtherCityLeafletMap();
+                $scope.otherCityMapPreview = '';
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+            });
+        }
 
         $scope.onChangeTripStartAndEndDate = () => {
             const tripVisitLength = self.trip.visits.length;

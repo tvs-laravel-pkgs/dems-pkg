@@ -27,6 +27,7 @@ Route::group(['middleware' => ['api']], function () {
 		//TRIPS
 		Route::post('trip/list', 'Uitoux\EYatra\Api\TripController@listTrip');
 		Route::post('trip/get-form-data', 'Uitoux\EYatra\Api\TripController@getTripFormData');
+		Route::get('trip/current-location-city', 'Uitoux\EYatra\Api\TripController@getCurrentLocationCity');
 		Route::post('trip/add', 'Uitoux\EYatra\Api\TripController@addTrip');
 		Route::post('trip/view/{trip_id}', 'Uitoux\EYatra\Api\TripController@viewTrip');
 		Route::get('trip/delete/{trip_id}', 'Uitoux\EYatra\Api\TripController@deleteTrip');
@@ -342,6 +343,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trips/visit/delete/{visit_id}', 'Uitoux\EYatra\TripController@deleteVisit')->name('deleteVisit');
 		// Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\TripController@searchCity')->name('searchCity');
 		Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
+		Route::get('eyatra/trip/current-location-city', 'Uitoux\EYatra\TripController@getCurrentLocationCity')->name('getTripCurrentLocationCity');
 		Route::get('eyatra/trip/get-filter-data', 'Uitoux\EYatra\TripController@eyatraTripFilterData')->name('eyatraTripFilterData');
 
 		//TRIPS VERIFICATION

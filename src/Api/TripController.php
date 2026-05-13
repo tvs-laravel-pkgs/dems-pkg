@@ -22,6 +22,22 @@ class TripController extends Controller {
 		return Trip::getTripFormData($r->trip_id);
 	}
 
+	public function getCurrentLocationCity(Request $request) {
+		$employee = Auth::user() ? Auth::user()->entity : null;
+		$is_l_grade_employee = Trip::isLGradeEmployee($employee);
+		$current_location_city_name = null;
+
+		if ($is_l_grade_employee && $request->has('latitude') && $request->has('longitude')) {
+			$current_location_city_name = Trip::getCityNameFromCoordinates($request->get('latitude'), $request->get('longitude'));
+		}
+
+		return response()->json([
+			'success' => true,
+			'is_l_grade_employee' => $is_l_grade_employee,
+			'current_location_city' => $current_location_city_name,
+		]);
+	}
+
 	public function addTrip(Request $request) {
 		 //dd($request->all());
 		return response()->json([

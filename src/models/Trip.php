@@ -400,6 +400,8 @@ class Trip extends Model {
 				$visit = Visit::where('trip_id', $trip->id)->where('booking_status_id', 3060)->forceDelete();
 				$booking_methods = ['Self','Agent'];
 				foreach ($request->visits as $key => $visit_data) {
+					$other_city = isset($visit_data['other_city']) ? trim((string) $visit_data['other_city']) : null;
+
 					//dump($visit_data);
 					if (empty($visit_data['booking_method_name'])) {
 						return response()->json([
@@ -450,7 +452,7 @@ class Trip extends Model {
 							$old_visit_detail_check = Visit::where('id', $visit_data['id'])
 								->where('from_city_id', $visit_data['from_city_id'])
 								->where('to_city_id', $visit_data['to_city_id'])
-								->where('other_city', $visit_data['other_city'])
+								->where('other_city', $other_city)
 								->where('travel_mode_id', $visit_data['travel_mode_id'])
 								->where('booking_method_id', $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042)
 								->whereDate('departure_date', date('Y-m-d', strtotime($visit_data['date'])))
@@ -493,7 +495,7 @@ class Trip extends Model {
 					$visit->trip_id = $trip->id;
 					$visit->from_city_id = $from_city_id;
 					$visit->to_city_id = $visit_data['to_city_id'];
-					$visit->other_city = $visit_data['other_city'] ? $visit_data['other_city'] : NULL;
+					$visit->other_city = $other_city ? $other_city : NULL;
 					$visit->travel_mode_id = $visit_data['travel_mode_id'];
 					$visit->trip_mode_id = $visit_data['trip_mode_id'];
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
@@ -530,9 +532,9 @@ class Trip extends Model {
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
 
 			// TRIP REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
-			sendWhatsAppNotification($trip, $notification_type = 'Trip Requested');
+			//sendWhatsAppNotification($trip, $notification_type = 'Trip Requested');
 
-			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
+			//$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
 			$activity_log = ActivityLog::saveLog($activity);
 
 			if (empty($request->id)) {
@@ -551,6 +553,72 @@ class Trip extends Model {
 					'Exception Error' => $e->getMessage() . '. Line:' . $e->getLine() . '. File:' . $e->getFile(),
 				],
 			]);
+		}
+	}
+
+	public static function isLGradeEmployee($employee) {
+		if (!$employee || !$employee->grade_id) {
+			return false;
+		}
+
+		return Entity::where('id', $employee->grade_id)
+			->where('entity_type_id', 500)
+			->where('name', 'like', '%L%')
+			->exists();
+	}
+
+	public static function getCurrentLocationCityNameForEmployee($employee) {
+		if (
+			!$employee ||
+			!$employee->outlet ||
+			!$employee->outlet->address ||
+			!$employee->outlet->address->city
+		) {
+			return null;
+		}
+
+		return $employee->outlet->address->city->name;
+	}
+
+	public static function getCityNameFromCoordinates($latitude, $longitude) {
+		if ($latitude === null || $longitude === null) {
+			return null;
+		}
+
+		try {
+			$client = new Client([
+				'timeout' => 5,
+			]);
+			$response = $client->get('https://nominatim.openstreetmap.org/reverse', [
+				'query' => [
+					'lat' => $latitude,
+					'lon' => $longitude,
+					'format' => 'jsonv2',
+					'addressdetails' => 1,
+				],
+				'headers' => [
+					'User-Agent' => 'DEMS-EYatra/1.0',
+					'Accept' => 'application/json',
+				],
+			]);
+
+			$data = json_decode($response->getBody()->getContents(), true);
+			$address = isset($data['address']) ? $data['address'] : [];
+
+			$city = null;
+			if (!empty($address['city'])) {
+				$city = $address['city'];
+			} elseif (!empty($address['town'])) {
+				$city = $address['town'];
+			} elseif (!empty($address['village'])) {
+				$city = $address['village'];
+			} elseif (!empty($address['state_district'])) {
+				$city = $address['state_district'];
+			}
+
+			return $city ? trim($city) : null;
+		} catch (\Exception $e) {
+			return null;
 		}
 	}
 
@@ -826,6 +894,7 @@ class Trip extends Model {
 			'frequently_travelled' => Visit::join('ncities', 'ncities.id', 'visits.to_city_id')->leftJoin('nstates', 'ncities.state_id', 'nstates.id')->where('ncities.company_id', Auth::user()->company_id)->select('ncities.id', DB::raw('CONCAT(ncities.name," - ",nstates.name) as name'))->distinct()->limit(10)->get(),
 			'claimable_travel_mode_list' => DB::table('travel_mode_category_type')->where('category_id', 3403)->pluck('travel_mode_id'),
 			'trip_mode' => collect(Config::select('name', 'id')->where('config_type_id', 548)->get())->prepend(['id' => '-1', 'name' => 'Select Trip Mode']),
+			'is_l_grade_employee' => self::isLGradeEmployee($grade),
 		];
 		$data['trip'] = $trip;
 
