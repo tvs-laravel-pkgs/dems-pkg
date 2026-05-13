@@ -184,6 +184,7 @@ app.component('eyatraTripForm', {
         $form_data_url = typeof($routeParams.trip_id) == 'undefined' ? trip_form_data_url : trip_form_data_url + '/' + $routeParams.trip_id;
         var self = this;
         var arr_ind;
+        self.otherCityGeolocationEnabled = false;
         self.hasPermission = HelperService.hasPermission;
         self.angular_routes = angular_routes;
 
@@ -219,6 +220,7 @@ app.component('eyatraTripForm', {
             self.trip_advance_amount_edit = response.data.trip_advance_amount_edit;
             self.trip_advance_amount_employee_edit = response.data.trip_advance_amount_employee_edit;
             self.is_self_booking_approval_must = response.data.is_self_booking_approval_must;
+            self.otherCityGeolocationEnabled = !!response.data.other_city_geolocation_enabled;
             self.scrollToTop = function() {
                 self.scrollTo(0);
             };
@@ -587,7 +589,97 @@ app.component('eyatraTripForm', {
                     return response.data || [];
                 });
         }
-        $scope.cityChanging = function(i, toCityDetails) {
+        var OTHERS_CITY_ID = 4100;
+        self._csrfTokenForHttp = function() {
+            var m = document.querySelector('meta[name="csrf-token"]');
+            return m && m.getAttribute('content') ? m.getAttribute('content') : '';
+        };
+        self._postWithCsrf = function(url, data) {
+            var token = self._csrfTokenForHttp();
+            var payload = angular.extend({}, data || {});
+            if (token) {
+                payload._token = token;
+            }
+            return $http.post(url, payload, {
+                headers: angular.extend(
+                    { 'X-Requested-With': 'XMLHttpRequest' },
+                    token ? { 'X-CSRF-TOKEN': token } : {}
+                ),
+            });
+        };
+        self.tryPrefillOtherCityFromGeolocation = function(visitIndex) {
+            if (!self.otherCityGeolocationEnabled) return;
+            if (!self.trip || !self.trip.visits || !self.trip.visits[visitIndex]) return;
+            var visit = self.trip.visits[visitIndex];
+            var toId = visit.to_city_details && visit.to_city_details.id;
+            var fromId = visit.from_city_id;
+            if (parseInt(toId, 10) !== OTHERS_CITY_ID && parseInt(fromId, 10) !== OTHERS_CITY_ID) {
+                visit._otherCityGeoPrompted = false;
+                return;
+            }
+            if (visit.other_city && String(visit.other_city).trim() !== '') return;
+            if (visit._otherCityGeoPrompted) return;
+            if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+            var geoUrl = laravel_routes['tripReverseGeocode'];
+            if (!geoUrl) {
+                if (typeof custom_noty === 'function') {
+                    custom_noty('error', 'Trip reverse-geocode route is not configured.');
+                }
+                return;
+            }
+            visit._otherCityGeoPrompted = true;
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    var lat = pos.coords.latitude;
+                    var lon = pos.coords.longitude;
+                    self._postWithCsrf(geoUrl, { lat: lat, lon: lon }).then(function(res) {
+                        if (!res.data || !res.data.success || !res.data.name) {
+                            $timeout(function() {
+                                var vv = self.trip.visits[visitIndex];
+                                if (vv) vv._otherCityGeoPrompted = false;
+                                if (typeof custom_noty === 'function') {
+                                    custom_noty('error', (res.data && res.data.message) ? res.data.message : 'Could not resolve city from your location. Please type the city name.');
+                                }
+                            });
+                            return;
+                        }
+                        var v = self.trip.visits[visitIndex];
+                        if (!v) return;
+                        if (!v.other_city || String(v.other_city).trim() === '') {
+                            $timeout(function() {
+                                v.other_city = res.data.name;
+                            });
+                        }
+                    }, function(err) {
+                        $timeout(function() {
+                            var vv = self.trip.visits[visitIndex];
+                            if (vv) vv._otherCityGeoPrompted = false;
+                            if (typeof custom_noty === 'function') {
+                                var msg = 'Could not resolve city from your location. Please type the city name.';
+                                if (err && err.status === 419) {
+                                    msg = 'Session expired. Refresh the page and try again.';
+                                } else if (err && err.status === 403) {
+                                    msg = 'This action is not allowed for your grade.';
+                                } else if (err && err.data && err.data.message) {
+                                    msg = err.data.message;
+                                }
+                                custom_noty('error', msg);
+                            }
+                        });
+                    });
+                },
+                function() {
+                    $timeout(function() {
+                        var vv = self.trip.visits[visitIndex];
+                        if (vv) vv._otherCityGeoPrompted = false;
+                    });
+                },
+                { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 }
+            );
+        };
+        $scope.cityChanging = function(i, selectedItem) {
+            var visitRow = self.trip.visits[i];
+            var toCityDetails = (selectedItem !== undefined && selectedItem !== null) ? selectedItem : (visitRow && visitRow.to_city_details);
             var index = i + 1;
             var id = (toCityDetails && toCityDetails.id) ? toCityDetails.id : '';
             id = (!id) ? '' : id;
@@ -625,6 +717,16 @@ app.component('eyatraTripForm', {
             } else {
                 $('.btn-submit').prop('disabled', false);
             }
+            // md-selected-item-change can run before visit.to_city_details is synced; read after digest
+            $timeout(function() {
+                var v = self.trip.visits[i];
+                if (!v) return;
+                var tid = v.to_city_details && v.to_city_details.id;
+                var fid = v.from_city_id;
+                if (parseInt(tid, 10) === OTHERS_CITY_ID || parseInt(fid, 10) === OTHERS_CITY_ID) {
+                    self.tryPrefillOtherCityFromGeolocation(i);
+                }
+            }, 100);
         }
         $scope.onChangeFromTrip = function(cityId, fromCityIndex) {
             var cityIndex = fromCityIndex + 1;
@@ -641,6 +743,15 @@ app.component('eyatraTripForm', {
                     }
                 }
             }
+            $timeout(function() {
+                var v = self.trip.visits[fromCityIndex];
+                if (!v) return;
+                var tid = v.to_city_details && v.to_city_details.id;
+                var fid = v.from_city_id;
+                if (parseInt(cityId, 10) === OTHERS_CITY_ID || parseInt(tid, 10) === OTHERS_CITY_ID || parseInt(fid, 10) === OTHERS_CITY_ID) {
+                    self.tryPrefillOtherCityFromGeolocation(fromCityIndex);
+                }
+            }, 100);
         }
 
         $scope.addVisit = async function(visit_array) {

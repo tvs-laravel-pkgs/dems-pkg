@@ -688,6 +688,65 @@ class Trip extends Model {
 
 	}
 
+	/**
+	 * L-grade employees (grade entity type 500, name contains "L") get optional "Others" city geolocation prefill.
+	 */
+	public static function isAuthUserLOtherCityGeolocationGrade() {
+		if (!Auth::check() || !Auth::user()->entity_id) {
+			return false;
+		}
+		return Employee::leftJoin('entities', 'entities.id', '=', 'employees.grade_id')
+			->where('employees.id', Auth::user()->entity_id)
+			->where('entities.entity_type_id', 500)
+			->where('entities.name', 'like', '%L%')
+			->exists();
+	}
+
+	/**
+	 * Reverse geocode coordinates via Nominatim (identify app via User-Agent per OSM usage policy).
+	 *
+	 * @param float $lat
+	 * @param float $lon
+	 * @return string|null City/locality display string or null on failure
+	 */
+	public static function reverseGeocodeCityName($lat, $lon) {
+		try {
+			$client = new Client();
+			$baseUrl = URL::to('/');
+			$userAgent = 'DEMS-EyatraTrip/1.0 (' . ($baseUrl ?: 'https://localhost') . ')';
+			$response = $client->get('https://nominatim.openstreetmap.org/reverse', [
+				'query' => [
+					'format' => 'json',
+					'lat' => $lat,
+					'lon' => $lon,
+				],
+				'headers' => [
+					'User-Agent' => $userAgent,
+				],
+				'timeout' => 10,
+			]);
+			$body = json_decode($response->getBody()->getContents(), true);
+			if (!$body || !is_array($body)) {
+				return null;
+			}
+			if (!empty($body['error'])) {
+				return null;
+			}
+			$addr = isset($body['address']) && is_array($body['address']) ? $body['address'] : [];
+			$locality = '';
+			foreach (['city', 'town', 'village', 'municipality', 'city_district', 'suburb', 'locality', 'hamlet', 'state_district'] as $k) {
+				if (!empty($addr[$k])) {
+					$locality = trim($addr[$k]);
+					break;
+				}
+			}
+			$county = !empty($addr['county']) ? trim($addr['county']) : '';
+			return $county !== '' ? $county : null;
+		} catch (\Exception $e) {
+			return null;
+		}
+	}
+
 	public static function getTripFormData($trip_id) {
 		$data = [];
 		if (!Auth::user()->entity->outlet) {
@@ -837,6 +896,7 @@ class Trip extends Model {
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-60 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
 		$data['is_self_booking_approval_must'] = Config::where('id', 3972)->first()->name;
+		$data['other_city_geolocation_enabled'] = self::isAuthUserLOtherCityGeolocationGrade();
 
 		return response()->json($data);
 	}

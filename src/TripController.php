@@ -136,6 +136,31 @@ class TripController extends Controller {
 		return Trip::getTripFormData($trip_id);
 	}
 
+	/**
+	 * Reverse geocode (Nominatim proxy) for L-grade "Others" city prefill only.
+	 */
+	public function reverseGeocode(Request $request) {
+		if (!Trip::isAuthUserLOtherCityGeolocationGrade()) {
+			return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+		}
+		$lat = $request->input('lat');
+		$lon = $request->input('lon');
+		if (!is_numeric($lat) || !is_numeric($lon)) {
+			return response()->json(['success' => false, 'message' => 'Invalid coordinates'], 422);
+		}
+		$lat = (float) $lat;
+		$lon = (float) $lon;
+		if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
+			return response()->json(['success' => false, 'message' => 'Invalid coordinates'], 422);
+		}
+		$name = Trip::reverseGeocodeCityName($lat, $lon);
+		//dd($name);
+		if ($name === null || $name === '') {
+			return response()->json(['success' => false, 'message' => 'Unable to resolve location'], 503);
+		}
+		return response()->json(['success' => true, 'name' => $name]);
+	}
+
 	// public function searchCity(Request $c) {
 	// 	$key = $c->key;
 	// $city_list = NCity::from('ncities')
