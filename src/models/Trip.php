@@ -703,9 +703,7 @@ class Trip extends Model {
 	}
 
 	/**
-	 * Reverse geocode coordinates via Google Maps Geocoding API.
-	 *
-	 * Set GOOGLE_MAPS_GEOCODING_API_KEY in the application environment.
+	 * Reverse geocode coordinates via Nominatim (identify app via User-Agent per OSM usage policy).
 	 *
 	 * @param float $lat
 	 * @param float $lon
@@ -713,43 +711,38 @@ class Trip extends Model {
 	 */
 	public static function reverseGeocodeCityName($lat, $lon) {
 		try {
-			$apiKey = env('GOOGLE_MAPS_GEOCODING_API_KEY');
-			//dd($apiKey, $lat, $lon);
-			if (empty($apiKey)) {
-				return null;
-			}
 			$client = new Client();
-			$response = $client->get(
-				'https://maps.googleapis.com/maps/api/geocode/json',
-				[
-					'query' => [
-						'latlng' => $lat . ',' . $lon,
-						'key' => $apiKey,
-					],
-					'timeout' => 5,
-				]
-			);
-			$data = json_decode($response->getBody()->getContents(), true);
-			if (!is_array($data) || empty($data['results']) || ($data['status'] ?? '') !== 'OK') {
+			$baseUrl = URL::to('/');
+			$userAgent = 'DEMS-EyatraTrip/1.0 (' . ($baseUrl ?: 'https://localhost') . ')';
+			$response = $client->get('https://nominatim.openstreetmap.org/reverse', [
+				'query' => [
+					'format' => 'json',
+					'lat' => $lat,
+					'lon' => $lon,
+				],
+				'headers' => [
+					'User-Agent' => $userAgent,
+				],
+				'timeout' => 10,
+			]);
+			$body = json_decode($response->getBody()->getContents(), true);
+			if (!$body || !is_array($body)) {
 				return null;
 			}
-			foreach ($data['results'] as $result) {
-				if (empty($result['address_components']) || !is_array($result['address_components'])) {
-					continue;
-				}
-				foreach ($result['address_components'] as $component) {
-					$types = isset($component['types']) && is_array($component['types']) ? $component['types'] : [];
-					if (
-						in_array('locality', $types, true) ||
-						in_array('administrative_area_level_2', $types, true)
-					) {
-						return isset($component['long_name']) ? $component['long_name'] : null;
-					}
+			if (!empty($body['error'])) {
+				return null;
+			}
+			$addr = isset($body['address']) && is_array($body['address']) ? $body['address'] : [];
+			$locality = '';
+			foreach (['city', 'town', 'village', 'municipality', 'city_district', 'suburb', 'locality', 'hamlet', 'state_district'] as $k) {
+				if (!empty($addr[$k])) {
+					$locality = trim($addr[$k]);
+					break;
 				}
 			}
-			return null;
+			$county = !empty($addr['county']) ? trim($addr['county']) : '';
+			return $county !== '' ? $county : null;
 		} catch (\Exception $e) {
-			\Log::error($e->getMessage());
 			return null;
 		}
 	}
