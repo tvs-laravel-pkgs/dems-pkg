@@ -712,7 +712,7 @@ class Trip extends Model {
 	 */
 	public static function reverseGeocodeCityName($lat, $lon) {
 		try {
-			$apiKey = "AIzaSyAx1V9P0ei_Zu7Xb3TxNmtmdJUtnHNWjkg";
+			$apiKey = config('custom.GOOGLE_MAP_API_KEY');
 			if (empty($apiKey)) {
 				return null;
 			}
