@@ -499,7 +499,17 @@ class Trip extends Model {
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
-					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
+					if ($visit_data['booking_method_name'] == 'Self') {
+						$visit->prefered_departure_time = null;
+					} else {
+						$pref = isset($visit_data['prefered_departure_time']) ? trim((string) $visit_data['prefered_departure_time']) : '';
+						if ($pref === '') {
+							$visit->prefered_departure_time = null;
+						} else {
+							$ts = strtotime($pref);
+							$visit->prefered_departure_time = ($ts !== false) ? date('H:i:s', $ts) : null;
+						}
+					}
 					if ($visit->booking_method_id == 3040) {
 						// $visit->self_booking_approval = 1;
 						if (isset($visit_data['self_booking_approval'])) {
@@ -519,7 +529,7 @@ class Trip extends Model {
 					} else {
 						$visit->agent_id = NULL;
 					}
-					$visit->notes_to_agent = isset($visit_data['notes_to_agent']) ? $visit_data['notes_to_agent'] : NULL;
+					$visit->notes_to_agent = (isset($visit_data['notes_to_agent']) && $visit_data['notes_to_agent'] !== '') ? $visit_data['notes_to_agent'] : null;
 					$visit->save();
 					$i++;
 				}
