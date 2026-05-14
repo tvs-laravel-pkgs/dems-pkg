@@ -140,6 +140,9 @@ class TripController extends Controller {
 	 * Reverse geocode (Nominatim proxy) for trip "Others" city prefill (authenticated users).
 	 */
 	public function reverseGeocode(Request $request) {
+		if (!Trip::isAuthUserLOtherCityGeolocationGrade()) {
+			return response()->json(['success' => false, 'message' => 'Geolocation prefill for Others city is not available for your grade.'], 403);
+		}
 		$lat = $request->input('lat');
 		$lon = $request->input('lon');
 		if (!is_numeric($lat) || !is_numeric($lon)) {
