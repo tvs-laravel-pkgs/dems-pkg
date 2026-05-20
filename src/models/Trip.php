@@ -495,7 +495,7 @@ class Trip extends Model {
 					$visit->to_city_id = $visit_data['to_city_id'];
 					$visit->other_city = $visit_data['other_city'] ? $visit_data['other_city'] : NULL;
 					$visit->travel_mode_id = $visit_data['travel_mode_id'];
-					$visit->trip_mode_id = $visit_data['trip_mode_id'];
+					//$visit->trip_mode_id = $visit_data['trip_mode_id'];
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
@@ -539,10 +539,21 @@ class Trip extends Model {
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
 
-			// TRIP REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
-			sendWhatsAppNotification($trip, $notification_type = 'Trip Requested');
+			// TRIP REQUEST WHATSAPP + EMAIL/SMS — deferred so save response is not blocked
+			$tripId = $trip->id;
+			$managerUserId = $user ? $user->id : null;
+			dispatchNotificationsAfterResponse(function () use ($tripId, $managerUserId) {
+				$trip = Trip::find($tripId);
+				if (!$trip) {
+					return;
+				}
+				$user = $managerUserId ? User::find($managerUserId) : null;
+				sendWhatsAppNotification($trip, 'Trip Requested');
+				if ($user) {
+					sendnotification(1, $trip, $user, 'Outstation Trip', 'Trip Requested');
+				}
+			});
 
-			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
 			$activity_log = ActivityLog::saveLog($activity);
 
 			if (empty($request->id)) {
@@ -2844,7 +2855,7 @@ class Trip extends Model {
 						->whereNotIn('visit_bookings.travel_mode_id', [15, 16, 17])
 						->where('visits.trip_id', $trip->id)
 						->where('visits.self_booking_approval', 1)
-						->where('visits.trip_mode_id', 3793) // 3793 -> Overnight
+						//->where('visits.trip_mode_id', 3793) // 3793 -> Overnight
 						->where('visits.status_id','!=', 3062)
 						->count();
 					if ($self_booking > 0 && !in_array(3755, $attachement_types)) {
@@ -4360,15 +4371,25 @@ class Trip extends Model {
 				
 				}
 
-				$employee = Employee::where('id', $trip->employee_id)->first();
-				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
-
-				// CLAIM REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
-				sendWhatsAppNotification($trip, $notification_type = 'Claim Requested');
-
-				$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
-
 				DB::commit();
+
+				// CLAIM REQUEST WHATSAPP + EMAIL/SMS — deferred so submit response is not blocked
+				$tripId = $trip->id;
+				dispatchNotificationsAfterResponse(function () use ($tripId) {
+					$trip = Trip::find($tripId);
+					if (!$trip) {
+						return;
+					}
+					$employee = Employee::where('id', $trip->employee_id)->first();
+					$user = $employee
+						? User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first()
+						: null;
+					sendWhatsAppNotification($trip, 'Claim Requested');
+					if ($user) {
+						sendnotification(5, $trip, $user, 'Outstation Trip', 'Claim Requested');
+					}
+				});
+
 				return response()->json(['success' => true]);
 			}
 
