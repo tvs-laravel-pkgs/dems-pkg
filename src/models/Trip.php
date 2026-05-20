@@ -536,23 +536,9 @@ class Trip extends Model {
 			}
 
 			DB::commit();
-			$employee = Employee::where('id', $trip->employee_id)->first();
-			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
 
-			// TRIP REQUEST WHATSAPP + EMAIL/SMS — deferred so save response is not blocked
-			$tripId = $trip->id;
-			$managerUserId = $user ? $user->id : null;
-			dispatchNotificationsAfterResponse(function () use ($tripId, $managerUserId) {
-				$trip = Trip::find($tripId);
-				if (!$trip) {
-					return;
-				}
-				$user = $managerUserId ? User::find($managerUserId) : null;
-				sendWhatsAppNotification($trip, 'Trip Requested');
-				if ($user) {
-					sendnotification(1, $trip, $user, 'Outstation Trip', 'Trip Requested');
-				}
-			});
+			// TRIP REQUEST WHATSAPP + EMAIL — published to queue; workers send in parallel
+			publishTripNotifications($trip->id, 'Trip Requested');
 
 			$activity_log = ActivityLog::saveLog($activity);
 
@@ -4373,22 +4359,8 @@ class Trip extends Model {
 
 				DB::commit();
 
-				// CLAIM REQUEST WHATSAPP + EMAIL/SMS — deferred so submit response is not blocked
-				$tripId = $trip->id;
-				dispatchNotificationsAfterResponse(function () use ($tripId) {
-					$trip = Trip::find($tripId);
-					if (!$trip) {
-						return;
-					}
-					$employee = Employee::where('id', $trip->employee_id)->first();
-					$user = $employee
-						? User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first()
-						: null;
-					sendWhatsAppNotification($trip, 'Claim Requested');
-					if ($user) {
-						sendnotification(5, $trip, $user, 'Outstation Trip', 'Claim Requested');
-					}
-				});
+				// CLAIM REQUEST WHATSAPP + EMAIL — published to queue; workers send in parallel
+				publishTripNotifications($trip->id, 'Claim Requested');
 
 				return response()->json(['success' => true]);
 			}
