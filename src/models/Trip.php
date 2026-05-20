@@ -537,16 +537,16 @@ class Trip extends Model {
 
 			DB::commit();
 
-			// TRIP REQUEST WHATSAPP + EMAIL — published to queue; workers send in parallel
-			publishTripNotifications($trip->id, 'Trip Requested');
-
 			$activity_log = ActivityLog::saveLog($activity);
 
-			if (empty($request->id)) {
-				return response()->json(['success' => true, 'message' => 'Trip added successfully!', 'trip' => $trip]);
-			} else {
-				return response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'trip' => $trip]);
-			}
+			$response = empty($request->id)
+				? response()->json(['success' => true, 'message' => 'Trip added successfully!', 'trip' => $trip])
+				: response()->json(['success' => true, 'message' => 'Trip updated successfully!', 'trip' => $trip]);
+
+			// Notifications after response — must not block save API
+			publishTripNotifications($trip->id, 'Trip Requested');
+
+			return $response;
 
 		} catch (\Exception $e) {
 			DB::rollBack();
