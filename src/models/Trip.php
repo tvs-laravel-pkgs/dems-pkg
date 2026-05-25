@@ -6,6 +6,7 @@ namespace Uitoux\EYatra;
 
 use App\Attachment;
 use App\Company;
+use App\Jobs\SendTripRequestedNotifications;
 use App\FinancialYear;
 use App\SerialNumberGroup;
 use App\User;
@@ -539,10 +540,8 @@ class Trip extends Model {
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
 
-			// TRIP REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
-			sendWhatsAppNotification($trip, $notification_type = 'Trip Requested');
-
-			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
+			// TRIP REQUEST notifications (WhatsApp + email/SMS) — processed by queue:work
+			dispatch(new SendTripRequestedNotifications($trip->id, $user ? $user->id : null));
 			$activity_log = ActivityLog::saveLog($activity);
 
 			if (empty($request->id)) {
