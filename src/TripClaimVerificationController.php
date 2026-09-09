@@ -176,6 +176,9 @@ class TripClaimVerificationController extends Controller {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		// $notification = sendnotification($type = 6, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Approved');
 
+		// NODAL CLAIM APPROVAL WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Nodal Claim Approved');
+
 		return response()->json(['success' => true]);
 	}
 
@@ -203,6 +206,10 @@ class TripClaimVerificationController extends Controller {
 		$activity_log = ActivityLog::saveLog($activity);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+		
+		// NODAL CLAIM REJECTED WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Nodal Claim Rejected');
+		
 		$notification = sendnotification($type = 7, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Rejected');
 
 		return response()->json(['success' => true]);

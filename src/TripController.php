@@ -136,6 +136,39 @@ class TripController extends Controller {
 		return Trip::getTripFormData($trip_id);
 	}
 
+	/**
+	 * Reverse geocode (Nominatim proxy) for trip "Others" city prefill (authenticated users).
+	 */
+	public function reverseGeocode(Request $request) {
+		if (!Trip::isAuthUserLOtherCityGeolocationGrade()) {
+			return response()->json(['success' => false, 'message' => 'Geolocation prefill for Others city is not available for your grade.'], 403);
+		}
+		$lat = $request->input('lat');
+		$lon = $request->input('lon');
+		if (!is_numeric($lat) || !is_numeric($lon)) {
+			return response()->json(['success' => false, 'message' => 'Invalid coordinates'], 422);
+		}
+		$lat = (float) $lat;
+		$lon = (float) $lon;
+		if ($lat < -90 || $lat > 90 || $lon < -180 || $lon > 180) {
+			return response()->json(['success' => false, 'message' => 'Invalid coordinates'], 422);
+		}
+		$name = null;
+		for ($attempt = 0; $attempt < 3; $attempt++) {
+			if ($attempt > 0) {
+				usleep(300000);
+			}
+			$name = Trip::reverseGeocodeCityName($lat, $lon);
+			if ($name !== null && $name !== '') {
+				break;
+			}
+		}
+		if ($name === null || $name === '') {
+			return response()->json(['success' => false, 'message' => 'Unable to resolve location'], 503);
+		}
+		return response()->json(['success' => true, 'name' => $name]);
+	}
+
 	// public function searchCity(Request $c) {
 	// 	$key = $c->key;
 	// $city_list = NCity::from('ncities')
@@ -329,8 +362,9 @@ class TripController extends Controller {
 		//Booking Status
 		//3061 => Booking
 		//3062 => Cancel
-$visit_booking= VisitBooking::select('is_proof_attached')->where('visit_id',$visit_id)->get()->first();
-		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062 || $visit_booking->is_proof_attached == 1) {
+$visit_booking= VisitBooking::select('is_proof_attached')->where('visit_id',$visit_id)->first();
+$isProofAttached = $visit_booking->is_proof_attached ?? 0;
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062 || $isProofAttached == 1) {
 			$relations[] = 'bookings';
 			$relations[] = 'bookings.attachments';
 			$relations[] = 'bookings.type';
@@ -343,7 +377,7 @@ $visit_booking= VisitBooking::select('is_proof_attached')->where('visit_id',$vis
 
 		$this->data['visit'] = $visit;
 		$this->data['trip'] = $visit->trip;
-		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062 || $visit_booking->is_proof_attached == 1) {
+		if ($visit->booking_status_id == 3061 || $visit->booking_status_id == 3062 || $isProofAttached == 1) {
 			$this->data['bookings'] = $visit->bookings;
 			//dd($this->data['bookings'][0]->total, IND_money_format($this->data['bookings'][0]->total));
 		} else {

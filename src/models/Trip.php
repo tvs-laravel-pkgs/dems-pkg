@@ -502,7 +502,17 @@ class Trip extends Model {
 					$visit->departure_date = date('Y-m-d', strtotime($visit_data['date']));
 					//booking_method_name - changed for API - Dont revert - ABDUL
 					$visit->booking_method_id = $visit_data['booking_method_name'] == 'Self' ? 3040 : 3042;
-					$visit->prefered_departure_time = $visit_data['booking_method_name'] == 'Self' ? NULL : $visit_data['prefered_departure_time'] ? date('H:i:s', strtotime($visit_data['prefered_departure_time'])) : NULL;
+					if ($visit_data['booking_method_name'] == 'Self') {
+						$visit->prefered_departure_time = null;
+					} else {
+						$pref = isset($visit_data['prefered_departure_time']) ? trim((string) $visit_data['prefered_departure_time']) : '';
+						if ($pref === '') {
+							$visit->prefered_departure_time = null;
+						} else {
+							$ts = strtotime($pref);
+							$visit->prefered_departure_time = ($ts !== false) ? date('H:i:s', $ts) : null;
+						}
+					}
 					if ($visit->booking_method_id == 3040) {
 						// $visit->self_booking_approval = 1;
 						if (isset($visit_data['self_booking_approval'])) {
@@ -522,7 +532,7 @@ class Trip extends Model {
 					} else {
 						$visit->agent_id = NULL;
 					}
-					$visit->notes_to_agent = isset($visit_data['notes_to_agent']) ? $visit_data['notes_to_agent'] : NULL;
+					$visit->notes_to_agent = (isset($visit_data['notes_to_agent']) && $visit_data['notes_to_agent'] !== '') ? $visit_data['notes_to_agent'] : null;
 					$visit->save();
 					$i++;
 				}
@@ -531,6 +541,10 @@ class Trip extends Model {
 			DB::commit();
 			$employee = Employee::where('id', $trip->employee_id)->first();
 			$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+
+			// TRIP REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
+			sendWhatsAppNotification($trip, $notification_type = 'Trip Requested');
+
 			$notification = sendnotification($type = 1, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Requested');
 			$activity_log = ActivityLog::saveLog($activity);
 
@@ -687,6 +701,70 @@ class Trip extends Model {
 
 	}
 
+	/**
+	 * L-grade employees (grade entity type 500, name contains "L") get optional "Others" city geolocation prefill.
+	 */
+	public static function isAuthUserLOtherCityGeolocationGrade() {
+		if (!Auth::check() || !Auth::user()->entity_id) {
+			return false;
+		}
+		return Employee::leftJoin('entities', 'entities.id', '=', 'employees.grade_id')
+			->where('employees.id', Auth::user()->entity_id)
+			->where('entities.entity_type_id', 500)
+			->where('entities.name', 'like', '%L%')
+			->exists();
+	}
+
+	/**
+	 * Reverse geocode coordinates via Google Maps Geocoding API.
+	 * Requires GOOGLE_MAP_API_KEY in the environment.
+	 *
+	 * @param float $lat
+	 * @param float $lon
+	 * @return string|null City/locality display string or null on failure
+	 */
+	public static function reverseGeocodeCityName($lat, $lon) {
+		try {
+			$apiKey = config('custom.GOOGLE_MAP_API_KEY');
+			if (empty($apiKey)) {
+				return null;
+			}
+			$client = new Client();
+			$response = $client->get(
+				'https://maps.googleapis.com/maps/api/geocode/json',
+				[
+					'query' => [
+						'latlng' => $lat . ',' . $lon,
+						'key' => $apiKey,
+					],
+					'timeout' => 5,
+				]
+			);
+			$data = json_decode($response->getBody()->getContents(), true);
+			if (!is_array($data) || empty($data['results']) || ($data['status'] ?? '') !== 'OK') {
+				return null;
+			}
+			foreach ($data['results'] as $result) {
+				if (empty($result['address_components']) || !is_array($result['address_components'])) {
+					continue;
+				}
+				foreach ($result['address_components'] as $component) {
+					$types = isset($component['types']) && is_array($component['types']) ? $component['types'] : [];
+					if (
+						in_array('locality', $types, true) ||
+						in_array('administrative_area_level_2', $types, true)
+					) {
+						return isset($component['long_name']) ? $component['long_name'] : null;
+					}
+				}
+			}
+			return null;
+		} catch (\Exception $e) {
+			\Log::error($e->getMessage());
+			return null;
+		}
+	}
+
 	public static function getTripFormData($trip_id) {
 		$data = [];
 		if (!Auth::user()->entity->outlet) {
@@ -836,6 +914,8 @@ class Trip extends Model {
 		$data['eligible_date'] = $eligible_date = date("Y-m-d", strtotime("-60 days"));
 		$data['max_eligible_date'] = $max_eligible_date = date("Y-m-d", strtotime("+90 days"));
 		$data['is_self_booking_approval_must'] = Config::where('id', 3972)->first()->name;
+		// "Others" city geolocation prefill only for L-grade employees (entity type 500, grade name contains "L").
+		$data['other_city_geolocation_enabled'] = self::isAuthUserLOtherCityGeolocationGrade();
 
 		return response()->json($data);
 	}
@@ -1292,6 +1372,9 @@ class Trip extends Model {
 		} else {
 			sendEmailNotification($trip, $notification_type = 'Cancel Trip', $trip_type = "Outstation Trip", $agentBookVisitIds = null);
 		}
+
+		// TRIP CANCEL WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Trip Cancel');
 		
 		return response()->json(['success' => true]);
 	}
@@ -1443,6 +1526,10 @@ class Trip extends Model {
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
 		//Approval Log
 		$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, Auth::user()->entity_id, Carbon::now());
+
+		// TRIP APPROVED WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Trip Approved');
+
 		$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 
 		DB::commit();
@@ -1480,6 +1567,10 @@ class Trip extends Model {
 		$trip->visits()->update(['manager_verification_status_id' => 3082]);
 
 		$user = User::where('entity_id', $trip->employee_id)->where('user_type_id', 3121)->first();
+
+		// TRIP REJECTED WHATSAPP NOTIFICATION TO EMPLOYEE
+		sendWhatsAppNotification($trip, $notification_type = 'Trip Rejected');
+
 		$notification = sendnotification($type = 3, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Rejected');
 
 		DB::commit();
@@ -2400,6 +2491,12 @@ class Trip extends Model {
 				->whereIn('visits.travel_mode_id',[15,16])
 				->pluck('travel_mode_id')->first();
 
+			//$job_card_check = EmployeeClaim::where('job_card_number', $request->job_card_number)->whereNotNull('job_card_number')->first();
+
+			// if(!empty($job_card_check)){
+			// 	return response()->json(['success' => false, 'errors' => ['Job Card Number Already Exist']]);
+			// }
+
 			$start_of_month = Carbon::now()->startOfMonth()->toDateString(); 
 			$end_of_month = Carbon::now()->endOfMonth()->toDateString();
 			$monthly_total_amounts = DB::table('claim_amount_details')
@@ -3231,7 +3328,7 @@ class Trip extends Model {
 					// LODGE STAY DAYS SHOULD NOT EXCEED TOTAL TRIP DAYS
 					$lodge_stayed_days = (int) array_sum(array_column($request->lodgings, 'stayed_days'));
 					$trip_total_days = (int) $request->trip_total_days;
-					if ($lodge_stayed_days > $trip_total_days) {
+					if ($lodge_stayed_days > $trip_total_days + 1) {
 						return response()->json(['success' => false, 'errors' => ['Total lodging days should be less than total trip days']]);
 					}
 
@@ -3275,7 +3372,7 @@ class Trip extends Model {
 							->where('trip_id', '!=', $request->trip_id)
 							->first();
 
-						if (!empty($lodging_check)) {
+						if (!empty($lodging_check) && $lodging_data['stay_type_id'] == 3340) {
 							$lodging_claim_user = User::where('id', $lodging_check->created_by)->pluck('name')->first();
 							return response()->json(['success' => false, 'errors' => ["Already Claimed This Invoice By {$lodging_claim_user}"]]);
 						}
@@ -4376,6 +4473,10 @@ class Trip extends Model {
 
 				$employee = Employee::where('id', $trip->employee_id)->first();
 				$user = User::where('entity_id', $employee->reporting_to_id)->where('user_type_id', 3121)->first();
+
+				// CLAIM REQUEST WHATSAPP NOTIFICATION TO EMPLOYEE AND MANAGER
+				sendWhatsAppNotification($trip, $notification_type = 'Claim Requested');
+
 				$notification = sendnotification($type = 5, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Claim Requested');
 
 				DB::commit();
@@ -4910,6 +5011,10 @@ request is not desired, then those may be rejected.';
 	
 						//Approval Log
 						$approval_log = ApprovalLog::saveApprovalLog(3581, $trip->id, 3600, $manager_id, Carbon::now());
+
+						// TRIP APPROVED WHATSAPP NOTIFICATION TO EMPLOYEE
+						sendWhatsAppNotification($trip, $notification_type = 'Trip Approved');
+
 						$notification = sendnotification($type = 2, $trip, $user, $trip_type = "Outstation Trip", $notification_type = 'Trip Approved');
 				
 				$cc_email = $arr['cc_email'] = [];
@@ -5462,7 +5567,8 @@ request is not desired, then those may be rejected.';
 		// $invoiceDate = $this->created_at ? date("Y-m-d", strtotime($this->created_at)) : null;
 		$invoiceDate = $tripManagerApprovedDate;
 		$employeeData = $this->employee;
-		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		//$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		$supplierNumber = $employeeData ? $employeeData->supplier_number : null;
 		// $invoiceType = 'Standard';
 		$invoiceType = 'Prepayment';
 		$description = '';
@@ -5513,7 +5619,8 @@ request is not desired, then those may be rejected.';
 		}
 		$location = $outletCode;
 		$naturalAccount = Config::where('id', 3860)->first()->name;
-		$supplierSiteName = $outletCode;
+		//$supplierSiteName = $outletCode;
+		$supplierSiteName = $employeeData ? $employeeData->supplier_site_name : null;
 
 		$bpas_portal = Portal::select([
 			'db_host_name',
@@ -5522,7 +5629,7 @@ request is not desired, then those may be rejected.';
 			'db_user_name',
 			'db_password',
 		])
-			->where('id', 1)
+			->where('id', 2)
 			->first();
 		DB::setDefaultConnection('dynamic');
 		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $bpas_portal->db_host_name);
@@ -5539,6 +5646,9 @@ request is not desired, then those may be rejected.';
 			'business_unit' => $companyBusinessUnit,
 			'invoice_source' => $invoiceSource,
 		])->get();
+		$batchTypeDetail = DB::table('oracle_transaction_batch_type_details')->where([
+			'template_type' => $documentType,
+		])->first();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
 			DB::setDefaultConnection('mysql');
@@ -5552,7 +5662,8 @@ request is not desired, then those may be rejected.';
 		// }
 
 		DB::table('oracle_ap_invoice_exports')->insert([
-			'company_id' => $companyId,
+			'company_id' => $batchTypeDetail->company_id,
+			'batch_type_id' => $batchTypeDetail->id,
 			'business_unit' => $businessUnitName,
 			'invoice_source' => $invoiceSource,
 			'invoice_number' => $invoiceNumber,
@@ -6674,7 +6785,8 @@ request is not desired, then those may be rejected.';
 		$businessUnitName = $companyBusinessUnit;
 		$employeeData = $employeeTrip->employee;
 		$customerCode = $employeeData ? $employeeData->code : null;
-		$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		//$supplierNumber = $employeeData ? 'EMP_' . ($employeeData->code) : null;
+		$supplierNumber = $employeeData ? $employeeData->supplier_number : null;
 		$invoiceType = 'Standard';
 		$invoiceDescription = '';
 		if (!empty($employeeData->code)) {
@@ -6766,7 +6878,8 @@ request is not desired, then those may be rejected.';
 		$location = $outletCode;
 		$naturalAccount = Config::where('id', 3861)->first()->name;
 		$empToCompanyNaturalAccount = Config::where('id', 3921)->first()->name;
-		$supplierSiteName = $outletCode;
+		//$supplierSiteName = $outletCode;
+		$supplierSiteName = $employeeData ? $employeeData->supplier_site_name : null;
 
 		$roundOffTransaction = OtherTypeTransactionDetail::apRoundOffTransaction();
 		$lodgeHsnCode = Config::where('id', 3771)->pluck('hsn_code')->first();
@@ -6777,7 +6890,7 @@ request is not desired, then those may be rejected.';
 			'db_user_name',
 			'db_password',
 		])
-			->where('id', 1)
+			->where('id', 2)
 			->first();
 		DB::setDefaultConnection('dynamic');
 		$db_host_name = dataBaseConfig::set('database.connections.dynamic.host', $bpas_portal->db_host_name);
@@ -6794,6 +6907,9 @@ request is not desired, then those may be rejected.';
 			'business_unit' => $businessUnitName,
 			'invoice_source' => $invoiceSource,
 		])->get();
+		$batchTypeDetail = DB::table('oracle_transaction_batch_type_details')->where([
+			'template_type' => $documentType,
+		])->first();
 		if (count($apInvoiceExports) > 0) {
 			$res['errors'] = ['Already exported to oracle table'];
 			DB::setDefaultConnection('mysql');
@@ -6876,7 +6992,7 @@ request is not desired, then those may be rejected.';
 
 		//TRANSPORT , BOARDING, LOCAL TRAVEL, LODGING-NON GST ENTRY
 		// $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentNumber, $prePaymentDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $description, $outletCode, $withoutTaxAmount, null, null, null, null, $employeeLodgingRoundoff, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount);
-		$apInvoiceId = $this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $claimManagerApprovedDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType , date("Y-m-d"));
+		$apInvoiceId = $this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, $invoiceAmount, $claimManagerApprovedDate, $prePaymentNumber, null, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $withoutTaxAmount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType , date("Y-m-d"), $batchTypeDetail->id);
 
 		// //LODGING-GST ENTRY
 		// if ($lodgingCgstSgstTaxableAmount && $lodgingCgstSgstTaxableAmount > 0) {
@@ -6917,7 +7033,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 							$hsnCode = $lodgingTaxInvoice->typeData ? $lodgingTaxInvoice->typeData->hsn_code : null; 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription , $outletCode, $lodgingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $lodgingTaxInvoice->cgst, $lodgingTaxInvoice->sgst, $lodgingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount ,$documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 
 						//DRY WASH
@@ -6939,7 +7055,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 							$hsnCode = $drywashTaxInvoice->typeData ? $drywashTaxInvoice->typeData->hsn_code : null;
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $drywashTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $drywashTaxInvoice->cgst, $drywashTaxInvoice->sgst, $drywashTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 
 						//BOARDING
@@ -6961,7 +7077,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 							$hsnCode = $boardingTaxInvoice->typeData ? $boardingTaxInvoice->typeData->hsn_code : null;
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $boardingTaxInvoice->without_tax_amount, $taxDetailRes['taxClassification'], $boardingTaxInvoice->cgst, $boardingTaxInvoice->sgst, $boardingTaxInvoice->igst, null, $hsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 					} else {
 						//SINGLE
@@ -6981,7 +7097,7 @@ request is not desired, then those may be rejected.';
 							}
 							$lineDescription = substr($lineDescription, 0, 250);
 
-							$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, $lodgeHsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"));
+							$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $lineDescription, $outletCode, $lodging->amount, $taxDetailRes['taxClassification'], $lodging->cgst, $lodging->sgst, $lodging->igst, null, $lodgeHsnCode, $taxDetailRes['taxAmount'], $accountingClass, $company, $lob, $location, $department, $naturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 						}
 					}
 				}
@@ -6999,7 +7115,7 @@ request is not desired, then those may be rejected.';
 				$roundOffNaturalAccount = $roundOffTransaction->natural_account;
 			}
 
-			$this->saveApOracleExport($companyId, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType , date("Y-m-d"));
+			$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $invoiceSource, $invoiceNumber, null, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $roundOffDescription, $outletCode, $employeeLodgingRoundoff, null, null, null, null, null, null, null, $roundOffAccountingClass, $company, $lob, $location, $department, $roundOffNaturalAccount, $documentType , date("Y-m-d"), $batchTypeDetail->id);
 		}
 
 		//IF ADVANCE RECEIVED
@@ -7007,7 +7123,7 @@ request is not desired, then those may be rejected.';
 			if ($employeeClaim->balance_amount && $employeeClaim->balance_amount != '0.00') {
 				//EMPLOYEE TO COMPANY
 				if ($employeeClaim->amount_to_pay == 2) {
-					$this->saveApOracleExport($companyId, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, $employeeClaim->balance_amount, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , date("Y-m-d"));
+					$this->saveApOracleExport($batchTypeDetail->company_id, $businessUnitName, $claimRefundInvoiceSource, $invoiceNumber, $employeeClaim->balance_amount, $claimManagerApprovedDate, null, null, null, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outletCode, $employeeClaim->balance_amount, null, null, null, null, null, null, null, $accountingClass, $company, $lob, $location, $department, $empToCompanyNaturalAccount, $claimRefundDocumentType , date("Y-m-d"), $batchTypeDetail->id);
 				}
 			}
 
@@ -7027,9 +7143,10 @@ request is not desired, then those may be rejected.';
 		return $res;
 	}
 
-	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentInvoiceDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outlet, $amount, $taxClassification, $cgst, $sgst, $igst, $roundOffAmount, $hsnCode, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType, $accountingDate = null) {
+	public function saveApOracleExport($companyId, $businessUnit, $invoiceSource, $invoiceNumber, $invoiceAmount, $invoiceDate, $prePaymentInvoiceNumber, $prePaymentInvoiceDate, $prePaymentAmount, $supplierNumber, $supplierSiteName, $invoiceType, $invoiceDescription, $outlet, $amount, $taxClassification, $cgst, $sgst, $igst, $roundOffAmount, $hsnCode, $taxAmount, $accountingClass, $company, $lob, $location, $department, $naturalAccount , $documentType, $accountingDate = null, $batch_type_id) {
 		return $apInvoiceId = DB::table('oracle_ap_invoice_exports')->insertGetId([
 			'company_id' => $companyId,
+			'batch_type_id' => $batch_type_id,
 			'business_unit' => $businessUnit,
 			'invoice_source' => $invoiceSource,
 			'invoice_number' => $invoiceNumber,
@@ -7431,7 +7548,7 @@ request is not desired, then those may be rejected.';
 		$roundOffAmt = round($employeeClaim->total_amount) - $employeeClaim->total_amount;
 		$employeeLodgingRoundoff += floatval($roundOffAmt);
 		if ($employeeLodgingRoundoff && $employeeLodgingRoundoff != '0.00') {
-			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberRoundOff, $employeeLodgingRoundoff, null, 'Roundoff', null, null, null, null,null);
+			$tallyExports[] = $this->claimApTallyExport($businessUnit, $template, $invoiceNumber, $claimManagerApprovedDate, date("Y-m-d"), $company, $lob, $location, $costCenter, $accountNumberRoundOff, $employeeLodgingRoundoff, null, 'Small Sundry Debit/Credit Balances', null, null, null, null,null);
 		}
 
 		//IF ADVANCE
@@ -7510,6 +7627,17 @@ request is not desired, then those may be rejected.';
 				],
 			]);
 		}
+
+		if ($debit != '0.00' && floatval($debit) < 0.00) {
+			$credit = number_format(abs((float) $debit), 2, '.', '');
+			$debit = null;
+		}
+
+		if ($credit != '0.00' && floatval($credit) < 0.00) {
+			$debit = number_format(abs((float) $credit), 2, '.', '');
+			$credit = null;
+		}
+
 		return [
 			'business_unit' => $businessUnit,
 			'template' => $template,
@@ -7652,6 +7780,9 @@ request is not desired, then those may be rejected.';
 						$message->from('travelex@tvs.in');
 					});
 	
+					// TRIP APPROVED WHATSAPP NOTIFICATION TO EMPLOYEE
+					sendWhatsAppNotification($trip, $notification_type = 'Trip Approved');
+
 					sendnotification(2, $trip, $user, "Outstation Trip", 'Trip Approved');
 				}
 	

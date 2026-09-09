@@ -342,6 +342,7 @@ Route::group(['middleware' => ['web']], function () {
 		Route::get('eyatra/trips/visit/delete/{visit_id}', 'Uitoux\EYatra\TripController@deleteVisit')->name('deleteVisit');
 		// Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\TripController@searchCity')->name('searchCity');
 		Route::post('eyatra/trip/city/search', 'Uitoux\EYatra\CityController@searchCity')->name('searchCity');
+		Route::post('eyatra/trip/reverse-geocode', 'Uitoux\EYatra\TripController@reverseGeocode')->name('tripReverseGeocode');
 		Route::get('eyatra/trip/get-filter-data', 'Uitoux\EYatra\TripController@eyatraTripFilterData')->name('eyatraTripFilterData');
 
 		//TRIPS VERIFICATION

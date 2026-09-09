@@ -61,6 +61,7 @@ app.component('eyatraTripClaimList', {
                 { data: 'advance_received', name: 'trips.advance_received', searchable: false },
                 { data: 'claim_total_amount', searchable: false },
                 { data: 'reason', name: 'reason', searchable: true },
+                { data: 'verification_one_remarks', name: 'verification_one_remarks', searchable: true },
                 { data: 'status', name: 'status.name', searchable: true },
             ],
             rowCallback: function(row, data) {
@@ -311,6 +312,7 @@ app.component('eyatraTripClaimForm', {
             self.travel_dates = response.data.travel_dates;
             self.extras = response.data.extras;
             self.trip = response.data.trip;
+            self.end_date = response.data.trip.end_date;
             self.transport_attachments = response.data.trip.transport_attachments;
             self.lodging_attachments = response.data.trip.lodging_attachments;
             self.boarding_attachments = response.data.trip.boarding_attachments;
@@ -1903,7 +1905,8 @@ app.component('eyatraTripClaimForm', {
                 $scope.boardingFromToDate();
                 // Calculating from, to date and boarding days by Karthick T on 21-01-2022
             } else {
-                self.trip.boardings[index].amount = '0.00';
+                //self.trip.boardings[index].amount = '0.00';
+                self.trip.boardings[index].amount = '';
             }
         }
         $scope.eligibleAmountCalc = function(actual_amount, index) {
@@ -2907,7 +2910,7 @@ app.component('eyatraTripClaimForm', {
                 } else {
                     self.trip.visits[index].self_booking['cgst'] = 0.00;
                     self.trip.visits[index].self_booking['sgst'] = 0.00;
-                    self.trip.visits[index].self_booking['igst'] = parseFloat(amount * (igst_percentage / 100)).toFixed(2);
+                    self.trip.visits[index].self_booking['igst'] = Math.floor(amount * (igst_percentage / 100)).toFixed(2);
                     self.trip.visits[index].self_booking['tax_percentage'] = 5;
                 }
             }
@@ -3157,10 +3160,20 @@ app.component('eyatraTripClaimForm', {
                 }else{
                     lodgePerDayAmt = lodgeWithoutTaxAmount;
                 }
+                const [day, month, year] = self.end_date.split("-");
+                const endDate = new Date(`${year}-${month}-${day}`);
+                const checkDate = new Date("2025-09-22");
+                console.log(endDate, checkDate);
+                let lodgePercentage;
 
-                let lodgePercentage = 12;
+                if (endDate < checkDate) {
+                    lodgePercentage = 12;
+                } else {
+                    lodgePercentage = 5;
+                }
+                //let lodgePercentage = 12;
                 // if (lodgeWithoutTaxAmount >= 7500) {
-                if (lodgePerDayAmt > 7500) {
+                if (lodgePerDayAmt >= 7500) {
                     lodgePercentage = 18;
                 }
 
@@ -3436,7 +3449,18 @@ app.component('eyatraTripClaimForm', {
 
             if (amount != undefined && amount && amount >= 1 && gst_number && gst_number.length == 15) {
                 const gst_state_code = gst_number.substr(0, 2);
-                percentage = 12;
+                //percentage = 12;
+                const [day, month, year] = self.end_date.split("-");
+                const endDate = new Date(`${year}-${month}-${day}`);
+                const checkDate = new Date("2025-09-22");
+                console.log(endDate, checkDate);
+                let percentage;
+
+                if (endDate < checkDate) {
+                    percentage = 12;
+                } else {
+                    percentage = 5;
+                }
 
                 if(stayed_days && stayed_days > 0){
                     lodge_per_day_amt = (amount / stayed_days);
@@ -3446,7 +3470,7 @@ app.component('eyatraTripClaimForm', {
 
                 // if (amount >= 7500)
                 // if (lodge_per_day_amt >= 7500)
-                if (lodge_per_day_amt > 7500)
+                if (lodge_per_day_amt >= 7500)
                     percentage = 18;
                 if (gst_state_code == self.state_code) {
                     cgst_percentage = sgst_percentage = percentage / 2;

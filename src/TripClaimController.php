@@ -42,6 +42,7 @@ class TripClaimController extends Controller {
 				'purpose.name as purpose',
 				DB::raw('IF((trips.advance_received) IS NULL,"--",FORMAT(trips.advance_received,"2","en_IN")) as advance_received'),
 				DB::raw('IF((trips.reason) IS NULL,"--",trips.reason) as reason'),
+				DB::raw('IF(trips.verification_one_remarks IS NULL OR TRIM(trips.verification_one_remarks) = "", "--", trips.verification_one_remarks) as verification_one_remarks'),
 				'status.name as status'
 			)
 			->where('e.company_id', Auth::user()->company_id)
